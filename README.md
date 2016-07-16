@@ -4,7 +4,14 @@
 
 ---
 
-Basic example of Kibana4 alarm plug-in development based on gitbook:  <http://kibana.logstash.es/content/kibana/v4/plugin/server-develop.html>
+Basic demo example of Kibana4 alarm plug-in development based on gitbook:  <http://kibana.logstash.es/content/kibana/v4/plugin/server-develop.html>
+
+### Dev Installation
+<pre>
+git clone https://github.com/chenryn/kaae
+cd kaae && npm install && npm package
+/opt/kibana/bin/kibana plugin --install kaae -u file://`pwd`/kaae-latest.tar.gz
+</pre>
 
 #### Trigger Example
 Following the official "watcher" configuration design, create an trigger and action for specific elements:
