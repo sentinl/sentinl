@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "lint": "eslint",
-    "package": "tar cvfz ./kaae-latest.tar.gz --exclude .* --exclude kaae-latest.tar.gz ."
+    "package": "tar cfz ./kaae-latest.tar.gz --exclude .git --exclude .gitignore --exclude kaae-latest.tar.gz ./* && ls -alF kaae-latest*"
   },
   "dependencies": {
     "later": "*",
