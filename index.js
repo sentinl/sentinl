@@ -1,6 +1,7 @@
 import later from 'later';
 import _ from 'lodash';
 import mustache from 'mustache';
+import exampleRoute from './server/routes/example';
 
 export default function (kibana) {
   return new kibana.Plugin({
@@ -10,12 +11,21 @@ export default function (kibana) {
       app: {
         title: 'Kaae',
         description: 'Kibana Alert App for Elasticsearch',
-        main: 'plugins/kaae/app'
+        main: 'plugins/kaae/app',
+	injectVars: function (server, options) {
+                               var config = server.config();
+                               return {
+                                   kbnIndex: config.get('kibana.index'),
+                                   esShardTimeout: config.get('elasticsearch.shardTimeout'),
+                                   esApiVersion: config.get('elasticsearch.apiVersion')
+                               };
+        }
       }
     },
 
     init(server, options) {
 
+      exampleRoute(server);
       var client = server.plugins.elasticsearch.client;
       var sched = later.parse.text('every 10 minute');
       later.setInterval(doalert, sched);
