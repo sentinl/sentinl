@@ -4,7 +4,8 @@
   "description": "Kibana Alert App for Elasticsearch",
   "main": "index.js",
   "scripts": {
-    "lint": "eslint"
+    "lint": "eslint",
+    "package": "tar cvfz ./kaae-latest.tar.gz --exclude .* --exclude kaae-latest.tar.gz ."
   },
   "dependencies": {
     "later": "*",
