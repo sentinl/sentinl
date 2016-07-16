@@ -6,11 +6,11 @@
 
 Proof-of-Concept Kibana4 app & alarm plug-in development based on gitbook:  <http://kibana.logstash.es/content/kibana/v4/plugin/server-develop.html>
 
-## Status 
+### Status 
 
 * Work in progress
  
--------------
+<br><br>
 
 #### Dev Plugin Install
 <pre>
