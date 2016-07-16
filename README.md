@@ -4,7 +4,7 @@
 
 ---
 
-Basic demo example of Kibana4 alarm plug-in development based on gitbook:  <http://kibana.logstash.es/content/kibana/v4/plugin/server-develop.html>
+Proof-of-Concept Kibana4 app & alarm plug-in development based on gitbook:  <http://kibana.logstash.es/content/kibana/v4/plugin/server-develop.html>
 
 ### Dev Installation
 <pre>
