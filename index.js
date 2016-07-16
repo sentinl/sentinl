@@ -12,6 +12,7 @@ export default function (kibana) {
         title: 'Kaae',
         description: 'Kibana Alert App for Elasticsearch',
         main: 'plugins/kaae/app',
+        icon: 'plugins/kaae/kaae.svg',
 	injectVars: function (server, options) {
                                var config = server.config();
                                return {
