@@ -9,7 +9,7 @@ Proof-of-Concept Kibana4 app & alarm plug-in development based on gitbook:  <htt
 #### Dev Installation
 <pre>
 git clone https://github.com/chenryn/kaae
-cd kaae && npm install && npm package
+cd kaae && npm install && npm run package
 /opt/kibana/bin/kibana plugin --install kaae -u file://`pwd`/kaae-latest.tar.gz
 </pre>
 
