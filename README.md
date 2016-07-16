@@ -6,7 +6,7 @@
 
 Proof-of-Concept Kibana4 app & alarm plug-in development based on gitbook:  <http://kibana.logstash.es/content/kibana/v4/plugin/server-develop.html>
 
-### Dev Installation
+#### Dev Installation
 <pre>
 git clone https://github.com/chenryn/kaae
 cd kaae && npm install && npm package
@@ -14,7 +14,7 @@ cd kaae && npm install && npm package
 </pre>
 
 #### Trigger Example
-Following the official "watcher" configuration design, create an trigger and action for specific elements:
+Following the official "watcher" configuration design, create a trigger and action for specific elements:
 
 <pre>
 # curl -XPUT http://127.0.0.1:9200/watcher/watch/error_status -d'
