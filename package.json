@@ -1,14 +1,19 @@
 {
   "name": "kaae",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Kibana Alert App for Elasticsearch",
   "main": "index.js",
   "scripts": {
-    "lint": "eslint"
+    "lint": "eslint",
+    "package": "tar cfz ./kaae-latest.tar.gz --exclude .git --exclude .gitignore --exclude kaae-latest.tar.gz ./* && ls -alF kaae-latest*"
+  },
+  "dependencies": {
+    "later": "*",
+    "mustache": "*"
   },
   "devDependencies": {
     "babel-eslint": "4.1.8",
     "eslint": "1.10.3",
-    "eslint-plugin-mocha": "1.1.0",
+    "eslint-plugin-mocha": "1.1.0"
   }
 }

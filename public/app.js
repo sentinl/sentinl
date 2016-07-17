@@ -3,7 +3,7 @@ import chrome from 'ui/chrome';
 import uiModules from 'ui/modules';
 import uiRoutes from 'ui/routes';
 
-import 'ui/autoload/styles';
+// import 'ui/autoload/styles';
 import './less/main.less';
 import template from './templates/index.html';
 
@@ -22,10 +22,10 @@ uiRoutes
       });
     }
   }
-});
+})
 
 uiModules
-.get('app/kaae', [])
+.get('api/kaae', [])
 .controller('kaaeHelloWorld', function ($scope, $route, $interval) {
   $scope.title = 'Kaae';
   $scope.description = 'Kibana Alert App for Elasticsearch';
