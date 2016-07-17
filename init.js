@@ -2,10 +2,12 @@ import later from 'later';
 import _ from 'lodash';
 import mustache from 'mustache';
 import exampleRoute from './server/routes/example';
+import $window from 'jquery';
 
 module.exports = function (server, options) {
 
-      var debug = false;
+      $window.keea = false; 
+      var debug = $window.keea;
       console.log('KAAE Initializing...');
 
       exampleRoute(server);
