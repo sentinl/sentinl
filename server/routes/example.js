@@ -8,4 +8,16 @@ export default function (server) {
     }
   });
 
+  server.route({
+    method: 'GET',
+    path: '/api/kaae/config',
+    handler: require('./config.js')
+  });
+
+  server.route({
+    method: 'GET',
+    path: '/api/kaae/getitems',
+    handler: require('./items.js')
+  });
+
 };
