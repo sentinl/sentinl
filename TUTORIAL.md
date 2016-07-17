@@ -19,7 +19,13 @@ cd kaae && npm install && npm run package
 ```
 
 ### Dataset
-To illustrate the logic and elements involved with *kaae* we will generate some random data and insert it to Elasticsearch using a simple bash script:
+To illustrate the logic and elements involved with *kaae* we will generate some random data and insert it to Elasticsearch.
+Our sample JSON object will report a UTC ```@timestamp``` and ```mos``` value per each interval:
+<pre>
+{"mos":4,"@timestamp":"2016-07-17T15:56:02.890"}
+</pre>
+
+The following BASH script will produce our entries for a realistic example:
 
 ```
 #!/bin/bash
@@ -39,10 +45,11 @@ do
 done
 ```
 
-Save the file as ```elasticgen.sh``` and execute it for a few minutes
+* Save the file as ```elasticgen.sh``` and execute it for a few minutes
 
 ### Watcher rule
 To illustrate the trigger logic, we will create an alert for an aggregation against the data we just created. 
+
 The example will use simple parameters: 
 * Run each 60 seconds
 * Target the daily mos-* index with query aggregation
@@ -151,3 +158,4 @@ Jul 17 17:54:00 es2pcap kibana[44702]: KAAE Condition: payload.aggregations.avg.
 </pre>
 
 
+#### To be continued ... 
