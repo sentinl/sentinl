@@ -2,7 +2,9 @@
 # kaae <img src="https://camo.githubusercontent.com/15f26c4f603cac9bf415c841a8a60077f6db5102/687474703a2f2f696d6775722e636f6d2f654c446f4f4b592e706e67">
 
 ## Proof-of-Concept Tutorial
-This tutorial will illustrate a working example of *kaae*
+This tutorial will illustrate a working example of **kaae** for alerting 
+
+_WARNING: This guide is a work-in-progress and should not be used in production!_
 
 ### Requirements
 
