@@ -5,7 +5,7 @@ import exampleRoute from './server/routes/example';
 
 export default function (kibana) {
   return new kibana.Plugin({
-    require: ['elasticsearch'],
+    require: ['kibana', 'elasticsearch'],
 
     uiExports: {
       app: {
@@ -44,9 +44,13 @@ export default function (kibana) {
               var transform = watch.transform.search.request;
               var actions = watch.actions;
               client.search(request).then(function(payload){
-                var ret = eval(condition);
+		if (!payload) return;
+		// console.log('KAAE Payload:',payload);
+		if (!condition) return;
+		// console.log('KAAE Condition:',condition);
+		try { var ret = eval(condition); } catch (err) { console.log(err) }
                 if (ret) {
-                  client.search(transform).then(function(payload) {
+                 // client.search(transform).then(function(payload) {
                     _.each(_.values(actions), function(action){
                       if(_.has(action, 'email')) {
                         var subject = mustache.render(action.email.subject, {"payload":payload});
@@ -54,7 +58,7 @@ export default function (kibana) {
                         console.log(subject, body);
                       }
                     });
-                  });
+                 // });
                 }
               });
             }
