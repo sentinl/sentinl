@@ -1,7 +1,7 @@
 import later from 'later';
 import _ from 'lodash';
 import mustache from 'mustache';
-import exampleRoute from './server/routes/example';
+import masterRoute from './server/routes/routes';
 import $window from 'jquery';
 
 module.exports = function (server, options) {
@@ -10,7 +10,7 @@ module.exports = function (server, options) {
       var debug = $window.keea;
       console.log('KAAE Initializing...');
 
-      exampleRoute(server);
+      masterRoute(server);
 
       var client = server.plugins.elasticsearch.client;
       var sched = later.parse.text('every 5 minute');

@@ -1,7 +1,4 @@
-import later from 'later';
 import _ from 'lodash';
-import mustache from 'mustache';
-import exampleRoute from './server/routes/example';
 
 export default function (kibana) {
   return new kibana.Plugin({
