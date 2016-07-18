@@ -1,4 +1,4 @@
-# kaae
+# kaae <img src="https://camo.githubusercontent.com/15f26c4f603cac9bf415c841a8a60077f6db5102/687474703a2f2f696d6775722e636f6d2f654c446f4f4b592e706e67">
 
 > Kibana Alert App for Elasticsearch
 
@@ -6,12 +6,14 @@
 
 Proof-of-Concept Kibana4 app & alarm plug-in development based on gitbook:  <http://kibana.logstash.es/content/kibana/v4/plugin/server-develop.html>
 
+For an illustrative working example, please check out the [TUTORIAL](TUTORIAL.md)
+
+
 ### Status 
 
 * Work in progress
  
 <br>
-
 #### Dev Plugin Install
 <pre>
 git clone https://github.com/chenryn/kaae

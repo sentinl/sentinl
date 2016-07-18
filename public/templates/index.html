@@ -6,6 +6,22 @@
         <p class="lead">{{ description }}</p>
       </div>
       <p>The current time is {{ currentTime }}</p>
+	<hr>
+
+	 <table>
+            <tr ng-repeat="item in items" class="item-unchecked">
+                <td><b>name:</b> {{item.name}} </td>
+                <td><b>msg:</b> {{item.message}} </td>
+            </tr>
+        </table>
+
+	<kbn-agg-table
+	  table="table"
+	  export-title="vis.title"
+	  per-page="spy.params.spyPerPage">
+	</kbn-agg-table>
+
+
     </div>
   </div>
 </div>
