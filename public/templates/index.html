@@ -8,12 +8,22 @@
       <p>The current time is {{ currentTime }}</p>
 	<hr>
 
-	<table>
-	  Watchers:
+      <div class="panel panel-default">
+	<div class="panel-heading"><h4>WATCHERS<div class="edit-group pull-right"><a href="#"><i class="fa fa-plus"></i></a></div></h4></div>
+	<table class="table">
+	  <thead>
+	    <tr>
+		<th> </th>
+		<th>ID</th>
+		<th>INTERVAL</th>
+		<th>INPUT</th>
+	    </tr>
 	  <tbody ng-repeat='watcher in watchers'>
 	    <tr>
 	         <td><input type=checkbox ng-model=collapse></td>
-	         <td>id: <b>{{watcher._id}}</b></td>
+	         <td>{{watcher._id}}</td>
+	         <td>{{watcher._source.trigger.schedule.interval}}</td>
+	         <td>{{watcher._source.input.search.request.indices.join(',')}}</td>
 	    </tr>
 	    <tr ng-show=collapse>
 	        <td> </td>
@@ -23,6 +33,8 @@
 	    </tr>
 	  </tbody>
 	</table>
+      </div>
+
 
 	<kbn-agg-table
 	  table="table"
