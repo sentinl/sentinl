@@ -8,12 +8,21 @@
       <p>The current time is {{ currentTime }}</p>
 	<hr>
 
-	 <table>
-            <tr ng-repeat="item in items" class="item-unchecked">
-                <td><b>name:</b> {{item.name}} </td>
-                <td><b>msg:</b> {{item.message}} </td>
-            </tr>
-        </table>
+	<table>
+	  Watchers:
+	  <tbody ng-repeat='watcher in watchers'>
+	    <tr>
+	         <td><input type=checkbox ng-model=collapse></td>
+	         <td>id: <b>{{watcher._id}}</b></td>
+	    </tr>
+	    <tr ng-show=collapse>
+	        <td> </td>
+	        <td>
+		   <pre>{{ watcher | json }}</pre>
+		</td>
+	    </tr>
+	  </tbody>
+	</table>
 
 	<kbn-agg-table
 	  table="table"
