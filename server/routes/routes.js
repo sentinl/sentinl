@@ -14,16 +14,6 @@ export default function (server) {
   let call = server.plugins.elasticsearch.callWithRequest;
 
   server.route({
-    path: '/api/kaae/status',
-    method: ['POST','GET'],
-    handler(req, reply) {
-      call(req, 'search',{index:'watcher',q:'*'}).then(function (response) {
-        reply(response)
-      });
-    }
-  });
-
-  server.route({
     path: '/api/kaae/list',
     method: ['POST', 'GET'],
     handler: function (req, reply) {
