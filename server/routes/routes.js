@@ -17,10 +17,8 @@ export default function (server) {
     path: '/api/kaae/status',
     method: ['POST','GET'],
     handler(req, reply) {
-      call(req, 'search',{index:'watcher/watch',q:'*:*'}).then(function (response) {
-        reply(
-          Object.keys(response.metadata.indices)
-        );
+      call(req, 'search',{index:'watcher',q:'*'}).then(function (response) {
+        reply(response)
       });
     }
   });
@@ -31,7 +29,7 @@ export default function (server) {
     handler: function (req, reply) {
       const boundCallWithRequest = _.partial(server.plugins.elasticsearch.callWithRequest, req);
       boundCallWithRequest('search', {
-	index: 'watcher/watch',
+	index: 'watcher',
         allowNoIndices: false
       })
       .then(
