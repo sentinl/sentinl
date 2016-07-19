@@ -1,18 +1,18 @@
 <img src="http://i.imgur.com/aDHvUxf.png" />
-# kaae <img src="https://camo.githubusercontent.com/15f26c4f603cac9bf415c841a8a60077f6db5102/687474703a2f2f696d6775722e636f6d2f654c446f4f4b592e706e67">
+# Kibana Alert App for Elasticsearch <img src="https://camo.githubusercontent.com/15f26c4f603cac9bf415c841a8a60077f6db5102/687474703a2f2f696d6775722e636f6d2f654c446f4f4b592e706e67">
 
-> Kibana Alert App for Elasticsearch
+> Proof-of-Concept Kibana4 app & alarm plug-in development based on gitbook:  <http://kibana.logstash.es/content/kibana/v4/plugin/server-develop.html>
 
 ---
 
-Proof-of-Concept Kibana4 app & alarm plug-in development based on gitbook:  <http://kibana.logstash.es/content/kibana/v4/plugin/server-develop.html>
+### Abstract
 
-For an illustrative working example, please check out the [TUTORIAL](TUTORIAL.md)
-
+This Kibana4+ App/Plugin extends the nodejs server/api to provide an independent Elasticsearch "Watcher" alternative.
+<br>For an illustrative working example, please check out the [TUTORIAL](TUTORIAL.md)
 
 ### Status 
 
-* Work in progress
+* Work in progress! Contributors Needed!
  
 <br>
 #### Dev Plugin Install
