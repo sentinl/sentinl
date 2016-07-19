@@ -1,13 +1,18 @@
+<header class="navbar navbar-static-top navbar-inverse">
+    <nav class="collapse navbar-collapse">
+	<ul class="nav navbar-nav">
+		<li><a href="javascript:window.location.replace('/app/kaae#/');">Watchers</a></li>
+		<li><a href="javascript:window.location.replace('/app/kaae#/');">Alarms</a></li>
+		<li><a href="javascript:window.location.replace('/app/kaae#/about');">About</a></li>
+	</ul>
+    </nav>
+</header>
+
 <div class="container" ng-controller="kaaeHelloWorld">
   <div class="row">
     <div class="col-12-sm">
-      <div class="well">
-        <h2>{{ title }}</h2>
-        <p class="lead">{{ description }}</p>
-      </div>
       <p>The current time is {{ currentTime }}</p>
 	<hr>
-
       <div class="panel panel-default">
 	<div class="panel-heading"><h4>WATCHERS<div class="edit-group pull-right"><a href="#"><i class="fa fa-plus"></i></a></div></h4></div>
 	<table class="table">
@@ -17,6 +22,7 @@
 		<th>ID</th>
 		<th>INTERVAL</th>
 		<th>INPUT</th>
+		<th></th>
 	    </tr>
 	  <tbody ng-repeat='watcher in watchers'>
 	    <tr>
@@ -24,9 +30,9 @@
 	         <td>{{watcher._id}}</td>
 	         <td>{{watcher._source.trigger.schedule.interval}}</td>
 	         <td>{{watcher._source.input.search.request.indices.join(',')}}</td>
+		 <td class="text-center edit-group"><a href="javascript:;" class="show-rule"><i class="fa fa-ellipsis-h"></i></a><a href="javascript:;" class="edit-rule"><i class="fa fa-edit"></i></a><a href="javascript:;" class="delete-rule"><i class="fa fa-trash"></i></a></td>
 	    </tr>
 	    <tr ng-show=collapse>
-	        <td> </td>
 	        <td>
 		   <pre>{{ watcher | json }}</pre>
 		</td>

@@ -9,21 +9,21 @@ import $ from 'jquery';
 import 'ui/timepicker';
 import 'ui/filter_bar';
 
-import TableVisTypeProvider from 'ui/template_vis_type/TemplateVisType';
+// import TableVisTypeProvider from 'ui/template_vis_type/TemplateVisType';
 // import VisSchemasProvider from 'ui/vis/schemas';
 // import tableVisTemplate from 'plugins/table_vis/table_vis.html';
+// require('ui/registry/vis_types').register(TableVisTypeProvider);
 
 import AggResponseTabifyTabifyProvider from 'ui/agg_response/tabify/tabify';
 // import tableSpyModeTemplate from 'plugins/spy_modes/table_spy_mode.html';
 
-require('ui/registry/vis_types').register(TableVisTypeProvider);
-
-// import Notifier from 'ui/notify/notifier';
+import Notifier from 'ui/notify/notifier';
 // import 'ui/autoload/styles';
 
 /* Custom Template + CSS */
 import './less/main.less';
 import template from './templates/index.html';
+import about from './templates/about.html';
 
 var impactLogo = require('plugins/kaae/kaae.svg');
 
@@ -55,15 +55,30 @@ uiRoutes
       });
     }
   }
-})
+});
+
+uiRoutes
+.when('/about', {
+  template: about
+});
 
 uiModules
 .get('api/kaae', [])
-.controller('kaaeHelloWorld', function ($scope, $route, $interval, timefilter, Private) {
+.controller('kaaeHelloWorld', function ($scope, $route, $interval, timefilter, Private, Notifier) {
   $scope.title = 'Kaae';
   $scope.description = 'Kibana Alert App for Elasticsearch';
   $scope.store = window.sessionStorage;
+
   timefilter.enabled = true;
+  /*
+	time: {
+	        gt: timefilter.getBounds().min.valueOf(),
+	        lte: timefilter.getBounds().max.valueOf()
+	      }
+  */
+
+  $scope.notify = new Notifier();
+  $scope.notify.warning('KAAE is a work in progress! Use at your own risk!');
 
   const tabifyAggResponse = Private(AggResponseTabifyTabifyProvider);
   if ($route.current.locals.currentWatchers.data.hits.hits) {
@@ -89,7 +104,21 @@ uiModules
   }, 1000);
   $scope.$watch('$destroy', unsubscribe);
 
-  $scope.items = [];
-  $scope.iackd = [];
+});
+
+uiModules
+.get('api/kaae', [])
+.controller('kaaeAbout', function ($scope, $route, $interval, timefilter) {
+  $scope.title = 'Kaae';
+  $scope.description = 'Kibana Alert App for Elasticsearch';
+  $scope.store = window.sessionStorage;
+  timefilter.enabled = false;
+
+  var currentTime = moment($route.current.locals.currentTime);
+  $scope.currentTime = currentTime.format('HH:mm:ss');
+  var unsubscribe = $interval(function () {
+    $scope.currentTime = currentTime.add(1, 'second').format('HH:mm:ss');
+  }, 1000);
+  $scope.$watch('$destroy', unsubscribe);
 
 });
