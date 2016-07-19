@@ -34,7 +34,7 @@ export default function (server) {
       })
       .then(
         function (res) {
-          reply(Object.keys(response.metadata.indices)); 
+          reply(res); 
         },
         function (error) {
           reply(handleESError(error));
@@ -57,3 +57,4 @@ export default function (server) {
 
 
 };
+
