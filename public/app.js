@@ -49,7 +49,7 @@ uiRoutes
       });
     },
     currentWatchers($http) {
-      return $http.get('../api/kaae/status').then(function (resp) {
+      return $http.get('../api/kaae/list').then(function (resp) {
 	console.log('DEBUG RESPONSE:',resp);
         return resp;
       });
