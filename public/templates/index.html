@@ -22,6 +22,8 @@
 		<th>ID</th>
 		<th>INTERVAL</th>
 		<th>INPUT</th>
+		<th>SCRIPT</th>
+		<th>ACTIONS</th>
 		<th></th>
 	    </tr>
 	  <tbody ng-repeat='watcher in watchers'>
@@ -30,6 +32,8 @@
 	         <td>{{watcher._id}}</td>
 	         <td>{{watcher._source.trigger.schedule.interval}}</td>
 	         <td>{{watcher._source.input.search.request.indices.join(',')}}</td>
+	         <td>{{watcher._source.condition.script.script}}</td>
+		 <td><span ng-repeat="(key,value) in watcher._source.actions"><p>{{ key }}</p></span> </td>
 		 <td class="text-center edit-group"><a href="javascript:;" class="show-rule"><i class="fa fa-ellipsis-h"></i></a><a href="javascript:;" class="edit-rule"><i class="fa fa-edit"></i></a><a href="javascript:;" class="delete-rule"><i class="fa fa-trash"></i></a></td>
 	    </tr>
 	    <tr ng-show=collapse>
