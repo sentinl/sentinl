@@ -24,6 +24,7 @@ import Notifier from 'ui/notify/notifier';
 import './less/main.less';
 import template from './templates/index.html';
 import about from './templates/about.html';
+import alarms from './templates/alarms.html';
 
 var impactLogo = require('plugins/kaae/kaae.svg');
 
@@ -39,6 +40,7 @@ chrome
   .setTabs([]);
 
 uiRoutes.enable();
+
 uiRoutes
 .when('/', {
   template,
@@ -50,7 +52,37 @@ uiRoutes
     },
     currentWatchers($http) {
       return $http.get('../api/kaae/list').then(function (resp) {
-	console.log('DEBUG RESPONSE:',resp);
+	console.log('DEBUG LIST:',resp);
+        return resp;
+      });
+    },
+    currentAlarms($http) {
+      return $http.get('../api/kaae/alarms').then(function (resp) {
+	console.log('DEBUG ALARMS:',resp);
+        return resp;
+      });
+    }
+  }
+});
+
+uiRoutes
+.when('/alarms', {
+  template: alarms,
+  resolve: {
+    currentTime($http) {
+      return $http.get('../api/kaae/example').then(function (resp) {
+        return resp.data.time;
+      });
+    },
+    currentWatchers($http) {
+      return $http.get('../api/kaae/list').then(function (resp) {
+	console.log('DEBUG LIST:',resp);
+        return resp;
+      });
+    },
+    currentAlarms($http) {
+      return $http.get('../api/kaae/alarms').then(function (resp) {
+	console.log('DEBUG ALARMS:',resp);
         return resp;
       });
     }
@@ -64,11 +96,10 @@ uiRoutes
 
 uiModules
 .get('api/kaae', [])
-.controller('kaaeHelloWorld', function ($scope, $route, $interval, timefilter, Private, Notifier, $window) {
+.controller('kaaeHelloWorld', function ($rootScope, $scope, $route, $interval, timefilter, Private, Notifier, $window, kbnUrl) {
   $scope.title = 'Kaae';
   $scope.description = 'Kibana Alert App for Elasticsearch';
-  $scope.store = window.sessionStorage;
-  $window.kaae = [{name: 'test'}];
+  // $scope.store = window.sessionStorage;
 
   timefilter.enabled = true;
   /*
@@ -77,6 +108,8 @@ uiModules
 	        lte: timefilter.getBounds().max.valueOf()
 	      }
   */
+
+  // kbnUrl.change('/', {});
 
   $scope.notify = new Notifier();
   $scope.notify.warning('KAAE is a work in progress! Use at your own risk!');
@@ -96,7 +129,9 @@ uiModules
 
   } else { $scope.watchers = []; }
 
-  $scope.items = {};
+  if ($route.current.locals.currentAlarms.data) {
+	   $scope.currentAlarms = $route.current.locals.currentAlarms.data;
+  } else { $scope.currentAlarms = [] }
 
   var currentTime = moment($route.current.locals.currentTime);
   $scope.currentTime = currentTime.format('HH:mm:ss');
@@ -112,7 +147,6 @@ uiModules
 .controller('kaaeAbout', function ($scope, $route, $interval, timefilter) {
   $scope.title = 'Kaae';
   $scope.description = 'Kibana Alert App for Elasticsearch';
-  $scope.store = window.sessionStorage;
   timefilter.enabled = false;
 
   var currentTime = moment($route.current.locals.currentTime);

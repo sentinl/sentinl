@@ -14,44 +14,30 @@
       <p>The current time is {{ currentTime }}</p>
 	<hr>
       <div class="panel panel-default">
-	<div class="panel-heading"><h4>WATCHERS<div class="edit-group pull-right"><a href="#"><i class="fa fa-plus"></i></a></div></h4></div>
+	<div class="panel-heading"><h4>ALARMS<div class="edit-group pull-right"><a href="#"><i class="fa fa-plus"></i></a></div></h4></div>
 	<table class="table">
 	  <thead>
 	    <tr>
 		<th> </th>
-		<th>ID</th>
-		<th>INTERVAL</th>
-		<th>INPUT</th>
-		<th>SCRIPT</th>
-		<th>ACTIONS</th>
+		<th>TIMESTAMP</th>
+		<th>MESSAGE</th>
 		<th></th>
 	    </tr>
-	  <tbody ng-repeat='watcher in watchers'>
+	  <tbody ng-repeat='alarm in currentAlarms'>
 	    <tr>
 	         <td><input type=checkbox ng-model=collapse></td>
-	         <td>{{watcher._id}}</td>
-	         <td>{{watcher._source.trigger.schedule.interval}}</td>
-	         <td>{{watcher._source.input.search.request.indices.join(',')}}</td>
-	         <td>{{watcher._source.condition.script.script}}</td>
-		 <td><span ng-repeat="(key,value) in watcher._source.actions"><p>{{ key }}</p></span> </td>
+	         <td>{{alarm[0].id}}</td>
+	         <td>{{alarm[0].message}}</td>
 		 <td class="text-center edit-group"><a href="javascript:;" class="show-rule"><i class="fa fa-ellipsis-h"></i></a><a href="javascript:;" class="edit-rule"><i class="fa fa-edit"></i></a><a href="javascript:;" class="delete-rule"><i class="fa fa-trash"></i></a></td>
 	    </tr>
 	    <tr ng-show=collapse>
 	        <td colspan="100%">
-		   <pre>{{ watcher | json }}</pre>
+		   <pre>{{ alarm | json }}</pre>
 		</td>
 	    </tr>
 	  </tbody>
 	</table>
       </div>
-
-
-	<kbn-agg-table
-	  table="table"
-	  export-title="vis.title"
-	  per-page="spy.params.spyPerPage">
-	</kbn-agg-table>
-
 
     </div>
   </div>

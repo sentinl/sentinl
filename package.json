@@ -1,4 +1,9 @@
 {
+  "author": "Boaz Leskes <boaz@elastic.co>",
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/elasticfence/kaae.git"
+  },
   "name": "kaae",
   "version": "0.0.1",
   "description": "Kibana Alert App for Elasticsearch",
@@ -15,5 +20,6 @@
     "babel-eslint": "4.1.8",
     "eslint": "1.10.3",
     "eslint-plugin-mocha": "1.1.0"
-  }
+  },
+   "license": "Apache-2.0"
 }

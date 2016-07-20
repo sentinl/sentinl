@@ -4,16 +4,15 @@ import mustache from 'mustache';
 import masterRoute from './server/routes/routes';
 import $window from 'jquery';
 
-var $ = require('jquery');
-
 module.exports = function (server, options) {
 
-      var debug = $window.kaae;
+      var $ = require('jquery');
+      var debug = $window.kaaedebug;
       console.log('KAAE Initializing...');
+      server.kaaeStore = [];
 
       masterRoute(server);
 
-      $window.kaaeStore = [];
       var client = server.plugins.elasticsearch.client;
       var sched = later.parse.text('every 5 minute');
       later.setInterval(doalert, sched);
@@ -46,7 +45,7 @@ module.exports = function (server, options) {
                         var subject = mustache.render(action.email.subject, {"payload":payload});
                         var body = mustache.render(action.email.body, {"payload":payload});
                         console.log('KAAE Alert: ',subject, body);
-			$window.kaaeStore.push({id:new Date(), message: body});
+			server.kaaeStore.push({id:new Date(), message: body});
                       }
                     });
                  // });

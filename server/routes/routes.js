@@ -11,6 +11,14 @@ export default function (server) {
     }
   });
 
+  server.route({
+    path: '/api/kaae/alarms',
+    method: ['POST','GET'],
+    handler(req, reply) {
+      reply({ data: server.kaaeStore });
+    }
+  });
+
   let call = server.plugins.elasticsearch.callWithRequest;
 
   server.route({
