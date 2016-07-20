@@ -136,6 +136,10 @@ curl -XPUT http://127.0.0.1:9200/watcher/watch/mos -d'
   }
 }'
 ```
+
+### Alarm Triggering
+Kibana/Kaae will automatically fetch and schedule jobs each 10 minutes, and execute the query according to the ```trigger.schedule``` parameter, validate its results according to the provided ```condition.script``` 
+
 ### Check output
 Assuming all data and scripts are correctly executed, you should start seeing output in your kibana logs.
 
