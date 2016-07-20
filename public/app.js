@@ -64,10 +64,11 @@ uiRoutes
 
 uiModules
 .get('api/kaae', [])
-.controller('kaaeHelloWorld', function ($scope, $route, $interval, timefilter, Private, Notifier) {
+.controller('kaaeHelloWorld', function ($scope, $route, $interval, timefilter, Private, Notifier, $window) {
   $scope.title = 'Kaae';
   $scope.description = 'Kibana Alert App for Elasticsearch';
   $scope.store = window.sessionStorage;
+  $window.kaae = [{name: 'test'}];
 
   timefilter.enabled = true;
   /*
