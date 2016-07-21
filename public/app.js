@@ -29,8 +29,6 @@ import alarms from './templates/alarms.html';
 
 var impactLogo = require('plugins/kaae/kaae.svg');
 
-console.log('DEBUG APP START');
-
 chrome
   .setBrand({
     'logo': 'url(' + impactLogo + ') left no-repeat',
@@ -53,13 +51,13 @@ uiRoutes
     },
     currentWatchers($http) {
       return $http.get('../api/kaae/list').then(function (resp) {
-	console.log('DEBUG LIST:',resp);
+	// console.log('DEBUG LIST:',resp);
         return resp;
       });
     },
     currentAlarms($http) {
       return $http.get('../api/kaae/alarms').then(function (resp) {
-	console.log('DEBUG ALARMS:',resp);
+	// console.log('DEBUG ALARMS:',resp);
         return resp;
       });
     }
@@ -77,13 +75,13 @@ uiRoutes
     },
     currentWatchers($http) {
       return $http.get('../api/kaae/list').then(function (resp) {
-	console.log('DEBUG LIST:',resp);
+	// console.log('DEBUG LIST:',resp);
         return resp;
       });
     },
     currentAlarms($http) {
       return $http.get('../api/kaae/alarms').then(function (resp) {
-	console.log('DEBUG ALARMS:',resp);
+	// console.log('DEBUG ALARMS:',resp);
         return resp;
       });
     }
@@ -151,7 +149,7 @@ uiModules
 	  $scope.currentRefresh = refreshValue;
   	  $interval.cancel($scope.refreshalarms);
 	  $scope.refreshalarms = $timeout(function () {
-	     console.log('Reloading data....');
+	     // console.log('Reloading data....');
 	     $route.reload();
           }, refreshValue);
      }
@@ -171,6 +169,9 @@ uiModules
       }
     });
 
+  $scope.deleteAlarm = function($index){
+	 $scope.currentAlarms.splice($index,1);     
+  }
 
   var currentTime = moment($route.current.locals.currentTime);
   $scope.currentTime = currentTime.format('HH:mm:ss');

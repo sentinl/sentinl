@@ -32,7 +32,7 @@
 	         <td><input type=checkbox ng-model=collapse></td>
 	         <td>{{ alarm.id }}</td>
 	         <td>{{ alarm.message }}</td>
-		 <td class="text-center edit-group"><a href="javascript:;" class="show-rule"><i class="fa fa-ellipsis-h"></i></a><a href="javascript:;" class="edit-rule"><i class="fa fa-edit"></i></a><a href="javascript:;" class="delete-rule"><i class="fa fa-trash"></i></a></td>
+		 <td class="text-center edit-group"><a href="javascript:;" class="show-rule"><i class="fa fa-ellipsis-h"></i></a><a href="javascript:;" ng-click="deleteAlarm($index)" class="delete-rule"><i class="fa fa-trash"></i></a></td>
 	    </tr>
 	    <tr ng-show=collapse>
 	        <td colspan="100%">
