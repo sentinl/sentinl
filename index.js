@@ -5,6 +5,8 @@ export default function (kibana) {
     require: ['kibana', 'elasticsearch'],
 
     uiExports: {
+      spyModes: ['plugins/kaae/button/alarm_button'],
+     // chromeNavControls: ['plugins/kaae/button/alarm_button'],
       app: {
         title: 'Kaae',
         description: 'Kibana Alert App for Elasticsearch',

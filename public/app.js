@@ -100,11 +100,18 @@ uiModules
   $scope.description = 'Kibana Alert App for Elasticsearch';
   // $scope.store = window.sessionStorage;
 
-  $scope.topNavMenu = [{
-    key: 'new',
-    description: 'HOME',
+  $scope.topNavMenu = [
+  {
+    key: 'watchers',
+    description: 'WATCH',
     run: function () { kbnUrl.change('/'); }
-  }];
+  },
+  {
+    key: 'about',
+    description: 'ABOUT',
+    run: function () { kbnUrl.change('/about'); }
+  }
+  ];
 
   timefilter.enabled = true;
   /*
