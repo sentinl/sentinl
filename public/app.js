@@ -7,6 +7,7 @@ import $ from 'jquery';
 
 /* Timepicker */
 import 'ui/timepicker';
+import 'ui/courier';
 import 'ui/filter_bar';
 
 // import TableVisTypeProvider from 'ui/template_vis_type/TemplateVisType';
@@ -101,6 +102,12 @@ uiModules
   $scope.description = 'Kibana Alert App for Elasticsearch';
   // $scope.store = window.sessionStorage;
 
+  $scope.topNavMenu = [{
+    key: 'new',
+    description: 'HOME',
+    run: function () { kbnUrl.change('/'); }
+  }];
+
   timefilter.enabled = true;
   /*
 	time: {
@@ -110,9 +117,6 @@ uiModules
   */
 
   // kbnUrl.change('/', {});
-
-  $scope.notify = new Notifier();
-  $scope.notify.warning('KAAE is a work in progress! Use at your own risk!');
 
   const tabifyAggResponse = Private(AggResponseTabifyTabifyProvider);
   if ($route.current.locals.currentWatchers.data.hits.hits) {
@@ -129,9 +133,21 @@ uiModules
 
   } else { $scope.watchers = []; }
 
-  if ($route.current.locals.currentAlarms.data) {
-	   $scope.currentAlarms = $route.current.locals.currentAlarms.data;
-  } else { $scope.currentAlarms = [] }
+  var checkAlarm = function() {
+	  if ($route.current.locals.currentAlarms.data) {
+		   $scope.currentAlarms = $route.current.locals.currentAlarms.data.data;
+	  } else { $scope.currentAlarms = [] }
+  }
+
+  checkAlarm();
+
+  // Auto Update every minute
+  var refreshalarms = $interval(function () {
+    // console.log('Reloading data.... (disabled)');
+    checkAlarm();
+  }, 30000);
+  $scope.$watch('$destroy', refreshalarms);
+
 
   var currentTime = moment($route.current.locals.currentTime);
   $scope.currentTime = currentTime.format('HH:mm:ss');
@@ -144,10 +160,16 @@ uiModules
 
 uiModules
 .get('api/kaae', [])
-.controller('kaaeAbout', function ($scope, $route, $interval, timefilter) {
+.controller('kaaeAbout', function ($scope, $route, $interval, timefilter, Notifier) {
   $scope.title = 'Kaae';
   $scope.description = 'Kibana Alert App for Elasticsearch';
   timefilter.enabled = false;
+
+  if (!$scope.notified) {
+	  $scope.notify = new Notifier();
+	  $scope.notify.warning('KAAE is a work in progress! Use at your own risk!');
+	  $scope.notified = true;
+  }
 
   var currentTime = moment($route.current.locals.currentTime);
   $scope.currentTime = currentTime.format('HH:mm:ss');

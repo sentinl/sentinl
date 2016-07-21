@@ -13,8 +13,12 @@
     <div class="col-12-sm">
       <p>The current time is {{ currentTime }}</p>
 	<hr>
-      <div class="panel panel-default">
-	<div class="panel-heading"><h4>ALARMS<div class="edit-group pull-right"><a href="#"><i class="fa fa-plus"></i></a></div></h4></div>
+      <div class="panel panel-default" ng-show="!currentAlarms.length">
+	<div class="panel-heading"><h4>NO RECENT ALARMS<div class="edit-group pull-right"><a href="#"><i class="fa fa-plus"></i></a></div></h4></div>
+      </div>
+
+      <div class="panel panel-default" ng-show="currentAlarms.length">
+	<div class="panel-heading"><h4>RECENT ALARMS<div class="edit-group pull-right"><a href="#"><i class="fa fa-plus"></i></a></div></h4></div>
 	<table class="table">
 	  <thead>
 	    <tr>
@@ -24,10 +28,10 @@
 		<th></th>
 	    </tr>
 	  <tbody ng-repeat='alarm in currentAlarms'>
-	    <tr>
+	    <tr class="alarmRow">
 	         <td><input type=checkbox ng-model=collapse></td>
-	         <td>{{alarm[0].id}}</td>
-	         <td>{{alarm[0].message}}</td>
+	         <td>{{ alarm.id }}</td>
+	         <td>{{ alarm.message }}</td>
 		 <td class="text-center edit-group"><a href="javascript:;" class="show-rule"><i class="fa fa-ellipsis-h"></i></a><a href="javascript:;" class="edit-rule"><i class="fa fa-edit"></i></a><a href="javascript:;" class="delete-rule"><i class="fa fa-trash"></i></a></td>
 	    </tr>
 	    <tr ng-show=collapse>
