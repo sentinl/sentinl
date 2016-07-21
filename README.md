@@ -35,8 +35,8 @@ cd kaae && npm install && npm run package
 
 ## TODO
 
-- [ ] Add actual actions for triggers _(Email, slack, etc)_
+- [ ] Add/Edit/Delete for alert rules rows _(es queries)_
 - [ ] Add JSON editors for alert rules _(Sense-like?)_
-- [ ] Record alert history into elasticsearch indices _(init)_
-- [ ] Add alert history view from elasticsearch indices
+- [ ] Add actual actions for triggers _(Email, slack, etc)_
+- [ ] Record & Read alert history to/from elasticsearch indices _(init)_
 
