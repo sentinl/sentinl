@@ -52,7 +52,7 @@ done
 ### Watcher rule
 To illustrate the trigger logic, we will create an alert for an aggregation against the data we just created. 
 
-The example will use simple parameters: 
+The basic example will use simple parameters: 
 * Run each 60 seconds
 * Target the daily mos-* index with query aggregation
 * Trip condition when aggregations.avg.value < 3
@@ -136,14 +136,20 @@ curl -XPUT http://127.0.0.1:9200/watcher/watch/mos -d'
   }
 }'
 ```
+### Extending Logic
+The basic Watcher can be extended and improved following the same logic used with the stock _Watcher, for example by using  ```transform``` to insert detections back in ES. An interesting set of examples is available  [here](https://www.elastic.co/blog/implementing-a-statistical-anomaly-detector-part-3)
+
 
 ### Alarm Triggering
-Kibana/Kaae will automatically fetch and schedule jobs each 10 minutes, and execute the query according to the ```trigger.schedule``` parameter, validate its results according to the provided ```condition.script``` 
+Kibana/Kaae will automatically fetch and schedule jobs, executing the watcher queries according to the ```trigger.schedule``` parameter, validating their results according to the provided ```condition.script``` 
 
 ### Check output
 Assuming all data and scripts are correctly executed, you should start seeing output in your kibana logs.
 
-##### Positive Match
+##### Positive Match (Kibana/UI)
+<img src="https://camo.githubusercontent.com/d81349b74ddd06be8fcafc9f9ccb5971c7afacdc/687474703a2f2f692e696d6775722e636f6d2f48626f53734e302e676966" />
+
+##### Positive Match (console)
 <pre>
 Jul 17 17:55:00 es2pcap kibana[44702]: KAAE Payload: { took: 21,
 Jul 17 17:55:00 es2pcap kibana[44702]: timed_out: false,
@@ -152,15 +158,6 @@ Jul 17 17:55:00 es2pcap kibana[44702]: aggregations: { avg: { value: 2.906976744
 Jul 17 17:55:00 es2pcap kibana[44702]: KAAE Condition: payload.aggregations.avg.value < 3
 <b>Jul 17 17:55:00 es2pcap kibana[44702]: Low MOS Detected: 2.9069767441860463  Low MOS Detected:
 Jul 17 17:55:00 es2pcap kibana[44702]: 2.9069767441860463 average with  measurements in 5 minutes</b>
-</pre>
-
-##### Negative Match
-<pre>
-Jul 17 17:54:00 es2pcap kibana[44702]: KAAE Payload: { took: 30,
-Jul 17 17:54:00 es2pcap kibana[44702]: timed_out: false,
-Jul 17 17:54:00 es2pcap kibana[44702]: _shards: { total: 186, successful: 186, failed: 0 },
-Jul 17 17:54:00 es2pcap kibana[44702]: aggregations: { avg: { value: 3.225806451612903 } } }
-Jul 17 17:54:00 es2pcap kibana[44702]: KAAE Condition: payload.aggregations.avg.value < 3
 </pre>
 
 
