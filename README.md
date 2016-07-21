@@ -10,7 +10,7 @@
 This Kibana4+ App/Plugin extends the nodejs server/api to provide an independent Elasticsearch "Watcher" alternative.
 <br>For an illustrative working example, please check out the [TUTORIAL](TUTORIAL.md)
 
-<img src="http://i.imgur.com/OHaodN6.png" />
+<img src="http://i.imgur.com/HboSsN0.gif" />
 
 ### Status 
 
