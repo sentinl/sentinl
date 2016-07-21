@@ -14,7 +14,8 @@ This Kibana4+ App/Plugin extends the nodejs server/api to provide an independent
 
 ### Status 
 
-* Work in progress! Contributors Needed!
+* Work in progress! Please [report](https://github.com/elasticfence/kaae/issues) any ideas, bugs and findings
+* Contributors Needed! If you know angular and elasticsearch join us!
  
 <br>
 #### Dev Plugin Install
@@ -34,7 +35,8 @@ cd kaae && npm install && npm run package
 
 ## TODO
 
-- [ ] Real email action.
-- [ ] Webpage for editing alert rules.
-- [ ] Record alert history into elasticsearch indices.
-- [ ] Webpage for history view(maybe use kibana app?).
+- [ ] Add actual actions for triggers _(Email, slack, etc)_
+- [ ] Add JSON editors for alert rules _(Sense-like?)_
+- [ ] Record alert history into elasticsearch indices _(init)_
+- [ ] Add alert history view from elasticsearch indices
+
