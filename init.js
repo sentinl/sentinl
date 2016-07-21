@@ -89,8 +89,6 @@ module.exports = function (server, options) {
       var t = later.setInterval(doalert, sched);
       function doalert() {
         if (debug) console.log('KAAE Alert Check...');
-	t.clear(); // testing
-        t = later.setInterval(doalert, sched);
         getCount().then(function(resp){
           getWatcher(resp.count).then(function(resp){
           _.each(resp.hits.hits, function(hit){
@@ -129,6 +127,10 @@ module.exports = function (server, options) {
             }
           });
           });
+
+	  t.clear(); // testing single pass
+          // t = later.setInterval(doalert, sched);
+
         });
       }
       /* run NOW, plus later */ 

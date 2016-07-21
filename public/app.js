@@ -97,7 +97,7 @@ uiRoutes
 
 uiModules
 .get('api/kaae', [])
-.controller('kaaeHelloWorld', function ($rootScope, $scope, $route, $interval, timefilter, Private, Notifier, $window, kbnUrl) {
+.controller('kaaeHelloWorld', function ($rootScope, $scope, $route, $interval, $timeout, timefilter, Private, Notifier, $window, kbnUrl) {
   $scope.title = 'Kaae';
   $scope.description = 'Kibana Alert App for Elasticsearch';
   // $scope.store = window.sessionStorage;
@@ -139,14 +139,37 @@ uiModules
 	  } else { $scope.currentAlarms = [] }
   }
 
+  $scope.currentRefresh = 0;
+  $scope.newRefresh = 0;
+
   checkAlarm();
 
-  // Auto Update every minute
-  var refreshalarms = $interval(function () {
-    // console.log('Reloading data.... (disabled)');
-    checkAlarm();
-  }, 30000);
-  $scope.$watch('$destroy', refreshalarms);
+  /* Reschedule updates */
+  var updateRefresh = function(refreshValue) {
+     if (refreshValue != $scope.currentRefresh && refreshValue != 0){
+	  console.log('NEW REFRESH:',refreshValue);
+	  $scope.currentRefresh = refreshValue;
+  	  $interval.cancel($scope.refreshalarms);
+	  $scope.refreshalarms = $timeout(function () {
+	     console.log('Reloading data....');
+	     $route.reload();
+          }, refreshValue);
+     }
+  }
+
+  /* Listen for refreshInterval changes */
+    $rootScope.$watchCollection('timefilter.refreshInterval', function () {
+      let refreshValue = _.get($rootScope, 'timefilter.refreshInterval.value');
+      let refreshPause = _.get($rootScope, 'timefilter.refreshInterval.pause');
+      if (_.isNumber(refreshValue) && !refreshPause) {
+	    $scope.newRefresh = refreshValue;
+	    updateRefresh(refreshValue);
+      } else {
+	  console.log('NO REFRESH');
+  	  $scope.currentRefresh = 0;
+	  $interval.cancel($scope.refreshalarms);
+      }
+    });
 
 
   var currentTime = moment($route.current.locals.currentTime);
@@ -179,3 +202,5 @@ uiModules
   $scope.$watch('$destroy', unsubscribe);
 
 });
+
+
