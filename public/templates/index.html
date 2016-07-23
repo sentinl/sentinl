@@ -14,7 +14,7 @@
       <p>The current time is {{ currentTime }}</p>
 	<hr>
       <div class="panel panel-default">
-	<div class="panel-heading"><h4>WATCHERS<div class="edit-group pull-right"><a href="#"><i class="fa fa-plus"></i></a></div></h4></div>
+	<div class="panel-heading"><h4>WATCHERS<div class="edit-group pull-right"><a href="#" ng-click="watcherNew()"><i class="fa fa-plus"></i></a></div></h4></div>
 	<table class="table">
 	  <thead>
 	    <tr>
@@ -38,8 +38,8 @@
 			<a href="javascript:;" class="show-rule" ng-click="setAce($index,true);collapse=!collapse" ng-model="collapse"><i class="fa fa-ellipsis-h"></i></a>
 			<a href="javascript:;" ng-show="collapse && editor_status.readonly" ng-click="setAce($index,false)" ng-model=collapse class="edit-rule"><i class="fa fa-edit"></i></a>
 			<a href="javascript:;" ng-show="collapse && !editor_status.readonly" ng-click="setAce($index,true)" ng-model=collapse class="edit-rule"><i class="fa fa-eye"></i></a>
-			<a href="javascript:;" ng-show="collapse && editor_status.readonly" class="delete-rule"><i class="fa fa-trash"></i></a>
-			<a href="javascript:;" ng-show="collapse && !editor_status.readonly" class="delete-rule"><i class="fa fa-save"></i></a>
+			<a href="javascript:;" ng-show="editor_status.undo && !editor_status.readonly" ng-click="watcherSave()" class="delete-rule"><i class="fa fa-save"></i></a>
+			<a href="javascript:;" class="delete-rule" ng-click="watcherDelete($index)"><i class="fa fa-trash"></i></a>
 		 </td>
 	    </tr>
 	    <tr ng-show=collapse>

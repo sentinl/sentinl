@@ -104,6 +104,8 @@ uiModules
   $scope.description = 'Kibana Alert App for Elasticsearch';
   // $scope.store = window.sessionStorage;
 
+  $scope.notify = new Notifier();
+
   $scope.topNavMenu = [
   {
     key: 'watchers',
@@ -141,6 +143,9 @@ uiModules
 	*/
 
   } else { $scope.watchers = []; }
+
+
+  /* Alarm Functions */
 
   var checkAlarm = function() {
 	  if ($route.current.locals.currentAlarms.data) {
@@ -181,13 +186,14 @@ uiModules
     });
 
   $scope.deleteAlarm = function($index){
+	 $scope.notify.warning('KAAE function not yet implemented!');
 	 $scope.currentAlarms.splice($index,1);     
   }
 
   
   /* ACE Editor */
   $scope.editor;
-  $scope.editor_status = { readonly: false }; 
+  $scope.editor_status = { readonly: false, undo: false, new: false }; 
   $scope.setAce = function($index,edit) {
 	  // var content = $scope.currentAlarms[$index];
           console.log('start ace editor...'); 
@@ -197,10 +203,70 @@ uiModules
 	  $scope.editor.setReadOnly(edit);
 	  $scope.editor_status.readonly = edit;
     	  _session.setUndoManager(new ace.UndoManager());
+
+	  $scope.editor_status.undo = $scope.editor.session.getUndoManager().isClean();
+
 	  if (!edit) { $scope.editor.getSession().setMode("ace/mode/json"); }
 	  else { $scope.editor.getSession().setMode("ace/mode/text"); }
-
   }
+
+  $scope.watcherDelete = function($index){
+	 $scope.notify.warning('KAAE function not yet implemented!');
+	 // $scope.watchers.splice($index,1);     
+  }
+
+  $scope.watcherSave = function($index){
+	 $scope.notify.warning('KAAE function not yet implemented!');
+  }
+
+  /* New Entry */
+  $scope.watcherNew = function(newwatcher) {
+	if (!newwatcher) {
+	 var newwatcher = {
+		  "_index": "watcher",
+		  "_type": "watch",
+		  "_id": "new",
+		  "_score": 1,
+		  "_source": {
+		    "trigger": {
+		      "schedule": {
+		        "interval": "60"
+		      }
+		    },
+	    "input": {
+		      "search": {
+		        "request": {
+		          "indices": [],
+		          "body": {},
+		        }
+		      }
+		    },
+		    "condition": {
+		      "script": {
+		        "script": "payload.hits.total > 100"
+		      }
+		    },
+		    "transform": {},
+		    "actions": {
+		      "email_admin": {
+		        "throttle_period": "15m",
+		        "email": {
+		          "to": "alarm@localhost",
+		          "subject": "Kaae Alarm",
+		          "priority": "high",
+		          "body": "Found {{payload.hits.total}} Events"
+		        }
+		      }
+		    }
+		  }
+		};
+
+        }
+	$scope.watchers.push[newwatcher];
+	$route.current.locals.currentWatchers.data.hits.hits.push[newwatcher];
+	console.log('new watcher',newwatcher,$scope.watchers);
+  }
+
 
   var currentTime = moment($route.current.locals.currentTime);
   $scope.currentTime = currentTime.format('HH:mm:ss');
@@ -217,9 +283,9 @@ uiModules
   $scope.title = 'Kaae';
   $scope.description = 'Kibana Alert App for Elasticsearch';
   timefilter.enabled = false;
+  $scope.notify = new Notifier();
 
   if (!$scope.notified) {
-	  $scope.notify = new Notifier();
 	  $scope.notify.warning('KAAE is a work in progress! Use at your own risk!');
 	  $scope.notified = true;
   }
