@@ -18,7 +18,7 @@
 	<table class="table">
 	  <thead>
 	    <tr>
-		<th> </th>
+		<!-- <th> </th> -->
 		<th>ID</th>
 		<th>INTERVAL</th>
 		<th>INPUT</th>
@@ -28,30 +28,28 @@
 	    </tr>
 	  <tbody ng-repeat='watcher in watchers'>
 	    <tr>
-	         <td><input type=checkbox ng-model=collapse></td>
+	         <!-- <td><input type=checkbox ng-model=collapse></td> -->
 	         <td>{{watcher._id}}</td>
 	         <td>{{watcher._source.trigger.schedule.interval}}</td>
 	         <td>{{watcher._source.input.search.request.indices.join(',')}}</td>
 	         <td>{{watcher._source.condition.script.script}}</td>
 		 <td><span ng-repeat="(key,value) in watcher._source.actions"><p>{{ key }}</p></span> </td>
-		 <td class="text-center edit-group"><a href="javascript:;" class="show-rule"><i class="fa fa-ellipsis-h"></i></a><a href="javascript:;" class="edit-rule"><i class="fa fa-edit"></i></a><a href="javascript:;" class="delete-rule"><i class="fa fa-trash"></i></a></td>
+		 <td class="text-center edit-group">
+			<a href="javascript:;" class="show-rule" ng-click="setAce($index,true);collapse=!collapse" ng-model="collapse"><i class="fa fa-ellipsis-h"></i></a>
+			<a href="javascript:;" ng-show="collapse && editor_status.readonly" ng-click="setAce($index,false)" ng-model=collapse class="edit-rule"><i class="fa fa-edit"></i></a>
+			<a href="javascript:;" ng-show="collapse && !editor_status.readonly" ng-click="setAce($index,true)" ng-model=collapse class="edit-rule"><i class="fa fa-eye"></i></a>
+			<a href="javascript:;" ng-show="collapse && editor_status.readonly" class="delete-rule"><i class="fa fa-trash"></i></a>
+			<a href="javascript:;" ng-show="collapse && !editor_status.readonly" class="delete-rule"><i class="fa fa-save"></i></a>
+		 </td>
 	    </tr>
 	    <tr ng-show=collapse>
 	        <td colspan="100%">
-		   <pre>{{ watcher | json }}</pre>
+		   <div name="editor" id="editor">{{ watcher | json }}</div>
 		</td>
 	    </tr>
 	  </tbody>
 	</table>
       </div>
-
-
-	<kbn-agg-table
-	  table="table"
-	  export-title="vis.title"
-	  per-page="spy.params.spyPerPage">
-	</kbn-agg-table>
-
 
     </div>
   </div>

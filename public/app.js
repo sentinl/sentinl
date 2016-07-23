@@ -5,6 +5,9 @@ import uiModules from 'ui/modules';
 import uiRoutes from 'ui/routes';
 import $ from 'jquery';
 
+/* Ace editor */
+import 'ace';
+
 /* Timepicker */
 import 'ui/timepicker';
 import 'ui/courier';
@@ -26,6 +29,7 @@ import './less/main.less';
 import template from './templates/index.html';
 import about from './templates/about.html';
 import alarms from './templates/alarms.html';
+import jsonHtml from './templates/json.html';
 
 var impactLogo = require('plugins/kaae/kaae.svg');
 
@@ -178,6 +182,24 @@ uiModules
 
   $scope.deleteAlarm = function($index){
 	 $scope.currentAlarms.splice($index,1);     
+  }
+
+  
+  /* ACE Editor */
+  $scope.editor;
+  $scope.editor_status = { readonly: false }; 
+  $scope.setAce = function($index,edit) {
+	  // var content = $scope.currentAlarms[$index];
+          console.log('start ace editor...'); 
+	  $scope.editor = ace.edit("editor");
+	  var _session = $scope.editor.getSession();
+    	  // var _renderer = $scope.editor.renderer;
+	  $scope.editor.setReadOnly(edit);
+	  $scope.editor_status.readonly = edit;
+    	  _session.setUndoManager(new ace.UndoManager());
+	  if (!edit) { $scope.editor.getSession().setMode("ace/mode/json"); }
+	  else { $scope.editor.getSession().setMode("ace/mode/text"); }
+
   }
 
   var currentTime = moment($route.current.locals.currentTime);
