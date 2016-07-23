@@ -55,7 +55,7 @@ uiRoutes
     },
     currentWatchers($http) {
       return $http.get('../api/kaae/list').then(function (resp) {
-	// console.log('DEBUG LIST:',resp);
+	console.log('DEBUG LIST:',resp);
         return resp;
       });
     },
@@ -197,7 +197,7 @@ uiModules
   $scope.setAce = function($index,edit) {
 	  // var content = $scope.currentAlarms[$index];
           console.log('start ace editor...'); 
-	  $scope.editor = ace.edit("editor");
+	  $scope.editor = ace.edit("editor-"+$index);
 	  var _session = $scope.editor.getSession();
     	  // var _renderer = $scope.editor.renderer;
 	  $scope.editor.setReadOnly(edit);
@@ -267,7 +267,7 @@ uiModules
 
         }
 
-	$scope.watchers.push(newwatcher);
+	$scope.watchers.unshift(newwatcher);
 	console.log('new watcher',newwatcher,$scope.getWatchers());
   }
 
