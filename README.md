@@ -20,7 +20,7 @@ This Kibana4+ App/Plugin extends the nodejs server/api to provide an independent
 <br>
 #### Dev Plugin Install
 <pre>
-git clone https://github.com/chenryn/kaae
+git clone https://github.com/elasticfence/kaae
 cd kaae && npm install && npm run package
 /opt/kibana/bin/kibana plugin --install kaae -u file://`pwd`/kaae-latest.tar.gz
 </pre>
