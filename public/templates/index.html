@@ -26,7 +26,7 @@
 		<th>ACTIONS</th>
 		<th></th>
 	    </tr>
-	  <tbody ng-repeat='watcher in watchers'>
+	  <tbody ng-repeat='watcher in getWatchers()'>
 	    <tr>
 	         <!-- <td><input type=checkbox ng-model=collapse></td> -->
 	         <td>{{watcher._id}}</td>
@@ -47,6 +47,7 @@
 		   <div name="editor" id="editor">{{ watcher | json }}</div>
 		</td>
 	    </tr>
+
 	  </tbody>
 	</table>
       </div>

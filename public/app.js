@@ -158,7 +158,7 @@ uiModules
 
   checkAlarm();
 
-  /* Reschedule updates */
+  /* Reschedule Watcher updates */
   var updateRefresh = function(refreshValue) {
      if (refreshValue != $scope.currentRefresh && refreshValue != 0){
 	  console.log('NEW REFRESH:',refreshValue);
@@ -219,9 +219,13 @@ uiModules
 	 $scope.notify.warning('KAAE function not yet implemented!');
   }
 
+  $scope.getWatchers = function(){
+	return $scope.watchers;
+  }
+
   /* New Entry */
   $scope.watcherNew = function(newwatcher) {
-	if (!newwatcher) {
+     if (!newwatcher) {
 	 var newwatcher = {
 		  "_index": "watcher",
 		  "_type": "watch",
@@ -262,9 +266,9 @@ uiModules
 		};
 
         }
-	$scope.watchers.push[newwatcher];
-	$route.current.locals.currentWatchers.data.hits.hits.push[newwatcher];
-	console.log('new watcher',newwatcher,$scope.watchers);
+
+	$scope.watchers.push(newwatcher);
+	console.log('new watcher',newwatcher,$scope.getWatchers());
   }
 
 
