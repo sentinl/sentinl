@@ -36,7 +36,7 @@ const linkReqRespStats = function ($scope, config) {
     const alarm = $scope.alarm = {
 	  "_index": "watcher",
 	  "_type": "watch",
-	  "_id": "new",
+	  "_id": "new_saved",
 	  "_score": 1,
 	  "_source": {
 	    "trigger": {
@@ -72,6 +72,7 @@ const linkReqRespStats = function ($scope, config) {
 	  }
 	};
 
+	window.localStorage.setItem('kaae_saved_query', JSON.stringify(alarm));
 
   });
 };

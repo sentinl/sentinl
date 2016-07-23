@@ -1,11 +1,9 @@
-<div ng-show="spy.mode.name === 'setalarm'">
+<div ng-show="spy.mode.name === 'setalarm'" class="fill visualize-spy-nav">
   <label>
-    Use Elasticsearch request for New Alarm &nbsp;
+    Use Elasticsearch request to create a New Watcher &nbsp;
   </label>
-  <ul class="nav">
-    <li><a href="/app/kaae">Set Alarm</a></li>
-  </ul>
   <br/>
+  <a class="btn btn-default ng-binding ng-scope" href="/app/kaae">Paste Query Watcher to Kaae</a>
   <pre>{{alarm | json}}</pre>
   <!-- <pre>{{req.fetchParams.body | json}}</pre> -->
 </div>

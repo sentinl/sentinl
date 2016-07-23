@@ -55,7 +55,7 @@ uiRoutes
     },
     currentWatchers($http) {
       return $http.get('../api/kaae/list').then(function (resp) {
-	console.log('DEBUG LIST:',resp);
+	// console.log('DEBUG LIST:',resp);
         return resp;
       });
     },
@@ -105,7 +105,7 @@ uiModules
   // $scope.store = window.sessionStorage;
 
   $scope.notify = new Notifier();
-
+  
   $scope.topNavMenu = [
   {
     key: 'watchers',
@@ -161,7 +161,7 @@ uiModules
   /* Reschedule Watcher updates */
   var updateRefresh = function(refreshValue) {
      if (refreshValue != $scope.currentRefresh && refreshValue != 0){
-	  console.log('NEW REFRESH:',refreshValue);
+	  // console.log('NEW REFRESH:',refreshValue);
 	  $scope.currentRefresh = refreshValue;
   	  $interval.cancel($scope.refreshalarms);
 	  $scope.refreshalarms = $timeout(function () {
@@ -179,7 +179,7 @@ uiModules
 	    $scope.newRefresh = refreshValue;
 	    updateRefresh(refreshValue);
       } else {
-	  console.log('NO REFRESH');
+	  // console.log('NO REFRESH');
   	  $scope.currentRefresh = 0;
 	  $interval.cancel($scope.refreshalarms);
       }
@@ -196,7 +196,6 @@ uiModules
   $scope.editor_status = { readonly: false, undo: false, new: false }; 
   $scope.setAce = function($index,edit) {
 	  // var content = $scope.currentAlarms[$index];
-          console.log('start ace editor...'); 
 	  $scope.editor = ace.edit("editor-"+$index);
 	  var _session = $scope.editor.getSession();
     	  // var _renderer = $scope.editor.renderer;
@@ -212,7 +211,7 @@ uiModules
 
   $scope.watcherDelete = function($index){
 	 $scope.notify.warning('KAAE function not yet implemented!');
-	 // $scope.watchers.splice($index,1);     
+	 $scope.watchers.splice($index,1);     
   }
 
   $scope.watcherSave = function($index){
@@ -223,10 +222,16 @@ uiModules
 	return $scope.watchers;
   }
 
+  /* New Entry from Saved Kibana Query */
+  if ($window.localStorage.getItem('kaae_saved_query')) $scope.watcherSaved = JSON.parse($window.localStorage.getItem('kaae_saved_query')); 
+
   /* New Entry */
   $scope.watcherNew = function(newwatcher) {
-     if (!newwatcher) {
-	 var newwatcher = {
+	if (newwatcher) {
+	  // patch timerange
+	  newwatcher._source.input.search.request.body.query.filtered.filter = {"range": { "@timestamp": {"from": "now-1h"} } };
+	} else if (!newwatcher) {
+	  var newwatcher = {
 		  "_index": "watcher",
 		  "_type": "watch",
 		  "_id": "new",
@@ -264,11 +269,17 @@ uiModules
 		    }
 		  }
 		};
-
         }
 
 	$scope.watchers.unshift(newwatcher);
-	console.log('new watcher',newwatcher,$scope.getWatchers());
+
+	/*	
+	 $scope.refreshalarms = $timeout(function () {
+	      //console.log('set new watcher to edit mode...');
+	      $scope.setAce(0,false);
+ 	 }, 200);
+	*/
+	
   }
 
 
