@@ -15,11 +15,7 @@ The Kibana4.5+ App extends the nodejs server/api to provide an independent Elast
 The integrated Kibana plug-in extends the default Spy functionality to shape new prototype Watchers based on Visualize queries, and providing them to Kaae for fine editing and scheduling.
 <img src="http://i.imgur.com/MwvV2bg.png" />
 
-### Status 
 
-* Work in progress! Please [report](https://github.com/elasticfence/kaae/issues) any ideas, bugs and findings
-* Contributors Needed! If you know angular and elasticsearch join us!
- 
 <br>
 #### Dev Plugin Install
 <pre>
@@ -34,12 +30,18 @@ cd kaae && npm install && npm run package
 </pre>
 
 
+## Status 
 
+* Work in progress! Please [report](https://github.com/elasticfence/kaae/issues) any ideas, bugs and findings
+* Contributors Needed! If you know angular and elasticsearch join us!
+ 
 
-## TODO
+### TODO/DONE (live)
 
-- [ ] Add/Edit/Delete for alert rules rows _(es queries)_
-- [ ] Add JSON editors for alert rules _(Sense-like?)_
-- [ ] Add actual actions for triggers _(Email, slack, etc)_
-- [ ] Record & Read alert history to/from elasticsearch indices _(init)_
+- [x] Add Background watcher load execution skeleton  _(Kibana core)_
+- [x] Add Kibana plugin to extend SPY and generate Watchers  _(Kibana plugin)_
+- [x] Add JSON editors for watcher rules _(Sense-like)_
+- [ ] Add/Edit/Delete for watcher rules rows _(es queries)_
+- [ ] Add actual actions for watcher triggers _(Email, slack, etc)_
+- [ ] Save & load watcher history & results to/from elasticsearch custom indices _(init)_
 
