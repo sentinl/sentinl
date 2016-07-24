@@ -33,15 +33,81 @@ const linkReqRespStats = function ($scope, config) {
       if (req.fetchParams.id) stats.push(['Id', req.fetchParams.id]);
     }
 
-    const alarm = $scope.alarm = {
+    $scope.intervals = [
+        { name: '1m', value: '60' }, 
+        { name: '5m', value: '300' }, 
+        { name: '10m', value: '600' }, 
+        { name: '1h', value: '3600' }
+    ];
+
+    $scope.ranges = [
+        { name: '1m', value: 'now-1m' }, 
+        { name: '5m', value: 'now-5m' }, 
+        { name: '10m', value: 'now-1h' }, 
+        { name: '1h', value: 'now-1h' },
+        { name: '6h', value: 'now-6h' },
+        { name: '12h', value: 'now-12h' },
+        { name: '1d', value: 'now-1d' }
+    ];
+
+    $scope.resKeys = [];
+    $scope.iterateKeys = function(data) {
+ 	   var result = {};
+ 	   function recurse (cur, prop) {
+ 	       if (Object(cur) !== cur) {
+ 	           result[prop] = cur;
+ 	       } else if (Array.isArray(cur)) {
+ 	            for(var i=0, l=cur.length; i<l; i++)
+ 	                recurse(cur[i], prop + "[" + i + "]");
+ 	           if (l == 0)
+ 	               result[prop] = [];
+ 	       } else {
+ 	           var isEmpty = true;
+ 	           for (var p in cur) {
+ 	               isEmpty = false;
+ 	               recurse(cur[p], prop ? prop+"."+p : p);
+ 	           }
+ 	           if (isEmpty && prop)
+ 	               result[prop] = {};
+ 	       }
+ 	   }
+ 	   recurse(data, "");
+ 	   $scope.resKeys = result;
+    }
+
+    if (resp) $scope.iterateKeys({payload:resp});
+
+
+    /* Defaults */
+    $scope.watcher_id = "new_saved";
+    $scope.watcher_script = "payload.hits.total > 100";
+    $scope.watcher_interval = $scope.intervals[0].value;
+    $scope.watcher_range = $scope.ranges[1].value;
+
+    $scope.savedWatcher = {};
+    var alarm = {};
+
+    $scope.watcherUpdate = function(){
+	    $scope.savedWatcher.interval = $scope.watcher_interval;
+	    $scope.savedWatcher.range = $scope.watcher_range;
+	    $scope.savedWatcher.id = $scope.watcher_id;
+	    $scope.savedWatcher.script = $scope.watcher_script;
+	    $scope.savedWatcher.keys = $scope.resKeys;
+	    config.savedWatcher = $scope.savedWatcher;
+    }
+    
+    $scope.makeAlarm = function(){
+	// console.log('updainge proto watcher..');
+	$scope.watcherUpdate();
+        $scope.alarm = {
 	  "_index": "watcher",
 	  "_type": "watch",
-	  "_id": "new_saved",
+	  "_id": $scope.watcher_id,
 	  "_score": 1,
 	  "_source": {
 	    "trigger": {
 	      "schedule": {
-	        "interval": "60"
+	        "interval": $scope.watcher_interval ? $scope.watcher_interval : "60"
 	      }
 	    },
 	    "input": {
@@ -54,7 +120,7 @@ const linkReqRespStats = function ($scope, config) {
 	    },
 	    "condition": {
 	      "script": {
-	        "script": "payload.hits.total > 100"
+	        "script": $scope.savedWatcher.script
 	      }
 	    },
 	    "transform": {},
@@ -62,17 +128,22 @@ const linkReqRespStats = function ($scope, config) {
 	      "email_admin": {
 	        "throttle_period": "15m",
 	        "email": {
-	          "to": "alarm@localhost",
-	          "subject": "Kaae Alarm",
+	          "to": $scope.watcher_email_to ? $scope.watcher_email_to : "alarm@localhost",
+	          "subject": $scope.watcher_email_subj ? $scope.watcher_email_subj : "Kaae Alarm",
 	          "priority": "high",
-	          "body": "Found {{payload.hits.total}} Events"
+	          "body": $scope.watcher_email_body ? $scope.watcher_email_body : "Found {{payload.hits.total}} Events"
 	        }
 	      }
 	    }
 	  }
 	};
+        alarm = $scope.alarm;
+	window.localStorage.setItem('kaae_saved_query', JSON.stringify($scope.alarm));
+        // console.log('WATCHER-CONF:',$scope.savedWatcher);
+    }
 
-	window.localStorage.setItem('kaae_saved_query', JSON.stringify(alarm));
+
+    $scope.makeAlarm();
 
   });
 };
