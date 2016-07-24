@@ -15,7 +15,8 @@ This Kibana4+ App/Plugin extends the nodejs server/api to provide an independent
 
 
 
-#### Kibana Plugin: Kaae Spy
+### Kibana Plugin: Kaae Spy
+The integrated Kibana plug-in extends the default Spy functionality to shape new Watchers and send them to Kaae
 <img src="http://i.imgur.com/MwvV2bg.png" />
 
 ### Status 
