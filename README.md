@@ -7,10 +7,16 @@
 
 ### Abstract
 
-This Kibana4+ App/Plugin extends the nodejs server/api to provide an independent Elasticsearch "Watcher" alternative.
+This Kibana4+ App/Plugin extends the nodejs server/api to provide an independent Elasticsearch "Watcher" alternative
 <br>For an illustrative working example, please check out the [TUTORIAL](TUTORIAL.md)
 
+#### Kibana App: Kaae
 <img src="http://i.imgur.com/jNYX1mv.gif" />
+
+
+
+#### Kibana Plugin: Kaae Spy
+<img src="http://i.imgur.com/MwvV2bg.png" />
 
 ### Status 
 
