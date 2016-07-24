@@ -36,7 +36,7 @@ cd kaae && npm install && npm run package
 * Contributors Needed! If you know angular and elasticsearch join us!
  
 
-### TODO/DONE (live)
+##### TODO/DONE (live)
 
 - [x] Add Background watcher load execution skeleton  _(Kibana core)_
 - [x] Add Kibana plugin to extend SPY and generate Watchers  _(Kibana plugin)_
@@ -44,7 +44,7 @@ cd kaae && npm install && npm run package
 - [ ] Add/Edit/Delete for watcher rules rows _(es queries)_
 - [ ] Add actual actions for watcher triggers _(Email, slack, etc)_
 - [ ] Save & load watcher history & results to/from elasticsearch custom indices _(init)_
-
+- [ ] Major Code & Style cleanup
 
 ## License
 <pre>
