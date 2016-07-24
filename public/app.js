@@ -222,9 +222,6 @@ uiModules
 	return $scope.watchers;
   }
 
-  /* New Entry from Saved Kibana Query */
-  if ($window.localStorage.getItem('kaae_saved_query')) $scope.watcherSaved = JSON.parse($window.localStorage.getItem('kaae_saved_query')); 
-
   /* New Entry */
   $scope.watcherNew = function(newwatcher) {
 	if (newwatcher) {
@@ -280,6 +277,13 @@ uiModules
  	 }, 200);
 	*/
 	
+  }
+
+  /* New Entry from Saved Kibana Query */
+  if ($window.localStorage.getItem('kaae_saved_query')) {
+	// $scope.watcherSaved = JSON.parse($window.localStorage.getItem('kaae_saved_query')); 
+	$scope.watcherNew(JSON.parse($window.localStorage.getItem('kaae_saved_query')));
+	$window.localStorage.removeItem('kaae_saved_query');
   }
 
 
