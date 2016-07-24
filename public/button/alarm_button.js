@@ -22,15 +22,23 @@ const linkReqRespStats = function ($scope, config) {
     const req = $scope.req;
     const resp = $scope.req.resp;
     const stats = $scope.stats = [];
+    const indices = $scope.indices = [];
 
     if (resp && resp.took != null) stats.push(['Query Duration', resp.took + 'ms']);
     if (req && req.ms != null) stats.push(['Request Duration', req.ms + 'ms']);
     if (resp && resp.hits) stats.push(['Hits', resp.hits.total]);
 
     if (req.fetchParams) {
-      if (req.fetchParams.index) stats.push(['Index', req.fetchParams.index]);
-      if (req.fetchParams.type) stats.push(['Type', req.fetchParams.type]);
-      if (req.fetchParams.id) stats.push(['Id', req.fetchParams.id]);
+      // if (req.fetchParams.index) stats.push(['Index', req.fetchParams.index]);
+      // if (req.fetchParams.type) stats.push(['Type', req.fetchParams.type]);
+      // if (req.fetchParams.id) stats.push(['Id', req.fetchParams.id]);
+
+      if (req.fetchParams.index) {
+		var idx = (req.fetchParams.index).toString();
+	        var tmp = idx.replace(/\*/g, '');
+		indices.push("<"+tmp+"{now/d}>");
+		indices.push("<"+tmp+"{now/d-1d}>");
+      }
     }
 
     $scope.intervals = [
@@ -83,6 +91,10 @@ const linkReqRespStats = function ($scope, config) {
     $scope.watcher_script = "payload.hits.total > 100";
     $scope.watcher_interval = $scope.intervals[0].value;
     $scope.watcher_range = $scope.ranges[1].value;
+
+    $scope.watcher_email_to = "root@localhost";
+    $scope.watcher_email_subj = "KAAE ALARM {{ payload._id }}";
+    $scope.watcher_email_body = "Series Alarm {{ payload._id}}: {{ payload.hits.total }}";
 
     $scope.savedWatcher = {};
     var alarm = {};
@@ -137,11 +149,17 @@ const linkReqRespStats = function ($scope, config) {
 	    }
 	  }
 	};
+
+	// Patch Indices
+	$scope.alarm._source.input.search.request.indices = $scope.indices ? $scope.indices : [];
+	// Patch Range
+	$scope.alarm._source.input.search.request.body.query.filtered.filter = {"range": { "@timestamp": {"from": $scope.watcher_range ? $scope.watcher_range : "now-1h" } } };
+
+	// Store Watcher
         alarm = $scope.alarm;
 	window.localStorage.setItem('kaae_saved_query', JSON.stringify($scope.alarm));
-        // console.log('WATCHER-CONF:',$scope.savedWatcher);
-    }
 
+    }
 
     $scope.makeAlarm();
 
@@ -153,7 +171,7 @@ const linkReqRespStats = function ($scope, config) {
 // Spy Placement
 require('ui/registry/spy_modes').register(function () {
   return {
-    display: 'Set Alarm',
+    display: 'Set Watcher',
     name: 'setalarm',
     order: 1000,
     link: linkReqRespStats,

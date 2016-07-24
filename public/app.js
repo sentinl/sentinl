@@ -224,10 +224,7 @@ uiModules
 
   /* New Entry */
   $scope.watcherNew = function(newwatcher) {
-	if (newwatcher) {
-	  // patch timerange
-	  newwatcher._source.input.search.request.body.query.filtered.filter = {"range": { "@timestamp": {"from": "now-1h"} } };
-	} else if (!newwatcher) {
+	if (!newwatcher) {
 	  var newwatcher = {
 		  "_index": "watcher",
 		  "_type": "watch",
