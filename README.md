@@ -5,18 +5,14 @@
 
 ---
 
-### Abstract
-
-This Kibana4+ App/Plugin extends the nodejs server/api to provide an independent Elasticsearch "Watcher" alternative
-<br>For an illustrative working example, please check out the [TUTORIAL](TUTORIAL.md)
-
-#### Kibana App: Kaae
+### Kibana App: Kaae
+The Kibana4.5+ App extends the nodejs server/api to provide an independent Elasticsearch "Watcher" alternative based on the same principles and trigger object format _(pontentially compatible for use with the original ```_watcher```)_
 <img src="http://i.imgur.com/jNYX1mv.gif" />
 
 
 
 ### Kibana Plugin: Kaae Spy
-The integrated Kibana plug-in extends the default Spy functionality to shape new Watchers and send them to Kaae
+The integrated Kibana plug-in extends the default Spy functionality to shape new prototype Watchers based on Visualize queries, and providing them to Kaae for fine editing and scheduling.
 <img src="http://i.imgur.com/MwvV2bg.png" />
 
 ### Status 
