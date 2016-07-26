@@ -5,11 +5,13 @@
     "url": "http://github.com/elasticfence/kaae.git"
   },
   "name": "kaae",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Kibana Alert App for Elasticsearch",
   "main": "index.js",
   "scripts": {
     "lint": "eslint",
+    "kaae-install": "/opt/kibana/bin/kibana plugin --install kaae -u file://`pwd`/kaae-latest.tar.gz",
+    "kaae-remove": "/opt/kibana/bin/kibana plugin --remove kaae",
     "package": "tar cfz ./kaae-latest.tar.gz --exclude .git --exclude .gitignore --exclude kaae-latest.tar.gz ./* && ls -alF kaae-latest*"
   },
   "dependencies": {
