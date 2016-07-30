@@ -54,5 +54,115 @@ export default function (server) {
   });
 
 
+  /* ES Functions */
+
+  server.route({
+    method: 'GET',
+    path: '/api/kaae/test/{id}',
+    handler: function (request, reply) {
+      var config = require('../../kaae.json');
+      var client = server.plugins.elasticsearch.client;
+
+	console.log('Test ES connection with param:',request.params.id);
+	client.ping({
+	  requestTimeout: 5000,
+	  // undocumented params are appended to the query string
+	  hello: "elasticsearch"
+	}, function (error) {
+	  if (error) {
+	    console.error('elasticsearch cluster is down!');
+            reply({ status: "DOWN" });
+	  } else {
+	    console.log('All is well');
+            reply({ status: "UP" });
+	  }
+	});
+
+   }
+  });
+
+  server.route({
+    method: 'GET',
+    path: '/api/kaae/get/{id}',
+    handler: function (request, reply) {
+      var config = require('../../kaae.json');
+      var client = server.plugins.elasticsearch.client;
+
+	console.log('Get watcher with ID:',request.params.id);
+	client.search({
+	  index: config.es.default_index,
+	  type: config.es.type,
+	  q: request.params.id
+	}).then(function (resp) {
+	    var hits = resp.hits.hits;
+            reply( resp );
+	}, function (err,resp) {
+	    console.trace(err.message);
+            reply( resp );
+	});
+   }
+  });
+
+
+  server.route({
+    method: 'GET',
+    path: '/api/kaae/delete/watcher/{id}',
+    handler: function (request, reply) {
+      var config = require('../../kaae.json');
+      var client = server.plugins.elasticsearch.client;
+      var callWithRequest = server.plugins.elasticsearch.callWithRequest;
+
+      var body = {
+        index: config.es.default_index,
+        type: config.es.type,
+        id: req.params.id
+      };
+
+      callWithRequest(request, 'delete', body).then(function (resp) {
+        reply({
+          ok: true,
+	  resp: resp
+        });
+      }).catch(function (resp) {
+        reply({
+          ok: false,
+          resp: resp
+        });
+      });
+
+   }
+  });
+
+
+  server.route({
+    method: 'GET',
+    path: '/api/kaae/validate/es',
+    handler: function (request, reply) {
+      var config = require('../../kaae.json');
+      var callWithRequest = server.plugins.elasticsearch.callWithRequest;
+
+      var body = {
+        index: config.es.default_index,
+      };
+
+      callWithRequest(request, 'fieldStats', body).then(function (resp) {
+        reply({
+          ok: true,
+          field: config.es.timefield,
+          min: resp.indices._all.fields[config.es.timefield].min_value,
+          max: resp.indices._all.fields[config.es.timefield].max_value
+        });
+      }).catch(function (resp) {
+        reply({
+          ok: false,
+          resp: resp
+        });
+      });
+
+    }
+  });
+
+
+
 };
 

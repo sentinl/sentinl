@@ -5,6 +5,10 @@ import uiModules from 'ui/modules';
 import uiRoutes from 'ui/routes';
 import $ from 'jquery';
 
+/* Elasticsearch */
+
+import elasticsearch from 'elasticsearch-browser';
+
 /* Ace editor */
 import 'ace';
 
@@ -99,7 +103,7 @@ uiRoutes
 
 uiModules
 .get('api/kaae', [])
-.controller('kaaeHelloWorld', function ($rootScope, $scope, $route, $interval, $timeout, timefilter, Private, Notifier, $window, kbnUrl) {
+.controller('kaaeHelloWorld', function ($rootScope, $scope, $route, $interval, $timeout, timefilter, Private, Notifier, $window, kbnUrl, $http) {
   $scope.title = 'Kaae';
   $scope.description = 'Kibana Alert App for Elasticsearch';
   // $scope.store = window.sessionStorage;
@@ -216,6 +220,11 @@ uiModules
 
   $scope.watcherSave = function($index){
 	 $scope.notify.warning('KAAE function not yet implemented!');
+	 console.log('saving watcher ', $scope.watchers[$index] );
+	 return $http.get('../api/kaae/get/'+$scope.watchers[$index]._id).then(function (resp) {
+        	console.log('API GET:',resp.data.time);
+         });
+
   }
 
   $scope.getWatchers = function(){

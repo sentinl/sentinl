@@ -6,36 +6,46 @@ import config from './config';
 
 var debug = true;
 
+var hlimit = config.kaae.history ? config.kaae.history : 10;
+
 export default function (server,actions,payload) {
 
+	/* Internal Support Functions */
+
 	var makeHistory = function(type,message) {
-		// Keep stack of latest alarms (temp)
+		// Keep history stack of latest alarms (temp)
 		server.kaaeStore.push({id:new Date(), action: type, message: message});
 		// Rotate local stack
-		if (server.kaaeStore.length > 10) { server.kaaeStore.shift(); } 
+		if (server.kaaeStore.length > hlimit) { server.kaaeStore.shift(); } 
 	}
+
+	var esHistory = function(type,message) {
+
+		var client = server.plugins.elasticsearch.client;
+	        console.log('Storing Alarm to ES with type:'+type);
+		var index_name = config.es.alarm_index ? config.es.alarm_index : 'watcher_alarms' 
+				 +'-'+ new Date().toISOString().substr(0, 10).replace(/-/g, '.');
+	        client.create({
+	          index: index_name,
+	          type: type,
+	          body: {
+			"@timestamp" : new Date().toISOString(),
+			"message" : message
+		  }
+	        }).then(function (resp) {
+	           // if (debug) console.log(resp);
+	        }, function (err,resp) {
+	            console.trace(err,resp);
+	        });
+
+	}
+
+
+	/* Loop Actions */
 
 	_.forOwn(actions, function(action, key) { 
 
 		if (debug) console.log('Processing action:',key);
-
-		/* ***************************************************************************** */
-
-		      /*
-			*   "email" : {
-			*      "to" : "root@localhost",
-			*      "subject" : "Alarm Title",
-			*      "priority" : "high",
-			*      "body" : "Series Alarm {{ payload._id}}: {{payload.hits.total}}"
-			*    }
-		      */
-
-                      if(_.has(action, 'email')) {
-                        var subject = mustache.render(action.email.subject, {"payload":payload});
-                        var body = mustache.render(action.email.body, {"payload":payload});
-                        if (debug) console.log('KAAE Email: ',subject, body);
-			makeHistory(key,body);
-                      }
 
 		/* ***************************************************************************** */
 
@@ -47,8 +57,37 @@ export default function (server,actions,payload) {
 		      */
 
                       if(_.has(action, 'console')) {
-                        var message = mustache.render(action.email.body, {"payload":payload});
+			var formater = action.console.message ? action.console.message : "{{ payload }}";
+                        var message = mustache.render(formatter, {"payload":payload});
                         if (debug) console.log('KAAE Console: ',payload);
+                      }
+
+		/* ***************************************************************************** */
+
+		      /*
+			*   "email" : {
+			*      "to" : "root@localhost",
+			*      "subject" : "Alarm Title",
+			*      "priority" : "high",
+			*      "body" : "Series Alarm {{ payload._id}}: {{payload.hits.total}}",
+			*      "stateless" : false
+			*    }
+		      */
+
+                      if(_.has(action, 'email')) {
+			var formatter_s = action.email.subject ? action.email.subject : "KAAE: "+key;
+			var formatter_b = action.email.body ? action.email.body : "Series Alarm {{ payload._id}}: {{payload.hits.total}}";
+                        var subject = mustache.render(formatter_s, {"payload":payload});
+                        var body = mustache.render(formatter_b, {"payload":payload});
+                        if (debug) console.log('KAAE Email: ',subject, body);
+
+			// TODO: Add send email using config.email 
+
+			if (!action.email.stateless) {
+				makeHistory(key,body);
+				esHistory(key,body);
+			}
+
                       }
 
 		/* ***************************************************************************** */
@@ -58,8 +97,8 @@ export default function (server,actions,payload) {
 			*      "method" : "POST", 
 			*      "host" : "remote.server", 
 			*      "port" : 9200, 
-			*      "path": ":/{{ctx.watch_id}", 
-			*      "body" : "{{ctx.watch_id}}:{{ctx.payload.hits.total}}" 
+			*      "path": ":/{{payload.watcher_id}", 
+			*      "body" : "{{payload.watcher_id}}:{{payload.hits.total}}" 
 			*    }
 		      */
 
@@ -98,17 +137,18 @@ export default function (server,actions,payload) {
 		/* ***************************************************************************** */
 
 		      /*
-			*   "local" : {
+			*   "elastic" : {
 			*      "priority" : "DEBUG",
 			*      "message" : "Avg {{payload.aggregations.avg.value}} measurements in 5 minutes"
 			*    }
 		      */
 
-                      if(_.has(action, 'local')) {
-                        var message = mustache.render(action.email.body, {"payload":payload});
+                      if(_.has(action, 'elastic')) {
+			var formater = action.local.message ? action.local.message : "{{ payload }}";
+                        var message = mustache.render(formatter, {"payload":payload});
                         if (debug) console.log('KAAE local: ',message);
-
-			makeHistory(key,body);
+			makeHistory(key,message);
+			esHistory(key,message);
 
                       }
 

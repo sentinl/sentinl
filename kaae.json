@@ -1,5 +1,13 @@
 {
-  "index": "kaae",
+  "es": {
+    "timefield":	"@timestamp",
+    "default_index":	"watcher",
+    "type": 		"watch",
+    "alarm_index":	"watcher_alarms"
+  },
+  "kaae": {
+    	"history": 	10
+  },
   "settings" : {
 	"email" : {
 	   "user":	"username", 
