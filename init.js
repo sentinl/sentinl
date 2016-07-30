@@ -117,7 +117,7 @@ module.exports = function (server, options) {
                 if (ret) {
 
 		      /* Process Actions */
-			doActions(actions,payload);
+			doActions(server,actions,payload);
 
 		      /* Transform Query (disabled) */
 			// client.search(transform).then(function(payload) {

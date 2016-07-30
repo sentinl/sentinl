@@ -27,6 +27,7 @@
 	    <tr>
 		<!-- <th> </th> -->
 		<th>TIMESTAMP</th>
+		<th>ACTION</th>
 		<th>MESSAGE</th>
 		<th></th>
 	    </tr>
@@ -34,6 +35,7 @@
 	    <tr class="alarmRow">
 	         <!-- <td><input type=checkbox ng-model=collapse></td> -->
 	         <td>{{ alarm.id }}</td>
+	         <td>{{ alarm.action }}</td>
 	         <td>{{ alarm.message }}</td>
 		 <td class="text-center edit-group">
 			<a href="javascript:;" ng-click="collapse=!collapse" ng-model="collapse" class="show-rule"><i class="fa fa-ellipsis-h"></i></a>

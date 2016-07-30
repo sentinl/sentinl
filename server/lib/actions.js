@@ -6,7 +6,14 @@ import config from './config';
 
 var debug = true;
 
-export default function (actions,payload) {
+export default function (server,actions,payload) {
+
+	var makeHistory = function(type,message) {
+		// Keep stack of latest alarms (temp)
+		server.kaaeStore.push({id:new Date(), action: type, message: message});
+		// Rotate local stack
+		if (server.kaaeStore.length > 10) { server.kaaeStore.shift(); } 
+	}
 
 	_.forOwn(actions, function(action, key) { 
 
@@ -27,6 +34,7 @@ export default function (actions,payload) {
                         var subject = mustache.render(action.email.subject, {"payload":payload});
                         var body = mustache.render(action.email.body, {"payload":payload});
                         if (debug) console.log('KAAE Email: ',subject, body);
+			makeHistory(key,body);
                       }
 
 		/* ***************************************************************************** */
@@ -99,10 +107,9 @@ export default function (actions,payload) {
                       if(_.has(action, 'local')) {
                         var message = mustache.render(action.email.body, {"payload":payload});
                         if (debug) console.log('KAAE local: ',message);
-			// Keep stack of latest alarms (temp)
-			server.kaaeStore.push({id:new Date(), message: message});
-			// Rotate local stack
-			if (server.kaaeStore.length > 10) { server.kaaeStore.shift(); } 
+
+			makeHistory(key,body);
+
                       }
 
 		/* ***************************************************************************** */

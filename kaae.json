@@ -2,17 +2,16 @@
   "index": "kaae",
   "settings" : {
 	"email" : {
-	   user:	"username", 
-	   password:	"password", 
-	   host:	"smtp.server.com", 
-	   ssl:		true,
-	   active:	true
+	   "user":	"username", 
+	   "password":	"password", 
+	   "host":	"smtp.server.com", 
+	   "ssl":	true,
+	   "active":	true
 	},
 	"slack" : {
-	   username:    "KaaE", 
-	   channel:     "#kaae",
-	   active:	true
-	},
-
+	   "username":	"KaaE", 
+	   "channel":	"#kaae",
+	   "active": 	true
+	}
   }
 }
