@@ -2,6 +2,7 @@ import later from 'later';
 import _ from 'lodash';
 import mustache from 'mustache';
 import masterRoute from './server/routes/routes';
+import doActions from './server/lib/actions';
 import $window from 'jquery';
 
 module.exports = function (server, options) {
@@ -103,27 +104,28 @@ module.exports = function (server, options) {
               var transform = watch.transform.search.request;
               var actions = watch.actions;
 	      if (debug) console.log('KAAE Watching:',request,condition,actions);
+
               client.search(request).then(function(payload){
 		if (!payload) return;
 		if (debug) console.log('KAAE Payload:',payload);
 		if (!condition) return;
 		if (debug) console.log('KAAE Condition:',condition);
+
+		/* Validate Condition */
+
 		try { var ret = eval(condition); } catch (err) { console.log(err) }
                 if (ret) {
-                 // client.search(transform).then(function(payload) {
-                    _.each(_.values(actions), function(action){
-                      if(_.has(action, 'email')) {
-                        var subject = mustache.render(action.email.subject, {"payload":payload});
-                        var body = mustache.render(action.email.body, {"payload":payload});
-                        console.log('KAAE Alert: ',subject, body);
-			// Keep stack of latest alarms (temp)
-			server.kaaeStore.push({id:new Date(), message: body});
-			if (server.kaaeStore.length > 10) { server.kaaeStore.shift(); } 
-                      }
-                    });
-                 // });
+
+		      /* Process Actions */
+			doActions(actions,payload);
+
+		      /* Transform Query (disabled) */
+			// client.search(transform).then(function(payload) {
+			//     console.log('Transaction resp:',payload);
+			// });
                 }
               });
+
             }
           });
           });

@@ -2,6 +2,9 @@
 
 import _ from 'lodash';
 import mustache from 'mustache';
+import config from './config';
+
+var debug = true;
 
 export default function (actions,payload) {
 
@@ -23,7 +26,7 @@ export default function (actions,payload) {
                       if(_.has(action, 'email')) {
                         var subject = mustache.render(action.email.subject, {"payload":payload});
                         var body = mustache.render(action.email.body, {"payload":payload});
-                        console.log('KAAE Email: ',subject, body);
+                        if (debug) console.log('KAAE Email: ',subject, body);
                       }
 
 		/* ***************************************************************************** */
@@ -37,7 +40,7 @@ export default function (actions,payload) {
 
                       if(_.has(action, 'console')) {
                         var message = mustache.render(action.email.body, {"payload":payload});
-                        console.log('KAAE Console: ',payload);
+                        if (debug) console.log('KAAE Console: ',payload);
                       }
 
 		/* ***************************************************************************** */
@@ -69,16 +72,16 @@ export default function (actions,payload) {
 			var req = http.request(options, function(res) {
 			    res.setEncoding('utf8');
 			    res.on('data', function (chunk) {
-			        console.log("body: " + chunk);
+			        if (debug) console.log("body: " + chunk);
 			    });
 			});
 
 			req.on('error', function(e) {
-			    console.log('Error shipping webhook: ' + e.message);
+			    if (debug) console.log('Error shipping webhook: ' + e.message);
 			});
 
 			if (actions.webhook.body) { req.write(action.webhook.body); }
-			else if { (actions.webhook.params) req.write(action.webhook.params); }
+			else if (actions.webhook.params) { req.write(action.webhook.params); }
 
 			req.end();
 
@@ -95,7 +98,7 @@ export default function (actions,payload) {
 
                       if(_.has(action, 'local')) {
                         var message = mustache.render(action.email.body, {"payload":payload});
-                        console.log('KAAE local: ',message);
+                        if (debug) console.log('KAAE local: ',message);
 			// Keep stack of latest alarms (temp)
 			server.kaaeStore.push({id:new Date(), message: message});
 			// Rotate local stack
