@@ -3,6 +3,9 @@ import handleESError from '../lib/handle_es_error';
 
 export default function (server) {
 
+  let call = server.plugins.elasticsearch.callWithRequest;
+
+  // Current Time
   server.route({
     path: '/api/kaae/example',
     method: 'GET',
@@ -12,6 +15,20 @@ export default function (server) {
   });
 
   server.route({
+    method: 'GET',
+    path: '/api/kaae/config',
+    handler: require('./config.js')
+  });
+
+  server.route({
+    method: 'GET',
+    path: '/api/kaae/getitems',
+    handler: require('./items.js')
+  });
+
+
+  // Local Alarms (session)
+  server.route({
     path: '/api/kaae/alarms',
     method: ['POST','GET'],
     handler(req, reply) {
@@ -19,8 +36,47 @@ export default function (server) {
     }
   });
 
-  let call = server.plugins.elasticsearch.callWithRequest;
+  // ES Alarms
+  server.route({
+    path: '/api/kaae/list/alarms',
+    method: ['POST', 'GET'],
+    handler: function (req, reply) {
+      var config = require('../../kaae.json');
+      const boundCallWithRequest = _.partial(server.plugins.elasticsearch.callWithRequest, req);
+      boundCallWithRequest('search', {
+	index: config.es.alarm_index ? config.es.alarm_index + "*" : "watcher_alarms*",
+	sort : "@timestamp : asc", 
+        allowNoIndices: false,
+	body: {
+		"size": 10,
+   		"query": {
+        		"filtered": {
+        		    "query": {
+        		        "match_all": {}
+    			        },
+    		        "filter": {
+    		            "range": {
+    		                "@timestamp": {
+    		                    "gte": "now-5m"
+    		                }
+    		            }
+    		        }
+    		    }
+    		}
+	}
+      })
+      .then(
+        function (res) {
+          reply(res); 
+        },
+        function (error) {
+          reply(handleESError(error));
+        }
+      );
+    }
+  });
 
+  // List Watchers
   server.route({
     path: '/api/kaae/list',
     method: ['POST', 'GET'],
@@ -41,21 +97,11 @@ export default function (server) {
     }
   });
 
-  server.route({
-    method: 'GET',
-    path: '/api/kaae/config',
-    handler: require('./config.js')
-  });
-
-  server.route({
-    method: 'GET',
-    path: '/api/kaae/getitems',
-    handler: require('./items.js')
-  });
-
 
   /* ES Functions */
 
+
+  // Test
   server.route({
     method: 'GET',
     path: '/api/kaae/test/{id}',
@@ -83,7 +129,7 @@ export default function (server) {
 
   server.route({
     method: 'GET',
-    path: '/api/kaae/get/{id}',
+    path: '/api/kaae/get/watcher/{id}',
     handler: function (request, reply) {
       var config = require('../../kaae.json');
       var client = server.plugins.elasticsearch.client;

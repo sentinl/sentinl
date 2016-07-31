@@ -50,6 +50,42 @@
 	</table>
       </div>
 
+     <hr>
+
+      <div class="panel panel-default" ng-show="!elasticAlarms.length">
+	<div class="panel-heading"><h4>NO ALARM HISTORY<div class="edit-group pull-right"><a href="#"><i class="fa fa-plus"></i></a></div></h4></div>
+      </div>
+
+      <div class="panel panel-default" ng-show="elasticAlarms.length">
+	<div class="panel-heading"><h4>ALARM HISTORY<div class="edit-group pull-right"><a href="#"><i class="fa fa-plus"></i></a></div></h4></div>
+	<table class="table">
+	  <thead>
+	    <tr>
+		<!-- <th> </th> -->
+		<th>TIMESTAMP</th>
+		<th>ACTION</th>
+		<th>MESSAGE</th>
+		<th></th>
+	    </tr>
+	  <tbody ng-repeat='alarm in elasticAlarms'>
+	    <tr class="alarmRow">
+	         <!-- <td><input type=checkbox ng-model=collapse></td> -->
+	         <td>{{ alarm._source['@timestamp']  }}</td>
+	         <td>{{ alarm._type }}</td>
+	         <td>{{ alarm._source['message'] }}</td>
+		 <td class="text-center edit-group">
+			<a href="javascript:;" ng-click="collapse=!collapse" ng-model="collapse" class="show-rule"><i class="fa fa-ellipsis-h"></i></a>
+			<a href="javascript:;" ng-click="deleteAlarm($index)" class="delete-rule"><i class="fa fa-trash"></i></a></td>
+	    </tr>
+	    <tr ng-show=collapse>
+	        <td colspan="100%">
+		   <pre>{{ alarm._source | json }}</pre>
+		</td>
+	    </tr>
+	  </tbody>
+	</table>
+      </div>
+
     </div>
   </div>
 </div>

@@ -62,12 +62,6 @@ uiRoutes
 	// console.log('DEBUG LIST:',resp);
         return resp;
       });
-    },
-    currentAlarms($http) {
-      return $http.get('../api/kaae/alarms').then(function (resp) {
-	// console.log('DEBUG ALARMS:',resp);
-        return resp;
-      });
     }
   }
 });
@@ -92,6 +86,12 @@ uiRoutes
 	// console.log('DEBUG ALARMS:',resp);
         return resp;
       });
+    },
+    elasticAlarms($http) {
+      return $http.get('../api/kaae/list/alarms').then(function (resp) {
+	// console.log('DEBUG ALARMS:',resp);
+        return resp;
+      });
     }
   }
 });
@@ -104,6 +104,96 @@ uiRoutes
 uiModules
 .get('api/kaae', [])
 .controller('kaaeHelloWorld', function ($rootScope, $scope, $route, $interval, $timeout, timefilter, Private, Notifier, $window, kbnUrl, $http) {
+  $scope.title = 'Kaae';
+  $scope.description = 'Kibana Alert App for Elasticsearch';
+  // $scope.store = window.sessionStorage;
+
+  $scope.notify = new Notifier();
+  
+  $scope.topNavMenu = [
+  {
+    key: 'watchers',
+    description: 'WATCH',
+    run: function () { kbnUrl.change('/'); }
+  },
+  {
+    key: 'about',
+    description: 'ABOUT',
+    run: function () { kbnUrl.change('/about'); }
+  }
+  ];
+
+  timefilter.enabled = true;
+
+  /* Alarm Functions */
+
+  var checkAlarm = function() {
+	  if ($route.current.locals.currentAlarms.data) {
+		   $scope.currentAlarms = $route.current.locals.currentAlarms.data.data;
+	  } else { $scope.currentAlarms = [] }
+  }
+
+  var getAlarmsFromEs = function() {
+	  if ($route.current.locals.elasticAlarms.data.hits) {
+		   $scope.elasticAlarms = $route.current.locals.elasticAlarms.data.hits.hits;
+	  } else { $scope.elasticAlarms = [] }
+  }
+
+  $scope.currentRefresh = 0;
+  $scope.newRefresh = 0;
+
+  checkAlarm();
+  getAlarmsFromEs();
+
+  /* Reschedule Watcher updates */
+  var updateRefresh = function(refreshValue) {
+     if (refreshValue != $scope.currentRefresh && refreshValue != 0){
+	  // console.log('NEW REFRESH:',refreshValue);
+	  $scope.currentRefresh = refreshValue;
+  	  $interval.cancel($scope.refreshalarms);
+	  $scope.refreshalarms = $timeout(function () {
+	     // console.log('Reloading data....');
+	     $route.reload();
+          }, refreshValue);
+     }
+  }
+
+  /* Listen for refreshInterval changes */
+    $rootScope.$watchCollection('timefilter.refreshInterval', function () {
+      let timeInterval = _.get($rootScope, 'timefilter.time');
+      let refreshValue = _.get($rootScope, 'timefilter.refreshInterval.value');
+      let refreshPause = _.get($rootScope, 'timefilter.refreshInterval.pause');
+      if (_.isNumber(refreshValue) && !refreshPause) {
+	    $scope.timeInterval = timeInterval;
+	    $scope.newInterval = refreshValue;
+	    $scope.newRefresh = refreshValue;
+	    updateRefresh(refreshValue);
+      } else {
+	  // console.log('NO REFRESH');
+	  $scope.timeInterval = timeInterval;
+  	  $scope.currentRefresh = 0;
+	  $interval.cancel($scope.refreshalarms);
+      }
+    });
+
+  $scope.deleteAlarm = function($index){
+	 $scope.notify.warning('KAAE function not yet implemented!');
+	 $scope.currentAlarms.splice($index,1);     
+  }
+
+  var currentTime = moment($route.current.locals.currentTime);
+  $scope.currentTime = currentTime.format('HH:mm:ss');
+  var unsubscribe = $interval(function () {
+    $scope.currentTime = currentTime.add(1, 'second').format('HH:mm:ss');
+  }, 1000);
+  $scope.$watch('$destroy', unsubscribe);
+
+});
+
+// WATCHERS CONTROLLER
+uiModules
+.get('api/kaae', [])
+.controller('kaaeWatchers', function ($rootScope, $scope, $route, $interval, $timeout, timefilter, Private, Notifier, $window, kbnUrl, $http) {
   $scope.title = 'Kaae';
   $scope.description = 'Kibana Alert App for Elasticsearch';
   // $scope.store = window.sessionStorage;
@@ -149,18 +239,8 @@ uiModules
   } else { $scope.watchers = []; }
 
 
-  /* Alarm Functions */
-
-  var checkAlarm = function() {
-	  if ($route.current.locals.currentAlarms.data) {
-		   $scope.currentAlarms = $route.current.locals.currentAlarms.data.data;
-	  } else { $scope.currentAlarms = [] }
-  }
-
   $scope.currentRefresh = 0;
   $scope.newRefresh = 0;
-
-  checkAlarm();
 
   /* Reschedule Watcher updates */
   var updateRefresh = function(refreshValue) {
@@ -188,11 +268,6 @@ uiModules
 	  $interval.cancel($scope.refreshalarms);
       }
     });
-
-  $scope.deleteAlarm = function($index){
-	 $scope.notify.warning('KAAE function not yet implemented!');
-	 $scope.currentAlarms.splice($index,1);     
-  }
 
   
   /* ACE Editor */
@@ -292,7 +367,6 @@ uiModules
 	$window.localStorage.removeItem('kaae_saved_query');
   }
 
-
   var currentTime = moment($route.current.locals.currentTime);
   $scope.currentTime = currentTime.format('HH:mm:ss');
   var unsubscribe = $interval(function () {
@@ -301,6 +375,8 @@ uiModules
   $scope.$watch('$destroy', unsubscribe);
 
 });
+
+// NEW END
 
 uiModules
 .get('api/kaae', [])
