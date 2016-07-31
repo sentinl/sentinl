@@ -139,42 +139,74 @@ uiModules
 	  } else { $scope.elasticAlarms = [] }
   }
 
-  $scope.currentRefresh = 0;
-  $scope.newRefresh = 0;
+  $scope.timeInterval = timefilter.time;
 
-  checkAlarm();
-  getAlarmsFromEs();
-
-  /* Reschedule Watcher updates */
-  var updateRefresh = function(refreshValue) {
-     if (refreshValue != $scope.currentRefresh && refreshValue != 0){
-	  // console.log('NEW REFRESH:',refreshValue);
-	  $scope.currentRefresh = refreshValue;
-  	  $interval.cancel($scope.refreshalarms);
-	  $scope.refreshalarms = $timeout(function () {
-	     // console.log('Reloading data....');
-	     $route.reload();
-          }, refreshValue);
-     }
+  /* Update Time Filter */
+  var updateFilter = function(){
+	  return $http.get('../api/kaae/set/interval/'+JSON.stringify($scope.timeInterval)).then(function (resp) {
+	        // console.log('NEW TIMEFILTER:',$scope.timeInterval);
+          });	
   }
 
+  // First Boot
+  // checkAlarm();
+  getAlarmsFromEs();
+  updateFilter()
+
   /* Listen for refreshInterval changes */
-    $rootScope.$watchCollection('timefilter.refreshInterval', function () {
+
+    $rootScope.$watchCollection('timefilter', function () {
       let timeInterval = _.get($rootScope, 'timefilter.time');
       let refreshValue = _.get($rootScope, 'timefilter.refreshInterval.value');
       let refreshPause = _.get($rootScope, 'timefilter.refreshInterval.pause');
-      if (_.isNumber(refreshValue) && !refreshPause) {
-	    $scope.timeInterval = timeInterval;
-	    $scope.newInterval = refreshValue;
-	    $scope.newRefresh = refreshValue;
-	    updateRefresh(refreshValue);
-      } else {
-	  // console.log('NO REFRESH');
-	  $scope.timeInterval = timeInterval;
-  	  $scope.currentRefresh = 0;
-	  $interval.cancel($scope.refreshalarms);
+
+      if ($scope.refreshalarms) {
+	  	$timeout.cancel($scope.refreshalarms);
+		$scope.refreshalarms = undefined;
       }
+
+      if (timeInterval) {
+	 	$scope.timeInterval = timeInterval;
+	  	updateFilter();
+      }
+
+      if (refreshPause) {
+		console.log('REFRESH PAUSED');
+		return;
+      }
+
+      if (refreshValue != $scope.currentRefresh && refreshValue != 0) {
+	// new refresh value
+      	      if (_.isNumber(refreshValue) && !refreshPause) {
+		    console.log('TIMEFILTER REFRESH');
+		    $scope.newRefresh = refreshValue;
+			  // Reset Interval & Schedule Next
+			  $scope.currentRefresh = refreshValue;
+			  $scope.refreshalarms = $timeout(function () {
+			     // console.log('Reloading data....');
+			     $route.reload();
+		          }, $scope.currentRefresh);
+  			  $scope.$watch('$destroy', $scope.refreshalarms);
+	      } else {
+		  console.log('NO REFRESH');
+	  	  $scope.currentRefresh = 0;
+		  $timeout.cancel($scope.refreshalarms);
+	      }
+
+      } else { 
+  	          $timeout.cancel($scope.refreshalarms);
+		  $route.reload(); 
+      }
+
     });
+
+	/*
+	    $rootScope.$watchCollection('timefilter.time', function () {
+	      let timeInterval = _.get($rootScope, 'timefilter.time');
+		  $scope.timeInterval = timeInterval;
+		  updateFilter();
+	    });
+	*/
 
   $scope.deleteAlarm = function($index){
 	 $scope.notify.warning('KAAE function not yet implemented!');
@@ -237,38 +269,6 @@ uiModules
 	*/
 
   } else { $scope.watchers = []; }
-
-
-  $scope.currentRefresh = 0;
-  $scope.newRefresh = 0;
-
-  /* Reschedule Watcher updates */
-  var updateRefresh = function(refreshValue) {
-     if (refreshValue != $scope.currentRefresh && refreshValue != 0){
-	  // console.log('NEW REFRESH:',refreshValue);
-	  $scope.currentRefresh = refreshValue;
-  	  $interval.cancel($scope.refreshalarms);
-	  $scope.refreshalarms = $timeout(function () {
-	     // console.log('Reloading data....');
-	     $route.reload();
-          }, refreshValue);
-     }
-  }
-
-  /* Listen for refreshInterval changes */
-    $rootScope.$watchCollection('timefilter.refreshInterval', function () {
-      let refreshValue = _.get($rootScope, 'timefilter.refreshInterval.value');
-      let refreshPause = _.get($rootScope, 'timefilter.refreshInterval.pause');
-      if (_.isNumber(refreshValue) && !refreshPause) {
-	    $scope.newRefresh = refreshValue;
-	    updateRefresh(refreshValue);
-      } else {
-	  // console.log('NO REFRESH');
-  	  $scope.currentRefresh = 0;
-	  $interval.cancel($scope.refreshalarms);
-      }
-    });
-
   
   /* ACE Editor */
   $scope.editor;
@@ -352,7 +352,7 @@ uiModules
 	$scope.watchers.unshift(newwatcher);
 
 	/*	
-	 $scope.refreshalarms = $timeout(function () {
+	 refreshalarms = $timeout(function () {
 	      //console.log('set new watcher to edit mode...');
 	      $scope.setAce(0,false);
  	 }, 200);

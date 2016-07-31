@@ -42,6 +42,15 @@ export default function (server) {
     method: ['POST', 'GET'],
     handler: function (req, reply) {
       var config = require('../../kaae.json');
+
+      // Use selected timefilter when available
+      if (server.kaaeInterval) {
+	var timeInterval = server.kaaeInterval;
+      } else {
+	var timeInterval = {from: "now-15m", mode: "quick", to: "now"};
+      }
+      var qrange = { gte: timeInterval.from, lt: timeInterval.to };
+
       const boundCallWithRequest = _.partial(server.plugins.elasticsearch.callWithRequest, req);
       boundCallWithRequest('search', {
 	index: config.es.alarm_index ? config.es.alarm_index + "*" : "watcher_alarms*",
@@ -56,9 +65,7 @@ export default function (server) {
     			        },
     		        "filter": {
     		            "range": {
-    		                "@timestamp": {
-    		                    "gte": "now-5m"
-    		                }
+    		                "@timestamp": qrange
     		            }
     		        }
     		    }
@@ -99,6 +106,18 @@ export default function (server) {
 
 
   /* ES Functions */
+
+  // Test
+  server.route({
+    method: 'GET',
+    path: '/api/kaae/set/interval/{timefilter}',
+    handler: function (request, reply) {
+      var config = require('../../kaae.json');
+	server.kaaeInterval = JSON.parse(request.params.timefilter);
+	// console.log('server timefilter:',server.kaaeInterval);
+	reply({ status: "200 OK" });
+   }
+  });
 
 
   // Test

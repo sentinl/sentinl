@@ -84,7 +84,7 @@ export default function (server,actions,payload) {
 			// TODO: Add send email using config.email 
 
 			if (!action.email.stateless) {
-				makeHistory(key,body);
+				// makeHistory(key,body);
 				esHistory(key,body);
 			}
 
@@ -147,7 +147,7 @@ export default function (server,actions,payload) {
 			var formater = action.local.message ? action.local.message : "{{ payload }}";
                         var message = mustache.render(formatter, {"payload":payload});
                         if (debug) console.log('KAAE local: ',message);
-			makeHistory(key,message);
+			// makeHistory(key,message);
 			esHistory(key,message);
 
                       }
