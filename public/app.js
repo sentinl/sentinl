@@ -245,7 +245,7 @@ uiModules
   }
   ];
 
-  timefilter.enabled = true;
+  timefilter.enabled = false;
   /*
 	time: {
 	        gt: timefilter.getBounds().min.valueOf(),
