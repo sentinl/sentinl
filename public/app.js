@@ -289,17 +289,35 @@ uiModules
   }
 
   $scope.watcherDelete = function($index){
-	 $scope.notify.warning('KAAE function not yet implemented!');
-	 $scope.watchers.splice($index,1);     
+
+     if (confirm('Are you sure?')) {
+	 return $http.get('../api/kaae/delete/watcher/'+$scope.watchers[$index]._id).then(function (resp) {
+        	console.log('API DELETE:',resp.data);
+			 var reload = $timeout(function () {
+		              $route.reload();
+		 	      $scope.notify.warning('KAAE Watcher successfully deleted!');
+		 	 }, 1000);
+         });
+      }
+  }
+
+  $scope.watcherGet = function($index){
+	 console.log('saving watcher ', $scope.watchers[$index] );
+	 return $http.get('../api/kaae/get/watcher/'+$scope.watchers[$index]._id).then(function (resp) {
+        	console.log('API GET:',resp.data);
+         });
   }
 
   $scope.watcherSave = function($index){
-	 $scope.notify.warning('KAAE function not yet implemented!');
 	 console.log('saving watcher ', $scope.watchers[$index] );
-	 return $http.get('../api/kaae/get/'+$scope.watchers[$index]._id).then(function (resp) {
-        	console.log('API GET:',resp.data.time);
+    	 var watcher = $scope.editor ? JSON.parse($scope.editor.getValue()) : $scope.watchers[$index];
+	 return $http.get('../api/kaae/save/watcher/'+JSON.stringify(watcher)).then(function (resp) {
+        	console.log('API STORE:',resp);
+			 var reload = $timeout(function () {
+		              $route.reload();
+		 	      $scope.notify.warning('KAAE Watcher successfully saved!');
+		 	 }, 1000);
          });
-
   }
 
   $scope.getWatchers = function(){
@@ -313,7 +331,6 @@ uiModules
 		  "_index": "watcher",
 		  "_type": "watch",
 		  "_id": "new",
-		  "_score": 1,
 		  "_source": {
 		    "trigger": {
 		      "schedule": {

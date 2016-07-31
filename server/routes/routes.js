@@ -168,11 +168,38 @@ export default function (server) {
    }
   });
 
+  server.route({
+    method: 'GET',
+    path: '/api/kaae/save/watcher/{watcher}',
+    handler: function (request, reply) {
+      var config = require('../../kaae.json');
+      var client = server.plugins.elasticsearch.client;
+      var watcher = JSON.parse(request.params.watcher)
+
+      console.log('Saving watcher with ID:',watcher._id);
+
+	        var body = {
+	        	index: config.es.default_index,
+	        	type: config.es.type,
+			id: watcher._id,
+	        	body: watcher._source
+	        };
+
+	        client.create(body).then(function (resp) {
+        		reply({ ok: true, resp: resp });
+	                   // if (debug) console.log(resp);
+	            }, function (err,resp) {
+        		reply({ ok: false, resp: resp });
+	           	console.trace(err,resp);
+		});
+   }
+  });
+
 
   server.route({
     method: 'GET',
     path: '/api/kaae/delete/watcher/{id}',
-    handler: function (request, reply) {
+    handler: function (req, reply) {
       var config = require('../../kaae.json');
       var client = server.plugins.elasticsearch.client;
       var callWithRequest = server.plugins.elasticsearch.callWithRequest;
@@ -183,7 +210,7 @@ export default function (server) {
         id: req.params.id
       };
 
-      callWithRequest(request, 'delete', body).then(function (resp) {
+      callWithRequest(req, 'delete', body).then(function (resp) {
         reply({
           ok: true,
 	  resp: resp

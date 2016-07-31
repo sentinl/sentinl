@@ -23,8 +23,8 @@ export default function (server,actions,payload) {
 
 		var client = server.plugins.elasticsearch.client;
 	        console.log('Storing Alarm to ES with type:'+type);
-		var index_name = config.es.alarm_index ? config.es.alarm_index : 'watcher_alarms' 
-				 +'-'+ new Date().toISOString().substr(0, 10).replace(/-/g, '.');
+		var indexDate = '-' + new Date().toISOString().substr(0, 10).replace(/-/g, '.');
+		var index_name = config.es.alarm_index ? config.es.alarm_index + indexDate : 'watcher_alarms' + indexDate;
 	        client.create({
 	          index: index_name,
 	          type: type,
