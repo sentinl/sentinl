@@ -11,8 +11,11 @@
 <div class="container" ng-controller="kaaeWatchers">
   <div class="row">
     <div class="col-12-sm">
-      <p>The current time is {{ currentTime }}</p>
-	<hr>
+      <p style="float:left;">UTC time is {{ utcTime }}</p>
+      <p style="float:right;">Local time is {{ currentTime }}</p>
+      <br style="clear:both;">
+
+      <hr>
       <div class="panel panel-default">
 	<div class="panel-heading"><h4>WATCHERS
 		<div class="edit-group pull-right">

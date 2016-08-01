@@ -103,6 +103,11 @@ uiRoutes
 
 uiModules
 .get('api/kaae', [])
+.filter('moment', function() {
+    return function(dateString) {
+        return moment(dateString).format('YYYY-MM-DD HH:mm:ss.sss');;
+    };
+})
 .controller('kaaeHelloWorld', function ($rootScope, $scope, $route, $interval, $timeout, timefilter, Private, Notifier, $window, kbnUrl, $http) {
   $scope.title = 'Kaae';
   $scope.description = 'Kibana Alert App for Elasticsearch';
@@ -215,8 +220,11 @@ uiModules
 
   var currentTime = moment($route.current.locals.currentTime);
   $scope.currentTime = currentTime.format('HH:mm:ss');
+  var utcTime = moment.utc($route.current.locals.currentTime);
+  $scope.utcTime = utcTime.format('HH:mm:ss');
   var unsubscribe = $interval(function () {
     $scope.currentTime = currentTime.add(1, 'second').format('HH:mm:ss');
+    $scope.utcTime = utcTime.add(1, 'second').format('HH:mm:ss');
   }, 1000);
   $scope.$watch('$destroy', unsubscribe);
 
@@ -386,8 +394,11 @@ uiModules
 
   var currentTime = moment($route.current.locals.currentTime);
   $scope.currentTime = currentTime.format('HH:mm:ss');
+  var utcTime = moment.utc($route.current.locals.currentTime);
+  $scope.utcTime = utcTime.format('HH:mm:ss');
   var unsubscribe = $interval(function () {
     $scope.currentTime = currentTime.add(1, 'second').format('HH:mm:ss');
+    $scope.utcTime = utcTime.add(1, 'second').format('HH:mm:ss');
   }, 1000);
   $scope.$watch('$destroy', unsubscribe);
 
@@ -410,8 +421,11 @@ uiModules
 
   var currentTime = moment($route.current.locals.currentTime);
   $scope.currentTime = currentTime.format('HH:mm:ss');
+  var utcTime = moment.utc($route.current.locals.currentTime);
+  $scope.utcTime = utcTime.format('HH:mm:ss');
   var unsubscribe = $interval(function () {
     $scope.currentTime = currentTime.add(1, 'second').format('HH:mm:ss');
+    $scope.utcTime = utcTime.add(1, 'second').format('HH:mm:ss');
   }, 1000);
   $scope.$watch('$destroy', unsubscribe);
 

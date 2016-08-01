@@ -10,7 +10,7 @@ export default function (server) {
     path: '/api/kaae/example',
     method: 'GET',
     handler(req, reply) {
-      reply({ time: (new Date()).toISOString() });
+      reply({ time: new Date().toISOString() });
     }
   });
 

@@ -14,7 +14,9 @@
 <div class="container" ng-controller="kaaeHelloWorld">
   <div class="row">
     <div class="col-12-sm">
-      <p>The current time is {{ currentTime }}</p>
+      <p style="float:left;">UTC time is {{ utcTime }}</p>
+      <p style="float:right;">Local time is {{ currentTime }}</p>
+      <br style="clear:both;">
 
 <!--
 	<hr>
@@ -54,14 +56,20 @@
       </div>
 
 
-     <hr>
+     <br>
 
       <div class="panel panel-default" ng-show="!elasticAlarms.length">
-	<div class="panel-heading"><h4>NO ALARM HISTORY IN RANGE<div class="edit-group pull-right"><a href="#"><i class="fa fa-plus"></i></a></div></h4></div>
+	<div class="panel-heading">
+	   <h4>NO ALARM HISTORY
+		<div class="edit-group pull-right"><a href="#"><i class="fa fa-bell-slash"></i></a></div>
+	  </h4>
+		No Alarms found - That's great!<br>
+		Change the selected Time Range to extend results.<br>
+	</div>
       </div>
 
       <div class="panel panel-default" ng-show="elasticAlarms.length">
-	<div class="panel-heading"><h4>ALARM HISTORY IN RANGE<div class="edit-group pull-right"><a href="#"><i class="fa fa-plus"></i></a></div></h4></div>
+	<div class="panel-heading"><h4>ALARM HISTORY<div class="edit-group pull-right"><a href="#"><i class="fa fa-bell"></i></a></div></h4></div>
 	<table class="table">
 	  <thead>
 	    <tr>
@@ -72,9 +80,9 @@
 		<th></th>
 	    </tr>
 	  <tbody ng-repeat='alarm in elasticAlarms'>
-	    <tr class="alarmRow">
+	    <tr ng-class-odd="'alarmRow-odd'" ng-class-even="'alarmRow'">
 	         <!-- <td><input type=checkbox ng-model=collapse></td> -->
-	         <td>{{ alarm._source['@timestamp']  }}</td>
+	         <td>{{ alarm._source['@timestamp'] | moment }}</td>
 	         <td>{{ alarm._type }}</td>
 	         <td>{{ alarm._source['message'] }}</td>
 		 <td class="text-center edit-group">
