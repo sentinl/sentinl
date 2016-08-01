@@ -144,8 +144,6 @@ uiModules
 	  } else { $scope.elasticAlarms = [] }
   }
 
-  $scope.timeInterval = timefilter.time;
-
   /* Update Time Filter */
   var updateFilter = function(){
 	  return $http.get('../api/kaae/set/interval/'+JSON.stringify($scope.timeInterval)).then(function (resp) {
@@ -153,65 +151,71 @@ uiModules
           });	
   }
 
-  // First Boot
+
+  /* First Boot */
+
+  $scope.timeInterval = timefilter.time;
+  updateFilter();
+
   // checkAlarm();
   getAlarmsFromEs();
-  updateFilter()
 
   /* Listen for refreshInterval changes */
 
-    $rootScope.$watchCollection('timefilter', function () {
+   $rootScope.$watchCollection('timefilter.time', function (newvar, oldvar) {
+      if (newvar == oldvar) { return; }
       let timeInterval = _.get($rootScope, 'timefilter.time');
+      // console.log('Time Range Change!',timefilter.time);
+      if (timeInterval) {
+	 	$scope.timeInterval = timeInterval;
+	  	updateFilter();
+		$route.reload();
+      }
+
+    });
+
+   $rootScope.$watchCollection('timefilter.refreshInterval', function () {
       let refreshValue = _.get($rootScope, 'timefilter.refreshInterval.value');
       let refreshPause = _.get($rootScope, 'timefilter.refreshInterval.pause');
 
+      // Kill any existing timer immediately
       if ($scope.refreshalarms) {
 	  	$timeout.cancel($scope.refreshalarms);
 		$scope.refreshalarms = undefined;
       }
 
-      if (timeInterval) {
-	 	$scope.timeInterval = timeInterval;
-	  	updateFilter();
-      }
-
+      // Check if Paused
       if (refreshPause) {
-		console.log('REFRESH PAUSED');
+		// console.log('REFRESH PAUSED');
+	  	if ($scope.refreshalarms) $timeout.cancel($scope.refreshalarms);
 		return;
       }
 
+      // Process New Filter
       if (refreshValue != $scope.currentRefresh && refreshValue != 0) {
-	// new refresh value
+	      // new refresh value
       	      if (_.isNumber(refreshValue) && !refreshPause) {
-		    console.log('TIMEFILTER REFRESH');
+		    // console.log('TIMEFILTER REFRESH');
 		    $scope.newRefresh = refreshValue;
 			  // Reset Interval & Schedule Next
-			  $scope.currentRefresh = refreshValue;
 			  $scope.refreshalarms = $timeout(function () {
 			     // console.log('Reloading data....');
 			     $route.reload();
-		          }, $scope.currentRefresh);
+		          }, refreshValue);
   			  $scope.$watch('$destroy', $scope.refreshalarms);
 	      } else {
-		  console.log('NO REFRESH');
+		  // console.log('PAUSE REFRESH');
 	  	  $scope.currentRefresh = 0;
 		  $timeout.cancel($scope.refreshalarms);
 	      }
 
       } else { 
-  	          $timeout.cancel($scope.refreshalarms);
-		  $route.reload(); 
+		// console.log('NULL CHANGE!');
+  	        $timeout.cancel($scope.refreshalarms);
       }
 
     });
 
-	/*
-	    $rootScope.$watchCollection('timefilter.time', function () {
-	      let timeInterval = _.get($rootScope, 'timefilter.time');
-		  $scope.timeInterval = timeInterval;
-		  updateFilter();
-	    });
-	*/
 
   $scope.deleteAlarm = function($index){
 	 $scope.notify.warning('KAAE function not yet implemented!');
@@ -300,7 +304,7 @@ uiModules
 
      if (confirm('Are you sure?')) {
 	 return $http.get('../api/kaae/delete/watcher/'+$scope.watchers[$index]._id).then(function (resp) {
-        	console.log('API DELETE:',resp.data);
+        	// console.log('API DELETE:',resp.data);
 			 var reload = $timeout(function () {
 		              $route.reload();
 		 	      $scope.notify.warning('KAAE Watcher successfully deleted!');
@@ -310,17 +314,17 @@ uiModules
   }
 
   $scope.watcherGet = function($index){
-	 console.log('saving watcher ', $scope.watchers[$index] );
+	 // console.log('saving watcher ', $scope.watchers[$index] );
 	 return $http.get('../api/kaae/get/watcher/'+$scope.watchers[$index]._id).then(function (resp) {
-        	console.log('API GET:',resp.data);
+        	// console.log('API GET:',resp.data);
          });
   }
 
   $scope.watcherSave = function($index){
-	 console.log('saving watcher ', $scope.watchers[$index] );
+	 // console.log('saving watcher ', $scope.watchers[$index] );
     	 var watcher = $scope.editor ? JSON.parse($scope.editor.getValue()) : $scope.watchers[$index];
 	 return $http.get('../api/kaae/save/watcher/'+JSON.stringify(watcher)).then(function (resp) {
-        	console.log('API STORE:',resp);
+        	// console.log('API STORE:',resp);
 			 var reload = $timeout(function () {
 		              $route.reload();
 		 	      $scope.notify.warning('KAAE Watcher successfully saved!');
@@ -378,7 +382,7 @@ uiModules
 
 	/*	
 	 refreshalarms = $timeout(function () {
-	      //console.log('set new watcher to edit mode...');
+	      // console.log('set new watcher to edit mode...');
 	      $scope.setAce(0,false);
  	 }, 200);
 	*/

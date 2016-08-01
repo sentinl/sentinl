@@ -107,15 +107,21 @@ export default function (server) {
 
   /* ES Functions */
 
-  // Test
+  // Get/Set Time Interval
   server.route({
     method: 'GET',
     path: '/api/kaae/set/interval/{timefilter}',
     handler: function (request, reply) {
-      var config = require('../../kaae.json');
 	server.kaaeInterval = JSON.parse(request.params.timefilter);
 	// console.log('server timefilter:',server.kaaeInterval);
 	reply({ status: "200 OK" });
+   }
+  });
+  server.route({
+    method: 'GET',
+    path: '/api/kaae/get/interval',
+    handler: function (request, reply) {
+	reply(server.kaaeInterval);
    }
   });
 
