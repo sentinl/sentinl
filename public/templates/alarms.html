@@ -1,15 +1,46 @@
 <kbn-top-nav name="kaae" config="topNavMenu">
+    <div class="kibana-nav-info">
+      <span ng-show="dash.id" class="kibana-nav-info-title">
+        <span ng-bind="::dash.title"></span>
+      </span>
+    </div>
 </kbn-top-nav>
 
 <header class="navbar navbar-static-top navbar-inverse">
-    <nav class="collapse navbar-collapse">
-	<ul class="nav navbar-nav">
-		<li><a href="javascript:window.location.replace('/app/kaae#/');">Watchers</a></li>
-		<li><a href="javascript:window.location.replace('/app/kaae#/alarms');">Alarms</a></li>
-		<li><a href="javascript:window.location.replace('/app/kaae#/about');">About</a></li>
-	</ul>
-    </nav>
+
+  <navbar ng-show="chrome.getVisible()" name="dashboard-search">
+    <form name="queryInput"
+      class="fill inline-form"
+      ng-submit="filterResults()"
+      role="form">
+
+      <div class="typeahead" kbn-typeahead="dashboard">
+        <div class="input-group"
+          ng-class="queryInput.$invalid ? 'has-error' : ''">
+
+          <input
+            type="text"
+            placeholder="Filter..."
+            aria-label="Filter input"
+            class="form-control"
+            ng-model="state.query"
+            input-focus
+            kbn-typeahead-input
+            parse-query>
+          <button type="submit" class="btn btn-default" ng-disabled="queryInput.$invalid" aria-label="Filter dashboards">
+            <span aria-hidden="true" class="fa fa-search"></span>
+          </button>
+        </div>
+
+        <kbn-typeahead-items></kbn-typeahead-items>
+      </div>
+
+    </form>
+    <div class="button-group"></div>
+  </navbar>
+
 </header>
+
 
 <div class="container" ng-controller="kaaeHelloWorld">
   <div class="row">

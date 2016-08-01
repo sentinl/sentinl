@@ -37,6 +37,21 @@ import jsonHtml from './templates/json.html';
 
 var impactLogo = require('plugins/kaae/kaae.svg');
 
+/* Inject Tabs */
+  var topNavMenu = [
+  {
+    key: 'watchers',
+    description: 'WATCH',
+    run: function () { kbnUrl.change('/'); }
+  },
+  {
+    key: 'about',
+    description: 'ABOUT',
+    run: function () { kbnUrl.change('/about'); }
+  }
+  ];
+
+
 chrome
   .setBrand({
     'logo': 'url(' + impactLogo + ') left no-repeat',
@@ -44,7 +59,23 @@ chrome
     'title': 'Kaae'
   })
   .setNavBackground('#222222')
-  .setTabs([]);
+  .setTabs([
+  {
+    id: '',
+    title: 'Watchers',
+    activeIndicatorColor: '#EFF0F2'
+  },
+  {
+    id: 'alarms',
+    title: 'Alarms',
+    activeIndicatorColor: '#EFF0F2'
+  },
+  {
+    id: 'about',
+    title: 'About',
+    activeIndicatorColor: '#EFF0F2'
+  }
+  ]);
 
 uiRoutes.enable();
 
@@ -114,19 +145,6 @@ uiModules
   // $scope.store = window.sessionStorage;
 
   $scope.notify = new Notifier();
-  
-  $scope.topNavMenu = [
-  {
-    key: 'watchers',
-    description: 'WATCH',
-    run: function () { kbnUrl.change('/'); }
-  },
-  {
-    key: 'about',
-    description: 'ABOUT',
-    run: function () { kbnUrl.change('/about'); }
-  }
-  ];
 
   timefilter.enabled = true;
 
