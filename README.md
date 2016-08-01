@@ -5,10 +5,14 @@
 
 ---
 
+Data Series are awesome, but who's Watching them 24/7/365? Introducing KaaE, the Kibana Watcher.
+
 
 
 ### Kibana App: Kaae
-The Kaae Kibana 4.5+ App extends the nodejs server/api to provide an independent Elasticsearch "Watcher" alternative based on the same principles and trigger object format _(pontentially compatible for use with the original ```_watcher```)_
+The Kaae Kibana 4.5+ App extends the nodejs server/api to provide an independent Elasticsearch ["watcher"](https://www.elastic.co/videos/watcher-lab-creating-your-first-alert) alternative based on the same principles and trigger object format _(pontentially compatible for use with the original ```_watcher```)_
+
+
 <img src="http://i.imgur.com/jNYX1mv.gif" />
 
 ---
