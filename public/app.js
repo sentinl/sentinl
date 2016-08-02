@@ -361,13 +361,14 @@ uiModules
 		  "_index": "watcher",
 		  "_type": "watch",
 		  "_id": "new",
+		  "_new": "true",
 		  "_source": {
 		    "trigger": {
 		      "schedule": {
 		        "interval": "60"
 		      }
 		    },
-	    "input": {
+		    "input": {
 		      "search": {
 		        "request": {
 		          "indices": [],

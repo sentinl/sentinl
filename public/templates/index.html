@@ -36,7 +36,7 @@
 		<th></th>
 	    </tr>
 	  <tbody ng-repeat='watcher in getWatchers()'>
-	    <tr ng-class="{newRow: watcher._id == 'new' || watcher._id == 'new_saved'}">
+	    <tr ng-class="{newRow: watcher._new == 'true' || watcher._id == 'new_saved'}">
 	         <td>{{watcher._id}}</td>
 	         <td>{{watcher._source.trigger.schedule.interval}}</td>
 	         <td>{{watcher._source.input.search.request.indices.join(',')}}</td>
@@ -47,7 +47,7 @@
 			<a href="javascript:;" ng-show="(collapse) && editor_status.readonly" ng-click="setAce($index,false)" ng-model=collapse class="edit-rule"><i class="fa fa-edit"></i></a>
 			<a href="javascript:;" ng-show="(collapse) && !editor_status.readonly" ng-click="setAce($index,true)" ng-model=collapse class="edit-rule"><i class="fa fa-eye"></i></a>
 			<a href="javascript:;" ng-show="editor_status.undo && !editor_status.readonly" ng-click="watcherSave($index)" class="delete-rule"><i class="fa fa-save"></i></a>
-			<a href="javascript:;" ng-hide="watcher._id == 'new'" class="delete-rule" ng-click="watcherDelete($index)"><i class="fa fa-trash"></i></a>
+			<a href="javascript:;" ng-hide="watcher._new == 'true'" class="delete-rule" ng-click="watcherDelete($index)"><i class="fa fa-trash"></i></a>
 		 </td>
 	    </tr>
 	    <!-- watcher._id=='new'" -->

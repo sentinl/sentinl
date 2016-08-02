@@ -115,7 +115,7 @@ const linkReqRespStats = function ($scope, config) {
 	  "_index": "watcher",
 	  "_type": "watch",
 	  "_id": $scope.watcher_id,
-	  "_score": 1,
+	  "_new": "true",
 	  "_source": {
 	    "trigger": {
 	      "schedule": {
