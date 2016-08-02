@@ -89,14 +89,21 @@
 
      <br>
 
-      <div class="panel panel-default" ng-show="!elasticAlarms.length">
-	<div class="panel-heading">
+      <div class="panel" ng-show="!elasticAlarms.length">
+	<div class="well">
 	   <h4>NO ALARM HISTORY
 		<div class="edit-group pull-right"><a href="#"><i class="fa fa-bell-slash"></i></a></div>
 	  </h4>
-		No Alarms found - That's great!<br>
-		Change the selected Time Range to extend results.<br>
+		No Alarms found - That's great, right? <i class="fa fa-smile-o" aria-hidden="true"></i><br>
 	</div>
+	<br>
+
+         <div class="panel">
+           <h4>Expand time range</h4>
+           <p>Alarms are indexed with a date field. It is possible your query does not match anything in the current time range, or that there is no data at all in the currently selected time range.<br>
+	      Click the button below to open the time picker. For future reference you can open the time picker by clicking on the <a class="btn btn-xs navbtn" ng-click="kbnTopNav.toggle('filter')" aria-expanded="kbnTopNav.is('filter')" aria-label="time picker" data-test-subj="discoverNoResultsTimefilter"><i aria-hidden="true" class="fa fa-clock-o"></i> time picker</a> button in the top right corner of your screen.</p>
+         </div>
+
       </div>
 
       <div class="panel panel-default" ng-show="elasticAlarms.length">

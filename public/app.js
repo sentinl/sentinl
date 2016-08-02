@@ -56,7 +56,7 @@ chrome
   .setBrand({
     'logo': 'url(' + impactLogo + ') left no-repeat',
     'smallLogo': 'url(' + impactLogo + ') left no-repeat',
-    'title': 'Kaae'
+    'title': 'KaaE'
   })
   .setNavBackground('#222222')
   .setTabs([
@@ -140,7 +140,7 @@ uiModules
     };
 })
 .controller('kaaeHelloWorld', function ($rootScope, $scope, $route, $interval, $timeout, timefilter, Private, Notifier, $window, kbnUrl, $http) {
-  $scope.title = 'Kaae';
+  $scope.title = 'KaaE: Alarms';
   $scope.description = 'Kibana Alert App for Elasticsearch';
   // $scope.store = window.sessionStorage;
 
@@ -256,7 +256,7 @@ uiModules
 uiModules
 .get('api/kaae', [])
 .controller('kaaeWatchers', function ($rootScope, $scope, $route, $interval, $timeout, timefilter, Private, Notifier, $window, kbnUrl, $http) {
-  $scope.title = 'Kaae';
+  $scope.title = 'KaaE: Watchers';
   $scope.description = 'Kibana Alert App for Elasticsearch';
   // $scope.store = window.sessionStorage;
 
@@ -387,7 +387,7 @@ uiModules
 		        "throttle_period": "15m",
 		        "email": {
 		          "to": "alarm@localhost",
-		          "subject": "Kaae Alarm",
+		          "subject": "KaaE Alarm",
 		          "priority": "high",
 		          "body": "Found {{payload.hits.total}} Events"
 		        }
@@ -432,7 +432,7 @@ uiModules
 uiModules
 .get('api/kaae', [])
 .controller('kaaeAbout', function ($scope, $route, $interval, timefilter, Notifier) {
-  $scope.title = 'Kaae';
+  $scope.title = 'KaaE';
   $scope.description = 'Kibana Alert App for Elasticsearch';
   timefilter.enabled = false;
   $scope.notify = new Notifier();
