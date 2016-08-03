@@ -89,7 +89,7 @@ module.exports = function (server, options) {
       var sched = later.parse.text('every 10 minute');
       var t = later.setInterval(doalert, sched);
       function doalert() {
-        if (debug) console.log('KAAE Alert Check...');
+        console.log('KAAE Reloading Watchers...');
         getCount().then(function(resp){
           getWatcher(resp.count).then(function(resp){
           _.each(resp.hits.hits, function(hit){
@@ -101,7 +101,7 @@ module.exports = function (server, options) {
             function watching() {
               var request = watch.input.search.request;
               var condition = watch.condition.script.script;
-              var transform = watch.transform.search.request;
+              var transform = watch.transform.search.request ? watch.transform.search.request : {};
               var actions = watch.actions;
 	      if (debug) console.log('KAAE Watching:',request,condition,actions);
 

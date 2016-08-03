@@ -238,7 +238,7 @@ uiModules
 
   $scope.deleteAlarm = function($index){
 	 $scope.notify.warning('KAAE function not yet implemented!');
-	 $scope.currentAlarms.splice($index,1);     
+	 // $scope.currentAlarms.splice($index,1);     
   }
 
   var currentTime = moment($route.current.locals.currentTime);

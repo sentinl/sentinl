@@ -191,7 +191,7 @@ export default function (server) {
 	        	body: watcher._source
 	        };
 
-	        client.create(body).then(function (resp) {
+	        client.index(body).then(function (resp) {
         		reply({ ok: true, resp: resp });
 	                   // if (debug) console.log(resp);
 	            }, function (err,resp) {
