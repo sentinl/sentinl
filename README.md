@@ -47,9 +47,10 @@ cd kaae && npm install && npm run package
 - [x] Add Background watcher load execution skeleton  _(Kibana core)_
 - [x] Add Kibana plugin to extend SPY and generate Watchers  _(Kibana plugin)_
 - [x] Add JSON editors for watcher rules _(Sense-like)_
-- [X] Save & load watcher history & results to/from elasticsearch custom indices _(init)_
+- [x] Save & load watcher history & results to/from elasticsearch custom indices _(init)_
 - [ ] Add/Edit/Delete for watcher rules rows _(es queries)_
 - [ ] Add actual actions for watcher triggers _(Email, slack, etc)_
+- [ ] Extend Spy plugin with more action types, options
 - [ ] Major Code & Style cleanup _(help welcome!)_
 
 ## License
