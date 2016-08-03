@@ -235,8 +235,22 @@ uiModules
 
     });
 
-
   $scope.deleteAlarm = function($index){
+     if (confirm('Delete is Forever!\n Are you sure?')) {
+	 return $http.get('../api/kaae/delete/alarm/'+$scope.elasticAlarms[$index]._index 
+			  + '/'+$scope.elasticAlarms[$index]._type 
+			  + '/'+$scope.elasticAlarms[$index]._id ).then(function (resp) {
+        	console.log('API ALARM DELETE:',resp.data);
+			 var reload = $timeout(function () {
+		              // $route.reload();
+		  	      $scope.elasticAlarms.splice($index,1);     
+		 	      $scope.notify.warning('KAAE Alarm log successfully deleted!');
+		 	 }, 500);
+         });
+      }
+  }
+
+  $scope.deleteAlarmLocal = function($index){
 	 $scope.notify.warning('KAAE function not yet implemented!');
 	 // $scope.currentAlarms.splice($index,1);     
   }
@@ -320,7 +334,6 @@ uiModules
   }
 
   $scope.watcherDelete = function($index){
-
      if (confirm('Are you sure?')) {
 	 return $http.get('../api/kaae/delete/watcher/'+$scope.watchers[$index]._id).then(function (resp) {
         	// console.log('API DELETE:',resp.data);

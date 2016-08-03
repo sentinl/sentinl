@@ -105,6 +105,36 @@ export default function (server) {
   });
 
 
+  server.route({
+    method: 'GET',
+    path: '/api/kaae/delete/alarm/{index}/{type}/{id}',
+    handler: function (req, reply) {
+      var config = require('../../kaae.json');
+      var client = server.plugins.elasticsearch.client;
+      var callWithRequest = server.plugins.elasticsearch.callWithRequest;
+
+      var body = {
+        index: req.params.index,
+        type: req.params.type,
+        id: req.params.id
+      };
+
+      callWithRequest(req, 'delete', body).then(function (resp) {
+        reply({
+          ok: true,
+	  resp: resp
+        });
+      }).catch(function (resp) {
+        reply({
+          ok: false,
+          resp: resp
+        });
+      });
+
+   }
+  });
+
+
   /* ES Functions */
 
   // Get/Set Time Interval
