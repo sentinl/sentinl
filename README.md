@@ -1,4 +1,5 @@
-<img src="http://i.imgur.com/aDHvUxf.png" />
+<img src="http://i.imgur.com/dAC4s3W.png" width="700"/>
+
 # Kibana Alert App for Elasticsearch <img src="https://camo.githubusercontent.com/15f26c4f603cac9bf415c841a8a60077f6db5102/687474703a2f2f696d6775722e636f6d2f654c446f4f4b592e706e67">
 
 > Proof-of-Concept Kibana4 app & alarm plug-in development based on gitbook:  <http://kibana.logstash.es/content/kibana/v4/plugin/server-develop.html>
@@ -12,6 +13,7 @@ Data Series are awesome, but who's Watching them 24/7/365? Introducing KaaE, the
 ### Kibana App: Kaae
 The Kaae Kibana 4.5+ App extends the nodejs server/api to provide an independent Elasticsearch ["watcher"](https://www.elastic.co/videos/watcher-lab-creating-your-first-alert) alternative based on the same principles and trigger object format _(pontentially compatible for use with the original ```_watcher```)_
 
+<!--<img src="http://i.imgur.com/aDHvUxf.png" width="400" /> -->
 
 <img src="http://i.imgur.com/sheqvAc.gif" />
 
