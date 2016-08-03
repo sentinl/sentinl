@@ -333,7 +333,7 @@ uiModules
   }
 
   $scope.watcherGet = function($index){
-	 // console.log('saving watcher ', $scope.watchers[$index] );
+	 // console.log('retreiving watcher ', $scope.watchers[$index] );
 	 return $http.get('../api/kaae/get/watcher/'+$scope.watchers[$index]._id).then(function (resp) {
         	// console.log('API GET:',resp.data);
          });
@@ -342,7 +342,8 @@ uiModules
   $scope.watcherSave = function($index){
 	 // console.log('saving watcher ', $scope.watchers[$index] );
     	 var watcher = $scope.editor ? JSON.parse($scope.editor.getValue()) : $scope.watchers[$index];
-	 return $http.get('../api/kaae/save/watcher/'+JSON.stringify(watcher)).then(function (resp) {
+	 console.log('saving object:',watcher);
+	 return $http.get('../api/kaae/save/watcher/'+encodeURIComponent(JSON.stringify(watcher))).then(function (resp) {
         	// console.log('API STORE:',resp);
 			 var reload = $timeout(function () {
 		              $route.reload();
