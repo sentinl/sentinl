@@ -1,4 +1,4 @@
-<img src="http://i.imgur.com/dAC4s3W.png?1" width="600"/>
+<img src="http://i.imgur.com/o25tuAG.png" width="300"/>
 
 # Kibana Alert App for Elasticsearch <img src="https://camo.githubusercontent.com/15f26c4f603cac9bf415c841a8a60077f6db5102/687474703a2f2f696d6775722e636f6d2f654c446f4f4b592e706e67">
 
