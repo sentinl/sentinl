@@ -101,7 +101,7 @@ module.exports = function (server, options) {
             function watching() {
               var request = watch.input.search.request;
               var condition = watch.condition.script.script;
-              var transform = watch.transform.search.request ? watch.transform.search.request : {};
+              var transform = watch.transform.search ? watch.transform.search.request : {};
               var actions = watch.actions;
 	      if (debug) console.log('KAAE Watching:',request,condition,actions);
 
