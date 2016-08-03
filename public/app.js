@@ -35,7 +35,7 @@ import about from './templates/about.html';
 import alarms from './templates/alarms.html';
 import jsonHtml from './templates/json.html';
 
-var impactLogo = require('plugins/kaae/kaae_logo.svg');
+var impactLogo = require('plugins/kaae/kaae_watch.svg');
 var smallLogo = require('plugins/kaae/kaae.svg');
 
 /* Inject Tabs */
@@ -56,8 +56,8 @@ var smallLogo = require('plugins/kaae/kaae.svg');
 chrome
   .setBrand({
     'logo': 'url(' + impactLogo + ') left no-repeat'
-    ,'smallLogo': 'url(' + smallLogo + ') left no-repeat'
-    // ,'title': 'KaaE'
+    ,'smallLogo': 'url(' + impactLogo + ') left no-repeat'
+    ,'title': 'KAAE'
   })
   .setNavBackground('#222222')
   .setTabs([
