@@ -110,6 +110,8 @@ export default function (server) {
     path: '/api/kaae/delete/alarm/{index}/{type}/{id}',
     handler: function (req, reply) {
       var config = require('../../kaae.json');
+      // Check if alarm index and discard everything else
+      if (!req.params.index.substr(0,config.es.alarm_index.length) === config.es.alarm_index) { console.log('FORBIDDEN DELETE!',req.params); return; } 
       var client = server.plugins.elasticsearch.client;
       var callWithRequest = server.plugins.elasticsearch.callWithRequest;
 

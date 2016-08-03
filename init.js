@@ -103,7 +103,7 @@ module.exports = function (server, options) {
               var condition = watch.condition.script.script;
               var transform = watch.transform.search ? watch.transform.search.request : {};
               var actions = watch.actions;
-	      if (debug) console.log('KAAE Watching:',request,condition,actions);
+	      if (debug) console.log('KAAE Watching:',request,condition,actions,every);
 
               client.search(request).then(function(payload){
 		if (!payload) return;
