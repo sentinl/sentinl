@@ -115,6 +115,7 @@
 	    <tr>
 		<!-- <th> </th> -->
 		<th>TIMESTAMP</th>
+		<th>LEVEL</th>
 		<th>ACTION</th>
 		<th>MESSAGE</th>
 		<th></th>
@@ -123,6 +124,7 @@
 	    <tr ng-class-odd="'alarmRow-odd'" ng-class-even="'alarmRow'">
 	         <!-- <td><input type=checkbox ng-model=collapse></td> -->
 	         <td>{{ alarm._source['@timestamp'] | moment }}</td>
+	         <td>{{ alarm._source['level'] }}</td>
 	         <td>{{ alarm._type }}</td>
 	         <td>{{ alarm._source['message'] }}</td>
 		 <td class="text-center edit-group">

@@ -4,6 +4,24 @@ import _ from 'lodash';
 import mustache from 'mustache';
 import config from './config';
 
+/* Email Settings */
+if (config.settings.email.active) {
+	var email   = require("emailjs");
+	var email_server  = email.server.connect({
+	   user:    config.settings.email.user,
+	   password:config.settings.email.password,
+	   host:    config.settings.email.host,
+	   ssl:     config.settings.email.ssl
+	});
+	// server.smtp.debug(100);
+}
+
+/* Slack Settings */
+if (config.settings.slack.active) {
+	var Slack   = require("node-slack");
+	var slack = new Slack(config.settings.slack.hook);
+}
+
 var debug = true;
 
 var hlimit = config.kaae.history ? config.kaae.history : 10;
@@ -12,16 +30,18 @@ export default function (server,actions,payload) {
 
 	/* Internal Support Functions */
 
-	var makeHistory = function(type,message) {
+	var tmpHistory = function(type,message) {
 		// Keep history stack of latest alarms (temp)
 		server.kaaeStore.push({id:new Date(), action: type, message: message});
 		// Rotate local stack
 		if (server.kaaeStore.length > hlimit) { server.kaaeStore.shift(); } 
 	}
 
-	var esHistory = function(type,message) {
+	/* ES Indexing Functions */
 
+	var esHistory = function(type,message,loglevel) {
 		var client = server.plugins.elasticsearch.client;
+		if (!loglevel) { var loglevel = "INFO"; }
 	        console.log('Storing Alarm to ES with type:'+type);
 		var indexDate = '-' + new Date().toISOString().substr(0, 10).replace(/-/g, '.');
 		var index_name = config.es.alarm_index ? config.es.alarm_index + indexDate : 'watcher_alarms' + indexDate;
@@ -30,6 +50,7 @@ export default function (server,actions,payload) {
 	          type: type,
 	          body: {
 			"@timestamp" : new Date().toISOString(),
+			"level" : loglevel,
 			"message" : message
 		  }
 	        }).then(function (resp) {
@@ -37,7 +58,6 @@ export default function (server,actions,payload) {
 	        }, function (err,resp) {
 	            console.trace(err,resp);
 	        });
-
 	}
 
 
@@ -57,9 +77,10 @@ export default function (server,actions,payload) {
 		      */
 
                       if(_.has(action, 'console')) {
-			var formater = action.console.message ? action.console.message : "{{ payload }}";
-                        var message = mustache.render(formatter, {"payload":payload});
+			var priority = action.console.priority ? action.console.priority : "INFO";
+			var message = action.console.message ? action.console.message : "{{ payload }}";
                         if (debug) console.log('KAAE Console: ',payload);
+			esHistory(key,message,priority);
                       }
 
 		/* ***************************************************************************** */
@@ -81,11 +102,43 @@ export default function (server,actions,payload) {
                         var body = mustache.render(formatter_b, {"payload":payload});
                         if (debug) console.log('KAAE Email: ',subject, body);
 
-			// TODO: Add send email using config.email 
+			if (!email_server) { console.log('Email disabled!'); }
 
 			if (!action.email.stateless) {
-				// makeHistory(key,body);
+				// Log Event
 				esHistory(key,body);
+			}
+
+                      }
+
+		/* ***************************************************************************** */
+
+		      /*
+			*   "slack" : {
+			*      "channel": '#<channel>',
+			*      "message" : "Series Alarm {{ payload._id}}: {{payload.hits.total}}",
+			*      "stateless" : false
+			*    }
+		      */
+
+                      if(_.has(action, 'slack')) {
+			var formatter = action.slack.message ? action.slack.message : "Series Alarm {{ payload._id}}: {{payload.hits.total}}";
+                        var message = mustache.render(formatter, {"payload":payload});
+                        if (debug) console.log('KAAE Slack Hook: ',action.slack.channel, message);
+
+			if (!slack) { console.log('Slack disabled!'); }
+			else {
+				try {
+					slack.send({
+	    				    text: message,
+					    username: config.settings.slack.username
+					});
+				} catch(err) { console.log('KAAE Slack Hook: failed sending message',config.settings.slack.hook); }
+			}
+
+			if (!action.slack.stateless) {
+				// Log Event
+				esHistory(key,message);
 			}
 
                       }
@@ -147,7 +200,6 @@ export default function (server,actions,payload) {
 			var formater = action.local.message ? action.local.message : "{{ payload }}";
                         var message = mustache.render(formatter, {"payload":payload});
                         if (debug) console.log('KAAE local: ',message);
-			// makeHistory(key,message);
 			esHistory(key,message);
 
                       }

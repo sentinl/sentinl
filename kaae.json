@@ -6,7 +6,7 @@
     "alarm_index":	"watcher_alarms"
   },
   "kaae": {
-    	"history": 	10
+    	"history": 	20
   },
   "settings" : {
 	"email" : {
@@ -14,12 +14,13 @@
 	   "password":	"password", 
 	   "host":	"smtp.server.com", 
 	   "ssl":	true,
-	   "active":	true
+	   "active":	false
 	},
 	"slack" : {
-	   "username":	"KaaE", 
+	   "username":	"KAAE",
+	   "hook":	"https://hooks.slack.com/services/<token>", 
 	   "channel":	"#kaae",
-	   "active": 	true
+	   "active": 	false
 	}
   }
 }

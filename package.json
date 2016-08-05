@@ -16,7 +16,9 @@
   },
   "dependencies": {
     "later": "*",
-    "mustache": "*"
+    "mustache": "*",
+    "emailjs": "*",
+    "node-slack": "*"
   },
   "devDependencies": {
     "babel-eslint": "4.1.8",
