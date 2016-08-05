@@ -24,6 +24,20 @@ The Kaae integrated Kibana plug-in extends the default Spy functionality to shap
 <img src="http://i.imgur.com/4lDTOVR.png" />
 
 
+## KAAE Watcher Anatomy
+
+  * Trigger
+    * Schedule
+  * Input
+    * Search
+  * Condition
+    * Script
+  * Transform
+  * Action
+    * Actions
+   
+For examples and details refer to the project [Wiki](https://github.com/elasticfence/kaae/wiki)
+
 #### Alarm Actions
 Currently supported __"actions"__ for KaaE watchers:
 
