@@ -24,7 +24,20 @@ The Kaae integrated Kibana plug-in extends the default Spy functionality to shap
 <img src="http://i.imgur.com/4lDTOVR.png" />
 
 
-<br>
+#### Alarm Actions
+Currently supported __"actions"__ for KaaE watchers:
+
+   * Elasticsearch Index (stable)
+   * Console (stable)
+   * Email/SMTP (testers needed!)
+   * Slack (testers needed!)
+
+<img src="http://i.imgur.com/abOO76s.png"> 
+
+--------------
+
+## Installation
+
 #### Dev Plugin Install
 <pre>
 git clone https://github.com/elasticfence/kaae
