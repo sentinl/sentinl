@@ -62,7 +62,7 @@ The basic example will use simple parameters:
 curl -XPUT http://127.0.0.1:9200/watcher/watch/mos -d'
 {
   "trigger": {
-    "schedule" : { "interval" : "60"  }
+    "schedule" : { "later" : "every 60 seconds"  }
   },
   "input" : {
     "search" : {

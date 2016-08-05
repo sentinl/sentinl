@@ -18,25 +18,26 @@ module.exports = function (server, options) {
       /* Index Management */
 
       /*
-	var dynamicTemplates = [ {
-	  string_fields : {
-	    mapping : {
-	      type : 'string',
-	      index : 'not_analyzed',
-	      type : 'string',
-	      doc_values: true,
-	      fields : {
-	        search : {
-	          index : 'analyzed',
-	          omit_norms : true,
-	          type : 'string',
+	  var dynamicTemplates = [ {
+	    string_fields : {
+	      mapping : {
+	        type : 'string',
+	        index : 'not_analyzed',
+	        type : 'string',
+	        doc_values: true,
+	        fields : {
+	          search : {
+	            index : 'analyzed',
+	            omit_norms : true,
+	            type : 'string',
+	          }
 	        }
-	      }
-	    },
-	    match_mapping_type : 'string',
-	    match : '*'
-	  }
-	}];
+	      },
+	      match_mapping_type : 'string',
+	      match : '*'
+	    }
+	  }];
+
 
 	  function createKaaeIndex() {
 	    console.log('Trying to create Kaae index');
@@ -63,11 +64,20 @@ module.exports = function (server, options) {
 	    });
 	  }
 
+	  var tryCount = 0;
+	  function tryCreate() {
+	    if (tryCount > 5) { console.log('KAAE: Failed creating Indices Mapping');return; }
+	    setTimeout(createKaaeIndex, 5000);
+	    tryCount++;
+	  }
+
+
+
 	  function createKaaeAlarmsIndex() {
 	    console.log('Trying to create Kaae Alarms index');
 	    if (!server.plugins.elasticsearch) {
 	      console.log('Elasticsearch client not available, retrying in 5s');
-	      tryCreate();
+	      tryAlarmCreate();
 	      return;
 	    }
 
@@ -100,9 +110,11 @@ module.exports = function (server, options) {
 	    });
 	  }
 	
-	  function tryCreate() {
-	    setTimeout(createKaaeIndex, 5000);
+	  var tryAlarmCount = 0;
+	  function tryAlarmCreate() {
+	    if (tryCount > 5) { console.log('KAAE: Failed creating Alarm Indices Mapping');return; }
 	    setTimeout(createKaaeAlarmIndex, 5000);
+	    tryAlarmCount++;
 	  }
 
 	  // Create Indices
@@ -118,20 +130,32 @@ module.exports = function (server, options) {
       var client = server.plugins.elasticsearch.client;
       var sched = later.parse.text('every 10 minute');
       var t = later.setInterval(doalert, sched);
-      var allSched = [];
+      var Schedule = [];
       function doalert() {
         console.log('KAAE Reloading Watchers...');
         getCount().then(function(resp){
           getWatcher(resp.count).then(function(resp){
           _.each(resp.hits.hits, function(hit){
+
 	    if (debug) console.log('KAAE Processing',hit);
-            var watch = hit._source;
-            var everySec = watch.trigger.schedule.interval;
-            var watchSched = later.parse.recur().every(everySec).second();
-            // var wt = later.setInterval(watching, watchSched);
-            allSched[hit._id] = later.setInterval(watching, watchSched);
-	    if (debug) console.log('KAAE Scheduler:',hit._id, everySec);
-            function watching() {
+	    if(hit._source.trigger.schedule.interval % 1 === 0){
+		// max 60 seconds!
+	        var interval = later.parse.recur().every(hit._source.trigger.schedule.interval).second();
+	    }
+
+	    if(hit._source.trigger.schedule.later){
+		// https://bunkat.github.io/later/parsers.html#text
+      	        var interval = later.parse.text(hit._source.trigger.schedule.later);
+	    }
+
+            Schedule[hit._id] = later.setInterval(function(){ watching(hit,interval) }, interval);
+		if (debug) console.log('KAAE Scheduler: '+hit._id+' every '+hit._source.trigger.schedule.interval+'s');
+
+            function watching(task,interval) {
+	      if (debug) console.log('Executing Watch:'+task._id );
+	      if (debug) console.log('Next execution of:'+task._id+' at '+later.schedule(interval).next(2) );
+
+	      var watch = task._source;
               var request = watch.input.search.request;
               var condition = watch.condition.script.script;
               var transform = watch.transform.search ? watch.transform.search.request : {};
