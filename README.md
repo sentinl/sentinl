@@ -34,6 +34,10 @@ Currently supported __"actions"__ for KaaE watchers:
 
 <img src="http://i.imgur.com/abOO76s.png"> 
 
+#### Configuration
+KaaE configuration is still in development!<br>
+Current settings can be configured/restored on each execution in ```/opt/kibana/installedPlugins/kaae/kaae.json```
+
 --------------
 
 ## Installation
