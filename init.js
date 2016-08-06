@@ -57,8 +57,8 @@ module.exports = function (server, options) {
 	    	  name: config.es.default_index,
 	    	  body: {
 	    	    settings: {
-	    	      number_of_shards: 2,
-	    	      number_of_replicas: 0
+	    	      number_of_shards: 1,
+	    	      number_of_replicas: 1
 	    	    }
 	    	  }
 	    	})
@@ -97,8 +97,8 @@ module.exports = function (server, options) {
 	    	  name: config.es.alarm_index,
 	    	  body: {
 	    	    settings: {
-	    	      number_of_shards: 2,
-	    	      number_of_replicas: 0
+	    	      number_of_shards: 1,
+	    	      number_of_replicas: 1
 	    	    }
 	    	  }
 	    	})
