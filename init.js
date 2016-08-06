@@ -15,9 +15,9 @@ module.exports = function (server, options) {
       server.kaaeStore = [];
       masterRoute(server);
 
-      /* Index Management */
 
-      /*
+      /* START INDICES HELPERS - TODO: MOVE TO DEDICATED PROCESSOR */
+
 	  var dynamicTemplates = [ {
 	    string_fields : {
 	      mapping : {
@@ -47,20 +47,27 @@ module.exports = function (server, options) {
 	      return;
 	    }
 
-	    client.indices.putTemplate({
-	      name: config.es.default_index,
-	      body: {
-	        settings: {
-	          number_of_shards: 2,
-	          number_of_replicas: 0
-	        }
-	      }
-	    })
-	    .catch(e => {
-	      console.log('Error storing template', e);
-	    })
-	    .then((err, resp) => {
-	      console.log('Kaae Template created!');
+            var client = server.plugins.elasticsearch.client;
+	    client.indices.exists({
+        	index: config.es.default_index
+    	    }, function (error, exists) {
+		 if (exists === true) { console.log('Kaae index exists'); return; }
+
+	    	client.indices.create({
+	    	  name: config.es.default_index,
+	    	  body: {
+	    	    settings: {
+	    	      number_of_shards: 2,
+	    	      number_of_replicas: 0
+	    	    }
+	    	  }
+	    	})
+	    	.catch(e => {
+	    	  console.log('Error storing template', e);
+	    	})
+	    	.then((err, resp) => {
+	    	  console.log('ES Response:',resp);
+	    	});
 	    });
 	  }
 
@@ -72,8 +79,7 @@ module.exports = function (server, options) {
 	  }
 
 
-
-	  function createKaaeAlarmsIndex() {
+	  function createKaaeAlarmIndex() {
 	    console.log('Trying to create Kaae Alarms index');
 	    if (!server.plugins.elasticsearch) {
 	      console.log('Elasticsearch client not available, retrying in 5s');
@@ -81,33 +87,29 @@ module.exports = function (server, options) {
 	      return;
 	    }
 
-	    client.indices.putTemplate({
-	      name: config.es.alarm_index,
-	      body: {
-	        template: config.es.alarm_index + '*',
-	        settings: {
-	          number_of_shards: 2,
-	          number_of_replicas: 0
-	        },
-	        mappings: {
-	          _default_: {
-	            dynamic_templates : dynamicTemplates,
-	            properties: {
-	              '@timestamp': { type: 'date', doc_values: true },
-	              'alarm_trigger': { type: 'string', doc_values: true, index: 'not_analyzed' },
-	              'alarm_msg': { type: 'string', doc_values: true, index: 'not_analyzed' },
-	              'alarm_score': { type: 'double' }
-	            }
-	          }
-	        }
-	      }
-	    })
-	    .catch(e => {
-	      console.log('Error storing template', e);
-	    })
-	    .then((err, resp) => {
-	      console.log('Kaae Template created!');
+            var client = server.plugins.elasticsearch.client;
+	    client.indices.exists({
+        	index: config.es.alarm_index
+    	    }, function (error, exists) {
+		 if (exists === true) { console.log('Kaae Alarm index exists'); return; }
+
+	    	client.indices.create({
+	    	  name: config.es.alarm_index,
+	    	  body: {
+	    	    settings: {
+	    	      number_of_shards: 2,
+	    	      number_of_replicas: 0
+	    	    }
+	    	  }
+	    	})
+	    	.catch(e => {
+	    	  console.log('Error storing template', e);
+	    	})
+	    	.then((err, resp) => {
+	    	  console.log('ES Response:',resp);
+	    	});
 	    });
+
 	  }
 	
 	  var tryAlarmCount = 0;
@@ -117,11 +119,13 @@ module.exports = function (server, options) {
 	    tryAlarmCount++;
 	  }
 
-	  // Create Indices
-	  createKaaeIndex();
-	  createKaaeAlarmIndex();
+      /* END INDICES HELPERS */
 
-      */
+
+      // Create KaaE Indices, if required
+      createKaaeIndex();
+      createKaaeAlarmIndex();
+
 
       /* Bird Watching and Duck Hunting */
 
