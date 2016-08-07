@@ -54,7 +54,7 @@ module.exports = function (server, options) {
 		 if (exists === true) { console.log('Kaae index exists'); return; }
 
 	    	client.indices.create({
-	    	  name: config.es.default_index,
+	    	  index: config.es.default_index,
 	    	  body: {
 	    	    settings: {
 	    	      number_of_shards: 1,
@@ -62,12 +62,11 @@ module.exports = function (server, options) {
 	    	    }
 	    	  }
 	    	})
-	    	.catch(e => {
-	    	  console.log('Error storing template', e);
-	    	})
-	    	.then((err, resp) => {
-	    	  console.log('ES Response:',resp);
-	    	});
+	    	.then(function (resp) {
+                console.log('ES Response:',resp);
+            }, function (err) {
+                console.trace(err.message);
+            });
 	    });
 	  }
 
@@ -94,7 +93,7 @@ module.exports = function (server, options) {
 		 if (exists === true) { console.log('Kaae Alarm index exists'); return; }
 
 	    	client.indices.create({
-	    	  name: config.es.alarm_index,
+	    	  index: config.es.alarm_index,
 	    	  body: {
 	    	    settings: {
 	    	      number_of_shards: 1,
@@ -102,16 +101,15 @@ module.exports = function (server, options) {
 	    	    }
 	    	  }
 	    	})
-	    	.catch(e => {
-	    	  console.log('Error storing template', e);
-	    	})
-	    	.then((err, resp) => {
-	    	  console.log('ES Response:',resp);
-	    	});
+	    	.then(function (resp) {
+                console.log('ES Response:',resp);
+            }, function (err) {
+                console.trace(err.message);
+            });
 	    });
 
 	  }
-	
+
 	  var tryAlarmCount = 0;
 	  function tryAlarmCreate() {
 	    if (tryCount > 5) { console.log('KAAE: Failed creating Alarm Indices Mapping');return; }
@@ -196,7 +194,7 @@ module.exports = function (server, options) {
 
         });
       }
-      /* run NOW, plus later */ 
+      /* run NOW, plus later */
       doalert();
 
       function getCount() {
