@@ -42,10 +42,10 @@ const linkReqRespStats = function ($scope, config) {
     }
 
     $scope.intervals = [
-        { name: '1m', value: '60' }, 
-        { name: '5m', value: '300' }, 
-        { name: '10m', value: '600' }, 
-        { name: '1h', value: '3600' }
+        { name: '1m', value: 'every 1 minute' }, 
+        { name: '5m', value: 'every 5 minutes' }, 
+        { name: '10m', value: 'every 10 minutes' }, 
+        { name: '1h', value: 'every 1 hour' }
     ];
 
     $scope.ranges = [
@@ -119,7 +119,7 @@ const linkReqRespStats = function ($scope, config) {
 	  "_source": {
 	    "trigger": {
 	      "schedule": {
-	        "interval": $scope.watcher_interval ? $scope.watcher_interval : "60"
+	        "later": $scope.watcher_interval ? $scope.watcher_interval : "every 5 minutes"
 	      }
 	    },
 	    "input": {
