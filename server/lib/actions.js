@@ -42,7 +42,7 @@ export default function (server,actions,payload) {
 	var esHistory = function(type,message,loglevel) {
 		var client = server.plugins.elasticsearch.client;
 		if (!loglevel) { var loglevel = "INFO"; }
-	        console.log('Storing Alarm to ES with type:'+type);
+	        server.log(['status', 'info', 'KaaE'],'Storing Alarm to ES with type:'+type);
 		var indexDate = '-' + new Date().toISOString().substr(0, 10).replace(/-/g, '.');
 		var index_name = config.es.alarm_index ? config.es.alarm_index + indexDate : 'watcher_alarms' + indexDate;
 	        client.create({
@@ -65,7 +65,7 @@ export default function (server,actions,payload) {
 
 	_.forOwn(actions, function(action, key) { 
 
-		if (debug) console.log('Processing action:',key);
+	        server.log(['status', 'info', 'KaaE'],'Processing action: '+key);
 
 		/* ***************************************************************************** */
 
@@ -79,7 +79,7 @@ export default function (server,actions,payload) {
                       if(_.has(action, 'console')) {
 			var priority = action.console.priority ? action.console.priority : "INFO";
 			var message = action.console.message ? action.console.message : "{{ payload }}";
-                        if (debug) console.log('KAAE Console: ',payload);
+		        server.log(['status', 'info', 'KaaE'],'Console Payload: '+payload);
 			esHistory(key,message,priority);
                       }
 
@@ -100,9 +100,9 @@ export default function (server,actions,payload) {
 			var formatter_b = action.email.body ? action.email.body : "Series Alarm {{ payload._id}}: {{payload.hits.total}}";
                         var subject = mustache.render(formatter_s, {"payload":payload});
                         var body = mustache.render(formatter_b, {"payload":payload});
-                        if (debug) console.log('KAAE Email: ',subject, body);
+		        server.log(['status', 'info', 'KaaE','email'],'Subject: '+subject+', Body: '+body);
 
-			if (!email_server) { console.log('Email disabled!'); }
+			if (!email_server) { server.log(['status', 'info', 'Kaae', 'email'], 'Delivery Disabled!'); }
 
 			if (!action.email.stateless) {
 				// Log Event
@@ -124,16 +124,20 @@ export default function (server,actions,payload) {
                       if(_.has(action, 'slack')) {
 			var formatter = action.slack.message ? action.slack.message : "Series Alarm {{ payload._id}}: {{payload.hits.total}}";
                         var message = mustache.render(formatter, {"payload":payload});
-                        if (debug) console.log('KAAE Slack Hook: ',action.slack.channel, message);
+	        	server.log(['status', 'info', 'KaaE', 'Slack'],'Webhook to #'+action.slack.channel+' msg: '+message);
 
-			if (!slack) { console.log('Slack disabled!'); }
+			if (!slack) { 
+			        server.log(['status', 'info', 'KaaE','slack'],'Delivery Disabled!');
+			}
 			else {
 				try {
 					slack.send({
 	    				    text: message,
 					    username: config.settings.slack.username
 					});
-				} catch(err) { console.log('KAAE Slack Hook: failed sending message',config.settings.slack.hook); }
+				} catch(err) { 
+				        server.log(['status', 'info', 'KaaE', 'slack'],'Failed sending to: '+condig.settings.slack.hook);
+				}
 			}
 
 			if (!action.slack.stateless) {
@@ -172,12 +176,12 @@ export default function (server,actions,payload) {
 			var req = http.request(options, function(res) {
 			    res.setEncoding('utf8');
 			    res.on('data', function (chunk) {
-			        if (debug) console.log("body: " + chunk);
+			        server.log(['status', 'debug', 'KaaE'],'Response: '+chunk);
 			    });
 			});
 
 			req.on('error', function(e) {
-			    if (debug) console.log('Error shipping webhook: ' + e.message);
+			        server.log(['status', 'err', 'KaaE'],'Error shipping webhook: '+e.message);
 			});
 
 			if (actions.webhook.body) { req.write(action.webhook.body); }
@@ -199,7 +203,7 @@ export default function (server,actions,payload) {
                       if(_.has(action, 'elastic')) {
 			var formater = action.local.message ? action.local.message : "{{ payload }}";
                         var message = mustache.render(formatter, {"payload":payload});
-                        if (debug) console.log('KAAE local: ',message);
+		        server.log(['status', 'info', 'KaaE', 'local'],'Message: '+message);
 			esHistory(key,message);
 
                       }

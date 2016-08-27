@@ -11,7 +11,7 @@ module.exports = function (server, options) {
       var config = require('./kaae.json');
 
       var $ = require('jquery');
-      console.log('KAAE Initializing...');
+      server.log(['status', 'info', 'KaaE'], `KaaE Initializing`);
       server.kaaeStore = [];
       masterRoute(server);
 
@@ -40,9 +40,9 @@ module.exports = function (server, options) {
 
 
 	  function createKaaeIndex() {
-	    console.log('Trying to create Kaae index');
+            server.log(['status', 'debug', 'KaaE'], `Core Index creation...`);
 	    if (!server.plugins.elasticsearch) {
-	      console.log('Elasticsearch client not available, retrying in 5s');
+	      server.log(['warning', 'error', 'KaaE'], `Elasticsearch client not available, retrying in 5s`);
 	      tryCreate();
 	      return;
 	    }
@@ -51,7 +51,10 @@ module.exports = function (server, options) {
 	    client.indices.exists({
         	index: config.es.default_index
     	    }, function (error, exists) {
-		 if (exists === true) { console.log('Kaae index exists'); return; }
+		 if (exists === true) { 
+		        server.log(['status', 'debug', 'KaaE'], `Core Index exists!`);
+			return;
+		 }
 
 	    	client.indices.create({
 	    	  index: config.es.default_index,
@@ -63,7 +66,7 @@ module.exports = function (server, options) {
 	    	  }
 	    	})
 	    	.then(function (resp) {
-                console.log('ES Response:',resp);
+	           server.log(['status', 'info', 'KaaE'], 'Core Index response', resp);
             }, function (err) {
                 console.trace(err.message);
             });
@@ -72,16 +75,19 @@ module.exports = function (server, options) {
 
 	  var tryCount = 0;
 	  function tryCreate() {
-	    if (tryCount > 5) { console.log('KAAE: Failed creating Indices Mapping');return; }
+	    if (tryCount > 5) {
+	        server.log(['error', 'warning', 'KaaE'], `Failed creating Indices mapping!`);
+		return;
+	    }
 	    setTimeout(createKaaeIndex, 5000);
 	    tryCount++;
 	  }
 
 
 	  function createKaaeAlarmIndex() {
-	    console.log('Trying to create Kaae Alarms index');
+            server.log(['status', 'info', 'KaaE'], `Alarm Index creation...`);
 	    if (!server.plugins.elasticsearch) {
-	      console.log('Elasticsearch client not available, retrying in 5s');
+	      server.log(['warning', 'error', 'KaaE'], `Elasticsearch client not available, retrying in 5s`);
 	      tryAlarmCreate();
 	      return;
 	    }
@@ -90,7 +96,10 @@ module.exports = function (server, options) {
 	    client.indices.exists({
         	index: config.es.alarm_index
     	    }, function (error, exists) {
-		 if (exists === true) { console.log('Kaae Alarm index exists'); return; }
+		 if (exists === true) { 
+		        server.log(['status', 'debug', 'KaaE'], `Alarms Index exists!`);
+			return;
+		 }
 
 	    	client.indices.create({
 	    	  index: config.es.alarm_index,
@@ -102,7 +111,7 @@ module.exports = function (server, options) {
 	    	  }
 	    	})
 	    	.then(function (resp) {
-                console.log('ES Response:',resp);
+	           server.log(['status', 'info', 'KaaE'], 'Alarm Index response', resp);
             }, function (err) {
                 console.trace(err.message);
             });
@@ -112,7 +121,10 @@ module.exports = function (server, options) {
 
 	  var tryAlarmCount = 0;
 	  function tryAlarmCreate() {
-	    if (tryCount > 5) { console.log('KAAE: Failed creating Alarm Indices Mapping');return; }
+	    if (tryCount > 5) { 
+	        server.log(['error', 'warning', 'KaaE'], `Failed creating Alarm Indices mapping!`);
+		return;
+	    }
 	    setTimeout(createKaaeAlarmIndex, 5000);
 	    tryAlarmCount++;
 	  }
@@ -134,12 +146,12 @@ module.exports = function (server, options) {
       var t = later.setInterval(doalert, sched);
       var Schedule = [];
       function doalert() {
-        console.log('KAAE Reloading Watchers...');
+        server.log(['status', 'info', 'KaaE'], `Reloading Watchers...`);
         getCount().then(function(resp){
           getWatcher(resp.count).then(function(resp){
           _.each(resp.hits.hits, function(hit){
 
-	    if (debug) console.log('KAAE Processing',hit);
+            server.log(['status', 'info', 'KaaE'], `Reloading Each Watcher...`);
 	    if(hit._source.trigger.schedule.interval % 1 === 0){
 		// max 60 seconds!
 	        var interval = later.parse.recur().every(hit._source.trigger.schedule.interval).second();
@@ -151,28 +163,27 @@ module.exports = function (server, options) {
 	    }
 
             Schedule[hit._id] = later.setInterval(function(){ watching(hit,interval) }, interval);
-		if (debug) console.log('KAAE Scheduler: '+hit._id+' every '+hit._source.trigger.schedule.interval+'s');
+                server.log(['status', 'debug', 'KaaE'], 'Scheduler: '+hit._id+' every '+hit._source.trigger.schedule.interval);
 
             function watching(task,interval) {
-	      if (debug) console.log('Executing Watch:'+task._id );
-	      if (debug) console.log('Next execution of:'+task._id+' at '+later.schedule(interval).next(2) );
+              server.log(['status', 'info', 'KaaE'], 'Executing watch: '+task._id);
+              server.log(['status', 'info', 'KaaE'], 'Next Round of '+task._id+' at '+later.schedule(interval).next(2) );
 
 	      var watch = task._source;
               var request = watch.input.search.request;
               var condition = watch.condition.script.script;
               var transform = watch.transform.search ? watch.transform.search.request : {};
               var actions = watch.actions;
-	      if (debug) console.log('KAAE Watching:',request,condition,actions);
 
               client.search(request).then(function(payload){
 		if (!payload) return;
-		if (debug) console.log('KAAE Payload:',payload);
 		if (!condition) return;
-		if (debug) console.log('KAAE Condition:',condition);
 
 		/* Validate Condition */
 
-		try { var ret = eval(condition); } catch (err) { console.log(err) }
+		try { var ret = eval(condition); } catch (err) { 
+	                server.log(['status', 'info', 'KaaE'], `Condition Error:`,err);
+		}
                 if (ret) {
 
 		      /* Process Actions */

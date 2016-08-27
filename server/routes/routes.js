@@ -111,7 +111,10 @@ export default function (server) {
     handler: function (req, reply) {
       var config = require('../../kaae.json');
       // Check if alarm index and discard everything else
-      if (!req.params.index.substr(0,config.es.alarm_index.length) === config.es.alarm_index) { console.log('FORBIDDEN DELETE!',req.params); return; } 
+      if (!req.params.index.substr(0,config.es.alarm_index.length) === config.es.alarm_index) { 
+		server.log(['status', 'err', 'KaaE'], 'Forbidden Delete Request! '+req.params);
+		return;
+      }
       var client = server.plugins.elasticsearch.client;
       var callWithRequest = server.plugins.elasticsearch.callWithRequest;
 
@@ -166,17 +169,17 @@ export default function (server) {
       var config = require('../../kaae.json');
       var client = server.plugins.elasticsearch.client;
 
-	console.log('Test ES connection with param:',request.params.id);
+	server.log(['status', 'info', 'KaaE'], 'Testing ES connection with param: '+request.params.id);
 	client.ping({
 	  requestTimeout: 5000,
 	  // undocumented params are appended to the query string
 	  hello: "elasticsearch"
 	}, function (error) {
 	  if (error) {
-	    console.error('elasticsearch cluster is down!');
+		server.log(['warning', 'info', 'KaaE'], 'ES Connectivity is down! '+request.params.id);
             reply({ status: "DOWN" });
 	  } else {
-	    console.log('All is well');
+		server.log(['status', 'info', 'KaaE'], 'ES Connectivity is up! '+request.params.id);
             reply({ status: "UP" });
 	  }
 	});
@@ -191,7 +194,7 @@ export default function (server) {
       var config = require('../../kaae.json');
       var client = server.plugins.elasticsearch.client;
 
-	console.log('Get watcher with ID:',request.params.id);
+	server.log(['status', 'info', 'KaaE'], 'Get Watcher with ID: '+request.params.id);
 	client.search({
 	  index: config.es.default_index,
 	  type: config.es.type,
@@ -214,7 +217,7 @@ export default function (server) {
       var client = server.plugins.elasticsearch.client;
       var watcher = JSON.parse(request.params.watcher)
 
-      console.log('Saving watcher with ID:',watcher._id);
+      server.log(['status', 'info', 'KaaE'], 'Saving Watcher with ID: '+watcher._id);
 
 	        var body = {
 	        	index: config.es.default_index,
