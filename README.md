@@ -6,8 +6,8 @@
 
 ---
 
-
-
+<img src="https://img.shields.io/badge/kibana-4.5+-yellow.svg"/>
+<img src="https://img.shields.io/badge/elasticsearch-*-yellow.svg"/>
 
 
 ### Kibana App: Kaae
@@ -107,3 +107,7 @@ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 License for the specific language governing permissions and limitations under
 the License.
 </pre>
+
+<img src="https://img.shields.io/github/license/elasticfence/kaae.svg"/>
+<img src="https://img.shields.io/badge/made%20with-love-red.svg"/>
+<img src="https://img.shields.io/badge/edited%20with-nano-blue.svg"/>
