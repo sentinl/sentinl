@@ -142,28 +142,37 @@ module.exports = function (server, options) {
       // TODO: Multi-Watcher scheduler w/ reloading!
 
       var client = server.plugins.elasticsearch.client;
-      var sched = later.parse.text('every 10 minute');
+      var sched = later.parse.text('every 1 minute');
       var t = later.setInterval(doalert, sched);
       var Schedule = [];
       function doalert() {
         server.log(['status', 'info', 'KaaE'], `Reloading Watchers...`);
         getCount().then(function(resp){
           getWatcher(resp.count).then(function(resp){
+            server.log(['status', 'info', 'KaaE'], 'Reloading Each Watcher...');
           _.each(resp.hits.hits, function(hit){
 
-            server.log(['status', 'info', 'KaaE'], `Reloading Each Watcher...`);
-	    if(hit._source.trigger.schedule.interval % 1 === 0){
-		// max 60 seconds!
-	        var interval = later.parse.recur().every(hit._source.trigger.schedule.interval).second();
+	    if ( Schedule[hit._id]) {
+		if (Schedule[hit._id].interval == hit._source.trigger.schedule.later || Schedule[hit._id].interval == hit._source.trigger.schedule.interval) { return; }
+	    	else { server.log(['status', 'info', 'KaaE'],'Clearing '+hit._id); Schedule[hit._id].later.clear(); }
 	    }
+
+	    Schedule[hit._id] = {};
 
 	    if(hit._source.trigger.schedule.later){
 		// https://bunkat.github.io/later/parsers.html#text
       	        var interval = later.parse.text(hit._source.trigger.schedule.later);
+		    Schedule[hit._id].interval = hit._source.trigger.schedule.later;
 	    }
 
-            Schedule[hit._id] = later.setInterval(function(){ watching(hit,interval) }, interval);
-                server.log(['status', 'debug', 'KaaE'], 'Scheduler: '+hit._id+' every '+hit._source.trigger.schedule.interval);
+	    else if(hit._source.trigger.schedule.interval % 1 === 0){
+		// max 60 seconds!
+	        var interval = later.parse.recur().every(hit._source.trigger.schedule.interval).second();
+		    Schedule[hit._id].interval = hit._source.trigger.schedule.interval;
+	    }
+
+            Schedule[hit._id].later = later.setInterval(function(){ watching(hit,interval) }, interval);
+                server.log(['status', 'info', 'KaaE'], 'Scheduler: '+hit._id+' every '+Schedule[hit._id].interval );
 
             function watching(task,interval) {
               server.log(['status', 'info', 'KaaE'], 'Executing watch: '+task._id);
@@ -200,8 +209,7 @@ module.exports = function (server, options) {
           });
           });
 
-	  t.clear(); // testing single pass
-          // t = later.setInterval(doalert, sched);
+	  //t.clear();
 
         });
       }
