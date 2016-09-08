@@ -77,14 +77,14 @@ cd kaae && npm install && npm run package
 
 ##### TODO/DONE (live)
 
-- [x] Add Background watcher load execution skeleton  _(Kaae core)_
-- [x] Add Kibana plugin to extend SPY and generate Watchers  _(Kibana plugin)_
-- [x] Add JSON editors for watcher rules _(Sense-like)_
+- [x] Background watcher load/execution skeleton  _(Kaae core)_
+- [x] Kibana plugin to extend SPY and generate Watchers  _(Kibana plugin)_
+- [x] JSON editors for watcher rules _(Sense-like)_
 - [x] Save & load watcher history & results to/from elasticsearch custom indices _(init)_
 - [x] Add/Edit/Delete for watcher rules rows _(es queries)_
-- [x] Add actions for watcher triggers beyond console _(email, slack, etc)_
-- [ ] Add dynamic reload of watchers on add/edit _(Kaae core)_
-- [ ] Add configuration for action preferences _(email server, slack hooks, etc)_
+- [x] Actions for watcher triggers beyond console _(email, slack, etc)_
+- [x] Dynamic reload of watchers on add/edit _(Kaae core)_
+- [ ] User configuration for action preferences _(email server, slack hooks, etc)_
 - [ ] Extend Spy plugin with more action types, options
 - [ ] Major Code & Style cleanup _(help welcome!)_
  
