@@ -121,7 +121,7 @@
 		<th>MESSAGE</th>
 		<th></th>
 	    </tr>
-	  <tbody ng-repeat='alarm in elasticAlarms'>
+	  <tbody ng-repeat="alarm in elasticAlarms | orderBy:alarm._source['@timestamp']">
 	    <tr ng-class-odd="'alarmRow-odd'" ng-class-even="'alarmRow'">
 	         <!-- <td><input type=checkbox ng-model=collapse></td> -->
 	         <td>{{ alarm._source['@timestamp'] | moment }}</td>

@@ -146,10 +146,9 @@ module.exports = function (server, options) {
       var t = later.setInterval(doalert, sched);
       var Schedule = [];
       function doalert() {
-        server.log(['status', 'info', 'KaaE'], `Reloading Watchers...`);
+        server.log(['status', 'debug', 'KaaE'], 'Reloading Watchers...');
         getCount().then(function(resp){
           getWatcher(resp.count).then(function(resp){
-            server.log(['status', 'info', 'KaaE'], 'Reloading Each Watcher...');
           _.each(resp.hits.hits, function(hit){
 
 	    if ( Schedule[hit._id]) {
@@ -172,11 +171,11 @@ module.exports = function (server, options) {
 	    }
 
             Schedule[hit._id].later = later.setInterval(function(){ watching(hit,interval) }, interval);
-                server.log(['status', 'info', 'KaaE'], 'Scheduler: '+hit._id+' every '+Schedule[hit._id].interval );
+                server.log(['status', 'info', 'KaaE'], 'Scheduled: '+hit._id+' every '+Schedule[hit._id].interval );
 
             function watching(task,interval) {
               server.log(['status', 'info', 'KaaE'], 'Executing watch: '+task._id);
-              server.log(['status', 'info', 'KaaE'], 'Next Round of '+task._id+' at '+later.schedule(interval).next(2) );
+              server.log(['status', 'info', 'KaaE'], 'Next Round of '+task._id+' at '+later.schedule(interval).next(1) );
 
 	      var watch = task._source;
               var request = watch.input.search.request;
@@ -191,7 +190,7 @@ module.exports = function (server, options) {
 		/* Validate Condition */
 
 		try { var ret = eval(condition); } catch (err) { 
-	                server.log(['status', 'info', 'KaaE'], `Condition Error:`,err);
+	                server.log(['status', 'info', 'KaaE'], 'Condition Error for '+rask._id+': '+err);
 		}
                 if (ret) {
 

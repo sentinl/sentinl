@@ -167,7 +167,7 @@ uiModules
   var updateFilter = function(){
 	  return $http.get('../api/kaae/set/interval/'+JSON.stringify($scope.timeInterval)).then(function (resp) {
 	        // console.log('NEW TIMEFILTER:',$scope.timeInterval);
-          });	
+          });
   }
 
 
@@ -243,7 +243,7 @@ uiModules
         	console.log('API ALARM DELETE:',resp.data);
 			 var reload = $timeout(function () {
 		              // $route.reload();
-		  	      $scope.elasticAlarms.splice($index,1);     
+		  	      $scope.elasticAlarms.splice($index,1);
 		 	      $scope.notify.warning('KAAE Alarm log successfully deleted!');
 		 	 }, 500);
          });
@@ -252,7 +252,6 @@ uiModules
 
   $scope.deleteAlarmLocal = function($index){
 	 $scope.notify.warning('KAAE function not yet implemented!');
-	 // $scope.currentAlarms.splice($index,1);     
   }
 
   var currentTime = moment($route.current.locals.currentTime);
@@ -380,7 +379,7 @@ uiModules
 		  "_source": {
 		    "trigger": {
 		      "schedule": {
-		        "interval": "60"
+		        "later": "every 5 minutes"
 		      }
 		    },
 		    "input": {
@@ -414,13 +413,13 @@ uiModules
 
 	$scope.watchers.unshift(newwatcher);
 
-	/*	
+	/*
 	 refreshalarms = $timeout(function () {
 	      // console.log('set new watcher to edit mode...');
 	      $scope.setAce(0,false);
  	 }, 200);
 	*/
-	
+
   }
 
   /* New Entry from Saved Kibana Query */
