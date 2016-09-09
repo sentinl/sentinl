@@ -152,11 +152,13 @@ module.exports = function (server, options) {
           _.each(resp.hits.hits, function(hit){
 
 	    if ( Schedule[hit._id]) {
-		if (Schedule[hit._id].interval == hit._source.trigger.schedule.later || Schedule[hit._id].interval == hit._source.trigger.schedule.interval) { return; }
-	    	else { server.log(['status', 'info', 'KaaE'],'Clearing '+hit._id); Schedule[hit._id].later.clear(); }
+		if (_.isEqual(Schedule[hit._id].hit, hit)) { return; }
+		// if (Schedule[hit._id].interval == hit._source.trigger.schedule.later || Schedule[hit._id].interval == hit._source.trigger.schedule.interval) { return; }
+	    	else { server.log(['status', 'info', 'KaaE'],'Clearing watcher: '+hit._id); Schedule[hit._id].later.clear(); }
 	    }
 
 	    Schedule[hit._id] = {};
+	    Schedule[hit._id].hit = hit;
 
 	    if(hit._source.trigger.schedule.later){
 		// https://bunkat.github.io/later/parsers.html#text
