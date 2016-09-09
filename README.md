@@ -13,7 +13,7 @@
 ### Kibana App: Kaae
 **KaaE** extends *Kibana* to provide a free an independent  ["watcher"](https://www.elastic.co/guide/en/watcher/current/introduction.html) alternative based on the same principles and useful to monitor and alert on data series changes.
 
-**KaaE** is designed to retain *logic compatibility* with the Elastic's own ```_watcher``` where possible
+**KaaE** is designed to simplify the process of creating and managing alerts in Kibana, while retaining *logic compatibility* with the Elastic's own ```_watcher``` where possible
 
 <!--<img src="http://i.imgur.com/aDHvUxf.png" width="400" /> -->
 
