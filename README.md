@@ -11,7 +11,9 @@
 
 
 ### Kibana App: Kaae
-The Kaae Kibana 4.5+ App extends the nodejs server/api to provide an independent Elasticsearch ["watcher"](https://www.elastic.co/videos/watcher-lab-creating-your-first-alert) alternative based on the same principles and trigger object format _(pontentially compatible for use with the original ```_watcher```)_
+**KaaE** extends *Kibana* to provide a free an independent  ["watcher"](https://www.elastic.co/guide/en/watcher/current/introduction.html) alternative based on the same principles and useful to monitor and alert on data series changes.
+
+**KaaE** is designed to retain *logic compatibility* with the Elastic's own ```_watcher``` where possible
 
 <!--<img src="http://i.imgur.com/aDHvUxf.png" width="400" /> -->
 
@@ -55,6 +57,11 @@ Current settings can be configured/restored on each execution in ```/opt/kibana/
 --------------
 
 ## Installation
+
+#### Snapshot Plugin Install
+<pre>
+/opt/kibana/bin/kibana plugin --install kaae -u https://github.com/elasticfence/kaae/releases/download/snapshot/kaae-latest.tar.gz
+</pre>
 
 #### Dev Plugin Install
 <pre>
