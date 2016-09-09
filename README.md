@@ -75,6 +75,10 @@ cd kaae && npm install && npm run package
 /opt/kibana/bin/kibana plugin -r kaae
 </pre>
 
+## Configuration
+
+To configure KaaE and its preferences for alerts delivery, please customize the [default config](https://github.com/elasticfence/kaae/wiki/KAAE-Config-Example) as per our wiki example
+
 
 ## Status 
 
