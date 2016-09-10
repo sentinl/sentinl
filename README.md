@@ -50,13 +50,10 @@ Currently supported __"actions"__ for KaaE watchers:
 
 <img src="http://i.imgur.com/abOO76s.png"> 
 
-#### Configuration
-KaaE configuration is still in development!<br>
-Current settings can be configured/restored on each execution in ```/opt/kibana/installedPlugins/kaae/kaae.json```
 
 --------------
 
-## Installation
+## App Installation
 
 #### Snapshot Plugin Install
 <pre>
@@ -96,7 +93,7 @@ To configure KaaE and its preferences for alerts delivery, please customize the 
 - [x] Actions for watcher triggers beyond console _(email, slack, etc)_
 - [x] Dynamic reload of watchers on add/edit _(Kaae core)_
 - [x] User configuration for action preferences _(email server, slack hooks, etc)_
-- [ ] Extend Spy plugin with more action types, options
+- [ ] Extend Spy plugin & Editor with more action types, options
 - [ ] Major Code & Style cleanup _(help welcome!)_
  
 ## License
