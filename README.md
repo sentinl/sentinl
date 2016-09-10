@@ -28,7 +28,7 @@ The Kaae integrated Kibana plug-in extends the default Spy functionality to shap
 ---
 
 ### Kibana Alerts Display
-KaaE alerts can easily be displayed back in Kibana dashboards using [saved search](https://github.com/elasticfence/kaae/wiki/KAAE-Alerts-in-Dashboar) visualizations
+KaaE alerts can easily be displayed back in Kibana dashboards using [saved search](https://github.com/elasticfence/kaae/wiki/KAAE-Alerts-in-Dashboard) visualizations
 
 
 --------------
