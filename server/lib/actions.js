@@ -41,8 +41,8 @@ export default function (server,actions,payload) {
 
 	var esHistory = function(type,message,loglevel,payload) {
 		var client = server.plugins.elasticsearch.client;
-		if (!loglevel) { var loglevel = "INFO"; }
-		if (!payload) { var payload = {}; }
+		if (!loglevel) { var loglevel = "INFO"; };
+		if (!payload) { var payload = {} };
 	        server.log(['status', 'info', 'KaaE'],'Storing Alarm to ES with type:'+type);
 		var indexDate = '-' + new Date().toISOString().substr(0, 10).replace(/-/g, '.');
 		var index_name = config.es.alarm_index ? config.es.alarm_index + indexDate : 'watcher_alarms' + indexDate;
@@ -105,17 +105,18 @@ export default function (server,actions,payload) {
 			var formatter_b = action.email.body ? action.email.body : "Series Alarm {{ payload._id}}: {{payload.hits.total}}";
                         var subject = mustache.render(formatter_s, {"payload":payload});
                         var body = mustache.render(formatter_b, {"payload":payload});
-			var priority = action.console.priority ? action.console.priority : "INFO";
+			var priority = action.email.priority ? action.email.priority : "INFO";
 		        server.log(['status', 'info', 'KaaE','email'],'Subject: '+subject+', Body: '+body);
 
-			if (!email_server) { server.log(['status', 'info', 'Kaae', 'email'], 'Delivery Disabled!'); }
+			if (!email_server || !config.settings.email.active ) { server.log(['status', 'info', 'Kaae', 'email'], 'Delivery Disabled!'); }
 			else {
+				server.log(['status', 'info', 'Kaae', 'email'], 'Delivering to Mail Server');
 				email_server.send({
 				   text:    body,
 				   from:    action.email.from,
 				   to:      action.email.to,
 				   subject: subject
-				}, function(err, message) { server.log(['status', 'warning', 'Kaae', 'email'], err || message); });
+				}, function(err, message) { server.log(['status', 'info', 'Kaae', 'email'], err || message); });
 			}
 
 			if (!action.email.stateless) {
@@ -141,7 +142,7 @@ export default function (server,actions,payload) {
 			var priority = action.slack.priority ? action.slack.priority : "INFO";
 	        	server.log(['status', 'info', 'KaaE', 'Slack'],'Webhook to #'+action.slack.channel+' msg: '+message);
 
-			if (!slack) { 
+			if (!slack || !config.settings.slack.active) {
 			        server.log(['status', 'info', 'KaaE','slack'],'Delivery Disabled!');
 			}
 			else {
@@ -218,7 +219,7 @@ export default function (server,actions,payload) {
                       if(_.has(action, 'elastic')) {
 			var formater = action.local.message ? action.local.message : "{{ payload }}";
                         var message = mustache.render(formatter, {"payload":payload});
-			var priority = action.console.priority ? action.console.priority : "INFO";
+			var priority = action.local.priority ? action.local.priority : "INFO";
 		        server.log(['status', 'info', 'KaaE', 'local'],'Message: '+message);
 			// Log Event
 			esHistory(key,message,priority,payload);
