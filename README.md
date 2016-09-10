@@ -11,9 +11,9 @@
 
 
 ### Kibana App: Kaae
-**KaaE** extends *Kibana* to provide a free an independent  ["watcher"](https://www.elastic.co/guide/en/watcher/current/introduction.html) alternative based on the same principles and useful to monitor and alert on data series changes.
+**KaaE** extends *Kibana* to provide a free an independent  ["watcher"](https://www.elastic.co/guide/en/watcher/current/introduction.html) alternative based on the same principles and useful to monitor and alert on data series changes using a variety of configurable actions.
 
-**KaaE** is designed to simplify the process of creating and managing alerts in Kibana, while retaining *logic compatibility* with the Elastic's own ```_watcher``` where possible
+**KaaE** is also designed to simplify the process of creating and managing alerts in Kibana, while retaining *logic and format compatibility* with the Elastic's own ```_watcher```
 
 <!--<img src="http://i.imgur.com/aDHvUxf.png" width="400" /> -->
 
@@ -22,39 +22,13 @@
 ---
 
 ### Kibana Plugin: Kaae Spy
-The Kaae integrated Kibana plug-in extends the default Spy functionality to shape new prototype Watchers based on Visualize queries, and providing them to Kaae for fine editing and scheduling.
+The Kaae integrated Kibana plug-in extends the default Spy functionality to shape new prototype Watchers based on Visualize queries, and providing them to Kaae for fine editing and deployment.
 <img src="http://i.imgur.com/4lDTOVR.png" />
 
 ---
 
 ### Kibana Alerts Display
 KaaE alerts can easily be displayed back in Kibana dashboards using [saved search](https://github.com/elasticfence/kaae/wiki/KAAE-Alerts-in-Dashboar) visualizations
-
-
-
-## KAAE Watcher Anatomy
-
-  * Trigger
-    * Schedule
-  * Input
-    * Search
-  * Condition
-    * Script
-  * Transform
-  * Action
-    * Actions
-   
-For examples and details refer to the project [Wiki](https://github.com/elasticfence/kaae/wiki)
-
-#### Alarm Actions
-Currently supported __"actions"__ for KaaE watchers:
-
-   * Elasticsearch Index (stable)
-   * Console (stable)
-   * Email/SMTP (testers needed!)
-   * Slack (testers needed!)
-
-<img src="http://i.imgur.com/abOO76s.png"> 
 
 
 --------------
@@ -78,15 +52,16 @@ cd kaae && npm install && npm run package
 /opt/kibana/bin/kibana plugin -r kaae
 </pre>
 
-## Configuration
+## Configuration & Usage
 
-To configure KaaE and its preferences for alerts delivery, please customize the [default config](https://github.com/elasticfence/kaae/wiki/KAAE-Config-Example) as per our wiki example
+Consult our [wiki](https://github.com/elasticfence/kaae/wiki) to learn how to configure and use **KaaE** and program awesome Watchers
 
 
-## Status 
+## Project Status 
 
-* Work in progress! Please [report](https://github.com/elasticfence/kaae/issues) any ideas, bugs and findings
-* Contributors Needed! If you know angular and elasticsearch join us!
+* Working Status, rough edges! 
+  * Please [report](https://github.com/elasticfence/kaae/issues) any ideas, bug reports and findings
+* Contributors Needed! If you know angular and elasticsearch, consider joining us!
  
 
 ##### TODO/DONE (live)
