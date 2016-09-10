@@ -25,6 +25,12 @@
 The Kaae integrated Kibana plug-in extends the default Spy functionality to shape new prototype Watchers based on Visualize queries, and providing them to Kaae for fine editing and scheduling.
 <img src="http://i.imgur.com/4lDTOVR.png" />
 
+---
+
+### Kibana Alerts Display
+KaaE alerts can easily be displayed back in Kibana dashboards using [saved search](https://github.com/elasticfence/kaae/wiki/KAAE-Alerts-in-Dashboar) visualizations
+
+
 
 ## KAAE Watcher Anatomy
 
