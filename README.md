@@ -62,23 +62,12 @@ Consult our [wiki](https://github.com/elasticfence/kaae/wiki) to learn how to co
 
 ## Project Status 
 
-* Working Status, rough edges! 
+* Working Status, more testers needed!
   * Please [report](https://github.com/elasticfence/kaae/issues) any ideas, bug reports and findings
 * Contributors Needed! If you know angular and elasticsearch, consider joining us!
  
 
-##### TODO/DONE (live)
 
-- [x] Background watcher load/execution skeleton  _(Kaae core)_
-- [x] Kibana plugin to extend SPY and generate Watchers  _(Kibana plugin)_
-- [x] JSON editors for watcher rules _(Sense-like)_
-- [x] Save & load watcher history & results to/from elasticsearch custom indices _(init)_
-- [x] Add/Edit/Delete for watcher rules rows _(es queries)_
-- [x] Actions for watcher triggers beyond console _(email, slack, etc)_
-- [x] Dynamic reload of watchers on add/edit _(Kaae core)_
-- [x] User configuration for action preferences _(email server, slack hooks, etc)_
-- [ ] Extend Spy plugin & Editor with more action types, options
-- [ ] Major Code & Style cleanup _(help welcome!)_
  
 ## License
 <pre>
