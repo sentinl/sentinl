@@ -228,7 +228,7 @@ uiModules
 		  $timeout.cancel($scope.refreshalarms);
 	      }
 
-      } else { 
+      } else {
 		// console.log('NULL CHANGE!');
   	        $timeout.cancel($scope.refreshalarms);
       }
@@ -237,8 +237,8 @@ uiModules
 
   $scope.deleteAlarm = function($index){
      if (confirm('Delete is Forever!\n Are you sure?')) {
-	 return $http.get('../api/kaae/delete/alarm/'+$scope.elasticAlarms[$index]._index 
-			  + '/'+$scope.elasticAlarms[$index]._type 
+	 return $http.get('../api/kaae/delete/alarm/'+$scope.elasticAlarms[$index]._index
+			  + '/'+$scope.elasticAlarms[$index]._type
 			  + '/'+$scope.elasticAlarms[$index]._id ).then(function (resp) {
         	console.log('API ALARM DELETE:',resp.data);
 			 var reload = $timeout(function () {
@@ -275,7 +275,7 @@ uiModules
   // $scope.store = window.sessionStorage;
 
   $scope.notify = new Notifier();
-  
+
   $scope.topNavMenu = [
   {
     key: 'watchers',
@@ -313,10 +313,10 @@ uiModules
 	*/
 
   } else { $scope.watchers = []; }
-  
+
   /* ACE Editor */
   $scope.editor;
-  $scope.editor_status = { readonly: false, undo: false, new: false }; 
+  $scope.editor_status = { readonly: false, undo: false, new: false };
   $scope.setAce = function($index,edit) {
 	  // var content = $scope.currentAlarms[$index];
 	  $scope.editor = ace.edit("editor-"+$index);
@@ -374,7 +374,7 @@ uiModules
 	  var newwatcher = {
 		  "_index": "watcher",
 		  "_type": "watch",
-		  "_id": "new",
+		  "_id": "new_watcher_"+ Math.random().toString(36).substr(2, 9),
 		  "_new": "true",
 		  "_source": {
 		    "trigger": {
@@ -422,9 +422,61 @@ uiModules
 
   }
 
+  $scope.reporterNew = function(newwatcher) {
+	if (!newwatcher) {
+	  var newwatcher = {
+		  "_index": "watcher",
+		  "_type": "watch",
+		  "_id": "reporter_"+ Math.random().toString(36).substr(2, 9),
+		  "_new": "true",
+		  "_source": {
+		    "trigger": {
+		      "schedule": {
+		        "later": "every 1 hour"
+		      }
+		    },
+        "report" : true,
+		    "transform": {},
+		    "actions": {
+		      "report_admin": {
+		        "throttle_period": "15m",
+		        "report": {
+		          "to": "report@localhost",
+		          "subject": "KaaE Report",
+		          "priority": "high",
+		          "body": "Sample KaaE Screenshot Report",
+              "snapshot" : {
+                  "res" : "1280x900",
+                  "url" : "http://127.0.0.1/app/kibana#/dashboard/Alerts",
+                  "path" : "/tmp/",
+                  "params" : {
+                      "username" : "username",
+                      "password" : "password",
+                      "delay" : 15,
+                      "crop" : false
+                  }
+              }
+		        }
+		      }
+		    }
+		  }
+		};
+        }
+
+	$scope.watchers.unshift(newwatcher);
+
+	/*
+	 refreshalarms = $timeout(function () {
+	      // console.log('set new watcher to edit mode...');
+	      $scope.setAce(0,false);
+ 	 }, 200);
+	*/
+
+  }
+
   /* New Entry from Saved Kibana Query */
   if ($window.localStorage.getItem('kaae_saved_query')) {
-	// $scope.watcherSaved = JSON.parse($window.localStorage.getItem('kaae_saved_query')); 
+	// $scope.watcherSaved = JSON.parse($window.localStorage.getItem('kaae_saved_query'));
 	$scope.watcherNew(JSON.parse($window.localStorage.getItem('kaae_saved_query')));
 	$window.localStorage.removeItem('kaae_saved_query');
   }
@@ -467,5 +519,3 @@ uiModules
   $scope.$watch('$destroy', unsubscribe);
 
 });
-
-

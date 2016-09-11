@@ -9,10 +9,10 @@ import $window from 'jquery';
 module.exports = function (server, options) {
 
       var debug = false;
-      var config = require('./kaae.json');
+      var config = require('./server/lib/config');
 
       var $ = require('jquery');
-      server.log(['status', 'info', 'KaaE'], `KaaE Initializing`);
+      server.log(['status', 'info', 'KaaE'], 'KaaE Initializing');
       server.kaaeStore = [];
       masterRoute(server);
 

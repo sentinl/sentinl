@@ -47,8 +47,16 @@ function doalert(server,client) {
             Schedule[hit._id].interval = hit._source.trigger.schedule.interval;
           }
 
-          Schedule[hit._id].later = later.setInterval(function(){ watching(hit,interval) }, interval);
-          server.log(['status', 'info', 'KaaE'], 'Scheduled: '+hit._id+' every '+Schedule[hit._id].interval );
+          if (hit._source.report) {
+            /* Report */
+            Schedule[hit._id].later = later.setInterval(function(){ reporting(hit,interval) }, interval);
+            server.log(['status', 'info', 'KaaE'], 'Scheduled Report: '+hit._id+' every '+Schedule[hit._id].interval );
+          } else {
+            /* Watcher */
+            Schedule[hit._id].later = later.setInterval(function(){ watching(hit,interval) }, interval);
+            server.log(['status', 'info', 'KaaE'], 'Scheduled Watch: '+hit._id+' every '+Schedule[hit._id].interval );
+          }
+
 
           function watching(task,interval) {
             server.log(['status', 'info', 'KaaE'], 'Executing watch: '+task._id);
@@ -77,6 +85,17 @@ function doalert(server,client) {
                   // });
               }
             });
+          }
+
+          function reporting(task,interval) {
+            server.log(['status', 'info', 'KaaE'], 'Executing reporter: '+task._id);
+            server.log(['status', 'info', 'KaaE'], 'Next Round of '+task._id+' at '+later.schedule(interval).next(1) );
+
+            var watch = task._source;
+            var actions = watch.actions;
+            var payload = { _id: task._id, report: true };
+            doActions(server,actions,payload);
+
           }
       });
     });

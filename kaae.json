@@ -9,18 +9,22 @@
     	"history": 	20
   },
   "settings" : {
-	"email" : {
-	   "user":	"username", 
-	   "password":	"password", 
-	   "host":	"smtp.server.com", 
-	   "ssl":	true,
-	   "active":	false
-	},
-	"slack" : {
-	   "username":	"KAAE",
-	   "hook":	"https://hooks.slack.com/services/<token>", 
-	   "channel":	"#kaae",
-	   "active": 	false
-	}
+    	"email" : {
+    	   "user":	"username",
+    	   "password":	"password",
+    	   "host":	"smtp.server.com",
+    	   "ssl":	true,
+    	   "active":	false
+    	},
+    	"slack" : {
+    	   "username":	"KAAE",
+    	   "hook":	"https://hooks.slack.com/services/<token>",
+    	   "channel":	"#kaae",
+    	   "active": 	false
+    	},
+      "report" : {
+         "tmp_path" : "/tmp/",
+         "active": 	false
+      }
   }
 }
