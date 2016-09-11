@@ -27,11 +27,10 @@ function doalert(server,client) {
     getWatcher(resp.count,client).then(function(resp){
       _.each(resp.hits.hits, function(hit){
 
-          if ( Schedule[hit._id]) {
-            if (_.isEqual(Schedule[hit._id].hit, hit)) { return; }
-            // if (Schedule[hit._id].interval == hit._source.trigger.schedule.later || Schedule[hit._id].interval == hit._source.trigger.schedule.interval) { return; }
-            else { server.log(['status', 'info', 'KaaE'],'Clearing watcher: '+hit._id); Schedule[hit._id].later.clear(); }
-          }
+        if (Schedule[hit._id]) {
+          if (_.isEqual(Schedule[hit._id].hit, hit)) { return; }
+          else { server.log(['status', 'info', 'KaaE'],'Clearing watcher: '+hit._id); Schedule[hit._id].later.clear(); }
+        }
 
           Schedule[hit._id] = {};
           Schedule[hit._id].hit = hit;
@@ -59,8 +58,7 @@ function doalert(server,client) {
 
 
           function watching(task,interval) {
-            server.log(['status', 'info', 'KaaE'], 'Executing watch: '+task._id);
-            server.log(['status', 'info', 'KaaE'], 'Next Round of '+task._id+' at '+later.schedule(interval).next(1) );
+            server.log(['status', 'info', 'KaaE'], 'Executing watch: '+task._id+' Next Round of '+task._id+' at '+later.schedule(interval).next(1) );
 
             var watch = task._source;
             var request = watch.input.search.request;
@@ -74,7 +72,7 @@ function doalert(server,client) {
 
               /* Validate Condition */
               try { var ret = eval(condition); } catch (err) {
-                          server.log(['status', 'info', 'KaaE'], 'Condition Error for '+rask._id+': '+err);
+                          server.log(['status', 'info', 'KaaE'], 'Condition Error for '+task._id+': '+err);
               }
               if (ret) {
                   /* Process Actions */
@@ -85,18 +83,14 @@ function doalert(server,client) {
                   // });
               }
             });
-          }
-
-          function reporting(task,interval) {
-            server.log(['status', 'info', 'KaaE'], 'Executing reporter: '+task._id);
-            server.log(['status', 'info', 'KaaE'], 'Next Round of '+task._id+' at '+later.schedule(interval).next(1) );
-
-            var watch = task._source;
-            var actions = watch.actions;
-            var payload = { _id: task._id, report: true };
-            doActions(server,actions,payload);
-
-          }
+        }
+        function reporting(task,interval) {
+          server.log(['status', 'info', 'KaaE'], 'Executing report: '+task._id+' Next round at '+later.schedule(interval).next(1) );
+          var actions = task._source.actions;
+          var payload = { "_id": task._id };
+          if (!actions) { server.log(['status', 'info', 'KaaE'], 'Condition Error for '+task._id); return; }
+          doActions(server,actions,payload);
+        }  
       });
     });
   });

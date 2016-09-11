@@ -27,11 +27,12 @@ export default function (server,actions,payload) {
 		/* Image Report Settings */
 		if (config.settings.report.active && config.settings.email.active) {
 			try {
-				const Pageres = require('pageres')
+				var Horseman = require('node-horseman');
+				var horseman = new Horseman();
 			} catch(err) {
-				server.log(['status', 'info', 'KaaE'],'Pageres and PhantomJS required! Reports Disabled.');
-				server.log(['status', 'info', 'KaaE'],'Install Pageres: "npm install --save pageres"');
-			}
+				server.log(['status', 'info', 'KaaE'],'Horseman and PhantomJS required! '+err);
+				server.log(['status', 'info', 'KaaE'],'Install Horseman: "npm install -g node-horseman"');
+			};
 		} else {
 			server.log(['status', 'info', 'KaaE'],'Action Report requires Email Settings! Reports Disabled.');
 		}
@@ -143,7 +144,7 @@ export default function (server,actions,payload) {
 							*      "priority" : "high",
 							*      "body" : "Series Report {{ payload._id}}: {{payload.hits.total}}",
 							*      "snapshot" : {
-							*      		"res" : "1280x900",
+							*      		"res" : "1280,900",
 							*         "url" : "http://127.0.0.1/app/kibana#/dashboard/Alerts",
 							*         "path" : "/tmp/",
 							*         "params" : {
@@ -164,34 +165,42 @@ export default function (server,actions,payload) {
 									  var body = mustache.render(formatter_b, {"payload":payload});
 										var priority = action.report.priority ? action.report.priority : "INFO";
 										server.log(['status', 'info', 'KaaE','report'],'Subject: '+subject+', Body: '+body);
-										if (!email_server) { server.log(['status', 'info', 'Kaae', 'report'], 'Reporting Disabled! Email Required!');return; }
-										if (!Pageres || !action.report.snapshot) { server.log(['status', 'info', 'Kaae', 'report'], 'Reporting Disabled! No Settings!');return; }
+										if (!email_server) { server.log(['status', 'info', 'Kaae', 'report'], 'Reporting Disabled! Email Required!'); return; }
+										if (!horseman || !action.report.snapshot) { server.log(['status', 'info', 'Kaae', 'report'], 'Reporting Disabled! No Settings!'); return; }
 										else {
-												action.report.snapshot.params.filename = "report-"+ Date.now()+".png"
-												server.log(['status', 'info', 'Kaae', 'report'], 'Delivering Report '+uuid+' to Mail Server');
-												var sendReport = function(){
-													email_server.send({
-																				   text:    body,
-																				   from:    action.email.from,
-																				   to:      action.email.to,
-																				   subject: subject,
-																					 attachment:
-																				   [
-																				      {path:action.report.snapshot.path+action.report.snapshot.params.filename, type:"image/png", name:action.report.snapshot.params.filename}
-																				   ]
-																				}, function(err, message) {
-																								server.log(['status', 'info', 'Kaae', 'report'], err || message);
-																								fs.unlinkSync(action.report.snapshot.path+action.report.snapshot.params.filename);
-																								payload.message = err || message;
-																				});
-												}
-												pageres = new Pageres({delay: 2})
-    										.src(action.report.snapshot.url, [action.report.snapshot.res ? action.report.snapshot.res : '1280x900'], action.report.snapshot.params)
-    										.dest(action.report.snapshot.path)
-    										.run()
-												.then(() => sendReport());
+												//var filename = "report-"+ Math.random().toString(36).substr(2, 9)+".pdf";
+												var filename = "report-"+ Math.random().toString(36).substr(2, 9)+".png";
+												server.log(['status', 'info', 'Kaae', 'report'], 'Crating Report for '+action.report.snapshot.url);
+												try {
+													horseman
+													.viewport(1280,900)
+	    										.open(action.report.snapshot.url)
+													.wait(action.report.snapshot.params.delay)
+													.screenshot(action.report.snapshot.path + filename)
+													//.pdf(action.report.snapshot.path + filename)
+													.then(function(){
+											        server.log(['status', 'info', 'Kaae', 'report'], 'Snapshot ready for url:'+action.report.snapshot.url);
+															email_server.send({
+																						   text:    body,
+																						   from:    action.report.from,
+																						   to:      action.report.to,
+																						   subject: subject,
+																							 attachment:
+																						   [
+																						      // { path: action.report.snapshot.path + filename, type: "application/pdf", name: filename },
+																									{ path: action.report.snapshot.path + filename, type: "image/png", name: filename+".png" }
+																						   ]
+																						}, function(err, message) {
+																										server.log(['status', 'info', 'Kaae', 'report'], err || message);
+																										fs.unlinkSync(action.report.snapshot.path+filename);
+																										payload.message = err || message;
+																						});
+										    	});
+												} catch (err) {
+															server.log(['status', 'info', 'Kaae', 'report'], 'ERROR: ' + err );
+												};
 										}
-										if (!action.report.stateless) {
+										if (action.report.stateless) {
 												// Log Event
 												esHistory(key,body,priority,payload);
 										}
