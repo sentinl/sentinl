@@ -6,7 +6,7 @@
   },
   "name": "kaae",
   "version": "0.0.8",
-  "description": "Kibana Alert App for Elasticsearch",
+  "description": "Kibana Alert & Report App for Elasticsearch",
   "main": "index.js",
   "scripts": {
     "lint": "eslint",
