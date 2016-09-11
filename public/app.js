@@ -401,6 +401,7 @@ uiModules
 		        "throttle_period": "15m",
 		        "email": {
 		          "to": "alarm@localhost",
+              "from": "kaae@localhost",
 		          "subject": "KaaE Alarm",
 		          "priority": "high",
 		          "body": "Found {{payload.hits.total}} Events"
@@ -442,6 +443,7 @@ uiModules
 		        "throttle_period": "15m",
 		        "report": {
 		          "to": "report@localhost",
+              "from": "kaae@localhost",
 		          "subject": "KaaE Report",
 		          "priority": "high",
 		          "body": "Sample KaaE Screenshot Report",

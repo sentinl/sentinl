@@ -5,44 +5,43 @@ import mustache from 'mustache';
 import config from './config';
 import fs from 'fs';
 
-/* Email Settings */
-if (config.settings.email.active) {
-	var email   = require("emailjs");
-	var email_server  = email.server.connect({
-	   user:    config.settings.email.user,
-	   password:config.settings.email.password,
-	   host:    config.settings.email.host,
-	   ssl:     config.settings.email.ssl
-	});
-	// server.smtp.debug(100);
-}
-
-/* Image Report Settings */
-if (config.settings.report) {
-	/* Image Report Settings */
-	if (config.settings.report.active && config.settings.email.active) {
-		try {
-			const Pageres = require('pageres')
-		} catch(err) {
-			server.log(['status', 'info', 'KaaE'],'Pageres and PhantomJS required! Reports Disabled.');
-			server.log(['status', 'info', 'KaaE'],'Install Pageres: "npm install --save pageres"');
-		}
-	} else {
-		server.log(['status', 'info', 'KaaE'],'Action Report requires Email Settings! Reports Disabled.');
-	}
-}
-
-/* Slack Settings */
-if (config.settings.slack.active) {
-	var Slack   = require("node-slack");
-	var slack = new Slack(config.settings.slack.hook);
-}
-
-
 var debug = true;
 var hlimit = config.kaae.history ? config.kaae.history : 10;
 
 export default function (server,actions,payload) {
+
+	/* Email Settings */
+	if (config.settings.email.active) {
+		var email   = require("emailjs");
+		var email_server  = email.server.connect({
+		   user:    config.settings.email.user,
+		   password:config.settings.email.password,
+		   host:    config.settings.email.host,
+		   ssl:     config.settings.email.ssl
+		}, function(err, message) { server.log(['status', 'info', 'Kaae', 'email'], err || message); });
+		// server.smtp.debug(100);
+	}
+
+	/* Image Report Settings */
+	if (config.settings.report) {
+		/* Image Report Settings */
+		if (config.settings.report.active && config.settings.email.active) {
+			try {
+				const Pageres = require('pageres')
+			} catch(err) {
+				server.log(['status', 'info', 'KaaE'],'Pageres and PhantomJS required! Reports Disabled.');
+				server.log(['status', 'info', 'KaaE'],'Install Pageres: "npm install --save pageres"');
+			}
+		} else {
+			server.log(['status', 'info', 'KaaE'],'Action Report requires Email Settings! Reports Disabled.');
+		}
+	}
+
+	/* Slack Settings */
+	if (config.settings.slack.active) {
+		var Slack   = require("node-slack");
+		var slack = new Slack(config.settings.slack.hook);
+	}
 
 	/* Internal Support Functions */
 	var tmpHistory = function(type,message) {
