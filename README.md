@@ -11,7 +11,7 @@
 
 
 ### Kibana App: Kaae
-**KaaE** extends *Kibana* to provide a free an independent  ["watcher"](https://www.elastic.co/guide/en/watcher/current/introduction.html) and alternative for Alerting and Reporting, based on the same principles and useful to monitor and alert on data series changes using a variety of configurable actions.
+**KaaE** extends *Kibana* to provide a free an independent  ["watcher"](https://www.elastic.co/guide/en/watcher/current/introduction.html) and alternative for **Alerting** and **Reporting**, based on the same principles and useful to monitor and alert on data series changes using a variety of configurable actions.
 
 **KaaE** is also designed to simplify the process of creating and managing alerts in Kibana, while retaining baseline *logic and configuration format compatibility* with the Elastic's own ```_watcher```
 
@@ -31,7 +31,8 @@ The Kaae integrated Kibana plug-in extends the default Spy functionality to shap
 KaaE alerts can easily be displayed back in Kibana dashboards using [saved search](https://github.com/elasticfence/kaae/wiki/KAAE-Alerts-in-Dashboard) visualizations
 
 ### Kibana Report Snapshots
-KaaE alerts can take timed snapshots of Kibana dashboards or any other website using the ```report``` action *(beta)*
+Your Boss wants to see charts each monday? No problem!<br>
+KaaE can take timed snapshots of Kibana dashboards _(or any other website)_ and deliver them via email using the [report](https://github.com/elasticfence/kaae/wiki/KAAE-Report-Example) action
 
 
 --------------
