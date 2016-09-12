@@ -11,9 +11,9 @@
 
 
 ### Kibana App: Kaae
-**KaaE** extends *Kibana* to provide a free an independent  ["watcher"](https://www.elastic.co/guide/en/watcher/current/introduction.html) and alternative for **Alerting** and **Reporting**, based on the same principles and useful to monitor and alert on data series changes using a variety of configurable actions.
+**KaaE** extends *Kibana* to provide a free an independent  ["watcher"](https://www.elastic.co/guide/en/watcher/current/introduction.html) alternative for **Alerting** and **Reporting** based on the same principles and useful to monitor and notify on data series changes using a variety of configurable actions.
 
-**KaaE** is also designed to simplify the process of creating and managing alerts in Kibana, while retaining baseline *logic and configuration format compatibility* with the Elastic's own ```_watcher```
+**KaaE** is also designed to simplify the process of creating and managing alerts and reports in Kibana, while retaining baseline *logic and configuration format compatibility* with the Elastic counterpart.
 
 <!--<img src="http://i.imgur.com/aDHvUxf.png" width="400" /> -->
 
