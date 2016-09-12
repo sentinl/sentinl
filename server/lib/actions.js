@@ -170,7 +170,7 @@ export default function (server,actions,payload) {
 										else {
 												//var filename = "report-"+ Math.random().toString(36).substr(2, 9)+".pdf";
 												var filename = "report-"+ Math.random().toString(36).substr(2, 9)+".png";
-												server.log(['status', 'info', 'Kaae', 'report'], 'Crating Report for '+action.report.snapshot.url);
+												server.log(['status', 'info', 'Kaae', 'report'], 'Creating Report for '+action.report.snapshot.url);
 												try {
 													horseman
 													.viewport(1280,900)
@@ -194,17 +194,22 @@ export default function (server,actions,payload) {
 																										server.log(['status', 'info', 'Kaae', 'report'], err || message);
 																										fs.unlinkSync(action.report.snapshot.path+filename);
 																										payload.message = err || message;
+																										if (!action.report.stateless) {
+																												// Log Event
+																												esHistory(key,body,priority,payload);
+																										}
 																						});
 										    	});
 												} catch (err) {
 															server.log(['status', 'info', 'Kaae', 'report'], 'ERROR: ' + err );
 															payload.message = err;
+															if (!action.report.stateless) {
+																	// Log Event
+																	esHistory(key,body,priority,payload);
+															}
 												};
 										}
-										if (!action.report.stateless) {
-												// Log Event
-												esHistory(key,body,priority,payload);
-										}
+
 								}
 
 								/* ***************************************************************************** */
