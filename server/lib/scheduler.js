@@ -25,6 +25,15 @@ function doalert(server,client) {
   server.log(['status', 'debug', 'KaaE'], 'Reloading Watchers...');
   getCount(client).then(function(resp){
     getWatcher(resp.count,client).then(function(resp){
+      /* Orphanizer */
+        var orphans = _.difference(_.each(Object.keys( Schedule )), _.map(resp.hits.hits, '_id')  );
+        _.each(orphans, function(orphan){
+                server.log(['status', 'info', 'KaaE'],'Deleting orphan watcher: '+orphan);
+                Schedule[orphan].later.clear();
+                delete Schedule[orphan];
+        });
+        
+      /* Scheduler */
       _.each(resp.hits.hits, function(hit){
 
         if (Schedule[hit._id]) {
