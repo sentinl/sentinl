@@ -141,6 +141,7 @@ const linkReqRespStats = function ($scope, config) {
 	        "throttle_period": "15m",
 	        "email": {
 	          "to": $scope.watcher_email_to ? $scope.watcher_email_to : "alarm@localhost",
+        	  "from": $scope.watcher_email_from ? $scope.watcher_email_from : "kaae@localhost",
 	          "subject": $scope.watcher_email_subj ? $scope.watcher_email_subj : "Kaae Alarm",
 	          "priority": "high",
 	          "body": $scope.watcher_email_body ? $scope.watcher_email_body : "Found {{payload.hits.total}} Events"
