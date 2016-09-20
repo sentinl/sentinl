@@ -199,7 +199,7 @@ export default function (server,actions,payload) {
 																												esHistory(key,body,priority,payload);
 																										}
 																						});
-										    	});
+										    	}).close();
 												} catch (err) {
 															server.log(['status', 'info', 'Kaae', 'report'], 'ERROR: ' + err );
 															payload.message = err;
