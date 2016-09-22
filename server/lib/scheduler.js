@@ -72,7 +72,7 @@ function doalert(server,client) {
             var watch = task._source;
             var request = watch.input.search.request;
             var condition = watch.condition.script.script;
-            var transform = watch.transform.search ? watch.transform.search.request : {};
+            var transform = watch.transform ? watch.transform : {};
             var actions = watch.actions;
 
             client.search(request).then(function(payload){
@@ -84,12 +84,19 @@ function doalert(server,client) {
                           server.log(['status', 'info', 'KaaE'], 'Condition Error for '+task._id+': '+err);
               }
               if (ret) {
-                  /* Process Actions */
-                  doActions(server,actions,payload);
-                  /* Transform Query (disabled) */
-                  // client.search(transform).then(function(payload) {
-                  //     console.log('Transaction resp:',payload);
-                  // });
+                  if (transform.script) {
+                      try { eval(transform.script.script); } catch (err) {
+                          server.log(['status', 'info', 'KaaE'], 'Transform Script Error for '+task._id+': '+err);
+                      }
+                      doActions(server,actions,payload);
+                  } else if (transform.search) {
+                      client.search(transform.search.request).then(function(payload) {
+                          if (!payload) return;
+                          doActions(server,actions,payload);
+                      });
+                  } else {
+                      doActions(server,actions,payload);
+                  }
               }
             });
         }
