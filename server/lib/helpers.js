@@ -5,7 +5,6 @@ var dynamicTemplates = [ {
     mapping : {
       type : 'string',
       index : 'not_analyzed',
-      type : 'string',
       doc_values: true,
       fields : {
         search : {
