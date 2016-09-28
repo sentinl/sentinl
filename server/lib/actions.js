@@ -234,6 +234,7 @@ export default function (server,actions,payload) {
 											try {
 												slack.send({
 								    				    text: message,
+								    				    channel: action.slack.channel,
 												    username: config.settings.slack.username
 												});
 											} catch(err) {
