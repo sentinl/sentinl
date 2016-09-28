@@ -57,7 +57,7 @@ export default function (server) {
 	sort : "@timestamp : asc", 
         allowNoIndices: false,
 	body: {
-		"size": 10,
+		"size": config.kaae.results ? config.kaae.results : 50,
    		"query": {
         		"filtered": {
         		    "query": {
