@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import handleESError from '../lib/handle_es_error';
+const config = require('../lib/config');
 
 export default function (server) {
 
@@ -41,8 +42,6 @@ export default function (server) {
     path: '/api/kaae/list/alarms',
     method: ['POST', 'GET'],
     handler: function (req, reply) {
-      var config = require('../../kaae.json');
-
       // Use selected timefilter when available
       if (server.kaaeInterval) {
 	var timeInterval = server.kaaeInterval;
@@ -91,6 +90,7 @@ export default function (server) {
       const boundCallWithRequest = _.partial(server.plugins.elasticsearch.callWithRequest, req);
       boundCallWithRequest('search', {
 	index: 'watcher',
+	size: config.kaae.results ? config.kaae.results : 50,
         allowNoIndices: false
       })
       .then(
@@ -109,7 +109,6 @@ export default function (server) {
     method: 'GET',
     path: '/api/kaae/delete/alarm/{index}/{type}/{id}',
     handler: function (req, reply) {
-      var config = require('../../kaae.json');
       // Check if alarm index and discard everything else
       if (!req.params.index.substr(0,config.es.alarm_index.length) === config.es.alarm_index) { 
 		server.log(['status', 'err', 'KaaE'], 'Forbidden Delete Request! '+req.params);
@@ -166,7 +165,6 @@ export default function (server) {
     method: 'GET',
     path: '/api/kaae/test/{id}',
     handler: function (request, reply) {
-      var config = require('../../kaae.json');
       var client = server.plugins.elasticsearch.client;
 
 	server.log(['status', 'info', 'KaaE'], 'Testing ES connection with param: '+request.params.id);
@@ -191,7 +189,6 @@ export default function (server) {
     method: 'GET',
     path: '/api/kaae/get/watcher/{id}',
     handler: function (request, reply) {
-      var config = require('../../kaae.json');
       var client = server.plugins.elasticsearch.client;
 
 	server.log(['status', 'info', 'KaaE'], 'Get Watcher with ID: '+request.params.id);
@@ -213,7 +210,6 @@ export default function (server) {
     method: 'GET',
     path: '/api/kaae/save/watcher/{watcher}',
     handler: function (request, reply) {
-      var config = require('../../kaae.json');
       var client = server.plugins.elasticsearch.client;
       var watcher = JSON.parse(request.params.watcher)
 
@@ -241,7 +237,6 @@ export default function (server) {
     method: 'GET',
     path: '/api/kaae/delete/watcher/{id}',
     handler: function (req, reply) {
-      var config = require('../../kaae.json');
       var client = server.plugins.elasticsearch.client;
       var callWithRequest = server.plugins.elasticsearch.callWithRequest;
 
@@ -271,7 +266,6 @@ export default function (server) {
     method: 'GET',
     path: '/api/kaae/validate/es',
     handler: function (request, reply) {
-      var config = require('../../kaae.json');
       var callWithRequest = server.plugins.elasticsearch.callWithRequest;
 
       var body = {
@@ -294,8 +288,5 @@ export default function (server) {
 
     }
   });
-
-
-
+	
 };
-
