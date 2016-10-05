@@ -36,6 +36,7 @@ function createKaaeIndex(server,config) {
                 server.log(['status', 'debug', 'KaaE'], 'Core Index exists!');
                 return;
             }
+            server.log(['status', 'debug', 'KaaE'], 'Creating KaaE core Index...');
             client.indices.create({
                 index: config.es.default_index,
                 body: {
@@ -80,6 +81,7 @@ function createKaaeAlarmIndex(server,config) {
                 server.log(['status', 'debug', 'KaaE'], 'Alarms Index exists!');
                 return;
             }
+            server.log(['status', 'debug', 'KaaE'], 'Creating KaaE Alarms Index...');
             client.indices.create({
                 index: config.es.alarm_index,
                 body: {

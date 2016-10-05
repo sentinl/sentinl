@@ -69,6 +69,8 @@ function doalert(server,client) {
           function watching(task,interval) {
             server.log(['status', 'info', 'KaaE'], 'Executing watch: '+task._id+' Next Round of '+task._id+' at '+later.schedule(interval).next(1) );
 
+	    server.log(['status', 'debug', 'KaaE', 'WATCHER DEBUG'], task);
+
             var watch = task._source;
             var request = watch.input.search.request;
             var condition = watch.condition.script.script;
@@ -76,8 +78,12 @@ function doalert(server,client) {
             var actions = watch.actions;
 
             client.search(request).then(function(payload){
-              if (!payload) return;
-              if (!condition) return;
+              if (!payload || !condition || !actions) {
+		    server.log(['status', 'debug', 'KaaE', 'WATCHER TASK'], 'Watcher Malformed or Missing Key Parameters!');
+		    return;
+	      }
+
+	      server.log(['status', 'debug', 'KaaE', 'PAYLOAD DEBUG'], payload);
 
               /* Validate Condition */
               try { var ret = eval(condition); } catch (err) {
