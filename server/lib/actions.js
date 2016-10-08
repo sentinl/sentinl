@@ -111,7 +111,7 @@ export default function (server,actions,payload) {
 						*	    }
 		      	*/
 
-            	if(_.has(action, 'email')) {
+            					if(_.has(action, 'email')) {
 										var formatter_s = action.email.subject ? action.email.subject : "KAAE: "+key;
 										var formatter_b = action.email.body ? action.email.body : "Series Alarm {{ payload._id}}: {{payload.hits.total}}";
 									  var subject = mustache.render(formatter_s, {"payload":payload});
@@ -133,7 +133,48 @@ export default function (server,actions,payload) {
 												// Log Event
 												esHistory(key,body,priority,payload);
 										}
-        			}
+        					}
+
+
+						/* ***************************************************************************** */
+		      	/*
+						*   "email_html" : {
+						*      "to" : "root@localhost",
+						*      "from" : "kaae@localhost",
+						*      "subject" : "Alarm Title",
+						*      "priority" : "high",
+						*      "body" : "Series Alarm {{ payload._id}}: {{payload.hits.total}}",
+						*      "html" : "<p>Series Alarm {{ payload._id}}: {{payload.hits.total}}</p>",
+						*      "stateless" : false
+						*	    }
+		      				*/
+
+            					if(_.has(action, 'email_html')) {
+										var formatter_s = action.email_html.subject ? action.email_html.subject : "KAAE: "+key;
+										var formatter_b = action.email_html.body ? action.email_html.body : "Series Alarm {{ payload._id}}: {{payload.hits.total}}";
+										var formatter_c = action.email_html.body ? action.email_html.body : "<p>Series Alarm {{ payload._id}}: {{payload.hits.total}}</p>";
+									 	var subject = mustache.render(formatter_s, {"payload":payload});
+									  	var body = mustache.render(formatter_b, {"payload":payload});
+										var html = mustache.render(formatter_c, {"payload":payload});
+										var priority = action.email_html.priority ? action.email_html.priority : "INFO";
+										server.log(['status', 'info', 'KaaE','email_html'],'Subject: '+subject+', Body: '+body+', HTML:'+html);
+
+										if (!email_server || !config.settings.email_html.active ) { server.log(['status', 'info', 'Kaae', 'email_html'], 'Delivery Disabled!'); }
+										else {
+													server.log(['status', 'info', 'Kaae', 'email'], 'Delivering to Mail Server');
+													email_server.send({
+													   text:    body,
+													   from:    action.email_html.from,
+													   to:      action.email_html.to,
+													   subject: subject,
+													   attachment: [{data:html, alternative:true}]
+													}, function(err, message) { server.log(['status', 'info', 'Kaae', 'email_html'], err || message); });
+										}
+										if (!action.email_html.stateless) {
+												// Log Event
+												esHistory(key,body,priority,payload);
+										}
+        						}
 
 							/* ***************************************************************************** */
 							/*
@@ -161,8 +202,8 @@ export default function (server,actions,payload) {
 							if(_.has(action, 'report')) {
 										var formatter_s = action.report.subject ? action.report.subject : "KAAE: "+key;
 										var formatter_b = action.report.body ? action.report.body : "Series Report {{ payload._id}}: {{payload.hits.total}}";
-									  var subject = mustache.render(formatter_s, {"payload":payload});
-									  var body = mustache.render(formatter_b, {"payload":payload});
+									  	var subject = mustache.render(formatter_s, {"payload":payload});
+									  	var body = mustache.render(formatter_b, {"payload":payload});
 										var priority = action.report.priority ? action.report.priority : "INFO";
 										server.log(['status', 'info', 'KaaE','report'],'Subject: '+subject+', Body: '+body);
 										if (!email_server) { server.log(['status', 'info', 'Kaae', 'report'], 'Reporting Disabled! Email Required!'); return; }
@@ -188,7 +229,8 @@ export default function (server,actions,payload) {
 																							 attachment:
 																						   [
 																						      // { path: action.report.snapshot.path + filename, type: "application/pdf", name: filename },
-																									{ path: action.report.snapshot.path + filename, type: "image/png", name: filename+".png" }
+																						    { data: "<html><img src='cid:my-report' width='100%'></html>"},
+																						    { path: action.report.snapshot.path + filename, type: "image/png", name: filename+".png", headers:{"Content-ID":"<my-report>"} }
 																						   ]
 																						}, function(err, message) {
 																										server.log(['status', 'info', 'Kaae', 'report'], err || message);

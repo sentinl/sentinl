@@ -336,10 +336,15 @@ uiModules
      if (confirm('Are you sure?')) {
 	 return $http.get('../api/kaae/delete/watcher/'+$scope.watchers[$index]._id).then(function (resp) {
         	// console.log('API DELETE:',resp.data);
+		if (resp.statusCode < 200 || resp.statusCode > 299) {
+			$scope.notify.error('Error Deleting Watcher! Check your syntax and try again!');
+    		}
+    		else {
 			 var reload = $timeout(function () {
 		              $route.reload();
 		 	      $scope.notify.warning('KAAE Watcher successfully deleted!');
 		 	 }, 1000);
+		}
          });
       }
   }
@@ -357,10 +362,15 @@ uiModules
 	 console.log('saving object:',watcher);
 	 return $http.get('../api/kaae/save/watcher/'+encodeURIComponent(JSON.stringify(watcher))).then(function (resp) {
         	// console.log('API STORE:',resp);
-			 var reload = $timeout(function () {
-		              $route.reload();
-		 	      $scope.notify.warning('KAAE Watcher successfully saved!');
-		 	 }, 1000);
+		if (resp.statusCode < 200 || resp.statusCode > 299) {
+			$scope.notify.error('Error Saving Watcher! Check your syntax and try again!');
+    		}
+    		else {
+			var reload = $timeout(function () {
+		            $route.reload();
+		 	    $scope.notify.warning('KAAE Watcher successfully saved!');
+		 	}, 1000);
+    		}
          });
   }
 
