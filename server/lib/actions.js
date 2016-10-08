@@ -229,7 +229,8 @@ export default function (server,actions,payload) {
 																							 attachment:
 																						   [
 																						      // { path: action.report.snapshot.path + filename, type: "application/pdf", name: filename },
-																									{ path: action.report.snapshot.path + filename, type: "image/png", name: filename+".png" }
+																						    { data: "<html><img src='cid:my-report' width='100%'></html>"},
+																						    { path: action.report.snapshot.path + filename, type: "image/png", name: filename+".png", headers:{"Content-ID":"<my-report>"} }
 																						   ]
 																						}, function(err, message) {
 																										server.log(['status', 'info', 'Kaae', 'report'], err || message);
