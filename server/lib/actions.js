@@ -353,6 +353,62 @@ export default function (server,actions,payload) {
 
 		/* ***************************************************************************** */
 
+
+
+
+        /* ***************************************************************************** */
+        /*      you must set your api key in config.settings.pushapps.api_key
+                mandatory parameters are text and at least on element in platforms array, see https://docs.pushapps.mobi/docs/notifications-create-notification for more info
+         *   "pushapps" : {
+         *      "platforms" : [ "android" , "ios", "web", "fb-messenger", "whatsapp"],
+         *      "tags" : [ "<optional tag from PushApps>"],
+         *      "campaign_id" : "<optional campaign id from PushApps>",
+         *      "text" : "Series Alarm {{ payload._id}}: {{payload.hits.total}}",
+         *      "url" : "<optional url to present>",
+         *      "image_url" : "<optional image url for the notification or message>"
+         *    }
+         */
+
+        var querystring = require('querystring');
+        var http = require('http');
+
+        if(_.has(action, 'pushapps')) {
+
+            var options = {
+                hostname: 'https://api.pushapps.mobi/v1',
+                port: 443,
+                path: '/notifications',
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Api-Key' : config.settings.pushapps.api_key
+                }
+            };
+
+            var post_data = querystring.stringify({
+                'text' : action.text,
+                'platforms': action.platform,
+                'tags': action.tags,
+                'campaign_id' : action.campaign_id,
+                'url' : action.url,
+                'image_url' : action.image_url
+            });
+
+            var req = http.request(options, function(res) {
+                res.setEncoding('utf8');
+                res.on('data', function (chunk) {
+                    server.log(['status', 'debug', 'KaaE'],'Response: '+chunk);
+                });
+            });
+
+            req.on('error', function(e) {
+                server.log(['status', 'err', 'KaaE'],'Error creating a PushApps notification: '+e);
+            });
+            req.write(post_data);
+            req.end();
+
+        }
+
 	});
 
 }
