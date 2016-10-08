@@ -26,6 +26,10 @@
       "report" : {
          "tmp_path" : "/tmp/",
          "active": 	false
-      }
+      },
+      "pushapps" : {
+        "api_key" : "<pushapps API Key>",
+        "active":	false
+    }
   }
 }
