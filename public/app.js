@@ -395,7 +395,7 @@ uiModules
 		    "input": {
 		      "search": {
 		        "request": {
-		          "indices": [],
+		          "index": [],
 		          "body": {},
 		        }
 		      }
