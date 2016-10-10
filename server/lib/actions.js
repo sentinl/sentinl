@@ -327,8 +327,8 @@ export default function (server,actions,payload) {
 									        server.log(['status', 'err', 'KaaE'],'Error shipping webhook: '+e.message);
 									});
 
-									if (actions.webhook.body) { req.write(action.webhook.body); }
-									else if (actions.webhook.params) { req.write(action.webhook.params); }
+									if (action.webhook.body) { req.write(action.webhook.body); }
+									else if (action.webhook.params) { req.write(action.webhook.params); }
 
 									req.end();
 
