@@ -95,7 +95,7 @@ export default function (server,actions,payload) {
            					if(_.has(action, 'console')) {
 							var priority = action.console.priority ? action.console.priority : "INFO";
 							var message = action.console.message ? action.console.message : "{{ payload }}";
-						  	server.log(['status', 'info', 'KaaE'],'Console Payload:', JSON.stringify(payload));
+						  	server.log(['status', 'info', 'KaaE'],'Console Payload: '+ JSON.stringify(payload));
 							esHistory(key,message,priority,payload);
             					}
 
