@@ -94,7 +94,8 @@ export default function (server,actions,payload) {
 
            					if(_.has(action, 'console')) {
 							var priority = action.console.priority ? action.console.priority : "INFO";
-							var message = action.console.message ? action.console.message : "{{ payload }}";
+							var formatter_c = action.console.message ? action.console.message : "{{ payload }}";
+							var message = mustache.render(formatter_c, {"payload":payload});
 						  	server.log(['status', 'info', 'KaaE'],'Console Payload: '+ JSON.stringify(payload));
 							esHistory(key,message,priority,payload);
             					}
