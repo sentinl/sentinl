@@ -5,7 +5,7 @@
     "url": "http://github.com/elasticfence/kaae.git"
   },
   "name": "kaae",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Kibana Alert & Report App for Elasticsearch",
   "main": "index.js",
   "scripts": {
