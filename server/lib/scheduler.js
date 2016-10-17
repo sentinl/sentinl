@@ -77,34 +77,67 @@ function doalert(server,client) {
             var transform = watch.transform ? watch.transform : {};
             var actions = watch.actions;
 
-            client.search(request).then(function(payload){
-              if (!payload || !condition || !actions) {
-		    server.log(['status', 'debug', 'KaaE', 'WATCHER TASK'], 'Watcher Malformed or Missing Key Parameters!');
-		    return;
-	      }
+	    if (JSON.stringify(request).indexOf('filterjoin') !== -1) {
+		/* Kibi Join Query */ 
+		client.coordinate_search(request).then(function(payload){
+		      if (!payload || !condition || !actions) {
+			    server.log(['status', 'debug', 'KaaE', 'WATCHER TASK'], 'Watcher Malformed or Missing Key Parameters!');
+			    return;
+		      }
 
-	      server.log(['status', 'debug', 'KaaE', 'PAYLOAD DEBUG'], payload);
+		      server.log(['status', 'debug', 'KaaE', 'PAYLOAD DEBUG'], payload);
 
-              /* Validate Condition */
-              try { var ret = eval(condition); } catch (err) {
-                          server.log(['status', 'info', 'KaaE'], 'Condition Error for '+task._id+': '+err);
-              }
-              if (ret) {
-                  if (transform.script) {
-                      try { eval(transform.script.script); } catch (err) {
-                          server.log(['status', 'info', 'KaaE'], 'Transform Script Error for '+task._id+': '+err);
-                      }
-                      doActions(server,actions,payload);
-                  } else if (transform.search) {
-                      client.search(transform.search.request).then(function(payload) {
-                          if (!payload) return;
-                          doActions(server,actions,payload);
-                      });
-                  } else {
-                      doActions(server,actions,payload);
-                  }
-              }
-            });
+		      /* Validate Condition */
+		      try { var ret = eval(condition); } catch (err) {
+				  server.log(['status', 'info', 'KaaE'], 'Condition Error for '+task._id+': '+err);
+		      }
+		      if (ret) {
+			  if (transform.script) {
+			      try { eval(transform.script.script); } catch (err) {
+				  server.log(['status', 'info', 'KaaE'], 'Transform Script Error for '+task._id+': '+err);
+			      }
+			      doActions(server,actions,payload);
+			  } else if (transform.search) {
+			      client.search(transform.search.request).then(function(payload) {
+				  if (!payload) return;
+				  doActions(server,actions,payload);
+			      });
+			  } else {
+			      doActions(server,actions,payload);
+			  }
+		      }
+		    });      
+	    } else {
+		/* Normal ES Query */
+		client.search(request).then(function(payload){
+		      if (!payload || !condition || !actions) {
+			    server.log(['status', 'debug', 'KaaE', 'WATCHER TASK'], 'Watcher Malformed or Missing Key Parameters!');
+			    return;
+		      }
+
+		      server.log(['status', 'debug', 'KaaE', 'PAYLOAD DEBUG'], payload);
+
+		      /* Validate Condition */
+		      try { var ret = eval(condition); } catch (err) {
+				  server.log(['status', 'info', 'KaaE'], 'Condition Error for '+task._id+': '+err);
+		      }
+		      if (ret) {
+			  if (transform.script) {
+			      try { eval(transform.script.script); } catch (err) {
+				  server.log(['status', 'info', 'KaaE'], 'Transform Script Error for '+task._id+': '+err);
+			      }
+			      doActions(server,actions,payload);
+			  } else if (transform.search) {
+			      client.search(transform.search.request).then(function(payload) {
+				  if (!payload) return;
+				  doActions(server,actions,payload);
+			      });
+			  } else {
+			      doActions(server,actions,payload);
+			  }
+		      }
+		    });  
+	    }
         }
         function reporting(task,interval) {
           server.log(['status', 'info', 'KaaE'], 'Executing report: '+task._id+' Next round at '+later.schedule(interval).next(2).split(',')[1] );

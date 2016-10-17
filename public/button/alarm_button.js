@@ -22,7 +22,7 @@ const linkReqRespStats = function ($scope, config) {
     const req = $scope.req;
     const resp = $scope.req.resp;
     const stats = $scope.stats = [];
-    const indices = $scope.indices = [];
+    const indices = $scope.index = [];
 
     if (resp && resp.took != null) stats.push(['Query Duration', resp.took + 'ms']);
     if (req && req.ms != null) stats.push(['Request Duration', req.ms + 'ms']);
@@ -125,7 +125,7 @@ const linkReqRespStats = function ($scope, config) {
 	    "input": {
 	      "search": {
 	        "request": {
-	          "indices": [],
+	          "index": [],
 	          "body": req.fetchParams.body,
 	        }
 	      }
@@ -152,7 +152,7 @@ const linkReqRespStats = function ($scope, config) {
 	};
 
 	// Patch Indices
-	$scope.alarm._source.input.search.request.indices = $scope.indices ? $scope.indices : [];
+	$scope.alarm._source.input.search.request.index = $scope.indices ? $scope.indices : [];
 	// Patch Range
 	$scope.alarm._source.input.search.request.body.query.filtered.filter = {"range": { "@timestamp": {"from": $scope.watcher_range ? $scope.watcher_range : "now-1h" } } };
 

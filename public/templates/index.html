@@ -40,7 +40,7 @@
 	         <td>{{watcher._id}}</td>
 	         <td ng-show="watcher._source.trigger.schedule.interval" ng-hide="watcher._source.trigger.schedule.later">{{ watcher._source.trigger.schedule.interval }}</td>
 	         <td ng-show="watcher._source.trigger.schedule.later">{{ watcher._source.trigger.schedule.later }}</td>
-	         <td>{{watcher._source.input.search.request.indices.join(',')}}</td>
+	         <td>{{watcher._source.input.search.request.index.join(',')}}</td>
 	         <td>{{watcher._source.condition.script.script}}</td>
 		 <td><span ng-repeat="(key,value) in watcher._source.actions"><p>{{ key }}</p></span> </td>
 		 <td class="text-right edit-group">

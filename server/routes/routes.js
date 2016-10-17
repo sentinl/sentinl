@@ -276,8 +276,8 @@ export default function (server) {
         reply({
           ok: true,
           field: config.es.timefield,
-          min: resp.indices._all.fields[config.es.timefield].min_value,
-          max: resp.indices._all.fields[config.es.timefield].max_value
+          min: resp.index._all.fields[config.es.timefield].min_value,
+          max: resp.index._all.fields[config.es.timefield].max_value
         });
       }).catch(function (resp) {
         reply({
