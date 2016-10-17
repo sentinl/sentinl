@@ -67,7 +67,7 @@ function doalert(server,client) {
 
 
           function watching(task,interval) {
-            server.log(['status', 'info', 'KaaE'], 'Executing watch: '+task._id+' Next Round of '+task._id+' at '+later.schedule(interval).next(1) );
+            server.log(['status', 'info', 'KaaE'], 'Executing watch: '+task._id+' Next Round at '+later.schedule(interval).next(2).split(',')[1] );
 
 	    server.log(['status', 'debug', 'KaaE', 'WATCHER DEBUG'], task);
 
@@ -140,7 +140,7 @@ function doalert(server,client) {
 	    }
         }
         function reporting(task,interval) {
-          server.log(['status', 'info', 'KaaE'], 'Executing report: '+task._id+' Next round at '+later.schedule(interval).next(1) );
+          server.log(['status', 'info', 'KaaE'], 'Executing report: '+task._id+' Next round at '+later.schedule(interval).next(2).split(',')[1] );
           var actions = task._source.actions;
           var payload = { "_id": task._id };
           if (!actions) { server.log(['status', 'info', 'KaaE'], 'Condition Error for '+task._id); return; }
