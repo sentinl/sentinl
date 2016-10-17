@@ -43,6 +43,16 @@ function createKaaeIndex(server,config) {
                   settings: {
                     number_of_shards: 1,
                     number_of_replicas: 1
+                  },
+                  mappings: {
+                    watch: { 
+                      properties: {
+                        input: {
+                          type: "object",
+                          enabled: false
+                        }
+                      }
+                    }
                   }
                 }
               })
