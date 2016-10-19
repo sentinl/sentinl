@@ -50,6 +50,14 @@ function createKaaeIndex(server,config) {
                         input: {
                           type: "object",
                           enabled: false
+                        },
+                        transform: {
+                          type: "object",
+                          enabled: false
+                        },
+                        condition: {
+                          type: "object",
+                          enabled: false
                         }
                       }
                     }
@@ -98,6 +106,16 @@ function createKaaeAlarmIndex(server,config) {
                   settings: {
                     number_of_shards: 1,
                     number_of_replicas: 1
+                  },
+                  mappings: {
+                    "_default_": {
+                       "properties": {
+                          "payload": { 
+                            "type": "object",
+                            "enabled":  false 
+                          }
+                       }
+                    }
                   }
                 }
             })
