@@ -67,8 +67,13 @@ function doalert(server,client) {
 
 
           function watching(task,interval) {
-            server.log(['status', 'info', 'KaaE'], 'Executing watch: '+task._id);
 
+	    if (!task._source || task._source.disable) {
+		server.log(['status', 'debug', 'KaaE'], 'Non-Executing Disabled Watch: '+task._id);
+          	return;
+ 	    }
+
+            server.log(['status', 'info', 'KaaE'], 'Executing watch: '+task._id);
 	    server.log(['status', 'debug', 'KaaE', 'WATCHER DEBUG'], task);
 
             var watch = task._source;
@@ -81,7 +86,7 @@ function doalert(server,client) {
 		/* Kibi Join Query */ 
 		client.coordinate_search(request).then(function(payload){
 		      if (!payload || !condition || !actions) {
-			    server.log(['status', 'debug', 'KaaE', 'WATCHER TASK'], 'Watcher Malformed or Missing Key Parameters!');
+			    server.log(['status', 'debug', 'KaaE', 'WATCHER TASK'], 'Join Watcher Malformed or Missing Key Parameters!');
 			    return;
 		      }
 
@@ -140,6 +145,10 @@ function doalert(server,client) {
 	    }
         }
         function reporting(task,interval) {
+	  if (!task._source || task._source.disable) {
+		server.log(['status', 'debug', 'KaaE'], 'Non-Executing Disabled report: '+task._id);
+          	return;
+ 	  }
           server.log(['status', 'info', 'KaaE'], 'Executing report: '+task._id );
           var actions = task._source.actions;
           var payload = { "_id": task._id };
