@@ -1,13 +1,13 @@
 <img src="http://i.imgur.com/o25tuAG.png" width="300"/>
 
-# Kibana Alert & Report App for Elasticsearch <img src="https://camo.githubusercontent.com/15f26c4f603cac9bf415c841a8a60077f6db5102/687474703a2f2f696d6775722e636f6d2f654c446f4f4b592e706e67">
+# Kibana 5 Alert & Report App for Elasticsearch <img src="https://camo.githubusercontent.com/15f26c4f603cac9bf415c841a8a60077f6db5102/687474703a2f2f696d6775722e636f6d2f654c446f4f4b592e706e67">
 
 > Data Series are awesome, but who's Watching them 24/7/365? Introducing KaaE, the Kibana Watcher
 
 ---
-
-<img src="https://img.shields.io/badge/kibana-4.5+-yellow.svg"/>
-<img src="https://img.shields.io/badge/elasticsearch-*-yellow.svg"/>
+<img src="https://img.shields.io/badge/unstable-dev-red.svg"/>
+<img src="https://img.shields.io/badge/kibana-5-red.svg"/>
+<img src="https://img.shields.io/badge/elasticsearch-5-red.svg"/>
 
 
 ### Kibana App: Kaae
@@ -16,9 +16,7 @@
 
 **KaaE** is also designed to simplify the process of creating and managing alerts and reports in Kibana via its integrated  App and Spy integration, while retaining baseline *logic and configuration style compatibility* with the Elastic counterparts.
 
-<!--<img src="http://i.imgur.com/aDHvUxf.png" width="400" /> -->
-
-<img src="http://i.imgur.com/sheqvAc.gif" />
+<!-- NEW IMAGE PLACEHOLDER -->
 
 ---
 
