@@ -1,18 +1,19 @@
 {
+  "name": "kaae",
+  "version": "0.5.0",
+  "kibana.version": "5.0.0-rc1",
+  "description": "Kibana Alert & Report App for Elasticsearch",
   "author": "Lorenzo Mangani <lorenzo.mangani@gmail.com>",
   "repository": {
     "type": "git",
     "url": "http://github.com/elasticfence/kaae.git"
   },
-  "name": "kaae",
-  "version": "0.0.9",
-  "description": "Kibana Alert & Report App for Elasticsearch",
   "main": "index.js",
   "scripts": {
-    "lint": "eslint",
-    "kaae-install": "/opt/kibana/bin/kibana plugin --install kaae -u file://`pwd`/kaae-latest.tar.gz",
-    "kaae-remove": "/opt/kibana/bin/kibana plugin --remove kaae",
-    "package": "tar cfz ./kaae-latest.tar.gz --exclude .git --exclude .gitignore --exclude kaae-latest.tar.gz ./* && ls -alF kaae-latest*"
+   "start": "gulp dev",
+    "build": "gulp build",
+    "package": "gulp package",
+    "test": "gulp test"
   },
   "dependencies": {
     "later": "*",
