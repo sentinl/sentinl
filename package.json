@@ -19,7 +19,8 @@
     "mustache": "*",
     "emailjs": "*",
     "node-slack": "*",
-    "node-horseman": "*"
+    "node-horseman": "*",
+    "sum-time": "*"
   },
   "devDependencies": {
     "babel-eslint": "4.1.8",

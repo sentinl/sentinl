@@ -32,7 +32,7 @@ export default function (server,actions,payload) {
 			} catch(err) {
 				server.log(['status', 'info', 'KaaE'],'Horseman and PhantomJS required! '+err);
 				server.log(['status', 'info', 'KaaE'],'Install Horseman: "npm install -g node-horseman"');
-			};
+			}
 		} else {
 			server.log(['status', 'info', 'KaaE'],'Action Report requires Email Settings! Reports Disabled.');
 		}
@@ -50,12 +50,32 @@ export default function (server,actions,payload) {
 		server.kaaeStore.push({id:new Date(), action: type, message: message});
 		// Rotate local stack
 		if (server.kaaeStore.length > hlimit) { server.kaaeStore.shift(); }
-	}
+	};
+
+	/* Debounce Function, returns true if throttled */
+	var getDuration = require('sum-time');
+	var debounce = function(id,period) {
+		var duration = getDuration(period);
+		if (duration) {
+			if (server.kaaeStore[id] === undefined) {
+		            server.kaaeStore[id] = new Date();
+			    return false;
+		        } else if ((server.kaaeStore[id] - new Date()) > duration) {
+		            server.kaaeStore[id] = new Date();
+			    return false;
+			} else {
+			    // reject action
+			    return true;
+			}
+		} else {
+		   return false;
+		}
+	};
 
 	/* ES Indexing Functions */
 	var esHistory = function(type,message,loglevel,payload) {
 		var client = server.plugins.elasticsearch.client;
-		if (!loglevel) { var loglevel = "INFO"; };
+		if (!loglevel) { var loglevel = "INFO" };
 		if (!payload) { var payload = {} };
 	        server.log(['status', 'info', 'KaaE'],'Storing Alarm to ES with type:'+type);
 		var indexDate = '-' + new Date().toISOString().substr(0, 10).replace(/-/g, '.');
@@ -85,12 +105,26 @@ export default function (server,actions,payload) {
 	        server.log(['status', 'info', 'KaaE'],'Processing action: '+key);
 
 						/* ***************************************************************************** */
-		      	/*
+		      				/*
+		      				/* Throttle Action based on 'throttle_period' optional parameter
+		      				/* "throttle_period": "5m"
+		      				/*
+						/* ***************************************************************************** */
+						if (_.has(action, 'throttle_period')) {
+							if (debounce(key,action.throttle_period)) {
+								server.log(['status', 'info', 'KaaE'],'Action Throtthled: '+ key);
+								return;
+							}
+						}
+
+
+						/* ***************************************************************************** */
+		      				/*
 						*   "console" : {
 						*      "priority" : "DEBUG",
 						*      "message" : "Average {{payload.aggregations.avg.value}}"
 						*    }
-		      	*/
+		      				*/
 
            					if(_.has(action, 'console')) {
 							var priority = action.console.priority ? action.console.priority : "INFO";
@@ -101,7 +135,7 @@ export default function (server,actions,payload) {
             					}
 
 						/* ***************************************************************************** */
-		      	/*
+		      				/*
 						*   "email" : {
 						*      "to" : "root@localhost",
 						*      "from" : "kaae@localhost",
@@ -110,7 +144,7 @@ export default function (server,actions,payload) {
 						*      "body" : "Series Alarm {{ payload._id}}: {{payload.hits.total}}",
 						*      "stateless" : false
 						*	    }
-		      	*/
+		      				*/
 
             					if(_.has(action, 'email')) {
 										var formatter_s = action.email.subject ? action.email.subject : "KAAE: "+key;
@@ -138,7 +172,7 @@ export default function (server,actions,payload) {
 
 
 						/* ***************************************************************************** */
-		      	/*
+		      				/*
 						*   "email_html" : {
 						*      "to" : "root@localhost",
 						*      "from" : "kaae@localhost",
@@ -175,30 +209,30 @@ export default function (server,actions,payload) {
 												// Log Event
 												esHistory(key,body,priority,payload);
 										}
-        						}
+        					}
 
-							/* ***************************************************************************** */
-							/*
-							*   "report" : {
-							*      "to" : "root@localhost",
-							*      "from" : "kaae@localhost",
-							*      "subject" : "Report Title",
-							*      "priority" : "high",
-							*      "body" : "Series Report {{ payload._id}}: {{payload.hits.total}}",
-							*      "snapshot" : {
-							*      		"res" : "1280,900",
-							*         "url" : "http://127.0.0.1/app/kibana#/dashboard/Alerts",
-							*         "path" : "/tmp/",
-							*         "params" : {
-							*      				"username" : "username",
-							*      				"password" : "password",
-							*      				"delay" : 15,
-							*             "crop" : false
-							*         }
-						  *       },
-							*      "stateless" : false
-							*    }
-							*/
+						/* ***************************************************************************** */
+						/*
+						*   "report" : {
+						*      "to" : "root@localhost",
+						*      "from" : "kaae@localhost",
+						*      "subject" : "Report Title",
+						*      "priority" : "high",
+						*      "body" : "Series Report {{ payload._id}}: {{payload.hits.total}}",
+						*      "snapshot" : {
+						*      		"res" : "1280,900",
+						*         "url" : "http://127.0.0.1/app/kibana#/dashboard/Alerts",
+						*         "path" : "/tmp/",
+						*         "params" : {
+						*      				"username" : "username",
+						*      				"password" : "password",
+						*      				"delay" : 15,
+						*             "crop" : false
+						*         }
+						*       },
+						*      "stateless" : false
+						*    }
+						*/
 
 							if(_.has(action, 'report')) {
 										var formatter_s = action.report.subject ? action.report.subject : "KAAE: "+key;
@@ -216,34 +250,34 @@ export default function (server,actions,payload) {
 												try {
 													horseman
 													.viewport(1280,900)
-	    										.open(action.report.snapshot.url)
+	    												.open(action.report.snapshot.url)
 													.wait(action.report.snapshot.params.delay)
 													.screenshot(action.report.snapshot.path + filename)
 													//.pdf(action.report.snapshot.path + filename)
 													.then(function(){
-											        server.log(['status', 'info', 'Kaae', 'report'], 'Snapshot ready for url:'+action.report.snapshot.url);
+													        server.log(['status', 'info', 'Kaae', 'report'], 'Snapshot ready for url:'+action.report.snapshot.url);
 															email_server.send({
-																						   text:    body,
-																						   from:    action.report.from,
-																						   to:      action.report.to,
-																						   subject: subject,
-																							 attachment:
-																						   [
-																						      // { path: action.report.snapshot.path + filename, type: "application/pdf", name: filename },
-																						    { data: "<html><img src='cid:my-report' width='100%'></html>"},
-																						    { path: action.report.snapshot.path + filename, type: "image/png", name: filename+".png", headers:{"Content-ID":"<my-report>"} }
-																						   ]
-																						}, function(err, message) {
-																										server.log(['status', 'info', 'Kaae', 'report'], err || message);
-																										fs.unlinkSync(action.report.snapshot.path+filename);
-																										payload.message = err || message;
-																										if (!action.report.stateless) {
-																												// Log Event
-																												esHistory(key,body,priority,payload);
-																										}
-																						});
-										    	}).close();
-												} catch (err) {
+																 text:    body,
+																 from:    action.report.from,
+																   to:      action.report.to,
+																   subject: subject,
+																	 attachment:
+																	   [
+																	      // { path: action.report.snapshot.path + filename, type: "application/pdf", name: filename },
+																	    { data: "<html><img src='cid:my-report' width='100%'></html>"},
+																	    { path: action.report.snapshot.path + filename, type: "image/png", name: filename+".png", headers:{"Content-ID":"<my-report>"} }
+																	   ]
+																	}, function(err, message) {
+																		server.log(['status', 'info', 'Kaae', 'report'], err || message);
+																		fs.unlinkSync(action.report.snapshot.path+filename);
+																		payload.message = err || message;
+																		if (!action.report.stateless) {
+																			// Log Event
+																			esHistory(key,body,priority,payload);
+																		}
+																	});
+														    	}).close();
+													} catch (err) {
 															server.log(['status', 'info', 'Kaae', 'report'], 'ERROR: ' + err );
 															payload.message = err;
 															if (!action.report.stateless) {
@@ -255,20 +289,20 @@ export default function (server,actions,payload) {
 
 								}
 
-								/* ***************************************************************************** */
-		      			/*
-								*   "slack" : {
-								*      "channel": '#<channel>',
-								*      "message" : "Series Alarm {{ payload._id}}: {{payload.hits.total}}",
-								*      "stateless" : false
-								*    }
-		      			*/
+							/* ***************************************************************************** */
+		      					/*
+							*   "slack" : {
+							*      "channel": '#<channel>',
+							*      "message" : "Series Alarm {{ payload._id}}: {{payload.hits.total}}",
+							*      "stateless" : false
+							*    }
+		      					*/
 
-                if(_.has(action, 'slack')) {
-										var formatter = action.slack.message ? action.slack.message : "Series Alarm {{ payload._id}}: {{payload.hits.total}}";
-                    var message = mustache.render(formatter, {"payload":payload});
-										var priority = action.slack.priority ? action.slack.priority : "INFO";
-	        					server.log(['status', 'info', 'KaaE', 'Slack'],'Webhook to #'+action.slack.channel+' msg: '+message);
+					                if(_.has(action, 'slack')) {
+								var formatter = action.slack.message ? action.slack.message : "Series Alarm {{ payload._id}}: {{payload.hits.total}}";
+                					    	var message = mustache.render(formatter, {"payload":payload});
+								var priority = action.slack.priority ? action.slack.priority : "INFO";
+	        						server.log(['status', 'info', 'KaaE', 'Slack'],'Webhook to #'+action.slack.channel+' msg: '+message);
 
 										if (!slack || !config.settings.slack.active) {
 										        server.log(['status', 'info', 'KaaE','slack'],'Delivery Disabled!');
@@ -290,23 +324,22 @@ export default function (server,actions,payload) {
 											esHistory(key,message,priority,payload);
 										}
 
-                }
+                					}
 
-								/* ***************************************************************************** */
- 		      			/*
-								*   "webhook" : {
-								*      "method" : "POST",
-								*      "host" : "remote.server",
-								*      "port" : 9200,
-								*      "path": ":/{{payload.watcher_id}",
-								*      "body" : "{{payload.watcher_id}}:{{payload.hits.total}}"
-								*    }
-		      			*/
+							/* ***************************************************************************** */
+ 		      					/*
+							*   "webhook" : {
+							*      "method" : "POST",
+							*      "host" : "remote.server",
+							*      "port" : 9200,
+							*      "path": ":/{{payload.watcher_id}",
+							*      "body" : "{{payload.watcher_id}}:{{payload.hits.total}}"
+							*    }
+		      					*/
 
-		      			var querystring = require('querystring');
-		      			var http = require('http');
-
-                if(_.has(action, 'webhook')) {
+				      			var querystring = require('querystring');
+				      			var http = require('http');
+					                if(_.has(action, 'webhook')) {
 
 									var options = {
 										hostname: action.webhook.host ? action.webhook.host : 'locahost',
@@ -333,28 +366,24 @@ export default function (server,actions,payload) {
 
 									req.end();
 
-                }
+                					}
 
-								/* ***************************************************************************** */
-		      			/*
-								*   "elastic" : {
-								*      "priority" : "DEBUG",
-								*      "message" : "Avg {{payload.aggregations.avg.value}} measurements in 5 minutes"
-								*    }
-		      			*/
+							/* ***************************************************************************** */
+		      					/*
+							*   "elastic" : {
+							*      "priority" : "DEBUG",
+							*      "message" : "Avg {{payload.aggregations.avg.value}} measurements in 5 minutes"
+							*    }
+		      					*/
 
-                if(_.has(action, 'elastic')) {
-										var formater = action.local.message ? action.local.message : "{{ payload }}";
-                    var message = mustache.render(formatter, {"payload":payload});
-										var priority = action.local.priority ? action.local.priority : "INFO";
-		        				server.log(['status', 'info', 'KaaE', 'local'],'Message: '+message);
-										// Log Event
-										esHistory(key,message,priority,payload);
-                }
-
-		/* ***************************************************************************** */
-
-
+					                if(_.has(action, 'elastic')) {
+								var formater = action.local.message ? action.local.message : "{{ payload }}";
+                    						var message = mustache.render(formatter, {"payload":payload});
+								var priority = action.local.priority ? action.local.priority : "INFO";
+		        						server.log(['status', 'info', 'KaaE', 'local'],'Message: '+message);
+									// Log Event
+									esHistory(key,message,priority,payload);
+                					}
 
 
         /* ***************************************************************************** */
