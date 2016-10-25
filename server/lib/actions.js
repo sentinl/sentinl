@@ -57,11 +57,12 @@ export default function (server,actions,payload) {
 	var debounce = function(id,period) {
 		var duration = getDuration(period);
 		if (duration) {
+			var justNow = new Date().getTime();
 			if (server.kaaeStore[id] === undefined) {
-		            server.kaaeStore[id] = new Date();
+		            server.kaaeStore[id] = justNow;
 			    return false;
-		        } else if ((server.kaaeStore[id] - new Date()) > duration) {
-		            server.kaaeStore[id] = new Date();
+		        } else if ((justNow - server.kaaeStore[id]) > duration) {
+		            server.kaaeStore[id] = justNow;
 			    return false;
 			} else {
 			    // reject action
