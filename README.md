@@ -6,8 +6,8 @@
 
 ---
 
-<img src="https://img.shields.io/badge/kibana-4.5+-yellow.svg"/>
-<img src="https://img.shields.io/badge/elasticsearch-*-yellow.svg"/>
+<img src="https://img.shields.io/badge/kibana-4.5+-green.svg"/>
+<img src="https://img.shields.io/badge/elasticsearch-2.*-green.svg"/>
 
 
 ### Kibana App: Kaae
