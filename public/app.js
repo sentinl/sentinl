@@ -1,3 +1,22 @@
+/*
+ * Copyright 2016, Lorenzo Mangani (lorenzo.mangani@gmail.com)
+ * Copyright 2015, Rao Chenlin (rao.chenlin@gmail.com)
+ *
+ * This file is part of KaaE (http://github.com/elasticfence/kaae)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import _ from 'lodash';
 import moment from 'moment';
 import chrome from 'ui/chrome';
@@ -6,7 +25,6 @@ import uiRoutes from 'ui/routes';
 import $ from 'jquery';
 
 /* Elasticsearch */
-
 import elasticsearch from 'elasticsearch-browser';
 
 /* Ace editor */
@@ -143,7 +161,6 @@ uiModules
 .controller('kaaeHelloWorld', function ($rootScope, $scope, $route, $interval, $timeout, timefilter, Private, Notifier, $window, kbnUrl, $http) {
   $scope.title = 'KaaE: Alarms';
   $scope.description = 'Kibana Alert App for Elasticsearch';
-  // $scope.store = window.sessionStorage;
 
   $scope.notify = new Notifier();
 
@@ -166,7 +183,6 @@ uiModules
   /* Update Time Filter */
   var updateFilter = function(){
 	  return $http.get('../api/kaae/set/interval/'+JSON.stringify($scope.timeInterval)).then(function (resp) {
-	        // console.log('NEW TIMEFILTER:',$scope.timeInterval);
           });
   }
 
@@ -175,8 +191,6 @@ uiModules
 
   $scope.timeInterval = timefilter.time;
   updateFilter();
-
-  // checkAlarm();
   getAlarmsFromEs();
 
   /* Listen for refreshInterval changes */
@@ -184,7 +198,6 @@ uiModules
    $rootScope.$watchCollection('timefilter.time', function (newvar, oldvar) {
       if (newvar == oldvar) { return; }
       let timeInterval = _.get($rootScope, 'timefilter.time');
-      // console.log('Time Range Change!',timefilter.time);
       if (timeInterval) {
 	 	$scope.timeInterval = timeInterval;
 	  	updateFilter();
@@ -205,7 +218,6 @@ uiModules
 
       // Check if Paused
       if (refreshPause) {
-		// console.log('REFRESH PAUSED');
 	  	if ($scope.refreshalarms) $timeout.cancel($scope.refreshalarms);
 		return;
       }
@@ -223,13 +235,11 @@ uiModules
 		          }, refreshValue);
   			  $scope.$watch('$destroy', $scope.refreshalarms);
 	      } else {
-		  // console.log('PAUSE REFRESH');
 	  	  $scope.currentRefresh = 0;
 		  $timeout.cancel($scope.refreshalarms);
 	      }
 
       } else {
-		// console.log('NULL CHANGE!');
   	        $timeout.cancel($scope.refreshalarms);
       }
 
@@ -242,7 +252,6 @@ uiModules
 			  + '/'+$scope.elasticAlarms[$index]._id ).then(function (resp) {
         	console.log('API ALARM DELETE:',resp.data);
 			 var reload = $timeout(function () {
-		              // $route.reload();
 		  	      $scope.elasticAlarms.splice($index,1);
 		 	      $scope.notify.warning('KAAE Alarm log successfully deleted!');
 		 	 }, 500);
@@ -272,7 +281,6 @@ uiModules
 .controller('kaaeWatchers', function ($rootScope, $scope, $route, $interval, $timeout, timefilter, Private, Notifier, $window, kbnUrl, $http) {
   $scope.title = 'KaaE: Watchers';
   $scope.description = 'Kibana Alert App for Elasticsearch';
-  // $scope.store = window.sessionStorage;
 
   $scope.notify = new Notifier();
 
@@ -290,14 +298,6 @@ uiModules
   ];
 
   timefilter.enabled = false;
-  /*
-	time: {
-	        gt: timefilter.getBounds().min.valueOf(),
-	        lte: timefilter.getBounds().max.valueOf()
-	      }
-  */
-
-  // kbnUrl.change('/', {});
 
   const tabifyAggResponse = Private(AggResponseTabifyTabifyProvider);
   if ($route.current.locals.currentWatchers.data.hits.hits) {
@@ -318,10 +318,8 @@ uiModules
   $scope.editor;
   $scope.editor_status = { readonly: false, undo: false, new: false };
   $scope.setAce = function($index,edit) {
-	  // var content = $scope.currentAlarms[$index];
 	  $scope.editor = ace.edit("editor-"+$index);
 	  var _session = $scope.editor.getSession();
-    	  // var _renderer = $scope.editor.renderer;
 	  $scope.editor.setReadOnly(edit);
 	  $scope.editor_status.readonly = edit;
     	  _session.setUndoManager(new ace.UndoManager());
@@ -335,7 +333,6 @@ uiModules
   $scope.watcherDelete = function($index){
      if (confirm('Are you sure?')) {
 	 return $http.get('../api/kaae/delete/watcher/'+$scope.watchers[$index]._id).then(function (resp) {
-        	// console.log('API DELETE:',resp.data);
 		if (resp.statusCode < 200 || resp.statusCode > 299) {
 			$scope.notify.error('Error Deleting Watcher! Check your syntax and try again!');
     		}
@@ -350,18 +347,14 @@ uiModules
   }
 
   $scope.watcherGet = function($index){
-	 // console.log('retreiving watcher ', $scope.watchers[$index] );
 	 return $http.get('../api/kaae/get/watcher/'+$scope.watchers[$index]._id).then(function (resp) {
-        	// console.log('API GET:',resp.data);
          });
   }
 
   $scope.watcherSave = function($index){
-	 // console.log('saving watcher ', $scope.watchers[$index] );
     	 var watcher = $scope.editor ? JSON.parse($scope.editor.getValue()) : $scope.watchers[$index];
 	 console.log('saving object:',watcher);
 	 return $http.get('../api/kaae/save/watcher/'+encodeURIComponent(JSON.stringify(watcher))).then(function (resp) {
-        	// console.log('API STORE:',resp);
 		if (resp.statusCode < 200 || resp.statusCode > 299) {
 			$scope.notify.error('Error Saving Watcher! Check your syntax and try again!');
     		}
@@ -488,7 +481,6 @@ uiModules
 
   /* New Entry from Saved Kibana Query */
   if ($window.localStorage.getItem('kaae_saved_query')) {
-	// $scope.watcherSaved = JSON.parse($window.localStorage.getItem('kaae_saved_query'));
 	$scope.watcherNew(JSON.parse($window.localStorage.getItem('kaae_saved_query')));
 	$window.localStorage.removeItem('kaae_saved_query');
   }
