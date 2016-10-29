@@ -1,11 +1,11 @@
-<img src="http://i.imgur.com/o25tuAG.png" width="300"/>
+<img src="http://i.imgur.com/o25tuAG.png" width="200"/>
 
 # Kibana Alert & Report App for Elasticsearch <img src="https://camo.githubusercontent.com/15f26c4f603cac9bf415c841a8a60077f6db5102/687474703a2f2f696d6775722e636f6d2f654c446f4f4b592e706e67">
 
 > Data Series are awesome, but who's Watching them 24/7/365? Introducing KaaE, the Kibana Watcher
 
 ---
-
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/77b040968c354d6597ff60a615195a1a)](https://www.codacy.com/app/lorenzo-mangani/kaae?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=elasticfence/kaae&amp;utm_campaign=Badge_Grade)
 <img src="https://img.shields.io/badge/kibana-4.5+-green.svg"/>
 <img src="https://img.shields.io/badge/elasticsearch-2.*-green.svg"/>
 
