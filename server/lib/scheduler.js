@@ -86,81 +86,81 @@ function doalert(server,client) {
 
           function watching(task,interval) {
 
-	    if (!task._source || task._source.disable) {
-		server.log(['status', 'debug', 'KaaE'], 'Non-Executing Disabled Watch: '+task._id);
-          	return;
- 	    }
+			if (!task._source || task._source.disable) {
+			server.log(['status', 'debug', 'KaaE'], 'Non-Executing Disabled Watch: '+task._id);
+				return;
+			}
 
-            server.log(['status', 'info', 'KaaE'], 'Executing watch: '+task._id);
-	    server.log(['status', 'debug', 'KaaE', 'WATCHER DEBUG'], task);
+				server.log(['status', 'info', 'KaaE'], 'Executing watch: '+task._id);
+			server.log(['status', 'debug', 'KaaE', 'WATCHER DEBUG'], task);
 
-            var watch = task._source;
-            var request = watch.input.search.request;
-            var condition = watch.condition.script.script;
-            var transform = watch.transform ? watch.transform : {};
-            var actions = watch.actions;
+				var watch = task._source;
+				var request = watch.input.search.request;
+				var condition = watch.condition.script.script;
+				var transform = watch.transform ? watch.transform : {};
+				var actions = watch.actions;
 
-	    if (JSON.stringify(request).indexOf('filterjoin') !== -1) {
-		/* Kibi Join Query */ 
-		client.coordinate_search(request).then(function(payload){
-		      if (!payload || !condition || !actions) {
-			    server.log(['status', 'debug', 'KaaE', 'WATCHER TASK'], 'Join Watcher Malformed or Missing Key Parameters!');
-			    return;
-		      }
+			if (JSON.stringify(request).indexOf('filterjoin') !== -1) {
+			/* Kibi Join Query */
+			client.coordinate_search(request).then(function(payload){
+				  if (!payload || !condition || !actions) {
+					server.log(['status', 'debug', 'KaaE', 'WATCHER TASK'], 'Join Watcher Malformed or Missing Key Parameters!');
+					return;
+				  }
 
-		      server.log(['status', 'debug', 'KaaE', 'PAYLOAD DEBUG'], payload);
+				  server.log(['status', 'debug', 'KaaE', 'PAYLOAD DEBUG'], payload);
 
-		      /* Validate Condition */
-		      try { var ret = eval(condition); } catch (err) {
-				  server.log(['status', 'info', 'KaaE'], 'Condition Error for '+task._id+': '+err);
-		      }
-		      if (ret) {
-			  if (transform.script) {
-			      try { eval(transform.script.script); } catch (err) {
-				  server.log(['status', 'info', 'KaaE'], 'Transform Script Error for '+task._id+': '+err);
-			      }
-			      doActions(server,actions,payload);
-			  } else if (transform.search) {
-			      client.search(transform.search.request).then(function(payload) {
-				  if (!payload) return;
-				  doActions(server,actions,payload);
-			      });
-			  } else {
-			      doActions(server,actions,payload);
-			  }
-		      }
-		    });      
-	    } else {
-		/* Normal ES Query */
-		client.search(request).then(function(payload){
-		      if (!payload || !condition || !actions) {
-			    server.log(['status', 'debug', 'KaaE', 'WATCHER TASK'], 'Watcher Malformed or Missing Key Parameters!');
-			    return;
-		      }
+				  /* Validate Condition */
+				  try { var ret = eval(condition); } catch (err) {
+					  server.log(['status', 'info', 'KaaE'], 'Condition Error for '+task._id+': '+err);
+				  }
+				  if (ret) {
+				  if (transform.script) {
+					  try { eval(transform.script.script); } catch (err) {
+					  server.log(['status', 'info', 'KaaE'], 'Transform Script Error for '+task._id+': '+err);
+					  }
+					  doActions(server,actions,payload);
+				  } else if (transform.search) {
+					  client.search(transform.search.request).then(function(payload) {
+					  if (!payload) return;
+					  doActions(server,actions,payload);
+					  });
+				  } else {
+					  doActions(server,actions,payload);
+				  }
+				  }
+				});
+			} else {
+			/* Normal ES Query */
+			client.search(request).then(function(payload){
+				  if (!payload || !condition || !actions) {
+					server.log(['status', 'debug', 'KaaE', 'WATCHER TASK'], 'Watcher Malformed or Missing Key Parameters!');
+					return;
+				  }
 
-		      server.log(['status', 'debug', 'KaaE', 'PAYLOAD DEBUG'], payload);
+				  server.log(['status', 'debug', 'KaaE', 'PAYLOAD DEBUG'], payload);
 
-		      /* Validate Condition */
-		      try { var ret = eval(condition); } catch (err) {
-				  server.log(['status', 'info', 'KaaE'], 'Condition Error for '+task._id+': '+err);
-		      }
-		      if (ret) {
-			  if (transform.script) {
-			      try { eval(transform.script.script); } catch (err) {
-				  server.log(['status', 'info', 'KaaE'], 'Transform Script Error for '+task._id+': '+err);
-			      }
-			      doActions(server,actions,payload);
-			  } else if (transform.search) {
-			      client.search(transform.search.request).then(function(payload) {
-				  if (!payload) return;
-				  doActions(server,actions,payload);
-			      });
-			  } else {
-			      doActions(server,actions,payload);
-			  }
-		      }
-		    });  
-	    }
+				  /* Validate Condition */
+				  try { var ret = eval(condition); } catch (err) {
+					  server.log(['status', 'info', 'KaaE'], 'Condition Error for '+task._id+': '+err);
+				  }
+				  if (ret) {
+				  if (transform.script) {
+					  try { eval(transform.script.script); } catch (err) {
+					  server.log(['status', 'info', 'KaaE'], 'Transform Script Error for '+task._id+': '+err);
+					  }
+					  doActions(server,actions,payload);
+				  } else if (transform.search) {
+					  client.search(transform.search.request).then(function(payload) {
+					  if (!payload) return;
+					  doActions(server,actions,payload);
+					  });
+				  } else {
+					  doActions(server,actions,payload);
+				  }
+				  }
+				});
+			}
         }
         function reporting(task,interval) {
 	  if (!task._source || task._source.disable) {
