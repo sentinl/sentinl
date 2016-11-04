@@ -41,7 +41,6 @@ module.exports = function (server, options) {
 
       /* Bird Watching and Duck Hunting */
       var client = server.plugins.elasticsearch.client;
-      // var sched = later.parse.text('every 25 seconds');
       var sched = later.parse.recur().on(25,55).second();;
       var t = later.setInterval(function(){ scheduler.doalert(server,client) }, sched);
       /* run NOW, plus later */
