@@ -210,19 +210,20 @@ uiModules
 
     });
 
-  $scope.deleteAlarm = function($index){
-     if (confirm('Delete is Forever!\n Are you sure?')) {
-	 return $http.get('../api/kaae/delete/alarm/'+$scope.elasticAlarms[$index]._index
-			  + '/'+$scope.elasticAlarms[$index]._type
-			  + '/'+$scope.elasticAlarms[$index]._id ).then(function (resp) {
-        	console.log('API ALARM DELETE:',resp.data);
-			 var reload = $timeout(function () {
-		  	      $scope.elasticAlarms.splice($index,1);
-		 	      $scope.notify.warning('KAAE Alarm log successfully deleted!');
-		 	 }, 500);
-         });
-      }
-  }
+  $scope.deleteAlarm = function ($index) {
+    if (confirm('Delete is Forever!\n Are you sure?')) {
+      return $http.get('../api/kaae/delete/alarm/' + $scope.elasticAlarms[$index]._index
+        + '/' + $scope.elasticAlarms[$index]._type
+        + '/' + $scope.elasticAlarms[$index]._id)
+      .then(
+        () => $timeout(function () {
+          $scope.elasticAlarms.splice($index, 1);
+          $scope.notify.warning('KAAE Alarm log successfully deleted!');
+        }),
+        $scope.notify.error
+      );
+    }
+  };
 
   $scope.deleteAlarmLocal = function($index){
 	 $scope.notify.warning('KAAE function not yet implemented!');
@@ -310,26 +311,20 @@ uiModules
 	  else { $scope.editor.getSession().setMode("ace/mode/text"); }
   }
 
-  $scope.watcherDelete = function($index){
-     if (confirm('Are you sure?')) {
-	 return $http.get('../api/kaae/delete/watcher/'+$scope.watchers[$index]._id).then(function (resp) {
-		if (resp.statusCode < 200 || resp.statusCode > 299) {
-			$scope.notify.error('Error Deleting Watcher! Check your syntax and try again!');
-    		}
-    		else {
-			 var reload = $timeout(function () {
-		              $route.reload();
-		 	      $scope.notify.warning('KAAE Watcher successfully deleted!');
-		 	 }, 1000);
-		}
-         });
-      }
-  }
-
-  $scope.watcherGet = function($index){
-	 return $http.get('../api/kaae/get/watcher/'+$scope.watchers[$index]._id).then(function (resp) {
-         });
-  }
+  $scope.watcherDelete = function ($index) {
+    if (confirm('Are you sure?')) {
+      return $http.get('../api/kaae/delete/watcher/' + $scope.watchers[$index]._id)
+      .then(
+        (resp) => {
+          $timeout(function () {
+            $route.reload();
+            $scope.notify.warning('KAAE Watcher successfully deleted!');
+          });
+        },
+        $scope.notify.error
+      );
+    }
+  };
 
   $scope.watcherSave = function($index){
     var watcher = $scope.editor ? JSON.parse($scope.editor.getValue()) : $scope.watchers[$index];

@@ -86,7 +86,7 @@ export default function (server) {
         allowNoIndices: false
       })
       .then((res) => reply(res))
-      .catch((err) => reply(handleESError(err)))
+      .catch((err) => reply(handleESError(err)));
     }
   });
 
@@ -108,17 +108,8 @@ export default function (server) {
       };
 
       callWithRequest(req, 'delete', body)
-      .then((resp) => {
-        reply({
-          ok: true,
-          resp: resp
-        });
-      }).catch((resp) => {
-        reply({
-          ok: false,
-          resp: resp
-        });
-      });
+      .then((resp) => reply({ok: true, resp: resp}))
+      .catch((err) => reply(handleESError(err)));
     }
   });
 
@@ -180,9 +171,9 @@ export default function (server) {
         q: request.params.id
       })
       .then((resp) => reply(resp))
-      .catch((err, resp) => {
+      .catch((err) => {
         server.log(['debug', 'Kaae'], err);
-        reply(resp);
+        reply(err);
       });
     }
   });
@@ -204,14 +195,10 @@ export default function (server) {
       };
 
       callWithRequest(request, 'index', body)
-      .then(function (resp) {
-        reply({ok: true, resp: resp});
-        // if (debug) console.log(resp);
-      })
+      .then((resp) => reply({ok: true, resp: resp}))
       .catch((err) => reply(handleESError(err)));
     }
   });
-
 
   server.route({
     method: 'GET',
@@ -225,21 +212,11 @@ export default function (server) {
         id: req.params.id
       };
 
-      callWithRequest(req, 'delete', body).then(function (resp) {
-        reply({
-          ok: true,
-          resp: resp
-        });
-      }).catch(function (resp) {
-        reply({
-          ok: false,
-          resp: resp
-        });
-      });
-
+      callWithRequest(req, 'delete', body)
+      .then((resp) => reply({ok: true, resp: resp}))
+      .catch((err) => reply(handleESError(err)));
    }
   });
-
 
   server.route({
     method: 'GET',
@@ -258,13 +235,8 @@ export default function (server) {
           min: resp.index._all.fields[config.es.timefield].min_value,
           max: resp.index._all.fields[config.es.timefield].max_value
         });
-      }).catch(function (resp) {
-        reply({
-          ok: false,
-          resp: resp
-        });
-      });
-
+      })
+      .catch((err) => reply(handleESError(err)));
     }
   });
 
