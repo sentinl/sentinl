@@ -103,15 +103,8 @@ uiRoutes
   template,
   resolve: {
     currentTime($http) {
-      return $http.get('../api/kaae/example').then(function (resp) {
-        return resp.data.time;
-      });
-    },
-    currentWatchers($http) {
-      return $http.get('../api/kaae/list').then(function (resp) {
-	// console.log('DEBUG LIST:',resp);
-        return resp;
-      });
+      return $http.get('../api/kaae/example')
+      .then((resp) => resp.data.time);
     }
   }
 });
@@ -123,24 +116,6 @@ uiRoutes
     currentTime($http) {
       return $http.get('../api/kaae/example').then(function (resp) {
         return resp.data.time;
-      });
-    },
-    currentWatchers($http) {
-      return $http.get('../api/kaae/list').then(function (resp) {
-	// console.log('DEBUG LIST:',resp);
-        return resp;
-      });
-    },
-    currentAlarms($http) {
-      return $http.get('../api/kaae/alarms').then(function (resp) {
-	// console.log('DEBUG ALARMS:',resp);
-        return resp;
-      });
-    },
-    elasticAlarms($http) {
-      return $http.get('../api/kaae/list/alarms').then(function (resp) {
-	// console.log('DEBUG ALARMS:',resp);
-        return resp;
       });
     }
   }
@@ -166,32 +141,22 @@ uiModules
 
   timefilter.enabled = true;
 
-  /* Alarm Functions */
-
-  var checkAlarm = function() {
-	  if ($route.current.locals.currentAlarms.data) {
-		   $scope.currentAlarms = $route.current.locals.currentAlarms.data.data;
-	  } else { $scope.currentAlarms = [] }
-  }
-
-  var getAlarmsFromEs = function() {
-	  if ($route.current.locals.elasticAlarms.data.hits) {
-		   $scope.elasticAlarms = $route.current.locals.elasticAlarms.data.hits.hits;
-	  } else { $scope.elasticAlarms = [] }
-  }
-
   /* Update Time Filter */
-  var updateFilter = function(){
-	  return $http.get('../api/kaae/set/interval/'+JSON.stringify($scope.timeInterval)).then(function (resp) {
-          });
-  }
-
+  var updateFilter = function () {
+    return $http.get('../api/kaae/set/interval/' + JSON.stringify($scope.timeInterval)).then(function (resp) {
+    });
+  };
 
   /* First Boot */
 
+  $scope.elasticAlarms = [];
   $scope.timeInterval = timefilter.time;
   updateFilter();
-  getAlarmsFromEs();
+  $http.get('../api/kaae/list/alarms')
+  .then(
+    (resp) => $scope.elasticAlarms = resp.data.hits.hits,
+    $scope.notify.error
+  );
 
   /* Listen for refreshInterval changes */
 
@@ -279,6 +244,8 @@ uiModules
 uiModules
 .get('api/kaae', [])
 .controller('kaaeWatchers', function ($rootScope, $scope, $route, $interval, $timeout, timefilter, Private, Notifier, $window, kbnUrl, $http) {
+  const tabifyAggResponse = Private(AggResponseTabifyTabifyProvider);
+
   $scope.title = 'KaaE: Watchers';
   $scope.description = 'Kibana Alert App for Elasticsearch';
 
@@ -299,20 +266,33 @@ uiModules
 
   timefilter.enabled = false;
 
-  const tabifyAggResponse = Private(AggResponseTabifyTabifyProvider);
-  if ($route.current.locals.currentWatchers.data.hits.hits) {
-	   $scope.watchers = $route.current.locals.currentWatchers.data.hits.hits;
+  $scope.watchers = [];
 
-	/*
-	   $scope.spy.params.spyPerPage = 10;
-	   $scope.table = tabifyAggResponse($scope.vis, $route.current.locals.currentWatchers.data.hits.hits, {
-             canSplit: false,
-             asAggConfigResults: true,
-             partialRows: true
-           });
-	*/
+  function importWatcherFromLocalStorage () {
+    /* New Entry from Saved Kibana Query */
+    if ($window.localStorage.getItem('kaae_saved_query')) {
+      $scope.watcherNew(JSON.parse($window.localStorage.getItem('kaae_saved_query')));
+      $window.localStorage.removeItem('kaae_saved_query');
+    }
+  };
 
-  } else { $scope.watchers = []; }
+  $http.get('../api/kaae/list')
+  .then((response) => {
+    $scope.watchers = response.data.hits.hits;
+    importWatcherFromLocalStorage();
+    /*
+     $scope.spy.params.spyPerPage = 10;
+     $scope.table = tabifyAggResponse($scope.vis, $route.current.locals.currentWatchers.data.hits.hits, {
+     canSplit: false,
+     asAggConfigResults: true,
+     partialRows: true
+     });
+     */
+  })
+  .catch((error) => {
+    $scope.notify.error(error);
+    importWatcherFromLocalStorage();
+  });
 
   /* ACE Editor */
   $scope.editor;
@@ -352,24 +332,25 @@ uiModules
   }
 
   $scope.watcherSave = function($index){
-    	 var watcher = $scope.editor ? JSON.parse($scope.editor.getValue()) : $scope.watchers[$index];
-	 console.log('saving object:',watcher);
-	 return $http.get('../api/kaae/save/watcher/'+encodeURIComponent(JSON.stringify(watcher))).then(function (resp) {
-		if (resp.statusCode < 200 || resp.statusCode > 299) {
-			$scope.notify.error('Error Saving Watcher! Check your syntax and try again!');
-    		}
-    		else {
-			var reload = $timeout(function () {
-		            $route.reload();
-		 	    $scope.notify.warning('KAAE Watcher successfully saved!');
-		 	}, 1000);
-    		}
-         });
-  }
+    var watcher = $scope.editor ? JSON.parse($scope.editor.getValue()) : $scope.watchers[$index];
+    console.log('saving object:', watcher);
+    return $http.get('../api/kaae/save/watcher/' + encodeURIComponent(JSON.stringify(watcher)))
+    .then(
+      () => {
+        $timeout(() => {
+          $route.reload();
+          $scope.notify.warning('KAAE Watcher successfully saved!');
+        }, 1000)
+      },
+      (err) => {
+        $scope.notify.error('Error Saving Watcher! Check your syntax and try again!');
+      }
+    );
+  };
 
-  $scope.getWatchers = function(){
-	return $scope.watchers;
-  }
+  $scope.getWatchers = function () {
+    return $scope.watchers;
+  };
 
   /* New Entry */
   $scope.watcherNew = function(newwatcher) {
@@ -477,12 +458,6 @@ uiModules
  	 }, 200);
 	*/
 
-  }
-
-  /* New Entry from Saved Kibana Query */
-  if ($window.localStorage.getItem('kaae_saved_query')) {
-	$scope.watcherNew(JSON.parse($window.localStorage.getItem('kaae_saved_query')));
-	$window.localStorage.removeItem('kaae_saved_query');
   }
 
   var currentTime = moment($route.current.locals.currentTime);
