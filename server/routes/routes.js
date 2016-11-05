@@ -4,8 +4,6 @@ const config = require('../lib/config');
 
 export default function (server) {
 
-  let call = server.plugins.elasticsearch.callWithRequest;
-
   // Current Time
   server.route({
     path: '/api/kaae/example',
@@ -44,41 +42,35 @@ export default function (server) {
     handler: function (req, reply) {
       // Use selected timefilter when available
       if (server.kaaeInterval) {
-	var timeInterval = server.kaaeInterval;
+        var timeInterval = server.kaaeInterval;
       } else {
-	var timeInterval = {from: "now-15m", mode: "quick", to: "now"};
+        var timeInterval = {from: "now-15m", mode: "quick", to: "now"};
       }
-      var qrange = { gte: timeInterval.from, lt: timeInterval.to };
+      var qrange = {gte: timeInterval.from, lt: timeInterval.to};
 
       const boundCallWithRequest = _.partial(server.plugins.elasticsearch.callWithRequest, req);
       boundCallWithRequest('search', {
-	index: config.es.alarm_index ? config.es.alarm_index + "*" : "watcher_alarms*",
-	sort : "@timestamp : asc", 
+        index: config.es.alarm_index ? config.es.alarm_index + "*" : "watcher_alarms*",
+        sort: "@timestamp : asc",
         allowNoIndices: false,
-	body: {
-		"size": config.kaae.results ? config.kaae.results : 50,
-   		"query": {
-        		"filtered": {
-        		    "query": {
-        		        "match_all": {}
-    			        },
-    		        "filter": {
-    		            "range": {
-    		                "@timestamp": qrange
-    		            }
-    		        }
-    		    }
-    		}
-	}
-      })
-      .then(
-        function (res) {
-          reply(res); 
-        },
-        function (error) {
-          reply(handleESError(error));
+        body: {
+          "size": config.kaae.results ? config.kaae.results : 50,
+          "query": {
+            "filtered": {
+              "query": {
+                "match_all": {}
+              },
+              "filter": {
+                "range": {
+                  "@timestamp": qrange
+                }
+              }
+            }
+          }
         }
-      );
+      })
+      .then((res) => reply(res))
+      .catch((err) => reply(handleESError(err)));
     }
   });
 
@@ -89,32 +81,24 @@ export default function (server) {
     handler: function (req, reply) {
       const boundCallWithRequest = _.partial(server.plugins.elasticsearch.callWithRequest, req);
       boundCallWithRequest('search', {
-	index: 'watcher',
-	size: config.kaae.results ? config.kaae.results : 50,
+        index: 'watcher',
+        size: config.kaae.results ? config.kaae.results : 50,
         allowNoIndices: false
       })
-      .then(
-        function (res) {
-          reply(res); 
-        },
-        function (error) {
-          reply(handleESError(error));
-        }
-      );
+      .then((res) => reply(res))
+      .catch((err) => reply(handleESError(err)));
     }
   });
-
 
   server.route({
     method: 'GET',
     path: '/api/kaae/delete/alarm/{index}/{type}/{id}',
     handler: function (req, reply) {
       // Check if alarm index and discard everything else
-      if (!req.params.index.substr(0,config.es.alarm_index.length) === config.es.alarm_index) { 
-		server.log(['status', 'err', 'KaaE'], 'Forbidden Delete Request! '+req.params);
-		return;
+      if (!req.params.index.substr(0, config.es.alarm_index.length) === config.es.alarm_index) {
+        server.log(['status', 'err', 'KaaE'], 'Forbidden Delete Request! ' + req.params);
+        return;
       }
-      var client = server.plugins.elasticsearch.client;
       var callWithRequest = server.plugins.elasticsearch.callWithRequest;
 
       var body = {
@@ -123,21 +107,11 @@ export default function (server) {
         id: req.params.id
       };
 
-      callWithRequest(req, 'delete', body).then(function (resp) {
-        reply({
-          ok: true,
-	  resp: resp
-        });
-      }).catch(function (resp) {
-        reply({
-          ok: false,
-          resp: resp
-        });
-      });
-
-   }
+      callWithRequest(req, 'delete', body)
+      .then((resp) => reply({ok: true, resp: resp}))
+      .catch((err) => reply(handleESError(err)));
+    }
   });
-
 
   /* ES Functions */
 
@@ -189,55 +163,47 @@ export default function (server) {
     method: 'GET',
     path: '/api/kaae/get/watcher/{id}',
     handler: function (request, reply) {
-      var client = server.plugins.elasticsearch.client;
-
-	server.log(['status', 'info', 'KaaE'], 'Get Watcher with ID: '+request.params.id);
-	client.search({
-	  index: config.es.default_index,
-	  type: config.es.type,
-	  q: request.params.id
-	}).then(function (resp) {
-	    var hits = resp.hits.hits;
-            reply( resp );
-	}, function (err,resp) {
-	    console.trace(err.message);
-            reply( resp );
-	});
-   }
+      const callWithRequest = server.plugins.elasticsearch.callWithRequest;
+      server.log(['status', 'info', 'KaaE'], 'Get Watcher with ID: ' + request.params.id);
+      callWithRequest(request, 'search', {
+        index: config.es.default_index,
+        type: config.es.type,
+        q: request.params.id
+      })
+      .then((resp) => reply(resp))
+      .catch((err) => {
+        server.log(['debug', 'Kaae'], err);
+        reply(err);
+      });
+    }
   });
 
   server.route({
     method: 'GET',
     path: '/api/kaae/save/watcher/{watcher}',
     handler: function (request, reply) {
-      var client = server.plugins.elasticsearch.client;
-      var watcher = JSON.parse(request.params.watcher)
+      const callWithRequest = server.plugins.elasticsearch.callWithRequest;
+      var watcher = JSON.parse(request.params.watcher);
 
       server.log(['status', 'info', 'KaaE'], 'Saving Watcher with ID: '+watcher._id);
 
-	        var body = {
-	        	index: config.es.default_index,
-	        	type: config.es.type,
-			id: watcher._id,
-	        	body: watcher._source
-	        };
+      var body = {
+        index: config.es.default_index,
+        type: config.es.type,
+        id: watcher._id,
+        body: watcher._source
+      };
 
-	        client.index(body).then(function (resp) {
-        		reply({ ok: true, resp: resp });
-	                   // if (debug) console.log(resp);
-	            }, function (err,resp) {
-        		reply({ ok: false, resp: resp });
-	           	console.trace(err,resp);
-		});
-   }
+      callWithRequest(request, 'index', body)
+      .then((resp) => reply({ok: true, resp: resp}))
+      .catch((err) => reply(handleESError(err)));
+    }
   });
-
 
   server.route({
     method: 'GET',
     path: '/api/kaae/delete/watcher/{id}',
     handler: function (req, reply) {
-      var client = server.plugins.elasticsearch.client;
       var callWithRequest = server.plugins.elasticsearch.callWithRequest;
 
       var body = {
@@ -246,21 +212,11 @@ export default function (server) {
         id: req.params.id
       };
 
-      callWithRequest(req, 'delete', body).then(function (resp) {
-        reply({
-          ok: true,
-	  resp: resp
-        });
-      }).catch(function (resp) {
-        reply({
-          ok: false,
-          resp: resp
-        });
-      });
-
+      callWithRequest(req, 'delete', body)
+      .then((resp) => reply({ok: true, resp: resp}))
+      .catch((err) => reply(handleESError(err)));
    }
   });
-
 
   server.route({
     method: 'GET',
@@ -279,14 +235,9 @@ export default function (server) {
           min: resp.index._all.fields[config.es.timefield].min_value,
           max: resp.index._all.fields[config.es.timefield].max_value
         });
-      }).catch(function (resp) {
-        reply({
-          ok: false,
-          resp: resp
-        });
-      });
-
+      })
+      .catch((err) => reply(handleESError(err)));
     }
   });
-	
+
 };

@@ -47,7 +47,7 @@ export default function (kibana) {
       }).default();
     },
 
-    init: require('./init.js'),
+    init: require('./init.js')
 
   });
 };

@@ -21,12 +21,14 @@ import _ from 'lodash';
 import mustache from 'mustache';
 import config from './config';
 import fs from 'fs';
+import getSentinelClient from './get_sentinel_client';
 
 var debug = true;
 var hlimit = config.kaae.history ? config.kaae.history : 10;
 
 export default function (server, actions, payload) {
 
+    const client = getSentinelClient(server);
     /* Email Settings */
     if (config.settings.email.active) {
         var email = require("emailjs");
@@ -96,7 +98,6 @@ export default function (server, actions, payload) {
 
     /* ES Indexing Functions */
     var esHistory = function (type, message, loglevel, payload) {
-        var client = server.plugins.elasticsearch.client;
         if (!loglevel) {
             var loglevel = "INFO"
         }
