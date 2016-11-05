@@ -17,6 +17,8 @@
  * limitations under the License.
  */
 
+import getSentinelClient from './get_sentinel_client';
+
 var dynamicTemplates = [ {
   string_fields : {
     mapping : {
@@ -45,7 +47,7 @@ function createKaaeIndex(server,config) {
           return;
         }
 
-        var client = server.plugins.elasticsearch.client;
+        var client = getSentinelClient(server);
         client.indices.exists({
           index: config.es.default_index
         }, function (error, exists) {
@@ -108,7 +110,7 @@ function createKaaeAlarmIndex(server,config) {
           return;
         }
 
-        var client = server.plugins.elasticsearch.client;
+        var client = getSentinelClient(server);
         client.indices.exists({
           index: config.es.alarm_index
         }, function (error, exists) {
