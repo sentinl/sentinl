@@ -96,33 +96,7 @@ curl -XPUT http://127.0.0.1:9200/watcher/watch/mos -d'
       "script" : "payload.aggregations.avg.value < 3"
     }
   },
-  "transform" : {
-    "search" : {
-      "request" : {
-        "indices" : [ "<mos-{now/d}>", "<mos-{now/d-1d}>"  ],
-        "body" : {
-          "query" : {
-            "filtered" : {
-              "query": {
-		"query_string": {
-		  "query": "mos:*",
-		  "analyze_wildcard": true
-		}
-	      },
-              "filter" : { "range" : { "@timestamp" : { "from" : "now-5m"  } } }
-            }
-          },
-           "aggs": {
-		"avg": {
-		  "avg": {
-		    "field": "mos"
-		  }
-		}
-	  }
-        }
-      }
-    }
-  },
+  "transform" : {},
   "actions" : {
     "email_admin" : {
     "throttle_period" : "15m",
