@@ -56,7 +56,7 @@ The basic example will use simple parameters:
 * Run each 60 seconds
 * Target the daily mos-* index with query aggregation
 * Trip condition when aggregations.avg.value < 3
-* Email action with details
+* Email action with details _(console output only, email delivery disabled by default in kaae.json)_
 
 ```
 curl -XPUT http://127.0.0.1:9200/watcher/watch/mos -d'
@@ -102,6 +102,7 @@ curl -XPUT http://127.0.0.1:9200/watcher/watch/mos -d'
     "throttle_period" : "15m",
     "email" : {
       "to" : "mos@qxip.net",
+      "from" : "kaae@localhost",
       "subject" : "Low MOS Detected: {{payload.aggregations.avg.value}} ",
       "priority" : "high",
       "body" : "Low MOS Detected:\n {{payload.aggregations.avg.value}} average with {{payload.aggregations.count.value}} measurements in 5 minutes"
