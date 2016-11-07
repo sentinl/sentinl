@@ -4,8 +4,8 @@
     "type": "git",
     "url": "http://github.com/elasticfence/kaae.git"
   },
-  "name": "kaae",
-  "version": "0.0.9",
+  "name": "sentinl",
+  "version": "0.1.0",
   "description": "Kibana Alert & Report App for Elasticsearch",
   "main": "index.js",
   "scripts": {
