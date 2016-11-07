@@ -22,7 +22,7 @@ import _ from 'lodash';
 import masterRoute from './server/routes/routes';
 import scheduler from './server/lib/scheduler';
 import helpers from './server/lib/helpers';
-import getSentinelClient from './server/lib/get_sentinel_client';
+import getElasticsearchClient from './server/lib/get_elasticsearch_client';
 
 const init = _.once((server) => {
   var config = require('./server/lib/config');
@@ -37,7 +37,7 @@ const init = _.once((server) => {
   helpers.createKaaeAlarmIndex(server,config);
 
   /* Bird Watching and Duck Hunting */
-  const client = getSentinelClient(server);
+  const client = getElasticsearchClient(server);
   var sched = later.parse.recur().on(25,55).second();
   var t = later.setInterval(function(){ scheduler.doalert(server,client) }, sched);
   /* run NOW, plus later */

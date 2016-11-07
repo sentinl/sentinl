@@ -21,14 +21,14 @@ import _ from 'lodash';
 import mustache from 'mustache';
 import config from './config';
 import fs from 'fs';
-import getSentinelClient from './get_sentinel_client';
+import getElasticsearchClient from './get_elasticsearch_client';
 
 var debug = true;
 var hlimit = config.kaae.history ? config.kaae.history : 10;
 
 export default function (server, actions, payload) {
 
-    const client = getSentinelClient(server);
+    const client = getElasticsearchClient(server);
     /* Email Settings */
     if (config.settings.email.active) {
         var email = require("emailjs");
