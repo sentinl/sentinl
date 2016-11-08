@@ -2,7 +2,7 @@
   "author": "Lorenzo Mangani <lorenzo.mangani@gmail.com>",
   "repository": {
     "type": "git",
-    "url": "http://github.com/elasticfence/kaae.git"
+    "url": "http://github.com/sirensolutions/sentinl.git"
   },
   "name": "sentinl",
   "version": "0.1.0",
@@ -10,9 +10,9 @@
   "main": "index.js",
   "scripts": {
     "lint": "eslint",
-    "kaae-install": "/opt/kibana/bin/kibana plugin --install kaae -u file://`pwd`/kaae-latest.tar.gz",
-    "kaae-remove": "/opt/kibana/bin/kibana plugin --remove kaae",
-    "package": "tar cfz ./kaae-latest.tar.gz --exclude .git --exclude .gitignore --exclude kaae-latest.tar.gz ./* && ls -alF kaae-latest*"
+    "kaae-install": "/opt/kibana/bin/kibi plugin --install kaae -u file://`pwd`/kaae-latest.tar.gz",
+    "kaae-remove": "/opt/kibana/bin/kibi plugin --remove kaae",
+    "package": "tar cfz ./sentinl-latest.tar.gz --exclude .git --exclude .gitignore --exclude sentinl-latest.tar.gz ./* && ls -alF sentinl-latest*"
   },
   "dependencies": {
     "later": "*",
