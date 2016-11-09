@@ -2,7 +2,7 @@
  * Copyright 2016, Lorenzo Mangani (lorenzo.mangani@gmail.com)
  * Copyright 2015, Rao Chenlin (rao.chenlin@gmail.com)
  *
- * This file is part of KaaE (http://github.com/elasticfence/kaae)
+ * This file is part of Sentinl (http://github.com/sirensolutions/sentinl)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,14 +27,14 @@ import getElasticsearchClient from './server/lib/get_elasticsearch_client';
 const init = _.once((server) => {
   var config = require('./server/lib/config');
 
-  server.log(['status', 'info', 'KaaE'], 'KaaE Initializing');
-  server.kaaeStore = [];
+  server.log(['status', 'info', 'Sentinl'], 'Sentinl Initializing');
+  server.sentinlStore = [];
 
   masterRoute(server);
 
-  // Create KaaE Indices, if required
-  helpers.createKaaeIndex(server,config);
-  helpers.createKaaeAlarmIndex(server,config);
+  // Create Sentinl Indices, if required
+  helpers.createSentinlIndex(server,config);
+  helpers.createSentinlAlarmIndex(server,config);
 
   /* Bird Watching and Duck Hunting */
   const client = getElasticsearchClient(server);

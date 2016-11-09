@@ -6,7 +6,7 @@ export default function (server) {
 
   // Current Time
   server.route({
-    path: '/api/kaae/example',
+    path: '/api/sentinl/example',
     method: 'GET',
     handler(req, reply) {
       reply({ time: new Date().toISOString() });
@@ -15,34 +15,34 @@ export default function (server) {
 
   server.route({
     method: 'GET',
-    path: '/api/kaae/config',
+    path: '/api/sentinl/config',
     handler: require('./config.js')
   });
 
   server.route({
     method: 'GET',
-    path: '/api/kaae/getitems',
+    path: '/api/sentinl/getitems',
     handler: require('./items.js')
   });
 
 
   // Local Alarms (session)
   server.route({
-    path: '/api/kaae/alarms',
+    path: '/api/sentinl/alarms',
     method: ['POST','GET'],
     handler(req, reply) {
-      reply({ data: server.kaaeStore });
+      reply({ data: server.sentinlStore });
     }
   });
 
   // ES Alarms
   server.route({
-    path: '/api/kaae/list/alarms',
+    path: '/api/sentinl/list/alarms',
     method: ['POST', 'GET'],
     handler: function (req, reply) {
       // Use selected timefilter when available
-      if (server.kaaeInterval) {
-        var timeInterval = server.kaaeInterval;
+      if (server.sentinlInterval) {
+        var timeInterval = server.sentinlInterval;
       } else {
         var timeInterval = {from: "now-15m", mode: "quick", to: "now"};
       }
@@ -54,7 +54,7 @@ export default function (server) {
         sort: "@timestamp : asc",
         allowNoIndices: false,
         body: {
-          "size": config.kaae.results ? config.kaae.results : 50,
+          "size": config.sentinl.results ? config.sentinl.results : 50,
           "query": {
             "filtered": {
               "query": {
@@ -76,13 +76,13 @@ export default function (server) {
 
   // List Watchers
   server.route({
-    path: '/api/kaae/list',
+    path: '/api/sentinl/list',
     method: ['POST', 'GET'],
     handler: function (req, reply) {
       const boundCallWithRequest = _.partial(server.plugins.elasticsearch.callWithRequest, req);
       boundCallWithRequest('search', {
         index: 'watcher',
-        size: config.kaae.results ? config.kaae.results : 50,
+        size: config.sentinl.results ? config.sentinl.results : 50,
         allowNoIndices: false
       })
       .then((res) => reply(res))
@@ -92,11 +92,11 @@ export default function (server) {
 
   server.route({
     method: 'GET',
-    path: '/api/kaae/delete/alarm/{index}/{type}/{id}',
+    path: '/api/sentinl/delete/alarm/{index}/{type}/{id}',
     handler: function (req, reply) {
       // Check if alarm index and discard everything else
       if (!req.params.index.substr(0, config.es.alarm_index.length) === config.es.alarm_index) {
-        server.log(['status', 'err', 'KaaE'], 'Forbidden Delete Request! ' + req.params);
+        server.log(['status', 'err', 'Sentinl'], 'Forbidden Delete Request! ' + req.params);
         return;
       }
       var callWithRequest = server.plugins.elasticsearch.callWithRequest;
@@ -118,18 +118,18 @@ export default function (server) {
   // Get/Set Time Interval
   server.route({
     method: 'GET',
-    path: '/api/kaae/set/interval/{timefilter}',
+    path: '/api/sentinl/set/interval/{timefilter}',
     handler: function (request, reply) {
-	server.kaaeInterval = JSON.parse(request.params.timefilter);
-	// console.log('server timefilter:',server.kaaeInterval);
+	server.sentinlInterval = JSON.parse(request.params.timefilter);
+	// console.log('server timefilter:',server.sentinlInterval);
 	reply({ status: "200 OK" });
    }
   });
   server.route({
     method: 'GET',
-    path: '/api/kaae/get/interval',
+    path: '/api/sentinl/get/interval',
     handler: function (request, reply) {
-	reply(server.kaaeInterval);
+	reply(server.sentinlInterval);
    }
   });
 
@@ -137,21 +137,21 @@ export default function (server) {
   // Test
   server.route({
     method: 'GET',
-    path: '/api/kaae/test/{id}',
+    path: '/api/sentinl/test/{id}',
     handler: function (request, reply) {
       var client = server.plugins.elasticsearch.client;
 
-	server.log(['status', 'info', 'KaaE'], 'Testing ES connection with param: '+request.params.id);
+	server.log(['status', 'info', 'Sentinl'], 'Testing ES connection with param: '+request.params.id);
 	client.ping({
 	  requestTimeout: 5000,
 	  // undocumented params are appended to the query string
 	  hello: "elasticsearch"
 	}, function (error) {
 	  if (error) {
-		server.log(['warning', 'info', 'KaaE'], 'ES Connectivity is down! '+request.params.id);
+		server.log(['warning', 'info', 'Sentinl'], 'ES Connectivity is down! '+request.params.id);
             reply({ status: "DOWN" });
 	  } else {
-		server.log(['status', 'info', 'KaaE'], 'ES Connectivity is up! '+request.params.id);
+		server.log(['status', 'info', 'Sentinl'], 'ES Connectivity is up! '+request.params.id);
             reply({ status: "UP" });
 	  }
 	});
@@ -161,10 +161,10 @@ export default function (server) {
 
   server.route({
     method: 'GET',
-    path: '/api/kaae/get/watcher/{id}',
+    path: '/api/sentinl/get/watcher/{id}',
     handler: function (request, reply) {
       const callWithRequest = server.plugins.elasticsearch.callWithRequest;
-      server.log(['status', 'info', 'KaaE'], 'Get Watcher with ID: ' + request.params.id);
+      server.log(['status', 'info', 'Sentinl'], 'Get Watcher with ID: ' + request.params.id);
       callWithRequest(request, 'search', {
         index: config.es.default_index,
         type: config.es.type,
@@ -172,7 +172,7 @@ export default function (server) {
       })
       .then((resp) => reply(resp))
       .catch((err) => {
-        server.log(['debug', 'Kaae'], err);
+        server.log(['debug', 'Sentinl'], err);
         reply(err);
       });
     }
@@ -180,12 +180,12 @@ export default function (server) {
 
   server.route({
     method: 'GET',
-    path: '/api/kaae/save/watcher/{watcher}',
+    path: '/api/sentinl/save/watcher/{watcher}',
     handler: function (request, reply) {
       const callWithRequest = server.plugins.elasticsearch.callWithRequest;
       var watcher = JSON.parse(request.params.watcher);
 
-      server.log(['status', 'info', 'KaaE'], 'Saving Watcher with ID: '+watcher._id);
+      server.log(['status', 'info', 'Sentinl'], 'Saving Watcher with ID: '+watcher._id);
 
       var body = {
         index: config.es.default_index,
@@ -202,7 +202,7 @@ export default function (server) {
 
   server.route({
     method: 'GET',
-    path: '/api/kaae/delete/watcher/{id}',
+    path: '/api/sentinl/delete/watcher/{id}',
     handler: function (req, reply) {
       var callWithRequest = server.plugins.elasticsearch.callWithRequest;
 
@@ -220,7 +220,7 @@ export default function (server) {
 
   server.route({
     method: 'GET',
-    path: '/api/kaae/validate/es',
+    path: '/api/sentinl/validate/es',
     handler: function (request, reply) {
       var callWithRequest = server.plugins.elasticsearch.callWithRequest;
 

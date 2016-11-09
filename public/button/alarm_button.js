@@ -2,7 +2,7 @@
  * Copyright 2016, Lorenzo Mangani (lorenzo.mangani@gmail.com)
  * Copyright 2015, Rao Chenlin (rao.chenlin@gmail.com)
  *
- * This file is part of KaaE (http://github.com/elasticfence/kaae)
+ * This file is part of Sentinl (http://github.com/sirensolutions/sentinl)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,7 +101,7 @@ const linkReqRespStats = function ($scope, config) {
     $scope.watcher_range = $scope.ranges[1].value;
 
     $scope.watcher_email_to = "root@localhost";
-    $scope.watcher_email_subj = "KAAE ALARM {{ payload._id }}";
+    $scope.watcher_email_subj = "SENTINL ALARM {{ payload._id }}";
     $scope.watcher_email_body = "Series Alarm {{ payload._id}}: {{ payload.hits.total }}";
 
     $scope.savedWatcher = {};
@@ -149,8 +149,8 @@ const linkReqRespStats = function ($scope, config) {
 	        "throttle_period": "15m",
 	        "email": {
 	          "to": $scope.watcher_email_to ? $scope.watcher_email_to : "alarm@localhost",
-        	  "from": $scope.watcher_email_from ? $scope.watcher_email_from : "kaae@localhost",
-	          "subject": $scope.watcher_email_subj ? $scope.watcher_email_subj : "Kaae Alarm",
+        	  "from": $scope.watcher_email_from ? $scope.watcher_email_from : "sentinl@localhost",
+	          "subject": $scope.watcher_email_subj ? $scope.watcher_email_subj : "Sentinl Alarm",
 	          "priority": "high",
 	          "body": $scope.watcher_email_body ? $scope.watcher_email_body : "Found {{payload.hits.total}} Events"
 	        }
@@ -166,7 +166,7 @@ const linkReqRespStats = function ($scope, config) {
 
 	// Store Watcher
         alarm = $scope.alarm;
-	window.localStorage.setItem('kaae_saved_query', JSON.stringify($scope.alarm));
+	window.localStorage.setItem('sentinl_saved_query', JSON.stringify($scope.alarm));
 
     }
 
@@ -184,7 +184,7 @@ require('ui/registry/spy_modes').register(function () {
     name: 'setalarm',
     order: 1000,
     link: linkReqRespStats,
-    template: require('plugins/kaae/button/alarm_spy.html')
+    template: require('plugins/sentinl/button/alarm_spy.html')
   };
 });
 

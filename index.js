@@ -2,7 +2,7 @@
  * Copyright 2016, Lorenzo Mangani (lorenzo.mangani@gmail.com)
  * Copyright 2015, Rao Chenlin (rao.chenlin@gmail.com)
  *
- * This file is part of KaaE (http://github.com/elasticfence/kaae)
+ * This file is part of Sentinl (http://github.com/sirensolutions/sentinl)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,13 +24,13 @@ export default function (kibana) {
     require: ['kibana', 'elasticsearch'],
 
     uiExports: {
-      spyModes: ['plugins/kaae/button/alarm_button'],
-      // chromeNavControls: ['plugins/kaae/button/alarm_button'],
+      spyModes: ['plugins/sentinl/button/alarm_button'],
+      // chromeNavControls: ['plugins/sentinl/button/alarm_button'],
       app: {
-        title: 'KaaE',
+        title: 'Sentinl',
         description: 'Kibana Alert App for Elasticsearch',
-        main: 'plugins/kaae/app',
-        icon: 'plugins/kaae/kaae.svg',
+        main: 'plugins/sentinl/app',
+        icon: 'plugins/sentinl/sentinl.svg',
 	injectVars: function (server, options) {
                                var config = server.config();
                                return {
