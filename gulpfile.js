@@ -24,7 +24,6 @@ var include = [
   '*.json',
   'LICENSE',
   'README.md',
-  'TUTORIAL.md',
   'index.js',
   'init.js',
   'server',
