@@ -23,20 +23,19 @@
     "sum-time": "*"
   },
   "devDependencies": {
-    "babel-eslint": "4.1.8",
-    "eslint": "1.10.3",
-    "eslint-plugin-mocha": "1.1.0",
+    "@elastic/eslint-config-kibana": "^0.2.0",
+    "babel-eslint": "^6.1.2",
     "bluebird": "^3.0.6",
     "gulp": "^3.9.0",
     "gulp-eslint": "^1.1.1",
-    "gulp-zip": "3.1.0",
     "gulp-util": "^3.0.7",
+    "gulp-zip": "3.1.0",
     "husky": "^0.10.2",
     "lodash": "^3.10.1",
+    "minimist": "1.2.0",
     "mkdirp": "^0.5.1",
     "rimraf": "^2.4.4",
-    "rsync": "^0.4.0",
-    "minimist": "1.2.0"
+    "rsync": "^0.4.0"
   },
   "license": "Apache-2.0"
 }
