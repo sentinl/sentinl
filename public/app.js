@@ -2,7 +2,7 @@
  * Copyright 2016, Lorenzo Mangani (lorenzo.mangani@gmail.com)
  * Copyright 2015, Rao Chenlin (rao.chenlin@gmail.com)
  *
- * This file is part of KaaE (http://github.com/elasticfence/kaae)
+ * This file is part of Sentinl (http://github.com/sirensolutions/sentinl)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,8 +53,8 @@ import about from './templates/about.html';
 import alarms from './templates/alarms.html';
 import jsonHtml from './templates/json.html';
 
-var impactLogo = require('plugins/kaae/kaae_watch.svg');
-var smallLogo = require('plugins/kaae/kaae.svg');
+var impactLogo = require('plugins/sentinl/sentinl_watch.svg');
+var smallLogo = require('plugins/sentinl/sentinl.svg');
 
 /* Inject Tabs */
   var topNavMenu = [
@@ -75,7 +75,7 @@ chrome
   .setBrand({
     'logo': 'url(' + impactLogo + ') left no-repeat'
     ,'smallLogo': 'url(' + impactLogo + ') left no-repeat'
-    ,'title': 'KAAE'
+    ,'title': 'SENTINL'
   })
   .setNavBackground('#222222')
   .setTabs([
@@ -103,7 +103,7 @@ uiRoutes
   template,
   resolve: {
     currentTime($http) {
-      return $http.get('../api/kaae/example')
+      return $http.get('../api/sentinl/example')
       .then((resp) => resp.data.time);
     }
   }
@@ -114,7 +114,7 @@ uiRoutes
   template: alarms,
   resolve: {
     currentTime($http) {
-      return $http.get('../api/kaae/example').then(function (resp) {
+      return $http.get('../api/sentinl/example').then(function (resp) {
         return resp.data.time;
       });
     }
@@ -127,14 +127,14 @@ uiRoutes
 });
 
 uiModules
-.get('api/kaae', [])
+.get('api/sentinl', [])
 .filter('moment', function() {
     return function(dateString) {
         return moment(dateString).format('YYYY-MM-DD HH:mm:ss.sss');;
     };
 })
-.controller('kaaeHelloWorld', function ($rootScope, $scope, $route, $interval, $timeout, timefilter, Private, Notifier, $window, kbnUrl, $http) {
-  $scope.title = 'KaaE: Alarms';
+.controller('sentinlHelloWorld', function ($rootScope, $scope, $route, $interval, $timeout, timefilter, Private, Notifier, $window, kbnUrl, $http) {
+  $scope.title = 'Sentinl: Alarms';
   $scope.description = 'Kibana Alert App for Elasticsearch';
 
   $scope.notify = new Notifier();
@@ -143,7 +143,7 @@ uiModules
 
   /* Update Time Filter */
   var updateFilter = function () {
-    return $http.get('../api/kaae/set/interval/' + JSON.stringify($scope.timeInterval)).then(function (resp) {
+    return $http.get('../api/sentinl/set/interval/' + JSON.stringify($scope.timeInterval)).then(function (resp) {
     });
   };
 
@@ -152,7 +152,7 @@ uiModules
   $scope.elasticAlarms = [];
   $scope.timeInterval = timefilter.time;
   updateFilter();
-  $http.get('../api/kaae/list/alarms')
+  $http.get('../api/sentinl/list/alarms')
   .then(
     (resp) => $scope.elasticAlarms = resp.data.hits.hits,
     $scope.notify.error
@@ -212,13 +212,13 @@ uiModules
 
   $scope.deleteAlarm = function ($index) {
     if (confirm('Delete is Forever!\n Are you sure?')) {
-      return $http.get('../api/kaae/delete/alarm/' + $scope.elasticAlarms[$index]._index
+      return $http.get('../api/sentinl/delete/alarm/' + $scope.elasticAlarms[$index]._index
         + '/' + $scope.elasticAlarms[$index]._type
         + '/' + $scope.elasticAlarms[$index]._id)
       .then(
         () => $timeout(function () {
           $scope.elasticAlarms.splice($index, 1);
-          $scope.notify.warning('KAAE Alarm log successfully deleted!');
+          $scope.notify.warning('SENTINL Alarm log successfully deleted!');
         }),
         $scope.notify.error
       );
@@ -226,7 +226,7 @@ uiModules
   };
 
   $scope.deleteAlarmLocal = function($index){
-	 $scope.notify.warning('KAAE function not yet implemented!');
+	 $scope.notify.warning('SENTINL function not yet implemented!');
   }
 
   var currentTime = moment($route.current.locals.currentTime);
@@ -243,11 +243,11 @@ uiModules
 
 // WATCHERS CONTROLLER
 uiModules
-.get('api/kaae', [])
-.controller('kaaeWatchers', function ($rootScope, $scope, $route, $interval, $timeout, timefilter, Private, Notifier, $window, kbnUrl, $http) {
+.get('api/sentinl', [])
+.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interval, $timeout, timefilter, Private, Notifier, $window, kbnUrl, $http) {
   const tabifyAggResponse = Private(AggResponseTabifyTabifyProvider);
 
-  $scope.title = 'KaaE: Watchers';
+  $scope.title = 'Sentinl: Watchers';
   $scope.description = 'Kibana Alert App for Elasticsearch';
 
   $scope.notify = new Notifier();
@@ -271,13 +271,13 @@ uiModules
 
   function importWatcherFromLocalStorage () {
     /* New Entry from Saved Kibana Query */
-    if ($window.localStorage.getItem('kaae_saved_query')) {
-      $scope.watcherNew(JSON.parse($window.localStorage.getItem('kaae_saved_query')));
-      $window.localStorage.removeItem('kaae_saved_query');
+    if ($window.localStorage.getItem('sentinl_saved_query')) {
+      $scope.watcherNew(JSON.parse($window.localStorage.getItem('sentinl_saved_query')));
+      $window.localStorage.removeItem('sentinl_saved_query');
     }
   };
 
-  $http.get('../api/kaae/list')
+  $http.get('../api/sentinl/list')
   .then((response) => {
     $scope.watchers = response.data.hits.hits;
     importWatcherFromLocalStorage();
@@ -313,12 +313,12 @@ uiModules
 
   $scope.watcherDelete = function ($index) {
     if (confirm('Are you sure?')) {
-      return $http.get('../api/kaae/delete/watcher/' + $scope.watchers[$index]._id)
+      return $http.get('../api/sentinl/delete/watcher/' + $scope.watchers[$index]._id)
       .then(
         (resp) => {
           $timeout(function () {
             $route.reload();
-            $scope.notify.warning('KAAE Watcher successfully deleted!');
+            $scope.notify.warning('SENTINL Watcher successfully deleted!');
           });
         },
         $scope.notify.error
@@ -329,12 +329,12 @@ uiModules
   $scope.watcherSave = function($index){
     var watcher = $scope.editor ? JSON.parse($scope.editor.getValue()) : $scope.watchers[$index];
     console.log('saving object:', watcher);
-    return $http.get('../api/kaae/save/watcher/' + encodeURIComponent(JSON.stringify(watcher)))
+    return $http.get('../api/sentinl/save/watcher/' + encodeURIComponent(JSON.stringify(watcher)))
     .then(
       () => {
         $timeout(() => {
           $route.reload();
-          $scope.notify.warning('KAAE Watcher successfully saved!');
+          $scope.notify.warning('SENTINL Watcher successfully saved!');
         }, 1000)
       },
       (err) => {
@@ -380,8 +380,8 @@ uiModules
 		        "throttle_period": "15m",
 		        "email": {
 		          "to": "alarm@localhost",
-              "from": "kaae@localhost",
-		          "subject": "KaaE Alarm",
+              "from": "sentinl@localhost",
+		          "subject": "Sentinl Alarm",
 		          "priority": "high",
 		          "body": "Found {{payload.hits.total}} Events"
 		        }
@@ -422,10 +422,10 @@ uiModules
 		        "throttle_period": "15m",
 		        "report": {
 		          "to": "report@localhost",
-              "from": "kaae@localhost",
-		          "subject": "KaaE Report",
+              "from": "sentinl@localhost",
+		          "subject": "Sentinl Report",
 		          "priority": "high",
-		          "body": "Sample KaaE Screenshot Report",
+		          "body": "Sample Sentinl Screenshot Report",
               "snapshot" : {
                   "res" : "1280x900",
                   "url" : "http://127.0.0.1/app/kibana#/dashboard/Alerts",
@@ -470,15 +470,15 @@ uiModules
 // NEW END
 
 uiModules
-.get('api/kaae', [])
-.controller('kaaeAbout', function ($scope, $route, $interval, timefilter, Notifier) {
-  $scope.title = 'KaaE';
+.get('api/sentinl', [])
+.controller('sentinlAbout', function ($scope, $route, $interval, timefilter, Notifier) {
+  $scope.title = 'Sentinl';
   $scope.description = 'Kibana Alert App for Elasticsearch';
   timefilter.enabled = false;
   $scope.notify = new Notifier();
 
   if (!$scope.notified) {
-	  $scope.notify.warning('KAAE is a work in progress! Use at your own risk!');
+	  $scope.notify.warning('SENTINL is a work in progress! Use at your own risk!');
 	  $scope.notified = true;
   }
 

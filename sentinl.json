@@ -5,7 +5,7 @@
     "type": 		"watch",
     "alarm_index":	"watcher_alarms"
   },
-  "kaae": {
+  "sentinl": {
     	"history": 	20,
       "results": 50
   },

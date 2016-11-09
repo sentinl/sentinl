@@ -2,7 +2,7 @@
  * Copyright 2016, Lorenzo Mangani (lorenzo.mangani@gmail.com)
  * Copyright 2015, Rao Chenlin (rao.chenlin@gmail.com)
  *
- * This file is part of KaaE (http://github.com/elasticfence/kaae)
+ * This file is part of Sentinl (http://github.com/sirensolutions/sentinl)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,13 +40,13 @@ function getWatcher(count,client) {
 }
 
 function doalert(server,client) {
-  server.log(['status', 'debug', 'KaaE'], 'Reloading Watchers...');
+  server.log(['status', 'debug', 'Sentinl'], 'Reloading Watchers...');
   getCount(client).then(function(resp){
     getWatcher(resp.count,client).then(function(resp){
       /* Orphanizer */
         var orphans = _.difference(_.each(Object.keys( Schedule )), _.map(resp.hits.hits, '_id')  );
         _.each(orphans, function(orphan){
-                server.log(['status', 'info', 'KaaE'],'Deleting orphan watcher: '+orphan);
+                server.log(['status', 'info', 'Sentinl'],'Deleting orphan watcher: '+orphan);
                 Schedule[orphan].later.clear();
                 delete Schedule[orphan];
         });
@@ -56,7 +56,7 @@ function doalert(server,client) {
 
         if (Schedule[hit._id]) {
           if (_.isEqual(Schedule[hit._id].hit, hit)) { return; }
-          else { server.log(['status', 'info', 'KaaE'],'Clearing watcher: '+hit._id); Schedule[hit._id].later.clear(); }
+          else { server.log(['status', 'info', 'Sentinl'],'Clearing watcher: '+hit._id); Schedule[hit._id].later.clear(); }
         }
 
           Schedule[hit._id] = {};
@@ -76,23 +76,23 @@ function doalert(server,client) {
           if (hit._source.report) {
             /* Report */
             Schedule[hit._id].later = later.setInterval(function(){ reporting(hit,interval) }, interval);
-            server.log(['status', 'info', 'KaaE'], 'Scheduled Report: '+hit._id+' every '+Schedule[hit._id].interval );
+            server.log(['status', 'info', 'Sentinl'], 'Scheduled Report: '+hit._id+' every '+Schedule[hit._id].interval );
           } else {
             /* Watcher */
             Schedule[hit._id].later = later.setInterval(function(){ watching(hit,interval) }, interval);
-            server.log(['status', 'info', 'KaaE'], 'Scheduled Watch: '+hit._id+' every '+Schedule[hit._id].interval );
+            server.log(['status', 'info', 'Sentinl'], 'Scheduled Watch: '+hit._id+' every '+Schedule[hit._id].interval );
           }
 
 
           function watching(task,interval) {
 
 			if (!task._source || task._source.disable) {
-			server.log(['status', 'debug', 'KaaE'], 'Non-Executing Disabled Watch: '+task._id);
+			server.log(['status', 'debug', 'Sentinl'], 'Non-Executing Disabled Watch: '+task._id);
 				return;
 			}
 
-				server.log(['status', 'info', 'KaaE'], 'Executing watch: '+task._id);
-			server.log(['status', 'debug', 'KaaE', 'WATCHER DEBUG'], task);
+				server.log(['status', 'info', 'Sentinl'], 'Executing watch: '+task._id);
+			server.log(['status', 'debug', 'Sentinl', 'WATCHER DEBUG'], task);
 
 				var watch = task._source;
 				var request = watch.input.search.request;
@@ -104,20 +104,20 @@ function doalert(server,client) {
 			/* Kibi Join Query */
 			client.coordinate_search(request).then(function(payload){
 				  if (!payload || !condition || !actions) {
-					server.log(['status', 'debug', 'KaaE', 'WATCHER TASK'], 'Join Watcher Malformed or Missing Key Parameters!');
+					server.log(['status', 'debug', 'Sentinl', 'WATCHER TASK'], 'Join Watcher Malformed or Missing Key Parameters!');
 					return;
 				  }
 
-				  server.log(['status', 'debug', 'KaaE', 'PAYLOAD DEBUG'], payload);
+				  server.log(['status', 'debug', 'Sentinl', 'PAYLOAD DEBUG'], payload);
 
 				  /* Validate Condition */
 				  try { var ret = eval(condition); } catch (err) {
-					  server.log(['status', 'info', 'KaaE'], 'Condition Error for '+task._id+': '+err);
+					  server.log(['status', 'info', 'Sentinl'], 'Condition Error for '+task._id+': '+err);
 				  }
 				  if (ret) {
 				  if (transform.script) {
 					  try { eval(transform.script.script); } catch (err) {
-					  server.log(['status', 'info', 'KaaE'], 'Transform Script Error for '+task._id+': '+err);
+					  server.log(['status', 'info', 'Sentinl'], 'Transform Script Error for '+task._id+': '+err);
 					  }
 					  doActions(server,actions,payload);
 				  } else if (transform.search) {
@@ -134,20 +134,20 @@ function doalert(server,client) {
 			/* Normal ES Query */
 			client.search(request).then(function(payload){
 				  if (!payload || !condition || !actions) {
-					server.log(['status', 'debug', 'KaaE', 'WATCHER TASK'], 'Watcher Malformed or Missing Key Parameters!');
+					server.log(['status', 'debug', 'Sentinl', 'WATCHER TASK'], 'Watcher Malformed or Missing Key Parameters!');
 					return;
 				  }
 
-				  server.log(['status', 'debug', 'KaaE', 'PAYLOAD DEBUG'], payload);
+				  server.log(['status', 'debug', 'Sentinl', 'PAYLOAD DEBUG'], payload);
 
 				  /* Validate Condition */
 				  try { var ret = eval(condition); } catch (err) {
-					  server.log(['status', 'info', 'KaaE'], 'Condition Error for '+task._id+': '+err);
+					  server.log(['status', 'info', 'Sentinl'], 'Condition Error for '+task._id+': '+err);
 				  }
 				  if (ret) {
 				  if (transform.script) {
 					  try { eval(transform.script.script); } catch (err) {
-					  server.log(['status', 'info', 'KaaE'], 'Transform Script Error for '+task._id+': '+err);
+					  server.log(['status', 'info', 'Sentinl'], 'Transform Script Error for '+task._id+': '+err);
 					  }
 					  doActions(server,actions,payload);
 				  } else if (transform.search) {
@@ -164,13 +164,13 @@ function doalert(server,client) {
         }
         function reporting(task,interval) {
 	  if (!task._source || task._source.disable) {
-		server.log(['status', 'debug', 'KaaE'], 'Non-Executing Disabled report: '+task._id);
+		server.log(['status', 'debug', 'Sentinl'], 'Non-Executing Disabled report: '+task._id);
           	return;
  	  }
-          server.log(['status', 'info', 'KaaE'], 'Executing report: '+task._id );
+          server.log(['status', 'info', 'Sentinl'], 'Executing report: '+task._id );
           var actions = task._source.actions;
           var payload = { "_id": task._id };
-          if (!actions) { server.log(['status', 'info', 'KaaE'], 'Condition Error for '+task._id); return; }
+          if (!actions) { server.log(['status', 'info', 'Sentinl'], 'Condition Error for '+task._id); return; }
           doActions(server,actions,payload);
         }  
       });

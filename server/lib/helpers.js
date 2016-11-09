@@ -2,7 +2,7 @@
  * Copyright 2016, Lorenzo Mangani (lorenzo.mangani@gmail.com)
  * Copyright 2015, Rao Chenlin (rao.chenlin@gmail.com)
  *
- * This file is part of KaaE (http://github.com/elasticfence/kaae)
+ * This file is part of Sentinl (http://github.com/sirensolutions/sentinl)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,10 +39,10 @@ var dynamicTemplates = [ {
 }];
 
 
-function createKaaeIndex(server,config) {
-        server.log(['status', 'info', 'KaaE'], 'Core Index check...');
+function createSentinlIndex(server,config) {
+        server.log(['status', 'info', 'Sentinl'], 'Core Index check...');
         if (!server.plugins.elasticsearch) {
-          server.log(['status', 'error', 'KaaE'], 'Elasticsearch client not available, retrying in 5s');
+          server.log(['status', 'error', 'Sentinl'], 'Elasticsearch client not available, retrying in 5s');
           tryCreate();
           return;
         }
@@ -52,10 +52,10 @@ function createKaaeIndex(server,config) {
           index: config.es.default_index
         }, function (error, exists) {
             if (exists === true) {
-                server.log(['status', 'debug', 'KaaE'], 'Core Index exists!');
+                server.log(['status', 'debug', 'Sentinl'], 'Core Index exists!');
                 return;
             }
-            server.log(['status', 'debug', 'KaaE'], 'Creating KaaE core Index...');
+            server.log(['status', 'debug', 'Sentinl'], 'Creating Sentinl core Index...');
             client.indices.create({
                 index: config.es.default_index,
                 body: {
@@ -84,9 +84,9 @@ function createKaaeIndex(server,config) {
                 }
               })
               .then(function (resp) {
-                   server.log(['status', 'info', 'KaaE'], 'Core Index response', resp);
+                   server.log(['status', 'info', 'Sentinl'], 'Core Index response', resp);
               }, function (err) {
-                   server.log(['status', 'warning', 'KaaE'], err.message);
+                   server.log(['status', 'warning', 'Sentinl'], err.message);
               });
         });
 }
@@ -94,18 +94,18 @@ function createKaaeIndex(server,config) {
 var tryCount = 0;
 function tryCreate() {
   if (tryCount > 5) {
-      server.log(['status', 'warning', 'KaaE'], 'Failed creating Indices mapping!');
+      server.log(['status', 'warning', 'Sentinl'], 'Failed creating Indices mapping!');
   return;
   }
-  setTimeout(createKaaeIndex, 5000);
+  setTimeout(createSentinlIndex, 5000);
   tryCount++;
 }
 
 
-function createKaaeAlarmIndex(server,config) {
-        server.log(['status', 'info', 'KaaE'], 'Alarm Index check...');
+function createSentinlAlarmIndex(server,config) {
+        server.log(['status', 'info', 'Sentinl'], 'Alarm Index check...');
         if (!server.plugins.elasticsearch) {
-          server.log(['status', 'error', 'KaaE'], 'Elasticsearch client not available, retrying in 5s');
+          server.log(['status', 'error', 'Sentinl'], 'Elasticsearch client not available, retrying in 5s');
           tryAlarmCreate();
           return;
         }
@@ -115,10 +115,10 @@ function createKaaeAlarmIndex(server,config) {
           index: config.es.alarm_index
         }, function (error, exists) {
             if (exists === true) {
-                server.log(['status', 'debug', 'KaaE'], 'Alarms Index exists!');
+                server.log(['status', 'debug', 'Sentinl'], 'Alarms Index exists!');
                 return;
             }
-            server.log(['status', 'debug', 'KaaE'], 'Creating KaaE Alarms Index...');
+            server.log(['status', 'debug', 'Sentinl'], 'Creating Sentinl Alarms Index...');
             client.indices.create({
                 index: config.es.alarm_index,
                 body: {
@@ -139,9 +139,9 @@ function createKaaeAlarmIndex(server,config) {
                 }
             })
             .then(function (resp) {
-                   server.log(['status', 'info', 'KaaE'], 'Alarm Index response', resp);
+                   server.log(['status', 'info', 'Sentinl'], 'Alarm Index response', resp);
             }, function (err) {
-                   server.log(['error', 'warning', 'KaaE'], err.message);
+                   server.log(['error', 'warning', 'Sentinl'], err.message);
             });
         });
 }
@@ -149,17 +149,17 @@ function createKaaeAlarmIndex(server,config) {
 var tryAlarmCount = 0;
 function tryAlarmCreate() {
   if (tryCount > 5) {
-      server.log(['error', 'warning', 'KaaE'], 'Failed creating Alarm Indices mapping!');
+      server.log(['error', 'warning', 'Sentinl'], 'Failed creating Alarm Indices mapping!');
   return;
   }
-  setTimeout(createKaaeAlarmIndex, 5000);
+  setTimeout(createSentinlAlarmIndex, 5000);
   tryAlarmCount++;
 }
 
 
 module.exports = {
-  createKaaeAlarmIndex: createKaaeAlarmIndex,
-  createKaaeIndex: createKaaeIndex,
+  createSentinlAlarmIndex: createSentinlAlarmIndex,
+  createSentinlIndex: createSentinlIndex,
   tryCreate: tryCreate,
   tryAlarmCreate: tryAlarmCreate
 };

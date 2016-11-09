@@ -2,7 +2,7 @@
  * Copyright 2016, Lorenzo Mangani (lorenzo.mangani@gmail.com)
  * Copyright 2015, Rao Chenlin (rao.chenlin@gmail.com)
  *
- * This file is part of KaaE (http://github.com/elasticfence/kaae)
+ * This file is part of Sentinl (http://github.com/sirensolutions/sentinl)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import fs from 'fs';
 import getElasticsearchClient from './get_elasticsearch_client';
 
 var debug = true;
-var hlimit = config.kaae.history ? config.kaae.history : 10;
+var hlimit = config.sentinl.history ? config.sentinl.history : 10;
 
 export default function (server, actions, payload) {
 
@@ -38,7 +38,7 @@ export default function (server, actions, payload) {
             host: config.settings.email.host,
             ssl: config.settings.email.ssl
         }, function (err, message) {
-            server.log(['status', 'info', 'Kaae', 'email'], err || message);
+            server.log(['status', 'info', 'Sentinl', 'email'], err || message);
         });
         // server.smtp.debug(100);
     }
@@ -51,11 +51,11 @@ export default function (server, actions, payload) {
                 var Horseman = require('node-horseman');
                 var horseman = new Horseman();
             } catch (err) {
-                server.log(['status', 'info', 'KaaE'], 'Horseman and PhantomJS required! ' + err);
-                server.log(['status', 'info', 'KaaE'], 'Install Horseman: "npm install -g node-horseman"');
+                server.log(['status', 'info', 'Sentinl'], 'Horseman and PhantomJS required! ' + err);
+                server.log(['status', 'info', 'Sentinl'], 'Install Horseman: "npm install -g node-horseman"');
             }
         } else {
-            server.log(['status', 'info', 'KaaE'], 'Action Report requires Email Settings! Reports Disabled.');
+            server.log(['status', 'info', 'Sentinl'], 'Action Report requires Email Settings! Reports Disabled.');
         }
     }
 
@@ -68,10 +68,10 @@ export default function (server, actions, payload) {
     /* Internal Support Functions */
     var tmpHistory = function (type, message) {
         // Keep history stack of latest alarms (temp)
-        server.kaaeStore.push({id: new Date(), action: type, message: message});
+        server.sentinlStore.push({id: new Date(), action: type, message: message});
         // Rotate local stack
-        if (server.kaaeStore.length > hlimit) {
-            server.kaaeStore.shift();
+        if (server.sentinlStore.length > hlimit) {
+            server.sentinlStore.shift();
         }
     };
 
@@ -81,11 +81,11 @@ export default function (server, actions, payload) {
         var duration = getDuration(period);
         if (duration) {
             var justNow = new Date().getTime();
-            if (server.kaaeStore[id] === undefined) {
-                server.kaaeStore[id] = justNow;
+            if (server.sentinlStore[id] === undefined) {
+                server.sentinlStore[id] = justNow;
                 return false;
-            } else if ((justNow - server.kaaeStore[id]) > duration) {
-                server.kaaeStore[id] = justNow;
+            } else if ((justNow - server.sentinlStore[id]) > duration) {
+                server.sentinlStore[id] = justNow;
                 return false;
             } else {
                 // reject action
@@ -106,7 +106,7 @@ export default function (server, actions, payload) {
             var payload = {}
         }
         ;
-        server.log(['status', 'info', 'KaaE'], 'Storing Alarm to ES with type:' + type);
+        server.log(['status', 'info', 'Sentinl'], 'Storing Alarm to ES with type:' + type);
         var indexDate = '-' + new Date().toISOString().substr(0, 10).replace(/-/g, '.');
         var index_name = config.es.alarm_index ? config.es.alarm_index + indexDate : 'watcher_alarms' + indexDate;
         client.create({
@@ -131,7 +131,7 @@ export default function (server, actions, payload) {
     /* Loop Actions */
     _.forOwn(actions, function (action, key) {
 
-        server.log(['status', 'info', 'KaaE'], 'Processing action: ' + key);
+        server.log(['status', 'info', 'Sentinl'], 'Processing action: ' + key);
 
         /* ***************************************************************************** */
         /*
@@ -141,7 +141,7 @@ export default function (server, actions, payload) {
          /* ***************************************************************************** */
         if (_.has(action, 'throttle_period')) {
             if (debounce(key, action.throttle_period)) {
-                server.log(['status', 'info', 'KaaE'], 'Action Throtthled: ' + key);
+                server.log(['status', 'info', 'Sentinl'], 'Action Throtthled: ' + key);
                 return;
             }
         }
@@ -159,7 +159,7 @@ export default function (server, actions, payload) {
             var priority = action.console.priority ? action.console.priority : "INFO";
             var formatter_c = action.console.message ? action.console.message : "{{ payload }}";
             var message = mustache.render(formatter_c, {"payload": payload});
-            server.log(['status', 'info', 'KaaE'], 'Console Payload: ' + JSON.stringify(payload));
+            server.log(['status', 'info', 'Sentinl'], 'Console Payload: ' + JSON.stringify(payload));
             esHistory(key, message, priority, payload);
         }
 
@@ -167,7 +167,7 @@ export default function (server, actions, payload) {
         /*
          *   "email" : {
          *      "to" : "root@localhost",
-         *      "from" : "kaae@localhost",
+         *      "from" : "sentinl@localhost",
          *      "subject" : "Alarm Title",
          *      "priority" : "high",
          *      "body" : "Series Alarm {{ payload._id}}: {{payload.hits.total}}",
@@ -176,25 +176,25 @@ export default function (server, actions, payload) {
          */
 
         if (_.has(action, 'email')) {
-            var formatter_s = action.email.subject ? action.email.subject : "KAAE: " + key;
+            var formatter_s = action.email.subject ? action.email.subject : "SENTINL: " + key;
             var formatter_b = action.email.body ? action.email.body : "Series Alarm {{ payload._id}}: {{payload.hits.total}}";
             var subject = mustache.render(formatter_s, {"payload": payload});
             var body = mustache.render(formatter_b, {"payload": payload});
             var priority = action.email.priority ? action.email.priority : "INFO";
-            server.log(['status', 'info', 'KaaE', 'email'], 'Subject: ' + subject + ', Body: ' + body);
+            server.log(['status', 'info', 'Sentinl', 'email'], 'Subject: ' + subject + ', Body: ' + body);
 
             if (!email_server || !config.settings.email.active) {
-                server.log(['status', 'info', 'Kaae', 'email'], 'Delivery Disabled!');
+                server.log(['status', 'info', 'Sentinl', 'email'], 'Delivery Disabled!');
             }
             else {
-                server.log(['status', 'info', 'Kaae', 'email'], 'Delivering to Mail Server');
+                server.log(['status', 'info', 'Sentinl', 'email'], 'Delivering to Mail Server');
                 email_server.send({
                     text: body,
                     from: action.email.from,
                     to: action.email.to,
                     subject: subject
                 }, function (err, message) {
-                    server.log(['status', 'info', 'Kaae', 'email'], err || message);
+                    server.log(['status', 'info', 'Sentinl', 'email'], err || message);
                 });
             }
             if (!action.email.stateless) {
@@ -208,7 +208,7 @@ export default function (server, actions, payload) {
         /*
          *   "email_html" : {
          *      "to" : "root@localhost",
-         *      "from" : "kaae@localhost",
+         *      "from" : "sentinl@localhost",
          *      "subject" : "Alarm Title",
          *      "priority" : "high",
          *      "body" : "Series Alarm {{ payload._id}}: {{payload.hits.total}}",
@@ -218,20 +218,20 @@ export default function (server, actions, payload) {
          */
 
         if (_.has(action, 'email_html')) {
-            var formatter_s = action.email_html.subject ? action.email_html.subject : "KAAE: " + key;
+            var formatter_s = action.email_html.subject ? action.email_html.subject : "SENTINL: " + key;
             var formatter_b = action.email_html.body ? action.email_html.body : "Series Alarm {{ payload._id}}: {{payload.hits.total}}";
             var formatter_c = action.email_html.body ? action.email_html.body : "<p>Series Alarm {{ payload._id}}: {{payload.hits.total}}</p>";
             var subject = mustache.render(formatter_s, {"payload": payload});
             var body = mustache.render(formatter_b, {"payload": payload});
             var html = mustache.render(formatter_c, {"payload": payload});
             var priority = action.email_html.priority ? action.email_html.priority : "INFO";
-            server.log(['status', 'info', 'KaaE', 'email_html'], 'Subject: ' + subject + ', Body: ' + body + ', HTML:' + html);
+            server.log(['status', 'info', 'Sentinl', 'email_html'], 'Subject: ' + subject + ', Body: ' + body + ', HTML:' + html);
 
             if (!email_server || !config.settings.email_html.active) {
-                server.log(['status', 'info', 'Kaae', 'email_html'], 'Delivery Disabled!');
+                server.log(['status', 'info', 'Sentinl', 'email_html'], 'Delivery Disabled!');
             }
             else {
-                server.log(['status', 'info', 'Kaae', 'email'], 'Delivering to Mail Server');
+                server.log(['status', 'info', 'Sentinl', 'email'], 'Delivering to Mail Server');
                 email_server.send({
                     text: body,
                     from: action.email_html.from,
@@ -239,7 +239,7 @@ export default function (server, actions, payload) {
                     subject: subject,
                     attachment: [{data: html, alternative: true}]
                 }, function (err, message) {
-                    server.log(['status', 'info', 'Kaae', 'email_html'], err || message);
+                    server.log(['status', 'info', 'Sentinl', 'email_html'], err || message);
                 });
             }
             if (!action.email_html.stateless) {
@@ -252,7 +252,7 @@ export default function (server, actions, payload) {
         /*
          *   "report" : {
          *      "to" : "root@localhost",
-         *      "from" : "kaae@localhost",
+         *      "from" : "sentinl@localhost",
          *      "subject" : "Report Title",
          *      "priority" : "high",
          *      "body" : "Series Report {{ payload._id}}: {{payload.hits.total}}",
@@ -272,24 +272,24 @@ export default function (server, actions, payload) {
          */
 
         if (_.has(action, 'report')) {
-            var formatter_s = action.report.subject ? action.report.subject : "KAAE: " + key;
+            var formatter_s = action.report.subject ? action.report.subject : "SENTINL: " + key;
             var formatter_b = action.report.body ? action.report.body : "Series Report {{ payload._id}}: {{payload.hits.total}}";
             var subject = mustache.render(formatter_s, {"payload": payload});
             var body = mustache.render(formatter_b, {"payload": payload});
             var priority = action.report.priority ? action.report.priority : "INFO";
-            server.log(['status', 'info', 'KaaE', 'report'], 'Subject: ' + subject + ', Body: ' + body);
+            server.log(['status', 'info', 'Sentinl', 'report'], 'Subject: ' + subject + ', Body: ' + body);
             if (!email_server) {
-                server.log(['status', 'info', 'Kaae', 'report'], 'Reporting Disabled! Email Required!');
+                server.log(['status', 'info', 'Sentinl', 'report'], 'Reporting Disabled! Email Required!');
                 return;
             }
             if (!horseman || !action.report.snapshot) {
-                server.log(['status', 'info', 'Kaae', 'report'], 'Reporting Disabled! No Settings!');
+                server.log(['status', 'info', 'Sentinl', 'report'], 'Reporting Disabled! No Settings!');
                 return;
             }
             else {
                 //var filename = "report-"+ Math.random().toString(36).substr(2, 9)+".pdf";
                 var filename = "report-" + Math.random().toString(36).substr(2, 9) + ".png";
-                server.log(['status', 'info', 'Kaae', 'report'], 'Creating Report for ' + action.report.snapshot.url);
+                server.log(['status', 'info', 'Sentinl', 'report'], 'Creating Report for ' + action.report.snapshot.url);
                 try {
                     horseman
                         .viewport(1280, 900)
@@ -298,7 +298,7 @@ export default function (server, actions, payload) {
                         .screenshot(action.report.snapshot.path + filename)
                         //.pdf(action.report.snapshot.path + filename)
                         .then(function () {
-                            server.log(['status', 'info', 'Kaae', 'report'], 'Snapshot ready for url:' + action.report.snapshot.url);
+                            server.log(['status', 'info', 'Sentinl', 'report'], 'Snapshot ready for url:' + action.report.snapshot.url);
                             email_server.send({
                                 text: body,
                                 from: action.report.from,
@@ -315,7 +315,7 @@ export default function (server, actions, payload) {
                                     }
                                 ]
                             }, function (err, message) {
-                                server.log(['status', 'info', 'Kaae', 'report'], err || message);
+                                server.log(['status', 'info', 'Sentinl', 'report'], err || message);
                                 fs.unlinkSync(action.report.snapshot.path + filename);
                                 payload.message = err || message;
                                 if (!action.report.stateless) {
@@ -325,7 +325,7 @@ export default function (server, actions, payload) {
                             });
                         }).close();
                 } catch (err) {
-                    server.log(['status', 'info', 'Kaae', 'report'], 'ERROR: ' + err);
+                    server.log(['status', 'info', 'Sentinl', 'report'], 'ERROR: ' + err);
                     payload.message = err;
                     if (!action.report.stateless) {
                         // Log Event
@@ -350,10 +350,10 @@ export default function (server, actions, payload) {
             var formatter = action.slack.message ? action.slack.message : "Series Alarm {{ payload._id}}: {{payload.hits.total}}";
             var message = mustache.render(formatter, {"payload": payload});
             var priority = action.slack.priority ? action.slack.priority : "INFO";
-            server.log(['status', 'info', 'KaaE', 'Slack'], 'Webhook to #' + action.slack.channel + ' msg: ' + message);
+            server.log(['status', 'info', 'Sentinl', 'Slack'], 'Webhook to #' + action.slack.channel + ' msg: ' + message);
 
             if (!slack || !config.settings.slack.active) {
-                server.log(['status', 'info', 'KaaE', 'slack'], 'Delivery Disabled!');
+                server.log(['status', 'info', 'Sentinl', 'slack'], 'Delivery Disabled!');
             }
             else {
                 try {
@@ -363,7 +363,7 @@ export default function (server, actions, payload) {
                         username: config.settings.slack.username
                     });
                 } catch (err) {
-                    server.log(['status', 'info', 'KaaE', 'slack'], 'Failed sending to: ' + condig.settings.slack.hook);
+                    server.log(['status', 'info', 'Sentinl', 'slack'], 'Failed sending to: ' + condig.settings.slack.hook);
                 }
             }
 
@@ -395,7 +395,7 @@ export default function (server, actions, payload) {
             var options = {
                 hostname: action.webhook.host ? action.webhook.host : 'locahost',
                 port: action.webhook.port ? action.webhook.port : 80,
-                path: action.webhook.path ? action.webhook.path : '/kaae',
+                path: action.webhook.path ? action.webhook.path : '/sentinl',
                 method: action.webhook.method ? action.webhook.method : 'POST'
             }
 
@@ -404,12 +404,12 @@ export default function (server, actions, payload) {
             var req = http.request(options, function (res) {
                 res.setEncoding('utf8');
                 res.on('data', function (chunk) {
-                    server.log(['status', 'debug', 'KaaE'], 'Webhook Response: ' + chunk);
+                    server.log(['status', 'debug', 'Sentinl'], 'Webhook Response: ' + chunk);
                 });
             });
 
             req.on('error', function (e) {
-                server.log(['status', 'err', 'KaaE'], 'Error shipping Webhook: ' + e.message);
+                server.log(['status', 'err', 'Sentinl'], 'Error shipping Webhook: ' + e.message);
             });
 
             if (webhook_body) {
@@ -435,7 +435,7 @@ export default function (server, actions, payload) {
             var es_formater = action.local.message ? action.local.message : "{{ payload }}";
             var es_message = mustache.render(es_formatter, {"payload": payload});
             var priority = action.local.priority ? action.local.priority : "INFO";
-            server.log(['status', 'info', 'KaaE', 'local'], 'Logged Message: ' + es_message);
+            server.log(['status', 'info', 'Sentinl', 'local'], 'Logged Message: ' + es_message);
             // Log Event
             esHistory(key, es_message, priority, payload);
         }
@@ -482,12 +482,12 @@ export default function (server, actions, payload) {
             var req = http.request(options, function (res) {
                 res.setEncoding('utf8');
                 res.on('data', function (chunk) {
-                    server.log(['status', 'debug', 'KaaE'], 'Response: ' + chunk);
+                    server.log(['status', 'debug', 'Sentinl'], 'Response: ' + chunk);
                 });
             });
 
             req.on('error', function (e) {
-                server.log(['status', 'err', 'KaaE'], 'Error creating a PushApps notification: ' + e);
+                server.log(['status', 'err', 'Sentinl'], 'Error creating a PushApps notification: ' + e);
             });
             req.write(post_data);
             req.end();
