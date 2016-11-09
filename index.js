@@ -17,8 +17,6 @@
  * limitations under the License.
  */
 
-import _ from 'lodash';
-
 export default function (kibana) {
   return new kibana.Plugin({
     require: ['kibana', 'elasticsearch'],
