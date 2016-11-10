@@ -88,6 +88,6 @@ License for the specific language governing permissions and limitations under
 the License.
 </pre>
 
-<img src="https://img.shields.io/github/license/sirensolutions/sentinl.svg"/>
+<img src="https://img.shields.io/github/license/sirensolutions/sentinl-private.svg"/>
 <img src="https://img.shields.io/badge/made%20with-love-red.svg"/>
-<img src="https://img.shields.io/badge/edited%20with-nano-blue.svg"/>
+<img src="https://img.shields.io/badge/made%20with-nano-blue.svg"/>
