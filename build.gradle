@@ -1,0 +1,275 @@
+///////////////////////////////////////////////////
+//                                               //
+//             Dependency Details                //
+//                                               //
+///////////////////////////////////////////////////
+
+buildscript {
+
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+
+    dependencies {
+        classpath 'com.moowork.gradle:gradle-node-plugin:0.13'
+        classpath 'com.moowork.gradle:gradle-gulp-plugin:0.13'
+        classpath 'com.moowork.gradle:gradle-grunt-plugin:0.13'
+        classpath 'org.ajoberstar:gradle-git:1.6.0'
+    }
+
+}
+
+apply plugin: "idea"
+apply plugin: "base"
+apply plugin: 'com.moowork.gulp'
+apply plugin: 'com.moowork.grunt'
+apply plugin: 'com.moowork.node'
+apply plugin: 'org.ajoberstar.grgit'
+apply plugin: 'maven-publish'
+
+import groovy.json.JsonSlurper
+import org.ajoberstar.grgit.Grgit
+
+///////////////////////////////////////////////////
+//                                               //
+//                Package Json                   //
+//                                               //
+///////////////////////////////////////////////////
+
+def loadPackageJson() {
+  File packageJson = new File(projectDir, "package.json")
+  return new JsonSlurper().parseText(packageJson.text)
+}
+
+def packageJson = loadPackageJson()
+
+///////////////////////////////////////////////////
+//                                               //
+//               Project Details                 //
+//                                               //
+///////////////////////////////////////////////////
+
+group = 'solutions.siren'
+version packageJson.version
+
+///////////////////////////////////////////////////
+//                                               //
+//                Install Kibi                   //
+//                                               //
+///////////////////////////////////////////////////
+
+/**
+ * Define the kibi source artifact dependency
+ */
+configurations {
+    kibi
+}
+
+dependencies {
+    kibi "solutions.siren:kibi-core:${project.version}:sources@zip"
+}
+
+/**
+ * Task to download locally the kibi dependency
+ */
+task downloadKibi(type: Copy) {
+    from configurations.kibi
+    into new File(buildDir, 'dependencies')
+    rename { name ->
+        def artifact = configurations.kibi.resolvedConfiguration.resolvedArtifacts.find { it.file.name == name }
+        "${artifact.name}.${artifact.extension}"
+    }
+}
+
+/**
+ * Task to unzip kibi
+ */
+task extractKibi(type: Copy, dependsOn: [downloadKibi]) {
+    from { zipTree(new File(downloadKibi.destinationDir, "kibi-core.zip")) }
+    into new File(buildDir, 'kibi-core')
+}
+
+/**
+ * Task to execute the `npmInstall` gradle's task from the kibi distribution
+ */
+task npmInstallKibi(type: GradleBuild, dependsOn: [extractKibi]) {
+    dir new File(extractKibi.destinationDir, "kibi-core-${project.version}-sources")
+    tasks = ['npmInstall']
+}
+
+/**
+ * Main task to install Kibi locally
+ */
+task installKibi(dependsOn: [downloadKibi, extractKibi, npmInstallKibi]) {}
+
+///////////////////////////////////////////////////
+//                                               //
+//                     Node                      //
+//                                               //
+///////////////////////////////////////////////////
+
+node {
+    // Version of node to use.
+    version = nodeVersion
+
+    // Base URL for fetching node distributions (change if you have a mirror).
+    distBaseUrl = 'https://nodejs.org/dist'
+
+    // If true, it will download node using above parameters.
+    // If false, it will try to use globally installed node.
+    download = true
+
+    // Set the work directory for unpacking node
+    workDir = file("${buildDir}/nodejs")
+
+    // Set the work directory where node_modules should be located
+    nodeModulesDir = file("${projectDir}")
+}
+
+///////////////////////////////////////////////////
+//                                               //
+//                   Package                     //
+//                                               //
+///////////////////////////////////////////////////
+
+task gulpPackage(dependsOn: ['gulp_package']) << {}
+
+// run npm install
+gulp_package.dependsOn 'npmInstall'
+
+// run gulp install
+gulp_package.dependsOn 'installGulp'
+
+///////////////////////////////////////////////////
+//                                               //
+//           Install Grunt Globally              //
+//                                               //
+///////////////////////////////////////////////////
+
+task installGruntGlobally(type: NpmTask) {
+    args = ['install', '-g', 'grunt']
+}
+
+///////////////////////////////////////////////////
+//                                               //
+//                     Dev                       //
+//                                               //
+///////////////////////////////////////////////////
+
+task gulpDev(type: GulpTask) {
+    args = ["dev"]
+    if (project.hasProperty('kibiHomePath')) {
+        args << "--kibanahomepath=${kibiHomePath}"
+    }
+    else {
+        dependsOn installKibi
+        args << "--kibanahomepath=${new File(extractKibi.destinationDir, "kibi-core-${project.version}-sources").getAbsolutePath()}"
+    }
+}
+
+// run npm install
+gulpDev.dependsOn 'npmInstall'
+
+// run gulp install
+gulpDev.dependsOn 'installGulp'
+
+// makes that grunt is installed
+gulpDev.dependsOn 'installGruntGlobally'
+gulpDev.dependsOn 'installGrunt'
+installGrunt.mustRunAfter 'installGruntGlobally'
+
+///////////////////////////////////////////////////
+//                                               //
+//                    Test                       //
+//                                               //
+///////////////////////////////////////////////////
+
+task gulpTest(type: GulpTask) {
+    args = ["test"]
+    if (project.hasProperty('kibiHomePath')) {
+        args << "--kibanahomepath=${kibiHomePath}"
+    }
+    else {
+        dependsOn installKibi
+        args << "--kibanahomepath=${new File(extractKibi.destinationDir, "kibi-core-${project.version}-sources").getAbsolutePath()}"
+    }
+}
+
+// run npm install
+gulpTest.dependsOn 'npmInstall'
+
+// run gulp install
+gulpTest.dependsOn 'installGulp'
+
+// makes that grunt is installed
+gulpTest.dependsOn 'installGruntGlobally'
+gulpTest.dependsOn 'installGrunt'
+installGrunt.mustRunAfter 'installGruntGlobally'
+
+///////////////////////////////////////////////////
+//                                               //
+//                  Test Dev                     //
+//                                               //
+///////////////////////////////////////////////////
+
+task gulpTestDev(type: GulpTask) {
+    args = ["testdev"]
+    if (project.hasProperty('kibiHomePath')) {
+        args << "--kibanahomepath=${kibiHomePath}"
+    }
+    else {
+        dependsOn installKibi
+        args << "--kibanahomepath=${new File(extractKibi.destinationDir, "kibi-core-${project.version}-sources").getAbsolutePath()}"
+    }
+}
+
+// run npm install
+gulpTestDev.dependsOn 'npmInstall'
+
+// run gulp install
+gulpTestDev.dependsOn 'installGulp'
+
+// makes that grunt is installed
+gulpTestDev.dependsOn 'installGruntGlobally'
+gulpTestDev.dependsOn 'installGrunt'
+installGrunt.mustRunAfter 'installGruntGlobally'
+
+///////////////////////////////////////////////////
+//                                               //
+//                    Clean                      //
+//                                               //
+///////////////////////////////////////////////////
+
+// Extends clean task to clean the node_modules directory
+clean << {
+    def nodeModulesDir = file("${projectDir}/node_modules")
+    if (nodeModulesDir.exists()) {
+        println "=== Cleaning node modules directory: ${nodeModulesDir} ==="
+        nodeModulesDir.deleteDir()
+    }
+}
+
+// Executes the Gulp's clean task
+clean.dependsOn 'gulp_clean'
+
+///////////////////////////////////////////////////
+//                                               //
+//                Publishing                     //
+//                                               //
+///////////////////////////////////////////////////
+
+publishing {
+  publications {
+
+    zipDist(MavenPublication) {
+      artifact(new File("${projectDir}/target/gulp", "${packageJson.name}.zip"))
+      groupId project.group
+      artifactId "sentinl"
+      version packageJson.version
+    }
+
+  }
+}
+
