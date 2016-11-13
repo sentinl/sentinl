@@ -44,11 +44,11 @@ import AggResponseTabifyTabifyProvider from 'ui/agg_response/tabify/tabify';
 // import tableSpyModeTemplate from 'plugins/spy_modes/table_spy_mode.html';
 
 import Notifier from 'ui/notify/notifier';
-// import 'ui/autoload/styles';
+import 'ui/autoload/styles';
 
 /* Custom Template + CSS */
 import './less/main.less';
-import template from './templates/index.html';
+import indexTemplate from './templates/index.html';
 import about from './templates/about.html';
 import alarms from './templates/alarms.html';
 import jsonHtml from './templates/json.html';
@@ -57,6 +57,7 @@ var impactLogo = require('plugins/kaae/kaae_watch.svg');
 var smallLogo = require('plugins/kaae/kaae.svg');
 
 /* Inject Tabs */
+/*
   var topNavMenu = [
   {
     key: 'watchers',
@@ -95,35 +96,43 @@ chrome
     activeIndicatorColor: '#EFF0F2'
   }
   ]);
+*/
 
 uiRoutes.enable();
 
 uiRoutes
 .when('/', {
-  template,
+  template: indexTemplate,/*
   resolve: {
     currentTime($http) {
       return $http.get('../api/kaae/example')
       .then((resp) => resp.data.time);
     }
-  }
-});
-
-uiRoutes
+  }*/
+  controller: 'kaaeWatchers',
+  controllerAs: 'ctrl'  
+})
 .when('/alarms', {
-  template: alarms,
+  template: alarms,/*
   resolve: {
     currentTime($http) {
       return $http.get('../api/kaae/example').then(function (resp) {
         return resp.data.time;
       });
     }
-  }
-});
-
-uiRoutes
+  }*/
+  controller: 'kaaeAlarms',
+  controllerAs: 'ctrl'
+})
 .when('/about', {
-  template: about
+  template: about,
+  controller: 'kaaeAbout',
+  controllerAs: 'ctrl'
+})
+.otherwise({
+  template: indexTemplate,
+  controller: 'kaaeWatchers',
+  controllerAs: 'ctrl'
 });
 
 uiModules
@@ -133,7 +142,7 @@ uiModules
         return moment(dateString).format('YYYY-MM-DD HH:mm:ss.sss');;
     };
 })
-.controller('kaaeHelloWorld', function ($rootScope, $scope, $route, $interval, $timeout, timefilter, Private, Notifier, $window, kbnUrl, $http) {
+.controller('kaaeAlarms', function ($rootScope, $scope, $route, $interval, $timeout, timefilter, Private, Notifier, $window, kbnUrl, $http) {
   $scope.title = 'KaaE: Alarms';
   $scope.description = 'Kibana Alert App for Elasticsearch';
 
@@ -245,32 +254,17 @@ uiModules
 uiModules
 .get('api/kaae', [])
 .controller('kaaeWatchers', function ($rootScope, $scope, $route, $interval, $timeout, timefilter, Private, Notifier, $window, kbnUrl, $http) {
-  const tabifyAggResponse = Private(AggResponseTabifyTabifyProvider);
+  //const tabifyAggResponse = Private(AggResponseTabifyTabifyProvider);
 
   $scope.title = 'KaaE: Watchers';
-  $scope.description = 'Kibana Alert App for Elasticsearch';
-
-  $scope.notify = new Notifier();
-
-  $scope.topNavMenu = [
-  {
-    key: 'watchers',
-    description: 'WATCH',
-    run: function () { kbnUrl.change('/'); }
-  },
-  {
-    key: 'about',
-    description: 'ABOUT',
-    run: function () { kbnUrl.change('/about'); }
-  }
-  ];
-
+  $scope.description = 'Kibana Alert App for Elasticsearch';  
   timefilter.enabled = false;
+  $scope.notify = new Notifier();
 
   $scope.watchers = [];
 
   function importWatcherFromLocalStorage () {
-    /* New Entry from Saved Kibana Query */
+    // New Entry from Saved Kibana Query 
     if ($window.localStorage.getItem('kaae_saved_query')) {
       $scope.watcherNew(JSON.parse($window.localStorage.getItem('kaae_saved_query')));
       $window.localStorage.removeItem('kaae_saved_query');
@@ -281,21 +275,21 @@ uiModules
   .then((response) => {
     $scope.watchers = response.data.hits.hits;
     importWatcherFromLocalStorage();
-    /*
-     $scope.spy.params.spyPerPage = 10;
-     $scope.table = tabifyAggResponse($scope.vis, $route.current.locals.currentWatchers.data.hits.hits, {
-     canSplit: false,
-     asAggConfigResults: true,
-     partialRows: true
-     });
-     */
+
+ //    $scope.spy.params.spyPerPage = 10;
+ //    $scope.table = tabifyAggResponse($scope.vis, $route.current.locals.currentWatchers.data.hits.hits, {
+ //    canSplit: false,
+ //    asAggConfigResults: true,
+ //    partialRows: true
+ //    });
+
   })
   .catch((error) => {
     $scope.notify.error(error);
     importWatcherFromLocalStorage();
   });
 
-  /* ACE Editor */
+  // ACE Editor
   $scope.editor;
   $scope.editor_status = { readonly: false, undo: false, new: false };
   $scope.setAce = function($index,edit) {
@@ -347,7 +341,7 @@ uiModules
     return $scope.watchers;
   };
 
-  /* New Entry */
+  // New Entry 
   $scope.watcherNew = function(newwatcher) {
 	if (!newwatcher) {
 	  var newwatcher = {
@@ -393,12 +387,12 @@ uiModules
 
 	$scope.watchers.unshift(newwatcher);
 
-	/*
-	 refreshalarms = $timeout(function () {
+	
+	 //refreshalarms = $timeout(function () {
 	      // console.log('set new watcher to edit mode...');
-	      $scope.setAce(0,false);
- 	 }, 200);
-	*/
+	 //     $scope.setAce(0,false);
+ 	 //}, 200);
+	
 
   }
 
@@ -446,12 +440,12 @@ uiModules
 
 	$scope.watchers.unshift(newwatcher);
 
-	/*
-	 refreshalarms = $timeout(function () {
+	
+	 //refreshalarms = $timeout(function () {
 	      // console.log('set new watcher to edit mode...');
-	      $scope.setAce(0,false);
- 	 }, 200);
-	*/
+	 //     $scope.setAce(0,false);
+ 	 //}, 200);
+	
 
   }
 

@@ -47,27 +47,22 @@ export default function (server) {
         var timeInterval = {from: "now-15m", mode: "quick", to: "now"};
       }
       var qrange = {gte: timeInterval.from, lt: timeInterval.to};
+      
+      var res_number = config.kaae.results ? config.kaae.results : 50;
+      var search_index = config.es.alarm_index ? config.es.alarm_index + "*" : "watcher_alarms*";
 
-      const boundCallWithRequest = _.partial(server.plugins.elasticsearch.callWithRequest, req);
-      boundCallWithRequest('search', {
-        index: config.es.alarm_index ? config.es.alarm_index + "*" : "watcher_alarms*",
+      server.plugins.elasticsearch.callWithRequest(req, 'search', {
+        index: search_index,
         sort: "@timestamp : asc",
         allowNoIndices: false,
+        size: res_number,
         body: {
-          "size": config.kaae.results ? config.kaae.results : 50,
-          "query": {
-            "filtered": {
-              "query": {
-                "match_all": {}
-              },
-              "filter": {
-                "range": {
-                  "@timestamp": qrange
-                }
-              }
-            }
-          }
-        }
+			query: {
+				range: {
+					"@timestamp": qrange
+				}
+			}
+		}
       })
       .then((res) => reply(res))
       .catch((err) => reply(handleESError(err)));
@@ -106,7 +101,7 @@ export default function (server) {
         type: req.params.type,
         id: req.params.id
       };
-
+      
       callWithRequest(req, 'delete', body)
       .then((resp) => reply({ok: true, resp: resp}))
       .catch((err) => reply(handleESError(err)));
@@ -122,6 +117,7 @@ export default function (server) {
     handler: function (request, reply) {
 	server.kaaeInterval = JSON.parse(request.params.timefilter);
 	// console.log('server timefilter:',server.kaaeInterval);
+	server.log(['debug', 'info', 'KaaE'], 'server timefilter: '+ JSON.stringify(server.kaaeInterval));
 	reply({ status: "200 OK" });
    }
   });

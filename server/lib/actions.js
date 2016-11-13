@@ -109,7 +109,7 @@ export default function (server, actions, payload) {
         server.log(['status', 'info', 'KaaE'], 'Storing Alarm to ES with type:' + type);
         var indexDate = '-' + new Date().toISOString().substr(0, 10).replace(/-/g, '.');
         var index_name = config.es.alarm_index ? config.es.alarm_index + indexDate : 'watcher_alarms' + indexDate;
-        client.create({
+        client.index({
             index: index_name,
             type: type,
             body: {
@@ -430,16 +430,14 @@ export default function (server, actions, payload) {
          *      "message" : "Avg {{payload.aggregations.avg.value}} measurements in 5 minutes"
          *    }
          */
-
         if (_.has(action, 'elastic')) {
-            var es_formater = action.local.message ? action.local.message : "{{ payload }}";
-            var es_message = mustache.render(es_formatter, {"payload": payload});
-            var priority = action.local.priority ? action.local.priority : "INFO";
+            var es_formater = action.elastic.message ? action.elastic.message : "{{ payload }}";
+            var es_message = mustache.render(es_formater, {"payload": payload});
+            var priority = action.elastic.priority ? action.elastic.priority : "INFO";
             server.log(['status', 'info', 'KaaE', 'local'], 'Logged Message: ' + es_message);
             // Log Event
             esHistory(key, es_message, priority, payload);
         }
-
 
         /* ***************************************************************************** */
         /*      you must set your api key in config.settings.pushapps.api_key
