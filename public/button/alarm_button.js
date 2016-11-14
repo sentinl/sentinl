@@ -16,8 +16,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { has, get, set, isArray } from 'lodash';
-import { toJson } from 'ui/utils/aggressive_parse';
 
 const linkReqRespStats = function ($scope, config) {
   $scope.$bind('req', 'searchSource.history[searchSource.history.length - 1]');
@@ -33,7 +31,6 @@ const linkReqRespStats = function ($scope, config) {
     const resp = $scope.req.resp;
     const stats = $scope.stats = [];
     const indices = $scope.index = [];
-    let indexPattern;
 
     if (resp && resp.took != null) stats.push(['Query Duration', resp.took + 'ms']);
     if (req && req.ms != null) stats.push(['Request Duration', req.ms + 'ms']);
@@ -45,60 +42,59 @@ const linkReqRespStats = function ($scope, config) {
       // if (req.fetchParams.id) stats.push(['Id', req.fetchParams.id]);
 
       if (req.fetchParams.index) {
-        var idx = (req.fetchParams.index).toString();
-        var tmp = idx.replace(/\*/g, '');
-        indices.push("<" + tmp + "{now/d}>");
-        indices.push("<" + tmp + "{now/d-1d}>");
-        indexPattern = req.fetchParams.index;
+		var idx = (req.fetchParams.index).toString();
+	        var tmp = idx.replace(/\*/g, '');
+		indices.push("<"+tmp+"{now/d}>");
+		indices.push("<"+tmp+"{now/d-1d}>");
       }
     }
 
     $scope.intervals = [
-      {name: '1m', value: 'every 1 minute'},
-      {name: '5m', value: 'every 5 minutes'},
-      {name: '10m', value: 'every 10 minutes'},
-      {name: '1h', value: 'every 1 hour'}
+        { name: '1m', value: 'every 1 minute' },
+        { name: '5m', value: 'every 5 minutes' },
+        { name: '10m', value: 'every 10 minutes' },
+        { name: '1h', value: 'every 1 hour' }
     ];
 
     $scope.ranges = [
-      {name: '1m', value: 'now-1m'},
-      {name: '5m', value: 'now-5m'},
-      {name: '10m', value: 'now-1h'},
-      {name: '1h', value: 'now-1h'},
-      {name: '6h', value: 'now-6h'},
-      {name: '12h', value: 'now-12h'},
-      {name: '1d', value: 'now-1d'}
+        { name: '1m', value: 'now-1m' },
+        { name: '5m', value: 'now-5m' },
+        { name: '10m', value: 'now-1h' },
+        { name: '1h', value: 'now-1h' },
+        { name: '6h', value: 'now-6h' },
+        { name: '12h', value: 'now-12h' },
+        { name: '1d', value: 'now-1d' }
     ];
 
     $scope.resKeys = [];
-    $scope.iterateKeys = function (data) {
-      var result = {};
-
-      function recurse(cur, prop) {
-        if (Object(cur) !== cur) {
-          result[prop] = cur;
-        } else if (Array.isArray(cur)) {
-          for (var i = 0, l = cur.length; i < l; i++)
-            recurse(cur[i], prop + "[" + i + "]");
-          if (l == 0)
-            result[prop] = [];
-        } else {
-          var isEmpty = true;
-          for (var p in cur) {
-            isEmpty = false;
-            recurse(cur[p], prop ? prop + "." + p : p);
-          }
-          if (isEmpty && prop)
-            result[prop] = {};
-        }
-      }
-
-      recurse(data, "");
-      $scope.resKeys = result;
+    $scope.iterateKeys = function(data) {
+ 	   var result = {};
+ 	   function recurse (cur, prop) {
+ 	       if (Object(cur) !== cur) {
+ 	           result[prop] = cur;
+ 	       } else if (Array.isArray(cur)) {
+ 	            for(var i=0, l=cur.length; i<l; i++)
+ 	                recurse(cur[i], prop + "[" + i + "]");
+ 	           if (l == 0)
+ 	               result[prop] = [];
+ 	       } else {
+ 	           var isEmpty = true;
+ 	           for (var p in cur) {
+ 	               isEmpty = false;
+ 	               recurse(cur[p], prop ? prop+"."+p : p);
+ 	           }
+ 	           if (isEmpty && prop)
+ 	               result[prop] = {};
+ 	       }
+ 	   }
+ 	   recurse(data, "");
+ 	   $scope.resKeys = result;
     }
 
-    if (resp) $scope.iterateKeys({payload: resp});
+    if (resp) $scope.iterateKeys({payload:resp});
 
+    /* User can select different form */
+    $scope.watcher_choose = ["E-Mail", "HTML E-Mail", "Slack", "Webhook"];
 
     /* Defaults */
     $scope.watcher_id = "new_saved";
@@ -106,101 +102,134 @@ const linkReqRespStats = function ($scope, config) {
     $scope.watcher_interval = $scope.intervals[0].value;
     $scope.watcher_range = $scope.ranges[1].value;
 
+    /* fields for e-mail option */
     $scope.watcher_email_to = "root@localhost";
     $scope.watcher_email_subj = "SENTINL ALARM {{ payload._id }}";
     $scope.watcher_email_body = "Series Alarm {{ payload._id}}: {{ payload.hits.total }}";
 
+    /*fields for html_e-mail option */
+    $scope.watcher_email_html_to = "root@localhost";
+    $scope.watcher_email_html_subj = "SENTINL ALARM {{ payload._id }}";
+    $scope.watcher_email_html_body = "Series Alarm {{ payload._id}}: {{ payload.hits.total }}";
+    $scope.watcher_email_html_html = "<p>Series Alarm {{ payload._id}}: {{payload.hits.total}}</p>";
+
+    /* fields for slack webhook option */
+   $scope.watcher_slack_channel = "#<channel>";
+    $scope.watcher_slack_message = "Series Alarm {{ payload._id}}: {{payload.hits.total}}";
+
+    /* fields for generic webhook option */
+    $scope.watcher_webhook_method = "POST";
+    $scope.watcher_webhook_host = "remote.server";
+    $scope.watcher_webhook_port = 9200;
+    $scope.watcher_webhook_path = ":/{{payload.watcher_id}";
+    $scope.watcher_webhook_body = "{{payload.watcher_id}}:{{payload.hits.total}}";
+
     $scope.savedWatcher = {};
     var alarm = {};
 
-    $scope.watcherUpdate = function () {
-      $scope.savedWatcher.interval = $scope.watcher_interval;
-      $scope.savedWatcher.range = $scope.watcher_range;
-      $scope.savedWatcher.id = $scope.watcher_id;
-      $scope.savedWatcher.script = $scope.watcher_script;
-      $scope.savedWatcher.keys = $scope.resKeys;
-      config.savedWatcher = $scope.savedWatcher;
-    };
+    $scope.watcherUpdate = function(){
+	    $scope.savedWatcher.interval = $scope.watcher_interval;
+	    $scope.savedWatcher.range = $scope.watcher_range;
+	    $scope.savedWatcher.id = $scope.watcher_id;
+	    $scope.savedWatcher.script = $scope.watcher_script;
+	    $scope.savedWatcher.keys = $scope.resKeys;
+	    config.savedWatcher = $scope.savedWatcher;
+    }
 
-    $scope.makeAlarm = function () {
-      $scope.watcherUpdate();
-      $scope.alarm = {
-        "_index": "watcher",
-        "_type": "watch",
-        "_id": $scope.watcher_id,
-        "_new": "true",
-        "_source": {
-          "trigger": {
-            "schedule": {
-              "later": $scope.watcher_interval ? $scope.watcher_interval : "every 5 minutes"
-            }
-          },
-          "input": {
-            "search": {
-              "request": {
-                "index": [],
-                // NOTE: this is required to remove state members and to avoid modifying the searchSource history.
-                body: has(req, 'fetchParams.body') ? JSON.parse(toJson(req.fetchParams.body, angular.toJson)) : {}
-              }
-            }
-          },
-          "condition": {
-            "script": {
-              "script": $scope.savedWatcher.script
-            }
-          },
-          "transform": {},
-          "actions": {
-            "email_admin": {
-              "throttle_period": "15m",
-              "email": {
-                "to": $scope.watcher_email_to ? $scope.watcher_email_to : "alarm@localhost",
-                "from": $scope.watcher_email_from ? $scope.watcher_email_from : "sentinl@localhost",
-                "subject": $scope.watcher_email_subj ? $scope.watcher_email_subj : "Sentinl Alarm",
-                "priority": "high",
-                "body": $scope.watcher_email_body ? $scope.watcher_email_body : "Found {{payload.hits.total}} Events"
-              }
-            }
-          }
+    $scope.makeAlarm = function(){
+    	// console.log('updainge proto watcher..');
+    	$scope.watcherUpdate();
+            $scope.alarm = {
+    	  "_index": "watcher",
+    	  "_type": "watch",
+    	  "_id": $scope.watcher_id,
+    	  "_new": "true",
+    	  "_source": {
+    	    "trigger": {
+    	      "schedule": {
+    	        "later": $scope.watcher_interval ? $scope.watcher_interval : "every 5 minutes"
+    	      }
+    	    },
+    	    "input": {
+    	      "search": {
+    	        "request": {
+    	          "index": [],
+    	          "body": req.fetchParams.body,
+    	        }
+    	      }
+    	    },
+    	    "condition": {
+    	      "script": {
+    	        "script": $scope.savedWatcher.script
+    	      }
+    	    },
+    	    "transform": {},
+    	    "actions": {
+    	      "kibi_actions": {}
+    	    }
+    	  }
+	};
+
+
+
+
+	// Patch Indices
+	$scope.alarm._source.input.search.request.index = $scope.indices ? $scope.indices : [];
+	// Patch Range
+	$scope.alarm._source.input.search.request.body.query.filtered.filter = {"range": { "@timestamp": {"from": $scope.watcher_range ? $scope.watcher_range : "now-1h" } } };
+
+	// Store Watcher
+        alarm = $scope.alarm;
+	window.localStorage.setItem('sentinl_saved_query', JSON.stringify($scope.alarm));
+
+    }
+
+    $scope.updateAction = function(isChanged){
+      /*if another action already exists, I delete it and I create another empty action*/
+      if(isChanged) {
+        delete $scope.alarm._source.actions.kibi_actions;
+        $scope.alarm._source.actions.kibi_actions = {};
+      }
+      console.log($scope.alarm._source.actions.kibi_actions);
+      if($scope.selectedchoose == 'E-Mail') {
+        $scope.alarm._source.actions.kibi_actions.email = {
+            "to": $scope.watcher_email_to ? $scope.watcher_email_to : "alarm@localhost",
+        	  "from": $scope.watcher_email_from ? $scope.watcher_email_from : "sentinl@localhost",
+            "subject": $scope.watcher_email_subj ? $scope.watcher_email_subj : "Sentinl Alarm",
+            "priority": "high",
+            "body": $scope.watcher_email_body ? $scope.watcher_email_body : "Found {{payload.hits.total}} Events"
         }
-      };
-
-      // Patch Indices
-      const search = $scope.alarm._source.input.search;
-      // TODO: filtered query is gone in ES 5
-      const query = search.request.body.query.filtered;
-      search.request.index = $scope.indices ? $scope.indices : [];
-
-      // Patch range if this is a time based index pattern.
-      // TODO: needs to be reviewed for the different filter hierarchies that can be generated by Kibi.
-      if (indexPattern && indexPattern.hasTimeField()) {
-        const rangeFilter = {};
-        rangeFilter[indexPattern.timeFieldName] = {
-          from: $scope.watcher_range ? $scope.watcher_range : 'now-1h'
-        };
-        let queryFilter = get(query, 'filter.bool.must');
-        let patched = false;
-        if (isArray(queryFilter)) {
-          for (let filter of queryFilter) {
-            if (filter.range && filter.range[indexPattern.timeFieldName]) {
-              filter.range = rangeFilter;
-              patched = true;
-            }
+      } else if ($scope.selectedchoose == 'HTML E-Mail') {
+        $scope.alarm._source.actions.kibi_actions.email_html = {
+             "to": $scope.watcher_email_html_to ? $scope.watcher_email_html_to : "alarm@localhost",
+             "from": $scope.watcher_email_html_from ? $scope.watcher_email_html_from : "sentinl@localhost",
+             "subject": $scope.watcher_email_html_subj ? $scope.watcher_email_html_subj : "Sentinl Alarm",
+             "priority": "high",
+             "body": $scope.watcher_email_html_body ? $scope.watcher_email_html_body : "Found {{payload.hits.total}} Events",
+             "html": $scope.watcher_email_html_html ? $scope.watcher_email_html_html : "<p>Series Alarm {{ payload._id}}: {{payload.hits.total}}</p>"
+         }
+      } else if ($scope.selectedchoose == 'Slack') {
+        $scope.alarm._source.actions.kibi_actions.slack = {
+            "channel": $scope.watcher_slack_channel ? $scope.watcher_slack_channel : "#<channel>",
+            "message": $scope.watcher_slack_message ? $scope.watcher_slack_message : "Series Alarm {{ payload._id}}: {{payload.hits.total}}"
           }
-        }
-        if (!patched) {
-          set(query, 'filter.range', rangeFilter);
+        } else if ($scope.selectedchoose == 'Webhook') {
+          $scope.alarm._source.actions.kibi_actions.webhook = {
+            "method": $scope.watcher_webhook_method ? $scope.watcher_webhook_method : "POST",
+            "host": $scope.watcher_webhook_host ? $scope.watcher_webhook_host : "remote.server",
+            "port": $scope.watcher_webhook_port ? $scope.watcher_webhook_port : 9200,
+            "path": $scope.watcher_webhook_path ? $scope.watcher_webhook_path : ":/{{payload.watcher_id}",
+            "body": $scope.watcher_webhook_body ? $scope.watcher_webhook_body : "{{payload.watcher_id}}:{{payload.hits.total}}"
         }
       }
-
-      // Store Watcher
-      alarm = $scope.alarm;
-      window.localStorage.setItem('sentinl_saved_query', JSON.stringify($scope.alarm));
-    };
+    }
 
     $scope.makeAlarm();
+    $scope.updateAction();
+
   });
 };
+
 
 
 // Spy Placement
@@ -213,4 +242,3 @@ require('ui/registry/spy_modes').register(function () {
     template: require('plugins/sentinl/button/alarm_spy.html')
   };
 });
-
