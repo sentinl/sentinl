@@ -117,7 +117,6 @@ export default function (server) {
     handler: function (request, reply) {
 	server.kaaeInterval = JSON.parse(request.params.timefilter);
 	// console.log('server timefilter:',server.kaaeInterval);
-	server.log(['debug', 'info', 'KaaE'], 'server timefilter: '+ JSON.stringify(server.kaaeInterval));
 	reply({ status: "200 OK" });
    }
   });
