@@ -22,6 +22,8 @@ import mustache from 'mustache';
 import config from './config';
 import fs from 'fs';
 import getElasticsearchClient from './get_elasticsearch_client';
+import horsemanFactory from './horseman_factory';
+import url from 'url';
 
 var debug = true;
 var hlimit = config.sentinl.history ? config.sentinl.history : 10;
@@ -29,6 +31,7 @@ var hlimit = config.sentinl.history ? config.sentinl.history : 10;
 export default function (server, actions, payload) {
 
     const client = getElasticsearchClient(server);
+
     /* Email Settings */
     if (config.settings.email.active) {
         var email = require("emailjs");
@@ -45,16 +48,7 @@ export default function (server, actions, payload) {
 
     /* Image Report Settings */
     if (config.settings.report) {
-        /* Image Report Settings */
-        if (config.settings.report.active && config.settings.email.active) {
-            try {
-                var Horseman = require('node-horseman');
-                var horseman = new Horseman();
-            } catch (err) {
-                server.log(['status', 'info', 'Sentinl'], 'Horseman and PhantomJS required! ' + err);
-                server.log(['status', 'info', 'Sentinl'], 'Install Horseman: "npm install -g node-horseman"');
-            }
-        } else {
+        if (!(config.settings.report.active || config.settings.email.active)) {
             server.log(['status', 'info', 'Sentinl'], 'Action Report requires Email Settings! Reports Disabled.');
         }
     }
@@ -282,48 +276,57 @@ export default function (server, actions, payload) {
                 server.log(['status', 'info', 'Sentinl', 'report'], 'Reporting Disabled! Email Required!');
                 return;
             }
-            if (!horseman || !action.report.snapshot) {
+
+            if (!_.has(action, 'report.snapshot.url')) {
                 server.log(['status', 'info', 'Sentinl', 'report'], 'Reporting Disabled! No Settings!');
                 return;
             }
-            else {
-                //var filename = "report-"+ Math.random().toString(36).substr(2, 9)+".pdf";
+
+            let domain = null;
+            try {
+                const parts = url.parse(action.report.snapshot.url);
+                domain = parts.hostname;
+            } catch (error) {
+            }
+
+            horsemanFactory(server, domain)
+            .then((horseman) => {
                 var filename = "report-" + Math.random().toString(36).substr(2, 9) + ".png";
                 server.log(['status', 'info', 'Sentinl', 'report'], 'Creating Report for ' + action.report.snapshot.url);
                 try {
                     horseman
-                        .viewport(1280, 900)
-                        .open(action.report.snapshot.url)
-                        .wait(action.report.snapshot.params.delay)
-                        .screenshot(action.report.snapshot.path + filename)
-                        //.pdf(action.report.snapshot.path + filename)
-                        .then(function () {
-                            server.log(['status', 'info', 'Sentinl', 'report'], 'Snapshot ready for url:' + action.report.snapshot.url);
-                            email_server.send({
-                                text: body,
-                                from: action.report.from,
-                                to: action.report.to,
-                                subject: subject,
-                                attachment: [
-                                    // { path: action.report.snapshot.path + filename, type: "application/pdf", name: filename },
-                                    {data: "<html><img src='cid:my-report' width='100%'></html>"},
-                                    {
-                                        path: action.report.snapshot.path + filename,
-                                        type: "image/png",
-                                        name: filename + ".png",
-                                        headers: {"Content-ID": "<my-report>"}
-                                    }
-                                ]
-                            }, function (err, message) {
-                                server.log(['status', 'info', 'Sentinl', 'report'], err || message);
-                                fs.unlinkSync(action.report.snapshot.path + filename);
-                                payload.message = err || message;
-                                if (!action.report.stateless) {
-                                    // Log Event
-                                    esHistory(key, body, priority, payload);
+                    .viewport(1280, 900)
+                    .open(action.report.snapshot.url)
+                    .wait(action.report.snapshot.params.delay)
+                    .screenshot(action.report.snapshot.path + filename)
+                    //.pdf(action.report.snapshot.path + filename)
+                    .then(function () {
+                        server.log(['status', 'info', 'Sentinl', 'report'], 'Snapshot ready for url:' + action.report.snapshot.url);
+                        email_server.send({
+                            text: body,
+                            from: action.report.from,
+                            to: action.report.to,
+                            subject: subject,
+                            attachment: [
+                                // { path: action.report.snapshot.path + filename, type: "application/pdf", name: filename },
+                                {data: "<html><img src='cid:my-report' width='100%'></html>"},
+                                {
+                                    path: action.report.snapshot.path + filename,
+                                    type: "image/png",
+                                    name: filename + ".png",
+                                    headers: {"Content-ID": "<my-report>"}
                                 }
-                            });
-                        }).close();
+                            ]
+                        }, function (err, message) {
+                            server.log(['status', 'info', 'Sentinl', 'report'], err || message);
+                            fs.unlinkSync(action.report.snapshot.path + filename);
+                            payload.message = err || message;
+                            if (!action.report.stateless) {
+                                // Log Event
+                                esHistory(key, body, priority, payload);
+                            }
+                        });
+                    }).close();
                 } catch (err) {
                     server.log(['status', 'info', 'Sentinl', 'report'], 'ERROR: ' + err);
                     payload.message = err;
@@ -332,9 +335,10 @@ export default function (server, actions, payload) {
                         esHistory(key, body, priority, payload);
                     }
                 }
-                ;
-            }
-
+            })
+            .catch((error) => {
+              server.log(['status', 'error', 'Sentinl'], `Cannot instantiate Horseman/PhantomJS: ${error}`);
+            });
         }
 
         /* ***************************************************************************** */
