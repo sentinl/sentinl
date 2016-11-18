@@ -46,7 +46,7 @@
   <div class="form-group" style="width:60%;float:left;margin-left:10px;">
     <label for="visTitle">Choose the type of action: </label>
     <select name="option_choose"
-      ng-change="updateAction(true)"
+      ng-change="updateAction()"
       ng-model="selectedchoose"
       ng-options="chs for chs in watcher_choose"
       class="form-control ng-pristine ng-valid ng-valid-required ng-touched"
@@ -56,45 +56,45 @@
   <!-- E-Mail div -->
   <div ng-show="selectedchoose=='E-Mail'" class="form-group" style="width:40%;float:left;margin-left:10px;">
     <label for="visTitle">Email To:</label>
-    <input ng-change="updateAction(false)" class="form-control ng-pristine ng-valid ng-touched" input-focus="select" type="text" ng-model="watcher_email_to" required="">
+    <input ng-change="updateAction()" class="form-control ng-pristine ng-valid ng-touched" input-focus="select" type="text" ng-model="watcher_email_to" required="">
     <label for="visTitle">Email Subject:</label>
-    <input ng-change="updateAction(false)" class="form-control ng-pristine ng-valid ng-touched" input-focus="select" type="text" ng-model="watcher_email_subj" required="">
+    <input ng-change="updateAction()" class="form-control ng-pristine ng-valid ng-touched" input-focus="select" type="text" ng-model="watcher_email_subj" required="">
     <label for="visTitle">Email Body:</label>
-    <input ng-change="updateAction(false)" class="form-control ng-pristine ng-valid ng-touched" input-focus="select" type="text" ng-model="watcher_email_body" required="">
+    <input ng-change="updateAction()" class="form-control ng-pristine ng-valid ng-touched" input-focus="select" type="text" ng-model="watcher_email_body" required="">
   </div>
 
   <!-- HTML E-Mail div -->
   <div ng-show="selectedchoose=='HTML E-Mail'" class="form-group" style="width:40%;float:left;margin-left:10px;">
     <label for="visTitle">Email To:</label>
-    <input ng-change="makeupdateAction(false)" class="form-control ng-pristine ng-valid ng-touched" input-focus="select" type="text" ng-model="watcher_email_html_to" required="">
+    <input ng-change="updateAction()" class="form-control ng-pristine ng-valid ng-touched" input-focus="select" type="text" ng-model="watcher_email_html_to" required="">
     <label for="visTitle">Email Subject:</label>
-    <input ng-change="updateAction(false)" class="form-control ng-pristine ng-valid ng-touched" input-focus="select" type="text" ng-model="watcher_email_html_subj" required="">
+    <input ng-change="updateAction()" class="form-control ng-pristine ng-valid ng-touched" input-focus="select" type="text" ng-model="watcher_email_html_subj" required="">
     <label for="visTitle">Email Body:</label>
-    <input ng-change="updateAction(false)" class="form-control ng-pristine ng-valid ng-touched" input-focus="select" type="text" ng-model="watcher_email_html_body" required="">
+    <input ng-change="updateAction()" class="form-control ng-pristine ng-valid ng-touched" input-focus="select" type="text" ng-model="watcher_email_html_body" required="">
     <label for="visTitle">Email HTML:</label>
-    <input ng-change="updateAction(false)" class="form-control ng-pristine ng-valid ng-touched" input-focus="select" type="text" ng-model="watcher_email_html_html" required="">
+    <input ng-change="updateAction()" class="form-control ng-pristine ng-valid ng-touched" input-focus="select" type="text" ng-model="watcher_email_html_html" required="">
   </div>
 
   <!-- Slack webhook div -->
   <div ng-show="selectedchoose=='Slack'" class="form-group" style="width:40%;float:left;margin-left:10px;">
     <label for="visTitle">Channel:</label>
-    <input ng-change="updateAction(false)" class="form-control ng-pristine ng-valid ng-touched" input-focus="select" type="text" ng-model="watcher_slack_channel" required="">
+    <input ng-change="updateAction()" class="form-control ng-pristine ng-valid ng-touched" input-focus="select" type="text" ng-model="watcher_slack_channel" required="">
     <label for="visTitle">Message:</label>
-    <input ng-change="updateAction(false)" class="form-control ng-pristine ng-valid ng-touched" input-focus="select" type="text" ng-model="watcher_slack_message" required="">
+    <input ng-change="updateAction()" class="form-control ng-pristine ng-valid ng-touched" input-focus="select" type="text" ng-model="watcher_slack_message" required="">
   </div>
 
   <!-- Slack webhook div -->
   <div ng-show="selectedchoose=='Webhook'" class="form-group" style="width:40%;float:left;margin-left:10px;">
     <label for="visTitle">Method:</label>
-    <input ng-change="updateAction(false)" class="form-control ng-pristine ng-valid ng-touched" input-focus="select" type="text" ng-model="watcher_webhook_method" required="">
+    <input ng-change="updateAction()" class="form-control ng-pristine ng-valid ng-touched" input-focus="select" type="text" ng-model="watcher_webhook_method" required="">
     <label for="visTitle">Host:</label>
-    <input ng-change="updateAction(false)" class="form-control ng-pristine ng-valid ng-touched" input-focus="select" type="text" ng-model="watcher_webhook_host" required="">
+    <input ng-change="updateAction()" class="form-control ng-pristine ng-valid ng-touched" input-focus="select" type="text" ng-model="watcher_webhook_host" required="">
     <label for="visTitle">Port:</label>
-    <input ng-change="updateAction(false)" class="form-control ng-pristine ng-valid ng-touched" input-focus="select" type="text" ng-model="watcher_webhook_port" required="">
+    <input ng-change="updateAction()" class="form-control ng-pristine ng-valid ng-touched" input-focus="select" type="text" ng-model="watcher_webhook_port" required="">
     <label for="visTitle">Path:</label>
-    <input ng-change="updateAction(false)" class="form-control ng-pristine ng-valid ng-touched" input-focus="select" type="text" ng-model="watcher_webhook_path" required="">
+    <input ng-change="updateAction()" class="form-control ng-pristine ng-valid ng-touched" input-focus="select" type="text" ng-model="watcher_webhook_path" required="">
     <label for="visTitle">Body:</label>
-    <input ng-change="updateAction(false)" class="form-control ng-pristine ng-valid ng-touched" input-focus="select" type="text" ng-model="watcher_webhook_body" required="">
+    <input ng-change="updateAction()" class="form-control ng-pristine ng-valid ng-touched" input-focus="select" type="text" ng-model="watcher_webhook_body" required="">
   </div>
 
   <div style="clear:both;"></div>

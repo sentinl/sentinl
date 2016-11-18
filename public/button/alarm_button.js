@@ -93,8 +93,9 @@ const linkReqRespStats = function ($scope, config) {
 
     if (resp) $scope.iterateKeys({payload:resp});
 
-    /* User can select different form */
+    /* User can select different form - change here to change labels of the select*/
     $scope.watcher_choose = ["E-Mail", "HTML E-Mail", "Slack", "Webhook"];
+    $scope.watcher_action = {};
 
     /* Defaults */
     $scope.watcher_id = "new_saved";
@@ -114,7 +115,7 @@ const linkReqRespStats = function ($scope, config) {
     $scope.watcher_email_html_html = "<p>Series Alarm {{ payload._id}}: {{payload.hits.total}}</p>";
 
     /* fields for slack webhook option */
-   $scope.watcher_slack_channel = "#<channel>";
+    $scope.watcher_slack_channel = "#<channel>";
     $scope.watcher_slack_message = "Series Alarm {{ payload._id}}: {{payload.hits.total}}";
 
     /* fields for generic webhook option */
@@ -133,6 +134,7 @@ const linkReqRespStats = function ($scope, config) {
 	    $scope.savedWatcher.id = $scope.watcher_id;
 	    $scope.savedWatcher.script = $scope.watcher_script;
 	    $scope.savedWatcher.keys = $scope.resKeys;
+      $scope.savedWatcher.actions = $scope.watcher_action;
 	    config.savedWatcher = $scope.savedWatcher;
     }
 
@@ -165,7 +167,7 @@ const linkReqRespStats = function ($scope, config) {
     	    },
     	    "transform": {},
     	    "actions": {
-    	      "kibi_actions": {}
+    	      "kibi_actions": $scope.savedWatcher.actions
     	    }
     	  }
 	};
@@ -184,23 +186,17 @@ const linkReqRespStats = function ($scope, config) {
 
     }
 
-    $scope.updateAction = function(isChanged){
-      /*if another action already exists, I delete it and I create another empty action*/
-      if(isChanged) {
-        delete $scope.alarm._source.actions.kibi_actions;
-        $scope.alarm._source.actions.kibi_actions = {};
-      }
-      console.log($scope.alarm._source.actions.kibi_actions);
-      if($scope.selectedchoose == 'E-Mail') {
-        $scope.alarm._source.actions.kibi_actions.email = {
+    $scope.updateAction = function(){
+      if($scope.selectedchoose == $scope.watcher_choose[0]) {
+        $scope.watcher_action.email = {
             "to": $scope.watcher_email_to ? $scope.watcher_email_to : "alarm@localhost",
         	  "from": $scope.watcher_email_from ? $scope.watcher_email_from : "sentinl@localhost",
             "subject": $scope.watcher_email_subj ? $scope.watcher_email_subj : "Sentinl Alarm",
             "priority": "high",
             "body": $scope.watcher_email_body ? $scope.watcher_email_body : "Found {{payload.hits.total}} Events"
         }
-      } else if ($scope.selectedchoose == 'HTML E-Mail') {
-        $scope.alarm._source.actions.kibi_actions.email_html = {
+      } else if ($scope.selectedchoose == $scope.watcher_choose[1]) {
+        $scope.watcher_action.email_html = {
              "to": $scope.watcher_email_html_to ? $scope.watcher_email_html_to : "alarm@localhost",
              "from": $scope.watcher_email_html_from ? $scope.watcher_email_html_from : "sentinl@localhost",
              "subject": $scope.watcher_email_html_subj ? $scope.watcher_email_html_subj : "Sentinl Alarm",
@@ -208,13 +204,13 @@ const linkReqRespStats = function ($scope, config) {
              "body": $scope.watcher_email_html_body ? $scope.watcher_email_html_body : "Found {{payload.hits.total}} Events",
              "html": $scope.watcher_email_html_html ? $scope.watcher_email_html_html : "<p>Series Alarm {{ payload._id}}: {{payload.hits.total}}</p>"
          }
-      } else if ($scope.selectedchoose == 'Slack') {
-        $scope.alarm._source.actions.kibi_actions.slack = {
+      } else if ($scope.selectedchoose == $scope.watcher_choose[2]) {
+        $scope.watcher_action.slack = {
             "channel": $scope.watcher_slack_channel ? $scope.watcher_slack_channel : "#<channel>",
             "message": $scope.watcher_slack_message ? $scope.watcher_slack_message : "Series Alarm {{ payload._id}}: {{payload.hits.total}}"
           }
-        } else if ($scope.selectedchoose == 'Webhook') {
-          $scope.alarm._source.actions.kibi_actions.webhook = {
+        } else if ($scope.selectedchoose == $scope.watcher_choose[3]) {
+          $scope.watcher_action.webhook = {
             "method": $scope.watcher_webhook_method ? $scope.watcher_webhook_method : "POST",
             "host": $scope.watcher_webhook_host ? $scope.watcher_webhook_host : "remote.server",
             "port": $scope.watcher_webhook_port ? $scope.watcher_webhook_port : 9200,
