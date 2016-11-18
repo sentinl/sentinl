@@ -167,7 +167,7 @@ const linkReqRespStats = function ($scope, config) {
     	    },
     	    "transform": {},
     	    "actions": {
-    	      "kibi_actions": $scope.savedWatcher.actions
+    	      "kibi_actions": $scope.watcher_action
     	    }
     	  }
 	};
