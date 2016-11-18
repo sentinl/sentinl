@@ -95,7 +95,6 @@ const linkReqRespStats = function ($scope, config) {
 
     /* User can select different form - change here to change labels of the select*/
     $scope.watcher_choose = ["E-Mail", "HTML E-Mail", "Slack", "Webhook"];
-    $scope.watcher_action = {};
 
     /* Defaults */
     $scope.watcher_id = "new_saved";
@@ -126,6 +125,7 @@ const linkReqRespStats = function ($scope, config) {
     $scope.watcher_webhook_body = "{{payload.watcher_id}}:{{payload.hits.total}}";
 
     $scope.savedWatcher = {};
+    $scope.savedWatcher.actions = {}
     var alarm = {};
 
     $scope.watcherUpdate = function(){
@@ -134,7 +134,6 @@ const linkReqRespStats = function ($scope, config) {
 	    $scope.savedWatcher.id = $scope.watcher_id;
 	    $scope.savedWatcher.script = $scope.watcher_script;
 	    $scope.savedWatcher.keys = $scope.resKeys;
-      $scope.savedWatcher.actions = $scope.watcher_action;
 	    config.savedWatcher = $scope.savedWatcher;
     }
 
@@ -167,7 +166,7 @@ const linkReqRespStats = function ($scope, config) {
     	    },
     	    "transform": {},
     	    "actions": {
-    	      "kibi_actions": $scope.watcher_action
+    	      "kibi_actions": $scope.savedWatcher.actions
     	    }
     	  }
 	};
@@ -188,7 +187,7 @@ const linkReqRespStats = function ($scope, config) {
 
     $scope.updateAction = function(){
       if($scope.selectedchoose == $scope.watcher_choose[0]) {
-        $scope.watcher_action.email = {
+        $scope.savedWatcher.actions.email = {
             "to": $scope.watcher_email_to ? $scope.watcher_email_to : "alarm@localhost",
         	  "from": $scope.watcher_email_from ? $scope.watcher_email_from : "sentinl@localhost",
             "subject": $scope.watcher_email_subj ? $scope.watcher_email_subj : "Sentinl Alarm",
@@ -196,7 +195,7 @@ const linkReqRespStats = function ($scope, config) {
             "body": $scope.watcher_email_body ? $scope.watcher_email_body : "Found {{payload.hits.total}} Events"
         }
       } else if ($scope.selectedchoose == $scope.watcher_choose[1]) {
-        $scope.watcher_action.email_html = {
+        $scope.savedWatcher.actions.email_html = {
              "to": $scope.watcher_email_html_to ? $scope.watcher_email_html_to : "alarm@localhost",
              "from": $scope.watcher_email_html_from ? $scope.watcher_email_html_from : "sentinl@localhost",
              "subject": $scope.watcher_email_html_subj ? $scope.watcher_email_html_subj : "Sentinl Alarm",
@@ -205,12 +204,12 @@ const linkReqRespStats = function ($scope, config) {
              "html": $scope.watcher_email_html_html ? $scope.watcher_email_html_html : "<p>Series Alarm {{ payload._id}}: {{payload.hits.total}}</p>"
          }
       } else if ($scope.selectedchoose == $scope.watcher_choose[2]) {
-        $scope.watcher_action.slack = {
+        $scope.savedWatcher.actions.slack = {
             "channel": $scope.watcher_slack_channel ? $scope.watcher_slack_channel : "#<channel>",
             "message": $scope.watcher_slack_message ? $scope.watcher_slack_message : "Series Alarm {{ payload._id}}: {{payload.hits.total}}"
           }
         } else if ($scope.selectedchoose == $scope.watcher_choose[3]) {
-          $scope.watcher_action.webhook = {
+          $scope.savedWatcher.actions.webhook = {
             "method": $scope.watcher_webhook_method ? $scope.watcher_webhook_method : "POST",
             "host": $scope.watcher_webhook_host ? $scope.watcher_webhook_host : "remote.server",
             "port": $scope.watcher_webhook_port ? $scope.watcher_webhook_port : 9200,
