@@ -1,6 +1,6 @@
-<img src="http://i.imgur.com/o25tuAG.png" width="200"/>
+<img src="http://i.imgur.com/s4TKpbF.png" width="400"/>
 
-# Kibana Alert & Report App for Elasticsearch <img src="https://camo.githubusercontent.com/15f26c4f603cac9bf415c841a8a60077f6db5102/687474703a2f2f696d6775722e636f6d2f654c446f4f4b592e706e67">
+# Kibana Alert & Report App for Elasticsearch<img src="https://camo.githubusercontent.com/15f26c4f603cac9bf415c841a8a60077f6db5102/687474703a2f2f696d6775722e636f6d2f654c446f4f4b592e706e67">
 
 > Data Series are awesome, but who's Watching them 24/7/365? Introducing SENTINL, the Kibana Watcher _(ex KAAE)_
 
