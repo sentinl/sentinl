@@ -42,7 +42,7 @@
 
   <br/>
 
-  <div class="form-group" style="width:60%;float:left;margin-left:10px;">
+  <div class="form-group" style="width:50%;float:left;margin-left:10px;">
     <label for="visTitle">Choose the type of action: </label>
     <select name="option_choose"
       ng-change="manageForm()"
@@ -52,10 +52,12 @@
       >  </select>
   </div>
 
-  <div ng-show="viewFlag==false && selectedchoose!=''" class="form-group" style="margin-left:10px;width:70%;float:left;">
+  <div ng-show="viewFlag==false && selectedchoose!=''" class="form-group" style="margin-left:10px;width:40%;float:left;">
+    <br/>
     <a class="btn btn-default ng-binding ng-scope" ng-click="switchViewFlag(true)">Add</a>
   </div>
-  <div ng-show="viewFlag==true && selectedchoose!=''" class="form-group" style="margin-left:10px;width:70%;float:left;">
+  <div ng-show="viewFlag==true && selectedchoose!=''" class="form-group" style="margin-left:10px;width:40%;float:left;">
+    <br/>
     <a class="btn btn-default ng-binding ng-scope" ng-click="switchViewFlag(false)">Delete</a>
   </div>
 

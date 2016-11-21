@@ -226,9 +226,12 @@ const linkReqRespStats = function ($scope, config) {
         $scope.manageViewArray(true);
         $scope.updateAction();
       } else {
-        $scope.viewFlag = false;
-        $scope.manageViewArray(false);
-        $scope.deleteAction();
+        var proceed = confirm("Are you sure to delete this action?");
+        if(proceed) {
+          $scope.viewFlag = false;
+          $scope.manageViewArray(false);
+          $scope.deleteAction();
+        }
       }
     };
 
