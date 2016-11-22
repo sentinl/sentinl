@@ -52,17 +52,14 @@
       >  </select>
   </div>
 
-  <div ng-show="viewFlag==false && selectedchoose!=''" class="form-group" style="margin-left:10px;width:40%;float:left;">
+  <div ng-show="selectedchoose!=''" class="form-group" style="margin-left:10px;width:40%;float:left;">
     <br/>
-    <a class="btn btn-default ng-binding ng-scope" ng-click="switchViewFlag(true)">Add</a>
-  </div>
-  <div ng-show="viewFlag==true && selectedchoose!=''" class="form-group" style="margin-left:10px;width:40%;float:left;">
-    <br/>
-    <a class="btn btn-default ng-binding ng-scope" ng-click="switchViewFlag(false)">Delete</a>
+    <a class="btn btn-default ng-binding ng-scope" ng-click="switchViewFlag(true)" ng-disabled="disbutton">Apply</a>
+    <a ng-show="viewFlag==true" class="btn btn-default ng-binding ng-scope" ng-click="switchViewFlag(false)">Delete</a>
   </div>
 
   <!-- E-Mail div -->
-  <div ng-show="selectedchoose=='E-Mail' && activeform.email==true" class="form-group" style="width:40%;float:left;margin-left:10px;">
+  <div ng-show="selectedchoose=='E-Mail'" class="form-group" style="width:40%;float:left;margin-left:10px;">
     <label for="visTitle">Email To:</label>
     <input ng-change="updateAction()" class="form-control ng-pristine ng-valid ng-touched" input-focus="select" type="text" ng-model="watcher_email_to" required="">
     <label for="visTitle">Email Subject:</label>
@@ -72,7 +69,7 @@
   </div>
 
   <!-- HTML E-Mail div -->
-  <div ng-show="selectedchoose=='HTML E-Mail' && activeform.htmlemail==true" class="form-group" style="width:40%;float:left;margin-left:10px;">
+  <div ng-show="selectedchoose=='HTML E-Mail'" class="form-group" style="width:40%;float:left;margin-left:10px;">
     <label for="visTitle">Email To:</label>
     <input ng-change="updateAction()" class="form-control ng-pristine ng-valid ng-touched" input-focus="select" type="text" ng-model="watcher_email_html_to" required="">
     <label for="visTitle">Email Subject:</label>
@@ -84,7 +81,7 @@
   </div>
 
   <!-- Slack webhook div -->
-  <div ng-show="selectedchoose=='Slack' && activeform.slack==true" class="form-group" style="width:40%;float:left;margin-left:10px;">
+  <div ng-show="selectedchoose=='Slack'" class="form-group" style="width:40%;float:left;margin-left:10px;">
     <label for="visTitle">Channel:</label>
     <input ng-change="updateAction()" class="form-control ng-pristine ng-valid ng-touched" input-focus="select" type="text" ng-model="watcher_slack_channel" required="">
     <label for="visTitle">Message:</label>
@@ -92,7 +89,7 @@
   </div>
 
   <!-- Slack webhook div -->
-  <div ng-show="selectedchoose=='Webhook' && activeform.webhook==true" class="form-group" style="width:40%;float:left;margin-left:10px;">
+  <div ng-show="selectedchoose=='Webhook'" class="form-group" style="width:40%;float:left;margin-left:10px;">
     <label for="visTitle">Method:</label>
     <input ng-change="updateAction()" class="form-control ng-pristine ng-valid ng-touched" input-focus="select" type="text" ng-model="watcher_webhook_method" required="">
     <label for="visTitle">Host:</label>
