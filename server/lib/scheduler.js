@@ -47,7 +47,7 @@ function doalert(server,client) {
         var orphans = _.difference(_.each(Object.keys( Schedule )), _.map(resp.hits.hits, '_id')  );
         _.each(orphans, function(orphan){
                 server.log(['status', 'info', 'KaaE'],'Deleting orphan watcher: '+orphan);
-                Schedule[orphan].later.clear();
+                if (Schedule[orphan].later) { Schedule[orphan].later.clear(); }
                 delete Schedule[orphan];
         });
         
