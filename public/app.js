@@ -280,8 +280,6 @@ uiModules
   $http.get('../api/sentinl/list')
   .then((response) => {
     $scope.watchers = response.data.hits.hits;
-    console.log("<<<<<<<<<<<");
-    console.log($scope.watchers);
     importWatcherFromLocalStorage();
     /*
      $scope.spy.params.spyPerPage = 10;

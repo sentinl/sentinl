@@ -6,45 +6,45 @@
       "alarm_index":	"watcher_alarms"
     },
     "sentinl": {
-      	"history": 	20,
-        "results": 50
+    	"history": 	20,
+      "results": 50
     },
     "settings" : {
       "email" : {
-         "user":	"username",
-         "password":	"password",
-         "host":	"smtp.server.com",
-         "ssl":	true,
-         "active":	false
+        "user":	"username",
+        "password":	"password",
+        "host":	"smtp.server.com",
+        "ssl":	true,
+        "active":	false
       },
       "email_html" : {
-      	   "user":	"username",
-      	   "password":	"password",
-      	   "host":	"smtp.server.com",
-      	   "ssl":	true,
-      	   "active":	false
-      	},
-      	"slack" : {
-      	   "username":	"username",
-      	   "hook":	"https://hooks.slack.com/services/<token>",
-      	   "channel":	"#channel",
-      	   "active": 	false
-      	},
-        "webhook" : {
-      	   "method": "POST",
-           "host": "host",
-           "port": 9200,
-           "path": ":/{{payload.watcher_id}",
-           "body" : "{{payload.watcher_id}}{payload.hits.total}}",
-           "active": 	false
-      	},
-        "report" : {
-           "tmp_path" : "/tmp/",
-           "active": 	false
-        },
-        "pushapps" : {
-          "api_key" : "<pushapps API Key>",
-          "active":	false
+  	    "user":	"username",
+  	    "password":	"password",
+  	    "host":	"smtp.server.com",
+  	    "ssl":	true,
+  	    "active":	false
+      },
+    	"slack" : {
+  	    "username":	"username",
+        "hook":	"https://hooks.slack.com/services/<token>",
+  	    "channel":	"#channel",
+  	    "active": 	false
+    	},
+      "webhook" : {
+  	    "method": "POST",
+        "host": "host",
+        "port": 9200,
+        "path": ":/{{payload.watcher_id}",
+        "body" : "{{payload.watcher_id}}{payload.hits.total}}",
+        "active": 	false
+    	},
+      "report" : {
+        "tmp_path" : "/tmp/",
+        "active": 	false
+      },
+      "pushapps" : {
+        "api_key" : "<pushapps API Key>",
+        "active":	false
       }
     }
   }

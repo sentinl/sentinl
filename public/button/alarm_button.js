@@ -42,50 +42,50 @@ const linkReqRespStats = function ($scope, config) {
       // if (req.fetchParams.id) stats.push(['Id', req.fetchParams.id]);
 
       if (req.fetchParams.index) {
-		var idx = (req.fetchParams.index).toString();
-	        var tmp = idx.replace(/\*/g, '');
-		indices.push("<"+tmp+"{now/d}>");
-		indices.push("<"+tmp+"{now/d-1d}>");
-      }
+  		  var idx = (req.fetchParams.index).toString();
+  	    var tmp = idx.replace(/\*/g, '');
+    		indices.push("<"+tmp+"{now/d}>");
+    		indices.push("<"+tmp+"{now/d-1d}>");
     }
+  }
 
     $scope.intervals = [
-        { name: '1m', value: 'every 1 minute' },
-        { name: '5m', value: 'every 5 minutes' },
-        { name: '10m', value: 'every 10 minutes' },
-        { name: '1h', value: 'every 1 hour' }
+      { name: '1m', value: 'every 1 minute' },
+      { name: '5m', value: 'every 5 minutes' },
+      { name: '10m', value: 'every 10 minutes' },
+      { name: '1h', value: 'every 1 hour' }
     ];
 
     $scope.ranges = [
-        { name: '1m', value: 'now-1m' },
-        { name: '5m', value: 'now-5m' },
-        { name: '10m', value: 'now-1h' },
-        { name: '1h', value: 'now-1h' },
-        { name: '6h', value: 'now-6h' },
-        { name: '12h', value: 'now-12h' },
-        { name: '1d', value: 'now-1d' }
+      { name: '1m', value: 'now-1m' },
+      { name: '5m', value: 'now-5m' },
+      { name: '10m', value: 'now-1h' },
+      { name: '1h', value: 'now-1h' },
+      { name: '6h', value: 'now-6h' },
+      { name: '12h', value: 'now-12h' },
+      { name: '1d', value: 'now-1d' }
     ];
 
     $scope.resKeys = [];
     $scope.iterateKeys = function(data) {
  	   var result = {};
  	   function recurse (cur, prop) {
- 	       if (Object(cur) !== cur) {
- 	           result[prop] = cur;
- 	       } else if (Array.isArray(cur)) {
- 	            for(var i=0, l=cur.length; i<l; i++)
- 	                recurse(cur[i], prop + "[" + i + "]");
- 	           if (l == 0)
- 	               result[prop] = [];
- 	       } else {
- 	           var isEmpty = true;
- 	           for (var p in cur) {
- 	               isEmpty = false;
- 	               recurse(cur[p], prop ? prop+"."+p : p);
- 	           }
- 	           if (isEmpty && prop)
- 	               result[prop] = {};
- 	       }
+       if (Object(cur) !== cur) {
+         result[prop] = cur;
+       } else if (Array.isArray(cur)) {
+          for(var i=0, l=cur.length; i<l; i++)
+            recurse(cur[i], prop + "[" + i + "]");
+         if (l == 0)
+           result[prop] = [];
+       } else {
+         var isEmpty = true;
+         for (var p in cur) {
+           isEmpty = false;
+           recurse(cur[p], prop ? prop+"."+p : p);
+         }
+         if (isEmpty && prop)
+           result[prop] = {};
+       }
  	   }
  	   recurse(data, "");
  	   $scope.resKeys = result;
@@ -138,7 +138,7 @@ const linkReqRespStats = function ($scope, config) {
     $scope.savedWatcher.actions = {}
     var alarm = {};
 
-    $scope.watcherUpdate = function(){
+    $scope.watcherUpdate = function() {
 	    $scope.savedWatcher.interval = $scope.watcher_interval;
 	    $scope.savedWatcher.range = $scope.watcher_range;
 	    $scope.savedWatcher.id = $scope.watcher_id;
@@ -147,7 +147,7 @@ const linkReqRespStats = function ($scope, config) {
 	    config.savedWatcher = $scope.savedWatcher;
     }
 
-    $scope.makeAlarm = function(){
+    $scope.makeAlarm = function() {
     	// console.log('updainge proto watcher..');
     	$scope.watcherUpdate();
         $scope.alarm = {
@@ -199,19 +199,22 @@ const linkReqRespStats = function ($scope, config) {
         } else {
           $scope.viewFlag = false;
         }
-      } else if($scope.selectedchoose == $scope.watcher_choose[1]) {
+      } else
+        if($scope.selectedchoose == $scope.watcher_choose[1]) {
           if($scope.savedWatcher.actions.email_html) {
             $scope.viewFlag = true;
           } else {
             $scope.viewFlag = false;
           }
-        } else if($scope.selectedchoose == $scope.watcher_choose[2]) {
+        } else
+          if($scope.selectedchoose == $scope.watcher_choose[2]) {
             if($scope.savedWatcher.actions.slack) {
               $scope.viewFlag = true;
             } else {
               $scope.viewFlag = false;
             }
-          } else if($scope.selectedchoose == $scope.watcher_choose[3]) {
+          } else
+            if($scope.selectedchoose == $scope.watcher_choose[3]) {
               if($scope.savedWatcher.actions.webhook) {
                 $scope.viewFlag = true;
               } else {
