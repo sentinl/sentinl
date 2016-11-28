@@ -303,7 +303,7 @@ uiModules
 	  var _session = $scope.editor.getSession();
 	  $scope.editor.setReadOnly(edit);
 	  $scope.editor_status.readonly = edit;
-    	  _session.setUndoManager(new ace.UndoManager());
+	  _session.setUndoManager(new ace.UndoManager());
 
 	  $scope.editor_status.undo = $scope.editor.session.getUndoManager().isClean();
 
