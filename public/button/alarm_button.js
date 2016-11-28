@@ -42,12 +42,12 @@ const linkReqRespStats = function ($scope, config) {
       // if (req.fetchParams.id) stats.push(['Id', req.fetchParams.id]);
 
       if (req.fetchParams.index) {
-  		  var idx = (req.fetchParams.index).toString();
-  	    var tmp = idx.replace(/\*/g, '');
-    		indices.push("<"+tmp+"{now/d}>");
-    		indices.push("<"+tmp+"{now/d-1d}>");
+        var idx = (req.fetchParams.index).toString();
+        var tmp = idx.replace(/\*/g, '');
+        indices.push('<' + tmp + '{now/d}>');
+        indices.push('<' + tmp + '{now/d-1d}>');
+      }
     }
-  }
 
     $scope.intervals = [
       {name: '1m', value: 'every 1 minute'},
@@ -67,282 +67,286 @@ const linkReqRespStats = function ($scope, config) {
     ];
 
     $scope.resKeys = [];
-    $scope.iterateKeys = function(data) {
- 	   var result = {};
- 	   function recurse (cur, prop) {
-       if (Object(cur) !== cur) {
-         result[prop] = cur;
-       } else if (Array.isArray(cur)) {
-          for(var i=0, l=cur.length; i<l; i++)
-            recurse(cur[i], prop + "[" + i + "]");
-         if (l == 0)
-           result[prop] = [];
-       } else {
-         var isEmpty = true;
-         for (var p in cur) {
-           isEmpty = false;
-           recurse(cur[p], prop ? prop+"."+p : p);
-         }
-         if (isEmpty && prop)
-           result[prop] = {};
-       }
- 	   }
- 	   recurse(data, "");
- 	   $scope.resKeys = result;
-    }
+    $scope.iterateKeys = function (data) {
+      var result = {};
+      function recurse(cur, prop) {
+        if (Object(cur) !== cur) {
+          result[prop] = cur;
+        } else if (Array.isArray(cur)) {
+          for (var i = 0, l = cur.length; i < l; i++) {
+            recurse(cur[i], prop + '[' + i + ']');
+          }
+          if (cur.length === 0) {
+            result[prop] = [];
+          }
+        } else {
+          var isEmpty = true;
+          for (var p in cur) {
+            if (p) {
+              isEmpty = false;
+              recurse(cur[p], prop ? prop + '.' + p : p);
+            }
+            if (isEmpty && prop) {
+              result[prop] = {};
+            }
+          }
+        }
+        recurse(data, '');
+        $scope.resKeys = result;
+      }
 
-    if (resp) $scope.iterateKeys({payload:resp});
+      if (resp) $scope.iterateKeys({payload:resp});
 
-    /* User can select different form - change here to change labels of the select*/
-    $scope.watcher_choose = ["E-Mail", "HTML E-Mail", "Slack", "Webhook"];
-    $scope.selectedchoose = '';
-    $scope.viewFlag = false;
+      /* User can select different form - change here to change labels of the select*/
+      $scope.watcher_choose = ['E-Mail', 'HTML E-Mail', 'Slack', 'Webhook'];
+      $scope.selectedchoose = '';
+      $scope.viewFlag = false;
 
-    /* Enable-disable forms */
-    $scope.activeform = {
-      "email": false,
-      "htmlemail": false,
-      "slack": false,
-      "webhook": false
-    };
+      /* Enable-disable forms */
+      $scope.activeform = {
+        'email': false,
+        'htmlemail': false,
+        'slack': false,
+        'webhook': false
+      };
 
-    /* Defaults */
-    $scope.watcher_id = "new_saved";
-    $scope.watcher_script = "payload.hits.total > 100";
-    $scope.watcher_interval = $scope.intervals[0].value;
-    $scope.watcher_range = $scope.ranges[1].value;
+      /* Defaults */
+      $scope.watcher_id = 'new_saved';
+      $scope.watcher_script = 'payload.hits.total > 100';
+      $scope.watcher_interval = $scope.intervals[0].value;
+      $scope.watcher_range = $scope.ranges[1].value;
 
-    /* fields for e-mail option */
-    $scope.watcher_email_to = "root@localhost";
-    $scope.watcher_email_subj = "SENTINL ALARM {{ payload._id }}";
-    $scope.watcher_email_body = "Series Alarm {{ payload._id}}: {{ payload.hits.total }}";
+      /* fields for e-mail option */
+      $scope.watcher_email_to = 'root@localhost';
+      $scope.watcher_email_subj = 'SENTINL ALARM {{ payload._id }}';
+      $scope.watcher_email_body = 'Series Alarm {{ payload._id}}: {{ payload.hits.total }}';
 
-    /*fields for html_e-mail option */
-    $scope.watcher_email_html_to = "root@localhost";
-    $scope.watcher_email_html_subj = "SENTINL ALARM {{ payload._id }}";
-    $scope.watcher_email_html_body = "Series Alarm {{ payload._id}}: {{ payload.hits.total }}";
-    $scope.watcher_email_html_html = "<p>Series Alarm {{ payload._id}}: {{payload.hits.total}}</p>";
+      /*fields for html_e-mail option */
+      $scope.watcher_email_html_to = 'root@localhost';
+      $scope.watcher_email_html_subj = 'SENTINL ALARM {{ payload._id }}';
+      $scope.watcher_email_html_body = 'Series Alarm {{ payload._id}}: {{ payload.hits.total }}';
+      $scope.watcher_email_html_html = '<p>Series Alarm {{ payload._id}}: {{payload.hits.total}}</p>';
 
-    /* fields for slack webhook option */
-    $scope.watcher_slack_channel = "#<channel>";
-    $scope.watcher_slack_message = "Series Alarm {{ payload._id}}: {{payload.hits.total}}";
+      /* fields for slack webhook option */
+      $scope.watcher_slack_channel = '#<channel>';
+      $scope.watcher_slack_message = 'Series Alarm {{ payload._id}}: {{payload.hits.total}}';
 
-    /* fields for generic webhook option */
-    $scope.watcher_webhook_method = "POST";
-    $scope.watcher_webhook_host = "remote.server";
-    $scope.watcher_webhook_port = 9200;
-    $scope.watcher_webhook_path = ":/{{payload.watcher_id}";
-    $scope.watcher_webhook_body = "{{payload.watcher_id}}:{{payload.hits.total}}";
+      /* fields for generic webhook option */
+      $scope.watcher_webhook_method = 'POST';
+      $scope.watcher_webhook_host = 'remote.server';
+      $scope.watcher_webhook_port = 9200;
+      $scope.watcher_webhook_path = ':/{{payload.watcher_id}';
+      $scope.watcher_webhook_body = '{{payload.watcher_id}}:{{payload.hits.total}}';
 
-    $scope.savedWatcher = {};
-    $scope.savedWatcher.actions = {}
-    var alarm = {};
+      $scope.savedWatcher = {};
+      $scope.savedWatcher.actions = {};
+      var alarm = {};
 
-    $scope.watcherUpdate = function() {
-	    $scope.savedWatcher.interval = $scope.watcher_interval;
-	    $scope.savedWatcher.range = $scope.watcher_range;
-	    $scope.savedWatcher.id = $scope.watcher_id;
-	    $scope.savedWatcher.script = $scope.watcher_script;
-	    $scope.savedWatcher.keys = $scope.resKeys;
-	    config.savedWatcher = $scope.savedWatcher;
-    }
+      $scope.watcherUpdate = function () {
+        $scope.savedWatcher.interval = $scope.watcher_interval;
+        $scope.savedWatcher.range = $scope.watcher_range;
+        $scope.savedWatcher.id = $scope.watcher_id;
+        $scope.savedWatcher.script = $scope.watcher_script;
+        $scope.savedWatcher.keys = $scope.resKeys;
+        config.savedWatcher = $scope.savedWatcher;
+      };
 
-    $scope.makeAlarm = function() {
-    	// console.log('updainge proto watcher..');
-    	$scope.watcherUpdate();
+      $scope.makeAlarm = function () {
+        $scope.watcherUpdate();
         $scope.alarm = {
-      	  "_index": "watcher",
-      	  "_type": "watch",
-      	  "_id": $scope.watcher_id,
-      	  "_new": "true",
-      	  "_source": {
-      	    "trigger": {
-      	      "schedule": {
-      	        "later": $scope.watcher_interval ? $scope.watcher_interval : "every 5 minutes"
-      	      }
-      	    },
-      	    "input": {
-      	      "search": {
-      	        "request": {
-      	          "index": [],
-      	          "body": req.fetchParams.body,
-      	        }
-      	      }
-      	    },
-      	    "condition": {
-      	      "script": {
-      	        "script": $scope.savedWatcher.script
-      	      }
-      	    },
-      	    "transform": {},
-      	    "actions": {
-      	      "kibi_actions": $scope.savedWatcher.actions
-      	    }
-      	  }
+          '_index': 'watcher',
+          '_type': 'watch',
+          '_id': $scope.watcher_id,
+          '_new': 'true',
+          '_source': {
+            'trigger': {
+              'schedule': {
+                'later': $scope.watcher_interval ? $scope.watcher_interval : 'every 5 minutes'
+              }
+            },
+            'input': {
+              'search': {
+                'request': {
+                  'index': [],
+                  'body': req.fetchParams.body,
+                }
+              }
+            },
+            'condition': {
+              'script': {
+                'script': $scope.savedWatcher.script
+              }
+            },
+            'transform': {},
+            'actions': {
+              'kibi_actions': $scope.savedWatcher.actions
+            }
+          }
         };
 
-    	// Patch Indices
-    	$scope.alarm._source.input.search.request.index = $scope.indices ? $scope.indices : [];
-    	// Patch Range
-    	$scope.alarm._source.input.search.request.body.query.filtered.filter = {"range": { "@timestamp": {"from": $scope.watcher_range ? $scope.watcher_range : "now-1h" } } };
+        // Patch Indices
+        $scope.alarm._source.input.search.request.index = $scope.indices ? $scope.indices : [];
+        // Patch Range
+        $scope.alarm._source.input.search.request.body.query.filtered.filter = {'range':
+        { '@timestamp': {'from': $scope.watcher_range ? $scope.watcher_range : 'now-1h' } } };
 
-    	// Store Watcher
-            alarm = $scope.alarm;
-    	window.localStorage.setItem('sentinl_saved_query', JSON.stringify($scope.alarm));
+        // Store Watcher
+        alarm = $scope.alarm;
+        window.localStorage.setItem('sentinl_saved_query', JSON.stringify($scope.alarm));
+      };
 
-    }
-
-    $scope.manageForm = function() {
-      if($scope.selectedchoose == $scope.watcher_choose[0]) {
-        if($scope.savedWatcher.actions.email) {
-          $scope.viewFlag = true;
-        } else {
-          $scope.viewFlag = false;
-        }
-      } else
-        if($scope.selectedchoose == $scope.watcher_choose[1]) {
-          if($scope.savedWatcher.actions.email_html) {
+      $scope.manageForm = function () {
+        if ($scope.selectedchoose === $scope.watcher_choose[0]) {
+          if ($scope.savedWatcher.actions.email) {
             $scope.viewFlag = true;
           } else {
             $scope.viewFlag = false;
           }
         } else
-          if($scope.selectedchoose == $scope.watcher_choose[2]) {
-            if($scope.savedWatcher.actions.slack) {
+          if ($scope.selectedchoose === $scope.watcher_choose[1]) {
+            if ($scope.savedWatcher.actions.email_html) {
               $scope.viewFlag = true;
             } else {
               $scope.viewFlag = false;
             }
           } else
-            if($scope.selectedchoose == $scope.watcher_choose[3]) {
-              if($scope.savedWatcher.actions.webhook) {
+            if ($scope.selectedchoose === $scope.watcher_choose[2]) {
+              if ($scope.savedWatcher.actions.slack) {
                 $scope.viewFlag = true;
               } else {
                 $scope.viewFlag = false;
               }
-            }
-    };
-
-    $scope.switchViewFlag = function(flag) {
-      if(flag) {
-        $scope.viewFlag = true;
-        $scope.manageViewArray(true);
-        $scope.updateAction();
-      } else {
-        var proceed = confirm("Are you sure to delete this action?");
-        if(proceed) {
-          $scope.viewFlag = false;
-          $scope.manageViewArray(false);
-          $scope.deleteAction();
-        }
-      }
-    };
-
-    $scope.manageViewArray = function(flag) {
-      switch($scope.selectedchoose) {
-        case 'E-Mail':
-          $scope.activeform.email = flag;
-          break;
-        case 'HTML E-Mail':
-          $scope.activeform.htmlemail = flag;
-          break;
-        case 'Slack':
-          $scope.activeform.slack = flag;
-          break;
-        case 'Webhook':
-          $scope.activeform.webhook = flag;
-          break;
-      }
-    };
-
-    $scope.goToCompiledForm = function(nameForm) {
-      $scope.selectedchoose = nameForm;
-      $scope.viewFlag = true;
-    }
-
-    $scope.deleteAction = function() {
-      if($scope.selectedchoose == $scope.watcher_choose[0]) {
-        if($scope.savedWatcher.actions.email) {
-          delete $scope.savedWatcher.actions.email;
-          $scope.watcher_email_to = "root@localhost";
-          $scope.watcher_email_subj = "SENTINL ALARM {{ payload._id }}";
-          $scope.watcher_email_body = "Series Alarm {{ payload._id}}: {{ payload.hits.total }}";
-        }
-      } else if($scope.selectedchoose == $scope.watcher_choose[1]) {
-          if($scope.savedWatcher.actions.email_html) {
-            delete $scope.savedWatcher.actions.email_html;
-            $scope.watcher_email_html_to = "root@localhost";
-            $scope.watcher_email_html_subj = "SENTINL ALARM {{ payload._id }}";
-            $scope.watcher_email_html_body = "Series Alarm {{ payload._id}}: {{ payload.hits.total }}";
-            $scope.watcher_email_html_html = "<p>Series Alarm {{ payload._id}}: {{payload.hits.total}}</p>";
-          }
-        } else if($scope.selectedchoose == $scope.watcher_choose[2]) {
-            if($scope.savedWatcher.actions.slack) {
-              delete $scope.savedWatcher.actions.slack;
-              $scope.watcher_slack_channel = "#<channel>";
-              $scope.watcher_slack_message = "Series Alarm {{ payload._id}}: {{payload.hits.total}}";
-            }
-          } else if($scope.selectedchoose == $scope.watcher_choose[3]) {
-              if($scope.savedWatcher.actions.webhook) {
-                delete $scope.savedWatcher.actions.webhook;
-                $scope.watcher_webhook_method = "POST";
-                $scope.watcher_webhook_host = "remote.server";
-                $scope.watcher_webhook_port = 9200;
-                $scope.watcher_webhook_path = ":/{{payload.watcher_id}";
-                $scope.watcher_webhook_body = "{{payload.watcher_id}}:{{payload.hits.total}}";
+            } else
+              if ($scope.selectedchoose === $scope.watcher_choose[3]) {
+                if ($scope.savedWatcher.actions.webhook) {
+                  $scope.viewFlag = true;
+                } else {
+                  $scope.viewFlag = false;
+                }
               }
-            }
-      $scope.selectedchoose = "";
+      };
+
+      $scope.switchViewFlag = function (flag) {
+        if (flag) {
+          $scope.viewFlag = true;
+          $scope.manageViewArray(true);
+          $scope.updateAction();
+        } else {
+          var proceed = confirm('Are you sure to delete this action?');
+          if (proceed) {
+            $scope.viewFlag = false;
+            $scope.manageViewArray(false);
+            $scope.deleteAction();
+          }
+        }
+      };
+
+      $scope.manageViewArray = function (flag) {
+        switch ($scope.selectedchoose) {
+          case 'E-Mail':
+            $scope.activeform.email = flag;
+            break;
+          case 'HTML E-Mail':
+            $scope.activeform.htmlemail = flag;
+            break;
+          case 'Slack':
+            $scope.activeform.slack = flag;
+            break;
+          case 'Webhook':
+            $scope.activeform.webhook = flag;
+            break;
+        }
+      };
+
+      $scope.goToCompiledForm = function (nameForm) {
+        $scope.selectedchoose = nameForm;
+        $scope.viewFlag = true;
+      };
+
+      $scope.deleteAction = function () {
+        if ($scope.selectedchoose === $scope.watcher_choose[0]) {
+          if ($scope.savedWatcher.actions.email) {
+            delete $scope.savedWatcher.actions.email;
+            $scope.watcher_email_to = 'root@localhost';
+            $scope.watcher_email_subj = 'SENTINL ALARM {{ payload._id }}';
+            $scope.watcher_email_body = 'Series Alarm {{ payload._id}}: {{ payload.hits.total }}';
+          }
+        } else if ($scope.selectedchoose === $scope.watcher_choose[1]) {
+          if ($scope.savedWatcher.actions.email_html) {
+            delete $scope.savedWatcher.actions.email_html;
+            $scope.watcher_email_html_to = 'root@localhost';
+            $scope.watcher_email_html_subj = 'SENTINL ALARM {{ payload._id }}';
+            $scope.watcher_email_html_body = 'Series Alarm {{ payload._id}}: {{ payload.hits.total }}';
+            $scope.watcher_email_html_html = '<p>Series Alarm {{ payload._id}}: {{payload.hits.total}}</p>';
+          }
+        } else if ($scope.selectedchoose === $scope.watcher_choose[2]) {
+          if ($scope.savedWatcher.actions.slack) {
+            delete $scope.savedWatcher.actions.slack;
+            $scope.watcher_slack_channel = '#<channel>';
+            $scope.watcher_slack_message = 'Series Alarm {{ payload._id}}: {{payload.hits.total}}';
+          }
+        } else if ($scope.selectedchoose === $scope.watcher_choose[3]) {
+          if ($scope.savedWatcher.actions.webhook) {
+            delete $scope.savedWatcher.actions.webhook;
+            $scope.watcher_webhook_method = 'POST';
+            $scope.watcher_webhook_host = 'remote.server';
+            $scope.watcher_webhook_port = 9200;
+            $scope.watcher_webhook_path = ':/{{payload.watcher_id}';
+            $scope.watcher_webhook_body = '{{payload.watcher_id}}:{{payload.hits.total}}';
+          }
+        }
+        $scope.selectedchoose = '';
+      };
+
+      $scope.updateAction = function () {
+        if ($scope.selectedchoose === $scope.watcher_choose[0]) {
+          $scope.savedWatcher.actions.email = {
+            'to': $scope.watcher_email_to ? $scope.watcher_email_to : 'alarm@localhost',
+            'from': $scope.watcher_email_from ? $scope.watcher_email_from : 'sentinl@localhost',
+            'subject': $scope.watcher_email_subj ? $scope.watcher_email_subj : 'Sentinl Alarm',
+            'priority': 'high',
+            'body': $scope.watcher_email_body ? $scope.watcher_email_body : 'Found {{payload.hits.total}} Events'
+          };
+        } else if ($scope.selectedchoose === $scope.watcher_choose[1]) {
+          $scope.savedWatcher.actions.email_html = {
+            'to': $scope.watcher_email_html_to ? $scope.watcher_email_html_to : 'alarm@localhost',
+            'from': $scope.watcher_email_html_from ? $scope.watcher_email_html_from : 'sentinl@localhost',
+            'subject': $scope.watcher_email_html_subj ? $scope.watcher_email_html_subj : 'Sentinl Alarm',
+            'priority': 'high',
+            'body': $scope.watcher_email_html_body ? $scope.watcher_email_html_body : 'Found {{payload.hits.total}} Events',
+            'html': $scope.watcher_email_html_html ? $scope.watcher_email_html_html :
+            '<p>Series Alarm {{ payload._id}}: {{payload.hits.total}}</p>'
+          };
+        } else if ($scope.selectedchoose === $scope.watcher_choose[2]) {
+          $scope.savedWatcher.actions.slack = {
+            'channel': $scope.watcher_slack_channel ? $scope.watcher_slack_channel : '#<channel>',
+            'message': $scope.watcher_slack_message ? $scope.watcher_slack_message : 'Series Alarm {{ payload._id}}: {{payload.hits.total}}'
+          };
+        } else if ($scope.selectedchoose === $scope.watcher_choose[3]) {
+          $scope.savedWatcher.actions.webhook = {
+            'method': $scope.watcher_webhook_method ? $scope.watcher_webhook_method : 'POST',
+            'host': $scope.watcher_webhook_host ? $scope.watcher_webhook_host : 'remote.server',
+            'port': $scope.watcher_webhook_port ? $scope.watcher_webhook_port : 9200,
+            'path': $scope.watcher_webhook_path ? $scope.watcher_webhook_path : ':/{{payload.watcher_id}',
+            'body': $scope.watcher_webhook_body ? $scope.watcher_webhook_body : '{{payload.watcher_id}}:{{payload.hits.total}}'
+          };
+        }
+      };
+      $scope.makeAlarm();
+      $scope.updateAction();
     };
 
-    $scope.updateAction = function() {
-      if($scope.selectedchoose == $scope.watcher_choose[0]) {
-        $scope.savedWatcher.actions.email = {
-          "to": $scope.watcher_email_to ? $scope.watcher_email_to : "alarm@localhost",
-          "from": $scope.watcher_email_from ? $scope.watcher_email_from : "sentinl@localhost",
-          "subject": $scope.watcher_email_subj ? $scope.watcher_email_subj : "Sentinl Alarm",
-          "priority": "high",
-          "body": $scope.watcher_email_body ? $scope.watcher_email_body : "Found {{payload.hits.total}} Events"
-        }
-      } else if ($scope.selectedchoose == $scope.watcher_choose[1]) {
-          $scope.savedWatcher.actions.email_html = {
-            "to": $scope.watcher_email_html_to ? $scope.watcher_email_html_to : "alarm@localhost",
-            "from": $scope.watcher_email_html_from ? $scope.watcher_email_html_from : "sentinl@localhost",
-            "subject": $scope.watcher_email_html_subj ? $scope.watcher_email_html_subj : "Sentinl Alarm",
-            "priority": "high",
-            "body": $scope.watcher_email_html_body ? $scope.watcher_email_html_body : "Found {{payload.hits.total}} Events",
-            "html": $scope.watcher_email_html_html ? $scope.watcher_email_html_html : "<p>Series Alarm {{ payload._id}}: {{payload.hits.total}}</p>"
-         }
-      } else if ($scope.selectedchoose == $scope.watcher_choose[2]) {
-          $scope.savedWatcher.actions.slack = {
-            "channel": $scope.watcher_slack_channel ? $scope.watcher_slack_channel : "#<channel>",
-            "message": $scope.watcher_slack_message ? $scope.watcher_slack_message : "Series Alarm {{ payload._id}}: {{payload.hits.total}}"
-          }
-        } else if ($scope.selectedchoose == $scope.watcher_choose[3]) {
-          $scope.savedWatcher.actions.webhook = {
-            "method": $scope.watcher_webhook_method ? $scope.watcher_webhook_method : "POST",
-            "host": $scope.watcher_webhook_host ? $scope.watcher_webhook_host : "remote.server",
-            "port": $scope.watcher_webhook_port ? $scope.watcher_webhook_port : 9200,
-            "path": $scope.watcher_webhook_path ? $scope.watcher_webhook_path : ":/{{payload.watcher_id}",
-            "body": $scope.watcher_webhook_body ? $scope.watcher_webhook_body : "{{payload.watcher_id}}:{{payload.hits.total}}"
-          }
-        }
-      }
-    $scope.makeAlarm();
-    $scope.updateAction();
 
+
+  // Spy Placement
+    require('ui/registry/spy_modes').register(function () {
+      return {
+        display: 'Set Watcher',
+        name: 'setalarm',
+        order: 1000,
+        link: linkReqRespStats,
+        template: require('plugins/sentinl/button/alarm_spy.html')
+      };
+    });
   });
 };
-
-
-
-// Spy Placement
-require('ui/registry/spy_modes').register(function () {
-  return {
-    display: 'Set Watcher',
-    name: 'setalarm',
-    order: 1000,
-    link: linkReqRespStats,
-    template: require('plugins/sentinl/button/alarm_spy.html')
-  };
-});

@@ -2,7 +2,7 @@
   "es": {
     "timefield":	"@timestamp",
     "default_index":	"watcher",
-    "type": 		"watch",
+    "type": 	"watch",
     "alarm_index":	"watcher_alarms"
   },
   "sentinl": {
