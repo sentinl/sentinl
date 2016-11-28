@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-import getSentinelClient from './get_sentinel_client';
+import getElasticsearchClient from './get_elasticsearch_client';
 
 var dynamicTemplates = [ {
   string_fields : {
@@ -47,7 +47,7 @@ function createKaaeIndex(server,config) {
           return;
         }
 
-        var client = getSentinelClient(server);
+        var client = getElasticsearchClient(server);
         client.indices.exists({
           index: config.es.default_index
         }, function (error, exists) {
@@ -64,7 +64,7 @@ function createKaaeIndex(server,config) {
                     number_of_replicas: 1
                   },
                   mappings: {
-                    watch: { 
+                    watch: {
                       properties: {
                         input: {
                           type: "object",
@@ -110,7 +110,7 @@ function createKaaeAlarmIndex(server,config) {
           return;
         }
 
-        var client = getSentinelClient(server);
+        var client = getElasticsearchClient(server);
         client.indices.exists({
           index: config.es.alarm_index
         }, function (error, exists) {
@@ -129,9 +129,9 @@ function createKaaeAlarmIndex(server,config) {
                   mappings: {
                     "_default_": {
                        "properties": {
-                          "payload": { 
+                          "payload": {
                             "type": "object",
-                            "enabled":  false 
+                            "enabled":  false
                           }
                        }
                     }
