@@ -6,7 +6,7 @@
     "alarm_index":	"watcher_alarms"
   },
   "sentinl": {
-  	"history": 	20,
+    "history": 20,
     "results": 50
   },
   "settings" : {

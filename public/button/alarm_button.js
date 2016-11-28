@@ -50,20 +50,20 @@ const linkReqRespStats = function ($scope, config) {
   }
 
     $scope.intervals = [
-      { name: '1m', value: 'every 1 minute' },
-      { name: '5m', value: 'every 5 minutes' },
-      { name: '10m', value: 'every 10 minutes' },
-      { name: '1h', value: 'every 1 hour' }
+      {name: '1m', value: 'every 1 minute'},
+      {name: '5m', value: 'every 5 minutes'},
+      {name: '10m', value: 'every 10 minutes'},
+      {name: '1h', value: 'every 1 hour'}
     ];
 
     $scope.ranges = [
-      { name: '1m', value: 'now-1m' },
-      { name: '5m', value: 'now-5m' },
-      { name: '10m', value: 'now-1h' },
-      { name: '1h', value: 'now-1h' },
-      { name: '6h', value: 'now-6h' },
-      { name: '12h', value: 'now-12h' },
-      { name: '1d', value: 'now-1d' }
+      {name: '1m', value: 'now-1m'},
+      {name: '5m', value: 'now-5m'},
+      {name: '10m', value: 'now-1h'},
+      {name: '1h', value: 'now-1h'},
+      {name: '6h', value: 'now-6h'},
+      {name: '12h', value: 'now-12h'},
+      {name: '1d', value: 'now-1d'}
     ];
 
     $scope.resKeys = [];
