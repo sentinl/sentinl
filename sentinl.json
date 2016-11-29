@@ -1,5 +1,4 @@
 {
-"buuuu" : "fuuu",
   "es": {
     "timefield":	"@timestamp",
     "default_index":	"watcher",
