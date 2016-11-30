@@ -39,7 +39,7 @@ const init = _.once((server) => {
   /* Bird Watching and Duck Hunting */
   const client = getElasticsearchClient(server);
   var sched = later.parse.recur().on(25,55).second();
-  var t = later.setInterval(function(){ scheduler.doalert(server,client) }, sched);
+  var t = later.setInterval(function () { scheduler.doalert(server,client); }, sched);
   /* run NOW, plus later */
   scheduler.doalert(server,client);
 });
@@ -48,7 +48,7 @@ export default function (server, options) {
 
   let status = server.plugins.elasticsearch.status;
   if (status && status.state === 'green') {
-      init(server);
+    init(server);
   } else {
     status.on('change', () => {
       if (server.plugins.elasticsearch.status.state === 'green') {

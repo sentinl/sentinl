@@ -20,22 +20,20 @@
 export default function (kibana) {
   return new kibana.Plugin({
     require: ['kibana', 'elasticsearch'],
-
     uiExports: {
       spyModes: ['plugins/sentinl/button/alarm_button'],
-      // chromeNavControls: ['plugins/sentinl/button/alarm_button'],
       app: {
         title: 'Sentinl',
         description: 'Kibana Alert App for Elasticsearch',
         main: 'plugins/sentinl/app',
         icon: 'plugins/sentinl/sentinl.svg',
-	injectVars: function (server, options) {
-                               var config = server.config();
-                               return {
-                                   kbnIndex: config.get('kibana.index'),
-                                   esShardTimeout: config.get('elasticsearch.shardTimeout'),
-                                   esApiVersion: config.get('elasticsearch.apiVersion')
-                               };
+        injectVars: function (server, options) {
+          var config = server.config();
+          return {
+            kbnIndex: config.get('kibana.index'),
+            esShardTimeout: config.get('elasticsearch.shardTimeout'),
+            esApiVersion: config.get('elasticsearch.apiVersion')
+          };
         }
       }
     },
@@ -44,8 +42,6 @@ export default function (kibana) {
         enabled: Joi.boolean().default(true),
       }).default();
     },
-
     init: require('./init.js')
-
   });
 };

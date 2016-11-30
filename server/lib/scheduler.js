@@ -27,14 +27,14 @@ var Schedule = [];
 function getCount(client) {
   return client.count({
     index: 'watcher',
-    type: "watch"
+    type: 'watch'
   });
 }
 
 function getWatcher(count, client) {
   return client.search({
     index: 'watcher',
-    type: "watch",
+    type: 'watch',
     size: count
   });
 }
@@ -67,27 +67,28 @@ function doalert(server, client) {
         Schedule[hit._id] = {};
         Schedule[hit._id].hit = hit;
 
+        var interval;
         if (hit._source.trigger.schedule.later) {
           // https://bunkat.github.io/later/parsers.html#text
-          var interval = later.parse.text(hit._source.trigger.schedule.later);
+          interval = later.parse.text(hit._source.trigger.schedule.later);
           Schedule[hit._id].interval = hit._source.trigger.schedule.later;
         }
         else if (hit._source.trigger.schedule.interval % 1 === 0) {
           // max 60 seconds!
-          var interval = later.parse.recur().every(hit._source.trigger.schedule.interval).second();
+          interval = later.parse.recur().every(hit._source.trigger.schedule.interval).second();
           Schedule[hit._id].interval = hit._source.trigger.schedule.interval;
         }
 
         if (hit._source.report) {
           /* Report */
           Schedule[hit._id].later = later.setInterval(function () {
-            reporting(hit, interval)
+            reporting(hit, interval);
           }, interval);
           server.log(['status', 'info', 'Sentinl'], 'Scheduled Report: ' + hit._id + ' every ' + Schedule[hit._id].interval);
         } else {
           /* Watcher */
           Schedule[hit._id].later = later.setInterval(function () {
-            watching(hit, interval)
+            watching(hit, interval);
           }, interval);
           server.log(['status', 'info', 'Sentinl'], 'Scheduled Watch: ' + hit._id + ' every ' + Schedule[hit._id].interval);
         }
@@ -127,8 +128,9 @@ function doalert(server, client) {
             server.log(['status', 'debug', 'Sentinl', 'PAYLOAD DEBUG'], payload);
 
             /* Validate Condition */
+            var ret;
             try {
-              var ret = eval(condition);
+              ret = eval(condition);
             } catch (err) {
               server.log(['status', 'info', 'Sentinl'], 'Condition Error for ' + task._id + ': ' + err);
             }
@@ -152,7 +154,7 @@ function doalert(server, client) {
           })
           .catch((error) => {
             server.log(['error', 'Sentinl'], `An error occurred while executing the watch: ${error}`);
-          })
+          });
 
         }
 
@@ -163,7 +165,7 @@ function doalert(server, client) {
           }
           server.log(['status', 'info', 'Sentinl'], 'Executing report: ' + task._id);
           var actions = task._source.actions;
-          var payload = {"_id": task._id};
+          var payload = {'_id': task._id};
           if (!actions) {
             server.log(['status', 'info', 'Sentinl'], 'Condition Error for ' + task._id);
             return;
