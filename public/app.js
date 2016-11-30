@@ -56,26 +56,11 @@ import jsonHtml from './templates/json.html';
 var impactLogo = require('plugins/sentinl/sentinl_watch.svg');
 var smallLogo = require('plugins/sentinl/sentinl.svg');
 
-/* Inject Tabs */
-/* var topNavMenu = [
-  {
-    key: 'watchers',
-    description: 'WATCH',
-    run: function () { kbnUrl.change('/'); }
-  },
-  {
-    key: 'about',
-    description: 'ABOUT',
-    run: function () { kbnUrl.change('/about'); }
-  }
-];
-*/
-
 chrome
   .setBrand({
-    'logo': 'url(' + impactLogo + ') left no-repeat',
-    'smallLogo': 'url(' + impactLogo + ') left no-repeat',
-    'title': 'SENTINL'
+    logo: 'url(' + impactLogo + ') left no-repeat',
+    smallLogo: 'url(' + impactLogo + ') left no-repeat',
+    title: 'SENTINL'
   })
   .setNavBackground('#222222')
   .setTabs([
@@ -191,11 +176,9 @@ uiModules
     if (refreshValue !== $scope.currentRefresh && refreshValue !== 0) {
       // new refresh value
       if (_.isNumber(refreshValue) && !refreshPause) {
-        // console.log('TIMEFILTER REFRESH');
         $scope.newRefresh = refreshValue;
         // Reset Interval & Schedule Next
         $scope.refreshalarms = $timeout(function () {
-          // console.log('Reloading data....');
           $route.reload();
         }, refreshValue);
         $scope.$watch('$destroy', $scope.refreshalarms);
@@ -280,14 +263,6 @@ uiModules
   .then((response) => {
     $scope.watchers = response.data.hits.hits;
     importWatcherFromLocalStorage();
-    /*
-     $scope.spy.params.spyPerPage = 10;
-     $scope.table = tabifyAggResponse($scope.vis, $route.current.locals.currentWatchers.data.hits.hits, {
-     canSplit: false,
-     asAggConfigResults: true,
-     partialRows: true
-     });
-     */
   })
   .catch((error) => {
     $scope.notify.error(error);
@@ -350,89 +325,80 @@ uiModules
   $scope.watcherNew = function (newwatcher) {
     if (!newwatcher) {
       newwatcher = {
-        '_index': 'watcher',
-        '_type': 'watch',
-        '_id': 'new_watcher_' + Math.random().toString(36).substr(2, 9),
-        '_new': 'true',
-        '_source': {
-          'trigger': {
-            'schedule': {
-              'later': 'every 5 minutes'
+        _index: 'watcher',
+        _type: 'watch',
+        _id: 'new_watcher_' + Math.random().toString(36).substr(2, 9),
+        _new: 'true',
+        _source: {
+          trigger: {
+            schedule: {
+              later: 'every 5 minutes'
             }
           },
-          'input': {
-            'search': {
-              'request': {
-                'index': [],
-                'body': {},
+          input: {
+            search: {
+              request: {
+                index: [],
+                body: {},
               }
             }
           },
-          'condition': {
-            'script': {
-              'script': 'payload.hits.total > 100'
+          condition: {
+            script: {
+              script: 'payload.hits.total > 100'
             }
           },
-          'transform': {},
-          'actions': {
-            'email_admin': {
-              'throttle_period': '15m',
-              'email': {
-                'to': 'alarm@localhost',
-                'from': 'sentinl@localhost',
-                'subject': 'Sentinl Alarm',
-                'priority': 'high',
-                'body': 'Found {{payload.hits.total}} Events'
+          transform: {},
+          actions: {
+            email_admin: {
+              throttle_period: '15m',
+              email: {
+                to: 'alarm@localhost',
+                from: 'sentinl@localhost',
+                subject: 'Sentinl Alarm',
+                priority: 'high',
+                body: 'Found {{payload.hits.total}} Events'
               }
             }
           }
         }
       };
     }
-
     $scope.watchers.unshift(newwatcher);
-
-  	/*
-  	 refreshalarms = $timeout(function () {
-  	      // console.log('set new watcher to edit mode...');
-  	      $scope.setAce(0,false);
-   	 }, 200);
-  	*/
   };
-
   $scope.reporterNew = function (newwatcher) {
     if (!newwatcher) {
       newwatcher = {
-        '_index': 'watcher',
-        '_type': 'watch',
-        '_id': 'reporter_' + Math.random().toString(36).substr(2, 9),
-        '_new': 'true',
-        '_source': {
-          'trigger': {
-            'schedule': {
-              'later': 'every 1 hour'
+        _index: 'watcher',
+        _type: 'watch',
+        _id: 'reporter_' + Math.random().toString(36).substr(2, 9),
+        _new: 'true',
+        _source: {
+          trigger: {
+            schedule: {
+              later: 'every 1 hour'
             }
           },
-          'report' : true,
-          'transform': {},
-          'actions': {
-            'report_admin': {
-              'throttle_period': '15m',
-              'report': {
-                'to': 'report@localhost',
-                'from': 'sentinl@localhost',
-                'subject': 'Sentinl Report',
-                'priority': 'high',
-                'body': 'Sample Sentinl Screenshot Report',
-                'snapshot' : {
-                  'res' : '1280x900',
-                  'url' : 'http://127.0.0.1/app/kibana#/dashboard/Alerts',
-                  'path' : '/tmp/',
-                  'params' : {
-                    'username' : 'username',
-                    'password' : 'password',
-                    'delay' : 15,
-                    'crop' : false
+          report : true,
+          transform: {},
+          actions: {
+            report_admin: {
+              throttle_period: '15m',
+              report: {
+                to: 'report@localhost',
+                from: 'sentinl@localhost',
+                subject: 'Sentinl Report',
+                priority: 'high',
+                body: 'Sample Sentinl Screenshot Report',
+                snapshot : {
+                  res : '1280x900',
+                  url : 'http://127.0.0.1/app/kibana#/dashboard/Alerts',
+                  path : '/tmp/',
+                  params : {
+                    username : 'username',
+                    password : 'password',
+                    delay : 15,
+                    crop : false
                   }
                 }
               }
@@ -441,16 +407,7 @@ uiModules
         }
       };
     }
-
     $scope.watchers.unshift(newwatcher);
-
-	/*
-	 refreshalarms = $timeout(function () {
-	      // console.log('set new watcher to edit mode...');
-	      $scope.setAce(0,false);
- 	 }, 200);
-	*/
-
   };
 
   var currentTime = moment($route.current.locals.currentTime);
@@ -489,5 +446,4 @@ uiModules
     $scope.utcTime = utcTime.add(1, 'second').format('HH:mm:ss');
   }, 1000);
   $scope.$watch('$destroy', unsubscribe);
-
 });
