@@ -129,15 +129,16 @@ function doalert(server, client) {
 
             /* Validate Condition */
             var ret;
+            var localEval = eval;
             try {
-              ret = eval(condition);
+              localEval(condition);
             } catch (err) {
               server.log(['status', 'info', 'Sentinl'], 'Condition Error for ' + task._id + ': ' + err);
             }
             if (ret) {
               if (transform.script) {
                 try {
-                  eval(transform.script.script);
+                  localEval(transform.script.script);
                 } catch (err) {
                   server.log(['status', 'info', 'Sentinl'], 'Transform Script Error for ' + task._id + ': ' + err);
                 }
@@ -165,7 +166,7 @@ function doalert(server, client) {
           }
           server.log(['status', 'info', 'Sentinl'], 'Executing report: ' + task._id);
           var actions = task._source.actions;
-          var payload = {'_id': task._id};
+          var payload = {_id: task._id};
           if (!actions) {
             server.log(['status', 'info', 'Sentinl'], 'Condition Error for ' + task._id);
             return;

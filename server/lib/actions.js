@@ -33,9 +33,11 @@ export default function (server, actions, payload) {
   const client = getElasticsearchClient(server);
 
   /* Email Settings */
+  var emailServer;
+  var email;
   if (config.settings.email.active) {
-    var email = require('emailjs');
-    var email_server = email.server.connect({
+    email = require('emailjs');
+    emailServer = email.server.connect({
       user: config.settings.email.user,
       password: config.settings.email.password,
       host: config.settings.email.host,
@@ -53,9 +55,10 @@ export default function (server, actions, payload) {
   }
 
   /* Slack Settings */
+  var Slack = require('node-slack');
+  var slack;
   if (config.settings.slack.active) {
-    var Slack = require('node-slack');
-    var slack = new Slack(config.settings.slack.hook);
+    slack = new Slack(config.settings.slack.hook);
   }
 
   /* Internal Support Functions */
@@ -92,18 +95,17 @@ export default function (server, actions, payload) {
   /* ES Indexing Functions */
   var esHistory = function (type, message, loglevel, payload) {
     if (!loglevel) {
-      var loglevel = 'INFO';
+      loglevel = 'INFO';
     }
-    ;
     if (!payload) {
-      var payload = {};
+      payload = {};
     }
 
     server.log(['status', 'info', 'Sentinl'], 'Storing Alarm to ES with type:' + type);
     var indexDate = '-' + new Date().toISOString().substr(0, 10).replace(/-/g, '.');
-    var index_name = config.es.alarm_index ? config.es.alarm_index + indexDate : 'watcher_alarms' + indexDate;
+    var indexName = config.es.alarm_index ? config.es.alarm_index + indexDate : 'watcher_alarms' + indexDate;
     client.create({
-      index: index_name,
+      index: indexName,
       type: type,
       body: {
         '@timestamp': new Date().toISOString(),
@@ -144,10 +146,13 @@ export default function (server, actions, payload) {
     *    }
     */
 
+    var priority;
+    var formatterC;
+    var message;
     if (_.has(action, 'console')) {
-      var priority = action.console.priority ? action.console.priority : 'INFO';
-      var formatter_c = action.console.message ? action.console.message : '{{ payload }}';
-      var message = mustache.render(formatter_c, {'payload': payload});
+      priority = action.console.priority ? action.console.priority : 'INFO';
+      formatterC = action.console.message ? action.console.message : '{{ payload }}';
+      message = mustache.render(formatterC, {payload: payload});
       server.log(['status', 'info', 'Sentinl'], 'Console Payload: ' + JSON.stringify(payload));
       esHistory(key, message, priority, payload);
     }
@@ -164,20 +169,24 @@ export default function (server, actions, payload) {
     *	    }
     */
 
+    var formatterS;
+    var formatterB;
+    var subject;
+    var body;
     if (_.has(action, 'email')) {
-      var formatter_s = action.email.subject ? action.email.subject : 'SENTINL: ' + key;
-      var formatter_b = action.email.body ? action.email.body : 'Series Alarm {{ payload._id}}: {{payload.hits.total}}';
-      var subject = mustache.render(formatter_s, {'payload': payload});
-      var body = mustache.render(formatter_b, {'payload': payload});
-      var priority = action.email.priority ? action.email.priority : 'INFO';
+      formatterS = action.email.subject ? action.email.subject : 'SENTINL: ' + key;
+      formatterB = action.email.body ? action.email.body : 'Series Alarm {{ payload._id}}: {{payload.hits.total}}';
+      subject = mustache.render(formatterS, {payload: payload});
+      body = mustache.render(formatterB, {payload: payload});
+      priority = action.email.priority ? action.email.priority : 'INFO';
       server.log(['status', 'info', 'Sentinl', 'email'], 'Subject: ' + subject + ', Body: ' + body);
 
-      if (!email_server || !config.settings.email.active) {
+      if (!emailServer || !config.settings.email.active) {
         server.log(['status', 'info', 'Sentinl', 'email'], 'Delivery Disabled!');
       }
       else {
         server.log(['status', 'info', 'Sentinl', 'email'], 'Delivering to Mail Server');
-        email_server.send({
+        emailServer.send({
           text: body,
           from: action.email.from,
           to: action.email.to,
@@ -205,23 +214,23 @@ export default function (server, actions, payload) {
     *      "stateless" : false
     *	    }
     */
-
+    var html;
     if (_.has(action, 'email_html')) {
-      var formatter_s = action.email_html.subject ? action.email_html.subject : 'SENTINL: ' + key;
-      var formatter_b = action.email_html.body ? action.email_html.body : 'Series Alarm {{ payload._id}}: {{payload.hits.total}}';
-      var formatter_c = action.email_html.body ? action.email_html.body : '<p>Series Alarm {{ payload._id}}: {{payload.hits.total}}</p>';
-      var subject = mustache.render(formatter_s, {'payload': payload});
-      var body = mustache.render(formatter_b, {'payload': payload});
-      var html = mustache.render(formatter_c, {'payload': payload});
-      var priority = action.email_html.priority ? action.email_html.priority : 'INFO';
+      formatterS = action.email_html.subject ? action.email_html.subject : 'SENTINL: ' + key;
+      formatterB = action.email_html.body ? action.email_html.body : 'Series Alarm {{ payload._id}}: {{payload.hits.total}}';
+      formatterC = action.email_html.body ? action.email_html.body : '<p>Series Alarm {{ payload._id}}: {{payload.hits.total}}</p>';
+      subject = mustache.render(formatterS, {payload: payload});
+      body = mustache.render(formatterB, {payload: payload});
+      html = mustache.render(formatterC, {payload: payload});
+      priority = action.email_html.priority ? action.email_html.priority : 'INFO';
       server.log(['status', 'info', 'Sentinl', 'email_html'], 'Subject: ' + subject + ', Body: ' + body + ', HTML:' + html);
 
-      if (!email_server || !config.settings.email_html.active) {
+      if (!emailServer || !config.settings.email_html.active) {
         server.log(['status', 'info', 'Sentinl', 'email_html'], 'Delivery Disabled!');
       }
       else {
         server.log(['status', 'info', 'Sentinl', 'email'], 'Delivering to Mail Server');
-        email_server.send({
+        emailServer.send({
           text: body,
           from: action.email_html.from,
           to: action.email_html.to,
@@ -261,13 +270,13 @@ export default function (server, actions, payload) {
     */
 
     if (_.has(action, 'report')) {
-      var formatter_s = action.report.subject ? action.report.subject : 'SENTINL: ' + key;
-      var formatter_b = action.report.body ? action.report.body : 'Series Report {{ payload._id}}: {{payload.hits.total}}';
-      var subject = mustache.render(formatter_s, {'payload': payload});
-      var body = mustache.render(formatter_b, {'payload': payload});
-      var priority = action.report.priority ? action.report.priority : 'INFO';
+      formatterS = action.report.subject ? action.report.subject : 'SENTINL: ' + key;
+      formatterB = action.report.body ? action.report.body : 'Series Report {{ payload._id}}: {{payload.hits.total}}';
+      subject = mustache.render(formatterS, {payload: payload});
+      body = mustache.render(formatterB, {payload: payload});
+      priority = action.report.priority ? action.report.priority : 'INFO';
       server.log(['status', 'info', 'Sentinl', 'report'], 'Subject: ' + subject + ', Body: ' + body);
-      if (!email_server) {
+      if (!emailServer) {
         server.log(['status', 'info', 'Sentinl', 'report'], 'Reporting Disabled! Email Required!');
         return;
       }
@@ -298,14 +307,14 @@ export default function (server, actions, payload) {
           //.pdf(action.report.snapshot.path + filename)
           .then(function () {
             server.log(['status', 'info', 'Sentinl', 'report'], 'Snapshot ready for url:' + action.report.snapshot.url);
-            email_server.send({
+            emailServer.send({
               text: body,
               from: action.report.from,
               to: action.report.to,
               subject: subject,
               attachment: [
                 // { path: action.report.snapshot.path + filename, type: "application/pdf", name: filename },
-                {data: "<html><img src='cid:my-report' width='100%'></html>"},
+                {data: '<html><img src=\'cid:my-report\' width=\'100%\'></html>'},
                 {
                   path: action.report.snapshot.path + filename,
                   type: 'image/png',
@@ -346,10 +355,11 @@ export default function (server, actions, payload) {
     *    }
     */
 
+    var formatter;
     if (_.has(action, 'slack')) {
-      var formatter = action.slack.message ? action.slack.message : 'Series Alarm {{ payload._id}}: {{payload.hits.total}}';
-      var message = mustache.render(formatter, {'payload': payload});
-      var priority = action.slack.priority ? action.slack.priority : 'INFO';
+      formatter = action.slack.message ? action.slack.message : 'Series Alarm {{ payload._id}}: {{payload.hits.total}}';
+      message = mustache.render(formatter, {payload: payload});
+      priority = action.slack.priority ? action.slack.priority : 'INFO';
       server.log(['status', 'info', 'Sentinl', 'Slack'], 'Webhook to #' + action.slack.channel + ' msg: ' + message);
 
       if (!slack || !config.settings.slack.active) {
@@ -363,7 +373,7 @@ export default function (server, actions, payload) {
             username: config.settings.slack.username
           });
         } catch (err) {
-          server.log(['status', 'info', 'Sentinl', 'slack'], 'Failed sending to: ' + condig.settings.slack.hook);
+          server.log(['status', 'info', 'Sentinl', 'slack'], 'Failed sending to: ' + config.settings.slack.hook);
         }
       }
 
@@ -386,11 +396,15 @@ export default function (server, actions, payload) {
 
     var querystring = require('querystring');
     var http = require('http');
+    var webhookFormatter;
+    var webhookBody;
+    var options;
+    var req;
     if (_.has(action, 'webhook')) {
-      var webhook_formatter = action.webhook.body ? action.webhook.body : '{{ payload._id}}: {{payload.hits.total}}';
-      var webhook_body = mustache.render(webhook_formatter, {'payload': payload});
+      webhookFormatter = action.webhook.body ? action.webhook.body : '{{ payload._id}}: {{payload.hits.total}}';
+      webhookBody = mustache.render(webhookFormatter, {payload: payload});
 
-      var options = {
+      options = {
         hostname: action.webhook.host ? action.webhook.host : 'locahost',
         port: action.webhook.port ? action.webhook.port : 80,
         path: action.webhook.path ? action.webhook.path : '/sentinl',
@@ -399,7 +413,7 @@ export default function (server, actions, payload) {
 
       if (action.webhook.headers) options.headers = action.webhook.headers;
 
-      var req = http.request(options, function (res) {
+      req = http.request(options, function (res) {
         res.setEncoding('utf8');
         res.on('data', function (chunk) {
           server.log(['status', 'debug', 'Sentinl'], 'Webhook Response: ' + chunk);
@@ -410,8 +424,8 @@ export default function (server, actions, payload) {
         server.log(['status', 'err', 'Sentinl'], 'Error shipping Webhook: ' + e.message);
       });
 
-      if (webhook_body) {
-        req.write(webhook_body);
+      if (webhookBody) {
+        req.write(webhookBody);
       }
       else if (action.webhook.params) {
         req.write(action.webhook.params);
@@ -427,13 +441,15 @@ export default function (server, actions, payload) {
     *    }
     */
 
+    var esMessage;
+    var esFormatter;
     if (_.has(action, 'elastic')) {
-      var es_formater = action.local.message ? action.local.message : '{{ payload }}';
-      var es_message = mustache.render(es_formatter, {'payload': payload});
-      var priority = action.local.priority ? action.local.priority : 'INFO';
-      server.log(['status', 'info', 'Sentinl', 'local'], 'Logged Message: ' + es_message);
+      esFormatter = action.local.message ? action.local.message : '{{ payload }}';
+      esMessage = mustache.render(esFormatter, {payload: payload});
+      priority = action.local.priority ? action.local.priority : 'INFO';
+      server.log(['status', 'info', 'Sentinl', 'local'], 'Logged Message: ' + esMessage);
       // Log Event
-      esHistory(key, es_message, priority, payload);
+      esHistory(key, esMessage, priority, payload);
     }
 
 
@@ -453,7 +469,7 @@ export default function (server, actions, payload) {
     var querystring = require('querystring');
     var http = require('http');
     if (_.has(action, 'pushapps')) {
-      var options = {
+      options = {
         hostname: 'https://api.pushapps.mobi/v1',
         port: 443,
         path: '/notifications',
@@ -464,7 +480,7 @@ export default function (server, actions, payload) {
         }
       };
 
-      var post_data = querystring.stringify({
+      var postData = querystring.stringify({
         text: action.text,
         platforms: action.platform,
         tags: action.tags,
@@ -473,7 +489,7 @@ export default function (server, actions, payload) {
         image_url: action.image_url
       });
 
-      var req = http.request(options, function (res) {
+      req = http.request(options, function (res) {
         res.setEncoding('utf8');
         res.on('data', function (chunk) {
           server.log(['status', 'debug', 'Sentinl'], 'Response: ' + chunk);
@@ -483,7 +499,7 @@ export default function (server, actions, payload) {
       req.on('error', function (e) {
         server.log(['status', 'err', 'Sentinl'], 'Error creating a PushApps notification: ' + e);
       });
-      req.write(post_data);
+      req.write(postData);
       req.end();
     }
   });

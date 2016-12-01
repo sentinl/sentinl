@@ -43,7 +43,7 @@ function createSentinlIndex(server,config) {
   server.log(['status', 'info', 'Sentinl'], 'Core Index check...');
   if (!server.plugins.elasticsearch) {
     server.log(['status', 'error', 'Sentinl'], 'Elasticsearch client not available, retrying in 5s');
-    tryCreate();
+    tryCreate(server);
     return;
   }
 
@@ -92,7 +92,7 @@ function createSentinlIndex(server,config) {
 }
 
 var tryCount = 0;
-function tryCreate() {
+function tryCreate(server) {
   if (tryCount > 5) {
     server.log(['status', 'warning', 'Sentinl'], 'Failed creating Indices mapping!');
     return;
@@ -106,7 +106,7 @@ function createSentinlAlarmIndex(server,config) {
   server.log(['status', 'info', 'Sentinl'], 'Alarm Index check...');
   if (!server.plugins.elasticsearch) {
     server.log(['status', 'error', 'Sentinl'], 'Elasticsearch client not available, retrying in 5s');
-    tryAlarmCreate();
+    tryAlarmCreate(server);
     return;
   }
 
@@ -147,7 +147,7 @@ function createSentinlAlarmIndex(server,config) {
 }
 
 var tryAlarmCount = 0;
-function tryAlarmCreate() {
+function tryAlarmCreate(server) {
   if (tryCount > 5) {
     server.log(['error', 'warning', 'Sentinl'], 'Failed creating Alarm Indices mapping!');
     return;
