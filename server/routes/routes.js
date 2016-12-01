@@ -129,7 +129,6 @@ export default function (server) {
     path: '/api/sentinl/set/interval/{timefilter}',
     handler: function (request, reply) {
       server.sentinlInterval = JSON.parse(request.params.timefilter);
-      // console.log('server timefilter:',server.sentinlInterval);
       reply({ status: '200 OK' });
     }
   });
