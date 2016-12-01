@@ -1,8 +1,8 @@
 <img src="http://i.imgur.com/s4TKpbF.png" width="400"/>
 
-# Kibana Alert & Report App for Elasticsearch<img src="https://camo.githubusercontent.com/15f26c4f603cac9bf415c841a8a60077f6db5102/687474703a2f2f696d6775722e636f6d2f654c446f4f4b592e706e67">
+# Kibi (& Kibana) Alerting & Reporting App
 
-> Data Series are awesome, but who's Watching them 24/7/365? Introducing SENTINL, the Kibana Watcher _(ex KAAE)_
+> Watching your data, 24/7/365. 
 
 ---
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/77b040968c354d6597ff60a615195a1a)](https://www.codacy.com/app/lorenzo-mangani/sentinl?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=sirensolutions/sentinl&amp;utm_campaign=Badge_Grade)
@@ -10,9 +10,9 @@
 <img src="https://img.shields.io/badge/elasticsearch-2.*-green.svg"/>
 
 
-**SENTINL** extends *Kibana* with **Alerting** and **Reporting** functionality to monitor, notify and report on data series changes using standard queries, programmable validators and a variety of configurable actions - Think of it as a free an independent ["Watcher"](https://www.elastic.co/guide/en/watcher/current/introduction.html) and ["Reporting"](https://www.elastic.co/products/reporting) alternative.
+**SENTINL** extends *Kibi*/*Kibana* with **Alerting** and **Reporting** functionality to monitor, notify and report on data series changes using standard queries, programmable validators and a variety of configurable actions - Think of it as a free an independent ["Watcher"](https://www.elastic.co/guide/en/watcher/current/introduction.html) which also has scheduled ["Reporting"](https://www.elastic.co/products/reporting) capabilities (with PDFs snapshopts).
 
-**SENTINL** is also designed to simplify the process of creating and managing alerts and reports in Kibana via its integrated  App and Spy integration, while retaining baseline *logic and configuration style compatibility* with the Elastic counterparts.
+**SENTINL** is also designed to simplify the process of creating and managing alerts and reports in Kibi/Kibana via its App and Spy integration, directly in the Kibi/Kibana UI.
 
 <!--<img src="http://i.imgur.com/aDHvUxf.png" width="400" /> -->
 
@@ -20,16 +20,16 @@
 
 ---
 
-### Kibana Plugin: SENTINL Spy
-The SENTINL integrated Kibana plug-in extends the default Spy functionality to shape new prototype Watchers based on Visualize queries, and providing them to SENTINL for fine editing and deployment.
+### Kibi/Kibana Plugin: SENTINL Spy
+The SENTINL integrated Kibi/Kibana plug-in extends the default Spy functionality to shape new prototype Watchers based on Visualize queries, and providing them to SENTINL for fine editing and deployment.
 <img src="http://i.imgur.com/4lDTOVR.png" />
 
 ---
 
-### Kibana Alerts Display
+### Kibi/Kibana Alerts Display
 SENTINL alerts can easily be displayed back in Kibana dashboards using [saved search](https://github.com/sirensolutions/sentinl/wiki/KAAE-Alerts-in-Dashboard) visualizations
 
-### Kibana Report Snapshots
+### Kibi/Kibana Report Snapshots
 Boss wants to see charts and reports? SENTINL can grab timed snapshots of Kibana dashboards _(or any other website)_ and deliver them via email using the [report](https://github.com/sirensolutions/sentinl/wiki/KAAE-Report-Example) action
 
 
@@ -72,6 +72,7 @@ Consult our [wiki](https://github.com/sirensolutions/sentinl/wiki) to learn how 
 <pre>
 This software is licensed under the Apache License, version 2 ("ALv2"), quoted below.
 
+Copyright 2016, 2017 Siren Solutions
 Copyright 2016, Lorenzo Mangani (lorenzo.mangani@gmail.com)
 Copyright 2015, Rao Chenlin (rao.chenlin@gmail.com)
 
