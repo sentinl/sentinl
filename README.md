@@ -16,7 +16,7 @@
 
 <!--<img src="http://i.imgur.com/aDHvUxf.png" width="400" /> -->
 
-<img src="http://i.imgur.com/sheqvAc.gif" />
+<img src="http://i.imgur.com/Pj1usin.gif" />
 
 ---
 
