@@ -40,62 +40,62 @@ var dynamicTemplates = [ {
 
 
 function createSentinlIndex(server,config) {
-        server.log(['status', 'info', 'Sentinl'], 'Core Index check...');
-        if (!server.plugins.elasticsearch) {
-          server.log(['status', 'error', 'Sentinl'], 'Elasticsearch client not available, retrying in 5s');
-          tryCreate();
-          return;
-        }
+  server.log(['status', 'info', 'Sentinl'], 'Core Index check...');
+  if (!server.plugins.elasticsearch) {
+    server.log(['status', 'error', 'Sentinl'], 'Elasticsearch client not available, retrying in 5s');
+    tryCreate(server);
+    return;
+  }
 
-        var client = getElasticsearchClient(server);
-        client.indices.exists({
-          index: config.es.default_index
-        }, function (error, exists) {
-            if (exists === true) {
-                server.log(['status', 'debug', 'Sentinl'], 'Core Index exists!');
-                return;
+  var client = getElasticsearchClient(server);
+  client.indices.exists({
+    index: config.es.default_index
+  }, function (error, exists) {
+    if (exists === true) {
+      server.log(['status', 'debug', 'Sentinl'], 'Core Index exists!');
+      return;
+    }
+    server.log(['status', 'debug', 'Sentinl'], 'Creating Sentinl core Index...');
+    client.indices.create({
+      index: config.es.default_index,
+      body: {
+        settings: {
+          number_of_shards: 1,
+          number_of_replicas: 1
+        },
+        mappings: {
+          watch: {
+            properties: {
+              input: {
+                type: 'object',
+                enabled: false
+              },
+              transform: {
+                type: 'object',
+                enabled: false
+              },
+              condition: {
+                type: 'object',
+                enabled: false
+              }
             }
-            server.log(['status', 'debug', 'Sentinl'], 'Creating Sentinl core Index...');
-            client.indices.create({
-                index: config.es.default_index,
-                body: {
-                  settings: {
-                    number_of_shards: 1,
-                    number_of_replicas: 1
-                  },
-                  mappings: {
-                    watch: {
-                      properties: {
-                        input: {
-                          type: "object",
-                          enabled: false
-                        },
-                        transform: {
-                          type: "object",
-                          enabled: false
-                        },
-                        condition: {
-                          type: "object",
-                          enabled: false
-                        }
-                      }
-                    }
-                  }
-                }
-              })
-              .then(function (resp) {
-                   server.log(['status', 'info', 'Sentinl'], 'Core Index response', resp);
-              }, function (err) {
-                   server.log(['status', 'warning', 'Sentinl'], err.message);
-              });
-        });
+          }
+        }
+      }
+    })
+    .then(function (resp) {
+      server.log(['status', 'info', 'Sentinl'], 'Core Index response', resp);
+    }, function (err) {
+      server.log(['status', 'warning', 'Sentinl'], err.message);
+    });
+  });
 }
 
 var tryCount = 0;
-function tryCreate() {
+function tryCreate(server) {
   if (tryCount > 5) {
-      server.log(['status', 'warning', 'Sentinl'], 'Failed creating Indices mapping!');
-  return;
+    server.log(['status', 'warning', 'Sentinl'], 'Failed creating Indices mapping!');
+    return;
   }
   setTimeout(createSentinlIndex, 5000);
   tryCount++;
@@ -103,54 +103,54 @@ function tryCreate() {
 
 
 function createSentinlAlarmIndex(server,config) {
-        server.log(['status', 'info', 'Sentinl'], 'Alarm Index check...');
-        if (!server.plugins.elasticsearch) {
-          server.log(['status', 'error', 'Sentinl'], 'Elasticsearch client not available, retrying in 5s');
-          tryAlarmCreate();
-          return;
-        }
+  server.log(['status', 'info', 'Sentinl'], 'Alarm Index check...');
+  if (!server.plugins.elasticsearch) {
+    server.log(['status', 'error', 'Sentinl'], 'Elasticsearch client not available, retrying in 5s');
+    tryAlarmCreate(server);
+    return;
+  }
 
-        var client = getElasticsearchClient(server);
-        client.indices.exists({
-          index: config.es.alarm_index
-        }, function (error, exists) {
-            if (exists === true) {
-                server.log(['status', 'debug', 'Sentinl'], 'Alarms Index exists!');
-                return;
+  var client = getElasticsearchClient(server);
+  client.indices.exists({
+    index: config.es.alarm_index
+  }, function (error, exists) {
+    if (exists === true) {
+      server.log(['status', 'debug', 'Sentinl'], 'Alarms Index exists!');
+      return;
+    }
+    server.log(['status', 'debug', 'Sentinl'], 'Creating Sentinl Alarms Index...');
+    client.indices.create({
+      index: config.es.alarm_index,
+      body: {
+        settings: {
+          number_of_shards: 1,
+          number_of_replicas: 1
+        },
+        mappings: {
+          _default_: {
+            properties: {
+              payload: {
+                type: 'object',
+                enabled:  false
+              }
             }
-            server.log(['status', 'debug', 'Sentinl'], 'Creating Sentinl Alarms Index...');
-            client.indices.create({
-                index: config.es.alarm_index,
-                body: {
-                  settings: {
-                    number_of_shards: 1,
-                    number_of_replicas: 1
-                  },
-                  mappings: {
-                    "_default_": {
-                       "properties": {
-                          "payload": {
-                            "type": "object",
-                            "enabled":  false
-                          }
-                       }
-                    }
-                  }
-                }
-            })
-            .then(function (resp) {
-                   server.log(['status', 'info', 'Sentinl'], 'Alarm Index response', resp);
-            }, function (err) {
-                   server.log(['error', 'warning', 'Sentinl'], err.message);
-            });
-        });
+          }
+        }
+      }
+    })
+    .then(function (resp) {
+      server.log(['status', 'info', 'Sentinl'], 'Alarm Index response', resp);
+    }, function (err) {
+      server.log(['error', 'warning', 'Sentinl'], err.message);
+    });
+  });
 }
 
 var tryAlarmCount = 0;
-function tryAlarmCreate() {
+function tryAlarmCreate(server) {
   if (tryCount > 5) {
-      server.log(['error', 'warning', 'Sentinl'], 'Failed creating Alarm Indices mapping!');
-  return;
+    server.log(['error', 'warning', 'Sentinl'], 'Failed creating Alarm Indices mapping!');
+    return;
   }
   setTimeout(createSentinlAlarmIndex, 5000);
   tryAlarmCount++;

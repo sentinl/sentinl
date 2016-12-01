@@ -18,13 +18,13 @@
  */
 
 module.exports = (function () {
-	var conf;
-	try {
-	  conf = require('/etc/sentinl.json');
-	  conf.custom = true;
-	} catch(e) {
-	  conf = require('../../sentinl.json');
-	  conf.custom = false;
-	}
-        return conf;
+  var conf;
+  try {
+    conf = require('/etc/sentinl.json');
+    conf.custom = true;
+  } catch (e) {
+    conf = require('../../sentinl.json');
+    conf.custom = false;
+  }
+  return conf;
 }());

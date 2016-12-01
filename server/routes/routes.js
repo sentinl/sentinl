@@ -40,29 +40,37 @@ export default function (server) {
     path: '/api/sentinl/list/alarms',
     method: ['POST', 'GET'],
     handler: function (req, reply) {
+      var timeInterval;
       // Use selected timefilter when available
       if (server.sentinlInterval) {
-        var timeInterval = server.sentinlInterval;
+        timeInterval = server.sentinlInterval;
       } else {
-        var timeInterval = {from: "now-15m", mode: "quick", to: "now"};
+        timeInterval = {
+          from: 'now-15m',
+          mode: 'quick',
+          to: 'now'
+        };
       }
-      var qrange = {gte: timeInterval.from, lt: timeInterval.to};
+      var qrange = {
+        gte: timeInterval.from,
+        lt: timeInterval.to
+      };
 
       const boundCallWithRequest = _.partial(server.plugins.elasticsearch.callWithRequest, req);
       boundCallWithRequest('search', {
-        index: config.es.alarm_index ? config.es.alarm_index + "*" : "watcher_alarms*",
-        sort: "@timestamp : asc",
+        index: config.es.alarm_index ? config.es.alarm_index + '*' : 'watcher_alarms*',
+        sort: '@timestamp : asc',
         allowNoIndices: false,
         body: {
-          "size": config.sentinl.results ? config.sentinl.results : 50,
-          "query": {
-            "filtered": {
-              "query": {
-                "match_all": {}
+          size: config.sentinl.results ? config.sentinl.results : 50,
+          query: {
+            filtered: {
+              query: {
+                match_all: {}
               },
-              "filter": {
-                "range": {
-                  "@timestamp": qrange
+              filter: {
+                range: {
+                  '@timestamp': qrange
                 }
               }
             }
@@ -120,19 +128,17 @@ export default function (server) {
     method: 'GET',
     path: '/api/sentinl/set/interval/{timefilter}',
     handler: function (request, reply) {
-	server.sentinlInterval = JSON.parse(request.params.timefilter);
-	// console.log('server timefilter:',server.sentinlInterval);
-	reply({ status: "200 OK" });
-   }
+      server.sentinlInterval = JSON.parse(request.params.timefilter);
+      reply({ status: '200 OK' });
+    }
   });
   server.route({
     method: 'GET',
     path: '/api/sentinl/get/interval',
     handler: function (request, reply) {
-	reply(server.sentinlInterval);
-   }
+      reply(server.sentinlInterval);
+    }
   });
-
 
   // Test
   server.route({
@@ -140,23 +146,21 @@ export default function (server) {
     path: '/api/sentinl/test/{id}',
     handler: function (request, reply) {
       var client = server.plugins.elasticsearch.client;
-
-	server.log(['status', 'info', 'Sentinl'], 'Testing ES connection with param: '+request.params.id);
-	client.ping({
-	  requestTimeout: 5000,
-	  // undocumented params are appended to the query string
-	  hello: "elasticsearch"
-	}, function (error) {
-	  if (error) {
-		server.log(['warning', 'info', 'Sentinl'], 'ES Connectivity is down! '+request.params.id);
-            reply({ status: "DOWN" });
-	  } else {
-		server.log(['status', 'info', 'Sentinl'], 'ES Connectivity is up! '+request.params.id);
-            reply({ status: "UP" });
-	  }
-	});
-
-   }
+      server.log(['status', 'info', 'Sentinl'], 'Testing ES connection with param: ' + request.params.id);
+      client.ping({
+        requestTimeout: 5000,
+        // undocumented params are appended to the query string
+        hello: 'elasticsearch'
+      }, function (error) {
+        if (error) {
+          server.log(['warning', 'info', 'Sentinl'], 'ES Connectivity is down! ' + request.params.id);
+          reply({ status: 'DOWN' });
+        } else {
+          server.log(['status', 'info', 'Sentinl'], 'ES Connectivity is up! ' + request.params.id);
+          reply({ status: 'UP' });
+        }
+      });
+    }
   });
 
   server.route({
@@ -184,16 +188,13 @@ export default function (server) {
     handler: function (request, reply) {
       const callWithRequest = server.plugins.elasticsearch.callWithRequest;
       var watcher = JSON.parse(request.params.watcher);
-
-      server.log(['status', 'info', 'Sentinl'], 'Saving Watcher with ID: '+watcher._id);
-
+      server.log(['status', 'info', 'Sentinl'], 'Saving Watcher with ID: ' + watcher._id);
       var body = {
         index: config.es.default_index,
         type: config.es.type,
         id: watcher._id,
         body: watcher._source
       };
-
       callWithRequest(request, 'index', body)
       .then((resp) => reply({ok: true, resp: resp}))
       .catch((err) => reply(handleESError(err)));
@@ -205,17 +206,15 @@ export default function (server) {
     path: '/api/sentinl/delete/watcher/{id}',
     handler: function (req, reply) {
       var callWithRequest = server.plugins.elasticsearch.callWithRequest;
-
       var body = {
         index: config.es.default_index,
         type: config.es.type,
         id: req.params.id
       };
-
       callWithRequest(req, 'delete', body)
       .then((resp) => reply({ok: true, resp: resp}))
       .catch((err) => reply(handleESError(err)));
-   }
+    }
   });
 
   server.route({
@@ -223,11 +222,9 @@ export default function (server) {
     path: '/api/sentinl/validate/es',
     handler: function (request, reply) {
       var callWithRequest = server.plugins.elasticsearch.callWithRequest;
-
       var body = {
         index: config.es.default_index,
       };
-
       callWithRequest(request, 'fieldStats', body).then(function (resp) {
         reply({
           ok: true,
@@ -239,5 +236,4 @@ export default function (server) {
       .catch((err) => reply(handleESError(err)));
     }
   });
-
 };
