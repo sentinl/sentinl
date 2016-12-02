@@ -139,7 +139,7 @@ function doalert(server, client) {
             if (ret) {
               if (transform.script) {
                 try {
-                  ret = eval(transform.script.script); // eslint-disable-line no-eval
+                  eval(transform.script.script); // eslint-disable-line no-eval
                 } catch (err) {
                   server.log(['status', 'info', 'Sentinl'], 'Transform Script Error for ' + task._id + ': ' + err);
                 }
