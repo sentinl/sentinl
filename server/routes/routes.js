@@ -89,7 +89,7 @@ export default function (server) {
     handler: function (req, reply) {
       const boundCallWithRequest = _.partial(server.plugins.elasticsearch.callWithRequest, req);
       boundCallWithRequest('search', {
-        index: 'watcher',
+        index: config.es.default_index,
         size: config.sentinl.results ? config.sentinl.results : 50,
         allowNoIndices: false
       })
