@@ -131,16 +131,15 @@ function doalert(server, client) {
 
             /* Validate Condition */
             var ret;
-            var localEval = eval;
             try {
-              localEval(condition);
+              ret = eval(condition); // eslint-disable-line no-eval
             } catch (err) {
               server.log(['status', 'info', 'Sentinl'], 'Condition Error for ' + task._id + ': ' + err);
             }
             if (ret) {
               if (transform.script) {
                 try {
-                  localEval(transform.script.script);
+                  ret = eval(transform.script.script); // eslint-disable-line no-eval
                 } catch (err) {
                   server.log(['status', 'info', 'Sentinl'], 'Transform Script Error for ' + task._id + ': ' + err);
                 }
