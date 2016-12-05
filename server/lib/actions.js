@@ -107,8 +107,9 @@ export default function (server, actions, payload) {
         payload: payload
       }
     }).then(function (resp) {
-    }, function (err, resp) {
-      server.log(['status', 'info', 'Sentinl', 'ES'], err || resp);
+      server.log(['status', 'info', 'Sentinl'], 'Alarm stored successfully to ES with type: [' + type + ']');
+    }).catch(function (err) {
+      server.log(['status', 'error', 'Sentinl', 'ES'], err);
     });
   };
 
