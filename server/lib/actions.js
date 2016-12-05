@@ -47,11 +47,6 @@ export default function (server, actions, payload) {
     });
   }
 
-  /* Image Report depends on Email Settings */
-  if (config.settings.report.active && !config.settings.email.active)) {
-      config.settings.report.active = false;
-  }
-
   /* Slack Settings */
   var Slack = require('node-slack');
   var slack;
