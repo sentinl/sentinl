@@ -47,13 +47,6 @@ export default function (server, actions, payload) {
     });
   }
 
-  /* Image Report Settings */
-  if (config.settings.report) {
-    if (!(config.settings.report.active || config.settings.email.active)) {
-      server.log(['status', 'info', 'Sentinl'], 'Action Report requires Email Settings! Reports Disabled.');
-    }
-  }
-
   /* Slack Settings */
   var Slack = require('node-slack');
   var slack;
@@ -281,8 +274,13 @@ export default function (server, actions, payload) {
         return;
       }
 
+      if (!config.settings.report.active || (config.settings.report.active && !config.settings.email.active)) {
+        server.log(['status', 'info', 'Sentinl', 'report'], 'Reports Disabled: Action requires Email Settings!');
+        return;
+      }
+      
       if (!_.has(action, 'report.snapshot.url')) {
-        server.log(['status', 'info', 'Sentinl', 'report'], 'Reporting Disabled! No Settings!');
+        server.log(['status', 'info', 'Sentinl', 'report'], 'Report Disabled: No URL Settings!');
         return;
       }
 
