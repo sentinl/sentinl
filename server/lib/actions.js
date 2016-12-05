@@ -25,7 +25,6 @@ import getElasticsearchClient from './get_elasticsearch_client';
 import horsemanFactory from './horseman_factory';
 import url from 'url';
 
-var debug = true;
 var hlimit = config.sentinl.history ? config.sentinl.history : 10;
 
 export default function (server, actions, payload) {
@@ -48,9 +47,9 @@ export default function (server, actions, payload) {
   }
 
   /* Slack Settings */
-  var Slack = require('node-slack');
   var slack;
   if (config.settings.slack.active) {
+    var Slack = require('node-slack');
     slack = new Slack(config.settings.slack.hook);
   }
 
@@ -108,8 +107,9 @@ export default function (server, actions, payload) {
         payload: payload
       }
     }).then(function (resp) {
-    }, function (err, resp) {
-      console.trace(err, resp);
+      server.log(['status', 'info', 'Sentinl'], 'Alarm stored successfully to ES with type: [' + type + ']');
+    }).catch(function (err) {
+      server.log(['status', 'error', 'Sentinl', 'ES'], err);
     });
   };
 
