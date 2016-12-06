@@ -85,7 +85,7 @@ export default function (server, actions, payload) {
   };
 
   /* ES Indexing Functions */
-  var esHistory = function (type, message, loglevel, payload) {
+  var esHistory = function (type, message, loglevel, payload, isReport) {
     if (!loglevel) {
       loglevel = 'INFO';
     }
@@ -104,7 +104,8 @@ export default function (server, actions, payload) {
         level: loglevel,
         message: message,
         action: type,
-        payload: payload
+        payload: payload,
+        report: isReport
       }
     }).then(function (resp) {
       server.log(['status', 'info', 'Sentinl'], 'Alarm stored successfully to ES with type: [' + type + ']');
@@ -147,7 +148,7 @@ export default function (server, actions, payload) {
       formatterC = action.console.message ? action.console.message : '{{ payload }}';
       message = mustache.render(formatterC, {payload: payload});
       server.log(['status', 'info', 'Sentinl'], 'Console Payload: ' + JSON.stringify(payload));
-      esHistory(key, message, priority, payload);
+      esHistory(key, message, priority, payload, false);
     }
 
     /* ***************************************************************************** */
@@ -190,7 +191,7 @@ export default function (server, actions, payload) {
       }
       if (!action.email.stateless) {
         // Log Event
-        esHistory(key, body, priority, payload);
+        esHistory(key, body, priority, payload, false);
       }
     }
 
@@ -235,7 +236,7 @@ export default function (server, actions, payload) {
       }
       if (!action.email_html.stateless) {
         // Log Event
-        esHistory(key, body, priority, payload);
+        esHistory(key, body, priority, payload, false);
       }
     }
 
@@ -326,7 +327,7 @@ export default function (server, actions, payload) {
               payload.message = err || message;
               if (!action.report.stateless) {
                 // Log Event
-                esHistory(key, body, priority, payload);
+                esHistory(key, body, priority, payload, true);
               }
             });
           }).close();
@@ -335,7 +336,7 @@ export default function (server, actions, payload) {
           payload.message = err;
           if (!action.report.stateless) {
             // Log Event
-            esHistory(key, body, priority, payload);
+            esHistory(key, body, priority, payload, true);
           }
         }
       })
@@ -377,7 +378,7 @@ export default function (server, actions, payload) {
 
       if (!action.slack.stateless) {
         // Log Event
-        esHistory(key, message, priority, payload);
+        esHistory(key, message, priority, payload, false);
       }
     }
 
@@ -447,7 +448,7 @@ export default function (server, actions, payload) {
       priority = action.local.priority ? action.local.priority : 'INFO';
       server.log(['status', 'info', 'Sentinl', 'local'], 'Logged Message: ' + esMessage);
       // Log Event
-      esHistory(key, esMessage, priority, payload);
+      esHistory(key, esMessage, priority, payload, false);
     }
 
 
