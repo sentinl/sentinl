@@ -3,50 +3,48 @@ import handleESError from '../lib/handle_es_error';
 const config = require('../lib/config');
 
 /* ES Functions */
-var getHandler = function (type, server) {
-  return function (req, reply) {
-    var timeInterval;
-    // Use selected timefilter when available
-    if (server.sentinlInterval) {
-      timeInterval = server.sentinlInterval;
-    } else {
-      timeInterval = {
-        from: 'now-15m',
-        mode: 'quick',
-        to: 'now'
-      };
-    }
-    var qrange = {
-      gte: timeInterval.from,
-      lt: timeInterval.to
+var getHandler = function (type, server, req, reply) {
+  var timeInterval;
+  // Use selected timefilter when available
+  if (server.sentinlInterval) {
+    timeInterval = server.sentinlInterval;
+  } else {
+    timeInterval = {
+      from: 'now-15m',
+      mode: 'quick',
+      to: 'now'
     };
+  }
+  var qrange = {
+    gte: timeInterval.from,
+    lt: timeInterval.to
+  };
 
-    const boundCallWithRequest = _.partial(server.plugins.elasticsearch.callWithRequest, req);
-    boundCallWithRequest('search', {
-      index: config.es.alarm_index ? config.es.alarm_index + '*' : 'watcher_alarms*',
-      sort: '@timestamp : asc',
-      allowNoIndices: false,
-      body: {
-        size: config.sentinl.results ? config.sentinl.results : 50,
-        query: {
-          filtered: {
-            query: {
-              match: {
-                isReport: type === 'report'
-              }
-            },
-            filter: {
-              range: {
-                '@timestamp': qrange
-              }
+  const boundCallWithRequest = _.partial(server.plugins.elasticsearch.callWithRequest, req);
+  boundCallWithRequest('search', {
+    index: config.es.alarm_index ? config.es.alarm_index + '*' : 'watcher_alarms*',
+    sort: '@timestamp : asc',
+    allowNoIndices: false,
+    body: {
+      size: config.sentinl.results ? config.sentinl.results : 50,
+      query: {
+        filtered: {
+          query: {
+            match: {
+              isReport: type === 'report'
+            }
+          },
+          filter: {
+            range: {
+              '@timestamp': qrange
             }
           }
         }
       }
-    })
-    .then((res) => reply(res))
-    .catch((err) => reply(handleESError(err)));
-  };
+    }
+  })
+  .then((res) => reply(res))
+  .catch((err) => reply(handleESError(err)));
 };
 
 export default function (server) {
@@ -86,13 +84,17 @@ export default function (server) {
   server.route({
     path: '/api/sentinl/list/alarms',
     method: ['POST', 'GET'],
-    handler: getHandler('alarms', server)
+    handler: function (req, reply) {
+      getHandler('alarms', server, req, reply);
+    }
   });
 
   server.route({
     path: '/api/sentinl/list/reports',
     method: ['POST', 'GET'],
-    handler: getHandler('reports', server)
+    handler:  function (req, reply) {
+      getHandler('report', server, req, reply);
+    }
   });
 
   // List Watchers
