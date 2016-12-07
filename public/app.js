@@ -59,8 +59,7 @@ var smallLogo = require('plugins/sentinl/sentinl.svg');
 chrome
   .setBrand({
     logo: 'url(' + impactLogo + ') left no-repeat',
-    smallLogo: 'url(' + impactLogo + ') left no-repeat',
-    title: 'SENTINL'
+    smallLogo: 'url(' + smallLogo + ') left no-repeat'
   })
   .setNavBackground('#222222')
   .setTabs([
