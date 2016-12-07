@@ -31,7 +31,7 @@ var getHandler = function (type, server, req, reply) {
         filtered: {
           query: {
             match: {
-              isReport: type === 'report'
+              report: type === 'report'
             }
           },
           filter: {
