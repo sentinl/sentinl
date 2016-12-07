@@ -136,8 +136,6 @@ export default function (server) {
     }
   });
 
-  /* ES Functions */
-
   // Get/Set Time Interval
   server.route({
     method: 'GET',

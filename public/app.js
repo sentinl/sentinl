@@ -251,7 +251,8 @@ uiModules
 
   /* Update Time Filter */
   var updateFilter = function () {
-    return $http.get('../api/sentinl/set/interval/' + JSON.stringify($scope.timeInterval)).then(function (resp) {
+    return $http.get('../api/sentinl/set/interval/' +
+    JSON.stringify($scope.timeInterval).replace(/\//g, '%2F')).then(function (resp) {
     });
   };
 
@@ -320,7 +321,7 @@ uiModules
 
   $scope.deleteReport = function ($index) {
     if (confirm('Delete is Forever!\n Are you sure?')) {
-      return $http.get('../api/sentinl/delete/report/' + $scope.elasticAlarms[$index]._index
+      return $http.get('../api/sentinl/delete/alarm/' + $scope.elasticReports[$index]._index
       + '/' + $scope.elasticReports[$index]._type
       + '/' + $scope.elasticReports[$index]._id)
       .then(
@@ -333,7 +334,7 @@ uiModules
     }
   };
 
-  $scope.deleteAlarmLocal = function ($index) {
+  $scope.deleteReportLocal = function ($index) {
     $scope.notify.warning('SENTINL function not yet implemented!');
   };
 

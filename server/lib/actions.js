@@ -288,9 +288,7 @@ export default function (server, actions, payload) {
       let domain = null;
       try {
         const parts = url.parse(action.report.snapshot.url);
-        console.log('BLBLAFLDF0    = ' + action.report.snapshot.url);
         domain = parts.hostname;
-        console.log(domain);
       } catch (error) {
         server.log(['status', 'info', 'Sentinl', 'report'], 'ERROR: ' + error);
       }
