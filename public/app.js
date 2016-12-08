@@ -53,14 +53,13 @@ import about from './templates/about.html';
 import alarms from './templates/alarms.html';
 import jsonHtml from './templates/json.html';
 
-var impactLogo = require('plugins/sentinl/sentinl_watch.svg');
+var impactLogo = require('plugins/sentinl/sentinl_logo.svg');
 var smallLogo = require('plugins/sentinl/sentinl.svg');
 
 chrome
   .setBrand({
     logo: 'url(' + impactLogo + ') left no-repeat',
-    smallLogo: 'url(' + impactLogo + ') left no-repeat',
-    title: 'SENTINL'
+    smallLogo: 'url(' + smallLogo + ') left no-repeat'
   })
   .setNavBackground('#222222')
   .setTabs([
