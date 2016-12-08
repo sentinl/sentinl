@@ -53,7 +53,7 @@ import about from './templates/about.html';
 import alarms from './templates/alarms.html';
 import jsonHtml from './templates/json.html';
 
-var impactLogo = require('plugins/sentinl/sentinl_watch.svg');
+var impactLogo = require('plugins/sentinl/sentinl_logo.svg');
 var smallLogo = require('plugins/sentinl/sentinl.svg');
 
 chrome
