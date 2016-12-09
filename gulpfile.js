@@ -36,7 +36,7 @@ var exclude = Object.keys(pkg.devDependencies).map(function (name) {
 
 var knownOptions = {
   string: 'kibanahomepath',
-  default: { kibanahomepath: 'kibana' }
+  default: { kibanahomepath: '../kibi-internal' }
 };
 var options = minimist(process.argv.slice(2), knownOptions);
 var kibanaPluginDir = path.resolve(__dirname, options.kibanahomepath + '/installedPlugins/' + packageName);
