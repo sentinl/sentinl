@@ -22,19 +22,21 @@ import _ from 'lodash';
 import later from 'later';
 import doActions from './actions';
 
+const config = require('./config');
+
 var Schedule = [];
 
 function getCount(client) {
   return client.count({
-    index: 'watcher',
-    type: 'watch'
+    index: config.es.default_index,
+    type: config.es.type
   });
 }
 
 function getWatcher(count, client) {
   return client.search({
-    index: 'watcher',
-    type: 'watch',
+    index: config.es.default_index,
+    type: config.es.type,
     size: count
   });
 }

@@ -128,8 +128,7 @@ uiModules
 
   /* Update Time Filter */
   var updateFilter = function () {
-    return $http.get('../api/sentinl/set/interval/' + JSON.stringify($scope.timeInterval)).then(function (resp) {
-    });
+    return $http.get('../api/sentinl/set/interval/' + JSON.stringify($scope.timeInterval).replace(/\//g, '%2F'));
   };
 
   /* First Boot */
