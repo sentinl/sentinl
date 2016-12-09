@@ -133,7 +133,7 @@ function createSentinlAlarmIndex(server,config) {
                 type: 'object',
                 enabled:  false
               },
-              attachment : { 
+              attachment : {
                 type : 'binary',
                 enabled: false
               }

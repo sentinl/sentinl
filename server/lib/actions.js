@@ -278,7 +278,7 @@ export default function (server, actions, payload) {
         server.log(['status', 'info', 'Sentinl', 'report'], 'Reports Disabled: Action requires Email Settings!');
         return;
       }
-      
+
       if (!_.has(action, 'report.snapshot.url')) {
         server.log(['status', 'info', 'Sentinl', 'report'], 'Report Disabled: No URL Settings!');
         return;
