@@ -1,60 +1,71 @@
 import moment from 'moment';
+import sinon from 'auto-release-sinon';
+import Promise from 'bluebird';
+import ngMock from 'ngMock';
+import expect from 'expect.js';
+
+import '../reportController';
 
 describe('Report Controller', function () {
   var $scope;
-  var sinon = require('auto-release-sinon');
-  var Promise = require('bluebird');
-  var ngMock = require('ngMock');
-  var expect = require('expect.js');
   var $httpBackend;
-  var createController;
-  require('../reportController');
-  function init({params = {}}) {
+  var $route;
+
+  function init({hits = []}) {
     ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', '');
       $provide.constant('kibiDefaultDashboardTitle', '');
       $provide.constant('elasticsearchPlugins', ['siren-join']);
     });
 
+    ngMock.inject(function (kibiState, $rootScope, $controller, _$route_, $injector, _$httpBackend_) {
+      $httpBackend = _$httpBackend_;
+      $httpBackend.whenGET(/\.\.\/api\/sentinl\/set\/interval\/.+/).respond(200, {
+        status: '200 OK'
+      });
+      $httpBackend.whenGET('../api/sentinl/list/reports').respond(200, {
+        hits: {
+          hits: hits
+        }
+      });
 
-    ngMock.inject(function (kibiState, $rootScope, $controller, $route, $injector, _$httpBackend_) {
-      var currentTime = moment('2016-12-08T11:56:42.108Z');
+      $route = _$route_;
       $route.current = {
         locals: {
-          currentTime: currentTime
+          currentTime: moment('2016-12-08T11:56:42.108Z')
         }
       };
       $scope = $rootScope;
-      $scope.vis = {
-        params: params
-      };
-      //$httpBackend = $injector.get('$httpBackend');
-      createController = function() {
-       return $controller('sentinlReports', { $scope, $route});
-     };
-     $httpBackend = _$httpBackend_;
+      $controller('sentinlReports', { $scope, $route });
       $scope.$digest();
+      $httpBackend.flush();
     });
   }
 
-  describe('Check if title exists', function () {
 
-    afterEach(function () {
-      //$httpBackend.verifyNoOutstandingExpectation();
-      //$httpBackend.verifyNoOutstandingRequest();
-    });
-
-    it('should exists', function () {
-      init({});
-
-      $httpBackend.whenGET('../api/sentinl/set/interval/:timeInterval').respond(200, {
-        status: '200 OK'
-      });
-      var controller = createController();
-      $httpBackend.flush();
-      expect($scope.title).to.be('ASDFGHJK');
-      expect($scope.description).to.be('ASDFGHJK');
-      //expect($scope.title).to.be('ASDFGHJK');
-    });
+  afterEach(function () {
+    $httpBackend.verifyNoOutstandingExpectation();
+    $httpBackend.verifyNoOutstandingRequest();
   });
+
+  it('Title and description', function () {
+    init({});
+    expect($scope.title).to.equal('Sentinl: Reports');
+    expect($scope.description).to.be('Kibi/Kibana Report App for Elasticsearch');
+  });
+
+  it('2 http requests should be made when controller is created', function () {
+    init({hits: [{id: 1}, {id: 2}]});
+    expect($scope.elasticReports.length).to.equal(2);
+    expect($scope.elasticReports).to.eql([{id: 1}, {id: 2}]);
+  });
+
+  xit('should refresh when timefilter.time changed', function () {
+    init({});
+    const spy = sinon.spy($route, 'reload');
+    $scope.timefilter.time = // TODO
+    $scope.$digest();
+    sinon.assert.calledOnce(spy);
+  });
+
 });

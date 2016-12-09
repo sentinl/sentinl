@@ -8,7 +8,7 @@ uiModules
 .controller('sentinlReports', function ($rootScope, $scope, $route, $interval,
   $timeout, timefilter, Private, createNotifier, $window, kbnUrl, $http) {
   $scope.title = 'Sentinl: Reports';
-  $scope.description = 'Kibana Report App for Elasticsearch';
+  $scope.description = 'Kibi/Kibana Report App for Elasticsearch';
 
   const notify = createNotifier({
     location: 'Sentinl Reports'
@@ -27,10 +27,8 @@ uiModules
   $scope.timeInterval = timefilter.time;
   updateFilter();
   $http.get('../api/sentinl/list/reports')
-  .then(
-    (resp) => $scope.elasticReports = resp.data.hits.hits,
-    notify.error
-  );
+  .then((resp) => $scope.elasticReports = resp.data.hits.hits)
+  .catch(notify.error);
 
   /* Listen for refreshInterval changes */
 
