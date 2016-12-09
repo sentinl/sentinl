@@ -55,6 +55,10 @@ cd sentinl && npm install && npm run package
 </pre>
 
 ## Configuration & Usage
+Copy the configuration file to your ```/etc``` folder and edit according to requirements.
+<pre>
+cp /opt/kibana/installedPlugins/sentinl/sentinl.json /etc/sentinl.json
+</pre>
 
 Consult our [wiki](https://github.com/sirensolutions/sentinl/wiki) to learn how to configure and use **SENTINL** and program awesome Watchers
 
