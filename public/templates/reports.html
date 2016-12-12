@@ -1,9 +1,9 @@
 <kbn-top-nav name="sentinl" config="topNavMenu">
-    <div class="kibana-nav-info">
-      <span ng-show="dash.id" class="kibana-nav-info-title">
-        <span ng-bind="::dash.title"></span>
-      </span>
-    </div>
+  <div class="kibana-nav-info">
+    <span ng-show="dash.id" class="kibana-nav-info-title">
+      <span ng-bind="::dash.title"></span>
+    </span>
+  </div>
 </kbn-top-nav>
 
 <navbar ng-show="chrome.getVisible()" name="dashboard-search">
@@ -43,22 +43,20 @@
     <div class="col-12-sm">
       <p style="float:left;">UTC time is {{ utcTime }}</p>
       <p style="float:right;">Local time is {{ currentTime }}</p>
-      <br style="clear:both;">
+      <br style="clear:both;"/>
 
       <div class="panel panel-default" ng-show="currentReports.length">
-        <div class="panel-heading"><h4>RECENT REPORTS<div class="edit-group pull-right"><a href="#"><i class="fa fa-plus"></i></a></div></h4></div>
+        <div class="panel-heading"><h4>RECENT REPORTS<span class="edit-group pull-right"><a href="#"><i class="fa fa-plus"></i></a></span></h4></div>
         <table class="table">
           <thead>
             <tr>
-            <!-- <th> </th> -->
-            <th>TIMESTAMP</th>
-            <th>ACTION</th>
-            <th>MESSAGE</th>
-            <th></th>
-              </tr>
+              <th>TIMESTAMP</th>
+              <th>ACTION</th>
+              <th>MESSAGE</th>
+              <th></th>
+            </tr>
             <tbody ng-repeat='report in currentReports'>
               <tr class="alarmRow">
-                <!-- <td><input type=checkbox ng-model=collapse></td> -->
                 <td>{{ report.id }}</td>
                 <td>{{ report.action }}</td>
                 <td>{{ report.message }}</td>
@@ -76,16 +74,16 @@
         </table>
       </div>
 
-      <br>
+      <br/>
 
       <div class="panel" ng-show="!elasticReports.length">
         <div class="well">
           <h4>NO REPORT HISTORY
             <span class="edit-group pull-right"><a href="#"><i class="fa fa-bell-slash"></i></a></span>
           </h4>
-          No Reports found - That's great, right? <i class="fa fa-smile-o" aria-hidden="true"></i><br>
+          No Reports found - That's great, right? <i class="fa fa-smile-o" aria-hidden="true"></i><br/>
         </div>
-        <br>
+        <br/>
 
         <div class="panel">
           <h4>Expand time range</h4>
@@ -95,20 +93,18 @@
       </div>
 
       <div class="panel panel-default" ng-show="elasticReports.length">
-        <div class="panel-heading"><h4>REPORT HISTORY<div class="edit-group pull-right"><a href="#"><i class="fa fa-bell"></i></a></div></h4></div>
+        <div class="panel-heading"><h4>REPORT HISTORY<span class="edit-group pull-right"><a href="#"><i class="fa fa-bell"></i></a></span></h4></div>
         <table class="table">
           <thead>
             <tr>
-          <!-- <th> </th> -->
-          <th>TIMESTAMP</th>
-          <th>LEVEL</th>
-          <th>ACTION</th>
-          <th>MESSAGE</th>
-          <th></th>
+              <th>TIMESTAMP</th>
+              <th>LEVEL</th>
+              <th>ACTION</th>
+              <th>MESSAGE</th>
+              <th></th>
             </tr>
           <tbody ng-repeat="report in elasticReports | orderBy:'_source[\'@timestamp\']':true">
             <tr ng-class-odd="'alarmRow-odd'" ng-class-even="'alarmRow'">
-              <!-- <td><input type=checkbox ng-model=collapse></td> -->
               <td>{{ report._source['@timestamp'] | moment }}</td>
               <td>{{ report._source['level'] }}</td>
               <td>{{ report._type }}</td>
