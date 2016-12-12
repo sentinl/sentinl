@@ -84,16 +84,17 @@ uiModules
 
   $scope.deleteReport = function ($index) {
     if ($window.confirm('Delete is Forever!\n Are you sure?')) {
-      return $http.get('../api/sentinl/delete/alarm/' +
-        $scope.elasticReports[$index]._index +
-        '/' + $scope.elasticReports[$index]._type +
-        '/' + $scope.elasticReports[$index]._id)
-      .then(
-        () => $timeout(function () {
-          $scope.elasticReports.splice($index, 1);
-          $scope.notify.warning('SENTINL Report log successfully deleted!');
-        }).catch(notify.error);
-      );
+      return $http.get(
+        '../api/sentinl/delete/alarm/' +
+        $scope.elasticReports[$index]._index + '/' +
+        $scope.elasticReports[$index]._type + '/' +
+        $scope.elasticReports[$index]._id
+      )
+      .then(() => $timeout(function () {
+        $scope.elasticReports.splice($index, 1);
+        $scope.notify.warning('SENTINL Report log successfully deleted!');
+      }))
+      .catch(notify.error);
     }
   };
 
