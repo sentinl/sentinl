@@ -6,39 +6,37 @@
     </div>
 </kbn-top-nav>
 
-  <navbar ng-show="chrome.getVisible()" name="dashboard-search">
-    <form name="queryInput"
-      class="fill inline-form"
-      ng-submit="filterResults()"
-      role="form">
+<navbar ng-show="chrome.getVisible()" name="dashboard-search">
+  <form name="queryInput"
+    class="fill inline-form"
+    ng-submit="filterResults()"
+    role="form">
 
-      <div class="typeahead" kbn-typeahead="dashboard">
-        <div class="input-group"
-          ng-class="queryInput.$invalid ? 'has-error' : ''">
+    <div class="typeahead" kbn-typeahead="dashboard">
+      <div class="input-group"
+        ng-class="queryInput.$invalid ? 'has-error' : ''">
 
-          <input
-	    disabled
-            type="text"
-            placeholder="Filter..."
-            aria-label="Filter input"
-            class="form-control"
-            ng-model="state.query"
-            input-focus
-            kbn-typeahead-input
-            parse-query>
-          <button type="submit" class="btn btn-default" ng-disabled="queryInput.$invalid" aria-label="Filter dashboards">
-            <span aria-hidden="true" class="fa fa-search"></span>
-          </button>
-        </div>
-
-        <kbn-typeahead-items></kbn-typeahead-items>
+        <input
+          disabled
+          type="text"
+          placeholder="Filter..."
+          aria-label="Filter input"
+          class="form-control"
+          ng-model="state.query"
+          input-focus
+          kbn-typeahead-input
+          parse-query>
+        <button type="submit" class="btn btn-default" ng-disabled="queryInput.$invalid" aria-label="Filter dashboards">
+          <span aria-hidden="true" class="fa fa-search"></span>
+        </button>
       </div>
 
-    </form>
-    <div class="button-group"></div>
-  </navbar>
+      <kbn-typeahead-items></kbn-typeahead-items>
+    </div>
 
-
+  </form>
+  <div class="button-group"></div>
+</navbar>
 
 <div class="container" ng-controller="sentinlReports">
   <div class="row">
@@ -48,91 +46,86 @@
       <br style="clear:both;">
 
       <div class="panel panel-default" ng-show="currentReports.length">
-	<div class="panel-heading"><h4>RECENT REPORTS<div class="edit-group pull-right"><a href="#"><i class="fa fa-plus"></i></a></div></h4></div>
-	<table class="table">
-	  <thead>
-	    <tr>
-		<!-- <th> </th> -->
-		<th>TIMESTAMP</th>
-		<th>ACTION</th>
-		<th>MESSAGE</th>
-		<th></th>
-	    </tr>
-	  <tbody ng-repeat='report in currentReports'>
-	    <tr class="alarmRow">
-	         <!-- <td><input type=checkbox ng-model=collapse></td> -->
-	         <td>{{ report.id }}</td>
-	         <td>{{ report.action }}</td>
-	         <td>{{ report.message }}</td>
-		 <td class="text-center edit-group">
-			<a href="javascript:;" ng-click="collapse=!collapse" ng-model="collapse" class="show-rule"><i class="fa fa-ellipsis-h"></i></a>
-			<a href="javascript:;" ng-click="deleteReportLocal($index)" class="delete-rule"><i class="fa fa-trash"></i></a></td>
-	    </tr>
-	    <tr ng-show=collapse>
-	        <td colspan="100%">
-		   <pre>{{ alarm | json }}</pre>
-		</td>
-	    </tr>
-	  </tbody>
-	</table>
+        <div class="panel-heading"><h4>RECENT REPORTS<div class="edit-group pull-right"><a href="#"><i class="fa fa-plus"></i></a></div></h4></div>
+        <table class="table">
+          <thead>
+            <tr>
+            <!-- <th> </th> -->
+            <th>TIMESTAMP</th>
+            <th>ACTION</th>
+            <th>MESSAGE</th>
+            <th></th>
+              </tr>
+            <tbody ng-repeat='report in currentReports'>
+              <tr class="alarmRow">
+                <!-- <td><input type=checkbox ng-model=collapse></td> -->
+                <td>{{ report.id }}</td>
+                <td>{{ report.action }}</td>
+                <td>{{ report.message }}</td>
+                <td class="text-center edit-group">
+                  <a href="javascript:;" ng-click="collapse=!collapse" ng-model="collapse" class="show-rule"><i class="fa fa-ellipsis-h"></i></a>
+                  <a href="javascript:;" ng-click="deleteReportLocal($index)" class="delete-rule"><i class="fa fa-trash"></i></a>
+                </td>
+              </tr>
+              <tr ng-show=collapse>
+                <td colspan="100%">
+                  <pre>{{ alarm | json }}</pre>
+                </td>
+              </tr>
+            </tbody>
+        </table>
       </div>
 
-
-     <br>
+      <br>
 
       <div class="panel" ng-show="!elasticReports.length">
-	<div class="well">
-	   <h4>NO REPORT HISTORY
-		<div class="edit-group pull-right"><a href="#"><i class="fa fa-bell-slash"></i></a></div>
-	  </h4>
-		No Reports found - That's great, right? <i class="fa fa-smile-o" aria-hidden="true"></i><br>
-	</div>
-	<br>
+        <div class="well">
+          <h4>NO REPORT HISTORY
+            <span class="edit-group pull-right"><a href="#"><i class="fa fa-bell-slash"></i></a></span>
+          </h4>
+          No Reports found - That's great, right? <i class="fa fa-smile-o" aria-hidden="true"></i><br>
+        </div>
+        <br>
 
-         <div class="panel">
-           <h4>Expand time range</h4>
-           <p>Reports are indexed with a date field. It is possible your query does not match anything in the current time range, or that there is no data at all in the currently selected time range.<br>
-	      Click the button below to open the time picker. For future reference you can open the time picker by clicking on the <a class="btn btn-xs navbtn" ng-click="kbnTopNav.toggle('filter')" aria-expanded="kbnTopNav.is('filter')" aria-label="time picker" data-test-subj="discoverNoResultsTimefilter"><i aria-hidden="true" class="fa fa-clock-o"></i> time picker</a> button in the top right corner of your screen.</p>
-         </div>
-
+        <div class="panel">
+          <h4>Expand time range</h4>
+          <p>Reports are indexed with a date field. It is possible your query does not match anything in the current time range, or that there is no data at all in the currently selected time range.<br>
+          Click the button below to open the time picker. For future reference you can open the time picker by clicking on the <a class="btn btn-xs navbtn" ng-click="kbnTopNav.toggle('filter')" aria-expanded="kbnTopNav.is('filter')" aria-label="time picker" data-test-subj="discoverNoResultsTimefilter"><i aria-hidden="true" class="fa fa-clock-o"></i> time picker</a> button in the top right corner of your screen.</p>
+        </div>
       </div>
 
       <div class="panel panel-default" ng-show="elasticReports.length">
-	<div class="panel-heading"><h4>REPORT HISTORY<div class="edit-group pull-right"><a href="#"><i class="fa fa-bell"></i></a></div></h4></div>
-	<table class="table">
-	  <thead>
-	    <tr>
-		<!-- <th> </th> -->
-		<th>TIMESTAMP</th>
-		<th>LEVEL</th>
-		<th>ACTION</th>
-		<th>MESSAGE</th>
-		<th></th>
-	    </tr>
-	  <tbody ng-repeat="report in elasticReports | orderBy:'_source[\'@timestamp\']':true">
-	    <tr ng-class-odd="'alarmRow-odd'" ng-class-even="'alarmRow'">
-	         <!-- <td><input type=checkbox ng-model=collapse></td> -->
-	         <td>{{ report._source['@timestamp'] | moment }}</td>
-	         <td>{{ report._source['level'] }}</td>
-	         <td>{{ report._type }}</td>
-	         <td>{{ report._source['message'] }}</td>
-		 <td class="text-center edit-group">
-			<a href="javascript:;" ng-click="collapse=!collapse" ng-model="collapse" class="show-rule"><i class="fa fa-ellipsis-h"></i></a>
-			<a href="javascript:;" ng-click="deleteReport($index)" class="delete-rule"><i class="fa fa-trash"></i></a>
-		 </td>
-	    </tr>
-	    <tr ng-show=collapse>
-	        <td colspan="100%">
-		   <pre>{{ report._source | json }}</pre>
-		</td>
-	    </tr>
-	  </tbody>
-	</table>
+        <div class="panel-heading"><h4>REPORT HISTORY<div class="edit-group pull-right"><a href="#"><i class="fa fa-bell"></i></a></div></h4></div>
+        <table class="table">
+          <thead>
+            <tr>
+          <!-- <th> </th> -->
+          <th>TIMESTAMP</th>
+          <th>LEVEL</th>
+          <th>ACTION</th>
+          <th>MESSAGE</th>
+          <th></th>
+            </tr>
+          <tbody ng-repeat="report in elasticReports | orderBy:'_source[\'@timestamp\']':true">
+            <tr ng-class-odd="'alarmRow-odd'" ng-class-even="'alarmRow'">
+              <!-- <td><input type=checkbox ng-model=collapse></td> -->
+              <td>{{ report._source['@timestamp'] | moment }}</td>
+              <td>{{ report._source['level'] }}</td>
+              <td>{{ report._type }}</td>
+              <td>{{ report._source['message'] }}</td>
+              <td class="text-center edit-group">
+                <a href="javascript:;" ng-click="collapse=!collapse" ng-model="collapse" class="show-rule"><i class="fa fa-ellipsis-h"></i></a>
+                <a href="javascript:;" ng-click="deleteReport($index)" class="delete-rule"><i class="fa fa-trash"></i></a>
+              </td>
+            </tr>
+            <tr ng-show=collapse>
+              <td colspan="100%">
+                <pre>{{ report._source | json }}</pre>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-
-
-
-
     </div>
   </div>
 </div>
