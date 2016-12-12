@@ -178,6 +178,9 @@ function doalert(server, client) {
         }
       });
     });
+  })
+  .catch((error) => {
+    server.log(['status', 'info', 'Sentinl'], 'No indices found, Initializing');
   });
 }
 
