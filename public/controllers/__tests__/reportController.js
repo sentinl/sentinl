@@ -60,12 +60,19 @@ describe('Report Controller', function () {
     expect($scope.elasticReports).to.eql([{id: 1}, {id: 2}]);
   });
 
-  xit('should refresh when timefilter.time changed', function () {
+  it('should refresh when timefilter.time changed', function () {
     init({});
     const spy = sinon.spy($route, 'reload');
-    $scope.timefilter.time = // TODO
+    $scope.timefilter = {
+      time: {
+        from: 'now/y',
+        mode: 'quick',
+        to: 'now/y'
+      }
+    };
     $scope.$digest();
     sinon.assert.calledOnce(spy);
+    $httpBackend.flush();
   });
 
 });
