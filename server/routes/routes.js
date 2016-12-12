@@ -2,6 +2,51 @@ import _ from 'lodash';
 import handleESError from '../lib/handle_es_error';
 const config = require('../lib/config');
 
+/* ES Functions */
+var getHandler = function (type, server, req, reply) {
+  var timeInterval;
+  // Use selected timefilter when available
+  if (server.sentinlInterval) {
+    timeInterval = server.sentinlInterval;
+  } else {
+    timeInterval = {
+      from: 'now-15m',
+      mode: 'quick',
+      to: 'now'
+    };
+  }
+  var qrange = {
+    gte: timeInterval.from,
+    lt: timeInterval.to
+  };
+
+  const boundCallWithRequest = _.partial(server.plugins.elasticsearch.callWithRequest, req);
+  boundCallWithRequest('search', {
+    index: config.es.alarm_index ? config.es.alarm_index + '*' : 'watcher_alarms*',
+    sort: '@timestamp : asc',
+    allowNoIndices: false,
+    body: {
+      size: config.sentinl.results ? config.sentinl.results : 50,
+      query: {
+        filtered: {
+          query: {
+            match: {
+              report: type === 'report'
+            }
+          },
+          filter: {
+            range: {
+              '@timestamp': qrange
+            }
+          }
+        }
+      }
+    }
+  })
+  .then((res) => reply(res))
+  .catch((err) => reply(handleESError(err)));
+};
+
 export default function (server) {
 
   // Current Time
@@ -40,45 +85,15 @@ export default function (server) {
     path: '/api/sentinl/list/alarms',
     method: ['POST', 'GET'],
     handler: function (req, reply) {
-      var timeInterval;
-      // Use selected timefilter when available
-      if (server.sentinlInterval) {
-        timeInterval = server.sentinlInterval;
-      } else {
-        timeInterval = {
-          from: 'now-15m',
-          mode: 'quick',
-          to: 'now'
-        };
-      }
-      var qrange = {
-        gte: timeInterval.from,
-        lt: timeInterval.to
-      };
+      getHandler('alarms', server, req, reply);
+    }
+  });
 
-      const boundCallWithRequest = _.partial(server.plugins.elasticsearch.callWithRequest, req);
-      boundCallWithRequest('search', {
-        index: config.es.alarm_index ? config.es.alarm_index + '*' : 'watcher_alarms*',
-        sort: '@timestamp : asc',
-        allowNoIndices: false,
-        body: {
-          size: config.sentinl.results ? config.sentinl.results : 50,
-          query: {
-            filtered: {
-              query: {
-                match_all: {}
-              },
-              filter: {
-                range: {
-                  '@timestamp': qrange
-                }
-              }
-            }
-          }
-        }
-      })
-      .then((res) => reply(res))
-      .catch((err) => reply(handleESError(err)));
+  server.route({
+    path: '/api/sentinl/list/reports',
+    method: ['POST', 'GET'],
+    handler:  function (req, reply) {
+      getHandler('report', server, req, reply);
     }
   });
 
@@ -120,8 +135,6 @@ export default function (server) {
       .catch((err) => reply(handleESError(err)));
     }
   });
-
-  /* ES Functions */
 
   // Get/Set Time Interval
   server.route({
