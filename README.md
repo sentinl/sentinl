@@ -10,19 +10,19 @@
 <img src="https://img.shields.io/badge/elasticsearch-2.*-green.svg"/>
 
 
-**SENTINL** extends *Kibi*/*Kibana* with **Alerting** and **Reporting** functionality to monitor, notify and report on data series changes using standard queries, programmable validators and a variety of configurable actions - Think of it as a free an independent ["Watcher"](https://www.elastic.co/guide/en/watcher/current/introduction.html) which also has scheduled ["Reporting"](https://www.elastic.co/products/reporting) capabilities (with PDFs snapshopts).
+**SENTINL** extends *Kibi*/*Kibana* with **Alerting** and **Reporting** functionality to monitor, notify and report on data series changes using standard queries, programmable validators and a variety of configurable actions - Think of it as a free an independent ["Watcher"](https://www.elastic.co/guide/en/watcher/current/introduction.html) which also has scheduled ["Reporting"](https://www.elastic.co/products/reporting) capabilities (PNG/PDFs snapshots).
 
 **SENTINL** is also designed to simplify the process of creating and managing alerts and reports in Kibi/Kibana via its App and Spy integration, directly in the Kibi/Kibana UI.
 
 <!--<img src="http://i.imgur.com/aDHvUxf.png" width="400" /> -->
 
-<img src="http://i.imgur.com/Pj1usin.gif" />
+<img src="http://i.imgur.com/fpDs7lo.gif" />
 
 ---
 
 ### Kibi/Kibana Plugin: SENTINL Spy
 The SENTINL integrated Kibi/Kibana plug-in extends the default Spy functionality to shape new prototype Watchers based on Visualize queries, and providing them to SENTINL for fine editing and deployment.
-<img src="http://i.imgur.com/4lDTOVR.png" />
+<img src="http://i.imgur.com/bw9LFvU.png" />
 
 ---
 
