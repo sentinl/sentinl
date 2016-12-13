@@ -22,6 +22,10 @@ import moment from 'moment';
 import chrome from 'ui/chrome';
 import uiModules from 'ui/modules';
 import uiRoutes from 'ui/routes';
+
+/* import controllers */
+import './controllers/reportController';
+
 import $ from 'jquery';
 
 /* Elasticsearch */
@@ -51,6 +55,7 @@ import './less/main.less';
 import template from './templates/index.html';
 import about from './templates/about.html';
 import alarms from './templates/alarms.html';
+import reports from './templates/reports.html';
 import jsonHtml from './templates/json.html';
 
 var impactLogo = require('plugins/sentinl/sentinl_logo.svg');
@@ -71,6 +76,11 @@ chrome
     {
       id: 'alarms',
       title: 'Alarms',
+      activeIndicatorColor: '#EFF0F2'
+    },
+    {
+      id: 'reports',
+      title: 'Reports',
       activeIndicatorColor: '#EFF0F2'
     },
     {
@@ -106,6 +116,18 @@ uiRoutes
 });
 
 uiRoutes
+.when('/reports', {
+  template: reports,
+  resolve: {
+    currentTime($http) {
+      return $http.get('../api/sentinl/example').then(function (resp) {
+        return resp.data.time;
+      });
+    }
+  }
+});
+
+uiRoutes
 .when('/about', {
   template: about
 });
@@ -128,8 +150,7 @@ uiModules
 
   /* Update Time Filter */
   var updateFilter = function () {
-    return $http.get('../api/sentinl/set/interval/' + JSON.stringify($scope.timeInterval)).then(function (resp) {
-    });
+    return $http.get('../api/sentinl/set/interval/' + JSON.stringify($scope.timeInterval).replace(/\//g, '%2F'));
   };
 
   /* First Boot */

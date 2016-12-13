@@ -13,9 +13,11 @@
     "precommit": "gulp lint",
     "sentinl-install": "/opt/kibana/bin/kibi plugin --install sentinl -u file://`pwd`/sentinl-latest.tar.gz",
     "sentinl-remove": "/opt/kibana/bin/kibi plugin --remove sentinl",
-    "package": "tar cfz ./sentinl-latest.tar.gz --exclude .git --exclude .gitignore --exclude sentinl-latest.tar.gz ./* && ls -alF sentinl-latest*"
+    "package": "gulp package",
+    "archive": "tar cfz ./sentinl-latest.tar.gz --exclude .git --exclude .gitignore --exclude sentinl-latest.tar.gz ./* && ls -alF sentinl-latest*"
   },
   "dependencies": {
+    "bluebird": "^3.0.6",
     "later": "*",
     "mustache": "*",
     "emailjs": "*",
@@ -24,9 +26,9 @@
     "sum-time": "*"
   },
   "devDependencies": {
-    "@elastic/eslint-config-kibana": "^0.2.0",
     "babel-eslint": "^6.1.2",
-    "bluebird": "^3.0.6",
+    "eslint": "^3.11.1",
+    "eslint-plugin-mocha": "^4.7.0",
     "gulp": "^3.9.0",
     "gulp-eslint": "^1.1.1",
     "gulp-util": "^3.0.7",
