@@ -43,9 +43,7 @@ export default function logEvent(server, client, config, type, message, loglevel
     body: indexBody
   }).then(function (resp) {
     server.log(['status', 'info', 'Sentinl'], 'Alarm stored successfully to ES with type: [' + type + ']');
-    return resp;
   }).catch(function (err) {
     server.log(['status', 'info', 'Sentinl'], 'Error storing Alarm: ' + err);
-    return err;
   });
 }
