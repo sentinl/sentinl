@@ -34,9 +34,9 @@ export default function (server, actions, payload) {
   const client = getElasticsearchClient(server);
 
   /* ES Indexing Functions */
-  var esHistory = function (type, message, loglevel, payload, object) {
+  var esHistory = function (type, message, loglevel, payload, isReport, object) {
     if (!object) { logHistory(server, client, config, type, message, loglevel, payload); }
-    else { logHistory(server, client, config, type, message, loglevel, payload, object); }
+    else { logHistory(server, client, config, type, message, loglevel, payload, isReport, object); }
   };
   
   /* Email Settings */
@@ -126,7 +126,7 @@ export default function (server, actions, payload) {
       formatterC = action.console.message ? action.console.message : '{{ payload }}';
       message = mustache.render(formatterC, {payload: payload});
       server.log(['status', 'info', 'Sentinl'], 'Console Payload: ' + JSON.stringify(payload));
-      esHistory(key, message, priority, payload);
+      esHistory(key, message, priority, payload, false);
     }
 
     /* ***************************************************************************** */
@@ -169,7 +169,7 @@ export default function (server, actions, payload) {
       }
       if (!action.email.stateless) {
         // Log Event
-        esHistory(key, body, priority, payload);
+        esHistory(key, body, priority, payload, false);
       }
     }
 
@@ -214,7 +214,7 @@ export default function (server, actions, payload) {
       }
       if (!action.email_html.stateless) {
         // Log Event
-        esHistory(key, body, priority, payload);
+        esHistory(key, body, priority, payload, false);
       }
     }
 
@@ -257,7 +257,7 @@ export default function (server, actions, payload) {
         server.log(['status', 'info', 'Sentinl', 'report'], 'Reports Disabled: Action requires Email Settings!');
         return;
       }
-      
+
       if (!_.has(action, 'report.snapshot.url')) {
         server.log(['status', 'info', 'Sentinl', 'report'], 'Report Disabled: No URL Settings!');
         return;
@@ -304,7 +304,7 @@ export default function (server, actions, payload) {
               if (!action.report.stateless) {
                 // Log Event
                 var attachment = fs.readFileSync(action.report.snapshot.path + filename);
-                esHistory(key, body, priority, payload, new Buffer(attachment).toString('base64') );
+                esHistory(key, body, priority, payload, true, new Buffer(attachment).toString('base64') );
               }
               fs.unlinkSync(action.report.snapshot.path + filename);
               payload.message = err || message;
@@ -312,11 +312,11 @@ export default function (server, actions, payload) {
             });
           }).close();
         } catch (err) {
-          server.log(['status', 'info', 'Sentinl', 'report'], 'ERROR: ' + err);
+          server.log(['status', 'error', 'Sentinl', 'report'], 'ERROR: ' + err);
           payload.message = err;
           if (!action.report.stateless) {
             // Log Event
-            esHistory(key, body, priority, payload);
+            esHistory(key, body, priority, payload, true);
           }
         }
       })
@@ -358,7 +358,7 @@ export default function (server, actions, payload) {
 
       if (!action.slack.stateless) {
         // Log Event
-        esHistory(key, message, priority, payload);
+        esHistory(key, message, priority, payload, false);
       }
     }
 
@@ -428,7 +428,7 @@ export default function (server, actions, payload) {
       priority = action.local.priority ? action.local.priority : 'INFO';
       server.log(['status', 'info', 'Sentinl', 'local'], 'Logged Message: ' + esMessage);
       // Log Event
-      esHistory(key, esMessage, priority, payload);
+      esHistory(key, esMessage, priority, payload, false);
     }
 
 
