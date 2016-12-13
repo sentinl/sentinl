@@ -23,6 +23,8 @@ import config from './config';
 import fs from 'fs';
 import getElasticsearchClient from './get_elasticsearch_client';
 import horsemanFactory from './horseman_factory';
+import logHistory from './log_history';
+
 import url from 'url';
 
 var hlimit = config.sentinl.history ? config.sentinl.history : 10;
@@ -30,6 +32,12 @@ var hlimit = config.sentinl.history ? config.sentinl.history : 10;
 export default function (server, actions, payload) {
 
   const client = getElasticsearchClient(server);
+
+  /* ES Indexing Functions */
+  var esHistory = function (type, message, loglevel, payload, isReport, object) {
+    if (!object) { logHistory(server, client, config, type, message, loglevel, payload); }
+    else { logHistory(server, client, config, type, message, loglevel, payload, isReport, object); }
+  };
 
   /* Email Settings */
   var emailServer;
@@ -84,53 +92,9 @@ export default function (server, actions, payload) {
     }
   };
 
-  /* ES Indexing Functions */
-  var esHistory = function (type, message, loglevel, payload, isReport) {
-    if (!loglevel) {
-      loglevel = 'INFO';
-    }
-    if (!payload) {
-      payload = {};
-    }
-
-    server.log(['status', 'info', 'Sentinl'], 'Storing Alarm to ES with type:' + type);
-    var indexDate = '-' + new Date().toISOString().substr(0, 10).replace(/-/g, '.');
-    var indexName = config.es.alarm_index ? config.es.alarm_index + indexDate : 'watcher_alarms' + indexDate;
-    client.create({
-      index: indexName,
-      type: type,
-      body: {
-        '@timestamp': new Date().toISOString(),
-        level: loglevel,
-        message: message,
-        action: type,
-        payload: payload,
-        report: isReport
-      }
-    }).then(function (resp) {
-      server.log(['status', 'info', 'Sentinl'], 'Alarm stored successfully to ES with type: [' + type + ']');
-    }).catch(function (err) {
-      server.log(['status', 'error', 'Sentinl', 'ES'], err);
-    });
-  };
-
-
   /* Loop Actions */
   _.forOwn(actions, function (action, key) {
     server.log(['status', 'info', 'Sentinl'], 'Processing action: ' + key);
-
-    /* ***************************************************************************** */
-    /*
-    /* Throttle Action based on 'throttle_period' optional parameter
-    /* "throttle_period": "5m"
-    /*
-    /* ***************************************************************************** */
-    if (_.has(action, 'throttle_period')) {
-      if (debounce(key, action.throttle_period)) {
-        server.log(['status', 'info', 'Sentinl'], 'Action Throtthled: ' + key);
-        return;
-      }
-    }
 
     /* ***************************************************************************** */
     /*
@@ -149,6 +113,20 @@ export default function (server, actions, payload) {
       message = mustache.render(formatterC, {payload: payload});
       server.log(['status', 'info', 'Sentinl'], 'Console Payload: ' + JSON.stringify(payload));
       esHistory(key, message, priority, payload, false);
+    }
+
+    /* ***************************************************************************** */
+    /*
+    /* Throttle Action based on 'throttle_period' optional parameter
+    /* "throttle_period": "5m"
+    /*
+    /* ***************************************************************************** */
+    if (_.has(action, 'throttle_period')) {
+      if (debounce(key, action.throttle_period)) {
+        server.log(['status', 'info', 'Sentinl'], 'Action Throtthled: ' + key);
+        esHistory(key, 'Action Throtthled for ' + action.throttle_period, priority, {});
+        return;
+      }
     }
 
     /* ***************************************************************************** */
@@ -323,12 +301,14 @@ export default function (server, actions, payload) {
               ]
             }, function (err, message) {
               server.log(['status', 'info', 'Sentinl', 'report'], err || message);
-              fs.unlinkSync(action.report.snapshot.path + filename);
-              payload.message = err || message;
               if (!action.report.stateless) {
                 // Log Event
-                esHistory(key, body, priority, payload, true);
+                var attachment = fs.readFileSync(action.report.snapshot.path + filename);
+                esHistory(key, body, priority, payload, true, new Buffer(attachment).toString('base64'));
               }
+              fs.unlinkSync(action.report.snapshot.path + filename);
+              payload.message = err || message;
+
             });
           }).close();
         } catch (err) {
