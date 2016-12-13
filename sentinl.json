@@ -17,13 +17,6 @@
       "ssl": true,
       "active": false
     },
-    "email_html" : {
-      "user": "username",
-      "password": "password",
-      "host": "smtp.server.com",
-      "ssl": true,
-      "active": false
-    },
     "slack" : {
       "username": "username",
       "hook": "https://hooks.slack.com/services/<token>",
