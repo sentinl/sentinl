@@ -38,7 +38,7 @@ export default function (server, actions, payload) {
     if (!object) { logHistory(server, client, config, type, message, loglevel, payload); }
     else { logHistory(server, client, config, type, message, loglevel, payload, isReport, object); }
   };
-  
+
   /* Email Settings */
   var emailServer;
   var email;
@@ -98,20 +98,6 @@ export default function (server, actions, payload) {
 
     /* ***************************************************************************** */
     /*
-    /* Throttle Action based on 'throttle_period' optional parameter
-    /* "throttle_period": "5m"
-    /*
-    /* ***************************************************************************** */
-    if (_.has(action, 'throttle_period')) {
-      if (debounce(key, action.throttle_period)) {
-        server.log(['status', 'info', 'Sentinl'], 'Action Throtthled: ' + key);
-        esHistory(key, 'Action Throtthled for ' + throttle_period, priority, {} );
-        return;
-      }
-    }
-
-    /* ***************************************************************************** */
-    /*
     *   "console" : {
     *      "priority" : "DEBUG",
     *      "message" : "Average {{payload.aggregations.avg.value}}"
@@ -127,6 +113,20 @@ export default function (server, actions, payload) {
       message = mustache.render(formatterC, {payload: payload});
       server.log(['status', 'info', 'Sentinl'], 'Console Payload: ' + JSON.stringify(payload));
       esHistory(key, message, priority, payload, false);
+    }
+
+    /* ***************************************************************************** */
+    /*
+    /* Throttle Action based on 'throttle_period' optional parameter
+    /* "throttle_period": "5m"
+    /*
+    /* ***************************************************************************** */
+    if (_.has(action, 'throttle_period')) {
+      if (debounce(key, action.throttle_period)) {
+        server.log(['status', 'info', 'Sentinl'], 'Action Throtthled: ' + key);
+        esHistory(key, 'Action Throtthled for ' + action.throttle_period, priority, {});
+        return;
+      }
     }
 
     /* ***************************************************************************** */
@@ -304,11 +304,11 @@ export default function (server, actions, payload) {
               if (!action.report.stateless) {
                 // Log Event
                 var attachment = fs.readFileSync(action.report.snapshot.path + filename);
-                esHistory(key, body, priority, payload, true, new Buffer(attachment).toString('base64') );
+                esHistory(key, body, priority, payload, true, new Buffer(attachment).toString('base64'));
               }
               fs.unlinkSync(action.report.snapshot.path + filename);
               payload.message = err || message;
-             
+
             });
           }).close();
         } catch (err) {

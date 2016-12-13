@@ -14,30 +14,38 @@
  * @return {String} Response.
  */
 export default function logEvent(server, client, config, type, message, loglevel, payload, isReport, object) {
-    if (!loglevel) { loglevel = 'INFO'; }
-    if (!payload) { payload = {}; }
-    if (!isReport) { isReport = false; }
-    server.log(['status', 'info', 'Sentinl'], 'Storing Alarm to ES with type:' + type);
-    var indexDate = '-' + new Date().toISOString().substr(0, 10).replace(/-/g, '.');
-    var indexName = config.es.alarm_index ? config.es.alarm_index + indexDate : 'watcher_alarms' + indexDate;
-    var indexBody = {
-        '@timestamp': new Date().toISOString(),
-        level: loglevel,
-        message: message,
-        action: type,
-        payload: payload,
-	report: isReport
-    };
-    if (object) indexBody.attachment = object;
-    client.create({
-      index: indexName,
-      type: type,
-      body: indexBody
-    }).then(function (resp) {
-      server.log(['status', 'info', 'Sentinl'], 'Alarm stored successfully to ES with type: [' + type + ']');
-      return resp;
-    }).catch(function (err) {
-      server.log(['status', 'info', 'Sentinl'], 'Error storing Alarm: ' + err);
-      return err;
-    });
+  if (!loglevel) {
+    loglevel = 'INFO';
+  }
+  if (!payload) {
+    payload = {};
+  }
+  if (!isReport) {
+    isReport = false;
+  }
+  server.log(['status', 'info', 'Sentinl'], 'Storing Alarm to ES with type:' + type);
+  var indexDate = '-' + new Date().toISOString().substr(0, 10).replace(/-/g, '.');
+  var indexName = config.es.alarm_index ? config.es.alarm_index + indexDate : 'watcher_alarms' + indexDate;
+  var indexBody = {
+    '@timestamp': new Date().toISOString(),
+    level: loglevel,
+    message: message,
+    action: type,
+    payload: payload,
+    report: isReport
+  };
+  if (object) {
+    indexBody.attachment = object;
+  }
+  client.create({
+    index: indexName,
+    type: type,
+    body: indexBody
+  }).then(function (resp) {
+    server.log(['status', 'info', 'Sentinl'], 'Alarm stored successfully to ES with type: [' + type + ']');
+    return resp;
+  }).catch(function (err) {
+    server.log(['status', 'info', 'Sentinl'], 'Error storing Alarm: ' + err);
+    return err;
+  });
 }
