@@ -90,7 +90,9 @@ uiModules
         + '/' + $rmid
       )
       .then(() => $timeout(function () {
-        $scope.notify.warning('SENTINL Report log successfully deleted!');
+        $scope.elasticReports.splice($index - 1, 1);
+        notify.warning('SENTINL Report log successfully deleted!');
+        $timeout(5000);
         $route.reload();
       }))
       .catch(notify.error);

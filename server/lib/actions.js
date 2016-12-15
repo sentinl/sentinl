@@ -35,8 +35,12 @@ export default function (server, actions, payload) {
 
   /* ES Indexing Functions */
   var esHistory = function (type, message, loglevel, payload, isReport, object) {
-    if (!object) { logHistory(server, client, config, type, message, loglevel, payload); }
-    else { logHistory(server, client, config, type, message, loglevel, payload, isReport, object); }
+    if (!isReport) {
+      logHistory(server, client, config, type, message, loglevel, payload);
+    } else {
+      object = false;
+      logHistory(server, client, config, type, message, loglevel, payload, isReport, object);
+    }
   };
 
   /* Email Settings */
