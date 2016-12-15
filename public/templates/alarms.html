@@ -130,7 +130,7 @@
 	         <td>{{ alarm._source['message'] }}</td>
 		 <td class="text-center edit-group">
 			<a href="javascript:;" ng-click="collapse=!collapse" ng-model="collapse" class="show-rule"><i class="fa fa-ellipsis-h"></i></a>
-			<a href="javascript:;" ng-click="deleteAlarm($index)" class="delete-rule"><i class="fa fa-trash"></i></a>
+			<a href="javascript:;" ng-click="deleteAlarm($index,alarm._index,alarm._type,alarm._id)" class="delete-rule"><i class="fa fa-trash"></i></a>
 		 </td>
 	    </tr>
 	    <tr ng-show=collapse>
