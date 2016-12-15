@@ -218,7 +218,9 @@ uiModules
         + '/' + $rmid)
       .then(
         () => $timeout(function () {
+          $scope.elasticAlarms.splice($index - 1, 1);
           $scope.notify.warning('SENTINL Alarm log successfully deleted!');
+          $timeout(1000);
           $route.reload();
         }),
         $scope.notify.error
