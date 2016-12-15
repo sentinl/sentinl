@@ -303,8 +303,12 @@ export default function (server, actions, payload) {
               server.log(['status', 'info', 'Sentinl', 'report'], err || message);
               if (!action.report.stateless) {
                 // Log Event
-                var attachment = fs.readFileSync(action.report.snapshot.path + filename);
-                esHistory(key, body, priority, payload, true, new Buffer(attachment).toString('base64'));
+                if (action.report.save) {
+                  var attachment = fs.readFileSync(action.report.snapshot.path + filename);
+                  esHistory(key, body, priority, payload, true, new Buffer(attachment).toString('base64'));
+                } else {
+                  esHistory(key, body, priority, payload, true);
+                }
               }
               fs.unlinkSync(action.report.snapshot.path + filename);
               payload.message = err || message;
