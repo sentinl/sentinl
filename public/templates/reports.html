@@ -111,6 +111,7 @@
               <td>{{ report._source['message'] }}</td>
               <td class="text-center edit-group">
                 <a href="javascript:;" ng-click="collapse=!collapse" ng-model="collapse" class="show-rule"><i class="fa fa-ellipsis-h"></i></a>
+                 <a href="javascript:;" ng-click="collapseimg=!collapseimg" ng-model="collapseimg" class="show-rule"><i class="fa fa-eye"></i></a>
                 <a href="javascript:;" ng-click="deleteReport($index)" class="delete-rule"><i class="fa fa-trash"></i></a>
               </td>
             </tr>
@@ -119,6 +120,11 @@
                 <pre>{{ report._source | json }}</pre>
               </td>
             </tr>
+             <tr ng-show=collapseimg>
+              <td colspan="100%">
+               <img src="data:image/gif;base64,{{ alarm._source['attachment'] }}" />
+            </td>
+          </tr>
           </tbody>
         </table>
       </div>
