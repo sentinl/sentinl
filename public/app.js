@@ -410,6 +410,7 @@ uiModules
                 subject: 'Sentinl Report',
                 priority: 'high',
                 body: 'Sample Sentinl Screenshot Report',
+                save: true,
                 snapshot : {
                   res : '1280x900',
                   url : 'http://127.0.0.1/app/kibana#/dashboard/Alerts',
