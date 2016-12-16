@@ -417,7 +417,7 @@ uiModules
                   params : {
                     username : 'username',
                     password : 'password',
-                    delay : 15,
+                    delay : 5000,
                     crop : false
                   }
                 }
