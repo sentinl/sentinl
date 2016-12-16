@@ -92,7 +92,7 @@ uiModules
       .then(() => $timeout(function () {
         $scope.elasticReports.splice($index - 1, 1);
         notify.warning('SENTINL Report log successfully deleted!');
-        $timeout(5000);
+        $timeout(1000);
         $route.reload();
       }))
       .catch(notify.error);

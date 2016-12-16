@@ -120,11 +120,11 @@
                 <pre>{{ report._source | json }}</pre>
               </td>
             </tr>
-             <tr ng-show=collapseimg ng-hide="!report._source['attachment']">
+            <tr ng-show=collapseimg ng-hide="!report._source['attachment']">
               <td colspan="100%">
-               <img ng-hide="!report._source['attachment']" src="data:image/png;base64,{{ report._source['attachment'] }}" />
-            </td>
-          </tr>
+                <img ng-hide="!report._source['attachment']" src="data:image/png;base64,{{ report._source['attachment'] }}" />
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>
