@@ -211,9 +211,9 @@ uiModules
     }
   });
 
-  $scope.deleteAlarm = function ($index, $rmindex, $rmtype, $rmid) {
+  $scope.deleteAlarm = function ($index, rmindex, rmtype, rmid) {
     if (confirm('Delete is Forever!\n Are you sure?')) {
-      return $http.get('../api/sentinl/delete/alarm/' + $rmindex + '/' + $rmtype + '/' + $rmid)
+      return $http.get('../api/sentinl/delete/alarm/' + rmindex + '/' + rmtype + '/' + rmid)
       .then(() => {
         $scope.elasticAlarms.splice($index - 1, 1);
         $timeout(() => {
