@@ -15,7 +15,7 @@
       "password": "password",
       "host": "smtp.server.com",
       "ssl": true,
-      "active": true
+      "active": false
     },
     "slack" : {
       "username": "username",
@@ -33,7 +33,7 @@
     },
     "report" : {
       "tmp_path" : "/tmp/",
-      "active": true
+      "active": false
     },
     "pushapps" : {
       "api_key" : "<pushapps API Key>",
