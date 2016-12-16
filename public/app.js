@@ -211,20 +211,17 @@ uiModules
     }
   });
 
-  $scope.deleteAlarm = function ($index, $rmi, $rmt, $rmid) {
+  $scope.deleteAlarm = function ($index, $rmindex, $rmtype, $rmid) {
     if (confirm('Delete is Forever!\n Are you sure?')) {
-      return $http.get('../api/sentinl/delete/alarm/' + $rmi
-        + '/' + $rmt
-        + '/' + $rmid)
-      .then(
-        () => $timeout(function () {
-          $scope.elasticAlarms.splice($index - 1, 1);
+      return $http.get('../api/sentinl/delete/alarm/' + $rmindex + '/' + $rmtype + '/' + $rmid)
+      .then(() => {
+        $scope.elasticAlarms.splice($index - 1, 1);
+        $timeout(() => {
           $scope.notify.warning('SENTINL Alarm log successfully deleted!');
-          $timeout(1000);
           $route.reload();
-        }),
-        $scope.notify.error
-      );
+        }, 1000);
+      })
+      .catch($scope.notify.error);
     }
   };
 
