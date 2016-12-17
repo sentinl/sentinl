@@ -215,8 +215,8 @@ uiModules
     if (confirm('Delete is Forever!\n Are you sure?')) {
       return $http.get('../api/sentinl/delete/alarm/' + rmindex + '/' + rmtype + '/' + rmid)
       .then(() => {
-        $scope.elasticAlarms.splice(index - 1, 1);
         $timeout(() => {
+          $scope.elasticAlarms.splice(index - 1, 1);
           $scope.notify.warning('SENTINL Alarm log successfully deleted!');
           $route.reload();
         }, 1000);
