@@ -35,8 +35,12 @@ export default function (server, actions, payload) {
 
   /* ES Indexing Functions */
   var esHistory = function (type, message, loglevel, payload, isReport, object) {
-    if (!object) { logHistory(server, client, config, type, message, loglevel, payload); }
-    else { logHistory(server, client, config, type, message, loglevel, payload, isReport, object); }
+    if (isReport) {
+      object = false;
+      logHistory(server, client, config, type, message, loglevel, payload, isReport, object);
+    } else {
+      logHistory(server, client, config, type, message, loglevel, payload);
+    }
   };
 
   /* Email Settings */
@@ -303,8 +307,12 @@ export default function (server, actions, payload) {
               server.log(['status', 'info', 'Sentinl', 'report'], err || message);
               if (!action.report.stateless) {
                 // Log Event
-                var attachment = fs.readFileSync(action.report.snapshot.path + filename);
-                esHistory(key, body, priority, payload, true, new Buffer(attachment).toString('base64'));
+                if (action.report.save) {
+                  var attachment = fs.readFileSync(action.report.snapshot.path + filename);
+                  esHistory(key, body, priority, payload, true, new Buffer(attachment).toString('base64'));
+                } else {
+                  esHistory(key, body, priority, payload, true);
+                }
               }
               fs.unlinkSync(action.report.snapshot.path + filename);
               payload.message = err || message;

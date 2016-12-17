@@ -211,22 +211,21 @@ uiModules
     }
   });
 
-  $scope.deleteAlarm = function ($index, $rmi, $rmt, $rmid) {
+  $scope.deleteAlarm = function (index, rmindex, rmtype, rmid) {
     if (confirm('Delete is Forever!\n Are you sure?')) {
-      return $http.get('../api/sentinl/delete/alarm/' + $rmi
-        + '/' + $rmt
-        + '/' + $rmid)
-      .then(
-        () => $timeout(function () {
+      return $http.get('../api/sentinl/delete/alarm/' + rmindex + '/' + rmtype + '/' + rmid)
+      .then(() => {
+        $timeout(() => {
+          $scope.elasticAlarms.splice(index - 1, 1);
           $scope.notify.warning('SENTINL Alarm log successfully deleted!');
           $route.reload();
-        }),
-        $scope.notify.error
-      );
+        }, 1000);
+      })
+      .catch($scope.notify.error);
     }
   };
 
-  $scope.deleteAlarmLocal = function ($index) {
+  $scope.deleteAlarmLocal = function (index) {
     $scope.notify.warning('SENTINL function not yet implemented!');
   };
 
@@ -410,6 +409,7 @@ uiModules
                 subject: 'Sentinl Report',
                 priority: 'high',
                 body: 'Sample Sentinl Screenshot Report',
+                save: true,
                 snapshot : {
                   res : '1280x900',
                   url : 'http://127.0.0.1/app/kibana#/dashboard/Alerts',

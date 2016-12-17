@@ -82,23 +82,21 @@ uiModules
 
   });
 
-  $scope.deleteReport = function ($index) {
-    if ($window.confirm('Delete is Forever!\n Are you sure?')) {
-      return $http.get(
-        '../api/sentinl/delete/alarm/' +
-        $scope.elasticReports[$index]._index + '/' +
-        $scope.elasticReports[$index]._type + '/' +
-        $scope.elasticReports[$index]._id
-      )
-      .then(() => $timeout(function () {
-        $scope.elasticReports.splice($index, 1);
-        $scope.notify.warning('SENTINL Report log successfully deleted!');
-      }))
+  $scope.deleteReport = function (index, rmindex, rmtype, rmid) {
+    if (confirm('Delete is Forever!\n Are you sure?')) {
+      return $http.get('../api/sentinl/delete/alarm/' + rmindex + '/' + rmtype + '/' + rmid)
+      .then(() => {
+        $scope.elasticReports.splice(index - 1, 1);
+        $timeout(() => {
+          notify.warning('SENTINL Report log successfully deleted!');
+          $route.reload();
+        }, 1000);
+      })
       .catch(notify.error);
     }
   };
 
-  $scope.deleteReportLocal = function ($index) {
+  $scope.deleteReportLocal = function (index) {
     notify.warning('SENTINL function not yet implemented!');
   };
 
