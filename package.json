@@ -14,7 +14,7 @@
     "sentinl-install": "/opt/kibana/bin/kibi plugin --install sentinl -u file://`pwd`/sentinl-latest.tar.gz",
     "sentinl-remove": "/opt/kibana/bin/kibi plugin --remove sentinl",
     "package": "gulp package",
-    "archive": "tar cfz ./sentinl-latest.tar.gz --exclude .git --exclude .gitignore --exclude sentinl-latest.tar.gz ./* && ls -alF sentinl-latest*"
+    "archive": "tar cfz ./sentinl-latest.tar.gz --exclude .git --exclude .gitignore --exclude .github --exclude gradle --exclude build --exclude target --exclude sentinl-latest.tar.gz ./* && ls -alF sentinl-latest*"
   },
   "dependencies": {
     "bluebird": "^3.0.6",
