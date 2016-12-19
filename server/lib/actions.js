@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import mustache from 'mustache';
-import config from './config';
+import getConfiguration from './get_configuration';
 import fs from 'fs';
 import getElasticsearchClient from './get_elasticsearch_client';
 import horsemanFactory from './horseman_factory';
@@ -27,11 +27,11 @@ import logHistory from './log_history';
 
 import url from 'url';
 
-var hlimit = config.sentinl.history ? config.sentinl.history : 10;
-
 export default function (server, actions, payload) {
 
   const client = getElasticsearchClient(server);
+  const config = getConfiguration(server);
+  const hlimit = config.sentinl.history ? config.sentinl.history : 10;
 
   /* ES Indexing Functions */
   var esHistory = function (type, message, loglevel, payload, isReport, object) {
