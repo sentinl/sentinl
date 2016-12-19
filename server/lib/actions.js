@@ -36,7 +36,6 @@ export default function (server, actions, payload) {
   /* ES Indexing Functions */
   var esHistory = function (type, message, loglevel, payload, isReport, object) {
     if (isReport) {
-      object = false;
       logHistory(server, client, config, type, message, loglevel, payload, isReport, object);
     } else {
       logHistory(server, client, config, type, message, loglevel, payload);
