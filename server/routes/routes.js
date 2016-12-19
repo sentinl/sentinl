@@ -58,19 +58,6 @@ export default function (server) {
     }
   });
 
-  server.route({
-    method: 'GET',
-    path: '/api/sentinl/config',
-    handler: require('./config.js')
-  });
-
-  server.route({
-    method: 'GET',
-    path: '/api/sentinl/getitems',
-    handler: require('./items.js')
-  });
-
-
   // Local Alarms (session)
   server.route({
     path: '/api/sentinl/alarms',
