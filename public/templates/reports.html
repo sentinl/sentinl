@@ -61,8 +61,8 @@
                 <td>{{ report.action }}</td>
                 <td>{{ report.message }}</td>
                 <td class="text-center edit-group">
-                  <span href="javascript:;" ng-click="collapse=!collapse" ng-model="collapse" class="show-rule"><i class="fa fa-ellipsis-h"></i></span>
-                  <span href="javascript:;" ng-click="deleteReportLocal($index)" class="delete-rule"><i class="fa fa-trash"></i></span>
+                  <span ng-click="collapse=!collapse" ng-model="collapse" class="show-rule"><i class="fa fa-ellipsis-h"></i></span>
+                  <span ng-click="deleteReportLocal($index)" class="delete-rule"><i class="fa fa-trash"></i></span>
                 </td>
               </tr>
               <tr ng-show=collapse>
@@ -111,8 +111,8 @@
               <td>{{ report._source.message }}</td>
               <td class="text-center edit-group">
                 <span ng-click="collapse=!collapse" ng-model="collapse" class="show-rule"><i class="fa fa-ellipsis-h"></i></span>
-                <span ng-hide="!report._source.attachment" ng-click="collapseimg=!collapseimg" ng-model="collapseimg" class="show-rule"><i class="fa fa-eye"></i></span>
-                <span ng-click="deleteReport($index,report._index,report._type,report._id)" class="delete-rule"><i class="fa fa-trash"></i></span>
+                <span ng-show="report._source.attachment" ng-click="collapseimg=!collapseimg" ng-model="collapseimg" class="show-rule"><i class="fa fa-eye"></i></span>
+                <span ng-click="deleteReport($index, report._index, report._type, report._id)" class="delete-rule"><i class="fa fa-trash"></i></span>
               </td>
             </tr>
             <tr ng-show=collapse>
