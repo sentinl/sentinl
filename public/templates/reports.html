@@ -61,8 +61,8 @@
                 <td>{{ report.action }}</td>
                 <td>{{ report.message }}</td>
                 <td class="text-center edit-group">
-                  <a href="javascript:;" ng-click="collapse=!collapse" ng-model="collapse" class="show-rule"><i class="fa fa-ellipsis-h"></i></a>
-                  <a href="javascript:;" ng-click="deleteReportLocal($index)" class="delete-rule"><i class="fa fa-trash"></i></a>
+                  <span href="javascript:;" ng-click="collapse=!collapse" ng-model="collapse" class="show-rule"><i class="fa fa-ellipsis-h"></i></span>
+                  <span href="javascript:;" ng-click="deleteReportLocal($index)" class="delete-rule"><i class="fa fa-trash"></i></span>
                 </td>
               </tr>
               <tr ng-show=collapse>
@@ -106,13 +106,13 @@
           <tbody ng-repeat="report in elasticReports | orderBy:'_source[\'@timestamp\']':true">
             <tr ng-class-odd="'alarmRow-odd'" ng-class-even="'alarmRow'">
               <td>{{ report._source['@timestamp'] | moment }}</td>
-              <td>{{ report._source['level'] }}</td>
+              <td>{{ report._source.level }}</td>
               <td>{{ report._type }}</td>
-              <td>{{ report._source['message'] }}</td>
+              <td>{{ report._source.message }}</td>
               <td class="text-center edit-group">
-                <a href="javascript:;" ng-click="collapse=!collapse" ng-model="collapse" class="show-rule"><i class="fa fa-ellipsis-h"></i></a>
-                <a ng-show="report._source.attachment" href="javascript:;" ng-click="collapseimg=!collapseimg" ng-model="collapseimg" class="show-rule"><i class="fa fa-eye"></i></a>
-                <a href="javascript:;" ng-click="deleteReport($index,report._index,report._type,alarm._id)" class="delete-rule"><i class="fa fa-trash"></i></a>
+                <span ng-click="collapse=!collapse" ng-model="collapse" class="show-rule"><i class="fa fa-ellipsis-h"></i></span>
+                <span ng-hide="!report._source.attachment" ng-click="collapseimg=!collapseimg" ng-model="collapseimg" class="show-rule"><i class="fa fa-eye"></i></span>
+                <span ng-click="deleteReport($index,report._index,report._type,report._id)" class="delete-rule"><i class="fa fa-trash"></i></span>
               </td>
             </tr>
             <tr ng-show=collapse>
