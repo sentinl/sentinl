@@ -312,7 +312,7 @@ uiModules
           $timeout(function () {
             $route.reload();
             $scope.notify.warning('SENTINL Watcher successfully deleted!');
-          });
+          }, 1000);
         },
         $scope.notify.error
       );
