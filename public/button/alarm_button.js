@@ -31,25 +31,18 @@ const linkReqRespStats = function ($scope, config) {
 
     const req = $scope.req;
     const resp = $scope.req.resp;
-    const stats = $scope.stats = [];
-    const indices = $scope.index = [];
     let indexPattern;
+    $scope.indices = [];
 
-    if (resp && resp.took != null) stats.push(['Query Duration', resp.took + 'ms']);
-    if (req && req.ms != null) stats.push(['Request Duration', req.ms + 'ms']);
-    if (resp && resp.hits) stats.push(['Hits', resp.hits.total]);
-
-    if (req.fetchParams) {
-      // if (req.fetchParams.index) stats.push(['Index', req.fetchParams.index]);
-      // if (req.fetchParams.type) stats.push(['Type', req.fetchParams.type]);
-      // if (req.fetchParams.id) stats.push(['Id', req.fetchParams.id]);
-
-      if (req.fetchParams.index) {
-        var idx = (req.fetchParams.index).toString();
-        var tmp = idx.replace(/\*/g, '');
-        indices.push('<' + tmp + '{now/d}>');
-        indices.push('<' + tmp + '{now/d-1d}>');
-        indexPattern = req.fetchParams.index;
+    if (req.fetchParams && req.fetchParams.index) {
+      const idx = req.fetchParams.index.toString();
+      indexPattern = req.fetchParams.index;
+      if (indexPattern.hasTimeField()) {
+        const tmp = idx.replace(/\*/g, '');
+        $scope.indices.push(`<${tmp}{now/d}>`);
+        $scope.indices.push(`<${tmp}{now/d-1d}>`);
+      } else {
+        $scope.indices.push(idx);
       }
     }
 
@@ -100,7 +93,9 @@ const linkReqRespStats = function ($scope, config) {
       $scope.resKeys = result;
     };
 
-    if (resp) $scope.iterateKeys({payload:resp});
+    if (resp) {
+      $scope.iterateKeys({ payload: resp });
+    }
 
     /* User can select different form - change here to change labels of the select*/
     $scope.watcher_choose = ['E-Mail', 'HTML E-Mail', 'Slack', 'Webhook'];
@@ -184,10 +179,7 @@ const linkReqRespStats = function ($scope, config) {
           },
           input: {
             search: {
-              request: {
-                index: [],
-                body: req.fetchParams.body,
-              }
+              request: {}
             }
           },
           condition: {
@@ -202,16 +194,21 @@ const linkReqRespStats = function ($scope, config) {
         }
       };
 
+      if (req.fetchParams && req.fetchParams.body) {
+        $scope.alarm._source.input.search.request.body = req.fetchParams.body;
+      }
       // Patch Indices
-      $scope.alarm._source.input.search.request.index = $scope.indices ? $scope.indices : [];
+      $scope.alarm._source.input.search.request.index = $scope.indices;
       // Patch Range
-      $scope.alarm._source.input.search.request.body.query.filtered.filter = {
-        range: {
-          '@timestamp': {
-            from: $scope.watcher_range ? $scope.watcher_range : 'now-1h'
+      if (indexPattern && indexPattern.hasTimeField()) {
+        $scope.alarm._source.input.search.request.body.query.filtered.filter = {
+          range: {
+            [indexPattern.timeFieldName]: {
+              from: $scope.watcher_range ? $scope.watcher_range : 'now-1h'
+            }
           }
-        }
-      };
+        };
+      }
       // Store Watcher
       alarm = $scope.alarm;
       window.localStorage.setItem('sentinl_saved_query', JSON.stringify($scope.alarm));
