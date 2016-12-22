@@ -1,9 +1,11 @@
 import _ from 'lodash';
 import handleESError from '../lib/handle_es_error';
-const config = require('../lib/config');
+import getConfiguration from  '../lib/get_configuration';
 
 /* ES Functions */
 var getHandler = function (type, server, req, reply) {
+  const config = getConfiguration(server);
+
   var timeInterval;
   // Use selected timefilter when available
   if (server.sentinlInterval) {
@@ -47,7 +49,9 @@ var getHandler = function (type, server, req, reply) {
   .catch((err) => reply(handleESError(err)));
 };
 
-export default function (server) {
+export default function routes(server) {
+
+  const config = getConfiguration(server);
 
   // Current Time
   server.route({
@@ -57,19 +61,6 @@ export default function (server) {
       reply({ time: new Date().toISOString() });
     }
   });
-
-  server.route({
-    method: 'GET',
-    path: '/api/sentinl/config',
-    handler: require('./config.js')
-  });
-
-  server.route({
-    method: 'GET',
-    path: '/api/sentinl/getitems',
-    handler: require('./items.js')
-  });
-
 
   // Local Alarms (session)
   server.route({

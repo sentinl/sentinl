@@ -39,7 +39,7 @@ var dynamicTemplates = [ {
 }];
 
 
-function createSentinlIndex(server,config) {
+function createSentinlIndex(server, config) {
   server.log(['status', 'info', 'Sentinl'], 'Core Index check...');
   if (!server.plugins.elasticsearch) {
     server.log(['status', 'error', 'Sentinl'], 'Elasticsearch client not available, retrying in 5s');

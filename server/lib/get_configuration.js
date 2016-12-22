@@ -16,15 +16,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { once } from 'lodash';
 
-module.exports = (function () {
-  var conf;
-  try {
-    conf = require('/etc/sentinl.json');
-    conf.custom = true;
-  } catch (e) {
-    conf = require('../../sentinl.json');
-    conf.custom = false;
-  }
-  return conf;
-}());
+const getConfiguration = once((server) => {
+  return server.config().get('sentinl');
+});
+
+export default getConfiguration;

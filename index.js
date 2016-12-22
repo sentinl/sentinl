@@ -40,6 +40,47 @@ export default function (kibana) {
     config: function (Joi) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
+        es: Joi.object({
+          timefield: Joi.string().default('@timestamp'),
+          default_index: Joi.string().default('watcher'),
+          type: Joi.string().default('watch'),
+          alarm_index: Joi.string().default('watcher_alarms')
+        }).default(),
+        sentinl: Joi.object({
+          history: Joi.number().default(20),
+          results: Joi.number().default(50)
+        }).default(),
+        settings: Joi.object({
+          email: Joi.object({
+            active: Joi.boolean().default(false),
+            user: Joi.string(),
+            password: Joi.string(),
+            host: Joi.string(),
+            ssl: Joi.boolean().default(true)
+          }).default(),
+          slack: Joi.object({
+            active: Joi.boolean().default(false),
+            username: Joi.string(),
+            hook: Joi.string(),
+            channel: Joi.string(),
+          }).default(),
+          webhook: Joi.object({
+            active: Joi.boolean().default(false),
+            method: Joi.string().default('POST'),
+            host: Joi.string(),
+            port: Joi.number(),
+            path: Joi.string().default(':/{{payload.watcher_id}'),
+            body: Joi.string().default('{{payload.watcher_id}}{payload.hits.total}}')
+          }).default(),
+          report: Joi.object({
+            active: Joi.boolean().default(false),
+            tmp_path: Joi.string().default('/tmp/')
+          }).default(),
+          pushapps: Joi.object({
+            active: Joi.boolean().default(false),
+            api_key: Joi.string()
+          }).default()
+        }).default()
       }).default();
     },
     init: require('./init.js')

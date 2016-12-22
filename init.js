@@ -20,12 +20,22 @@
 import later from 'later';
 import _ from 'lodash';
 import masterRoute from './server/routes/routes';
-import scheduler from './server/lib/scheduler';
+import getScheduler from './server/lib/scheduler';
 import helpers from './server/lib/helpers';
 import getElasticsearchClient from './server/lib/get_elasticsearch_client';
+import getConfiguration from './server/lib/get_configuration';
+import fs from 'fs';
 
 const init = _.once((server) => {
-  var config = require('./server/lib/config');
+  const config = getConfiguration(server);
+  const scheduler = getScheduler(server);
+
+  if (fs.existsSync('/etc/sentinl.json')) {
+    server.plugins.sentinl.status.red('Setting configuration values in /etc/sentinl.json is not supported anymore, please copy ' +
+                                      'your Sentinl configuration values to config/kibi.yml or config/kibana.yml, ' +
+                                      'remove /etc/sentinl.json and restart.');
+    return;
+  }
 
   server.log(['status', 'info', 'Sentinl'], 'Sentinl Initializing');
   server.sentinlStore = [];
