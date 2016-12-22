@@ -209,7 +209,7 @@ export default function routes(server) {
       .then(function () {
           var es = server.plugins.elasticsearch.client;
           return es.indices.refresh({
-            index: 'watcher'
+            index: config.es.default_index: config.es.default_index : 'watcher'
           })
       })
       .then((resp) => reply({ok: true, resp: resp}))
@@ -231,7 +231,7 @@ export default function routes(server) {
       .then(function () {
           var es = server.plugins.elasticsearch.client;
           return es.indices.refresh({
-            index: 'watcher'
+            index: config.es.default_index: config.es.default_index : 'watcher'
           })
       })
       .then((resp) => reply({ok: true, resp: resp}))
