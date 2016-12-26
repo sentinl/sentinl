@@ -125,7 +125,7 @@ export default function routes(server) {
       .then(function () {
           var es = server.plugins.elasticsearch.client;
           return es.indices.refresh({
-            index: req.params.type
+            index: req.params.index
           })
       })
       .then((resp) => reply({ok: true, resp: resp}))
