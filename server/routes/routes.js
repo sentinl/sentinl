@@ -123,10 +123,10 @@ export default function routes(server) {
 
       callWithRequest(req, 'delete', body)
       .then(function () {
-          var es = server.plugins.elasticsearch.client;
-          return es.indices.refresh({
-            index: req.params.index
-          })
+        var es = server.plugins.elasticsearch.client;
+        return es.indices.refresh({
+          index: req.params.index
+        });
       })
       .then((resp) => reply({ok: true, resp: resp}))
       .catch((err) => reply(handleESError(err)));
@@ -207,10 +207,10 @@ export default function routes(server) {
       };
       callWithRequest(request, 'index', body)
       .then(function () {
-          var es = server.plugins.elasticsearch.client;
-          return es.indices.refresh({
-            index: config.es.default_index
-          })
+        var es = server.plugins.elasticsearch.client;
+        return es.indices.refresh({
+          index: config.es.default_index
+        });
       })
       .then((resp) => reply({ok: true, resp: resp}))
       .catch((err) => reply(handleESError(err)));
@@ -229,10 +229,10 @@ export default function routes(server) {
       };
       callWithRequest(req, 'delete', body)
       .then(function () {
-          var es = server.plugins.elasticsearch.client;
-          return es.indices.refresh({
-            index: config.es.default_index
-          })
+        var es = server.plugins.elasticsearch.client;
+        return es.indices.refresh({
+          index: config.es.default_index
+        });
       })
       .then((resp) => reply({ok: true, resp: resp}))
       .catch((err) => reply(handleESError(err)));
