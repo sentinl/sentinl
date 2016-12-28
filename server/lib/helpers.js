@@ -118,14 +118,11 @@ function createSentinlAlarmIndex(server,config) {
       server.log(['status', 'debug', 'Sentinl'], 'Alarms Index exists!');
       return;
     }
-    server.log(['status', 'debug', 'Sentinl'], 'Creating Sentinl Alarms Index...');
-    client.indices.create({
-      index: config.es.alarm_index,
+    server.log(['status', 'debug', 'Sentinl'], 'Creating Sentinl Alarms Template...');
+    client.indices.putTemplate({
+      name: config.es.alarm_index,
       body: {
-        settings: {
-          number_of_shards: 1,
-          number_of_replicas: 1
-        },
+        template: config.es.alarm_index + "-*",
         mappings: {
           _default_: {
             properties: {
@@ -142,7 +139,23 @@ function createSentinlAlarmIndex(server,config) {
       }
     })
     .then(function (resp) {
-      server.log(['status', 'info', 'Sentinl'], 'Alarm Index response', resp);
+      server.log(['status', 'debug', 'Sentinl'], 'Alarm Template response', resp);
+    }, function (err) {
+      server.log(['error', 'warning', 'Sentinl'], err.message);
+    });
+    
+    server.log(['status', 'debug', 'Sentinl'], 'Creating Sentinl Alarms Index...');
+    client.indices.create({
+      index: config.es.alarm_index,
+      body: {
+        settings: {
+          number_of_shards: 1,
+          number_of_replicas: 1
+        }
+      }
+    })
+    .then(function (resp) {
+      server.log(['status', 'debug', 'Sentinl'], 'Alarm Index response', resp);
     }, function (err) {
       server.log(['error', 'warning', 'Sentinl'], err.message);
     });
