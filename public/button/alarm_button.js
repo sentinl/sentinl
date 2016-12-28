@@ -172,6 +172,8 @@ const linkReqRespStats = function ($scope, config) {
         _id: $scope.watcher_id,
         _new: 'true',
         _source: {
+          uuid: $scope.watcher_id,
+          disable: false,
           trigger: {
             schedule: {
               later: $scope.watcher_interval ? $scope.watcher_interval : 'every 5 minutes'
