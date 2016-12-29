@@ -55,7 +55,7 @@ function createSentinlIndex(server, config) {
       server.log(['status', 'debug', 'Sentinl'], 'Core Index exists!');
       return;
     }
-    server.log(['status', 'debug', 'Sentinl'], 'Creating Sentinl core Index...');
+    server.log(['status', 'info', 'Sentinl'], 'Creating Sentinl core Index...');
     client.indices.create({
       index: config.es.default_index,
       body: {
@@ -84,7 +84,7 @@ function createSentinlIndex(server, config) {
       }
     })
     .then(function (resp) {
-      server.log(['status', 'info', 'Sentinl'], 'Core Index response', resp);
+      server.log(['status', 'debug', 'Sentinl'], 'Core Index response', resp);
     }, function (err) {
       server.log(['status', 'warning', 'Sentinl'], err.message);
     });
@@ -118,7 +118,7 @@ function createSentinlAlarmIndex(server,config) {
       server.log(['status', 'debug', 'Sentinl'], 'Alarms Index exists!');
       return;
     }
-    server.log(['status', 'debug', 'Sentinl'], 'Creating Sentinl Alarms Template...');
+    server.log(['status', 'info', 'Sentinl'], 'Creating Sentinl Alarms Template...');
     client.indices.putTemplate({
       name: config.es.alarm_index,
       body: {
@@ -144,7 +144,7 @@ function createSentinlAlarmIndex(server,config) {
       server.log(['error', 'warning', 'Sentinl'], err.message);
     });
     
-    server.log(['status', 'debug', 'Sentinl'], 'Creating Sentinl Alarms Index...');
+    server.log(['status', 'info', 'Sentinl'], 'Creating Sentinl Alarms Index...');
     client.indices.create({
       index: config.es.alarm_index,
       body: {
