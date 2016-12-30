@@ -77,6 +77,16 @@ function createSentinlIndex(server, config) {
               condition: {
                 type: 'object',
                 enabled: false
+              },
+              uuid: {
+                type:  'string',
+                index: 'not_analyzed'
+              },
+              report: {
+                type: 'boolean'
+              },
+              disable: {
+                 type: 'boolean'
               }
             }
           }
@@ -132,6 +142,10 @@ function createSentinlAlarmIndex(server,config) {
               },
               attachment : {
                 type : 'binary'
+              },
+              uuid: {
+                type:  'string',
+                index: 'not_analyzed'
               }
             }
           }
