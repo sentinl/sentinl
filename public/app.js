@@ -343,12 +343,15 @@ uiModules
   /* New Entry */
   $scope.watcherNew = function (newwatcher) {
     if (!newwatcher) {
+      var wid = 'new_watcher_' + Math.random().toString(36).substr(2, 9);
       newwatcher = {
         _index: 'watcher',
         _type: 'watch',
-        _id: 'new_watcher_' + Math.random().toString(36).substr(2, 9),
+        _id: wid,
         _new: 'true',
         _source: {
+          disable: false,
+          uuid: wid,
           trigger: {
             schedule: {
               later: 'every 5 minutes'
@@ -387,12 +390,15 @@ uiModules
   };
   $scope.reporterNew = function (newwatcher) {
     if (!newwatcher) {
+      var wid = 'reporter_' + Math.random().toString(36).substr(2, 9);
       newwatcher = {
         _index: 'watcher',
         _type: 'watch',
-        _id: 'reporter_' + Math.random().toString(36).substr(2, 9),
+        _id: wid,
         _new: 'true',
         _source: {
+          disable: false,
+          uuid: wid,
           trigger: {
             schedule: {
               later: 'every 1 hour'
