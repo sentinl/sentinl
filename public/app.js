@@ -398,7 +398,7 @@ uiModules
         _new: 'true',
         _source: {
           disable: false,
-          uuid: wid,          
+          uuid: wid,
           trigger: {
             schedule: {
               later: 'every 1 hour'

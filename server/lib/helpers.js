@@ -90,7 +90,7 @@ function createSentinlIndex(server, config) {
                 type: 'boolean'
               },
               disable: {
-                 type: 'boolean'
+                type: 'boolean'
               }
             }
           }
@@ -136,7 +136,7 @@ function createSentinlAlarmIndex(server,config) {
     client.indices.putTemplate({
       name: config.es.alarm_index,
       body: {
-        template: config.es.alarm_index + "-*",
+        template: config.es.alarm_index + '-*',
         mappings: {
           _default_: {
             properties: {
@@ -161,7 +161,7 @@ function createSentinlAlarmIndex(server,config) {
     }, function (err) {
       server.log(['error', 'warning', 'Sentinl'], err.message);
     });
-    
+
     server.log(['status', 'info', 'Sentinl'], 'Creating Sentinl Alarms Index...');
     client.indices.create({
       index: config.es.alarm_index,
