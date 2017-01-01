@@ -70,6 +70,10 @@ function createSentinlIndex(server, config) {
                 type: 'object',
                 enabled: false
               },
+              action: {
+                type: 'object',
+                enabled: false
+              },
               transform: {
                 type: 'object',
                 enabled: false
