@@ -1,8 +1,9 @@
 <div ng-show="spy.mode.name === 'setalarm'" class="fill visualize-spy-nav alarm-spy">
   <div class="form-group">
-  	<a class="btn btn-warning ng-binding ng-scope" ng-click="makeAlarm()" target="_sentinl" href="./sentinl">Edit Watcher in Sentinl</a>
-	<p class="hintbox">
-		Configure the new Watcher preferences before sending to Sentinl for processing and scheduling.
+  	<a ng-show="viewFlag==true" class="btn btn-success ng-binding ng-scope" ng-click="makeAlarm()" target="_sentinl" href="./sentinl">Ready! Continue Editing in Sentinl</a>
+  	<a ng-show="viewFlag==false" class="btn btn-warning disabled ng-binding ng-scope" ng-click="" target="_sentinl" href="#">Please Add an Action to Continue!</a>
+    <p class="hintbox">
+		Configure the new Watcher preferences and Actions before sending to Sentinl for processing and scheduling.
 	</p>
   </div>
 
@@ -49,7 +50,7 @@
       ng-model="selectedchoose"
       ng-options="chs for chs in watcher_choose"
       class="form-control ng-pristine ng-valid ng-valid-required ng-touched"
-      >  </select>
+      required="">  </select>
   </div>
 
   <div class="common-field">
