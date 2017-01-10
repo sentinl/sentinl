@@ -36,7 +36,7 @@ const linkReqRespStats = function ($scope, config) {
 
     if (req.fetchParams && req.fetchParams.index) {
       const idx = req.fetchParams.index.toString();
-      indexPattern = req.fetchParams.index;
+      indexPattern = $scope.searchSource.get('index');
       if (indexPattern.hasTimeField()) {
         const tmp = idx.replace(/\*/g, '');
         $scope.indices.push(`<${tmp}{now/d}>`);
