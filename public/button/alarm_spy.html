@@ -80,6 +80,8 @@
   <div ng-show="selectedchoose=='E-Mail' && activeform.email==true" class="form-group common-field">
     <label for="visTitle">Email To:</label>
     <input ng-change="updateAction()" class="form-control ng-pristine ng-valid ng-touched" input-focus="select" type="text" ng-model="watcher_email_to" required="">
+    <label for="visTitle">Email From:</label>
+    <input ng-change="updateAction()" class="form-control ng-pristine ng-valid ng-touched" input-focus="select" type="text" ng-model="watcher_email_from" required="">
     <label for="visTitle">Email Subject:</label>
     <input ng-change="updateAction()" class="form-control ng-pristine ng-valid ng-touched" input-focus="select" type="text" ng-model="watcher_email_subj" required="">
     <label for="visTitle">Email Body:</label>
@@ -90,6 +92,8 @@
   <div ng-show="selectedchoose=='HTML E-Mail' && activeform.htmlemail==true" class="form-group common-field">
     <label for="visTitle">Email To:</label>
     <input ng-change="updateAction()" class="form-control ng-pristine ng-valid ng-touched" input-focus="select" type="text" ng-model="watcher_email_html_to" required="">
+    <label for="visTitle">Email From:</label>
+    <input ng-change="updateAction()" class="form-control ng-pristine ng-valid ng-touched" input-focus="select" type="text" ng-model="watcher_email_html_from" required="">
     <label for="visTitle">Email Subject:</label>
     <input ng-change="updateAction()" class="form-control ng-pristine ng-valid ng-touched" input-focus="select" type="text" ng-model="watcher_email_html_subj" required="">
     <label for="visTitle">Email Body:</label>
