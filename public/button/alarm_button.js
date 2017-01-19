@@ -119,6 +119,7 @@ const linkReqRespStats = function ($scope, config) {
     /* fields for e-mail option */
     $scope.initEmail = function () {
       $scope.watcher_email_to = 'root@localhost';
+      $scope.watcher_email_from = 'sentinl@localhost';
       $scope.watcher_email_subj = 'SENTINL ALARM {{ payload._id }}';
       $scope.watcher_email_body = 'Series Alarm {{ payload._id}}: {{ payload.hits.total }}';
     };
@@ -126,6 +127,7 @@ const linkReqRespStats = function ($scope, config) {
     /*fields for html_e-mail option */
     $scope.initEmailHtml = function () {
       $scope.watcher_email_html_to = 'root@localhost';
+      $scope.watcher_email_html_from = 'sentinl@localhost';
       $scope.watcher_email_html_subj = 'SENTINL ALARM {{ payload._id }}';
       $scope.watcher_email_html_body = 'Series Alarm {{ payload._id}}: {{ payload.hits.total }}';
       $scope.watcher_email_html_html = '<p>Series Alarm {{ payload._id}}: {{payload.hits.total}}</p>';
