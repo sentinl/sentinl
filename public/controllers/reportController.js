@@ -84,7 +84,7 @@ uiModules
 
   $scope.deleteReport = function (index, rmindex, rmtype, rmid) {
     if (confirm('Delete is Forever!\n Are you sure?')) {
-      return $http.get('../api/sentinl/delete/alarm/' + rmindex + '/' + rmtype + '/' + rmid)
+      return $http.delete('../api/sentinl/alarm/' + rmindex + '/' + rmtype + '/' + rmid)
       .then(() => {
         $scope.elasticReports.splice(index - 1, 1);
         $timeout(() => {
