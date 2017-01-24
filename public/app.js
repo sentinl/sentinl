@@ -306,7 +306,7 @@ uiModules
 
   $scope.watcherDelete = function ($index) {
     if (confirm('Are you sure?')) {
-      return $http.get('../api/sentinl/delete/watcher/' + $scope.watchers[$index]._id)
+      return $http.delete(`../api/sentinl/watcher/${$scope.watchers[$index]._id}`)
       .then(
         (resp) => {
           $timeout(function () {
@@ -322,7 +322,7 @@ uiModules
   $scope.watcherSave = function ($index) {
     var watcher = $scope.editor ? JSON.parse($scope.editor.getValue()) : $scope.watchers[$index];
     console.log('saving object:', watcher);
-    return $http.get('../api/sentinl/save/watcher/' + encodeURIComponent(JSON.stringify(watcher)))
+    return $http.post(`../api/sentinl/watcher/${watcher._id}`, watcher)
     .then(
       () => {
         $timeout(() => {
@@ -330,9 +330,7 @@ uiModules
           $scope.notify.warning('SENTINL Watcher successfully saved!');
         }, 1000);
       },
-      (err) => {
-        $scope.notify.error('Error Saving Watcher! Check your syntax and try again!');
-      }
+      $scope.notify.error
     );
   };
 
