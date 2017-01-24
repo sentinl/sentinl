@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import handleESError from '../lib/handle_es_error';
 import getConfiguration from  '../lib/get_configuration';
+import Joi from 'joi';
 
 /* ES Functions */
 var getHandler = function (type, server, req, reply) {
@@ -52,6 +53,7 @@ var getHandler = function (type, server, req, reply) {
 export default function routes(server) {
 
   const config = getConfiguration(server);
+  const callWithRequest = server.plugins.elasticsearch.callWithRequest;
 
   // Current Time
   server.route({
@@ -193,11 +195,10 @@ export default function routes(server) {
   });
 
   server.route({
-    method: 'GET',
-    path: '/api/sentinl/save/watcher/{watcher}',
+    method: 'POST',
+    path: '/api/sentinl/watcher/{id}',
     handler: function (request, reply) {
-      const callWithRequest = server.plugins.elasticsearch.callWithRequest;
-      var watcher = JSON.parse(request.params.watcher);
+      var watcher = request.payload;
       server.log(['status', 'info', 'Sentinl'], 'Saving Watcher with ID: ' + watcher._id);
       var body = {
         index: config.es.default_index,
@@ -206,36 +207,36 @@ export default function routes(server) {
         body: watcher._source
       };
       callWithRequest(request, 'index', body)
-      .then(function () {
-        var es = server.plugins.elasticsearch.client;
-        return es.indices.refresh({
-          index: config.es.default_index
-        });
-      })
+      .then(() => callWithRequest(request, 'indices.refresh', {
+        index: config.es.default_index
+      }))
       .then((resp) => reply({ok: true, resp: resp}))
       .catch((err) => reply(handleESError(err)));
     }
   });
 
   server.route({
-    method: 'GET',
-    path: '/api/sentinl/delete/watcher/{id}',
-    handler: function (req, reply) {
-      var callWithRequest = server.plugins.elasticsearch.callWithRequest;
+    method: 'DELETE',
+    path: '/api/sentinl/watcher/{id}',
+    handler: function (request, reply) {
       var body = {
         index: config.es.default_index,
         type: config.es.type,
-        id: req.params.id
+        id: request.params.id
       };
-      callWithRequest(req, 'delete', body)
-      .then(function () {
-        var es = server.plugins.elasticsearch.client;
-        return es.indices.refresh({
-          index: config.es.default_index
-        });
-      })
+      callWithRequest(request, 'delete', body)
+      .then(() => callWithRequest(request, 'indices.refresh', {
+        index: config.es.default_index
+      }))
       .then((resp) => reply({ok: true, resp: resp}))
       .catch((err) => reply(handleESError(err)));
+    },
+    config: {
+      validate: {
+        params: {
+          id: Joi.string()
+        }
+      }
     }
   });
 
