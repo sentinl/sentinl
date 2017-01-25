@@ -10,10 +10,11 @@
       Configure the new Watcher preferences and Actions before sending to Sentinl for processing and scheduling.
     </p>
   </div>
-
   <div class="form-group common-field">
     <label for="visTitle">Watcher ID:</label>
-    <input ng-change="makeAlarm()" class="form-control ng-pristine ng-valid ng-touched" input-focus="select" type="text" name="watcherTitle" ng-model="watcher_id" required="">
+    <input ng-change="makeAlarm()" class="form-control ng-pristine ng-valid ng-touched" input-focus="select" type="text" name="watcherId" ng-model="watcher_id" required="">
+    <label for="visTitle">Watcher Title:</label>
+    <input ng-change="makeAlarm()" class="form-control ng-pristine ng-valid ng-touched" input-focus="select" type="text" name="watcherTitle" ng-model="watcher_title" required="">
     <label for="visTitle">Watcher Repeat Interval:</label>
     <select name="watcherInterval"
             ng-change="makeAlarm()"
@@ -28,9 +29,29 @@
             class="form-control ng-pristine ng-valid ng-valid-required ng-touched"
             ng-model="watcher_range">
     </select>
+    <div class="form-group select-action">
+    <label for="visTitle">Choose the type of the action: </label>
+    <select name="option_choose"
+            ng-change="manageForm()"
+            ng-model="selectedchoose"
+            ng-options="chs for chs in watcher_choose"
+            class="form-control ng-pristine ng-valid ng-valid-required ng-touched"
+            required="">
+    </select>
+    </div>
+    <div>
+      <div ng-show="viewFlag==false && selectedchoose!=''" class="form-group">
+        <br/>
+        <a class="btn btn-success" ng-click="switchViewFlag(true)">Add</a>
+      </div>
+      <div class="form-group" ng-show="viewFlag==true && selectedchoose!=''">
+        <br/>
+        <a class="btn btn-danger" ng-click="switchViewFlag(false)">Delete</a>
+      </div>
+    </div>
   </div>
 
-  <div class="form-group common-field-lg">
+  <div class="form-group common-field">
     <label for="visTitle">Watcher Indices:</label>
     <input ng-change="makeAlarm()" class="form-control ng-pristine ng-valid ng-touched" input-focus="select" type="text" name="watcherIndices" ng-model="indices" required="">
     <label for="visTitle">Watcher Script:</label>
@@ -46,27 +67,7 @@
 
   <br/>
 
-  <div class="form-group select-action">
-    <label for="visTitle">Choose the type of the action: </label>
-    <select name="option_choose"
-            ng-change="manageForm()"
-            ng-model="selectedchoose"
-            ng-options="chs for chs in watcher_choose"
-            class="form-control ng-pristine ng-valid ng-valid-required ng-touched"
-            required="">
-    </select>
-  </div>
 
-  <div class="common-field">
-    <div ng-show="viewFlag==false && selectedchoose!=''" class="form-group">
-      <br/>
-      <a class="btn btn-success" ng-click="switchViewFlag(true)">Add</a>
-    </div>
-    <div class="form-group" ng-show="viewFlag==true && selectedchoose!=''">
-      <br/>
-      <a class="btn btn-danger" ng-click="switchViewFlag(false)">Delete</a>
-    </div>
-  </div>
 
   <div class="form-group editform">
     <label for="visTitle">Edited actions: </label>

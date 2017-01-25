@@ -348,6 +348,7 @@ uiModules
         _id: wid,
         _new: 'true',
         _source: {
+          title: 'watcher_title',
           disable: false,
           uuid: wid,
           trigger: {
@@ -395,6 +396,7 @@ uiModules
         _id: wid,
         _new: 'true',
         _source: {
+          title: 'reporter_title',
           disable: false,
           uuid: wid,
           trigger: {

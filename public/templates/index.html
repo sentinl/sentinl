@@ -16,7 +16,7 @@
         <table class="table">
           <thead>
             <tr>
-              <th>ID</th>
+              <th>TITLE</th>
               <th>INTERVAL</th>
               <th>INPUT</th>
               <th>SCRIPT</th>
@@ -24,8 +24,8 @@
               <th></th>
             </tr>
           <tbody ng-repeat='watcher in getWatchers()'>
-            <tr ng-class="{newRow: watcher._new == 'true' || watcher._id == 'new_saved'}">
-              <td>{{watcher._id}}</td>
+            <tr ng-class="{newRow: watcher._new == 'true' || watcher._source.title == 'watcher_title'}">
+              <td>{{watcher._source.title}}</td>
               <td ng-show="watcher._source.trigger.schedule.interval" ng-hide="watcher._source.trigger.schedule.later">{{ watcher._source.trigger.schedule.interval }}</td>
               <td ng-show="watcher._source.trigger.schedule.later">{{ watcher._source.trigger.schedule.later }}</td>
               <td>{{watcher._source.input.search.request.index.join(',')}}</td>
