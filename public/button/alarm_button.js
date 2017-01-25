@@ -111,7 +111,7 @@ const linkReqRespStats = function ($scope, config) {
     };
 
     /* Defaults */
-    $scope.watcher_id = 'new_saved_'  + Math.random().toString(36).substr(2, 9);
+    $scope.watcher_id = 'new_spy_watcher'  + Math.random().toString(36).substr(2, 9);
     $scope.watcher_title = 'new_title';
     $scope.watcher_script = 'payload.hits.total > 100';
     $scope.watcher_interval = $scope.intervals[0].value;
