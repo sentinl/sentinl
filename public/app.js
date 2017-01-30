@@ -213,7 +213,7 @@ uiModules
 
   $scope.deleteAlarm = function (index, rmindex, rmtype, rmid) {
     if (confirm('Delete is Forever!\n Are you sure?')) {
-      return $http.get('../api/sentinl/delete/alarm/' + rmindex + '/' + rmtype + '/' + rmid)
+      return $http.delete('../api/sentinl/alarm/' + rmindex + '/' + rmtype + '/' + rmid)
       .then(() => {
         $timeout(() => {
           $scope.elasticAlarms.splice(index - 1, 1);
@@ -306,7 +306,7 @@ uiModules
 
   $scope.watcherDelete = function ($index) {
     if (confirm('Are you sure?')) {
-      return $http.delete(`../api/sentinl/watcher/${$scope.watchers[$index]._id}`)
+      return $http.delete('../api/sentinl/watcher/' + $scope.watchers[$index]._id)
       .then(
         (resp) => {
           $timeout(function () {
