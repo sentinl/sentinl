@@ -107,8 +107,8 @@ export default function routes(server) {
   });
 
   server.route({
-    method: 'GET',
-    path: '/api/sentinl/delete/alarm/{index}/{type}/{id}',
+    method: 'DELETE',
+    path: '/api/sentinl/alarm/{index}/{type}/{id}',
     handler: function (req, reply) {
       // Check if alarm index and discard everything else
       if (!req.params.index.substr(0, config.es.alarm_index.length) === config.es.alarm_index) {
@@ -219,6 +219,7 @@ export default function routes(server) {
     method: 'DELETE',
     path: '/api/sentinl/watcher/{id}',
     handler: function (request, reply) {
+      var callWithRequest = server.plugins.elasticsearch.callWithRequest;
       var body = {
         index: config.es.default_index,
         type: config.es.type,
