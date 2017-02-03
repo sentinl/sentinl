@@ -1,6 +1,6 @@
 <img src="http://i.imgur.com/s4TKpbF.png" width="400"/>
 
-# Kibi (& Kibana) Alerting & Reporting App
+# Kibi & Kibana Alerting & Reporting App
 
 > Watching your data, 24/7/365. 
 
@@ -16,7 +16,7 @@
 
 <!--<img src="http://i.imgur.com/aDHvUxf.png" width="400" /> -->
 
-<img src="http://i.imgur.com/fpDs7lo.gif" />
+<img src="http://i.imgur.com/K7zwJKQ.gif" />
 
 ---
 
@@ -63,11 +63,6 @@ cd sentinl && npm install && gulp package
 </pre>
 
 ## Configuration & Usage
-Copy the configuration file to your ```/etc``` folder and edit according to requirements.
-<pre>
-cp /opt/kibana/installedPlugins/sentinl/sentinl.json /etc/sentinl.json
-</pre>
-
 Consult our [wiki](https://github.com/sirensolutions/sentinl/wiki) to learn how to configure and use **SENTINL** and program awesome Watchers
 
 
@@ -101,6 +96,5 @@ License for the specific language governing permissions and limitations under
 the License.
 </pre>
 
-<img src="https://img.shields.io/github/license/sirensolutions/sentinl-private.svg"/>
+<img src="https://img.shields.io/github/license/sirensolutions/sentinl.svg"/>
 <img src="https://img.shields.io/badge/made%20with-love-red.svg"/>
-<img src="https://img.shields.io/badge/made%20with-nano-blue.svg"/>
