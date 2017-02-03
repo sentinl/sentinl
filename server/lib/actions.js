@@ -200,7 +200,7 @@ export default function (server, actions, payload) {
       priority = action.email_html.priority ? action.email_html.priority : 'INFO';
       server.log(['status', 'info', 'Sentinl', 'email_html'], 'Subject: ' + subject + ', Body: ' + body + ', HTML:' + html);
 
-      if (!emailServer || !config.settings.email_html.active) {
+      if (!emailServer || !config.settings.email.active) {
         server.log(['status', 'info', 'Sentinl', 'email_html'], 'Delivery Disabled!');
       }
       else {

@@ -25,10 +25,14 @@ import getConfiguration from './get_configuration';
 export default function getScheduler(server) {
 
   const config = getConfiguration(server);
-  const elasticsearchPlugins = server.config().get('elasticsearch.plugins');
   let sirenJoinAvailable = false;
-  if (elasticsearchPlugins && elasticsearchPlugins.indexOf('siren-join') > -1) {
-    sirenJoinAvailable = true;
+  try {
+    const elasticsearchPlugins = server.config().get('elasticsearch.plugins');
+    if (elasticsearchPlugins && elasticsearchPlugins.indexOf('siren-join') > -1) {
+      sirenJoinAvailable = true;
+    }
+  } catch (err) {
+    // 'elasticsearch.plugins' not available when running from kibana
   }
 
   var Schedule = [];

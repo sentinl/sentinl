@@ -213,7 +213,7 @@ uiModules
 
   $scope.deleteAlarm = function (index, rmindex, rmtype, rmid) {
     if (confirm('Delete is Forever!\n Are you sure?')) {
-      return $http.get('../api/sentinl/delete/alarm/' + rmindex + '/' + rmtype + '/' + rmid)
+      return $http.delete('../api/sentinl/alarm/' + rmindex + '/' + rmtype + '/' + rmid)
       .then(() => {
         $timeout(() => {
           $scope.elasticAlarms.splice(index - 1, 1);
@@ -306,7 +306,7 @@ uiModules
 
   $scope.watcherDelete = function ($index) {
     if (confirm('Are you sure?')) {
-      return $http.get('../api/sentinl/delete/watcher/' + $scope.watchers[$index]._id)
+      return $http.delete('../api/sentinl/watcher/' + $scope.watchers[$index]._id)
       .then(
         (resp) => {
           $timeout(function () {
@@ -322,7 +322,7 @@ uiModules
   $scope.watcherSave = function ($index) {
     var watcher = $scope.editor ? JSON.parse($scope.editor.getValue()) : $scope.watchers[$index];
     console.log('saving object:', watcher);
-    return $http.get('../api/sentinl/save/watcher/' + encodeURIComponent(JSON.stringify(watcher)))
+    return $http.post(`../api/sentinl/watcher/${watcher._id}`, watcher)
     .then(
       () => {
         $timeout(() => {
@@ -330,9 +330,7 @@ uiModules
           $scope.notify.warning('SENTINL Watcher successfully saved!');
         }, 1000);
       },
-      (err) => {
-        $scope.notify.error('Error Saving Watcher! Check your syntax and try again!');
-      }
+      $scope.notify.error
     );
   };
 
@@ -343,12 +341,16 @@ uiModules
   /* New Entry */
   $scope.watcherNew = function (newwatcher) {
     if (!newwatcher) {
+      var wid = 'new_watcher_' + Math.random().toString(36).substr(2, 9);
       newwatcher = {
         _index: 'watcher',
         _type: 'watch',
-        _id: 'new_watcher_' + Math.random().toString(36).substr(2, 9),
+        _id: wid,
         _new: 'true',
         _source: {
+          title: 'watcher_title',
+          disable: false,
+          uuid: wid,
           trigger: {
             schedule: {
               later: 'every 5 minutes'
@@ -387,12 +389,16 @@ uiModules
   };
   $scope.reporterNew = function (newwatcher) {
     if (!newwatcher) {
+      var wid = 'reporter_' + Math.random().toString(36).substr(2, 9);
       newwatcher = {
         _index: 'watcher',
         _type: 'watch',
-        _id: 'reporter_' + Math.random().toString(36).substr(2, 9),
+        _id: wid,
         _new: 'true',
         _source: {
+          title: 'reporter_title',
+          disable: false,
+          uuid: wid,
           trigger: {
             schedule: {
               later: 'every 1 hour'

@@ -36,7 +36,7 @@ const linkReqRespStats = function ($scope, config) {
 
     if (req.fetchParams && req.fetchParams.index) {
       const idx = req.fetchParams.index.toString();
-      indexPattern = req.fetchParams.index;
+      indexPattern = $scope.searchSource.get('index');
       if (indexPattern.hasTimeField()) {
         const tmp = idx.replace(/\*/g, '');
         $scope.indices.push(`<${tmp}{now/d}>`);
@@ -111,7 +111,8 @@ const linkReqRespStats = function ($scope, config) {
     };
 
     /* Defaults */
-    $scope.watcher_id = 'new_saved';
+    $scope.watcher_id = 'new_spy_watcher'  + Math.random().toString(36).substr(2, 9);
+    $scope.watcher_title = 'new_title';
     $scope.watcher_script = 'payload.hits.total > 100';
     $scope.watcher_interval = $scope.intervals[0].value;
     $scope.watcher_range = $scope.ranges[1].value;
@@ -119,6 +120,7 @@ const linkReqRespStats = function ($scope, config) {
     /* fields for e-mail option */
     $scope.initEmail = function () {
       $scope.watcher_email_to = 'root@localhost';
+      $scope.watcher_email_from = 'sentinl@localhost';
       $scope.watcher_email_subj = 'SENTINL ALARM {{ payload._id }}';
       $scope.watcher_email_body = 'Series Alarm {{ payload._id}}: {{ payload.hits.total }}';
     };
@@ -126,6 +128,7 @@ const linkReqRespStats = function ($scope, config) {
     /*fields for html_e-mail option */
     $scope.initEmailHtml = function () {
       $scope.watcher_email_html_to = 'root@localhost';
+      $scope.watcher_email_html_from = 'sentinl@localhost';
       $scope.watcher_email_html_subj = 'SENTINL ALARM {{ payload._id }}';
       $scope.watcher_email_html_body = 'Series Alarm {{ payload._id}}: {{ payload.hits.total }}';
       $scope.watcher_email_html_html = '<p>Series Alarm {{ payload._id}}: {{payload.hits.total}}</p>';
@@ -172,6 +175,9 @@ const linkReqRespStats = function ($scope, config) {
         _id: $scope.watcher_id,
         _new: 'true',
         _source: {
+          title: $scope.watcher_title,
+          uuid: $scope.watcher_id,
+          disable: false,
           trigger: {
             schedule: {
               later: $scope.watcher_interval ? $scope.watcher_interval : 'every 5 minutes'
