@@ -375,29 +375,29 @@ export default function (server, actions, payload) {
     *      "method" : "POST",
     *      "host" : "remote.server",
     *      "port" : 9200,
-    *      "path": ":/{{payload.watcher_id}",
+    *      "path": "/{{payload.watcher_id}}",
     *      "body" : "{{payload.watcher_id}}:{{payload.hits.total}}"
     *    }
     */
 
     var querystring = require('querystring');
     var http = require('http');
-    var webhookFormatter;
     var webhookBody;
     var options;
     var req;
     if (_.has(action, 'webhook')) {
-      webhookFormatter = action.webhook.body ? action.webhook.body : '{{ payload._id}}: {{payload.hits.total}}';
-      webhookBody = mustache.render(webhookFormatter, {payload: payload});
+      webhookBody = action.webhook.body ? mustache.render(action.webhook.body, {payload: payload}) : null;
 
       options = {
+        protocol: action.webhook.protocol ? action.webhook.protocol : 'http:',
         hostname: action.webhook.host ? action.webhook.host : 'locahost',
         port: action.webhook.port ? action.webhook.port : 80,
-        path: action.webhook.path ? action.webhook.path : '/sentinl',
-        method: action.webhook.method ? action.webhook.method : 'POST'
+        path: action.webhook.path ? action.webhook.path : '/',
+        method: action.webhook.method ? action.webhook.method : 'GET'
       };
 
       if (action.webhook.headers) options.headers = action.webhook.headers;
+      if (action.webhook.auth) options.auth = action.webhook.auth;
 
       req = http.request(options, function (res) {
         res.setEncoding('utf8');
