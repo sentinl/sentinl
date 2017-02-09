@@ -13,9 +13,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.moowork.gradle:gradle-node-plugin:0.13'
-        classpath 'com.moowork.gradle:gradle-gulp-plugin:0.13'
-        classpath 'com.moowork.gradle:gradle-grunt-plugin:0.13'
+        classpath "com.moowork.gradle:gradle-node-plugin:1.1.1"
         classpath 'org.ajoberstar:gradle-git:1.6.0'
     }
 
