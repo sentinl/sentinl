@@ -390,7 +390,7 @@ export default function (server, actions, payload) {
 
       options = {
         protocol: action.webhook.protocol ? action.webhook.protocol : 'http:',
-        hostname: action.webhook.host ? action.webhook.host : 'locahost',
+        hostname: action.webhook.host ? action.webhook.host : 'localhost',
         port: action.webhook.port ? action.webhook.port : 80,
         path: action.webhook.path ? action.webhook.path : '/',
         method: action.webhook.method ? action.webhook.method : 'GET'
