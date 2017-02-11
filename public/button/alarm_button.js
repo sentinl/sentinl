@@ -50,7 +50,10 @@ const linkReqRespStats = function ($scope, config) {
       {name: '1m', value: 'every 1 minute'},
       {name: '5m', value: 'every 5 minutes'},
       {name: '10m', value: 'every 10 minutes'},
-      {name: '1h', value: 'every 1 hour'}
+      {name: '1h', value: 'every 1 hour'},
+      {name: '6h', value: 'every 6 hours'},
+      {name: '12h', value: 'every 12 hours'},
+      {name: '1d', value: 'every 1 day'}
     ];
 
     $scope.ranges = [
