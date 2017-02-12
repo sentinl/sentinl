@@ -203,11 +203,12 @@ const linkReqRespStats = function ($scope, config) {
         }
       };
 
+      // Set Index
+      $scope.alarm._source.input.search.request.index = $scope.indices;
+      // Set Request Body
       if (req.fetchParams && req.fetchParams.body) {
         $scope.alarm._source.input.search.request.body = req.fetchParams.body;
       }
-      // Patch Indices
-      $scope.alarm._source.input.search.request.index = $scope.indices;
       // Patch Range
       if (indexPattern && indexPattern.hasTimeField()) {
         $scope.alarm._source.input.search.request.body.query.filtered.filter = {
