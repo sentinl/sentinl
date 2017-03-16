@@ -50,7 +50,10 @@ const linkReqRespStats = function ($scope, config) {
       {name: '1m', value: 'every 1 minute'},
       {name: '5m', value: 'every 5 minutes'},
       {name: '10m', value: 'every 10 minutes'},
-      {name: '1h', value: 'every 1 hour'}
+      {name: '1h', value: 'every 1 hour'},
+      {name: '6h', value: 'every 6 hours'},
+      {name: '12h', value: 'every 12 hours'},
+      {name: '1d', value: 'every 1 day'}
     ];
 
     $scope.ranges = [
@@ -121,23 +124,23 @@ const linkReqRespStats = function ($scope, config) {
     $scope.initEmail = function () {
       $scope.watcher_email_to = 'root@localhost';
       $scope.watcher_email_from = 'sentinl@localhost';
-      $scope.watcher_email_subj = 'SENTINL ALARM {{ payload._id }}';
-      $scope.watcher_email_body = 'Series Alarm {{ payload._id}}: {{ payload.hits.total }}';
+      $scope.watcher_email_subj = 'SENTINL ALARM {{payload._id}}';
+      $scope.watcher_email_body = 'Series Alarm {{payload._id}}: {{payload.hits.total}}';
     };
 
     /*fields for html_e-mail option */
     $scope.initEmailHtml = function () {
       $scope.watcher_email_html_to = 'root@localhost';
       $scope.watcher_email_html_from = 'sentinl@localhost';
-      $scope.watcher_email_html_subj = 'SENTINL ALARM {{ payload._id }}';
-      $scope.watcher_email_html_body = 'Series Alarm {{ payload._id}}: {{ payload.hits.total }}';
-      $scope.watcher_email_html_html = '<p>Series Alarm {{ payload._id}}: {{payload.hits.total}}</p>';
+      $scope.watcher_email_html_subj = 'SENTINL ALARM {{payload._id}}';
+      $scope.watcher_email_html_body = 'Series Alarm {{payload._id}}: {{payload.hits.total}}';
+      $scope.watcher_email_html_html = '<p>Series Alarm {{payload._id}}: {{payload.hits.total}}</p>';
     };
 
     /* fields for slack webhook option */
     $scope.initSlack = function () {
       $scope.watcher_slack_channel = '#<channel>';
-      $scope.watcher_slack_message = 'Series Alarm {{ payload._id}}: {{payload.hits.total}}';
+      $scope.watcher_slack_message = 'Series Alarm {{payload._id}}: {{payload.hits.total}}';
     };
 
     /* fields for generic webhook option */
@@ -145,7 +148,7 @@ const linkReqRespStats = function ($scope, config) {
       $scope.watcher_webhook_method = 'POST';
       $scope.watcher_webhook_host = 'remote.server';
       $scope.watcher_webhook_port = 9200;
-      $scope.watcher_webhook_path = ':/{{payload.watcher_id}';
+      $scope.watcher_webhook_path = '/{{payload.watcher_id}}';
       $scope.watcher_webhook_body = '{{payload.watcher_id}}:{{payload.hits.total}}';
     };
 
@@ -200,11 +203,12 @@ const linkReqRespStats = function ($scope, config) {
         }
       };
 
+      // Set Index
+      $scope.alarm._source.input.search.request.index = $scope.indices;
+      // Set Request Body
       if (req.fetchParams && req.fetchParams.body) {
         $scope.alarm._source.input.search.request.body = req.fetchParams.body;
       }
-      // Patch Indices
-      $scope.alarm._source.input.search.request.index = $scope.indices;
       // Patch Range
       if (indexPattern && indexPattern.hasTimeField()) {
         $scope.alarm._source.input.search.request.body.query.filtered.filter = {
@@ -311,19 +315,19 @@ const linkReqRespStats = function ($scope, config) {
           priority: 'high',
           body: $scope.watcher_email_html_body ? $scope.watcher_email_html_body : 'Found {{payload.hits.total}} Events',
           html: $scope.watcher_email_html_html ? $scope.watcher_email_html_html :
-          '<p>Series Alarm {{ payload._id}}: {{payload.hits.total}}</p>'
+          '<p>Series Alarm {{payload._id}}: {{payload.hits.total}}</p>'
         };
       } else if ($scope.selectedchoose === $scope.watcher_choose[2]) {
         $scope.savedWatcher.actions.slack = {
           channel: $scope.watcher_slack_channel ? $scope.watcher_slack_channel : '#<channel>',
-          message: $scope.watcher_slack_message ? $scope.watcher_slack_message : 'Series Alarm {{ payload._id}}: {{payload.hits.total}}'
+          message: $scope.watcher_slack_message ? $scope.watcher_slack_message : 'Series Alarm {{payload._id}}: {{payload.hits.total}}'
         };
       } else if ($scope.selectedchoose === $scope.watcher_choose[3]) {
         $scope.savedWatcher.actions.webhook = {
           method: $scope.watcher_webhook_method ? $scope.watcher_webhook_method : 'POST',
           host: $scope.watcher_webhook_host ? $scope.watcher_webhook_host : 'remote.server',
           port: $scope.watcher_webhook_port ? $scope.watcher_webhook_port : 9200,
-          path: $scope.watcher_webhook_path ? $scope.watcher_webhook_path : ':/{{payload.watcher_id}',
+          path: $scope.watcher_webhook_path ? $scope.watcher_webhook_path : '/{{payload.watcher_id}}',
           body: $scope.watcher_webhook_body ? $scope.watcher_webhook_body : '{{payload.watcher_id}}:{{payload.hits.total}}'
         };
       }
