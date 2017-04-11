@@ -396,6 +396,11 @@ export default function (server, actions, payload) {
         method: action.webhook.method ? action.webhook.method : 'GET'
       };
 
+      // Log Alarm Event
+      if (Object.keys(payload).length > 0 && payload.constructor === Object) {
+        esHistory(key, action.webhook.message, action.webhook.priority, payload, false);
+      }
+
       if (action.webhook.headers) options.headers = action.webhook.headers;
       if (action.webhook.auth) options.auth = action.webhook.auth;
 
