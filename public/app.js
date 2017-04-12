@@ -57,6 +57,7 @@ import about from './templates/about.html';
 import alarms from './templates/alarms.html';
 import reports from './templates/reports.html';
 import jsonHtml from './templates/json.html';
+import watcherEditorForm from './templates/watcherEditorForm.html';
 
 var impactLogo = require('plugins/sentinl/sentinl_logo.svg');
 var smallLogo = require('plugins/sentinl/sentinl.svg');
@@ -241,11 +242,25 @@ uiModules
 
 });
 
+// WATCHER EDITOR FORM CONTROLLER
+uiModules
+.get('api/sentinl', [])
+.controller('WatcherEditorInstanceCtrl', function ($scope, $modalInstance, watcher) {
+
+  $scope.save = function () {
+    $modalInstance.close();
+  };
+
+  $scope.cancel = function () {
+    $modalInstance.dismiss('cancel');
+  };
+});
+
 // WATCHERS CONTROLLER
 uiModules
 .get('api/sentinl', [])
 .controller('sentinlWatchers', function ($rootScope, $scope, $route, $interval,
-  $timeout, timefilter, Private, Notifier, $window, kbnUrl, $http) {
+  $timeout, timefilter, Private, Notifier, $window, kbnUrl, $http, $modal, $log) {
   const tabifyAggResponse = Private(AggResponseTabifyTabifyProvider);
 
   $scope.title = 'Sentinl: Watchers';
@@ -434,6 +449,29 @@ uiModules
       };
     }
     $scope.watchers.unshift(newwatcher);
+  };
+
+  $scope.openWatcherEditorForm = function ($index) {
+
+    const modalInstance = $modal.open({
+      template: watcherEditorForm,
+      controller: 'WatcherEditorInstanceCtrl',
+      size: 'lg',
+      resolve: {
+        watcher: function () {
+          return $scope.watchers[$index];
+        },
+      }
+    });
+
+    modalInstance.result.then((selectedItem) => {
+      console.log('pass');
+    }).catch((error) => {
+      if (!_.contains(['cancel', 'backdrop click'], error)) {
+        $log.error('Watcher Editor Form failed.');
+        $log.error(error);
+      }
+    });
   };
 
   var currentTime = moment($route.current.locals.currentTime);
