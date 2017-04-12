@@ -397,7 +397,7 @@ export default function (server, actions, payload) {
       };
 
       // Log Alarm Event
-      if (Object.keys(payload).length > 0 && payload.constructor === Object) {
+      if (action.webhook.create_alert && payload.constructor === Object && Object.keys(payload).length) {
         esHistory(key, action.webhook.message, action.webhook.priority, payload, false);
       }
 
