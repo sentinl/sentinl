@@ -247,8 +247,38 @@ uiModules
 .get('api/sentinl', [])
 .controller('WatcherEditorInstanceCtrl', function ($scope, $modalInstance, watcher) {
 
+  $scope.watcher = watcher;
+
+  $scope.form = {
+    disabled: $scope.watcher._source.disable,
+    status: !$scope.watcher._source.disable ? 'Enabled' : 'Disable',
+    time: { // TO-DO timepicker and datepicker
+      now: new Date(),
+      hstep: 1,
+      mstep: 1,
+      ismeridian: true,
+      seconds: true
+    },
+    input: {
+      string: JSON.stringify(watcher._source.input, null, 2)
+    }
+  };
+
+  $scope.toggleWatcher = function () {
+    $scope.form.status = !$scope.form.disabled ? 'Enabled' : 'Disabled';
+  };
+
+  $scope.aceOptions = {
+    mode: ['json'],
+    advanced: {
+      highlightActiveLine: true
+    }
+  };
+
   $scope.save = function () {
-    $modalInstance.close();
+    $scope.watcher._source.disable = $scope.form.disabled;
+    $scope.watcher._source.input = JSON.parse($scope.form.input.string);
+    $modalInstance.close($scope.watcher);
   };
 
   $scope.cancel = function () {
@@ -293,6 +323,29 @@ uiModules
     }
   };
 
+  $scope.openWatcherEditorForm = function ($index) {
+
+    const modalInstance = $modal.open({
+      template: watcherEditorForm,
+      controller: 'WatcherEditorInstanceCtrl',
+      size: 'lg',
+      resolve: {
+        watcher: function () {
+          return $scope.watchers[$index];
+        },
+      }
+    });
+
+    modalInstance.result.then((watcher) => {
+      $scope.watchers[$index] = watcher;
+      $scope.watcherSave($index, true);
+    }).catch((error) => {
+      if (!_.contains(['cancel', 'backdrop click'], error)) {
+        $log.error(error);
+      }
+    });
+  };
+
   $http.get('../api/sentinl/list')
   .then((response) => {
     $scope.watchers = response.data.hits.hits;
@@ -334,8 +387,14 @@ uiModules
     }
   };
 
-  $scope.watcherSave = function ($index) {
-    var watcher = $scope.editor ? JSON.parse($scope.editor.getValue()) : $scope.watchers[$index];
+  $scope.watcherSave = function ($index, callFromWatcherEditorForm = false) {
+    let watcher;
+    if ($scope.editor && !callFromWatcherEditorForm) {
+      watcher = JSON.parse($scope.editor.getValue());
+    } else {
+      watcher = $scope.watchers[$index];
+    }
+
     console.log('saving object:', watcher);
     return $http.post(`../api/sentinl/watcher/${watcher._id}`, watcher)
     .then(
@@ -449,29 +508,6 @@ uiModules
       };
     }
     $scope.watchers.unshift(newwatcher);
-  };
-
-  $scope.openWatcherEditorForm = function ($index) {
-
-    const modalInstance = $modal.open({
-      template: watcherEditorForm,
-      controller: 'WatcherEditorInstanceCtrl',
-      size: 'lg',
-      resolve: {
-        watcher: function () {
-          return $scope.watchers[$index];
-        },
-      }
-    });
-
-    modalInstance.result.then((selectedItem) => {
-      console.log('pass');
-    }).catch((error) => {
-      if (!_.contains(['cancel', 'backdrop click'], error)) {
-        $log.error('Watcher Editor Form failed.');
-        $log.error(error);
-      }
-    });
   };
 
   var currentTime = moment($route.current.locals.currentTime);

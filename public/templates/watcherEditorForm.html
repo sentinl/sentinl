@@ -10,6 +10,17 @@
         <p></p>
       </div>
       <div class="form-group">
+        <div class="col-md-2"></div>
+        <div class="col-md-6">
+          <button
+            type="button"
+            class="btn btn-sm btn-success"
+            ng-click="form.disabled = !form.disabled; toggleWatcher()"
+            ng-class="{true: 'btn-warning', false: 'btn-success'}[form.disabled]"
+            >{{form.status}}</button>
+        </div>
+      </div>
+      <div class="form-group">
         <label class="col-md-2 control-label" for="title">Title:</label>
         <div class="col-md-6">
           <input
@@ -18,39 +29,80 @@
             name="title"
             value="{{watcher._source.title}}"
             class="form-control"
-            ng-disabled="disabled">
+            ng-model="watcher._source.title"
+            ng-disabled="form.disabled">
         </div>
       </div>
       <div class="form-group">
-        <div class="col-md-2"></div>
+        <label class="col-md-2 control-label" for="schedule">Schedule:</label>
         <div class="col-md-6">
-          <button type="button" class="btn btn-warning btn-sm" ng-click="disabled = !disabled">Enable/Disable</button>
+          <input
+            type="text"
+            id="schedule"
+            name="schedule"
+            value="{{watcher._source.trigger.schedule.later}}"
+            class="form-control"
+            ng-model="watcher._source.trigger.schedule.later"
+            ng-disabled="form.disabled">
         </div>
-      </div>
-      <div class="form-group">
-        <label class="col-md-2 control-label" for="title">Schedule:</label>
-        <div class="col-md-6">
-          <timepicker ng-model="form.time.time"
+          <!-- TO-DO: add timepicker and datepicker -->
+          <!-- angular ui v0.12
+          <timepicker
+            ng-model="form.time.now"
             ng-change="changed()"
             hour-step="form.time.hstep"
             minute-step="form.time.mstep"
             show-meridian="form.time.ismeridian"></timepicker>
+          -->
+          <!-- angular ui v2.5
+          <div uib-timepicker
+            ng-model="form.time.now"
+            ng-change="changed()"
+            hour-step="form.time.hstep"
+            minute-step="form.time.mstep"
+            show-meridian="form.time.ismeridian"
+            ng-disabled="disabled"></div>
         </div>
+          -->
       </div>
     </tab>
-    <tab index="1" heading="Input">
+    <tab index="1" heading="Input" select="input">
       <div class="form-group">
         <p></p>
+      </div>
+      <div class="form-group">
+        <div class="col-md-12">
+          <div id="inputEdit"
+            class="aceditor"
+            ui-ace="aceOptions"
+            ng-model="form.input.string">{{form.input.string}}</div>
+        </div>
       </div>
     </tab>
     <tab index="2" heading="Condition">
       <div class="form-group">
         <p></p>
       </div>
+      <div class="form-group">
+        <div class="col-md-12">
+          <div id="conditionEdit"
+            class="aceditor"
+            ui-ace="aceOptions"
+            ng-model="watcher._source.condition.script.script">{{watcher._source.condition.script.script}}</div>
+        </div>
+      </div>
     </tab>
     <tab index="3" heading="Transform">
       <div class="form-group">
         <p></p>
+      </div>
+      <div class="form-group">
+        <div class="col-md-12">
+          <div id="transformEdit"
+            class="aceditor"
+            ui-ace="aceOptions"
+            ng-model="watcher._source.transform.script.script">{{watcher._source.transform.script.script}}</div>
+        </div>
       </div>
     </tab>
     <tab index="4" heading="Actions">
