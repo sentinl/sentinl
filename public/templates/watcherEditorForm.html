@@ -2,32 +2,64 @@
   <h3 class="modal-title">Create watcher</h3>
 </div>
 <div class="modal-body">
-  <tabset>
-    <tab heading="General">
+
+<form name="outerForm" class="form-horizontal">
+  <tabset active="activeForm">
+    <tab index="0" heading="General">
       <div class="form-group">
-        <label>Title:</label>
-        <input type="text" value="{{watcher._source.title}}" class="form-control" ng-disabled="disabled">
+        <p></p>
       </div>
       <div class="form-group">
-        <button type="button" class="btn btn-warning btn-sm" ng-click="disabled = !disabled">Enable/Disable</button>
+        <label class="col-md-2 control-label" for="title">Title:</label>
+        <div class="col-md-6">
+          <input
+            type="text"
+            id="title"
+            name="title"
+            value="{{watcher._source.title}}"
+            class="form-control"
+            ng-disabled="disabled">
+        </div>
       </div>
       <div class="form-group">
-        <timepicker ng-model="form.time.time"
-          ng-change="changed()"
-          hour-step="form.time.hstep"
-          minute-step="form.time.mstep"
-          show-meridian="form.time.ismeridian"></timepicker>
+        <div class="col-md-2"></div>
+        <div class="col-md-6">
+          <button type="button" class="btn btn-warning btn-sm" ng-click="disabled = !disabled">Enable/Disable</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="col-md-2 control-label" for="title">Schedule:</label>
+        <div class="col-md-6">
+          <timepicker ng-model="form.time.time"
+            ng-change="changed()"
+            hour-step="form.time.hstep"
+            minute-step="form.time.mstep"
+            show-meridian="form.time.ismeridian"></timepicker>
+        </div>
       </div>
     </tab>
-    <tab heading="Input">
+    <tab index="1" heading="Input">
+      <div class="form-group">
+        <p></p>
+      </div>
     </tab>
-    <tab heading="Condition">
+    <tab index="2" heading="Condition">
+      <div class="form-group">
+        <p></p>
+      </div>
     </tab>
-    <tab heading="Transform">
+    <tab index="3" heading="Transform">
+      <div class="form-group">
+        <p></p>
+      </div>
     </tab>
-    <tab heading="Actions">
+    <tab index="4" heading="Actions">
+      <div class="form-group">
+        <p></p>
+      </div>
     </tab>
-  <tabset>
+  </tabset>
+</form>
 </div>
 <div class="modal-footer">
   <button class="btn btn-primary" ng-click="save()">Save</button>
