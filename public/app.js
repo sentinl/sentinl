@@ -250,7 +250,6 @@ uiModules
   $scope.watcher = watcher;
 
   $scope.form = {
-    disabled: $scope.watcher._source.disable,
     status: !$scope.watcher._source.disable ? 'Enabled' : 'Disable',
     time: { // TO-DO timepicker and datepicker
       now: new Date(),
@@ -259,25 +258,101 @@ uiModules
       ismeridian: true,
       seconds: true
     },
-    input: {
-      string: JSON.stringify(watcher._source.input, null, 2)
+    actions: {
+      editor: {},
+      toEdit: {},
+      webhook: {
+        viaProxy: false
+      },
+      email: {}
     }
   };
 
   $scope.toggleWatcher = function () {
-    $scope.form.status = !$scope.form.disabled ? 'Enabled' : 'Disabled';
+    if (!$scope.watcher._source.disable) {
+      $scope.form.status = 'Enabled';
+      $scope.watcher._source.disable = false;
+    } else {
+      $scope.form.status = 'Disabled';
+      $scope.watcher._source.disable = true;
+    }
   };
 
   $scope.aceOptions = {
-    mode: ['json'],
+    mode: ['json', 'Javascript'],
     advanced: {
       highlightActiveLine: true
     }
   };
 
+  $scope.getInput = function () {
+    $scope.editorInputEdit = ace.edit('inputEdit');
+    $scope.editorInputEdit.getSession().setMode('ace/mode/json');
+  }
+
+  $scope.getTransform = function () {
+    $scope.editorTransformEdit = ace.edit('transformEdit');
+    $scope.editorTransformEdit.getSession().setMode('ace/mode/javascript');
+  }
+
+  $scope.getCondition = function () {
+    $scope.editorConditionEdit = ace.edit('conditionEdit');
+    $scope.editorConditionEdit.getSession().setMode('ace/mode/javascript');
+  }
+
+  $scope.enableAdvancedFields = function (actionType, actionName, enable) {
+    if (actionType === 'webhook') {
+      if (enable) {
+        $scope.watcher._source.actions[actionName][actionType].path = ':/{{payload.watcher_id}';
+        $scope.watcher._source.actions[actionName][actionType].headers = JSON.stringify({
+          'Content-Type': 'application/x-www-form-urlencoded' });
+      } else {
+        delete $scope.watcher._source.actions[actionName][actionType].path;
+        delete $scope.watcher._source.actions[actionName][actionType].headers;
+      }
+    }
+  };
+
+  $scope.editAction = function (name, properties) {
+    if (!$scope.form.actions.toEdit[name]) {
+      $scope.form.actions.toEdit[name] = true;
+    } else {
+      $scope.form.actions.toEdit[name] = false;
+    }
+
+    if (_.has(properties, 'webhook')) {
+      if (!_.has($scope.form.actions.editor, name)) {
+        $scope.form.actions.editor[name] = {};
+      }
+      $scope.form.actions.editor[name].editorWebhookHeaders = ace.edit('webhookHeaders');
+      $scope.form.actions.editor[name].editorWebhookHeaders.getSession().setMode('ace/mode/json');
+      $scope.form.actions.editor[name].editorWebhookBody = ace.edit('webhookBody');
+      $scope.form.actions.editor[name].editorWebhookBody.getSession().setMode('ace/mode/json');
+    }
+
+    $scope.watcher._source.actions[name].$title = name;
+  };
+
+  const renameActions = function (actions) {
+    const newActions = {};
+    _.forOwn(actions, (settings, name) => {
+      newActions[settings.$title] = settings;
+      delete newActions[settings.$title].$title;
+    });
+    return newActions;
+  };
+
   $scope.save = function () {
-    $scope.watcher._source.disable = $scope.form.disabled;
-    $scope.watcher._source.input = JSON.parse($scope.form.input.string);
+    $scope.watcher._source.input = JSON.parse($scope.editorInputEdit.getValue());
+    $scope.watcher._source.transform.script.script = JSON.parse($scope.editorTransformEdit.getValue());
+    $scope.watcher._source.condition.script.script = JSON.parse($scope.editorConditionEdit.getValue());
+
+    //_.forOwn($scope.form.action.editor, (value, key) => {
+    //
+    //});
+
+    $scope.watcher._source.actions = renameActions($scope.watcher._source.actions);
+
     $modalInstance.close($scope.watcher);
   };
 
