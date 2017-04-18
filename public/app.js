@@ -288,17 +288,17 @@ uiModules
   $scope.getInput = function () {
     $scope.editorInputEdit = ace.edit('inputEdit');
     $scope.editorInputEdit.getSession().setMode('ace/mode/json');
-  }
+  };
 
   $scope.getTransform = function () {
     $scope.editorTransformEdit = ace.edit('transformEdit');
     $scope.editorTransformEdit.getSession().setMode('ace/mode/javascript');
-  }
+  };
 
   $scope.getCondition = function () {
     $scope.editorConditionEdit = ace.edit('conditionEdit');
     $scope.editorConditionEdit.getSession().setMode('ace/mode/javascript');
-  }
+  };
 
   $scope.enableAdvancedFields = function (actionType, actionName, enable) {
     if (actionType === 'webhook') {
