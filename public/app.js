@@ -258,13 +258,21 @@ uiModules
       ismeridian: true,
       seconds: true
     },
+    input: {
+      visited: false
+    },
+    condition: {
+      visited: false
+    },
+    transform: {
+      visited: false
+    },
     actions: {
       editor: {},
       toEdit: {},
       webhook: {
         viaProxy: false
-      },
-      email: {}
+      }
     }
   };
 
@@ -278,81 +286,116 @@ uiModules
     }
   };
 
-  $scope.aceOptions = {
-    mode: ['json', 'Javascript'],
-    advanced: {
-      highlightActiveLine: true
-    }
-  };
-
   $scope.getInput = function () {
+    $scope.form.input.visited = true;
     $scope.editorInputEdit = ace.edit('inputEdit');
     $scope.editorInputEdit.getSession().setMode('ace/mode/json');
   };
 
   $scope.getTransform = function () {
+    $scope.form.transform.visited = true;
     $scope.editorTransformEdit = ace.edit('transformEdit');
     $scope.editorTransformEdit.getSession().setMode('ace/mode/javascript');
   };
 
   $scope.getCondition = function () {
+    $scope.form.condition.visited = true;
     $scope.editorConditionEdit = ace.edit('conditionEdit');
     $scope.editorConditionEdit.getSession().setMode('ace/mode/javascript');
   };
 
-  $scope.enableAdvancedFields = function (actionType, actionName, enable) {
+  const _createEditor = function (actionName, actionType, field, tagId, mode = null) {
+    $scope.form.actions.editor[actionName][actionType][field] = ace.edit(tagId);
+    if (mode) {
+      $scope.form.actions.editor[actionName][actionType][field].getSession().setMode(`ace/mode/${mode}`);
+    }
+  };
+
+  const _deleteEditor = function (actionName, actionType, field) {
+    delete $scope.watcher._source.actions[actionName][actionType][field];
+    delete $scope.form.actions.editor[actionName][actionType][field];
+  };
+
+  $scope.enableActionExtraFields = function (actionName, actionType, enable) {
+    if (!_.has($scope.form.actions.editor[actionName], actionType)) {
+      $scope.form.actions.editor[actionName][actionType] = {};
+    }
+
     if (actionType === 'webhook') {
       if (enable) {
-        $scope.watcher._source.actions[actionName][actionType].path = ':/{{payload.watcher_id}';
-        $scope.watcher._source.actions[actionName][actionType].headers = JSON.stringify({
-          'Content-Type': 'application/x-www-form-urlencoded' });
+        $scope.watcher._source.actions[actionName][actionType].headers =
+          { 'Content-Type': 'application/x-www-form-urlencoded' };
+        _createEditor(actionName, actionType, 'headers', 'webhookHeaders', 'json');
       } else {
-        delete $scope.watcher._source.actions[actionName][actionType].path;
-        delete $scope.watcher._source.actions[actionName][actionType].headers;
+        _deleteEditor(actionName, actionType, 'headers');
       }
     }
   };
 
-  $scope.editAction = function (name, properties) {
-    if (!$scope.form.actions.toEdit[name]) {
-      $scope.form.actions.toEdit[name] = true;
+  $scope.editAction = function (actionName, properties) {
+    if (!$scope.form.actions.toEdit[actionName]) {
+      $scope.form.actions.toEdit[actionName] = true;
     } else {
-      $scope.form.actions.toEdit[name] = false;
+      $scope.form.actions.toEdit[actionName] = false;
+    }
+
+    if (!_.has($scope.form.actions.editor, actionName)) {
+      $scope.form.actions.editor[actionName] = {};
     }
 
     if (_.has(properties, 'webhook')) {
-      if (!_.has($scope.form.actions.editor, name)) {
-        $scope.form.actions.editor[name] = {};
+      if (!_.has($scope.form.actions.editor[actionName], 'webhook')) {
+        $scope.form.actions.editor[actionName].webhook = {};
       }
-      $scope.form.actions.editor[name].editorWebhookHeaders = ace.edit('webhookHeaders');
-      $scope.form.actions.editor[name].editorWebhookHeaders.getSession().setMode('ace/mode/json');
-      $scope.form.actions.editor[name].editorWebhookBody = ace.edit('webhookBody');
-      $scope.form.actions.editor[name].editorWebhookBody.getSession().setMode('ace/mode/json');
+      if (_.has($scope.watcher._source.actions[actionName].webhook, 'headers')) {
+        _createEditor(actionName, 'webhook', 'headers', 'webhookHeaders', 'json');
+      }
+      if (_.has($scope.watcher._source.actions[actionName].webhook, 'body')) {
+        _createEditor(actionName, 'webhook', 'body', 'webhookBody', 'text');
+      }
     }
 
-    $scope.watcher._source.actions[name].$title = name;
+    //$scope.watcher._source.actions[actionName].$title = actionName;
   };
 
-  const renameActions = function (actions) {
-    const newActions = {};
-    _.forOwn(actions, (settings, name) => {
-      newActions[settings.$title] = settings;
-      delete newActions[settings.$title].$title;
-    });
-    return newActions;
+  //const renameActions = function (actions) {
+  //  const newActions = {};
+  //  _.forOwn(actions, (settings, name) => {
+  //    newActions[settings.$title] = settings;
+  //    delete newActions[settings.$title].$title;
+  //  });
+  //  return newActions;
+  //};
+
+  const saveEditorsText = function () {
+    if ($scope.form.input.visited) {
+      $scope.watcher._source.input = JSON.parse($scope.editorInputEdit.getValue());
+    }
+    if ($scope.form.transform.visited) {
+      $scope.watcher._source.transform.script.script = $scope.editorTransformEdit.getValue();
+    }
+    if ($scope.form.condition.visited) {
+      $scope.watcher._source.condition.script.script = $scope.editorConditionEdit.getValue();
+    }
+
+    if (_.has($scope.form.actions, 'editor')) {
+      _.forOwn($scope.form.actions.editor, (types, name) => {
+        _.forOwn(types, (properties, type) => {
+          _.forOwn(properties, (editor, key) => {
+            if (_.includes(['headers'], key)) {
+              $scope.watcher._source.actions[name][type][key] = JSON.parse(editor.getValue());
+            } else {
+              $scope.watcher._source.actions[name][type][key] = editor.getValue();
+            }
+          });
+        });
+      });
+    }
   };
 
   $scope.save = function () {
-    $scope.watcher._source.input = JSON.parse($scope.editorInputEdit.getValue());
-    $scope.watcher._source.transform.script.script = JSON.parse($scope.editorTransformEdit.getValue());
-    $scope.watcher._source.condition.script.script = JSON.parse($scope.editorConditionEdit.getValue());
-
-    //_.forOwn($scope.form.action.editor, (value, key) => {
-    //
-    //});
-
-    $scope.watcher._source.actions = renameActions($scope.watcher._source.actions);
-
+    saveEditorsText();
+    //$scope.watcher._source.actions = renameActions($scope.watcher._source.actions);
     $modalInstance.close($scope.watcher);
   };
 

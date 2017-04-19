@@ -86,7 +86,6 @@
         <div class="col-md-12">
           <div id="conditionEdit"
             class="aceditor"
-            ui-ace="aceOptions"
             ng-model="watcher._source.condition.script.script">{{watcher._source.condition.script.script}}</div>
         </div>
       </div>
@@ -99,7 +98,6 @@
         <div class="col-md-12">
           <div id="transformEdit"
             class="aceditor"
-            ui-ace="aceOptions"
             ng-model="watcher._source.transform.script.script">{{watcher._source.transform.script.script}}</div>
         </div>
       </div>
@@ -117,6 +115,9 @@
                 <a href="" ng-click="editAction(name, properties)">{{name}}</a>
 
                 <!-- Start of webhook template  -->
+                        <!--
+                        ng-model="watcher._source.actions[name].$title"
+                        -->
                 <div ng-show="form.actions.toEdit[name]">
                   <div class="form-group">
                     <label class="col-md-2 control-label" for="webhookTitle">Title:</label>
@@ -128,7 +129,6 @@
                         value="{{name}}"
                         class="form-control"
                         placeholder="{{watcher._source.uuid}}"
-                        ng-model="watcher._source.actions[name].$title"
                         ng-disabled="form.disabled">
                     </div>
                   </div>
@@ -175,12 +175,12 @@
                       <label class="checkbox">
                         <input type="checkbox"
                           ng-model="form.actions.webhook.viaProxy"
-                          ng-click="enableAdvancedFields('webhook', name, form.actions.webhook.viaProxy)"
-                          ng-checked="properties.webhook.headers && properties.webhook.path"> via proxy
+                          ng-click="enableActionExtraFields(name, 'webhook', form.actions.webhook.viaProxy)"
+                          ng-checked="properties.webhook.headers"> via proxy
                       </label>
                     </div>
                   </div>
-                  <div class="form-group" ng-if="properties.webhook.path">
+                  <div class="form-group">
                     <label class="col-md-2 control-label" for="webhookPath">Path:</label>
                     <div class="col-md-6">
                       <input
@@ -200,7 +200,7 @@
                       <div id="webhookBody" class="aceditor">{{ properties.webhook.body | json }}</div>
                     </div>
                   </div>
-                  <div class="form-group" ng-if="properties.webhook.headers">
+                  <div class="form-group" ng-show="properties.webhook.headers">
                     <label class="col-md-2 control-label" for="webhookHeaders">Headers:</label>
                     <div class="col-md-6">
                       <div id="webhookHeaders" class="aceditor">{{ properties.webhook.headers | json }}</div>
