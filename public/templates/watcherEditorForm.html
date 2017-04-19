@@ -115,9 +115,6 @@
                 <a href="" ng-click="editAction(name, properties)">{{name}}</a>
 
                 <!-- Start of webhook template  -->
-                        <!--
-                        ng-model="watcher._source.actions[name].$title"
-                        -->
                 <div ng-show="form.actions.toEdit[name]">
                   <div class="form-group">
                     <label class="col-md-2 control-label" for="webhookTitle">Title:</label>
@@ -129,6 +126,7 @@
                         value="{{name}}"
                         class="form-control"
                         placeholder="{{watcher._source.uuid}}"
+                        ng-model="watcher._source.actions[name].$title"
                         ng-disabled="form.disabled">
                     </div>
                   </div>
@@ -197,7 +195,7 @@
                   <div class="form-group">
                     <label class="col-md-2 control-label" for="webhookBody">Body:</label>
                     <div class="col-md-6">
-                      <div id="webhookBody" class="aceditor">{{ properties.webhook.body | json }}</div>
+                      <div id="webhookBody" class="aceditor">{{ properties.webhook.body }}</div>
                     </div>
                   </div>
                   <div class="form-group" ng-show="properties.webhook.headers">

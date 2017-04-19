@@ -249,6 +249,8 @@ uiModules
 
   $scope.watcher = watcher;
 
+  _.forOwn($scope.watcher._source.actions, (settings, name) => { settings.$title = name; });
+
   $scope.form = {
     status: !$scope.watcher._source.disable ? 'Enabled' : 'Disable',
     time: { // TO-DO timepicker and datepicker
@@ -351,21 +353,19 @@ uiModules
         _createEditor(actionName, 'webhook', 'headers', 'webhookHeaders', 'json');
       }
       if (_.has($scope.watcher._source.actions[actionName].webhook, 'body')) {
-        _createEditor(actionName, 'webhook', 'body', 'webhookBody', 'text');
+        _createEditor(actionName, 'webhook', 'body', 'webhookBody', 'behaviour');
       }
     }
-
-    //$scope.watcher._source.actions[actionName].$title = actionName;
   };
 
-  //const renameActions = function (actions) {
-  //  const newActions = {};
-  //  _.forOwn(actions, (settings, name) => {
-  //    newActions[settings.$title] = settings;
-  //    delete newActions[settings.$title].$title;
-  //  });
-  //  return newActions;
-  //};
+  const renameActions = function (actions) {
+    const newActions = {};
+    _.forOwn(actions, (settings, name) => {
+      newActions[settings.$title] = settings;
+      delete newActions[settings.$title].$title;
+    });
+    return newActions;
+  };
 
   const saveEditorsText = function () {
     if ($scope.form.input.visited) {
@@ -395,7 +395,7 @@ uiModules
 
   $scope.save = function () {
     saveEditorsText();
-    //$scope.watcher._source.actions = renameActions($scope.watcher._source.actions);
+    $scope.watcher._source.actions = renameActions($scope.watcher._source.actions);
     $modalInstance.close($scope.watcher);
   };
 
