@@ -1,0 +1,91 @@
+<h4>Webhook</h4>
+<div>
+  <div class="form-group">
+    <label class="col-md-2 control-label" for="webhookTitle">Title:</label>
+    <div class="col-md-6">
+      <input
+        type="text"
+        id="webhookTitle"
+        actionName="webhookTitle"
+        value="{{actionName}}"
+        class="form-control"
+        placeholder="{{watcher._source.uuid}}"
+        ng-model="watcher._source.actions[actionName].$title"
+        ng-disabled="form.disabled">
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-md-2 control-label" for="webhookHost">Method:</label>
+    <div class="btn-group col-md-2" dropdown is-open="status.isopen">
+      <button type="button" class="btn btn-default btn-md dropdown-toggle" dropdown-toggle ng-disabled="form.disabled">
+        {{actionSettings.webhook.method}} <span class="caret"></span>
+      </button>
+      <ul class="dropdown-menu" role="menu">
+        <li><a href="#">POST</a></li>
+        <li><a href="#">GET</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-md-2 control-label" for="webhookHost">Host:</label>
+    <div class="col-md-6">
+      <input
+        type="text"
+        id="webhookHost"
+        name="webhookHost"
+        value="{{actionSettings.webhook.host}}"
+        class="form-control"
+        placeholder="remote.server"
+        ng-model="actionSettings.webhook.host"
+        ng-disabled="form.disabled">
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-md-2 control-label" for="webhookPort">Port:</label>
+    <div class="col-md-2">
+      <input
+        type="text"
+        id="webhookPort"
+        name="webhookPort"
+        value="{{actionSettings.webhook.port}}"
+        class="form-control"
+        placeholder="9200"
+        ng-model="actionSettings.webhook.port"
+        ng-disabled="form.disabled">
+    </div>
+    <div class="col-md-3">
+      <label class="checkbox">
+        <input type="checkbox"
+          ng-model="webhookAction.viaProxy"
+          ng-click="enableExtraFields()"
+          ng-checked="webhookAction.viaProxy"> via proxy
+      </label>
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-md-2 control-label" for="webhookPath">Path:</label>
+    <div class="col-md-6">
+      <input
+        type="text"
+        id="webhookPath"
+        name="webhookPath"
+        value="{{actionSettings.webhook.path}}"
+        class="form-control"
+        placeholder=":/{{payload.watcher_id}"
+        ng-model="actionSettings.webhook.path"
+        ng-disabled="form.disabled">
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-md-2 control-label" for="webhookBody">Body:</label>
+    <div class="col-md-6">
+      <div id="webhookBody" class="aceditor"></div>
+    </div>
+  </div>
+  <div class="form-group" ng-show="webhookAction.viaProxy">
+    <label class="col-md-2 control-label" for="webhookHeaders">Headers:</label>
+    <div class="col-md-6">
+      <div id="webhookHeaders" class="aceditor"></div>
+    </div>
+  </div>
+</div>

@@ -57,7 +57,8 @@ import about from './templates/about.html';
 import alarms from './templates/alarms.html';
 import reports from './templates/reports.html';
 import jsonHtml from './templates/json.html';
-import watcherEditorForm from './templates/watcherEditorForm.html';
+import watcherForm from './templates/watcher/form.html';
+import watcherWebhookAction from './templates/watcher/webhook-action.html';
 
 var impactLogo = require('plugins/sentinl/sentinl_logo.svg');
 var smallLogo = require('plugins/sentinl/sentinl.svg');
@@ -242,6 +243,69 @@ uiModules
 
 });
 
+
+uiModules
+.get('api/sentinl', [])
+.directive('webhookAction', function () {
+
+  function webhookActionDirective(scope, element, attrs) {
+
+    scope.webhookAction = {
+      title: attrs.actionname,
+      viaProxy: false
+    };
+
+    if (!_.has(scope.form.actions.editor, scope.webhookAction.title)) {
+      scope.form.actions.editor[scope.webhookAction.title] = {};
+    }
+
+    if (!_.has(scope.form.actions.editor[scope.webhookAction.title], 'webhook')) {
+      scope.form.actions.editor[scope.webhookAction.title].webhook = {};
+    }
+
+    if (_.has(scope.watcher._source.actions[scope.webhookAction.title].webhook, 'headers')) {
+      scope.webhookAction.viaProxy = true;
+      scope.form.actions.editor[scope.webhookAction.title].webhook.headers = ace.edit('webhookHeaders');
+      scope.form.actions.editor[scope.webhookAction.title].webhook.headers.getSession().setMode('ace/mode/json');
+
+      let headers = scope.watcher._source.actions[scope.webhookAction.title].webhook.headers;
+      try {
+        headers = JSON.parse(headers);
+      } catch (e) {
+        headers = JSON.stringify(headers);
+      }
+      scope.form.actions.editor[scope.webhookAction.title].webhook.headers.setValue(headers);
+    }
+
+    scope.form.actions.editor[scope.webhookAction.title].webhook.body = ace.edit('webhookBody');
+    scope.form.actions.editor[scope.webhookAction.title].webhook.body.getSession().setMode('ace/mode/behaviour');
+    scope.form.actions.editor[scope.webhookAction.title].webhook.body.setValue(
+      scope.watcher._source.actions[scope.webhookAction.title].webhook.body
+    );
+
+    scope.enableExtraFields = function () {
+      if (scope.webhookAction.viaProxy) {
+        scope.watcher._source.actions[scope.webhookAction.title].webhook.headers = {};
+        scope.form.actions.editor[scope.webhookAction.title].webhook.headers = ace.edit('webhookHeaders');
+        scope.form.actions.editor[scope.webhookAction.title].webhook.headers.getSession().setMode('ace/mode/json');
+      } else {
+        delete scope.watcher._source.actions[scope.webhookAction.title].webhook.headers;
+        delete scope.form.actions.editor[scope.webhookAction.title].webhook.headers;
+      }
+    };
+
+  };
+
+  return {
+    restrict: 'E',
+    template: watcherWebhookAction,
+    transclude: true,
+    scope: true,
+    link: webhookActionDirective
+  };
+});
+
+
 // WATCHER EDITOR FORM CONTROLLER
 uiModules
 .get('api/sentinl', [])
@@ -270,11 +334,13 @@ uiModules
       visited: false
     },
     actions: {
+      types: ['webhook', 'email'],
       editor: {},
       toEdit: {},
       webhook: {
         viaProxy: false
-      }
+      },
+      email: {}
     }
   };
 
@@ -290,72 +356,28 @@ uiModules
 
   $scope.getInput = function () {
     $scope.form.input.visited = true;
-    $scope.editorInputEdit = ace.edit('inputEdit');
-    $scope.editorInputEdit.getSession().setMode('ace/mode/json');
+    $scope.form.input.editor = ace.edit('inputEdit');
+    $scope.form.input.editor.getSession().setMode('ace/mode/json');
   };
 
   $scope.getTransform = function () {
     $scope.form.transform.visited = true;
-    $scope.editorTransformEdit = ace.edit('transformEdit');
-    $scope.editorTransformEdit.getSession().setMode('ace/mode/javascript');
+    $scope.form.transform.editor = ace.edit('transformEdit');
+    $scope.form.transform.editor.getSession().setMode('ace/mode/javascript');
   };
 
   $scope.getCondition = function () {
     $scope.form.condition.visited = true;
-    $scope.editorConditionEdit = ace.edit('conditionEdit');
-    $scope.editorConditionEdit.getSession().setMode('ace/mode/javascript');
-  };
-
-  const _createEditor = function (actionName, actionType, field, tagId, mode = null) {
-    $scope.form.actions.editor[actionName][actionType][field] = ace.edit(tagId);
-    if (mode) {
-      $scope.form.actions.editor[actionName][actionType][field].getSession().setMode(`ace/mode/${mode}`);
-    }
-  };
-
-  const _deleteEditor = function (actionName, actionType, field) {
-    delete $scope.watcher._source.actions[actionName][actionType][field];
-    delete $scope.form.actions.editor[actionName][actionType][field];
-  };
-
-  $scope.enableActionExtraFields = function (actionName, actionType, enable) {
-    if (!_.has($scope.form.actions.editor[actionName], actionType)) {
-      $scope.form.actions.editor[actionName][actionType] = {};
-    }
-
-    if (actionType === 'webhook') {
-      if (enable) {
-        $scope.watcher._source.actions[actionName][actionType].headers =
-          { 'Content-Type': 'application/x-www-form-urlencoded' };
-        _createEditor(actionName, actionType, 'headers', 'webhookHeaders', 'json');
-      } else {
-        _deleteEditor(actionName, actionType, 'headers');
-      }
-    }
+    $scope.form.condition.editor = ace.edit('conditionEdit');
+    $scope.form.condition.editor.getSession().setMode('ace/mode/javascript');
   };
 
   $scope.editAction = function (actionName, properties) {
-    if (!$scope.form.actions.toEdit[actionName]) {
-      $scope.form.actions.toEdit[actionName] = true;
-    } else {
-      $scope.form.actions.toEdit[actionName] = false;
-    }
-
-    if (!_.has($scope.form.actions.editor, actionName)) {
-      $scope.form.actions.editor[actionName] = {};
-    }
-
-    if (_.has(properties, 'webhook')) {
-      if (!_.has($scope.form.actions.editor[actionName], 'webhook')) {
-        $scope.form.actions.editor[actionName].webhook = {};
+    _.each($scope.form.actions.types, (type) => {
+      if (_.has(properties, type)) {
+        $scope.form.actions[type].edit = !$scope.form.actions[type].edit;
       }
-      if (_.has($scope.watcher._source.actions[actionName].webhook, 'headers')) {
-        _createEditor(actionName, 'webhook', 'headers', 'webhookHeaders', 'json');
-      }
-      if (_.has($scope.watcher._source.actions[actionName].webhook, 'body')) {
-        _createEditor(actionName, 'webhook', 'body', 'webhookBody', 'behaviour');
-      }
-    }
+    });
   };
 
   const renameActions = function (actions) {
@@ -369,13 +391,13 @@ uiModules
 
   const saveEditorsText = function () {
     if ($scope.form.input.visited) {
-      $scope.watcher._source.input = JSON.parse($scope.editorInputEdit.getValue());
+      $scope.watcher._source.input = JSON.parse($scope.form.input.editor.getValue());
     }
     if ($scope.form.transform.visited) {
-      $scope.watcher._source.transform.script.script = $scope.editorTransformEdit.getValue();
+      $scope.watcher._source.transform.script.script = $scope.form.transform.editor.getValue();
     }
     if ($scope.form.condition.visited) {
-      $scope.watcher._source.condition.script.script = $scope.editorConditionEdit.getValue();
+      $scope.watcher._source.condition.script.script = $scope.form.condition.editor.getValue();
     }
 
     if (_.has($scope.form.actions, 'editor')) {
@@ -444,7 +466,7 @@ uiModules
   $scope.openWatcherEditorForm = function ($index) {
 
     const modalInstance = $modal.open({
-      template: watcherEditorForm,
+      template: watcherForm,
       controller: 'WatcherEditorInstanceCtrl',
       size: 'lg',
       resolve: {
