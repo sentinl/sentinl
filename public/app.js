@@ -265,9 +265,9 @@ uiModules
         const title = `New webhook action ${Math.random().toString(36).slice(2)}`;
         scope.watcher._source.actions[title] = {
           _title: title,
-          _edit: false,
           throttle_period: '1s',
           webhook: {
+            _edit: false,
             _proxy: false,
             method: 'POST',
             host: '',
@@ -283,9 +283,9 @@ uiModules
         const title = `New email action ${Math.random().toString(36).slice(2)}`;
         scope.watcher._source.actions[title] = {
           _title: title,
-          _edit: false,
           throttle_period: '1s',
           email: {
+            _edit: false,
             to: '',
             from: '',
             subject: '',
