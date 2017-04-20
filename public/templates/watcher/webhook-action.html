@@ -1,4 +1,4 @@
-<h4>Webhook</h4>
+<h4>{{ action.type }}</h4>
 <div>
   <div class="form-group">
     <label class="col-md-2 control-label" for="webhookTitle">Title:</label>
@@ -10,7 +10,7 @@
         value="{{actionName}}"
         class="form-control"
         placeholder="{{watcher._source.uuid}}"
-        ng-model="watcher._source.actions[actionName].$title"
+        ng-model="actionSettings._title"
         ng-disabled="form.disabled">
     </div>
   </div>
@@ -55,10 +55,16 @@
     </div>
     <div class="col-md-3">
       <label class="checkbox">
+        <!--
         <input type="checkbox"
           ng-model="action.viaProxy"
           ng-click="enableExtraFields()"
           ng-checked="action.viaProxy"> via proxy
+        -->
+        <input type="checkbox"
+          ng-model="actionSettings.webhook._proxy"
+          ng-click="enableExtraFields()"
+          ng-checked="actionSettings.webhook._proxy"> via proxy
       </label>
     </div>
   </div>
@@ -82,7 +88,7 @@
       <div id="webhookBody" class="aceditor"></div>
     </div>
   </div>
-  <div class="form-group" ng-show="action.viaProxy">
+  <div class="form-group" ng-show="actionSettings.webhook._proxy">
     <label class="col-md-2 control-label" for="webhookHeaders">Headers:</label>
     <div class="col-md-6">
       <div id="webhookHeaders" class="aceditor"></div>

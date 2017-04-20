@@ -86,7 +86,7 @@
         <div class="col-md-12">
           <div id="conditionEdit"
             class="aceditor"
-            ng-model="watcher._source.condition.script.script">{{watcher._source.condition.script.script}}</div>
+            ng-model="watcher._source.condition.script.script">{{ watcher._source.condition.script.script }}</div>
         </div>
       </div>
     </tab>
@@ -98,7 +98,7 @@
         <div class="col-md-12">
           <div id="transformEdit"
             class="aceditor"
-            ng-model="watcher._source.transform.script.script">{{watcher._source.transform.script.script}}</div>
+            ng-model="watcher._source.transform.script.script">{{ watcher._source.transform.script.script }}</div>
         </div>
       </div>
     </tab>
@@ -108,24 +108,33 @@
       </div>
 
       <div class="form-group">
-        <div class="col-md-12">
-          <div class="form-group">
-            <ul ng-repeat="(actionName, actionSettings) in watcher._source.actions" style="list-style-type:none;">
-              <li>
-                <a href="" class="fa fa-minus" ng-click="removeAction(actionName)"></a>
-                <a href="" ng-click="editAction(actionName, actionSettings)">{{actionName}}</a>
-                <div ng-if="form.actions.webhook.edit">
-                  <webhook-action actionname="{{actionName}}" actionsettings="{{actionSettings}}"></webhook-action>
-                </div>
-              </li>
-              <li>
-                <a href="" class="fa fa-plus" ng-click="addAction()"></a>
-              </li>
-            </ul>
-          </div>
+        <div class="col-md-1">
+        </div>
+        <div class="col-md-11">
+          <ul class="formActionsList" ng-repeat="(actionName, actionSettings) in watcher._source.actions" style="list-style-type:none;">
+            <li>
+              <a href="" class="fa fa-minus" ng-click="removeAction(actionName)"></a>
+              <a href="" ng-click="editAction(actionName, actionSettings)">{{actionName}}</a>
+              <div ng-if="actionSettings._edit">
+                <webhook-action name="{{actionName}}"></webhook-action>
+              </div>
+            </li>
+          </ul>
         </div>
       </div>
 
+      <div class="form-group">
+        <div class="col-md-1">
+        </div>
+        <div class="col-md-11">
+          <a href=""
+            ng-class="{'fa': true, 'fa-plus': !form.actions.new.edit, 'fa-minus': form.actions.new.edit}"
+            ng-click="addAction()"></a>
+          <div ng-if="form.actions.new.edit">
+            <new-action></new-action>
+          </div>
+        </div>
+      </div>
 
     </tab>
   </tabset>
