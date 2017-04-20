@@ -1,0 +1,65 @@
+<h4>{{ action.type }}</h4>
+<div>
+  <div class="form-group">
+    <label class="col-md-2 control-label" for="emailTitle">Title:</label>
+    <div class="col-md-6">
+      <input
+        type="text"
+        id="emailTitle"
+        actionName="emailTitle"
+        value="{{actionName}}"
+        class="form-control"
+        placeholder="{{watcher._source.uuid}}"
+        ng-model="actionSettings._title"
+        ng-disabled="form.disabled">
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-md-2 control-label" for="emailTo">To:</label>
+    <div class="col-md-6">
+      <input
+        type="text"
+        id="emailTo"
+        name="emailTo"
+        value="{{actionSettings.email.to}}"
+        class="form-control"
+        placeholder="remote.server"
+        ng-model="actionSettings.email.to"
+        ng-disabled="form.disabled">
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-md-2 control-label" for="emailFrom">From:</label>
+    <div class="col-md-6">
+      <input
+        type="text"
+        id="emailFrom"
+        name="emailFrom"
+        value="{{actionSettings.email.from}}"
+        class="form-control"
+        placeholder="remote.server"
+        ng-model="actionSettings.email.from"
+        ng-disabled="form.disabled">
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-md-2 control-label" for="emailSubject">Subject:</label>
+    <div class="col-md-6">
+      <input
+        type="text"
+        id="emailSubject"
+        name="emailSubject"
+        value="{{actionSettings.email.subject}}"
+        class="form-control"
+        placeholder="remote.server"
+        ng-model="actionSettings.email.subject"
+        ng-disabled="form.disabled">
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-md-2 control-label" for="emailBody">Body:</label>
+    <div class="col-md-6">
+      <div id="emailBody" class="aceditor"></div>
+    </div>
+  </div>
+</div>

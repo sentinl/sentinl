@@ -60,6 +60,7 @@ import jsonHtml from './templates/json.html';
 import watcherForm from './templates/watcher/form.html';
 import watcherWebhookAction from './templates/watcher/webhook-action.html';
 import watcherNewAction from './templates/watcher/new-action.html';
+import watcherEmailAction from './templates/watcher/email-action.html';
 
 var impactLogo = require('plugins/sentinl/sentinl_logo.svg');
 var smallLogo = require('plugins/sentinl/sentinl.svg');
@@ -253,7 +254,8 @@ uiModules
 
     scope.action = {
       types: {
-        webhook: {}
+        webhook: {},
+        email: {}
       }
     };
 
@@ -277,6 +279,21 @@ uiModules
         };
       }
 
+      if (type === 'email') {
+        const title = `New email action ${Math.random().toString(36).slice(2)}`;
+        scope.watcher._source.actions[title] = {
+          _title: title,
+          _edit: false,
+          throttle_period: '1s',
+          email: {
+            to: '',
+            from: '',
+            subject: '',
+            body: ''
+          }
+        };
+      }
+
     };
   };
 
@@ -291,14 +308,41 @@ uiModules
 
 uiModules
 .get('api/sentinl', [])
+.directive('emailAction', function () {
+
+  function actionDirective(scope, element, attrs) {
+
+    scope.action = {
+      type: 'email',
+      title: attrs.name
+    };
+
+    scope.form.editors.actions[attrs.name].email.body = ace.edit('emailBody');
+    scope.form.editors.actions[attrs.name].email.body.getSession().setMode('ace/mode/behaviour');
+    scope.form.editors.actions[attrs.name].email.body.setValue(
+      scope.watcher._source.actions[attrs.name].email.body
+    );
+
+  };
+
+  return {
+    restrict: 'E',
+    template: watcherEmailAction,
+    scope: true,
+    link: actionDirective
+  };
+});
+
+
+uiModules
+.get('api/sentinl', [])
 .directive('webhookAction', function () {
 
   function actionDirective(scope, element, attrs) {
 
     scope.action = {
       type: 'webhook',
-      title: attrs.name,
-      viaProxy: false
+      title: attrs.name
     };
 
     if (_.has(scope.watcher._source.actions[attrs.name].webhook, 'headers')) {
@@ -405,22 +449,30 @@ uiModules
   };
 
   $scope.editAction = function (actionName, actionSettings) {
-    // edit one action at a time
-    actionSettings._edit = !actionSettings._edit;
-    _.forOwn($scope.watcher._source.actions, (settings, name) => {
-      if (name !== actionName) settings._edit = false;
-    });
-
     // init object structure for editors
     if (!_.has($scope.form.editors.actions, actionName)) {
       $scope.form.editors.actions[actionName] = {};
     }
+
     _.each($scope.form.actions.types, (type) => {
       if (_.has(actionSettings, type)) {
+        actionSettings[type]._edit = !actionSettings[type]._edit;
+
+        // create a property to hold ace editors
         if (!_.has($scope.form.editors.actions[actionName], type)) {
           $scope.form.editors.actions[actionName][type] = {};
         }
       }
+    });
+
+    // edit one action at a time
+    // close all other actions
+    _.forOwn($scope.watcher._source.actions, (settings, name) => {
+      _.each($scope.form.actions.types, (type) => {
+        if (_.has(settings, type)) {
+          if (name !== actionName) settings[type]._edit = false;
+        }
+      });
     });
   };
 
@@ -459,8 +511,14 @@ uiModules
           settings.webhook.body = $scope.form.editors.actions[name].webhook.body.getValue();
         }
         delete settings.webhook._proxy;
+        delete settings.webhook._edit;
       }
-      delete settings._edit;
+      if (_.has(settings, 'email')) {
+        if (_.has($scope.form.editors.actions, `${name}.email.body`)) {
+          settings.email.body = $scope.form.editors.actions[name].email.body.getValue();
+        }
+        delete settings.email._edit;
+      }
     });
 
   };
