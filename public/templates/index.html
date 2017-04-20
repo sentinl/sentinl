@@ -37,6 +37,10 @@
                 <span ng-show="collapse && !editor_status.readonly" title="Read-Only" ng-click="setAce($index,true)" ng-model=collapse class="edit-rule"><i class="fa fa-eye"></i></span>
                 <span ng-show="editor_status.undo && !editor_status.readonly" title="Save" ng-click="watcherSave($index)" class="delete-rule"><i class="fa fa-save"></i></span>
                 <span ng-hide="watcher._new == 'true'" title="Delete" class="delete-rule" ng-click="watcherDelete($index)"><i class="fa fa-trash"></i></span>
+
+                <span ng-show="watcher._source.disable == 'true'" title="Disabled" class="delete-rule"><i class="fa fa-toggle-off"></i></span>
+                <span ng-show="watcher._source.disable == 'false'" title="Enabled" class="delete-rule"><i class="fa fa-toggle-on"></i></span>
+                
               </td>
             </tr>
             <tr ng-show="collapse">
