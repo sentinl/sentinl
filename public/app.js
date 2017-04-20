@@ -248,49 +248,49 @@ uiModules
 .get('api/sentinl', [])
 .directive('webhookAction', function () {
 
-  function webhookActionDirective(scope, element, attrs) {
+  function actionDirective(scope, element, attrs) {
 
-    scope.webhookAction = {
+    scope.action = {
       title: attrs.actionname,
       viaProxy: false
     };
 
-    if (!_.has(scope.form.actions.editor, scope.webhookAction.title)) {
-      scope.form.actions.editor[scope.webhookAction.title] = {};
+    if (!_.has(scope.form.actions.editor, scope.action.title)) {
+      scope.form.actions.editor[scope.action.title] = {};
     }
 
-    if (!_.has(scope.form.actions.editor[scope.webhookAction.title], 'webhook')) {
-      scope.form.actions.editor[scope.webhookAction.title].webhook = {};
+    if (!_.has(scope.form.actions.editor[scope.action.title], 'webhook')) {
+      scope.form.actions.editor[scope.action.title].webhook = {};
     }
 
-    if (_.has(scope.watcher._source.actions[scope.webhookAction.title].webhook, 'headers')) {
-      scope.webhookAction.viaProxy = true;
-      scope.form.actions.editor[scope.webhookAction.title].webhook.headers = ace.edit('webhookHeaders');
-      scope.form.actions.editor[scope.webhookAction.title].webhook.headers.getSession().setMode('ace/mode/json');
+    if (_.has(scope.watcher._source.actions[scope.action.title].webhook, 'headers')) {
+      scope.action.viaProxy = true;
+      scope.form.actions.editor[scope.action.title].webhook.headers = ace.edit('webhookHeaders');
+      scope.form.actions.editor[scope.action.title].webhook.headers.getSession().setMode('ace/mode/json');
 
-      let headers = scope.watcher._source.actions[scope.webhookAction.title].webhook.headers;
+      let headers = scope.watcher._source.actions[scope.action.title].webhook.headers;
       try {
         headers = JSON.parse(headers);
       } catch (e) {
         headers = JSON.stringify(headers);
       }
-      scope.form.actions.editor[scope.webhookAction.title].webhook.headers.setValue(headers);
+      scope.form.actions.editor[scope.action.title].webhook.headers.setValue(headers);
     }
 
-    scope.form.actions.editor[scope.webhookAction.title].webhook.body = ace.edit('webhookBody');
-    scope.form.actions.editor[scope.webhookAction.title].webhook.body.getSession().setMode('ace/mode/behaviour');
-    scope.form.actions.editor[scope.webhookAction.title].webhook.body.setValue(
-      scope.watcher._source.actions[scope.webhookAction.title].webhook.body
+    scope.form.actions.editor[scope.action.title].webhook.body = ace.edit('webhookBody');
+    scope.form.actions.editor[scope.action.title].webhook.body.getSession().setMode('ace/mode/behaviour');
+    scope.form.actions.editor[scope.action.title].webhook.body.setValue(
+      scope.watcher._source.actions[scope.action.title].webhook.body
     );
 
     scope.enableExtraFields = function () {
-      if (scope.webhookAction.viaProxy) {
-        scope.watcher._source.actions[scope.webhookAction.title].webhook.headers = {};
-        scope.form.actions.editor[scope.webhookAction.title].webhook.headers = ace.edit('webhookHeaders');
-        scope.form.actions.editor[scope.webhookAction.title].webhook.headers.getSession().setMode('ace/mode/json');
+      if (scope.action.viaProxy) {
+        scope.watcher._source.actions[scope.action.title].webhook.headers = {};
+        scope.form.actions.editor[scope.action.title].webhook.headers = ace.edit('webhookHeaders');
+        scope.form.actions.editor[scope.action.title].webhook.headers.getSession().setMode('ace/mode/json');
       } else {
-        delete scope.watcher._source.actions[scope.webhookAction.title].webhook.headers;
-        delete scope.form.actions.editor[scope.webhookAction.title].webhook.headers;
+        delete scope.watcher._source.actions[scope.action.title].webhook.headers;
+        delete scope.form.actions.editor[scope.action.title].webhook.headers;
       }
     };
 
@@ -301,7 +301,7 @@ uiModules
     template: watcherWebhookAction,
     transclude: true,
     scope: true,
-    link: webhookActionDirective
+    link: actionDirective
   };
 });
 
@@ -371,6 +371,13 @@ uiModules
     $scope.form.condition.editor = ace.edit('conditionEdit');
     $scope.form.condition.editor.getSession().setMode('ace/mode/javascript');
   };
+
+  $scope.removeAction = function (actionName) {
+    delete $scope.watcher._source.actions[actionName];
+    delete $scope.form.actions.editor[actionName];
+  };
+
+  $scope.addAction = function () {};
 
   $scope.editAction = function (actionName, properties) {
     _.each($scope.form.actions.types, (type) => {

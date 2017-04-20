@@ -112,12 +112,14 @@
           <div class="form-group">
             <ul ng-repeat="(actionName, actionSettings) in watcher._source.actions" style="list-style-type:none;">
               <li>
+                <a href="" class="fa fa-minus" ng-click="removeAction(actionName)"></a>
                 <a href="" ng-click="editAction(actionName, actionSettings)">{{actionName}}</a>
-
                 <div ng-if="form.actions.webhook.edit">
                   <webhook-action actionname="{{actionName}}" actionsettings="{{actionSettings}}"></webhook-action>
                 </div>
-
+              </li>
+              <li>
+                <a href="" class="fa fa-plus" ng-click="addAction()"></a>
               </li>
             </ul>
           </div>
