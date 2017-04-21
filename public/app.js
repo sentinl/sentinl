@@ -408,7 +408,7 @@ uiModules
 });
 
 
-// WATCHER EDITOR FORM CONTROLLER
+// WATCHER FORM CONTROLLER
 uiModules
 .get('api/sentinl', [])
 .controller('WatcherEditorInstanceCtrl', function ($scope, $modalInstance, watcher) {
@@ -690,7 +690,11 @@ uiModules
               script: 'payload.hits.total > 100'
             }
           },
-          transform: {},
+          transform: {
+            script: {
+              script: ''
+            }
+          },
           actions: {
             email_admin: {
               throttle_period: '15m',
