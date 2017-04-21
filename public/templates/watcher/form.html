@@ -135,6 +135,9 @@
             <li>
               <a href="" class="fa fa-minus" ng-click="removeAction(actionName)"></a>
               <a href="" ng-click="editAction(actionName, actionSettings)">{{actionName}}</a>
+              <i class="fa fa-arrow-down"
+                ng-show="actionSettings.webhook._edit || actionSettings.email._edit || actionSettings.report._edit"
+                aria-hidden="true"></i>
               <div class="form-group" ng-if="actionSettings.webhook._edit || actionSettings.email._edit">
                 <div class="formSubform">
                   <label class="col-md-2 control-label" for="throttle_period">Throttle period:</label>
