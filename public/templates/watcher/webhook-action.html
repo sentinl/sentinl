@@ -55,12 +55,6 @@
     </div>
     <div class="col-md-3">
       <label class="checkbox">
-        <!--
-        <input type="checkbox"
-          ng-model="action.viaProxy"
-          ng-click="enableExtraFields()"
-          ng-checked="action.viaProxy"> via proxy
-        -->
         <input type="checkbox"
           ng-model="actionSettings.webhook._proxy"
           ng-click="enableExtraFields()"
@@ -85,13 +79,23 @@
   <div class="form-group">
     <label class="col-md-2 control-label" for="webhookBody">Body:</label>
     <div class="col-md-6">
-      <div id="webhookBody" class="aceditor"></div>
+      <div id="webhookBody"
+        class="aceditor"
+        ng-model="actionSettings.webhook.body"
+        ui-ace="{
+          mode: 'behaviour'
+        }"></div>
     </div>
   </div>
   <div class="form-group" ng-show="actionSettings.webhook._proxy">
     <label class="col-md-2 control-label" for="webhookHeaders">Headers:</label>
     <div class="col-md-6">
-      <div id="webhookHeaders" class="aceditor"></div>
+      <div id="webhookHeaders"
+        class="aceditor"
+        ng-model="actionSettings.webhook._headers"
+        ui-ace="{
+          mode: 'json'
+        }"></div>
     </div>
   </div>
 </div>

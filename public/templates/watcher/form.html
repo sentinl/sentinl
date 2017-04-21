@@ -74,7 +74,10 @@
       </div>
       <div class="form-group">
         <div class="col-md-12">
-          <div id="inputEdit" class="aceditor">{{ watcher._source.input | json }}</div>
+          <div id="inputEdit"
+            class="aceditor"
+            ng-model="watcher._source._input"
+            ui-ace="{ mode: 'json' }">{{ watcher._source._input }}</div>
         </div>
       </div>
     </tab>
@@ -86,7 +89,8 @@
         <div class="col-md-12">
           <div id="conditionEdit"
             class="aceditor"
-            ng-model="watcher._source.condition.script.script">{{ watcher._source.condition.script.script }}</div>
+            ng-model="watcher._source._condition"
+            ui-ace="{ mode: 'javascript' }">{{ watcher._source._condition }}</div>
         </div>
       </div>
     </tab>
@@ -97,8 +101,9 @@
       <div class="form-group">
         <div class="col-md-12">
           <div id="transformEdit"
-            class="aceditor"
-            ng-model="watcher._source.transform.script.script">{{ watcher._source.transform.script.script }}</div>
+            ng-model="watcher._source._transform"
+            ui-ace="{ mode: 'javascript' }"
+            class="aceditor">{{ watcher._source._transform }}</div>
         </div>
       </div>
     </tab>

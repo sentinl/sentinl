@@ -317,12 +317,6 @@ uiModules
       title: attrs.name
     };
 
-    scope.form.editors.actions[attrs.name].email.body = ace.edit('emailBody');
-    scope.form.editors.actions[attrs.name].email.body.getSession().setMode('ace/mode/behaviour');
-    scope.form.editors.actions[attrs.name].email.body.setValue(
-      scope.watcher._source.actions[attrs.name].email.body
-    );
-
   };
 
   return {
@@ -347,32 +341,17 @@ uiModules
 
     if (_.has(scope.watcher._source.actions[attrs.name].webhook, 'headers')) {
       scope.watcher._source.actions[attrs.name].webhook._proxy = true;
-
-      scope.form.editors.actions[attrs.name].webhook.headers = ace.edit('webhookHeaders');
-      scope.form.editors.actions[attrs.name].webhook.headers.getSession().setMode('ace/mode/json');
       let headers = scope.watcher._source.actions[attrs.name].webhook.headers;
-      try {
-        headers = JSON.parse(headers);
-      } catch (e) {
-        headers = JSON.stringify(headers);
-      }
-      scope.form.editors.actions[attrs.name].webhook.headers.setValue(headers);
+      scope.watcher._source.actions[attrs.name].webhook._headers = JSON.stringify(headers, null, 2);
     }
-
-    scope.form.editors.actions[attrs.name].webhook.body = ace.edit('webhookBody');
-    scope.form.editors.actions[attrs.name].webhook.body.getSession().setMode('ace/mode/behaviour');
-    scope.form.editors.actions[attrs.name].webhook.body.setValue(
-      scope.watcher._source.actions[attrs.name].webhook.body
-    );
 
     scope.enableExtraFields = function () {
       if (scope.watcher._source.actions[attrs.name].webhook._proxy) {
         scope.watcher._source.actions[attrs.name].webhook.headers = {};
-        scope.form.editors.actions[attrs.name].webhook.headers = ace.edit('webhookHeaders');
-        scope.form.editors.actions[attrs.name].webhook.headers.getSession().setMode('ace/mode/json');
+        scope.watcher._source.actions[attrs.name].webhook._headers = '';
       } else {
         delete scope.watcher._source.actions[attrs.name].webhook.headers;
-        delete scope.form.editors.actions[attrs.name].webhook.headers;
+        delete scope.watcher._source.actions[attrs.name].webhook._headers;
       }
     };
 
@@ -398,14 +377,6 @@ uiModules
 
   $scope.form = {
     status: !$scope.watcher._source.disable ? 'Enabled' : 'Disable',
-    editors: {
-      general: {
-        input: {},
-        transform: {},
-        condition: {}
-      },
-      actions: {}
-    },
     actions: {
       new: {
         edit: false
@@ -425,23 +396,19 @@ uiModules
   };
 
   $scope.getInput = function () {
-    $scope.form.editors.general.input = ace.edit('inputEdit');
-    $scope.form.editors.general.input.getSession().setMode('ace/mode/json');
+    $scope.watcher._source._input = JSON.stringify($scope.watcher._source.input, null, 2);
   };
 
   $scope.getTransform = function () {
-    $scope.form.editors.general.transform = ace.edit('transformEdit');
-    $scope.form.editors.general.transform.getSession().setMode('ace/mode/javascript');
+    $scope.watcher._source._transform = $scope.watcher._source.transform.script.script;
   };
 
   $scope.getCondition = function () {
-    $scope.form.editors.general.condition = ace.edit('conditionEdit');
-    $scope.form.editors.general.condition.getSession().setMode('ace/mode/javascript');
+    $scope.watcher._source._condition = $scope.watcher._source.condition.script.script;
   };
 
   $scope.removeAction = function (actionName) {
     delete $scope.watcher._source.actions[actionName];
-    delete $scope.form.editors.actions[actionName];
   };
 
   $scope.addAction = function () {
@@ -449,19 +416,10 @@ uiModules
   };
 
   $scope.editAction = function (actionName, actionSettings) {
-    // init object structure for editors
-    if (!_.has($scope.form.editors.actions, actionName)) {
-      $scope.form.editors.actions[actionName] = {};
-    }
-
+    // toggle edit for the selected action
     _.each($scope.form.actions.types, (type) => {
       if (_.has(actionSettings, type)) {
         actionSettings[type]._edit = !actionSettings[type]._edit;
-
-        // create a property to hold ace editors
-        if (!_.has($scope.form.editors.actions[actionName], type)) {
-          $scope.form.editors.actions[actionName][type] = {};
-        }
       }
     });
 
@@ -487,38 +445,37 @@ uiModules
 
   const saveEditorsText = function () {
 
-    if (_.has($scope.form.editors.general.input, 'renderer')) {
-      $scope.watcher._source.input = JSON.parse($scope.form.editors.general.input.getValue());
-      delete $scope.form.editors.general.input;
+    if ($scope.watcher._source._input) {
+      $scope.watcher._source.input = JSON.parse($scope.watcher._source._input);
+      delete $scope.watcher._source._input;
     }
 
-    if (_.has($scope.form.editors.general.transform, 'renderer')) {
-      $scope.watcher._source.transform.script.script = $scope.form.editors.general.transform.getValue();
-      delete $scope.form.editors.general.transform;
+    if ($scope.watcher._source._condition) {
+      $scope.watcher._source.condition.script.script = $scope.watcher._source._condition;
+      delete $scope.watcher._source._condition;
     }
 
-    if (_.has($scope.form.editors.general.condition, 'renderer')) {
-      $scope.watcher._source.condition.script.script = $scope.form.editors.general.condition.getValue();
-      delete $scope.form.editors.general.condition;
+    if ($scope.watcher._source._transform) {
+      $scope.watcher._source.transform.script.script = $scope.watcher._source._transform;
+      delete $scope.watcher._source._transform;
     }
 
     _.forOwn($scope.watcher._source.actions, (settings, name) => {
-      if (_.has(settings, 'webhook')) {
-        if (_.has($scope.form.editors.actions, `${name}.webhook.headers`)) {
-          settings.webhook.headers = JSON.parse($scope.form.editors.actions[name].webhook.headers.getValue());
+      _.each($scope.form.actions.types, (type) => {
+
+        if (_.has(settings, type)) {
+          delete settings[type]._edit;
         }
-        if (_.has($scope.form.editors.actions, `${name}.webhook.body`)) {
-          settings.webhook.body = $scope.form.editors.actions[name].webhook.body.getValue();
+
+        if (type === 'webhook' && _.has(settings, type)) {
+          if (settings[type]._headers) {
+            settings[type].headers = JSON.parse(settings[type]._headers);
+            delete settings[type]._headers;
+          }
+          delete settings[type]._proxy;
         }
-        delete settings.webhook._proxy;
-        delete settings.webhook._edit;
-      }
-      if (_.has(settings, 'email')) {
-        if (_.has($scope.form.editors.actions, `${name}.email.body`)) {
-          settings.email.body = $scope.form.editors.actions[name].email.body.getValue();
-        }
-        delete settings.email._edit;
-      }
+
+      });
     });
 
   };

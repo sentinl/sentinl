@@ -59,7 +59,11 @@
   <div class="form-group">
     <label class="col-md-2 control-label" for="emailBody">Body:</label>
     <div class="col-md-6">
-      <div id="emailBody" class="aceditor"></div>
+      <div id="emailBody"
+        ng-model="actionSettings.email.body"
+        ui-ace="{
+          mode: 'behaviour'
+        }" class="aceditor"></div>
     </div>
   </div>
 </div>
