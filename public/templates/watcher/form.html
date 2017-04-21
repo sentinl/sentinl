@@ -136,17 +136,19 @@
               <a href="" class="fa fa-minus" ng-click="removeAction(actionName)"></a>
               <a href="" ng-click="editAction(actionName, actionSettings)">{{actionName}}</a>
               <div class="form-group" ng-if="actionSettings.webhook._edit || actionSettings.email._edit">
-                <label class="col-md-2 control-label" for="throttle_period">Throttle period:</label>
-                <div class="col-md-2">
-                  <input
-                    type="text"
-                    id="throttle_period"
-                    name="throttle_period"
-                    value="{{actionSettings.throttle_period}}"
-                    class="form-control"
-                    placeholder="1m"
-                    ng-model="actionSettings.throttle_period"
-                    ng-disabled="form.disabled">
+                <div class="formSubform">
+                  <label class="col-md-2 control-label" for="throttle_period">Throttle period:</label>
+                  <div class="col-md-2">
+                    <input
+                      type="text"
+                      id="throttle_period"
+                      name="throttle_period"
+                      value="{{actionSettings.throttle_period}}"
+                      class="form-control"
+                      placeholder="1m"
+                      ng-model="actionSettings.throttle_period"
+                      ng-disabled="form.disabled">
+                  </div>
                 </div>
               </div>
               <div ng-show="actionSettings.webhook._edit">
