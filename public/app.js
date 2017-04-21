@@ -310,20 +310,10 @@ uiModules
 .get('api/sentinl', [])
 .directive('emailAction', function () {
 
-  function actionDirective(scope, element, attrs) {
-
-    scope.action = {
-      type: 'email',
-      title: attrs.name
-    };
-
-  };
-
   return {
     restrict: 'E',
     template: watcherEmailAction,
-    scope: true,
-    link: actionDirective
+    scope: true
   };
 });
 
