@@ -1,12 +1,20 @@
 <h4>{{ action.type }}</h4>
-<div>
+<div class="jumbotron">
+  <div class="form-group">
+    <label class="col-md-2 control-label">Priority:</label>
+    <div class="btn-group col-md-4">
+      <label class="btn btn-danger btn-sm" ng-model="actionSettings.webhook.priority" btn-radio="'high'">High</label>
+      <label class="btn btn-warning btn-sm" ng-model="actionSettings.webhook.priority" btn-radio="'medium'">Medium</label>
+      <label class="btn btn-info btn-sm" ng-model="actionSettings.webhook.priority" btn-radio="'low'">Low</label>
+    </div>
+  </div>
   <div class="form-group">
     <label class="col-md-2 control-label" for="webhookTitle">Title:</label>
     <div class="col-md-6">
       <input
         type="text"
         id="webhookTitle"
-        actionName="webhookTitle"
+        name="webhookTitle"
         value="{{actionName}}"
         class="form-control"
         placeholder="{{watcher._source.uuid}}"
@@ -21,8 +29,8 @@
         {{actionSettings.webhook.method}} <span class="caret"></span>
       </button>
       <ul class="dropdown-menu" role="menu">
-        <li><a href="#">POST</a></li>
-        <li><a href="#">GET</a></li>
+        <li><a href="#" ng-click="changeMethod('POST')">POST</a></li>
+        <li><a href="#" ng-click="changeMethod('GET')">GET</a></li>
       </ul>
     </div>
   </div>
@@ -53,12 +61,19 @@
         ng-model="actionSettings.webhook.port"
         ng-disabled="form.disabled">
     </div>
-    <div class="col-md-3">
+    <div class="col-md-2">
       <label class="checkbox">
         <input type="checkbox"
           ng-model="actionSettings.webhook._proxy"
           ng-click="enableExtraFields()"
           ng-checked="actionSettings.webhook._proxy"> via proxy
+      </label>
+    </div>
+    <div class="col-md-2">
+      <label class="checkbox">
+        <input type="checkbox"
+          ng-model="actionSettings.webhook.create_alert"
+          ng-checked="actionSettings.webhook.create_alert"> create alert
       </label>
     </div>
   </div>
@@ -78,7 +93,7 @@
   </div>
   <div class="form-group">
     <label class="col-md-2 control-label" for="webhookBody">Body:</label>
-    <div class="col-md-6">
+    <div class="col-md-8">
       <div id="webhookBody"
         class="aceditor"
         ng-model="actionSettings.webhook.body"
@@ -89,7 +104,7 @@
   </div>
   <div class="form-group" ng-show="actionSettings.webhook._proxy">
     <label class="col-md-2 control-label" for="webhookHeaders">Headers:</label>
-    <div class="col-md-6">
+    <div class="col-md-8">
       <div id="webhookHeaders"
         class="aceditor"
         ng-model="actionSettings.webhook._headers"

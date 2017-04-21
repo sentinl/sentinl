@@ -345,6 +345,10 @@ uiModules
       scope.watcher._source.actions[attrs.name].webhook._headers = JSON.stringify(headers, null, 2);
     }
 
+    scope.changeMethod = function (method) {
+      scope.watcher._source.actions[attrs.name].webhook.method = method;
+    };
+
     scope.enableExtraFields = function () {
       if (scope.watcher._source.actions[attrs.name].webhook._proxy) {
         scope.watcher._source.actions[attrs.name].webhook.headers = {};
