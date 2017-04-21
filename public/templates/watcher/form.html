@@ -148,13 +148,13 @@
                     ng-disabled="form.disabled">
                 </div>
               </div>
-              <div ng-if="actionSettings.webhook._edit">
+              <div ng-show="actionSettings.webhook._edit">
                 <webhook-action name="{{actionName}}"></webhook-action>
               </div>
-              <div ng-if="actionSettings.email._edit">
+              <div ng-show="actionSettings.email._edit">
                 <email-action name="{{actionName}}"></email-action>
               </div>
-              <div ng-if="actionSettings.report._edit">
+              <div ng-show="actionSettings.report._edit">
                 <report-action name="{{actionName}}"></report-action>
               </div>
             </li>
