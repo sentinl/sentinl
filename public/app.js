@@ -762,8 +762,17 @@ uiModules
               later: 'every 1 hour'
             }
           },
+          condition: {
+            script: {
+              script: ''
+            }
+          },
+          transform: {
+            script: {
+              script: ''
+            }
+          },
           report : true,
-          transform: {},
           actions: {
             report_admin: {
               throttle_period: '15m',
