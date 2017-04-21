@@ -61,6 +61,7 @@ import watcherForm from './templates/watcher/form.html';
 import watcherWebhookAction from './templates/watcher/webhook-action.html';
 import watcherNewAction from './templates/watcher/new-action.html';
 import watcherEmailAction from './templates/watcher/email-action.html';
+import watcherReportAction from './templates/watcher/report-action.html';
 
 var impactLogo = require('plugins/sentinl/sentinl_logo.svg');
 var smallLogo = require('plugins/sentinl/sentinl.svg');
@@ -255,7 +256,8 @@ uiModules
     scope.action = {
       types: {
         webhook: {},
-        email: {}
+        email: {},
+        report: {}
       }
     };
 
@@ -294,6 +296,29 @@ uiModules
         };
       }
 
+      if (type === 'report') {
+        const title = `New report action ${Math.random().toString(36).slice(2)}`;
+        scope.watcher._source.report = true;
+        scope.watcher._source.actions[title] = {
+          _title: title,
+          report: {
+            _edit: false,
+            to: '',
+            from: '',
+            subject: '',
+            body: '',
+            snapshot: {
+              res: '1280x900',
+              url: 'http://www.google.com',
+              path: '/tmp/',
+              params: {
+                delay: 5000
+              }
+            }
+          }
+        };
+      }
+
     };
   };
 
@@ -302,6 +327,18 @@ uiModules
     template: watcherNewAction,
     scope: true,
     link: actionDirective
+  };
+});
+
+
+uiModules
+.get('api/sentinl', [])
+.directive('reportAction', function () {
+
+  return {
+    restrict: 'E',
+    template: watcherReportAction,
+    scope: true
   };
 });
 
@@ -375,7 +412,7 @@ uiModules
       new: {
         edit: false
       },
-      types: [ 'webhook', 'email' ]
+      types: [ 'webhook', 'email', 'report' ]
     }
   };
 

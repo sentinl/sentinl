@@ -1,0 +1,77 @@
+<h4>{{ action.type }}</h4>
+<div class="jumbotron">
+  <div class="form-group">
+    <label class="col-md-2 control-label">Priority:</label>
+    <div class="btn-group col-md-4">
+      <label class="btn btn-danger btn-sm" ng-model="actionSettings.report.priority" btn-radio="'high'">High</label>
+      <label class="btn btn-warning btn-sm" ng-model="actionSettings.report.priority" btn-radio="'medium'">Medium</label>
+      <label class="btn btn-info btn-sm" ng-model="actionSettings.report.priority" btn-radio="'low'">Low</label>
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-md-2 control-label" for="reportTitle">Title:</label>
+    <div class="col-md-6">
+      <input
+        type="text"
+        id="reportTitle"
+        actionName="reportTitle"
+        value="{{actionName}}"
+        class="form-control"
+        placeholder="{{watcher._source.uuid}}"
+        ng-model="actionSettings._title"
+        ng-disabled="form.disabled">
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-md-2 control-label" for="reportTo">To:</label>
+    <div class="col-md-6">
+      <input
+        type="text"
+        id="reportTo"
+        name="reportTo"
+        value="{{actionSettings.report.to}}"
+        class="form-control"
+        placeholder="remote.server"
+        ng-model="actionSettings.report.to"
+        ng-disabled="form.disabled">
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-md-2 control-label" for="reportFrom">From:</label>
+    <div class="col-md-6">
+      <input
+        type="text"
+        id="reportFrom"
+        name="reportFrom"
+        value="{{actionSettings.report.from}}"
+        class="form-control"
+        placeholder="remote.server"
+        ng-model="actionSettings.report.from"
+        ng-disabled="form.disabled">
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-md-2 control-label" for="reportSubject">Subject:</label>
+    <div class="col-md-6">
+      <input
+        type="text"
+        id="reportSubject"
+        name="reportSubject"
+        value="{{actionSettings.report.subject}}"
+        class="form-control"
+        placeholder="remote.server"
+        ng-model="actionSettings.report.subject"
+        ng-disabled="form.disabled">
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-md-2 control-label" for="reportBody">Body:</label>
+    <div class="col-md-8">
+      <div id="reportBody"
+        ng-model="actionSettings.report.body"
+        ui-ace="{
+          mode: 'behaviour'
+        }" class="aceditor"></div>
+    </div>
+  </div>
+</div>
