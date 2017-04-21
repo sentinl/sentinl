@@ -33,6 +33,21 @@
         <li><a href="#" ng-click="changeMethod('GET')">GET</a></li>
       </ul>
     </div>
+    <div class="col-md-2">
+      <label class="checkbox">
+        <input type="checkbox"
+          ng-model="actionSettings.webhook._proxy"
+          ng-click="enableExtraFields()"
+          ng-checked="actionSettings.webhook._proxy"> via proxy
+      </label>
+    </div>
+    <div class="col-md-2">
+      <label class="checkbox">
+        <input type="checkbox"
+          ng-model="actionSettings.webhook.create_alert"
+          ng-checked="actionSettings.webhook.create_alert"> create alert
+      </label>
+    </div>
   </div>
   <div class="form-group">
     <label class="col-md-2 control-label" for="webhookHost">Host:</label>
@@ -60,21 +75,6 @@
         placeholder="9200"
         ng-model="actionSettings.webhook.port"
         ng-disabled="form.disabled">
-    </div>
-    <div class="col-md-2">
-      <label class="checkbox">
-        <input type="checkbox"
-          ng-model="actionSettings.webhook._proxy"
-          ng-click="enableExtraFields()"
-          ng-checked="actionSettings.webhook._proxy"> via proxy
-      </label>
-    </div>
-    <div class="col-md-2">
-      <label class="checkbox">
-        <input type="checkbox"
-          ng-model="actionSettings.webhook.create_alert"
-          ng-checked="actionSettings.webhook.create_alert"> create alert
-      </label>
     </div>
   </div>
   <div class="form-group">

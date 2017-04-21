@@ -116,6 +116,19 @@
         <div class="col-md-1">
         </div>
         <div class="col-md-11">
+          <a href=""
+            ng-class="{'fa': true, 'fa-plus': !form.actions.new.edit, 'fa-minus': form.actions.new.edit}"
+            ng-click="addAction()"></a>
+          <div ng-if="form.actions.new.edit">
+            <new-action></new-action>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="col-md-1">
+        </div>
+        <div class="col-md-11">
           <ul class="formActionsList"
             ng-repeat="(actionName, actionSettings) in watcher._source.actions" style="list-style-type:none;">
             <li>
@@ -143,19 +156,6 @@
               </div>
             </li>
           </ul>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <div class="col-md-1">
-        </div>
-        <div class="col-md-11">
-          <a href=""
-            ng-class="{'fa': true, 'fa-plus': !form.actions.new.edit, 'fa-minus': form.actions.new.edit}"
-            ng-click="addAction()"></a>
-          <div ng-if="form.actions.new.edit">
-            <new-action></new-action>
-          </div>
         </div>
       </div>
 
