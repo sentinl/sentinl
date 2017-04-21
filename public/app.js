@@ -57,6 +57,7 @@ import about from './templates/about.html';
 import alarms from './templates/alarms.html';
 import reports from './templates/reports.html';
 import jsonHtml from './templates/json.html';
+import confirmBox from './templates/confirm-box.html';
 import watcherForm from './templates/watcher/form.html';
 import watcherWebhookAction from './templates/watcher/webhook-action.html';
 import watcherNewAction from './templates/watcher/new-action.html';
@@ -408,10 +409,27 @@ uiModules
 });
 
 
+uiModules
+.get('api/sentinl', [])
+.controller('ConfirmCtrl', function ($scope, $modalInstance, action) {
+
+  $scope.actionName = action;
+
+  $scope.yes = function () {
+    $modalInstance.close('yes');
+  };
+
+  $scope.no = function () {
+    $modalInstance.dismiss('no');
+  };
+
+});
+
+
 // WATCHER FORM CONTROLLER
 uiModules
 .get('api/sentinl', [])
-.controller('WatcherEditorInstanceCtrl', function ($scope, $modalInstance, watcher) {
+.controller('WatcherFormCtrl', function ($scope, $modalInstance, $modal, $log, watcher) {
 
   $scope.watcher = watcher;
 
@@ -450,7 +468,24 @@ uiModules
   };
 
   $scope.removeAction = function (actionName) {
-    delete $scope.watcher._source.actions[actionName];
+    const confirmModal = $modal.open({
+      template: confirmBox,
+      controller: 'ConfirmCtrl',
+      size: 'sm',
+      resolve: {
+        action: function () {
+          return actionName;
+        }
+      }
+    });
+
+    confirmModal.result.then((response) => {
+      if (response === 'yes') {
+        delete $scope.watcher._source.actions[actionName];
+      }
+    }, () => {
+      $log.info(`You choose not deleting the action "${actionName}"`);
+    });
   };
 
   $scope.addAction = function () {
@@ -572,9 +607,9 @@ uiModules
 
   $scope.openWatcherEditorForm = function ($index) {
 
-    const modalInstance = $modal.open({
+    const formModal = $modal.open({
       template: watcherForm,
-      controller: 'WatcherEditorInstanceCtrl',
+      controller: 'WatcherFormCtrl',
       size: 'lg',
       resolve: {
         watcher: function () {
@@ -583,13 +618,11 @@ uiModules
       }
     });
 
-    modalInstance.result.then((watcher) => {
+    formModal.result.then((watcher) => {
       $scope.watchers[$index] = watcher;
       $scope.watcherSave($index, true);
-    }).catch((error) => {
-      if (!_.contains(['cancel', 'backdrop click'], error)) {
-        $log.error(error);
-      }
+    }, () => {
+      $log.info('You choose to close watcher form');
     });
   };
 

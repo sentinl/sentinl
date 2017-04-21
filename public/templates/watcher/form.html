@@ -130,7 +130,8 @@
         </div>
         <div class="col-md-11">
           <ul class="formActionsList"
-            ng-repeat="(actionName, actionSettings) in watcher._source.actions" style="list-style-type:none;">
+            ng-repeat="(actionName, actionSettings) in watcher._source.actions"
+            style="list-style-type:none;">
             <li>
               <a href="" class="fa fa-minus" ng-click="removeAction(actionName)"></a>
               <a href="" ng-click="editAction(actionName, actionSettings)">{{actionName}}</a>
