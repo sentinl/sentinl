@@ -250,7 +250,6 @@ uiModules
 uiModules
 .get('api/sentinl', [])
 .directive('newAction', function () {
-
   function actionDirective(scope, element, attrs) {
 
     scope.action = {
@@ -334,11 +333,17 @@ uiModules
 uiModules
 .get('api/sentinl', [])
 .directive('reportAction', function () {
+  function actionDirective(scope, element, attrs) {
+    scope.action = {
+      type: 'report'
+    };
+  }
 
   return {
     restrict: 'E',
     template: watcherReportAction,
-    scope: true
+    scope: true,
+    link: actionDirective
   };
 });
 
@@ -346,11 +351,17 @@ uiModules
 uiModules
 .get('api/sentinl', [])
 .directive('emailAction', function () {
+  function actionDirective(scope, element, attrs) {
+    scope.action = {
+      type: 'email'
+    };
+  }
 
   return {
     restrict: 'E',
     template: watcherEmailAction,
-    scope: true
+    scope: true,
+    link: actionDirective
   };
 });
 
