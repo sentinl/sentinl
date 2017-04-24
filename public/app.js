@@ -484,7 +484,7 @@ uiModules
         showPrintMargin: false,
         maxLines: 4294967296
       }
-    }
+    };
   };
 
   const initActionTitles = function () {
