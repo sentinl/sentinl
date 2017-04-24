@@ -372,33 +372,10 @@ uiModules
 .get('api/sentinl', [])
 .directive('scheduleTag', function () {
 
-  //function scheduleTagDirective (scope, element, attrs) {
-  //  scope.ation = {
-  //    time: {
-  //      hours: 1,
-  //      mins: 1,
-  //      secs: 0
-  //    }
-  //  };
-
-  //  _.each($scope.watcher._source.trigger.schedule.later.split(','), (period) => {
-  //    if (period.match(/hour/i)) {
-  //      $scope.action.time.hours = parseInt(period.split(' ')[1]);
-  //    }
-  //    if (period.match(/min/i)) {
-  //      $scope.action.time.mins = parseInt(period.split(' ')[1]);
-  //    }
-  //    if (period.match(/sec/i)) {
-  //      $scope.action.time.secs = parseInt(period.split(' ')[1]);
-  //    }
-  //  });
-  //};
-
   return {
     restrict: 'E',
     template: scheduleTagTemplate,
-    scope: true/*,
-    link: scheduleTagDirective*/
+    scope: true
   };
 });
 
