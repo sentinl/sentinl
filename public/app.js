@@ -459,8 +459,6 @@ uiModules
 
   $scope.watcher = watcher;
 
-  _.forOwn($scope.watcher._source.actions, (settings, name) => { settings._title = name; });
-
   $scope.form = {
     status: !$scope.watcher._source.disable ? 'Enabled' : 'Disable',
     schedule: {
@@ -474,6 +472,10 @@ uiModules
       },
       types: [ 'webhook', 'email', 'report' ]
     }
+  };
+
+  const initActionTitles = function () {
+    _.forOwn($scope.watcher._source.actions, (settings, name) => { settings._title = name; });
   };
 
   const initSchedule = function () {
@@ -535,18 +537,6 @@ uiModules
       $scope.form.status = 'Disabled';
       $scope.watcher._source.disable = true;
     }
-  };
-
-  $scope.getInput = function () {
-    $scope.watcher._source._input = JSON.stringify($scope.watcher._source.input, null, 2);
-  };
-
-  $scope.getTransform = function () {
-    $scope.watcher._source._transform = $scope.watcher._source.transform.script.script;
-  };
-
-  $scope.getCondition = function () {
-    $scope.watcher._source._condition = $scope.watcher._source.condition.script.script;
   };
 
   $scope.removeAction = function (actionName) {
@@ -638,8 +628,16 @@ uiModules
     });
   };
 
-  initSchedule();
-  initThrottlePeriods();
+  const init = function () {
+    initActionTitles();
+    initSchedule();
+    initThrottlePeriods();
+    $scope.watcher._source._input = JSON.stringify($scope.watcher._source.input, null, 2);
+    $scope.watcher._source._transform = $scope.watcher._source.transform.script.script;
+    $scope.watcher._source._condition = $scope.watcher._source.condition.script.script;
+  };
+
+  init();
 
   $scope.save = function () {
     saveSchedule();
