@@ -64,6 +64,7 @@ import watcherNewAction from './templates/watcher/new-action.html';
 import watcherEmailAction from './templates/watcher/email-action.html';
 import watcherReportAction from './templates/watcher/report-action.html';
 import scheduleTagTemplate from './templates/watcher/schedule-tag.html';
+import throttlePeriodTagTemplate from './templates/watcher/throttle-period-tag.html';
 
 var impactLogo = require('plugins/sentinl/sentinl_logo.svg');
 var smallLogo = require('plugins/sentinl/sentinl.svg');
@@ -382,6 +383,18 @@ uiModules
 
 uiModules
 .get('api/sentinl', [])
+.directive('throttlePeriodTag', function () {
+
+  return {
+    restrict: 'E',
+    template: throttlePeriodTagTemplate,
+    scope: true
+  };
+});
+
+
+uiModules
+.get('api/sentinl', [])
 .directive('webhookAction', function () {
 
   function actionDirective(scope, element, attrs) {
@@ -477,7 +490,25 @@ uiModules
     });
   };
 
-  initSchedule();
+  const initThrottlePeriods = function () {
+    const getHours = function (str) {
+      return str.match(/([0-9]?[0-9])h/i) ? +str.match(/([0-9]?[0-9])h/i)[1] : 0;
+    };
+    const getMins = function (str) {
+      return str.match(/([0-9]?[0-9])m/i) ? +str.match(/([0-9]?[0-9])m/i)[1] : 0;
+    };
+    const getSecs = function (str) {
+      return str.match(/([0-9]?[0-9])s/i) ? +str.match(/([0-9]?[0-9])s/i)[1] : 0;
+    };
+
+    _.forOwn($scope.watcher._source.actions, (actions) => {
+      actions._throttle = {
+        hours: getHours(actions.throttle_period),
+        mins: getMins(actions.throttle_period),
+        secs: getSecs(actions.throttle_period)
+      };
+    });
+  };
 
   const saveSchedule = function () {
     let schedule = [];
@@ -487,6 +518,13 @@ uiModules
       }
     });
     $scope.watcher._source.trigger.schedule.later = schedule.join(', ');
+  };
+
+  const saveThrottle = function () {
+    _.forOwn($scope.watcher._source.actions, (actions) => {
+      actions.throttle_period = `${actions._throttle.hours}h${actions._throttle.mins}m${actions._throttle.secs}s`;
+      delete actions._throttle;
+    });
   };
 
   $scope.toggleWatcher = function () {
@@ -598,11 +636,14 @@ uiModules
 
       });
     });
-
   };
+
+  initSchedule();
+  initThrottlePeriods();
 
   $scope.save = function () {
     saveSchedule();
+    saveThrottle();
     saveEditorsText();
     $scope.watcher._source.actions = renameActions($scope.watcher._source.actions);
     $modalInstance.close($scope.watcher);
