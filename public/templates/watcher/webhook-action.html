@@ -97,9 +97,7 @@
       <div id="webhookBody"
         class="aceditor"
         ng-model="actionSettings.webhook.body"
-        ui-ace="{
-          mode: 'behaviour'
-        }"></div>
+        ui-ace="aceOptions('behaviour')"></div>
     </div>
   </div>
   <div class="form-group" ng-show="actionSettings.webhook._proxy">
@@ -108,9 +106,7 @@
       <div id="webhookHeaders"
         class="aceditor"
         ng-model="actionSettings.webhook._headers"
-        ui-ace="{
-          mode: 'json'
-        }"></div>
+        ui-ace="aceOptions('json')"></div>
     </div>
   </div>
 </div>

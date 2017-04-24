@@ -50,7 +50,7 @@
           <div id="inputEdit"
             class="aceditor"
             ng-model="watcher._source._input"
-            ui-ace="{ mode: 'json' }">{{ watcher._source._input }}</div>
+            ui-ace="aceOptions('json')">{{ watcher._source._input }}</div>
         </div>
       </div>
     </tab>
@@ -63,7 +63,7 @@
           <div id="conditionEdit"
             class="aceditor"
             ng-model="watcher._source._condition"
-            ui-ace="{ mode: 'javascript' }">{{ watcher._source._condition }}</div>
+            ui-ace="aceOptions('javascript')">{{ watcher._source._condition }}</div>
         </div>
       </div>
     </tab>
@@ -74,9 +74,9 @@
       <div class="form-group">
         <div class="col-md-12">
           <div id="transformEdit"
+            class="aceditor"
             ng-model="watcher._source._transform"
-            ui-ace="{ mode: 'javascript' }"
-            class="aceditor">{{ watcher._source._transform }}</div>
+            ui-ace="aceOptions('javascript')">{{ watcher._source._transform }}</div>
         </div>
       </div>
     </tab>

@@ -474,6 +474,19 @@ uiModules
     }
   };
 
+  $scope.aceOptions = function (mode) {
+    return {
+      mode: mode,
+      advanced: {
+        tabSize: 2
+      },
+      rendererOptions: {
+        showPrintMargin: false,
+        maxLines: 4294967296
+      }
+    }
+  };
+
   const initActionTitles = function () {
     _.forOwn($scope.watcher._source.actions, (settings, name) => { settings._title = name; });
   };
