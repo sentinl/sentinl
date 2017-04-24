@@ -10,7 +10,7 @@
         max="23"
         id="hours"
         name="hours"
-        value="{{form.schedule.hours}}"
+        ng-value="form.schedule.hours"
         class="form-control"
         ng-model="form.schedule.hours"
         ng-disabled="form.disabled">
@@ -25,7 +25,7 @@
         max="59"
         id="mins"
         name="mins"
-        value="{{form.schedule.mins}}"
+        ng-value="form.schedule.mins"
         class="form-control"
         ng-model="form.schedule.mins"
         ng-disabled="form.disabled">
@@ -40,7 +40,7 @@
         max="59"
         id="secs"
         name="secs"
-        value="{{form.schedule.secs}}"
+        ng-value="form.schedule.secs"
         class="form-control"
         ng-model="form.schedule.secs"
         ng-disabled="form.disabled">

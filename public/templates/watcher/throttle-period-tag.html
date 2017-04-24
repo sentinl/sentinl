@@ -10,7 +10,7 @@
         max="23"
         id="hours"
         name="hours"
-        value="{{actionSettings._throttle.hours}}"
+        ng-value="actionSettings._throttle.hours"
         class="form-control"
         ng-model="actionSettings._throttle.hours"
         ng-disabled="form.disabled">
@@ -25,7 +25,7 @@
         max="59"
         id="mins"
         name="mins"
-        value="{{actionSettings._throttle.mins}}"
+        ng-value="actionSettings._throttle.mins"
         class="form-control"
         ng-model="actionSettings._throttle.mins"
         ng-disabled="form.disabled">
@@ -40,7 +40,7 @@
         max="59"
         id="secs"
         name="secs"
-        value="{{actionSettings._throttle.secs}}"
+        ng-value="actionSettings._throttle.secs"
         class="form-control"
         ng-model="actionSettings._throttle.secs"
         ng-disabled="form.disabled">
