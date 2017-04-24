@@ -35,37 +35,10 @@
         </div>
       </div>
       <div class="form-group">
-        <label class="col-md-2 control-label" for="schedule">Schedule:</label>
-        <div class="col-md-6">
-          <input
-            type="text"
-            id="schedule"
-            name="schedule"
-            value="{{watcher._source.trigger.schedule.later}}"
-            class="form-control"
-            placeholder="every 1m"
-            ng-model="watcher._source.trigger.schedule.later"
-            ng-disabled="form.disabled">
+        <label class="col-md-2 control-label">Run every:</label>
+        <div class="col-md-10">
+          <schedule-tag></schedule-tag>
         </div>
-          <!-- TO-DO: add timepicker and datepicker -->
-          <!-- angular ui v0.12
-          <timepicker
-            ng-model="form.time.now"
-            ng-change="changed()"
-            hour-step="form.time.hstep"
-            minute-step="form.time.mstep"
-            show-meridian="form.time.ismeridian"></timepicker>
-          -->
-          <!-- angular ui v2.5
-          <div uib-timepicker
-            ng-model="form.time.now"
-            ng-change="changed()"
-            hour-step="form.time.hstep"
-            minute-step="form.time.mstep"
-            show-meridian="form.time.ismeridian"
-            ng-disabled="disabled"></div>
-        </div>
-          -->
       </div>
     </tab>
     <tab index="1" heading="Input" select="getInput()">
@@ -141,16 +114,8 @@
               <div class="form-group" ng-if="actionSettings.webhook._edit || actionSettings.email._edit">
                 <div class="formSubform">
                   <label class="col-md-2 control-label" for="throttle_period">Throttle period:</label>
-                  <div class="col-md-2">
-                    <input
-                      type="text"
-                      id="throttle_period"
-                      name="throttle_period"
-                      value="{{actionSettings.throttle_period}}"
-                      class="form-control"
-                      placeholder="1m"
-                      ng-model="actionSettings.throttle_period"
-                      ng-disabled="form.disabled">
+                  <div class="col-md-4">
+                    <schedule-tag></schedule-tag>
                   </div>
                 </div>
               </div>

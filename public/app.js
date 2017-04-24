@@ -63,6 +63,7 @@ import watcherWebhookAction from './templates/watcher/webhook-action.html';
 import watcherNewAction from './templates/watcher/new-action.html';
 import watcherEmailAction from './templates/watcher/email-action.html';
 import watcherReportAction from './templates/watcher/report-action.html';
+import scheduleTagTemplate from './templates/watcher/schedule-tag.html';
 
 var impactLogo = require('plugins/sentinl/sentinl_logo.svg');
 var smallLogo = require('plugins/sentinl/sentinl.svg');
@@ -369,6 +370,41 @@ uiModules
 
 uiModules
 .get('api/sentinl', [])
+.directive('scheduleTag', function () {
+
+  //function scheduleTagDirective (scope, element, attrs) {
+  //  scope.ation = {
+  //    time: {
+  //      hours: 1,
+  //      mins: 1,
+  //      secs: 0
+  //    }
+  //  };
+
+  //  _.each($scope.watcher._source.trigger.schedule.later.split(','), (period) => {
+  //    if (period.match(/hour/i)) {
+  //      $scope.action.time.hours = parseInt(period.split(' ')[1]);
+  //    }
+  //    if (period.match(/min/i)) {
+  //      $scope.action.time.mins = parseInt(period.split(' ')[1]);
+  //    }
+  //    if (period.match(/sec/i)) {
+  //      $scope.action.time.secs = parseInt(period.split(' ')[1]);
+  //    }
+  //  });
+  //};
+
+  return {
+    restrict: 'E',
+    template: scheduleTagTemplate,
+    scope: true/*,
+    link: scheduleTagDirective*/
+  };
+});
+
+
+uiModules
+.get('api/sentinl', [])
 .directive('webhookAction', function () {
 
   function actionDirective(scope, element, attrs) {
@@ -437,12 +473,43 @@ uiModules
 
   $scope.form = {
     status: !$scope.watcher._source.disable ? 'Enabled' : 'Disable',
+    schedule: {
+      hours: 0,
+      mins: 0,
+      secs: 0
+    },
     actions: {
       new: {
         edit: false
       },
       types: [ 'webhook', 'email', 'report' ]
     }
+  };
+
+  const initSchedule = function () {
+    _.each($scope.watcher._source.trigger.schedule.later.split(','), (period) => {
+      if (period.match(/hour/i)) {
+        $scope.form.schedule.hours = +_.trim(period).split(' ')[1];
+      }
+      if (period.match(/min/i)) {
+        $scope.form.schedule.mins = +_.trim(period).split(' ')[1];
+      }
+      if (period.match(/sec/i)) {
+        $scope.form.schedule.secs = +_.trim(period).split(' ')[1];
+      }
+    });
+  };
+
+  initSchedule();
+
+  const saveSchedule = function () {
+    let schedule = [];
+    _.forOwn($scope.form.schedule, (value, key) => {
+      if (value) {
+        schedule.push(`every ${value} ${key}`);
+      }
+    });
+    $scope.watcher._source.trigger.schedule.later = schedule.join(', ');
   };
 
   $scope.toggleWatcher = function () {
@@ -558,6 +625,7 @@ uiModules
   };
 
   $scope.save = function () {
+    saveSchedule();
     saveEditorsText();
     $scope.watcher._source.actions = renameActions($scope.watcher._source.actions);
     $modalInstance.close($scope.watcher);
