@@ -338,7 +338,8 @@ uiModules
 .directive('reportAction', function () {
   function actionDirective(scope, element, attrs) {
     scope.action = {
-      type: 'report'
+      type: 'report',
+      resolutionPattern: '^\\d{1,4}x\\d{1,4}$'
     };
   }
 
@@ -652,12 +653,14 @@ uiModules
 
   init();
 
-  $scope.save = function () {
-    saveSchedule();
-    saveThrottle();
-    saveEditorsText();
-    $scope.watcher._source.actions = renameActions($scope.watcher._source.actions);
-    $modalInstance.close($scope.watcher);
+  $scope.save = function (isValid) {
+    if (isValid) {
+      saveSchedule();
+      saveThrottle();
+      saveEditorsText();
+      $scope.watcher._source.actions = renameActions($scope.watcher._source.actions);
+      $modalInstance.close($scope.watcher);
+    }
   };
 
   $scope.cancel = function () {

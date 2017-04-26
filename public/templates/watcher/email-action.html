@@ -1,5 +1,5 @@
 <h4>{{ action.type }}</h4>
-<div class="jumbotron">
+<div class="jumbotron" ng-form="emailForm">
   <div class="form-group">
     <label class="col-md-2 control-label">Priority:</label>
     <div class="btn-group col-md-4">
@@ -15,21 +15,25 @@
       </label>
     </div>
   </div>
-  <div class="form-group">
+  <div class="form-group" ng-class="{'has-error': emailForm.emailTitle.$invalid && !emailForm.emailTitle.$pristine}">
     <label class="col-md-2 control-label" for="emailTitle">Title:</label>
     <div class="col-md-6">
       <input
         type="text"
         id="emailTitle"
-        actionName="emailTitle"
+        name="emailTitle"
         value="{{actionName}}"
         class="form-control"
         placeholder="{{watcher._source.uuid}}"
         ng-model="actionSettings._title"
-        ng-disabled="form.disabled">
+        ng-disabled="form.disabled"
+        ng-required="actionSettings.email._edit">
     </div>
+    <p ng-show="emailForm.emailTitle.$invalid && !emailForm.emailTitle.$pristine" class="help-block">
+      <small>Action title is required.</small>
+    </p>
   </div>
-  <div class="form-group">
+  <div class="form-group" ng-class="{'has-error': emailForm.emailTo.$invalid && !emailForm.emailTo.$pristine}">
     <label class="col-md-2 control-label" for="emailTo">To:</label>
     <div class="col-md-6">
       <input
@@ -40,10 +44,14 @@
         class="form-control"
         placeholder="root@localhost"
         ng-model="actionSettings.email.to"
-        ng-disabled="form.disabled">
+        ng-disabled="form.disabled"
+        ng-required="actionSettings.email._edit">
     </div>
+    <p ng-show="emailForm.emailTo.$invalid && !emailForm.emailTo.$pristine" class="help-block">
+      <small>Enter a valid email.</small>
+    </p>
   </div>
-  <div class="form-group">
+  <div class="form-group" ng-class="{'has-error': emailForm.emailFrom.$invalid && !emailForm.emailFrom.$pristine}">
     <label class="col-md-2 control-label" for="emailFrom">From:</label>
     <div class="col-md-6">
       <input
@@ -54,10 +62,14 @@
         class="form-control"
         placeholder="sentinl@localhost"
         ng-model="actionSettings.email.from"
-        ng-disabled="form.disabled">
+        ng-disabled="form.disabled"
+        ng-required="actionSettings.email._edit">
     </div>
+    <p ng-show="emailForm.emailFrom.$invalid && !emailForm.emailFrom.$pristine" class="help-block">
+      <small>Enter a valid email.</small>
+    </p>
   </div>
-  <div class="form-group">
+  <div class="form-group" ng-class="{'has-error': emailForm.emailSubject.$invalid && !emailForm.emailSubject.$pristine}">
     <label class="col-md-2 control-label" for="emailSubject">Subject:</label>
     <div class="col-md-6">
       <input
@@ -70,13 +82,27 @@
         ng-model="actionSettings.email.subject"
         ng-disabled="form.disabled">
     </div>
+    <p ng-show="emailForm.emailSubject.$invalid && !emailForm.emailSubject.$pristine" class="help-block">
+      <small>Enter a valid email subject.</small>
+    </p>
   </div>
-  <div class="form-group">
-    <label class="col-md-2 control-label" for="emailBody">Body:</label>
-    <div class="col-md-8">
-      <div id="emailBody"
-        ng-model="actionSettings.email.body"
-        ui-ace="aceOptions('behaviour')" class="aceditor"></div>
+  <div class="form-group" ng-class="{'has-error': !actionSettings.email.body.length}">
+    <div class="row">
+      <label class="col-md-2 control-label" for="emailBody">Body:</label>
+      <div class="col-md-8">
+        <div id="emailBody"
+          ng-model="actionSettings.email.body"
+          ui-ace="aceOptions('behaviour')" class="aceditor">
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-2"></div>
+      <div class="col-md-8">
+        <p ng-show="!actionSettings.email.body.length" class="text-warning">
+          <small>Describe the alert in the email body.</small>
+        </p>
+      </div>
     </div>
   </div>
 </div>

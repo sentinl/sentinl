@@ -1,143 +1,163 @@
 <div class="modal-header">
   <h3 class="modal-title">Create watcher</h3>
 </div>
+
 <div class="modal-body">
 
-<form name="outerForm" class="form-horizontal">
-  <tabset active="activeForm">
-    <tab index="0" heading="General">
-      <div class="form-group">
-        <p></p>
-      </div>
-      <div class="form-group">
-        <div class="col-md-2"></div>
-        <div class="col-md-6">
-          <button
-            type="button"
-            class="btn btn-sm btn-success"
-            ng-click="watcher._source.disable = !watcher._source.disable; toggleWatcher()"
-            ng-class="{true: 'btn-warning', false: 'btn-success'}[watcher._source.disable]"
-            >{{form.status}}</button>
+  <form name="watcherForm" class="form-horizontal" novalidate>
+    <tabset>
+      <tab active index="0" heading="General">
+        <div class="form-group">
+          <p></p>
         </div>
-      </div>
-      <div class="form-group">
-        <label class="col-md-2 control-label" for="title">Title:</label>
-        <div class="col-md-6">
-          <input
-            type="text"
-            id="title"
-            name="title"
-            value="{{watcher._source.title}}"
-            class="form-control"
-            placeholder="{{watcher._source.uuid}}"
-            ng-model="watcher._source.title"
-            ng-disabled="form.disabled">
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="col-md-2 control-label">Run every:</label>
-        <div class="col-md-10">
-          <schedule-tag></schedule-tag>
-        </div>
-      </div>
-    </tab>
-    <tab index="1" heading="Input">
-      <div class="form-group">
-        <p></p>
-      </div>
-      <div class="form-group">
-        <div class="col-md-12">
-          <div id="inputEdit"
-            class="aceditor"
-            ng-model="watcher._source._input"
-            ui-ace="aceOptions('json')">{{ watcher._source._input }}</div>
-        </div>
-      </div>
-    </tab>
-    <tab index="2" heading="Condition">
-      <div class="form-group">
-        <p></p>
-      </div>
-      <div class="form-group">
-        <div class="col-md-12">
-          <div id="conditionEdit"
-            class="aceditor"
-            ng-model="watcher._source._condition"
-            ui-ace="aceOptions('javascript')">{{ watcher._source._condition }}</div>
-        </div>
-      </div>
-    </tab>
-    <tab index="3" heading="Transform">
-      <div class="form-group">
-        <p></p>
-      </div>
-      <div class="form-group">
-        <div class="col-md-12">
-          <div id="transformEdit"
-            class="aceditor"
-            ng-model="watcher._source._transform"
-            ui-ace="aceOptions('javascript')">{{ watcher._source._transform }}</div>
-        </div>
-      </div>
-    </tab>
-    <tab index="4" heading="Actions">
-      <div class="form-group">
-        <p></p>
-      </div>
-
-      <div class="form-group">
-        <div class="col-md-1">
-        </div>
-        <div class="col-md-11">
-          <a href=""
-            ng-class="{'fa': true, 'fa-plus': !form.actions.new.edit, 'fa-minus': form.actions.new.edit}"
-            ng-click="addAction()"></a>
-          <div ng-if="form.actions.new.edit">
-            <new-action></new-action>
+        <div class="form-group">
+          <div class="col-md-2"></div>
+          <div class="col-md-6">
+            <button
+              type="button"
+              class="btn btn-sm btn-success"
+              ng-click="watcher._source.disable = !watcher._source.disable; toggleWatcher()"
+              ng-class="{true: 'btn-warning', false: 'btn-success'}[watcher._source.disable]"
+              >{{form.status}}</button>
           </div>
         </div>
-      </div>
-
-      <div class="form-group">
-        <div class="col-md-1">
+        <div class="form-group" ng-class="{'has-error': watcherForm.title.$invalid && !watcherForm.title.$pristine}">
+          <label class="col-md-2 control-label" for="title">Title:</label>
+          <div class="col-md-6">
+            <input
+              type="text"
+              id="title"
+              name="title"
+              value="{{watcher._source.title}}"
+              class="form-control"
+              ng-model="watcher._source.title"
+              ng-disabled="form.disabled"
+              required>
+          </div>
+          <p ng-show="watcherForm.title.$invalid && !watcherForm.title.$pristine" class="help-block">
+            Watcher title is required.
+          </p>
         </div>
-        <div class="col-md-11">
-          <ul class="formActionsList"
-            ng-repeat="(actionName, actionSettings) in watcher._source.actions"
-            style="list-style-type:none;">
-            <li>
-              <a href="" class="fa fa-minus" ng-click="removeAction(actionName)"></a>
-              <a href="" ng-click="editAction(actionName, actionSettings)">{{actionName}}</a>
-              <i class="fa fa-arrow-down"
-                ng-show="actionSettings.webhook._edit || actionSettings.email._edit || actionSettings.report._edit"
-                aria-hidden="true"></i>
-              <div class="form-group" ng-if="actionSettings.webhook._edit || actionSettings.email._edit">
-                <div class="formSubform">
-                  <label class="col-md-2 control-label" for="throttle_period">Throttle period:</label>
-                  <div class="col-md-4">
-                    <throttle-period-tag></throttle-period-tag>
+        <div class="form-group">
+          <label class="col-md-2 control-label">Run every:</label>
+          <div class="col-md-10">
+            <schedule-tag></schedule-tag>
+          </div>
+        </div>
+      </tab>
+      <tab index="1" heading="Input">
+        <div class="form-group">
+          <p></p>
+        </div>
+        <div class="form-group">
+          <div class="col-md-12">
+            <div id="inputEdit"
+              class="aceditor"
+              ng-model="watcher._source._input"
+              ui-ace="aceOptions('json')">{{ watcher._source._input }}</div>
+          </div>
+        </div>
+      </tab>
+      <tab index="2" heading="Condition">
+        <div class="form-group">
+          <p></p>
+        </div>
+        <div class="form-group">
+          <div class="col-md-12">
+            <div id="conditionEdit"
+              class="aceditor"
+              ng-model="watcher._source._condition"
+              ui-ace="aceOptions('javascript')">{{ watcher._source._condition }}</div>
+          </div>
+        </div>
+      </tab>
+      <tab index="3" heading="Transform">
+        <div class="form-group">
+          <p></p>
+        </div>
+        <div class="form-group">
+          <div class="col-md-12">
+            <div id="transformEdit"
+              class="aceditor"
+              ng-model="watcher._source._transform"
+              ui-ace="aceOptions('javascript')">{{ watcher._source._transform }}</div>
+          </div>
+        </div>
+      </tab>
+      <tab index="4" heading="Actions">
+        <div class="form-group">
+          <p></p>
+        </div>
+
+        <div class="form-group">
+          <div class="col-md-1">
+          </div>
+          <div class="col-md-11">
+            <a href=""
+              ng-class="{
+                'fa': true,
+                'fa-plus': !form.actions.new.edit,
+                'fa-minus': form.actions.new.edit
+              }"
+              ng-click="addAction()"></a>
+            <div ng-if="form.actions.new.edit">
+              <new-action></new-action>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="col-md-1">
+          </div>
+          <div class="col-md-11">
+            <ul class="formActionsList"
+              ng-repeat="(actionName, actionSettings) in watcher._source.actions"
+              style="list-style-type:none;">
+              <li>
+                <a href="" class="fa fa-minus" ng-click="removeAction(actionName)"></a>
+                <a href="" ng-click="editAction(actionName, actionSettings)">{{actionName}}</a>
+                <i class="fa fa-arrow-down"
+                  ng-show="actionSettings.webhook._edit || actionSettings.email._edit || actionSettings.report._edit"
+                  aria-hidden="true"></i>
+                <div class="form-group" ng-if="actionSettings.webhook._edit || actionSettings.email._edit">
+                  <div class="formSubform">
+                    <label class="col-md-2 control-label" for="throttle_period">Throttle period:</label>
+                    <div class="col-md-4">
+                      <throttle-period-tag></throttle-period-tag>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div ng-show="actionSettings.webhook._edit">
-                <webhook-action name="{{actionName}}"></webhook-action>
-              </div>
-              <div ng-show="actionSettings.email._edit">
-                <email-action name="{{actionName}}"></email-action>
-              </div>
-              <div ng-show="actionSettings.report._edit">
-                <report-action name="{{actionName}}"></report-action>
-              </div>
-            </li>
-          </ul>
+                <div ng-show="actionSettings.webhook._edit">
+                  <webhook-action name="{{actionName}}"></webhook-action>
+                </div>
+                <div ng-show="actionSettings.email._edit">
+                  <email-action name="{{actionName}}"></email-action>
+                </div>
+                <div ng-show="actionSettings.report._edit">
+                  <report-action name="{{actionName}}"></report-action>
+                </div>
+              </li>
+            </ul>
+          </div>
         </div>
-      </div>
 
-    </tab>
-  </tabset>
-</form>
-</div>
+      </tab>
+    </tabset>
+
+  </form>
+
+</div> <!-- End of modal-body-->
+
 <div class="modal-footer">
-  <button class="btn btn-success" ng-click="save()">Save</button>
-  <button class="btn btn-warning" ng-click="cancel()">Cancel</button>
+  <div class="row">
+    <div class="col-md-9">
+      <p ng-show="watcherForm.$invalid" class="text-center text-danger">
+        <strong>Settings are invalid, correct the settings to save the watcher.</strong>
+      </p>
+    </div>
+    <div class="col-md-3">
+      <button class="btn btn-success" ng-disabled="watcherForm.$invalid" ng-click="save(watcherForm.$valid)">Save</button>
+      <button class="btn btn-warning" ng-click="cancel()">Cancel</button>
+    </div>
+  </div>
 </div>

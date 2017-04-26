@@ -1,5 +1,5 @@
 <h4>{{ action.type }}</h4>
-<div class="jumbotron">
+<div class="jumbotron" ng-form="webhookForm">
   <div class="form-group">
     <label class="col-md-2 control-label">Priority:</label>
     <div class="btn-group col-md-4">
@@ -8,7 +8,7 @@
       <label class="btn btn-info btn-sm" ng-model="actionSettings.webhook.priority" btn-radio="'low'">Low</label>
     </div>
   </div>
-  <div class="form-group">
+  <div class="form-group" ng-class="{'has-error': webhookForm.webhookTitle.$invalid && !webhookForm.webhookTitle.$pristine}">
     <label class="col-md-2 control-label" for="webhookTitle">Title:</label>
     <div class="col-md-6">
       <input
@@ -19,8 +19,12 @@
         class="form-control"
         placeholder="{{watcher._source.uuid}}"
         ng-model="actionSettings._title"
-        ng-disabled="form.disabled">
+        ng-disabled="form.disabled"
+        ng-required="actionSettings.webhook._edit">
     </div>
+    <p ng-show="webhookForm.webhookTitle.$invalid && !webhookForm.webhookTitle.$pristine" class="help-block">
+      <small>Action title is required.</small>
+    </p>
   </div>
   <div class="form-group">
     <label class="col-md-2 control-label" for="webhookHost">Method:</label>
@@ -49,7 +53,7 @@
       </label>
     </div>
   </div>
-  <div class="form-group">
+  <div class="form-group" ng-class="{'has-error': webhookForm.webhookHost.$invalid && !webhookForm.webhookHost.$pristine}">
     <label class="col-md-2 control-label" for="webhookHost">Host:</label>
     <div class="col-md-6">
       <input
@@ -60,22 +64,30 @@
         class="form-control"
         placeholder="remote.server"
         ng-model="actionSettings.webhook.host"
-        ng-disabled="form.disabled">
+        ng-disabled="form.disabled"
+        ng-required="actionSettings.webhook._edit">
     </div>
+    <p ng-show="webhookForm.webhookHost.$invalid && !webhookForm.webhookHost.$pristine" class="help-block">
+      <small>Host is required.</small>
+    </p>
   </div>
-  <div class="form-group">
+    <div class="form-group" ng-class="{'has-error': webhookForm.webhookPort.$invalid && !webhookForm.webhookPort.$pristine}">
     <label class="col-md-2 control-label" for="webhookPort">Port:</label>
     <div class="col-md-2">
       <input
         type="number"
         id="webhookPort"
         name="webhookPort"
-        ng-value="actionSettings.webhook.port"
         class="form-control"
+        ng-value="actionSettings.webhook.port"
         placeholder="9200"
         ng-model="actionSettings.webhook.port"
-        ng-disabled="form.disabled">
+        ng-disabled="form.disabled"
+        ng-required="actionSettings.webhook._edit">
     </div>
+    <p ng-show="webhookForm.webhookPort.$invalid && !webhookForm.webhookPort.$pristine" class="help-block">
+      <small>Port must be a number.</small>
+    </p>
   </div>
   <div class="form-group">
     <label class="col-md-2 control-label" for="webhookPath">Path:</label>
@@ -91,13 +103,42 @@
         ng-disabled="form.disabled">
     </div>
   </div>
-  <div class="form-group">
-    <label class="col-md-2 control-label" for="webhookBody">Body:</label>
-    <div class="col-md-8">
-      <div id="webhookBody"
-        class="aceditor"
-        ng-model="actionSettings.webhook.body"
-        ui-ace="aceOptions('behaviour')"></div>
+  <div class="form-group" ng-class="{'has-error': !actionSettings.webhook.body.length}">
+    <div class="row">
+      <label class="col-md-2 control-label" for="webhookBody">Body:</label>
+      <div class="col-md-8">
+        <div id="webhookBody"
+          ng-model="actionSettings.webhook.body"
+          ui-ace="aceOptions('behaviour')" class="aceditor">
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-2"></div>
+      <div class="col-md-8">
+        <p ng-show="!actionSettings.webhook.body.length" class="text-warning">
+          <small>Insert a bulk query into body.</small>
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="form-group" ng-class="{'has-error': !actionSettings.report.body.length}">
+    <div class="row">
+      <label class="col-md-2 control-label" for="reportBody">Body:</label>
+      <div class="col-md-8">
+        <div id="reportBody"
+          ng-model="actionSettings.report.body"
+          ui-ace="aceOptions('behaviour')" class="aceditor">
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-2"></div>
+      <div class="col-md-8">
+        <p ng-show="!actionSettings.report.body.length" class="text-warning">
+          <small>Describe the report in the body.</small>
+        </p>
+      </div>
     </div>
   </div>
   <div class="form-group" ng-show="actionSettings.webhook._proxy">
