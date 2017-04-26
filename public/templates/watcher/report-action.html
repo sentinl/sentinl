@@ -73,7 +73,8 @@
         class="form-control"
         placeholder="SENTINL Report"
         ng-model="actionSettings.report.subject"
-        ng-disabled="form.disabled">
+        ng-disabled="form.disabled"
+        ng-required="actionSettings.report._edit">
     </div>
   </div>
   <div class="form-group" ng-class="{'has-error': !actionSettings.report.body.length}">

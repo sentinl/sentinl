@@ -80,7 +80,8 @@
         class="form-control"
         placeholder="Alarm Title"
         ng-model="actionSettings.email.subject"
-        ng-disabled="form.disabled">
+        ng-disabled="form.disabled"
+        ng-required="actionSettings.email._edit">
     </div>
     <p ng-show="emailForm.emailSubject.$invalid && !emailForm.emailSubject.$pristine" class="help-block">
       <small>Enter a valid email subject.</small>
