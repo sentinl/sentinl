@@ -465,7 +465,11 @@ uiModules
     schedule: {
       hours: 0,
       mins: 0,
-      secs: 0
+      secs: 0,
+      pattern: {
+        hours: '^[01]?\\d|2[0-3]$',
+        minsAndSecs: '^[0-5]?\\d$'
+      }
     },
     actions: {
       new: {
