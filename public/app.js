@@ -396,8 +396,7 @@ uiModules
     restrict: 'E',
     template: scheduleTagTemplate,
     scope: {
-      timesrc: '=',
-      disable: '='
+      timesrc: '='
     },
     link: actionDirective
   };
