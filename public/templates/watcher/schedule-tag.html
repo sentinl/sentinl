@@ -14,10 +14,10 @@
             max="23"
             id="hours"
             name="hours"
-            ng-pattern="form.schedule.pattern.hours"
-            ng-value="form.schedule.values.hours"
+            ng-pattern="action.pattern.hours"
+            ng-value="timesrc.hours"
             class="form-control"
-            ng-model="form.schedule.values.hours"
+            ng-model="timesrc.hours"
             ng-disabled="form.disabled">
         </td>
         <td>
@@ -30,10 +30,10 @@
             max="59"
             id="mins"
             name="mins"
-            ng-pattern="form.schedule.pattern.minsAndSecs"
-            ng-value="form.schedule.values.mins"
+            ng-pattern="action.pattern.minsAndSecs"
+            ng-value="timesrc.mins"
             class="form-control"
-            ng-model="form.schedule.values.mins"
+            ng-model="timesrc.mins"
             ng-disabled="form.disabled">
         </td>
         <td>
@@ -46,10 +46,10 @@
             max="59"
             id="secs"
             name="secs"
-            ng-pattern="form.schedule.pattern.minsAndSecs"
-            ng-value="form.schedule.values.secs"
+            ng-pattern="action.pattern.minsAndSecs"
+            ng-value="timesrc.secs"
             class="form-control"
-            ng-model="form.schedule.values.secs"
+            ng-model="timesrc.secs"
             ng-disabled="form.disabled">
         </td>
       </tr>

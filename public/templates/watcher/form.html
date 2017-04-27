@@ -41,7 +41,7 @@
         <div class="form-group">
           <label class="col-md-2 control-label">Run every:</label>
           <div class="col-md-10">
-            <schedule-tag></schedule-tag>
+            <schedule-tag timesrc="watcher._source._schedule"></schedule-tag>
           </div>
         </div>
       </tab>
@@ -123,7 +123,7 @@
                   <div class="formSubform">
                     <label class="col-md-2 control-label" for="throttle_period">Throttle period:</label>
                     <div class="col-md-4">
-                      <throttle-period-tag></throttle-period-tag>
+                      <schedule-tag timesrc="actionSettings._throttle"></schedule-tag>
                     </div>
                   </div>
                 </div>
