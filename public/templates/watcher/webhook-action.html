@@ -76,6 +76,8 @@
     <div class="col-md-2">
       <input
         type="number"
+        min="0"
+        max="65535"
         id="webhookPort"
         name="webhookPort"
         class="form-control"
@@ -86,7 +88,7 @@
         ng-required="actionSettings.webhook._edit">
     </div>
     <p ng-show="webhookForm.webhookPort.$invalid && !webhookForm.webhookPort.$pristine" class="help-block">
-      <small>Port must be a number.</small>
+      <small>Port is a number from 0 to 65535.</small>
     </p>
   </div>
   <div class="form-group">

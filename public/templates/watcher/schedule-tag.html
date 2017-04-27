@@ -1,6 +1,8 @@
 <div ng-form="scheduleForm">
   <table class="scheduleTag">
-    <div class="form-group" ng-class="{'has-error': scheduleForm.hours.$invalid && !scheduleForm.hours.$pristine}">
+    <div class="form-group" ng-class="{'has-error': scheduleForm.hours.$invalid && !scheduleForm.hours.$pristine ||
+      scheduleForm.mins.$invalid && !scheduleForm.mins.$pristine ||
+      scheduleForm.secs.$invalid && !scheduleForm.secs.$pristine}">
       <tr>
         <td>
           h:

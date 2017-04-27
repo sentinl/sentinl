@@ -1,6 +1,8 @@
 <div ng-form="throttleForm">
   <table class="throttleTag">
-    <div class="form-group" ng-class="{'has-error': throttleForm.hours.$invalid && !throttleForm.hours.$pristine}">
+    <div class="form-group" ng-class="{'has-error': throttleForm.hours.$invalid && !throttleForm.hours.$pristine ||
+      throttleForm.mins.$invalid && !throttleForm.mins.$pristine ||
+      throttleForm.secs.$invalid && !throttleForm.secs.$pristine}">
       <tr>
         <td>
           h:

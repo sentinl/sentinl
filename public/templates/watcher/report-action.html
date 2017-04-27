@@ -113,7 +113,7 @@
         ng-disabled="form.disabled">
     </div>
     <p ng-show="reportForm.reportResolution.$invalid && !reportForm.reportResolution.$pristine" class="help-block">
-      <small>Enter a valid resolution.</small>
+      <small>Enter a valid resolution pattern.</small>
     </p>
   </div>
   <div class="form-group" ng-class="{'has-error': reportForm.reportUrl.$invalid && !reportForm.reportUrl.$pristine}">
@@ -148,11 +148,12 @@
         ng-disabled="form.disabled">
     </div>
   </div>
-  <div class="form-group">
+  <div class="form-group" ng-class="{'has-error': reportForm.reportDelay.$invalid && !reportForm.reportDelay.$pristine}">
     <label class="col-md-2 control-label" for="reportDelay">Delay:</label>
     <div class="col-md-6">
       <input
         type="number"
+        min="0"
         id="reportDelay"
         name="reportDelay"
         ng-value="actionSettings.report.snapshot.params.delay"
@@ -161,5 +162,8 @@
         ng-model="actionSettings.report.snapshot.params.delay"
         ng-disabled="form.disabled">
     </div>
+    <p ng-show="reportForm.reportDelay.$invalid && !reportForm.reportDelay.$pristine" class="help-block">
+      <small>Delay must be a positive integer.</small>
+    </p>
   </div>
 </div>
