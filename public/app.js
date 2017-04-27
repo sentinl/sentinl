@@ -463,9 +463,11 @@ uiModules
   $scope.form = {
     status: !$scope.watcher._source.disable ? 'Enabled' : 'Disable',
     schedule: {
-      hours: 0,
-      mins: 0,
-      secs: 0,
+      values: {
+        hours: 0,
+        mins: 0,
+        secs: 0
+      },
       pattern: {
         hours: '^[01]?\\d|2[0-3]$',
         minsAndSecs: '^[0-5]?\\d$'
@@ -499,13 +501,13 @@ uiModules
   const initSchedule = function () {
     _.each($scope.watcher._source.trigger.schedule.later.split(','), (period) => {
       if (period.match(/hour/i)) {
-        $scope.form.schedule.hours = +_.trim(period).split(' ')[1];
+        $scope.form.schedule.values.hours = +_.trim(period).split(' ')[1];
       }
       if (period.match(/min/i)) {
-        $scope.form.schedule.mins = +_.trim(period).split(' ')[1];
+        $scope.form.schedule.values.mins = +_.trim(period).split(' ')[1];
       }
       if (period.match(/sec/i)) {
-        $scope.form.schedule.secs = +_.trim(period).split(' ')[1];
+        $scope.form.schedule.values.secs = +_.trim(period).split(' ')[1];
       }
     });
   };
@@ -532,7 +534,7 @@ uiModules
 
   const saveSchedule = function () {
     let schedule = [];
-    _.forOwn($scope.form.schedule, (value, key) => {
+    _.forOwn($scope.form.schedule.values, (value, key) => {
       if (value) {
         schedule.push(`every ${value} ${key}`);
       }
