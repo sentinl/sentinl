@@ -57,6 +57,13 @@ import about from './templates/about.html';
 import alarms from './templates/alarms.html';
 import reports from './templates/reports.html';
 import jsonHtml from './templates/json.html';
+import confirmBox from './templates/confirm-box.html';
+import watcherForm from './templates/watcher/form.html';
+import watcherWebhookAction from './templates/watcher/webhook-action.html';
+import watcherNewAction from './templates/watcher/new-action.html';
+import watcherEmailAction from './templates/watcher/email-action.html';
+import watcherReportAction from './templates/watcher/report-action.html';
+import scheduleTagTemplate from './templates/watcher/schedule-tag.html';
 
 var impactLogo = require('plugins/sentinl/sentinl_logo.svg');
 var smallLogo = require('plugins/sentinl/sentinl.svg');
@@ -241,11 +248,452 @@ uiModules
 
 });
 
+
+uiModules
+.get('api/sentinl', [])
+.directive('newAction', function () {
+  function actionDirective(scope, element, attrs) {
+
+    scope.action = {
+      types: {
+        webhook: {},
+        email: {},
+        report: {}
+      }
+    };
+
+    scope.addAction = function (type) {
+
+      const throttle = {
+        hours: 0,
+        mins: 0,
+        secs: 1
+      };
+
+      if (type === 'webhook') {
+        const title = `New webhook action ${Math.random().toString(36).slice(2)}`;
+        scope.watcher._source.actions[title] = {
+          _title: title,
+          _throttle: throttle,
+          throttle_period: '1s',
+          webhook: {
+            _edit: false,
+            _proxy: false,
+            method: 'POST',
+            host: '',
+            port: 9200,
+            proxy: false,
+            path: '',
+            body: ''
+          }
+        };
+      }
+
+      if (type === 'email') {
+        const title = `New email action ${Math.random().toString(36).slice(2)}`;
+        scope.watcher._source.actions[title] = {
+          _title: title,
+          _throttle: throttle,
+          throttle_period: '1s',
+          email: {
+            _edit: false,
+            to: '',
+            from: '',
+            subject: '',
+            body: ''
+          }
+        };
+      }
+
+      if (type === 'report') {
+        const title = `New report action ${Math.random().toString(36).slice(2)}`;
+        scope.watcher._source.report = true;
+        scope.watcher._source.actions[title] = {
+          _title: title,
+          _throttle: throttle,
+          throttle_period: '1s',
+          report: {
+            _edit: false,
+            to: '',
+            from: '',
+            subject: '',
+            body: '',
+            snapshot: {
+              res: '1280x900',
+              url: 'http://www.google.com',
+              path: '/tmp/',
+              params: {
+                delay: 5000
+              }
+            }
+          }
+        };
+      }
+
+    };
+  };
+
+  return {
+    restrict: 'E',
+    template: watcherNewAction,
+    scope: true,
+    link: actionDirective
+  };
+});
+
+
+uiModules
+.get('api/sentinl', [])
+.directive('reportAction', function () {
+  function actionDirective(scope, element, attrs) {
+    scope.action = {
+      type: 'report',
+      resolutionPattern: '^\\d{1,4}x\\d{1,4}$'
+    };
+  }
+
+  return {
+    restrict: 'E',
+    template: watcherReportAction,
+    scope: true,
+    link: actionDirective
+  };
+});
+
+
+uiModules
+.get('api/sentinl', [])
+.directive('emailAction', function () {
+  function actionDirective(scope, element, attrs) {
+    scope.action = {
+      type: 'email'
+    };
+  }
+
+  return {
+    restrict: 'E',
+    template: watcherEmailAction,
+    scope: true,
+    link: actionDirective
+  };
+});
+
+
+uiModules
+.get('api/sentinl', [])
+.directive('scheduleTag', function () {
+
+  function actionDirective(scope, element, attrs) {
+    scope.action = {
+      pattern: {
+        hours: '^[01]?\\d|2[0-3]$',
+        minsAndSecs: '^[0-5]?\\d$'
+      }
+    };
+  };
+
+  return {
+    restrict: 'E',
+    template: scheduleTagTemplate,
+    scope: {
+      timesrc: '='
+    },
+    link: actionDirective
+  };
+});
+
+
+uiModules
+.get('api/sentinl', [])
+.directive('webhookAction', function () {
+
+  function actionDirective(scope, element, attrs) {
+
+    scope.action = {
+      type: 'webhook',
+      title: attrs.name
+    };
+
+    if (_.has(scope.watcher._source.actions[attrs.name].webhook, 'headers')) {
+      scope.watcher._source.actions[attrs.name].webhook._proxy = true;
+      let headers = scope.watcher._source.actions[attrs.name].webhook.headers;
+      scope.watcher._source.actions[attrs.name].webhook._headers = JSON.stringify(headers, null, 2);
+    }
+
+    scope.changeMethod = function (method) {
+      scope.watcher._source.actions[attrs.name].webhook.method = method;
+    };
+
+    scope.enableExtraFields = function () {
+      if (scope.watcher._source.actions[attrs.name].webhook._proxy) {
+        scope.watcher._source.actions[attrs.name].webhook.headers = {};
+        scope.watcher._source.actions[attrs.name].webhook._headers = '';
+      } else {
+        delete scope.watcher._source.actions[attrs.name].webhook.headers;
+        delete scope.watcher._source.actions[attrs.name].webhook._headers;
+      }
+    };
+
+  };
+
+  return {
+    restrict: 'E',
+    template: watcherWebhookAction,
+    scope: true,
+    link: actionDirective
+  };
+});
+
+
+uiModules
+.get('api/sentinl', [])
+.controller('ConfirmCtrl', function ($scope, $modalInstance, action) {
+
+  $scope.actionName = action;
+
+  $scope.yes = function () {
+    $modalInstance.close('yes');
+  };
+
+  $scope.no = function () {
+    $modalInstance.dismiss('no');
+  };
+
+});
+
+
+// WATCHER FORM CONTROLLER
+uiModules
+.get('api/sentinl', [])
+.controller('WatcherFormCtrl', function ($scope, $modalInstance, $modal, $log, watcher) {
+
+  $scope.notify = new Notifier();
+
+  $scope.watcher = watcher;
+
+  $scope.form = {
+    status: !$scope.watcher._source.disable ? 'Enabled' : 'Disable',
+    actions: {
+      new: {
+        edit: false
+      },
+      types: [ 'webhook', 'email', 'report' ]
+    }
+  };
+
+  $scope.aceOptions = function (mode) {
+    return {
+      mode: mode,
+      advanced: {
+        tabSize: 2
+      },
+      onLoad: function (_editor) {
+        _editor.$blockScrolling = Infinity;
+      }
+    };
+  };
+
+  const initActionTitles = function () {
+    _.forOwn($scope.watcher._source.actions, (settings, name) => { settings._title = name; });
+  };
+
+  const initSchedule = function () {
+    $scope.watcher._source._schedule = {
+      hours: 0,
+      mins: 0,
+      secs: 0
+    };
+    _.each($scope.watcher._source.trigger.schedule.later.split(','), (period) => {
+      if (period.match(/hour/i)) {
+        $scope.watcher._source._schedule.hours = +_.trim(period).split(' ')[1];
+      }
+      if (period.match(/min/i)) {
+        $scope.watcher._source._schedule.mins = +_.trim(period).split(' ')[1];
+      }
+      if (period.match(/sec/i)) {
+        $scope.watcher._source._schedule.secs = +_.trim(period).split(' ')[1];
+      }
+    });
+  };
+
+  const initThrottlePeriods = function () {
+    const getHours = function (str) {
+      return str.match(/([0-9]?[0-9])h/i) ? +str.match(/([0-9]?[0-9])h/i)[1] : 0;
+    };
+    const getMins = function (str) {
+      return str.match(/([0-9]?[0-9])m/i) ? +str.match(/([0-9]?[0-9])m/i)[1] : 0;
+    };
+    const getSecs = function (str) {
+      return str.match(/([0-9]?[0-9])s/i) ? +str.match(/([0-9]?[0-9])s/i)[1] : 0;
+    };
+
+    _.forOwn($scope.watcher._source.actions, (actions) => {
+      actions._throttle = {
+        hours: getHours(actions.throttle_period),
+        mins: getMins(actions.throttle_period),
+        secs: getSecs(actions.throttle_period)
+      };
+    });
+  };
+
+  const saveSchedule = function () {
+    let schedule = [];
+    _.forOwn($scope.watcher._source._schedule, (value, key) => {
+      if (value) {
+        schedule.push(`every ${value} ${key}`);
+      }
+    });
+    $scope.watcher._source.trigger.schedule.later = schedule.join(', ');
+    delete $scope.watcher._source._schedule;
+  };
+
+  const saveThrottle = function () {
+    _.forOwn($scope.watcher._source.actions, (action) => {
+      _.forOwn(action._throttle, (value, key) => {
+        if (!value) action._throttle[key] = 0;
+      });
+      action.throttle_period = `${action._throttle.hours}h${action._throttle.mins}m${action._throttle.secs}s`;
+      delete action._throttle;
+    });
+  };
+
+  $scope.toggleWatcher = function () {
+    if (!$scope.watcher._source.disable) {
+      $scope.form.status = 'Enabled';
+      $scope.watcher._source.disable = false;
+    } else {
+      $scope.form.status = 'Disabled';
+      $scope.watcher._source.disable = true;
+    }
+  };
+
+  $scope.removeAction = function (actionName) {
+    const confirmModal = $modal.open({
+      template: confirmBox,
+      controller: 'ConfirmCtrl',
+      size: 'sm',
+      resolve: {
+        action: function () {
+          return actionName;
+        }
+      }
+    });
+
+    confirmModal.result.then((response) => {
+      if (response === 'yes') {
+        delete $scope.watcher._source.actions[actionName];
+      }
+    }, () => {
+      $log.info(`You choose not deleting the action "${actionName}"`);
+    });
+  };
+
+  $scope.addAction = function () {
+    $scope.form.actions.new.edit = !$scope.form.actions.new.edit;
+  };
+
+  $scope.editAction = function (actionName, actionSettings) {
+    // toggle edit for the selected action
+    _.each($scope.form.actions.types, (type) => {
+      if (_.has(actionSettings, type)) {
+        actionSettings[type]._edit = !actionSettings[type]._edit;
+      }
+    });
+
+    // edit one action at a time
+    // close all other actions
+    _.forOwn($scope.watcher._source.actions, (settings, name) => {
+      _.each($scope.form.actions.types, (type) => {
+        if (_.has(settings, type)) {
+          if (name !== actionName) settings[type]._edit = false;
+        }
+      });
+    });
+  };
+
+  const renameActions = function (actions) {
+    const newActions = {};
+    _.forOwn(actions, (settings, name) => {
+      newActions[settings._title] = settings;
+      delete newActions[settings._title]._title;
+    });
+    return newActions;
+  };
+
+  const saveEditorsText = function () {
+
+    _.each(['_input', '_condition', '_transform'], (field) => {
+      if (_.has($scope.watcher._source, field)) {
+        if ($scope.watcher._source[field]) {
+          if (field === '_input') {
+            $scope.watcher._source[field.substring(1)] = JSON.parse($scope.watcher._source[field]);
+          } else {
+            $scope.watcher._source[field.substring(1)].script.script = $scope.watcher._source[field];
+          }
+        }
+        delete $scope.watcher._source[field];
+      }
+    });
+
+    _.forOwn($scope.watcher._source.actions, (settings, name) => {
+      _.each($scope.form.actions.types, (type) => {
+        if (_.has(settings, type)) {
+          delete settings[type]._edit;
+        }
+
+        if (type === 'webhook' && _.has(settings, type)) {
+          if (settings[type]._headers) {
+            settings[type].headers = JSON.parse(settings[type]._headers);
+            delete settings[type]._headers;
+          }
+          delete settings[type]._proxy;
+        }
+      });
+    });
+
+  };
+
+  const init = function () {
+    initActionTitles();
+    initSchedule();
+    initThrottlePeriods();
+    $scope.watcher._source._input = JSON.stringify($scope.watcher._source.input, null, 2);
+    $scope.watcher._source._transform = $scope.watcher._source.transform.script.script;
+    $scope.watcher._source._condition = $scope.watcher._source.condition.script.script;
+  };
+
+  init();
+
+  $scope.save = function () {
+    try {
+      if ($scope.watcher._source._input && $scope.watcher._source._input.length) {
+        JSON.parse($scope.watcher._source._input);
+      }
+    } catch (e) {
+      $scope.notify.error(e);
+      $scope.watcherForm.$valid = false;
+      $scope.watcherForm.$invalid = true;
+    }
+
+    if ($scope.watcherForm.$valid) {
+      saveSchedule();
+      saveThrottle();
+      saveEditorsText();
+      $scope.watcher._source.actions = renameActions($scope.watcher._source.actions);
+      $modalInstance.close($scope.watcher);
+    }
+  };
+
+  $scope.cancel = function () {
+    $modalInstance.dismiss('cancel');
+  };
+});
+
 // WATCHERS CONTROLLER
 uiModules
 .get('api/sentinl', [])
 .controller('sentinlWatchers', function ($rootScope, $scope, $route, $interval,
-  $timeout, timefilter, Private, Notifier, $window, kbnUrl, $http) {
+  $timeout, timefilter, Private, Notifier, $window, kbnUrl, $http, $modal, $log) {
   const tabifyAggResponse = Private(AggResponseTabifyTabifyProvider);
 
   $scope.title = 'Sentinl: Watchers';
@@ -276,6 +724,27 @@ uiModules
       $scope.watcherNew(JSON.parse($window.localStorage.getItem('sentinl_saved_query')));
       $window.localStorage.removeItem('sentinl_saved_query');
     }
+  };
+
+  $scope.openWatcherEditorForm = function ($index) {
+
+    const formModal = $modal.open({
+      template: watcherForm,
+      controller: 'WatcherFormCtrl',
+      size: 'lg',
+      resolve: {
+        watcher: function () {
+          return $scope.watchers[$index];
+        },
+      }
+    });
+
+    formModal.result.then((watcher) => {
+      $scope.watchers[$index] = watcher;
+      $scope.watcherSave($index, true);
+    }, () => {
+      $log.info('You choose to close watcher form');
+    });
   };
 
   $http.get('../api/sentinl/list')
@@ -319,8 +788,14 @@ uiModules
     }
   };
 
-  $scope.watcherSave = function ($index) {
-    var watcher = $scope.editor ? JSON.parse($scope.editor.getValue()) : $scope.watchers[$index];
+  $scope.watcherSave = function ($index, callFromWatcherEditorForm = false) {
+    let watcher;
+    if ($scope.editor && !callFromWatcherEditorForm) {
+      watcher = JSON.parse($scope.editor.getValue());
+    } else {
+      watcher = $scope.watchers[$index];
+    }
+
     console.log('saving object:', watcher);
     return $http.post(`../api/sentinl/watcher/${watcher._id}`, watcher)
     .then(
@@ -369,7 +844,11 @@ uiModules
               script: 'payload.hits.total > 100'
             }
           },
-          transform: {},
+          transform: {
+            script: {
+              script: ''
+            }
+          },
           actions: {
             email_admin: {
               throttle_period: '15m',
@@ -404,8 +883,17 @@ uiModules
               later: 'every 1 hour'
             }
           },
+          condition: {
+            script: {
+              script: ''
+            }
+          },
+          transform: {
+            script: {
+              script: ''
+            }
+          },
           report : true,
-          transform: {},
           actions: {
             report_admin: {
               throttle_period: '15m',
