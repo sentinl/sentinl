@@ -31,7 +31,7 @@
               value="{{watcher._source.title}}"
               class="form-control"
               ng-model="watcher._source.title"
-              ng-disabled="form.disabled"
+              ng-disabled="watcher._source.disable"
               required>
           </div>
           <p ng-show="watcherForm.title.$invalid && !watcherForm.title.$pristine" class="help-block">
@@ -41,7 +41,7 @@
         <div class="form-group">
           <label class="col-md-2 control-label">Run every:</label>
           <div class="col-md-10">
-            <schedule-tag timesrc="watcher._source._schedule"></schedule-tag>
+            <schedule-tag timesrc="watcher._source._schedule" disable="watcher._source.disable"></schedule-tag>
           </div>
         </div>
       </tab>
@@ -119,7 +119,8 @@
                 <i class="fa fa-arrow-down"
                   ng-show="actionSettings.webhook._edit || actionSettings.email._edit || actionSettings.report._edit"
                   aria-hidden="true"></i>
-                <div class="form-group" ng-if="actionSettings.webhook._edit || actionSettings.email._edit">
+                <div class="form-group" ng-if="actionSettings.webhook._edit || actionSettings.email._edit ||
+                  actionSettings.report._edit">
                   <div class="formSubform">
                     <label class="col-md-2 control-label" for="throttle_period">Throttle period:</label>
                     <div class="col-md-4">
@@ -154,9 +155,12 @@
       <p ng-show="watcherForm.$invalid" class="text-center text-danger">
         <strong>Settings are invalid, correct the settings to save the watcher.</strong>
       </p>
+      <p ng-show="watcherForm.$invalid" class="text-center text-danger">
+        The input must be in JSON format.
+      </p>
     </div>
     <div class="col-md-3">
-      <button class="btn btn-success" ng-disabled="watcherForm.$invalid" ng-click="save(watcherForm.$valid)">Save</button>
+      <button class="btn btn-success" ng-disabled="watcherForm.$invalid" ng-click="save()">Save</button>
       <button class="btn btn-warning" ng-click="cancel()">Cancel</button>
     </div>
   </div>

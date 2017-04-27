@@ -264,10 +264,17 @@ uiModules
 
     scope.addAction = function (type) {
 
+      const throttle = {
+        hours: 0,
+        mins: 0,
+        secs: 1
+      };
+
       if (type === 'webhook') {
         const title = `New webhook action ${Math.random().toString(36).slice(2)}`;
         scope.watcher._source.actions[title] = {
           _title: title,
+          _throttle: throttle,
           throttle_period: '1s',
           webhook: {
             _edit: false,
@@ -286,6 +293,7 @@ uiModules
         const title = `New email action ${Math.random().toString(36).slice(2)}`;
         scope.watcher._source.actions[title] = {
           _title: title,
+          _throttle: throttle,
           throttle_period: '1s',
           email: {
             _edit: false,
@@ -302,6 +310,8 @@ uiModules
         scope.watcher._source.report = true;
         scope.watcher._source.actions[title] = {
           _title: title,
+          _throttle: throttle,
+          throttle_period: '1s',
           report: {
             _edit: false,
             to: '',
@@ -386,7 +396,8 @@ uiModules
     restrict: 'E',
     template: scheduleTagTemplate,
     scope: {
-      timesrc: '='
+      timesrc: '=',
+      disable: '='
     },
     link: actionDirective
   };
@@ -457,15 +468,12 @@ uiModules
 .get('api/sentinl', [])
 .controller('WatcherFormCtrl', function ($scope, $modalInstance, $modal, $log, watcher) {
 
+  $scope.notify = new Notifier();
+
   $scope.watcher = watcher;
 
   $scope.form = {
     status: !$scope.watcher._source.disable ? 'Enabled' : 'Disable',
-    //schedule: {
-    //  hours: 0,
-    //  mins: 0,
-    //  secs: 0
-    //},
     actions: {
       new: {
         edit: false
@@ -480,9 +488,8 @@ uiModules
       advanced: {
         tabSize: 2
       },
-      rendererOptions: {
-        showPrintMargin: false,
-        maxLines: 4294967296
+      onLoad: function (_editor) {
+        _editor.$blockScrolling = Infinity;
       }
     };
   };
@@ -542,9 +549,12 @@ uiModules
   };
 
   const saveThrottle = function () {
-    _.forOwn($scope.watcher._source.actions, (actions) => {
-      actions.throttle_period = `${actions._throttle.hours}h${actions._throttle.mins}m${actions._throttle.secs}s`;
-      delete actions._throttle;
+    _.forOwn($scope.watcher._source.actions, (action) => {
+      _.forOwn(action._throttle, (value, key) => {
+        if (!value) action._throttle[key] = 0;
+      });
+      action.throttle_period = `${action._throttle.hours}h${action._throttle.mins}m${action._throttle.secs}s`;
+      delete action._throttle;
     });
   };
 
@@ -613,24 +623,21 @@ uiModules
 
   const saveEditorsText = function () {
 
-    if ($scope.watcher._source._input) {
-      $scope.watcher._source.input = JSON.parse($scope.watcher._source._input);
-      delete $scope.watcher._source._input;
-    }
-
-    if ($scope.watcher._source._condition) {
-      $scope.watcher._source.condition.script.script = $scope.watcher._source._condition;
-      delete $scope.watcher._source._condition;
-    }
-
-    if ($scope.watcher._source._transform) {
-      $scope.watcher._source.transform.script.script = $scope.watcher._source._transform;
-      delete $scope.watcher._source._transform;
-    }
+    _.each(['_input', '_condition', '_transform'], (field) => {
+      if (_.has($scope.watcher._source, field)) {
+        if ($scope.watcher._source[field]) {
+          if (field === '_input') {
+            $scope.watcher._source[field.substring(1)] = JSON.parse($scope.watcher._source[field]);
+          } else {
+            $scope.watcher._source[field.substring(1)].script.script = $scope.watcher._source[field];
+          }
+        }
+        delete $scope.watcher._source[field];
+      }
+    });
 
     _.forOwn($scope.watcher._source.actions, (settings, name) => {
       _.each($scope.form.actions.types, (type) => {
-
         if (_.has(settings, type)) {
           delete settings[type]._edit;
         }
@@ -642,9 +649,9 @@ uiModules
           }
           delete settings[type]._proxy;
         }
-
       });
     });
+
   };
 
   const init = function () {
@@ -658,8 +665,18 @@ uiModules
 
   init();
 
-  $scope.save = function (isValid) {
-    if (isValid) {
+  $scope.save = function () {
+    try {
+      if ($scope.watcher._source._input && $scope.watcher._source._input.length) {
+        JSON.parse($scope.watcher._source._input);
+      }
+    } catch (e) {
+      $scope.notify.error(e);
+      $scope.watcherForm.$valid = false;
+      $scope.watcherForm.$invalid = true;
+    }
+
+    if ($scope.watcherForm.$valid) {
       saveSchedule();
       saveThrottle();
       saveEditorsText();

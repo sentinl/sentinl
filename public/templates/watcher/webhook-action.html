@@ -19,7 +19,6 @@
         class="form-control"
         placeholder="{{watcher._source.uuid}}"
         ng-model="actionSettings._title"
-        ng-disabled="form.disabled"
         ng-required="actionSettings.webhook._edit">
     </div>
     <p ng-show="webhookForm.webhookTitle.$invalid && !webhookForm.webhookTitle.$pristine" class="help-block">
@@ -29,7 +28,7 @@
   <div class="form-group">
     <label class="col-md-2 control-label" for="webhookHost">Method:</label>
     <div class="btn-group col-md-2" dropdown is-open="status.isopen">
-      <button type="button" class="btn btn-default btn-md dropdown-toggle" dropdown-toggle ng-disabled="form.disabled">
+      <button type="button" class="btn btn-default btn-md dropdown-toggle" dropdown-toggle>
         {{actionSettings.webhook.method}} <span class="caret"></span>
       </button>
       <ul class="dropdown-menu" role="menu">
@@ -64,7 +63,6 @@
         class="form-control"
         placeholder="remote.server"
         ng-model="actionSettings.webhook.host"
-        ng-disabled="form.disabled"
         ng-required="actionSettings.webhook._edit">
     </div>
     <p ng-show="webhookForm.webhookHost.$invalid && !webhookForm.webhookHost.$pristine" class="help-block">
@@ -84,7 +82,6 @@
         ng-value="actionSettings.webhook.port"
         placeholder="9200"
         ng-model="actionSettings.webhook.port"
-        ng-disabled="form.disabled"
         ng-required="actionSettings.webhook._edit">
     </div>
     <p ng-show="webhookForm.webhookPort.$invalid && !webhookForm.webhookPort.$pristine" class="help-block">
@@ -101,8 +98,7 @@
         value="{{actionSettings.webhook.path}}"
         class="form-control"
         placeholder=":/{{payload.watcher_id}"
-        ng-model="actionSettings.webhook.path"
-        ng-disabled="form.disabled">
+        ng-model="actionSettings.webhook.path">
     </div>
   </div>
   <div class="form-group" ng-class="{'has-error': !actionSettings.webhook.body.length}">

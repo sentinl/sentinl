@@ -26,7 +26,6 @@
         class="form-control"
         placeholder="{{watcher._source.uuid}}"
         ng-model="actionSettings._title"
-        ng-disabled="form.disabled"
         ng-required="actionSettings.email._edit">
     </div>
     <p ng-show="emailForm.emailTitle.$invalid && !emailForm.emailTitle.$pristine" class="help-block">
@@ -44,7 +43,6 @@
         class="form-control"
         placeholder="root@localhost"
         ng-model="actionSettings.email.to"
-        ng-disabled="form.disabled"
         ng-required="actionSettings.email._edit">
     </div>
     <p ng-show="emailForm.emailTo.$invalid && !emailForm.emailTo.$pristine" class="help-block">
@@ -62,7 +60,6 @@
         class="form-control"
         placeholder="sentinl@localhost"
         ng-model="actionSettings.email.from"
-        ng-disabled="form.disabled"
         ng-required="actionSettings.email._edit">
     </div>
     <p ng-show="emailForm.emailFrom.$invalid && !emailForm.emailFrom.$pristine" class="help-block">
@@ -80,7 +77,6 @@
         class="form-control"
         placeholder="Alarm Title"
         ng-model="actionSettings.email.subject"
-        ng-disabled="form.disabled"
         ng-required="actionSettings.email._edit">
     </div>
     <p ng-show="emailForm.emailSubject.$invalid && !emailForm.emailSubject.$pristine" class="help-block">
