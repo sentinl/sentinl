@@ -26,6 +26,13 @@ import uiRoutes from 'ui/routes';
 /* import controllers */
 import './controllers/reportController';
 
+/* import directives */
+import './directives/newAction/new-action';
+import './directives/emailAction/email-action';
+import './directives/webhookAction/webhook-action';
+import './directives/reportAction/report-action';
+import './directives/scheduleTag/schedule-tag';
+
 import $ from 'jquery';
 
 /* Elasticsearch */
@@ -59,11 +66,6 @@ import reports from './templates/reports.html';
 import jsonHtml from './templates/json.html';
 import confirmBox from './templates/confirm-box.html';
 import watcherForm from './templates/watcher/form.html';
-import watcherWebhookAction from './templates/watcher/webhook-action.html';
-import watcherNewAction from './templates/watcher/new-action.html';
-import watcherEmailAction from './templates/watcher/email-action.html';
-import watcherReportAction from './templates/watcher/report-action.html';
-import scheduleTagTemplate from './templates/watcher/schedule-tag.html';
 
 var impactLogo = require('plugins/sentinl/sentinl_logo.svg');
 var smallLogo = require('plugins/sentinl/sentinl.svg');
@@ -246,202 +248,6 @@ uiModules
   }, 1000);
   $scope.$watch('$destroy', unsubscribe);
 
-});
-
-
-uiModules
-.get('api/sentinl', [])
-.directive('newAction', function () {
-  function actionDirective(scope, element, attrs) {
-
-    scope.action = {
-      types: {
-        webhook: {},
-        email: {},
-        report: {}
-      }
-    };
-
-    scope.addAction = function (type) {
-
-      const throttle = {
-        hours: 0,
-        mins: 0,
-        secs: 1
-      };
-
-      if (type === 'webhook') {
-        const title = `New webhook action ${Math.random().toString(36).slice(2)}`;
-        scope.watcher._source.actions[title] = {
-          _title: title,
-          _throttle: throttle,
-          throttle_period: '1s',
-          webhook: {
-            _edit: false,
-            _proxy: false,
-            method: 'POST',
-            host: '',
-            port: 9200,
-            proxy: false,
-            path: '',
-            body: ''
-          }
-        };
-      }
-
-      if (type === 'email') {
-        const title = `New email action ${Math.random().toString(36).slice(2)}`;
-        scope.watcher._source.actions[title] = {
-          _title: title,
-          _throttle: throttle,
-          throttle_period: '1s',
-          email: {
-            _edit: false,
-            to: '',
-            from: '',
-            subject: '',
-            body: ''
-          }
-        };
-      }
-
-      if (type === 'report') {
-        const title = `New report action ${Math.random().toString(36).slice(2)}`;
-        scope.watcher._source.report = true;
-        scope.watcher._source.actions[title] = {
-          _title: title,
-          _throttle: throttle,
-          throttle_period: '1s',
-          report: {
-            _edit: false,
-            to: '',
-            from: '',
-            subject: '',
-            body: '',
-            snapshot: {
-              res: '1280x900',
-              url: 'http://www.google.com',
-              path: '/tmp/',
-              params: {
-                delay: 5000
-              }
-            }
-          }
-        };
-      }
-
-    };
-  };
-
-  return {
-    restrict: 'E',
-    template: watcherNewAction,
-    scope: true,
-    link: actionDirective
-  };
-});
-
-
-uiModules
-.get('api/sentinl', [])
-.directive('reportAction', function () {
-  function actionDirective(scope, element, attrs) {
-    scope.action = {
-      type: 'report',
-      resolutionPattern: '^\\d{1,4}x\\d{1,4}$'
-    };
-  }
-
-  return {
-    restrict: 'E',
-    template: watcherReportAction,
-    scope: true,
-    link: actionDirective
-  };
-});
-
-
-uiModules
-.get('api/sentinl', [])
-.directive('emailAction', function () {
-  function actionDirective(scope, element, attrs) {
-    scope.action = {
-      type: 'email'
-    };
-  }
-
-  return {
-    restrict: 'E',
-    template: watcherEmailAction,
-    scope: true,
-    link: actionDirective
-  };
-});
-
-
-uiModules
-.get('api/sentinl', [])
-.directive('scheduleTag', function () {
-
-  function actionDirective(scope, element, attrs) {
-    scope.action = {
-      pattern: {
-        hours: '^[01]?\\d|2[0-3]$',
-        minsAndSecs: '^[0-5]?\\d$'
-      }
-    };
-  };
-
-  return {
-    restrict: 'E',
-    template: scheduleTagTemplate,
-    scope: {
-      timesrc: '='
-    },
-    link: actionDirective
-  };
-});
-
-
-uiModules
-.get('api/sentinl', [])
-.directive('webhookAction', function () {
-
-  function actionDirective(scope, element, attrs) {
-
-    scope.action = {
-      type: 'webhook',
-      title: attrs.name
-    };
-
-    if (_.has(scope.watcher._source.actions[attrs.name].webhook, 'headers')) {
-      scope.watcher._source.actions[attrs.name].webhook._proxy = true;
-      let headers = scope.watcher._source.actions[attrs.name].webhook.headers;
-      scope.watcher._source.actions[attrs.name].webhook._headers = JSON.stringify(headers, null, 2);
-    }
-
-    scope.changeMethod = function (method) {
-      scope.watcher._source.actions[attrs.name].webhook.method = method;
-    };
-
-    scope.enableExtraFields = function () {
-      if (scope.watcher._source.actions[attrs.name].webhook._proxy) {
-        scope.watcher._source.actions[attrs.name].webhook.headers = {};
-        scope.watcher._source.actions[attrs.name].webhook._headers = '';
-      } else {
-        delete scope.watcher._source.actions[attrs.name].webhook.headers;
-        delete scope.watcher._source.actions[attrs.name].webhook._headers;
-      }
-    };
-
-  };
-
-  return {
-    restrict: 'E',
-    template: watcherWebhookAction,
-    scope: true,
-    link: actionDirective
-  };
 });
 
 
