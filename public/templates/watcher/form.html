@@ -117,10 +117,22 @@
                 <a href="" class="fa fa-minus" ng-click="removeAction(actionName)"></a>
                 <a href="" ng-click="editAction(actionName, actionSettings)">{{actionName}}</a>
                 <i class="fa fa-arrow-down"
-                  ng-show="actionSettings.webhook._edit || actionSettings.email._edit || actionSettings.report._edit"
+                  ng-show="[
+                    actionSettings.webhook._edit,
+                    actionSettings.email._edit,
+                    actionSettings.report._edit,
+                    actionSettings.slack._edit,
+                    actionSettings.console._edit
+                    ].indexOf(true) != -1"
                   aria-hidden="true"></i>
-                <div class="form-group" ng-if="actionSettings.webhook._edit || actionSettings.email._edit ||
-                  actionSettings.report._edit">
+                <div class="form-group"
+                  ng-if="[
+                    actionSettings.webhook._edit,
+                    actionSettings.email._edit,
+                    actionSettings.report._edit,
+                    actionSettings.slack._edit,
+                    actionSettings.console._edit
+                    ].indexOf(true) != -1">
                   <div class="formSubform">
                     <label class="col-md-2 control-label" for="throttle_period">Throttle period:</label>
                     <div class="col-md-4">
@@ -136,6 +148,12 @@
                 </div>
                 <div ng-show="actionSettings.report._edit">
                   <report-action name="{{actionName}}"></report-action>
+                </div>
+                <div ng-show="actionSettings.slack._edit">
+                  <slack-action name="{{actionName}}"></slack-action>
+                </div>
+                <div ng-show="actionSettings.console._edit">
+                  <console-action name="{{actionName}}"></console-action>
                 </div>
               </li>
             </ul>

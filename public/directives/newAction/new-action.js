@@ -10,7 +10,9 @@ uiModules
       types: {
         webhook: {},
         email: {},
-        report: {}
+        report: {},
+        slack: {},
+        console: {}
       }
     };
 
@@ -81,6 +83,35 @@ uiModules
           }
         };
       }
+
+      if (type === 'slack') {
+        const title = `New slack action ${Math.random().toString(36).slice(2)}`;
+        scope.watcher._source.actions[title] = {
+          _title: title,
+          _throttle: throttle,
+          throttle_period: '1s',
+          slack: {
+            _edit: false,
+            channel: '',
+            message: '',
+            stateless: false
+          }
+        };
+      }
+
+      if (type === 'console') {
+        const title = `New console action ${Math.random().toString(36).slice(2)}`;
+        scope.watcher._source.actions[title] = {
+          _title: title,
+          _throttle: throttle,
+          throttle_period: '1s',
+          console: {
+            _edit: false,
+            message: '',
+          }
+        };
+      }
+
 
     };
   };

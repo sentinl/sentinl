@@ -31,6 +31,8 @@ import './directives/newAction/new-action';
 import './directives/emailAction/email-action';
 import './directives/webhookAction/webhook-action';
 import './directives/reportAction/report-action';
+import './directives/slackAction/slack-action';
+import './directives/consoleAction/console-action';
 import './directives/scheduleTag/schedule-tag';
 
 import $ from 'jquery';
@@ -283,7 +285,7 @@ uiModules
       new: {
         edit: false
       },
-      types: [ 'webhook', 'email', 'report' ]
+      types: [ 'webhook', 'email', 'report', 'slack', 'console' ]
     }
   };
 
