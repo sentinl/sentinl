@@ -290,11 +290,17 @@ uiModules
     }
   };
 
-  $scope.aceOptions = function (mode) {
+  $scope.aceOptions = function (mode, lines = 10) {
     return {
       mode: mode,
-      advanced: {
-        tabSize: 2
+      useWrapMode : true,
+      showGutter: true,
+      rendererOptions: {
+        maxLines: lines,
+        minLines: 5
+      },
+      editorOptions: {
+        autoScrollEditorIntoView: false
       },
       onLoad: function (_editor) {
         _editor.$blockScrolling = Infinity;

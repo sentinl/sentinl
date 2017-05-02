@@ -52,9 +52,8 @@
         <div class="form-group">
           <div class="col-md-12">
             <div id="inputEdit"
-              class="aceditor"
               ng-model="watcher._source._input"
-              ui-ace="aceOptions('json')">{{ watcher._source._input }}</div>
+              ui-ace="aceOptions('json', 30)">{{ watcher._source._input }}</div>
           </div>
         </div>
       </tab>
@@ -65,7 +64,6 @@
         <div class="form-group">
           <div class="col-md-12">
             <div id="conditionEdit"
-              class="aceditor"
               ng-model="watcher._source._condition"
               ui-ace="aceOptions('javascript')">{{ watcher._source._condition }}</div>
           </div>
@@ -78,9 +76,8 @@
         <div class="form-group">
           <div class="col-md-12">
             <div id="transformEdit"
-              class="aceditor"
               ng-model="watcher._source._transform"
-              ui-ace="aceOptions('javascript')">{{ watcher._source._transform }}</div>
+              ui-ace="aceOptions('javascript', 30)">{{ watcher._source._transform }}</div>
           </div>
         </div>
       </tab>
@@ -142,22 +139,22 @@
                     </div>
                   </div>
                 </div>
-                <div ng-show="actionSettings.webhook._edit">
+                <div ng-if="actionSettings.webhook._edit">
                   <webhook-action name="{{actionName}}"></webhook-action>
                 </div>
-                <div ng-show="actionSettings.email._edit">
+                <div ng-if="actionSettings.email._edit">
                   <email-action name="{{actionName}}"></email-action>
                 </div>
-                <div ng-show="actionSettings.email_html._edit">
+                <div ng-if="actionSettings.email_html._edit">
                   <email-html-action name="{{actionName}}"></email-html-action>
                 </div>
-                <div ng-show="actionSettings.report._edit">
+                <div ng-if="actionSettings.report._edit">
                   <report-action name="{{actionName}}"></report-action>
                 </div>
-                <div ng-show="actionSettings.slack._edit">
+                <div ng-if="actionSettings.slack._edit">
                   <slack-action name="{{actionName}}"></slack-action>
                 </div>
-                <div ng-show="actionSettings.console._edit">
+                <div ng-if="actionSettings.console._edit">
                   <console-action name="{{actionName}}"></console-action>
                 </div>
               </li>
