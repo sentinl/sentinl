@@ -34,7 +34,7 @@
               ng-disabled="watcher._source.disable"
               required>
           </div>
-          <p ng-show="watcherForm.title.$invalid && !watcherForm.title.$pristine" class="help-block">
+          <p ng-if="watcherForm.title.$invalid && !watcherForm.title.$pristine" class="help-block">
             Watcher title is required.
           </p>
         </div>
@@ -114,7 +114,7 @@
                 <a href="" class="fa fa-minus" ng-click="removeAction(actionName)"></a>
                 <a href="" ng-click="editAction(actionName, actionSettings)">{{actionName}}</a>
                 <i class="fa fa-arrow-down"
-                  ng-show="[
+                  ng-if="[
                     actionSettings.webhook._edit,
                     actionSettings.email._edit,
                     actionSettings.email_html._edit,
@@ -172,10 +172,10 @@
 <div class="modal-footer">
   <div class="row">
     <div class="col-md-9">
-      <p ng-show="watcherForm.$invalid" class="text-center text-danger">
+      <p ng-if="watcherForm.$invalid" class="text-center text-danger">
         <strong>Settings are invalid, correct the settings to save the watcher.</strong>
       </p>
-      <p ng-show="watcherForm.$invalid" class="text-center text-danger">
+      <p ng-if="watcherForm.$invalid" class="text-center text-danger">
         The input must be in JSON format.
       </p>
     </div>
