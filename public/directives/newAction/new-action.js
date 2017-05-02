@@ -10,6 +10,7 @@ uiModules
       types: {
         webhook: {},
         email: {},
+        email_html: {},
         report: {},
         slack: {},
         console: {}
@@ -55,6 +56,23 @@ uiModules
             from: '',
             subject: '',
             body: ''
+          }
+        };
+      }
+
+      if (type === 'email_html') {
+        const title = `New HTML email action ${Math.random().toString(36).slice(2)}`;
+        scope.watcher._source.actions[title] = {
+          _title: title,
+          _throttle: throttle,
+          throttle_period: '1s',
+          email_html: {
+            _edit: false,
+            to: '',
+            from: '',
+            subject: '',
+            body: '',
+            html: ''
           }
         };
       }

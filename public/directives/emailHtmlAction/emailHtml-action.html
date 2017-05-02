@@ -1,0 +1,124 @@
+<h4>{{ action.type }}</h4>
+<div class="jumbotron" ng-form="emailHtmlForm">
+  <div class="form-group">
+    <label class="col-md-2 control-label">Priority:</label>
+    <div class="btn-group col-md-4">
+      <label class="btn btn-danger btn-sm" ng-model="actionSettings.email_html.priority" btn-radio="'high'">High</label>
+      <label class="btn btn-warning btn-sm" ng-model="actionSettings.email_html.priority" btn-radio="'medium'">Medium</label>
+      <label class="btn btn-info btn-sm" ng-model="actionSettings.email_html.priority" btn-radio="'low'">Low</label>
+    </div>
+    <div class="col-md-2">
+      <label class="checkbox">
+        <input type="checkbox"
+          ng-model="actionSettings.email_html.stateless"
+          ng-checked="actionSettings.email_html.stateless"> stateless
+      </label>
+    </div>
+  </div>
+  <div class="form-group" ng-class="{'has-error': emailHtmlForm.emailHtmlTitle.$invalid && !emailHtmlForm.emailHtmlTitle.$pristine}">
+    <label class="col-md-2 control-label" for="emailHtmlTitle">Title:</label>
+    <div class="col-md-6">
+      <input
+        type="text"
+        id="emailHtmlTitle"
+        name="emailHtmlTitle"
+        value="{{actionName}}"
+        class="form-control"
+        placeholder="{{watcher._source.uuid}}"
+        ng-model="actionSettings._title"
+        ng-required="actionSettings.email_html._edit">
+    </div>
+    <p ng-show="emailHtmlForm.emailHtmlTitle.$invalid && !emailHtmlForm.emailHtmlTitle.$pristine" class="help-block">
+      <small>Action title is required.</small>
+    </p>
+  </div>
+  <div class="form-group" ng-class="{'has-error': emailHtmlForm.emailHtmlTo.$invalid && !emailHtmlForm.emailHtmlTo.$pristine}">
+    <label class="col-md-2 control-label" for="emailHtmlTo">To:</label>
+    <div class="col-md-6">
+      <input
+        type="email"
+        id="emailHtmlTo"
+        name="emailHtmlTo"
+        value="{{actionSettings.email_html.to}}"
+        class="form-control"
+        placeholder="root@localhost"
+        ng-model="actionSettings.email_html.to"
+        ng-required="actionSettings.email_html._edit">
+    </div>
+    <p ng-show="emailHtmlForm.emailHtmlTo.$invalid && !emailHtmlForm.emailHtmlTo.$pristine" class="help-block">
+      <small>Enter a valid emailHtml.</small>
+    </p>
+  </div>
+  <div class="form-group" ng-class="{'has-error': emailHtmlForm.emailHtmlFrom.$invalid && !emailHtmlForm.emailHtmlFrom.$pristine}">
+    <label class="col-md-2 control-label" for="emailHtmlFrom">From:</label>
+    <div class="col-md-6">
+      <input
+        type="email"
+        id="emailHtmlFrom"
+        name="emailHtmlFrom"
+        value="{{actionSettings.email_html.from}}"
+        class="form-control"
+        placeholder="sentinl@localhost"
+        ng-model="actionSettings.email_html.from"
+        ng-required="actionSettings.email_html._edit">
+    </div>
+    <p ng-show="emailHtmlForm.emailHtmlFrom.$invalid && !emailHtmlForm.emailHtmlFrom.$pristine" class="help-block">
+      <small>Enter a valid emailHtml.</small>
+    </p>
+  </div>
+  <div class="form-group" ng-class="{'has-error': emailHtmlForm.emailHtmlSubject.$invalid && !emailHtmlForm.emailHtmlSubject.$pristine}">
+    <label class="col-md-2 control-label" for="emailHtmlSubject">Subject:</label>
+    <div class="col-md-6">
+      <input
+        type="text"
+        id="emailHtmlSubject"
+        name="emailHtmlSubject"
+        value="{{actionSettings.email_html.subject}}"
+        class="form-control"
+        placeholder="Alarm Title"
+        ng-model="actionSettings.email_html.subject"
+        ng-required="actionSettings.email_html._edit">
+    </div>
+    <p ng-show="emailHtmlForm.emailHtmlSubject.$invalid && !emailHtmlForm.emailHtmlSubject.$pristine" class="help-block">
+      <small>Enter a subject.</small>
+    </p>
+  </div>
+  <div class="form-group" ng-class="{'has-error': !actionSettings.email_html.body.length}">
+    <div class="row">
+      <label class="col-md-2 control-label" for="emailHtmlBody">Body:</label>
+      <div class="col-md-8">
+        <div id="emailHtmlBody"
+          ng-model="actionSettings.email_html.body"
+          ui-ace="aceOptions('behaviour')" class="aceditor">
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-2"></div>
+      <div class="col-md-8">
+        <p ng-show="!actionSettings.email_html.body.length" class="text-warning">
+          <small>Describe the alert in the email body.</small>
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="form-group" ng-class="{'has-error': !actionSettings.email_html.html.length}">
+    <div class="row">
+      <label class="col-md-2 control-label" for="emailHtmlBody">Body:</label>
+      <div class="col-md-8">
+        <div id="emailHtmlBody"
+          ng-model="actionSettings.email_html.html"
+          ui-ace="aceOptions('html')" class="aceditor">
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-2"></div>
+      <div class="col-md-8">
+        <p ng-show="!actionSettings.email_html.html.length" class="text-warning">
+          <small>Describe the alert in the email body HTML.</small>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

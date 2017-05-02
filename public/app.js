@@ -29,6 +29,7 @@ import './controllers/reportController';
 /* import directives */
 import './directives/newAction/new-action';
 import './directives/emailAction/email-action';
+import './directives/emailHtmlAction/emailHtml-action';
 import './directives/webhookAction/webhook-action';
 import './directives/reportAction/report-action';
 import './directives/slackAction/slack-action';
@@ -285,7 +286,7 @@ uiModules
       new: {
         edit: false
       },
-      types: [ 'webhook', 'email', 'report', 'slack', 'console' ]
+      types: [ 'webhook', 'email', 'email_html', 'report', 'slack', 'console' ]
     }
   };
 
