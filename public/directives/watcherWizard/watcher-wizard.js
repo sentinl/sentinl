@@ -1,12 +1,14 @@
 import uiModules from 'ui/modules';
 import _ from 'lodash';
-import confirmBox from '../../templates/confirm-box.html';
+import confirmMessage from '../../templates/confirm-message.html';
 import watcherEmailAction from './watcher-wizard.html';
 
 uiModules
 .get('api/sentinl', [])
-.directive('watcherWizard', function ($modal, $log) {
+.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, Notifier) {
   function wizardDirective($scope, element, attrs) {
+
+    $scope.notify = new Notifier();
 
     $scope.watcher.$json = JSON.stringify($scope.watcher, null, 2);
 
@@ -114,8 +116,8 @@ uiModules
 
     $scope.removeAction = function (actionName) {
       const confirmModal = $modal.open({
-        template: confirmBox,
-        controller: 'ConfirmCtrl',
+        template: confirmMessage,
+        controller: 'ConfirmMessageController',
         size: 'sm',
         resolve: {
           action: function () {
@@ -207,15 +209,41 @@ uiModules
       $scope.watcher._source._condition = $scope.watcher._source.condition.script.script;
     };
 
-    init();
+    const save = function () {
+      try {
+        if ($scope.watcher._source._input && $scope.watcher._source._input.length) {
+          JSON.parse($scope.watcher._source._input);
+        }
+      } catch (e) {
+        $scope.notify.error(e);
+        $scope.watcherForm.$valid = false;
+        $scope.watcherForm.$invalid = true;
+      }
 
+      if ($scope.watcherForm.$valid) {
+        saveSchedule();
+        saveThrottle();
+        saveEditorsText();
+        $scope.watcher._source.actions = renameActions($scope.watcher._source.actions);
+      }
+    };
+
+    $scope.$on('wizardSave', (event, index) => {
+      if (+index === +$scope.index) {
+        save();
+        $scope.$emit('wizardSaveConfirm', index);
+      }
+    });
+
+    init();
   }
 
   return {
     restrict: 'E',
     template: watcherEmailAction,
     scope: {
-      watcher: '='
+      watcher: '=',
+      index: '='
     },
     link: wizardDirective
   };

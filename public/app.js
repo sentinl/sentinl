@@ -25,6 +25,7 @@ import uiRoutes from 'ui/routes';
 
 /* import controllers */
 import './controllers/reportController';
+import './controllers/confirmMessageController';
 
 /* import directives */
 import './directives/watcherWizard/watcher-wizard';
@@ -68,7 +69,7 @@ import about from './templates/about.html';
 import alarms from './templates/alarms.html';
 import reports from './templates/reports.html';
 import jsonHtml from './templates/json.html';
-import confirmBox from './templates/confirm-box.html';
+import confirmMessage from './templates/confirm-message.html';
 
 var impactLogo = require('plugins/sentinl/sentinl_logo.svg');
 var smallLogo = require('plugins/sentinl/sentinl.svg');
@@ -254,21 +255,19 @@ uiModules
 });
 
 
-uiModules
-.get('api/sentinl', [])
-.controller('ConfirmCtrl', function ($scope, $modalInstance, action) {
-
-  $scope.actionName = action;
-
-  $scope.yes = function () {
-    $modalInstance.close('yes');
-  };
-
-  $scope.no = function () {
-    $modalInstance.dismiss('no');
-  };
-
-});
+//uiModules
+//.get('api/sentinl', [])
+//.controller('ConfirmCtrl', function ($scope, $modalInstance, action) {
+//
+//  $scope.yes = function () {
+//    $modalInstance.close('yes');
+//  };
+//
+//  $scope.no = function () {
+//    $modalInstance.dismiss('no');
+//  };
+//
+//});
 
 
 // WATCHERS CONTROLLER
@@ -347,6 +346,19 @@ uiModules
         $scope.notify.error
       );
     }
+  };
+
+  $scope.wizardSave = function ($index) {
+    $scope.$broadcast('wizardSave', $index);
+  };
+
+  $scope.$on('wizardSaveConfirm', (event, index) => {
+    $scope.watcherSave(index);
+  });
+
+  $scope.toggleWatcher = function (index) {
+    $scope.watchers[index]._source.disable = !$scope.watchers[index]._source.disable;
+    $scope.watcherSave(index);
   };
 
   $scope.watcherSave = function ($index, callFromWatcherEditorForm = false) {
