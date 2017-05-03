@@ -1,13 +1,14 @@
 import uiModules from 'ui/modules';
 import _ from 'lodash';
 import watcherEmailAction from './watcher-wizzard.html';
-
-import confirmBox from './templates/confirm-box.html';
+import confirmBox from './confirm-box.html';
 
 uiModules
 .get('api/sentinl', [])
 .directive('watcherWizzard', function () {
   function wizzardDirective($scope, $modal, $log, element, attrs) {
+
+    $scope.watcher.$json = JSON.stringify($scope.watcher, null, 2);
 
     $scope.form = {
       status: !$scope.watcher._source.disable ? 'Enabled' : 'Disable',
