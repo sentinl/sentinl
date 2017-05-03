@@ -27,6 +27,7 @@ import uiRoutes from 'ui/routes';
 import './controllers/reportController';
 
 /* import directives */
+import './directives/watcherWizzard/watcher-wizzard';
 import './directives/newAction/new-action';
 import './directives/emailAction/email-action';
 import './directives/emailHtmlAction/emailHtml-action';
