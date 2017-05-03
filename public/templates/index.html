@@ -44,8 +44,16 @@
                 <span ng-show="collapse" title="Save" ng-click="watcherSave($index)" class="delete-rule"><i class="fa fa-save"></i></span>
                 <span ng-hide="watcher._new == 'true'" title="Delete" class="delete-rule" ng-click="watcherDelete($index)"><i class="fa fa-trash"></i></span>
 
-                <span ng-show="watcher._source.disable" title="Disabled" class="delete-rule"><i class="fa fa-toggle-off"></i></span>
-                <span ng-show="!watcher._source.disable" title="Enabled" class="delete-rule"><i class="fa fa-toggle-on"></i></span>
+                <span ng-show="watcher._source.disable"
+                      ng-click="watcher._source.disable=!watcher._source.disable"
+                      title="Disabled" class="delete-rule">
+                  <i class="fa fa-toggle-off"></i>
+                </span>
+                <span ng-show="!watcher._source.disable"
+                      ng-click="watcher._source.disable=!watcher._source.disable"
+                      title="Enabled" class="delete-rule">
+                  <i class="fa fa-toggle-on"></i>
+                </span>
 
               </td>
             </tr>

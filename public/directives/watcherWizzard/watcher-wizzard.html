@@ -4,17 +4,6 @@
       <div class="form-group">
         <p></p>
       </div>
-      <div class="form-group">
-        <div class="col-md-2"></div>
-        <div class="col-md-6">
-          <button
-            type="button"
-            class="btn btn-sm btn-success"
-            ng-click="watcher._source.disable = !watcher._source.disable; toggleWatcher()"
-            ng-class="{true: 'btn-warning', false: 'btn-success'}[watcher._source.disable]"
-            >{{form.status}}</button>
-        </div>
-      </div>
       <div class="form-group" ng-class="{'has-error': watcherForm.title.$invalid && !watcherForm.title.$pristine}">
         <label class="col-md-2 control-label" for="title">Title:</label>
         <div class="col-md-6">
