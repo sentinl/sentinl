@@ -1,12 +1,12 @@
 import uiModules from 'ui/modules';
 import _ from 'lodash';
 import confirmBox from '../../templates/confirm-box.html';
-import watcherEmailAction from './watcher-wizzard.html';
+import watcherEmailAction from './watcher-wizard.html';
 
 uiModules
 .get('api/sentinl', [])
-.directive('watcherWizzard', function ($modal, $log) {
-  function wizzardDirective($scope, element, attrs) {
+.directive('watcherWizard', function ($modal, $log) {
+  function wizardDirective($scope, element, attrs) {
 
     $scope.watcher.$json = JSON.stringify($scope.watcher, null, 2);
 
@@ -217,6 +217,6 @@ uiModules
     scope: {
       watcher: '='
     },
-    link: wizzardDirective
+    link: wizardDirective
   };
 });

@@ -27,7 +27,7 @@ import uiRoutes from 'ui/routes';
 import './controllers/reportController';
 
 /* import directives */
-import './directives/watcherWizzard/watcher-wizzard';
+import './directives/watcherWizard/watcher-wizard';
 import './directives/newAction/new-action';
 import './directives/emailAction/email-action';
 import './directives/emailHtmlAction/emailHtml-action';
@@ -69,7 +69,6 @@ import alarms from './templates/alarms.html';
 import reports from './templates/reports.html';
 import jsonHtml from './templates/json.html';
 import confirmBox from './templates/confirm-box.html';
-import watcherForm from './templates/watcher/form.html';
 
 var impactLogo = require('plugins/sentinl/sentinl_logo.svg');
 var smallLogo = require('plugins/sentinl/sentinl.svg');
