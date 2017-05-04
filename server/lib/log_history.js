@@ -13,7 +13,7 @@
  *
  * @return {String} Response.
  */
-export default function logEvent(server, client, config, type, message, loglevel, payload, isReport, object) {
+export default function logEvent(server, client, config, watcherTitle, type, message, loglevel, payload, isReport, object) {
   if (!loglevel) {
     loglevel = 'INFO';
   }
@@ -28,6 +28,7 @@ export default function logEvent(server, client, config, type, message, loglevel
   var indexName = config.es.alarm_index ? config.es.alarm_index + indexDate : 'watcher_alarms' + indexDate;
   var indexBody = {
     '@timestamp': new Date().toISOString(),
+    watcher: watcherTitle,
     level: loglevel,
     message: message,
     action: type,
