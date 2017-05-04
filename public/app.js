@@ -352,8 +352,11 @@ uiModules
     $scope.$broadcast('wizardSave', $index);
   };
 
-  $scope.$on('wizardSaveConfirm', (event, index) => {
-    $scope.watcherSave(index);
+  $scope.$on('wizardSaveConfirm', (event, wizard) => {
+    if (wizard.watcher) {
+      $scope.watchers[wizard.index] = wizard.watcher;
+    }
+    $scope.watcherSave(wizard.index);
   });
 
   $scope.toggleWatcher = function (index) {

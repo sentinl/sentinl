@@ -34,7 +34,9 @@
           <p></p>
         </div>
         <div class="form-group">
-          <div class="col-md-12">
+          <div class="col-md-1">
+          </div>
+          <div class="col-md-11">
             <div id="inputEdit"
               ng-model="watcher._source._input"
               ui-ace="aceOptions('json', 30)">{{ watcher._source._input }}</div>
@@ -46,7 +48,9 @@
           <p></p>
         </div>
         <div class="form-group">
-          <div class="col-md-12">
+          <div class="col-md-1">
+          </div>
+          <div class="col-md-11">
             <div id="conditionEdit"
               ng-model="watcher._source._condition"
               ui-ace="aceOptions('javascript')">{{ watcher._source._condition }}</div>
@@ -58,7 +62,9 @@
           <p></p>
         </div>
         <div class="form-group">
-          <div class="col-md-12">
+          <div class="col-md-1">
+          </div>
+          <div class="col-md-11">
             <div id="transformEdit"
               ng-model="watcher._source._transform"
               ui-ace="aceOptions('javascript', 30)">{{ watcher._source._transform }}</div>
@@ -147,8 +153,28 @@
         </div>
 
       </tab>
-      <tab index="5" heading="JSON">
-        <div ui-ace="aceOptions('json', 30)" ng-model="watcher.$json"></div>
+      <tab index="5" heading="Raw">
+        <div class="form-group">
+          <p></p>
+        </div>
+        <div class="form-group">
+          <div class="col-md-1">
+          </div>
+          <div class="col-md-11">
+            <label class="checkbox">
+              <input type="checkbox"
+                ng-model="form.raw_enabled"
+                ng-checked="form.raw_enabled"> enable
+            </label>ATTENTION! All settings will have been overwritten if enable is checked and the watcher is saved.
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="col-md-1">
+          </div>
+          <div class="col-md-11">
+            <div ui-ace="aceOptions('json', 30)" ng-model="watcher.$raw"></div>
+          </div>
+        </div>
       </tab>
     </tabset>
 
