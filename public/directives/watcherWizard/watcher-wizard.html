@@ -2,181 +2,174 @@
   <form name="watcherForm" class="form-horizontal" novalidate>
     <tabset>
       <tab active index="0" heading="General">
-        <div class="form-group">
-          <p></p>
-        </div>
-        <div class="form-group" ng-class="{'has-error': watcherForm.title.$invalid && !watcherForm.title.$pristine}">
-          <label class="col-md-2 control-label" for="title">Title:</label>
-          <div class="col-md-6">
-            <input
-              type="text"
-              id="title"
-              name="title"
-              value="{{watcher._source.title}}"
-              class="form-control"
-              ng-model="watcher._source.title"
-              ng-disabled="watcher._source.disable"
-              required>
+        <div class="tabContent">
+          <div class="form-group" ng-class="{'has-error': watcherForm.title.$invalid && !watcherForm.title.$pristine}">
+            <label class="col-md-2 control-label" for="title">Title:</label>
+            <div class="col-md-6">
+              <input
+                type="text"
+                id="title"
+                name="title"
+                value="{{watcher._source.title}}"
+                class="form-control"
+                ng-model="watcher._source.title"
+                ng-disabled="watcher._source.disable"
+                required>
+            </div>
+            <p ng-if="watcherForm.title.$invalid && !watcherForm.title.$pristine" class="help-block">
+              Watcher title is required.
+            </p>
           </div>
-          <p ng-if="watcherForm.title.$invalid && !watcherForm.title.$pristine" class="help-block">
-            Watcher title is required.
-          </p>
-        </div>
-        <div class="form-group">
-          <label class="col-md-2 control-label">Run every:</label>
-          <div class="col-md-10">
-            <schedule-tag timesrc="watcher._source._schedule"></schedule-tag>
+          <div class="form-group">
+            <label class="col-md-2 control-label">Run every:</label>
+            <div class="col-md-10">
+              <schedule-tag timesrc="watcher._source._schedule"></schedule-tag>
+            </div>
           </div>
         </div>
       </tab>
       <tab index="1" heading="Input">
-        <div class="form-group">
-          <p></p>
-        </div>
-        <div class="form-group">
-          <div class="col-md-1">
-          </div>
-          <div class="col-md-11">
-            <div id="inputEdit"
-              ng-model="watcher._source._input"
-              ui-ace="aceOptions('json', 30)">{{ watcher._source._input }}</div>
+        <div class="tabContent">
+          <div class="form-group">
+            <div class="col-md-1">
+            </div>
+            <div class="col-md-11">
+              <div id="inputEdit"
+                ng-model="watcher._source._input"
+                ui-ace="aceOptions('json', 30)">{{ watcher._source._input }}</div>
+            </div>
           </div>
         </div>
       </tab>
       <tab index="2" heading="Condition">
-        <div class="form-group">
-          <p></p>
-        </div>
-        <div class="form-group">
-          <div class="col-md-1">
-          </div>
-          <div class="col-md-11">
-            <div id="conditionEdit"
-              ng-model="watcher._source._condition"
-              ui-ace="aceOptions('javascript')">{{ watcher._source._condition }}</div>
+        <div class="tabContent">
+          <div class="form-group">
+            <div class="col-md-1">
+            </div>
+            <div class="col-md-11">
+              <div id="conditionEdit"
+                ng-model="watcher._source._condition"
+                ui-ace="aceOptions('javascript')">{{ watcher._source._condition }}</div>
+            </div>
           </div>
         </div>
       </tab>
       <tab index="3" heading="Transform">
-        <div class="form-group">
-          <p></p>
-        </div>
-        <div class="form-group">
-          <div class="col-md-1">
-          </div>
-          <div class="col-md-11">
-            <div id="transformEdit"
-              ng-model="watcher._source._transform"
-              ui-ace="aceOptions('javascript', 30)">{{ watcher._source._transform }}</div>
+        <div class="tabContent">
+          <div class="form-group">
+            <div class="col-md-1">
+            </div>
+            <div class="col-md-11">
+              <div id="transformEdit"
+                ng-model="watcher._source._transform"
+                ui-ace="aceOptions('javascript', 30)">{{ watcher._source._transform }}</div>
+            </div>
           </div>
         </div>
       </tab>
       <tab index="4" heading="Actions">
-        <div class="form-group">
-          <p></p>
-        </div>
-
-        <div class="form-group">
-          <div class="col-md-1">
+        <div class="tabContent">
+          <div class="form-group">
+            <div class="col-md-1">
+            </div>
+            <div class="col-md-11">
+              <a href=""
+                ng-class="{
+                  'fa': true,
+                  'fa-plus': !form.actions.new.edit,
+                  'fa-minus': form.actions.new.edit
+                }"
+                ng-click="addAction()"></a>
+              <div ng-if="form.actions.new.edit">
+                <new-action></new-action>
+              </div>
+            </div>
           </div>
-          <div class="col-md-11">
-            <a href=""
-              ng-class="{
-                'fa': true,
-                'fa-plus': !form.actions.new.edit,
-                'fa-minus': form.actions.new.edit
-              }"
-              ng-click="addAction()"></a>
-            <div ng-if="form.actions.new.edit">
-              <new-action></new-action>
+          <div class="form-group">
+            <div class="col-md-1">
+            </div>
+            <div class="col-md-11">
+              <ul class="formActionsList"
+                ng-repeat="(actionName, actionSettings) in watcher._source.actions"
+                style="list-style-type:none;">
+                <li>
+                  <a href="" class="fa fa-minus" ng-click="removeAction(actionName)"></a>
+                  <a href="" ng-click="editAction(actionName, actionSettings)">{{actionName}}</a>
+                  <i class="fa fa-arrow-down"
+                    ng-if="[
+                      actionSettings.webhook._edit,
+                      actionSettings.email._edit,
+                      actionSettings.email_html._edit,
+                      actionSettings.report._edit,
+                      actionSettings.slack._edit,
+                      actionSettings.console._edit
+                      ].indexOf(true) != -1"
+                    aria-hidden="true"></i>
+                  <div class="form-group"
+                    ng-if="[
+                      actionSettings.webhook._edit,
+                      actionSettings.email._edit,
+                      actionSettings.email_html._edit,
+                      actionSettings.report._edit,
+                      actionSettings.slack._edit,
+                      actionSettings.console._edit
+                      ].indexOf(true) != -1">
+                    <div class="formSubform">
+                      <label class="col-md-2 control-label" for="throttle_period">Throttle period:</label>
+                      <div class="col-md-4">
+                        <schedule-tag timesrc="actionSettings._throttle"></schedule-tag>
+                      </div>
+                    </div>
+                  </div>
+                  <div ng-if="actionSettings.webhook._edit">
+                    <webhook-action name="{{actionName}}"></webhook-action>
+                  </div>
+                  <div ng-if="actionSettings.email._edit">
+                    <email-action name="{{actionName}}"></email-action>
+                  </div>
+                  <div ng-if="actionSettings.email_html._edit">
+                    <email-html-action name="{{actionName}}"></email-html-action>
+                  </div>
+                  <div ng-if="actionSettings.report._edit">
+                    <report-action name="{{actionName}}"></report-action>
+                  </div>
+                  <div ng-if="actionSettings.slack._edit">
+                    <slack-action name="{{actionName}}"></slack-action>
+                  </div>
+                  <div ng-if="actionSettings.console._edit">
+                    <console-action name="{{actionName}}"></console-action>
+                  </div>
+                </li>
+              </ul>
             </div>
           </div>
         </div>
-
-        <div class="form-group">
-          <div class="col-md-1">
-          </div>
-          <div class="col-md-11">
-            <ul class="formActionsList"
-              ng-repeat="(actionName, actionSettings) in watcher._source.actions"
-              style="list-style-type:none;">
-              <li>
-                <a href="" class="fa fa-minus" ng-click="removeAction(actionName)"></a>
-                <a href="" ng-click="editAction(actionName, actionSettings)">{{actionName}}</a>
-                <i class="fa fa-arrow-down"
-                  ng-if="[
-                    actionSettings.webhook._edit,
-                    actionSettings.email._edit,
-                    actionSettings.email_html._edit,
-                    actionSettings.report._edit,
-                    actionSettings.slack._edit,
-                    actionSettings.console._edit
-                    ].indexOf(true) != -1"
-                  aria-hidden="true"></i>
-                <div class="form-group"
-                  ng-if="[
-                    actionSettings.webhook._edit,
-                    actionSettings.email._edit,
-                    actionSettings.email_html._edit,
-                    actionSettings.report._edit,
-                    actionSettings.slack._edit,
-                    actionSettings.console._edit
-                    ].indexOf(true) != -1">
-                  <div class="formSubform">
-                    <label class="col-md-2 control-label" for="throttle_period">Throttle period:</label>
-                    <div class="col-md-4">
-                      <schedule-tag timesrc="actionSettings._throttle"></schedule-tag>
-                    </div>
-                  </div>
-                </div>
-                <div ng-if="actionSettings.webhook._edit">
-                  <webhook-action name="{{actionName}}"></webhook-action>
-                </div>
-                <div ng-if="actionSettings.email._edit">
-                  <email-action name="{{actionName}}"></email-action>
-                </div>
-                <div ng-if="actionSettings.email_html._edit">
-                  <email-html-action name="{{actionName}}"></email-html-action>
-                </div>
-                <div ng-if="actionSettings.report._edit">
-                  <report-action name="{{actionName}}"></report-action>
-                </div>
-                <div ng-if="actionSettings.slack._edit">
-                  <slack-action name="{{actionName}}"></slack-action>
-                </div>
-                <div ng-if="actionSettings.console._edit">
-                  <console-action name="{{actionName}}"></console-action>
-                </div>
-              </li>
-            </ul>
-          </div>
-        </div>
-
       </tab>
       <tab index="5" heading="Raw">
-        <div class="form-group">
-          <p></p>
-        </div>
-        <div class="form-group">
-          <div class="col-md-1">
+        <div class="tabContent">
+          <div class="form-group">
+            <p></p>
           </div>
-          <div class="col-md-11">
-            <label class="checkbox">
-              <input type="checkbox"
-                ng-model="form.raw_enabled"
-                ng-checked="form.raw_enabled"> enable
-            </label>ATTENTION! All settings will have been overwritten if enable is checked and the watcher is saved.
+          <div class="form-group">
+            <div class="col-md-1">
+            </div>
+            <div class="col-md-11">
+              <label class="checkbox">
+                <input type="checkbox"
+                  ng-model="form.raw_enabled"
+                  ng-checked="form.raw_enabled"> enable
+              </label>ATTENTION! All settings will have been overwritten if enable is checked and the watcher is saved.
+            </div>
           </div>
-        </div>
-        <div class="form-group">
-          <div class="col-md-1">
-          </div>
-          <div class="col-md-11">
-            <div ui-ace="aceOptions('json', 30)" ng-model="watcher.$raw"></div>
+          <div class="form-group">
+            <div class="col-md-1">
+            </div>
+            <div class="col-md-11">
+              <div ui-ace="aceOptions('json', 30)" ng-model="watcher.$raw"></div>
+            </div>
           </div>
         </div>
       </tab>
     </tabset>
-
   </form>
 </div>
