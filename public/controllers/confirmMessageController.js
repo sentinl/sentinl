@@ -3,7 +3,7 @@ import chrome from 'ui/chrome';
 
 uiModules
 .get('api/sentinl', [])
-.controller('ConfirmMessageController', function ($scope, $modalInstance, action) {
+.controller('ConfirmMessageController', function ($scope, $modalInstance) {
 
   $scope.yes = function () {
     $modalInstance.close('yes');

@@ -153,7 +153,7 @@ uiModules
   };
 })
 .controller('sentinlHelloWorld', function ($rootScope, $scope, $route, $interval,
-  $timeout, timefilter, Private, Notifier, $window, kbnUrl, $http) {
+  $timeout, timefilter, Private, Notifier, $window, kbnUrl, $http, $modal) {
   $scope.title = 'Sentinl: Alarms';
   $scope.description = 'Kibana Alert App for Elasticsearch';
 
@@ -225,17 +225,25 @@ uiModules
   });
 
   $scope.deleteAlarm = function (index, rmindex, rmtype, rmid) {
-    if (confirm('Delete is Forever!\n Are you sure?')) {
-      return $http.delete('../api/sentinl/alarm/' + rmindex + '/' + rmtype + '/' + rmid)
-      .then(() => {
-        $timeout(() => {
-          $scope.elasticAlarms.splice(index - 1, 1);
-          $scope.notify.warning('SENTINL Alarm log successfully deleted!');
-          $route.reload();
-        }, 1000);
-      })
-      .catch($scope.notify.error);
-    }
+    const confirmModal = $modal.open({
+      template: confirmMessage,
+      controller: 'ConfirmMessageController',
+      size: 'sm'
+    });
+
+    confirmModal.result.then((response) => {
+      if (response === 'yes') {
+        return $http.delete('../api/sentinl/alarm/' + rmindex + '/' + rmtype + '/' + rmid)
+        .then(() => {
+          $timeout(() => {
+            $scope.elasticAlarms.splice(index - 1, 1);
+            $scope.notify.warning('SENTINL Alarm log successfully deleted!');
+            $route.reload();
+          }, 1000);
+        })
+        .catch($scope.notify.error);
+      }
+    });
   };
 
   $scope.deleteAlarmLocal = function (index) {
@@ -334,18 +342,26 @@ uiModules
   };
 
   $scope.watcherDelete = function ($index) {
-    if (confirm('Are you sure?')) {
-      return $http.delete('../api/sentinl/watcher/' + $scope.watchers[$index]._id)
-      .then(
-        (resp) => {
-          $timeout(function () {
-            $route.reload();
-            $scope.notify.warning('SENTINL Watcher successfully deleted!');
-          }, 1000);
-        },
-        $scope.notify.error
-      );
-    }
+    const confirmModal = $modal.open({
+      template: confirmMessage,
+      controller: 'ConfirmMessageController',
+      size: 'sm'
+    });
+
+    confirmModal.result.then((response) => {
+      if (response === 'yes') {
+        return $http.delete('../api/sentinl/watcher/' + $scope.watchers[$index]._id)
+        .then(
+          (resp) => {
+            $timeout(function () {
+              $route.reload();
+              $scope.notify.warning('SENTINL Watcher successfully deleted!');
+            }, 1000);
+          },
+          $scope.notify.error
+        );
+      }
+    });
   };
 
   $scope.wizardSave = function ($index) {

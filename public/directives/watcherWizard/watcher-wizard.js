@@ -126,12 +126,7 @@ uiModules
       const confirmModal = $modal.open({
         template: confirmMessage,
         controller: 'ConfirmMessageController',
-        size: 'sm',
-        resolve: {
-          action: function () {
-            return actionName;
-          }
-        }
+        size: 'sm'
       });
 
       confirmModal.result.then((response) => {
