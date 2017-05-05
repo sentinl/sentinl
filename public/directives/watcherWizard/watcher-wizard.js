@@ -11,6 +11,12 @@ uiModules
 
     $scope.form = {
       status: !$scope.watcher._source.disable ? 'Enabled' : 'Disable',
+      scripts: {
+        transform: {}
+      },
+      source: {
+        fields: ['_input', '_condition', '_transform', '_transformTitle']
+      },
       actions: {
         new: {
           edit: false
@@ -108,6 +114,28 @@ uiModules
     };
 
 
+    $scope.isEmpty = function (obj) {
+      return _.isEmpty(obj);
+    };
+
+
+    $scope.saveScript = function (type) {
+      $scope.form.scripts[type][$scope.watcher._source._transformTitle] = $scope.watcher._source[`_${type}`];
+    };
+
+
+    $scope.selectScript = function (type, name) {
+      $scope.watcher._source[`_${type}Title`] = name;
+      $scope.watcher._source[`_${type}`] = $scope.form.scripts[type][name];
+    };
+
+
+    $scope.removeScript = function (type) {
+      delete $scope.form.scripts[type][$scope.watcher._source._transformTitle];
+      delete $scope.watcher._source._transformTitle;
+    };
+
+
     $scope.toggleWatcher = function () {
       if (!$scope.watcher._source.disable) {
         $scope.form.status = 'Enabled';
@@ -173,7 +201,7 @@ uiModules
 
     const saveEditorsText = function () {
 
-      _.each(['_input', '_condition', '_transform'], (field) => {
+      _.each($scope.form.source.fields, (field) => {
         if (_.has($scope.watcher._source, field)) {
           if ($scope.watcher._source[field]) {
             if (field === '_input') {

@@ -7,8 +7,8 @@
       <tab active index="0" heading="General">
         <div class="tabContent">
           <div class="form-group" ng-class="{'has-error': watcherForm.title.$invalid && !watcherForm.title.$pristine}">
-            <label class="col-md-2 control-label" for="title">Title:</label>
-            <div class="col-md-6">
+            <label class="col-md-1 control-label" for="title">Title:</label>
+            <div class="col-md-3">
               <input
                 type="text"
                 id="title"
@@ -24,7 +24,7 @@
             </p>
           </div>
           <div class="form-group">
-            <label class="col-md-2 control-label">Run every:</label>
+            <label class="col-md-1 control-label">Run every:</label>
             <div class="col-md-10">
               <schedule-tag timesrc="watcher._source._schedule"></schedule-tag>
             </div>
@@ -34,8 +34,6 @@
       <tab index="1" heading="Input">
         <div class="tabContent">
           <div class="form-group">
-            <div class="col-md-1">
-            </div>
             <div class="col-md-11">
               <div id="inputEdit"
                 ng-model="watcher._source._input"
@@ -47,8 +45,6 @@
       <tab index="2" heading="Condition">
         <div class="tabContent">
           <div class="form-group">
-            <div class="col-md-1">
-            </div>
             <div class="col-md-11">
               <div id="conditionEdit"
                 ng-model="watcher._source._condition"
@@ -60,12 +56,51 @@
       <tab index="3" heading="Transform">
         <div class="tabContent">
           <div class="form-group">
+            <div class="col-md-1"></div>
+            <div class="col-md-4">
+              <span class="dropdown" dropdown>
+                <a href class="dropdown-toggle" dropdown-toggle>
+                  Get saved scripts
+                </a>
+                <ul class="dropdown-menu">
+                  <li ng-repeat="(name, value) in form.scripts.transform">
+                    <a href ng-click="selectScript('transform', name)">{{ name }}</a>
+                  </li>
+                  <li ng-show="isEmpty(form.scripts.transform)">
+                    <a href>No scripts strored</a>
+                  </li>
+                </ul>
+              </span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-md-1 control-label" for="title">Title:</label>
+            <div class="col-md-3">
+              <input
+                type="text"
+                id="scriptTitle"
+                name="sriptTitle"
+                value="{{watcher._source._transformTitle}}"
+                class="form-control"
+                placeholder="title"
+                ng-model="watcher._source._transformTitle">
+            </div>
+          </div>
+          <div class="form-group">
             <div class="col-md-1">
             </div>
-            <div class="col-md-11">
+            <div class="col-md-10">
               <div id="transformEdit"
                 ng-model="watcher._source._transform"
                 ui-ace="aceOptions('javascript', 30)">{{ watcher._source._transform }}</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="col-md-1">
+            </div>
+            <div class="col-md-4">
+              <button type="button" class="btn btn-default btn-sm" ng-click="saveScript('transform')">Save</button>
+              <button type="button" class="btn btn-danger btn-sm" ng-click="removeScript('transform')">Remove</button>
             </div>
           </div>
         </div>
@@ -73,8 +108,6 @@
       <tab index="4" heading="Actions">
         <div class="tabContent">
           <div class="form-group">
-            <div class="col-md-1">
-            </div>
             <div class="col-md-11">
               <a href=""
                 ng-class="{
@@ -89,8 +122,6 @@
             </div>
           </div>
           <div class="form-group">
-            <div class="col-md-1">
-            </div>
             <div class="col-md-11">
               <ul class="formActionsList"
                 ng-repeat="(actionName, actionSettings) in watcher._source.actions"
@@ -118,7 +149,7 @@
                       actionSettings.console._edit
                       ].indexOf(true) != -1">
                     <div class="formSubform">
-                      <label class="col-md-2 control-label" for="throttle_period">Throttle period:</label>
+                      <label class="col-md-1 control-label" for="throttle_period">Throttle period:</label>
                       <div class="col-md-4">
                         <schedule-tag timesrc="actionSettings._throttle"></schedule-tag>
                       </div>
@@ -151,8 +182,7 @@
       <tab index="5" heading="Raw">
         <div class="tabContent">
           <div class="form-group">
-            <div class="col-md-1">
-            </div>
+            <div class="col-md-1"></div>
             <div class="col-md-11">
               <label class="checkbox">
                 <input type="checkbox"
@@ -162,8 +192,6 @@
             </div>
           </div>
           <div class="form-group">
-            <div class="col-md-1">
-            </div>
             <div class="col-md-11">
               <div ui-ace="aceOptions('json', 30)" ng-model="watcher.$raw"></div>
             </div>
