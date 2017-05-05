@@ -5,6 +5,10 @@
       <p style="float:right;">Local time is {{ currentTime }}</p>
       <br style="clear:both;">
 
+      <div class="search-bar">
+        <input type="text" class="form-control" ng-model="searchWatchers" placeholder="Search">
+      </div>
+
       <div class="panel panel-default">
         <div class="panel-heading"><h4>WATCHERS
           <div class="edit-group pull-right">
@@ -23,7 +27,7 @@
               <th>ACTIONS</th>
               <th></th>
             </tr>
-          <tbody ng-repeat='watcher in getWatchers()'>
+          <tbody ng-repeat='watcher in getWatchers() | filter:searchWatchers'>
             <tr ng-class="{newRow: watcher._new == 'true' || watcher._source.title == 'watcher_title'}">
               <td>{{watcher._source.title}}</td>
               <td ng-show="watcher._source.trigger.schedule.interval" ng-hide="watcher._source.trigger.schedule.later">{{ watcher._source.trigger.schedule.interval }}</td>

@@ -27,18 +27,18 @@ import logHistory from './log_history';
 
 import url from 'url';
 
-export default function (server, actions, payload) {
+export default function (server, actions, payload, watcherTitle) {
 
   const client = getElasticsearchClient(server);
   const config = getConfiguration(server);
   const hlimit = config.sentinl.history ? config.sentinl.history : 10;
 
   /* ES Indexing Functions */
-  var esHistory = function (type, message, loglevel, payload, isReport, object) {
+  var esHistory = function (watcherTitle, type, message, loglevel, payload, isReport, object) {
     if (isReport) {
-      logHistory(server, client, config, type, message, loglevel, payload, isReport, object);
+      logHistory(server, client, config, watcherTitle, type, message, loglevel, payload, isReport, object);
     } else {
-      logHistory(server, client, config, type, message, loglevel, payload);
+      logHistory(server, client, config, watcherTitle, type, message, loglevel, payload);
     }
   };
 
@@ -115,7 +115,7 @@ export default function (server, actions, payload) {
       formatterC = action.console.message ? action.console.message : '{{ payload }}';
       message = mustache.render(formatterC, {payload: payload});
       server.log(['status', 'info', 'Sentinl'], 'Console Payload: ' + JSON.stringify(payload));
-      esHistory(key, message, priority, payload, false);
+      esHistory(watcherTitle, key, message, priority, payload, false);
     }
 
     /* ***************************************************************************** */
@@ -127,7 +127,7 @@ export default function (server, actions, payload) {
     if (_.has(action, 'throttle_period')) {
       if (debounce(key, action.throttle_period)) {
         server.log(['status', 'info', 'Sentinl'], 'Action Throtthled: ' + key);
-        esHistory(key, 'Action Throtthled for ' + action.throttle_period, priority, {});
+        esHistory(watcherTitle, key, 'Action Throtthled for ' + action.throttle_period, priority, {});
         return;
       }
     }
@@ -172,7 +172,7 @@ export default function (server, actions, payload) {
       }
       if (!action.email.stateless) {
         // Log Event
-        esHistory(key, body, priority, payload, false);
+        esHistory(watcherTitle, key, body, priority, payload, false);
       }
     }
 
@@ -217,7 +217,7 @@ export default function (server, actions, payload) {
       }
       if (!action.email_html.stateless) {
         // Log Event
-        esHistory(key, body, priority, payload, false);
+        esHistory(watcherTitle, key, body, priority, payload, false);
       }
     }
 
@@ -308,9 +308,9 @@ export default function (server, actions, payload) {
                 // Log Event
                 if (action.report.save) {
                   var attachment = fs.readFileSync(action.report.snapshot.path + filename);
-                  esHistory(key, body, priority, payload, true, new Buffer(attachment).toString('base64'));
+                  esHistory(watcherTitle, key, body, priority, payload, true, new Buffer(attachment).toString('base64'));
                 } else {
-                  esHistory(key, body, priority, payload, true);
+                  esHistory(watcherTitle, key, body, priority, payload, true);
                 }
               }
               fs.unlinkSync(action.report.snapshot.path + filename);
@@ -323,7 +323,7 @@ export default function (server, actions, payload) {
           payload.message = err;
           if (!action.report.stateless) {
             // Log Event
-            esHistory(key, body, priority, payload, true);
+            esHistory(watcherTitle, key, body, priority, payload, true);
           }
         }
       })
@@ -365,7 +365,7 @@ export default function (server, actions, payload) {
 
       if (!action.slack.stateless) {
         // Log Event
-        esHistory(key, message, priority, payload, false);
+        esHistory(watcherTitle, key, message, priority, payload, false);
       }
     }
 
@@ -398,7 +398,7 @@ export default function (server, actions, payload) {
 
       // Log Alarm Event
       if (action.webhook.create_alert && payload.constructor === Object && Object.keys(payload).length) {
-        esHistory(key, action.webhook.message, action.webhook.priority, payload, false);
+        esHistory(watcherTitle, key, action.webhook.message, action.webhook.priority, payload, false);
       }
 
       if (action.webhook.headers) options.headers = action.webhook.headers;
@@ -440,7 +440,7 @@ export default function (server, actions, payload) {
       priority = action.local.priority ? action.local.priority : 'INFO';
       server.log(['status', 'info', 'Sentinl', 'local'], 'Logged Message: ' + esMessage);
       // Log Event
-      esHistory(key, esMessage, priority, payload, false);
+      esHistory(watcherTitle, key, esMessage, priority, payload, false);
     }
 
 

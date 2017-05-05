@@ -158,14 +158,14 @@ export default function getScheduler(server) {
                   } catch (err) {
                     server.log(['status', 'info', 'Sentinl'], 'Transform Script Error for ' + task._id + ': ' + err);
                   }
-                  doActions(server, actions, payload);
+                  doActions(server, actions, payload, watch.title);
                 } else if (transform.search) {
                   client[method](transform.search.request).then(function (payload) {
                     if (!payload) return;
-                    doActions(server, actions, payload);
+                    doActions(server, actions, payload, watch.title);
                   });
                 } else {
-                  doActions(server, actions, payload);
+                  doActions(server, actions, payload, watch.title);
                 }
               }
             })
@@ -176,6 +176,7 @@ export default function getScheduler(server) {
           }
 
           function reporting(task, interval) {
+            const watch = task._source;
             if (!task._source || task._source.disable) {
               server.log(['status', 'debug', 'Sentinl'], 'Non-Executing Disabled report: ' + task._id);
               return;
@@ -187,7 +188,7 @@ export default function getScheduler(server) {
               server.log(['status', 'info', 'Sentinl'], 'Condition Error for ' + task._id);
               return;
             }
-            doActions(server, actions, payload);
+            doActions(server, actions, payload, watch.title);
           }
         });
       });
