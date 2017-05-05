@@ -263,21 +263,6 @@ uiModules
 });
 
 
-//uiModules
-//.get('api/sentinl', [])
-//.controller('ConfirmCtrl', function ($scope, $modalInstance, action) {
-//
-//  $scope.yes = function () {
-//    $modalInstance.close('yes');
-//  };
-//
-//  $scope.no = function () {
-//    $modalInstance.dismiss('no');
-//  };
-//
-//});
-
-
 // WATCHERS CONTROLLER
 uiModules
 .get('api/sentinl', [])
