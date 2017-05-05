@@ -9,8 +9,6 @@ uiModules
 .directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, Notifier) {
   function wizardDirective($scope, element, attrs) {
 
-    $scope.notify = new Notifier();
-
     $scope.form = {
       status: !$scope.watcher._source.disable ? 'Enabled' : 'Disable',
       actions: {
@@ -19,8 +17,7 @@ uiModules
         },
         types: [ 'webhook', 'email', 'email_html', 'report', 'slack', 'console' ]
       },
-      raw_enabled: false,
-      valid: true
+      raw_enabled: false
     };
 
     $scope.aceOptions = function (mode, lines = 10) {
@@ -219,14 +216,16 @@ uiModules
 
 
     const save = function () {
+      $scope.form.errors = [];
 
       if ($scope.form.raw_enabled) {
         try {
           // All settings will have been overwritten if enable is checked and the watcher is saved.
           $scope.watcher = JSON.parse($scope.watcher.$raw);
         } catch (e) {
-          $scope.notify.error(`Raw settings: ${e}`);
-          $scope.form.valid = false;
+          $scope.form.errors.push(`Raw settings: ${e}`);
+          $scope.watcherForm.$valid = false;
+          $scope.watcherForm.$invalid = true;
         }
         return;
       }
@@ -236,25 +235,41 @@ uiModules
           JSON.parse($scope.watcher._source._input);
         }
       } catch (e) {
-        $scope.notify.error(`Input settings: ${e}`);
-        $scope.form.valid = false;
+        $scope.form.errors.push(`Input settings: ${e}`);
+        $scope.watcherForm.$valid = false;
+        $scope.watcherForm.$invalid = true;
       }
 
-      if ($scope.form.valid) {
+      if ($scope.watcherForm.$valid) {
         saveSchedule();
         saveThrottle();
         saveEditorsText();
         $scope.watcher._source.actions = renameActions($scope.watcher._source.actions);
+        $scope.form.saved = true;
       }
     };
+
+
+    $scope.$on('$destroy', () => {
+      if (!$scope.form.saved) {
+        const data = {
+          index: $scope.index,
+          watcher: JSON.parse($scope.watcher.$raw),
+          collapse: true
+        };
+        $scope.$emit('wizardSaveConfirm', data);
+      }
+    });
 
 
     $scope.$on('wizardSave', (event, index) => {
       if (+index === +$scope.index) {
         save();
 
-        if ($scope.form.valid) {
-          const data = { index: index };
+        if ($scope.watcherForm.$valid) {
+          const data = {
+            index: index
+          };
           if ($scope.form.raw_enabled) {
             data.watcher = $scope.watcher;
           }

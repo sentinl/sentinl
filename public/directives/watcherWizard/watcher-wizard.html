@@ -1,4 +1,7 @@
 <div id="watcherWizard">
+  <div ng-if="form.errors.length"
+      ng-repeat="error in form.errors"
+      class="alert alert-danger">{{ error }}</div>
   <form name="watcherForm" class="form-horizontal" novalidate>
     <tabset>
       <tab active index="0" heading="General">

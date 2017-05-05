@@ -357,7 +357,9 @@ uiModules
     if (wizard.watcher) {
       $scope.watchers[wizard.index] = wizard.watcher;
     }
-    $scope.watcherSave(wizard.index);
+    if (!wizard.collapse) {
+      $scope.watcherSave(wizard.index);
+    }
   });
 
   $scope.toggleWatcher = function (index) {
