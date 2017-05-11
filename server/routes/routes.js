@@ -98,6 +98,7 @@ export default function routes(server) {
       const boundCallWithRequest = _.partial(server.plugins.elasticsearch.callWithRequest, req);
       boundCallWithRequest('search', {
         index: config.es.default_index,
+        type: config.es.type,
         size: config.sentinl.results ? config.sentinl.results : 50,
         allowNoIndices: false
       })
