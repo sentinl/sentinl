@@ -12,7 +12,9 @@ uiModules
     $scope.form = {
       status: !$scope.watcher._source.disable ? 'Enabled' : 'Disable',
       scripts: {
-        transform: {}
+        transform: {},
+        input: {},
+        condition: {}
       },
       source: {
         fields: ['_input', '_condition', '_transform', '_transformTitle']
@@ -43,7 +45,6 @@ uiModules
         }
       };
     };
-
 
     const initActionTitles = function () {
       _.forOwn($scope.watcher._source.actions, (settings, name) => { settings._title = name; });
@@ -120,7 +121,12 @@ uiModules
 
 
     $scope.saveScript = function (type) {
-      $scope.form.scripts[type][$scope.watcher._source[`_${type}Title`]] = $scope.watcher._source[`_${type}`];
+      const script = {
+        body: $scope.watcher._source[`_${type}`],
+        title: $scope.watcher._source[`_${type}Title`]
+      };
+      $scope.form.scripts[type][script.title] = script.body;
+      $http.post(`../api/sentinl/save/scripts/${type}`, script);
     };
 
 
@@ -231,9 +237,19 @@ uiModules
       });
     };
 
+    const initScripts = function () {
+      _.forEach($scope.form.scripts, (value, type) => {
+        $http.get(`../api/sentinl/get/scripts/${type}`).then((resp) => {
+          _.forEach(resp.data.hits.hits, (script) => {
+            $scope.form.scripts[type][script._source.title] = script._source.body;
+          });
+        });
+      });
+    };
 
     const init = function () {
       $scope.watcher.$raw = JSON.stringify($scope.watcher, null, 2);
+      initScripts();
       initActionTitles();
       initSchedule();
       initThrottlePeriods();
