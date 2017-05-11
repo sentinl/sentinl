@@ -266,7 +266,7 @@ export default function routes(server) {
     path: '/api/sentinl/save/scripts/{type}',
     handler: function (request, reply) {
       const script = request.payload;
-      server.log(['status', 'info', 'Sentinl'], `Saving scripts with type: ${script.type}`);
+      server.log(['status', 'info', 'Sentinl'], `Saving scripts with type: ${request.params.type}`);
       const body = {
         index: config.es.default_index,
         type: request.params.type,
