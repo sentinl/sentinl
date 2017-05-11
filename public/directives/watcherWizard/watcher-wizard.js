@@ -120,7 +120,7 @@ uiModules
 
 
     $scope.saveScript = function (type) {
-      $scope.form.scripts[type][$scope.watcher._source._transformTitle] = $scope.watcher._source[`_${type}`];
+      $scope.form.scripts[type][$scope.watcher._source[`_${type}Title`]] = $scope.watcher._source[`_${type}`];
     };
 
 
@@ -131,8 +131,8 @@ uiModules
 
 
     $scope.removeScript = function (type) {
-      delete $scope.form.scripts[type][$scope.watcher._source._transformTitle];
-      delete $scope.watcher._source._transformTitle;
+      delete $scope.form.scripts[type][$scope.watcher._source[`_${type}Title`]];
+      delete $scope.watcher._source[`_${type}Title`];
     };
 
 
