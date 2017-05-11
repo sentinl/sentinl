@@ -34,10 +34,51 @@
       <tab index="1" heading="Input">
         <div class="tabContent">
           <div class="form-group">
-            <div class="col-md-11">
+            <div class="col-md-1"></div>
+            <div class="col-md-4">
+              <span class="dropdown" dropdown>
+                <a href class="dropdown-toggle" dropdown-toggle>
+                  Get saved scripts
+                </a>
+                <ul class="dropdown-menu">
+                  <li ng-repeat="(name, value) in form.scripts.input">
+                    <a href ng-click="selectScript('input', name)">{{ name }}</a>
+                  </li>
+                  <li ng-show="isEmpty(form.scripts.input)">
+                    <a href>No scripts strored</a>
+                  </li>
+                </ul>
+              </span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-md-1 control-label" for="title">Title:</label>
+            <div class="col-md-3">
+              <input
+                type="text"
+                id="inputTitle"
+                name="inputTitle"
+                value="{{watcher._source._inputTitle}}"
+                class="form-control"
+                placeholder="title"
+                ng-model="watcher._source._inputTitle">
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="col-md-1">
+            </div>
+            <div class="col-md-10">
               <div id="inputEdit"
                 ng-model="watcher._source._input"
                 ui-ace="aceOptions('json', 30)">{{ watcher._source._input }}</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="col-md-1">
+            </div>
+            <div class="col-md-4">
+              <button type="button" class="btn btn-default btn-sm" ng-click="saveScript('input')">Save</button>
+              <button type="button" class="btn btn-danger btn-sm" ng-click="removeScript('input')">Remove</button>
             </div>
           </div>
         </div>
@@ -45,10 +86,51 @@
       <tab index="2" heading="Condition">
         <div class="tabContent">
           <div class="form-group">
-            <div class="col-md-11">
+            <div class="col-md-1"></div>
+            <div class="col-md-4">
+              <span class="dropdown" dropdown>
+                <a href class="dropdown-toggle" dropdown-toggle>
+                  Get saved scripts
+                </a>
+                <ul class="dropdown-menu">
+                  <li ng-repeat="(name, value) in form.scripts.condition">
+                    <a href ng-click="selectScript('condition', name)">{{ name }}</a>
+                  </li>
+                  <li ng-show="isEmpty(form.scripts.condition)">
+                    <a href>No scripts strored</a>
+                  </li>
+                </ul>
+              </span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-md-1 control-label" for="title">Title:</label>
+            <div class="col-md-3">
+              <input
+                type="text"
+                id="conditionTitle"
+                name="conditionTitle"
+                value="{{watcher._source._conditionTitle}}"
+                class="form-control"
+                placeholder="title"
+                ng-model="watcher._source._conditionTitle">
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="col-md-1">
+            </div>
+            <div class="col-md-10">
               <div id="conditionEdit"
                 ng-model="watcher._source._condition"
                 ui-ace="aceOptions('javascript')">{{ watcher._source._condition }}</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="col-md-1">
+            </div>
+            <div class="col-md-4">
+              <button type="button" class="btn btn-default btn-sm" ng-click="saveScript('condition')">Save</button>
+              <button type="button" class="btn btn-danger btn-sm" ng-click="removeScript('condition')">Remove</button>
             </div>
           </div>
         </div>
@@ -78,8 +160,8 @@
             <div class="col-md-3">
               <input
                 type="text"
-                id="scriptTitle"
-                name="sriptTitle"
+                id="transformTitle"
+                name="transformTitle"
                 value="{{watcher._source._transformTitle}}"
                 class="form-control"
                 placeholder="title"

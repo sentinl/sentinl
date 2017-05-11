@@ -17,7 +17,7 @@ uiModules
         condition: {}
       },
       source: {
-        fields: ['_input', '_condition', '_transform', '_transformTitle']
+        fields: ['_input', '_condition', '_transform', '_transformTitle', '_inputTitle', '_conditionTitle']
       },
       actions: {
         new: {
