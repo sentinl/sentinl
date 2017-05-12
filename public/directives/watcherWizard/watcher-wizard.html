@@ -41,8 +41,8 @@
                   Get saved scripts
                 </a>
                 <ul class="dropdown-menu">
-                  <li ng-repeat="(name, value) in form.scripts.input">
-                    <a href ng-click="selectScript('input', name)">{{ name }}</a>
+                  <li ng-repeat="(id, script) in form.scripts.input">
+                    <a href ng-click="selectScript('input', id)">{{ script.title }}</a>
                   </li>
                   <li ng-show="isEmpty(form.scripts.input)">
                     <a href>No scripts strored</a>
@@ -58,10 +58,10 @@
                 type="text"
                 id="inputTitle"
                 name="inputTitle"
-                value="{{watcher._source._inputTitle}}"
+                value="{{watcher.$scripts.input.title}}"
                 class="form-control"
                 placeholder="title"
-                ng-model="watcher._source._inputTitle">
+                ng-model="watcher.$scripts.input.title">
             </div>
           </div>
           <div class="form-group">
@@ -69,8 +69,8 @@
             </div>
             <div class="col-md-10">
               <div id="inputEdit"
-                ng-model="watcher._source._input"
-                ui-ace="aceOptions('json', 30)">{{ watcher._source._input }}</div>
+                ng-model="watcher.$scripts.input.body"
+                ui-ace="aceOptions('json', 30)">{{ watcher.$scripts.input.body }}</div>
             </div>
           </div>
           <div class="form-group">
@@ -93,8 +93,8 @@
                   Get saved scripts
                 </a>
                 <ul class="dropdown-menu">
-                  <li ng-repeat="(name, value) in form.scripts.condition">
-                    <a href ng-click="selectScript('condition', name)">{{ name }}</a>
+                  <li ng-repeat="(id, script) in form.scripts.condition">
+                    <a href ng-click="selectScript('condition', id)">{{ script.title }}</a>
                   </li>
                   <li ng-show="isEmpty(form.scripts.condition)">
                     <a href>No scripts strored</a>
@@ -110,10 +110,10 @@
                 type="text"
                 id="conditionTitle"
                 name="conditionTitle"
-                value="{{watcher._source._conditionTitle}}"
+                value="{{watcher.$scripts.condition.title}}"
                 class="form-control"
                 placeholder="title"
-                ng-model="watcher._source._conditionTitle">
+                ng-model="watcher.$scripts.condition.title">
             </div>
           </div>
           <div class="form-group">
@@ -121,8 +121,8 @@
             </div>
             <div class="col-md-10">
               <div id="conditionEdit"
-                ng-model="watcher._source._condition"
-                ui-ace="aceOptions('javascript')">{{ watcher._source._condition }}</div>
+                ng-model="watcher.$scripts.condition.body"
+                ui-ace="aceOptions('javascript')">{{ watcher.$scripts.condition.body }}</div>
             </div>
           </div>
           <div class="form-group">
@@ -145,8 +145,8 @@
                   Get saved scripts
                 </a>
                 <ul class="dropdown-menu">
-                  <li ng-repeat="(name, value) in form.scripts.transform">
-                    <a href ng-click="selectScript('transform', name)">{{ name }}</a>
+                  <li ng-repeat="(id, script) in form.scripts.transform">
+                    <a href ng-click="selectScript('transform', id)">{{ script.title }}</a>
                   </li>
                   <li ng-show="isEmpty(form.scripts.transform)">
                     <a href>No scripts strored</a>
@@ -162,10 +162,10 @@
                 type="text"
                 id="transformTitle"
                 name="transformTitle"
-                value="{{watcher._source._transformTitle}}"
+                value="{{watcher.$scripts.transform.title}}"
                 class="form-control"
                 placeholder="title"
-                ng-model="watcher._source._transformTitle">
+                ng-model="watcher.$scripts.transform.title">
             </div>
           </div>
           <div class="form-group">
@@ -173,8 +173,8 @@
             </div>
             <div class="col-md-10">
               <div id="transformEdit"
-                ng-model="watcher._source._transform"
-                ui-ace="aceOptions('javascript', 30)">{{ watcher._source._transform }}</div>
+                ng-model="watcher.$scripts.transform.body"
+                ui-ace="aceOptions('javascript', 30)">{{ watcher.$scripts.transform.body }}</div>
             </div>
           </div>
           <div class="form-group">

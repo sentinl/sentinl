@@ -16,9 +16,6 @@ uiModules
         input: {},
         condition: {}
       },
-      source: {
-        fields: ['_input', '_condition', '_transform']
-      },
       actions: {
         new: {
           edit: false
@@ -121,18 +118,22 @@ uiModules
 
 
     $scope.saveScript = function (type) {
-      const script = {
-        body: $scope.watcher._source[`_${type}`],
-        title: $scope.watcher._source[`_${type}Title`]
+      const id = Math.random().toString(36).slice(2);
+      $scope.form.scripts[type][id] = {
+        id: id,
+        title: $scope.watcher.$scripts[type].title,
+        body: $scope.watcher.$scripts[type].body
       };
-      $scope.form.scripts[type][script.title] = script.body;
-      $http.post(`../api/sentinl/save/scripts/${type}`, script);
+      $http.post(`../api/sentinl/save/scripts/${type}`, $scope.form.scripts[type][id]);
     };
 
 
-    $scope.selectScript = function (type, name) {
-      $scope.watcher._source[`_${type}Title`] = name;
-      $scope.watcher._source[`_${type}`] = $scope.form.scripts[type][name];
+    $scope.selectScript = function (type, id) {
+      $scope.watcher.$scripts[type] = {
+        id: id,
+        title: $scope.form.scripts[type][id].title,
+        body: $scope.form.scripts[type][id].body
+      };
     };
 
 
@@ -206,21 +207,14 @@ uiModules
 
 
     const saveEditorsText = function () {
-      _.each($scope.form.source.fields, (field) => {
-        if (_.has($scope.watcher._source, field)) {
-          if ($scope.watcher._source[field]) {
-            if (field === '_input') {
-              $scope.watcher._source[field.substring(1)] = JSON.parse($scope.watcher._source[field]);
-            } else {
-              $scope.watcher._source[field.substring(1)].script.script = $scope.watcher._source[field];
-            }
+      _.forEach($scope.watcher.$scripts, (script, field) => {
+        if ($scope.watcher._source[field]) {
+          if (field === 'input') {
+            $scope.watcher._source[field] = JSON.parse(script.body);
+          } else {
+            $scope.watcher._source[field].script.script = script.body;
           }
-          delete $scope.watcher._source[field];
         }
-      });
-
-      _.forEach(['_transformTitle', '_inputTitle', '_conditionTitle'], (field) => {
-        delete $scope.watcher._source[field];
       });
 
       _.forOwn($scope.watcher._source.actions, (settings, name) => {
@@ -241,10 +235,19 @@ uiModules
     };
 
     const initScripts = function () {
-      _.forEach($scope.form.scripts, (value, type) => {
-        $http.get(`../api/sentinl/get/scripts/${type}`).then((resp) => {
+      $scope.watcher.$scripts = {};
+      _.forEach($scope.form.scripts, (script, field) => {
+        let value = field === 'input' ? $scope.watcher._source.input : $scope.watcher._source[field].script.script;
+
+        $scope.watcher.$scripts[field] = {
+          id: null,
+          title: null,
+          body: field === 'input' ? JSON.stringify(value, null, 2) : value
+        };
+
+        $http.get(`../api/sentinl/get/scripts/${field}`).then((resp) => {
           _.forEach(resp.data.hits.hits, (script) => {
-            $scope.form.scripts[type][script._source.title] = script._source.body;
+            $scope.form.scripts[field][script._id] = script._source;
           });
         });
       });
@@ -256,9 +259,6 @@ uiModules
       initActionTitles();
       initSchedule();
       initThrottlePeriods();
-      $scope.watcher._source._input = JSON.stringify($scope.watcher._source.input, null, 2);
-      $scope.watcher._source._transform = $scope.watcher._source.transform.script.script;
-      $scope.watcher._source._condition = $scope.watcher._source.condition.script.script;
     };
 
 
