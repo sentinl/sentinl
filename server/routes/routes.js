@@ -292,6 +292,7 @@ export default function routes(server) {
       callWithRequest(request, 'search', {
         index: config.es.default_index,
         type: request.params.type,
+        size: config.sentinl.scriptResults ? config.sentinl.scriptResults : 50,
         q: 'title:*'
       })
       .then((resp) => reply(resp))
