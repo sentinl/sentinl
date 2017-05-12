@@ -264,13 +264,14 @@ export default function routes(server) {
 
   server.route({
     method: 'POST',
-    path: '/api/sentinl/save/scripts/{type}',
+    path: '/api/sentinl/save/one_script/{type}/{id}',
     handler: function (request, reply) {
       const script = request.payload;
       server.log(['status', 'info', 'Sentinl'], `Saving scripts with type: ${request.params.type}`);
       const body = {
         index: config.es.default_index,
         type: request.params.type,
+        id: request.params.id,
         body: script
       };
       callWithRequest(request, 'index', body)
