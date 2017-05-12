@@ -17,7 +17,7 @@ uiModules
         condition: {}
       },
       source: {
-        fields: ['_input', '_condition', '_transform', '_transformTitle', '_inputTitle', '_conditionTitle']
+        fields: ['_input', '_condition', '_transform']
       },
       actions: {
         new: {
@@ -206,7 +206,6 @@ uiModules
 
 
     const saveEditorsText = function () {
-
       _.each($scope.form.source.fields, (field) => {
         if (_.has($scope.watcher._source, field)) {
           if ($scope.watcher._source[field]) {
@@ -218,6 +217,10 @@ uiModules
           }
           delete $scope.watcher._source[field];
         }
+      });
+
+      _.forEach(['_transformTitle', '_inputTitle', '_conditionTitle'], (field) => {
+        delete $scope.watcher._source[field];
       });
 
       _.forOwn($scope.watcher._source.actions, (settings, name) => {
