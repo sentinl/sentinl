@@ -121,13 +121,25 @@ uiModules
 
 
     $scope.saveScript = function (type) {
-      const id = Math.random().toString(36).slice(2);
-      $scope.form.scripts[type][id] = {
-        id: id,
-        title: $scope.watcher.$scripts[type].title,
-        body: $scope.watcher.$scripts[type].body
-      };
-      $http.post(`../api/sentinl/save/scripts/${type}`, $scope.form.scripts[type][id]).catch($scope.notify.error);
+      const title = `${type}Title`;
+
+      if ($scope.watcherForm[title].$viewValue && $scope.watcherForm[title].$viewValue.length) {
+        $scope.watcherForm[title].$valid = true;
+        $scope.watcherForm[title].$invalid = false;
+      } else {
+        $scope.watcherForm[title].$valid = false;
+        $scope.watcherForm[title].$invalid = true;
+      }
+
+      if ($scope.watcherForm[title].$valid) {
+        const id = Math.random().toString(36).slice(2);
+        $scope.form.scripts[type][id] = {
+          id: id,
+          title: $scope.watcher.$scripts[type].title,
+          body: $scope.watcher.$scripts[type].body
+        };
+        $http.post(`../api/sentinl/save/scripts/${type}`, $scope.form.scripts[type][id]).catch($scope.notify.error);
+      }
     };
 
 

@@ -63,6 +63,7 @@
                 placeholder="title"
                 ng-model="watcher.$scripts.input.title">
             </div>
+            <p ng-show="watcherForm.inputTitle.$invalid" class="text-danger">Title is required.</p>
           </div>
           <div class="form-group">
             <div class="col-md-1">
@@ -115,6 +116,7 @@
                 placeholder="title"
                 ng-model="watcher.$scripts.condition.title">
             </div>
+            <p ng-show="watcherForm.conditionTitle.$invalid" class="text-danger">Title is required.</p>
           </div>
           <div class="form-group">
             <div class="col-md-1">
@@ -167,6 +169,7 @@
                 placeholder="title"
                 ng-model="watcher.$scripts.transform.title">
             </div>
+            <p ng-show="watcherForm.transformTitle.$invalid" class="text-danger">Title is required.</p>
           </div>
           <div class="form-group">
             <div class="col-md-1">
