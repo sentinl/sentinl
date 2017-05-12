@@ -301,4 +301,24 @@ export default function routes(server) {
     }
   });
 
+  server.route({
+    method: 'DELETE',
+    path: '/api/sentinl/remove/one_script/{type}/{id}',
+    handler: function (request, reply) {
+      const callWithRequest = server.plugins.elasticsearch.callWithRequest;
+      const body = {
+        index: config.es.default_index,
+        type: request.params.type,
+        id: request.params.id
+      };
+      server.log(['status', 'info', 'Sentinl'], `Delete script with type/id: ${request.params.type}/${request.params.id}`);
+      callWithRequest(request, 'delete', body)
+      .then(() => callWithRequest(request, 'indices.refresh', {
+        index: config.es.default_index
+      }))
+      .then((resp) => reply({ok: true, resp: resp}))
+      .catch((err) => reply(handleESError(err)));
+    }
+  });
+
 };

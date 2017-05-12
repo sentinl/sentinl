@@ -1,4 +1,5 @@
 import uiModules from 'ui/modules';
+import Notifier from 'ui/notify/notifier';
 import _ from 'lodash';
 import confirmMessage from '../../templates/confirm-message.html';
 import watcherEmailAction from './watcher-wizard.html';
@@ -8,6 +9,8 @@ uiModules
 .get('api/sentinl', [])
 .directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, Notifier) {
   function wizardDirective($scope, element, attrs) {
+
+    $scope.notify = new Notifier();
 
     $scope.form = {
       status: !$scope.watcher._source.disable ? 'Enabled' : 'Disable',
@@ -124,7 +127,7 @@ uiModules
         title: $scope.watcher.$scripts[type].title,
         body: $scope.watcher.$scripts[type].body
       };
-      $http.post(`../api/sentinl/save/scripts/${type}`, $scope.form.scripts[type][id]);
+      $http.post(`../api/sentinl/save/scripts/${type}`, $scope.form.scripts[type][id]).catch($scope.notify.error);
     };
 
 
@@ -138,8 +141,9 @@ uiModules
 
 
     $scope.removeScript = function (type) {
-      delete $scope.form.scripts[type][$scope.watcher._source[`_${type}Title`]];
-      delete $scope.watcher._source[`_${type}Title`];
+      const id = $scope.watcher.$scripts[type].id;
+      $http.delete(`../api/sentinl/remove/one_script/${type}/${id}`).catch($scope.notify.error);
+      delete $scope.form.scripts[type][id];
     };
 
 
@@ -249,7 +253,7 @@ uiModules
           _.forEach(resp.data.hits.hits, (script) => {
             $scope.form.scripts[field][script._id] = script._source;
           });
-        });
+        }).catch($scope.notify.error);
       });
     };
 
