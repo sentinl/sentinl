@@ -8,6 +8,9 @@
   "version": "5.2.2",
   "description": "Kibana Alert & Report App for Elasticsearch",
   "main": "index.js",
+  "kibana": {
+    "version": "kibana"
+  },
   "scripts": {
     "lint": "eslint",
     "precommit": "gulp lint",
