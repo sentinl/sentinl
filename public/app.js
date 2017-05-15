@@ -25,6 +25,18 @@ import uiRoutes from 'ui/routes';
 
 /* import controllers */
 import './controllers/reportController';
+import './controllers/confirmMessageController';
+
+/* import directives */
+import './directives/watcherWizard/watcher-wizard';
+import './directives/newAction/new-action';
+import './directives/emailAction/email-action';
+import './directives/emailHtmlAction/emailHtml-action';
+import './directives/webhookAction/webhook-action';
+import './directives/reportAction/report-action';
+import './directives/slackAction/slack-action';
+import './directives/consoleAction/console-action';
+import './directives/scheduleTag/schedule-tag';
 
 import $ from 'jquery';
 
@@ -57,6 +69,7 @@ import about from './templates/about.html';
 import alarms from './templates/alarms.html';
 import reports from './templates/reports.html';
 import jsonHtml from './templates/json.html';
+import confirmMessage from './templates/confirm-message.html';
 
 var impactLogo = require('plugins/sentinl/sentinl_logo.svg');
 var smallLogo = require('plugins/sentinl/sentinl.svg');
@@ -140,7 +153,7 @@ uiModules
   };
 })
 .controller('sentinlHelloWorld', function ($rootScope, $scope, $route, $interval,
-  $timeout, timefilter, Private, Notifier, $window, kbnUrl, $http) {
+  $timeout, timefilter, Private, Notifier, $window, kbnUrl, $http, $modal) {
   $scope.title = 'Sentinl: Alarms';
   $scope.description = 'Kibana Alert App for Elasticsearch';
 
@@ -212,17 +225,25 @@ uiModules
   });
 
   $scope.deleteAlarm = function (index, rmindex, rmtype, rmid) {
-    if (confirm('Delete is Forever!\n Are you sure?')) {
-      return $http.delete('../api/sentinl/alarm/' + rmindex + '/' + rmtype + '/' + rmid)
-      .then(() => {
-        $timeout(() => {
-          $scope.elasticAlarms.splice(index - 1, 1);
-          $scope.notify.warning('SENTINL Alarm log successfully deleted!');
-          $route.reload();
-        }, 1000);
-      })
-      .catch($scope.notify.error);
-    }
+    const confirmModal = $modal.open({
+      template: confirmMessage,
+      controller: 'ConfirmMessageController',
+      size: 'sm'
+    });
+
+    confirmModal.result.then((response) => {
+      if (response === 'yes') {
+        return $http.delete('../api/sentinl/alarm/' + rmindex + '/' + rmtype + '/' + rmid)
+        .then(() => {
+          $timeout(() => {
+            $scope.elasticAlarms.splice(index - 1, 1);
+            $scope.notify.warning('SENTINL Alarm log successfully deleted!');
+            $route.reload();
+          }, 1000);
+        })
+        .catch($scope.notify.error);
+      }
+    });
   };
 
   $scope.deleteAlarmLocal = function (index) {
@@ -241,11 +262,12 @@ uiModules
 
 });
 
+
 // WATCHERS CONTROLLER
 uiModules
 .get('api/sentinl', [])
 .controller('sentinlWatchers', function ($rootScope, $scope, $route, $interval,
-  $timeout, timefilter, Private, Notifier, $window, kbnUrl, $http) {
+  $timeout, timefilter, Private, Notifier, $window, kbnUrl, $http, $modal, $log) {
   const tabifyAggResponse = Private(AggResponseTabifyTabifyProvider);
 
   $scope.title = 'Sentinl: Watchers';
@@ -305,22 +327,54 @@ uiModules
   };
 
   $scope.watcherDelete = function ($index) {
-    if (confirm('Are you sure?')) {
-      return $http.delete('../api/sentinl/watcher/' + $scope.watchers[$index]._id)
-      .then(
-        (resp) => {
-          $timeout(function () {
-            $route.reload();
-            $scope.notify.warning('SENTINL Watcher successfully deleted!');
-          }, 1000);
-        },
-        $scope.notify.error
-      );
-    }
+    const confirmModal = $modal.open({
+      template: confirmMessage,
+      controller: 'ConfirmMessageController',
+      size: 'sm'
+    });
+
+    confirmModal.result.then((response) => {
+      if (response === 'yes') {
+        return $http.delete('../api/sentinl/watcher/' + $scope.watchers[$index]._id)
+        .then(
+          (resp) => {
+            $timeout(function () {
+              $route.reload();
+              $scope.notify.warning('SENTINL Watcher successfully deleted!');
+            }, 1000);
+          },
+          $scope.notify.error
+        );
+      }
+    });
   };
 
-  $scope.watcherSave = function ($index) {
-    var watcher = $scope.editor ? JSON.parse($scope.editor.getValue()) : $scope.watchers[$index];
+  $scope.wizardSave = function ($index) {
+    $scope.$broadcast('wizardSave', $index);
+  };
+
+  $scope.$on('wizardSaveConfirm', (event, wizard) => {
+    if (wizard.watcher) {
+      $scope.watchers[wizard.index] = wizard.watcher;
+    }
+    if (!wizard.collapse) {
+      $scope.watcherSave(wizard.index);
+    }
+  });
+
+  $scope.toggleWatcher = function (index) {
+    $scope.watchers[index]._source.disable = !$scope.watchers[index]._source.disable;
+    $scope.watcherSave(index);
+  };
+
+  $scope.watcherSave = function ($index, callFromWatcherEditorForm = false) {
+    let watcher;
+    if ($scope.editor && !callFromWatcherEditorForm) {
+      watcher = JSON.parse($scope.editor.getValue());
+    } else {
+      watcher = $scope.watchers[$index];
+    }
+
     console.log('saving object:', watcher);
     return $http.post(`../api/sentinl/watcher/${watcher._id}`, watcher)
     .then(
@@ -369,7 +423,11 @@ uiModules
               script: 'payload.hits.total > 100'
             }
           },
-          transform: {},
+          transform: {
+            script: {
+              script: ''
+            }
+          },
           actions: {
             email_admin: {
               throttle_period: '15m',
@@ -404,8 +462,17 @@ uiModules
               later: 'every 1 hour'
             }
           },
+          condition: {
+            script: {
+              script: ''
+            }
+          },
+          transform: {
+            script: {
+              script: ''
+            }
+          },
           report : true,
-          transform: {},
           actions: {
             report_admin: {
               throttle_period: '15m',

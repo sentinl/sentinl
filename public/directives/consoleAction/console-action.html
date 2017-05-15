@@ -1,0 +1,47 @@
+<h4>{{ action.type }}</h4>
+<div class="jumbotron" ng-form="consoleForm">
+  <div class="form-group">
+    <label class="col-md-2 control-label">Priority:</label>
+    <div class="btn-group col-md-4">
+      <label class="btn btn-danger btn-sm" ng-model="actionSettings.console.priority" btn-radio="'high'">High</label>
+      <label class="btn btn-warning btn-sm" ng-model="actionSettings.console.priority" btn-radio="'medium'">Medium</label>
+      <label class="btn btn-info btn-sm" ng-model="actionSettings.console.priority" btn-radio="'low'">Low</label>
+    </div>
+  </div>
+  <div class="form-group" ng-class="{'has-error': consoleForm.consoleTitle.$invalid && !consoleForm.consoleTitle.$pristine}">
+    <label class="col-md-2 control-label" for="consoleTitle">Title:</label>
+    <div class="col-md-6">
+      <input
+        type="text"
+        id="consoleTitle"
+        name="consoleTitle"
+        value="{{actionName}}"
+        class="form-control"
+        placeholder="{{watcher._source.uuid}}"
+        ng-model="actionSettings._title"
+        ng-required="actionSettings.console._edit">
+    </div>
+    <p ng-show="consoleForm.consoleTitle.$invalid && !consoleForm.consoleTitle.$pristine" class="help-block">
+      <small>Action title is required.</small>
+    </p>
+  </div>
+  <div class="form-group" ng-class="{'has-error': !actionSettings.console.message.length}">
+    <div class="row">
+      <label class="col-md-2 control-label" for="consoleMessage">Message:</label>
+      <div class="col-md-8">
+        <div id="consoleMessage"
+          ng-model="actionSettings.console.message"
+          ui-ace="aceOptions('behaviour')">
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-2"></div>
+      <div class="col-md-8">
+        <p ng-show="!actionSettings.console.message.length" class="text-warning">
+          <small>Write a message.</small>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

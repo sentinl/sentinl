@@ -1,0 +1,161 @@
+<h4>{{ action.type }}</h4>
+<div class="jumbotron" ng-form="reportForm">
+  <div class="form-group">
+    <label class="col-md-2 control-label">Priority:</label>
+    <div class="btn-group col-md-4">
+      <label class="btn btn-danger btn-sm" ng-model="actionSettings.report.priority" btn-radio="'high'">High</label>
+      <label class="btn btn-warning btn-sm" ng-model="actionSettings.report.priority" btn-radio="'medium'">Medium</label>
+      <label class="btn btn-info btn-sm" ng-model="actionSettings.report.priority" btn-radio="'low'">Low</label>
+    </div>
+  </div>
+  <div class="form-group" ng-class="{'has-error': reportForm.reportTitle.$invalid && !reportForm.reportTitle.$pristine}">
+    <label class="col-md-2 control-label" for="reportTitle">Title:</label>
+    <div class="col-md-6">
+      <input
+        type="text"
+        id="reportTitle"
+        name="reportTitle"
+        value="{{actionName}}"
+        class="form-control"
+        placeholder="{{watcher._source.uuid}}"
+        ng-model="actionSettings._title"
+        ng-required="actionSettings.report._edit">
+    </div>
+    <p ng-show=" reportForm.reportTitle.$invalid && !reportForm.reportTitle.$pristine" class="help-block">
+      <small>Action title is required.</small>
+    </p>
+  </div>
+  <div class="form-group" ng-class="{'has-error': reportForm.reportTo.$invalid && !reportForm.reportTo.$pristine}">
+    <label class="col-md-2 control-label" for="reportTo">To:</label>
+    <div class="col-md-6">
+      <input
+        type="email"
+        id="reportTo"
+        name="reportTo"
+        value="{{actionSettings.report.to}}"
+        class="form-control"
+        placeholder="reports@localhost"
+        ng-model="actionSettings.report.to"
+        ng-required="actionSettings.report._edit">
+    </div>
+    <p ng-show="reportForm.reportTo.$invalid && !reportForm.reportTo.$pristine" class="help-block">
+      <small>Enter a valid email.</small>
+    </p>
+  </div>
+  <div class="form-group" ng-class="{'has-error': reportForm.reportFrom.$invalid && !reportForm.reportFrom.$pristine}">
+    <label class="col-md-2 control-label" for="reportFrom">From:</label>
+    <div class="col-md-6">
+      <input
+        type="email"
+        id="reportFrom"
+        name="reportFrom"
+        value="{{actionSettings.report.from}}"
+        class="form-control"
+        placeholder="sentinl@localhost"
+        ng-model="actionSettings.report.from"
+        ng-required="actionSettings.report._edit">
+    </div>
+    <p ng-show="reportForm.reportFrom.$invalid && !reportForm.reportFrom.$pristine" class="help-block">
+      <small>Enter a valid email.</small>
+    </p>
+  </div>
+  <div class="form-group">
+    <label class="col-md-2 control-label" for="reportSubject">Subject:</label>
+    <div class="col-md-6">
+      <input
+        type="text"
+        id="reportSubject"
+        name="reportSubject"
+        value="{{actionSettings.report.subject}}"
+        class="form-control"
+        placeholder="SENTINL Report"
+        ng-model="actionSettings.report.subject"
+        ng-required="actionSettings.report._edit">
+    </div>
+  </div>
+  <div class="form-group" ng-class="{'has-error': !actionSettings.report.body.length}">
+    <div class="row">
+      <label class="col-md-2 control-label" for="reportBody">Body:</label>
+      <div class="col-md-8">
+        <div id="reportBody"
+          ng-model="actionSettings.report.body"
+          ui-ace="aceOptions('behaviour')">
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-2"></div>
+      <div class="col-md-8">
+        <p ng-show="!actionSettings.report.body.length" class="text-warning">
+          <small>Describe the report in the body.</small>
+        </p>
+      </div>
+    </div>
+  </div>
+  <hr />
+  <div class="form-group" ng-class="{'has-error': reportForm.reportResolution.$invalid && !reportForm.reportResolution.$pristine}">
+    <label class="col-md-2 control-label" for="reportResolution">Resolution:</label>
+    <div class="col-md-3">
+      <input
+        type="text"
+        id="reportResolution"
+        name="reportResolution"
+        value="{{actionSettings.report.snapshot.res}}"
+        class="form-control"
+        placeholder="1280x900"
+        ng-model="actionSettings.report.snapshot.res"
+        ng-pattern="action.resolutionPattern"
+        ng-required="actionSettings.report._edit">
+    </div>
+    <p ng-show="reportForm.reportResolution.$invalid && !reportForm.reportResolution.$pristine" class="help-block">
+      <small>Enter a valid resolution pattern.</small>
+    </p>
+  </div>
+  <div class="form-group" ng-class="{'has-error': reportForm.reportUrl.$invalid && !reportForm.reportUrl.$pristine}">
+    <label class="col-md-2 control-label" for="reportUrl">URL:</label>
+    <div class="col-md-6">
+      <input
+        type="url"
+        id="reportUrl"
+        name="reportUrl"
+        value="{{actionSettings.report.snapshot.url}}"
+        class="form-control"
+        placeholder="http://www.google.com"
+        ng-model="actionSettings.report.snapshot.url"
+        ng-required="actionSettings.report._edit">
+    </div>
+    <p ng-show="reportForm.reportUrl.$invalid && !reportForm.reportUrl.$pristine" class="help-block">
+      <small>Enter a valid URL.</small>
+    </p>
+  </div>
+  <div class="form-group">
+    <label class="col-md-2 control-label" for="reportPath">Path:</label>
+    <div class="col-md-6">
+      <input
+        type="text"
+        id="reportPath"
+        name="reportPath"
+        value="{{actionSettings.report.snapshot.path}}"
+        class="form-control"
+        placeholder="/tmp/"
+        ng-model="actionSettings.report.snapshot.path">
+    </div>
+  </div>
+  <div class="form-group" ng-class="{'has-error': reportForm.reportDelay.$invalid && !reportForm.reportDelay.$pristine}">
+    <label class="col-md-2 control-label" for="reportDelay">Delay:</label>
+    <div class="col-md-6">
+      <input
+        type="number"
+        min="0"
+        id="reportDelay"
+        name="reportDelay"
+        ng-value="actionSettings.report.snapshot.params.delay"
+        class="form-control"
+        placeholder="5000"
+        ng-model="actionSettings.report.snapshot.params.delay">
+    </div>
+    <p ng-show="reportForm.reportDelay.$invalid && !reportForm.reportDelay.$pristine" class="help-block">
+      <small>Delay must be a positive integer.</small>
+    </p>
+  </div>
+</div>

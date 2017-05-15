@@ -48,7 +48,8 @@ export default function (kibana) {
         }).default(),
         sentinl: Joi.object({
           history: Joi.number().default(20),
-          results: Joi.number().default(50)
+          results: Joi.number().default(50),
+          scriptResults: Joi.number().default(50)
         }).default(),
         settings: Joi.object({
           email: Joi.object({
