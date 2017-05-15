@@ -34,7 +34,7 @@ var knownOptions = {
   default: { kibanahomepath: '../kibi-internal' }
 };
 var options = minimist(process.argv.slice(2), knownOptions);
-var kibanaPluginDir = path.resolve(__dirname, options.kibanahomepath + '/installedPlugins/' + packageName);
+var kibanaPluginDir = path.resolve(__dirname, options.kibanahomepath + '/plugins/' + packageName);
 
 
 function syncPluginTo(dest, done) {
