@@ -1,4 +1,5 @@
 import uiModules from 'ui/modules';
+import Notifier from 'ui/notify/notifier';
 import _ from 'lodash';
 import confirmMessage from '../../templates/confirm-message.html';
 import watcherEmailAction from './watcher-wizard.html';
@@ -9,8 +10,15 @@ uiModules
 .directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, Notifier) {
   function wizardDirective($scope, element, attrs) {
 
+    $scope.notify = new Notifier();
+
     $scope.form = {
       status: !$scope.watcher._source.disable ? 'Enabled' : 'Disable',
+      scripts: {
+        transform: {},
+        input: {},
+        condition: {}
+      },
       actions: {
         new: {
           edit: false
@@ -37,7 +45,6 @@ uiModules
         }
       };
     };
-
 
     const initActionTitles = function () {
       _.forOwn($scope.watcher._source.actions, (settings, name) => { settings._title = name; });
@@ -108,6 +115,49 @@ uiModules
     };
 
 
+    $scope.isEmpty = function (obj) {
+      return _.isEmpty(obj);
+    };
+
+
+    $scope.saveScript = function (type) {
+      const title = `${type}Title`;
+
+      if ($scope.watcherForm[title].$viewValue && $scope.watcherForm[title].$viewValue.length) {
+        $scope.watcherForm[title].$valid = true;
+        $scope.watcherForm[title].$invalid = false;
+      } else {
+        $scope.watcherForm[title].$valid = false;
+        $scope.watcherForm[title].$invalid = true;
+      }
+
+      if ($scope.watcherForm[title].$valid) {
+        const id = Math.random().toString(36).slice(2);
+        $scope.form.scripts[type][id] = {
+          title: $scope.watcher.$scripts[type].title,
+          body: $scope.watcher.$scripts[type].body
+        };
+        $http.post(`../api/sentinl/save/one_script/${type}/${id}`, $scope.form.scripts[type][id]).catch($scope.notify.error);
+      }
+    };
+
+
+    $scope.selectScript = function (type, id) {
+      $scope.watcher.$scripts[type] = {
+        id: id,
+        title: $scope.form.scripts[type][id].title,
+        body: $scope.form.scripts[type][id].body
+      };
+    };
+
+
+    $scope.removeScript = function (type) {
+      const id = $scope.watcher.$scripts[type].id;
+      $http.delete(`../api/sentinl/remove/one_script/${type}/${id}`).catch($scope.notify.error);
+      delete $scope.form.scripts[type][id];
+    };
+
+
     $scope.toggleWatcher = function () {
       if (!$scope.watcher._source.disable) {
         $scope.form.status = 'Enabled';
@@ -172,17 +222,13 @@ uiModules
 
 
     const saveEditorsText = function () {
-
-      _.each(['_input', '_condition', '_transform'], (field) => {
-        if (_.has($scope.watcher._source, field)) {
-          if ($scope.watcher._source[field]) {
-            if (field === '_input') {
-              $scope.watcher._source[field.substring(1)] = JSON.parse($scope.watcher._source[field]);
-            } else {
-              $scope.watcher._source[field.substring(1)].script.script = $scope.watcher._source[field];
-            }
+      _.forEach($scope.watcher.$scripts, (script, field) => {
+        if ($scope.watcher._source[field]) {
+          if (field === 'input') {
+            $scope.watcher._source[field] = JSON.parse(script.body);
+          } else {
+            $scope.watcher._source[field].script.script = script.body;
           }
-          delete $scope.watcher._source[field];
         }
       });
 
@@ -203,15 +249,31 @@ uiModules
       });
     };
 
+    const initScripts = function () {
+      $scope.watcher.$scripts = {};
+      _.forEach($scope.form.scripts, (script, field) => {
+        let value = field === 'input' ? $scope.watcher._source.input : $scope.watcher._source[field].script.script;
+
+        $scope.watcher.$scripts[field] = {
+          id: null,
+          title: null,
+          body: field === 'input' ? JSON.stringify(value, null, 2) : value
+        };
+
+        $http.get(`../api/sentinl/get/scripts/${field}`).then((resp) => {
+          _.forEach(resp.data.hits.hits, (script) => {
+            $scope.form.scripts[field][script._id] = script._source;
+          });
+        }).catch($scope.notify.error);
+      });
+    };
 
     const init = function () {
       $scope.watcher.$raw = JSON.stringify($scope.watcher, null, 2);
+      initScripts();
       initActionTitles();
       initSchedule();
       initThrottlePeriods();
-      $scope.watcher._source._input = JSON.stringify($scope.watcher._source.input, null, 2);
-      $scope.watcher._source._transform = $scope.watcher._source.transform.script.script;
-      $scope.watcher._source._condition = $scope.watcher._source.condition.script.script;
     };
 
 

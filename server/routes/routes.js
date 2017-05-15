@@ -98,6 +98,7 @@ export default function routes(server) {
       const boundCallWithRequest = _.partial(server.plugins.elasticsearch.callWithRequest, req);
       boundCallWithRequest('search', {
         index: config.es.default_index,
+        type: config.es.type,
         size: config.sentinl.results ? config.sentinl.results : 50,
         allowNoIndices: false
       })
@@ -260,4 +261,66 @@ export default function routes(server) {
       .catch((err) => reply(handleESError(err)));
     }
   });
+
+  server.route({
+    method: 'POST',
+    path: '/api/sentinl/save/one_script/{type}/{id}',
+    handler: function (request, reply) {
+      const script = request.payload;
+      server.log(['status', 'info', 'Sentinl'], `Saving scripts with type: ${request.params.type}`);
+      const body = {
+        index: config.es.default_index,
+        type: request.params.type,
+        id: request.params.id,
+        body: script
+      };
+      callWithRequest(request, 'index', body)
+      .then(() => callWithRequest(request, 'indices.refresh', {
+        index: config.es.default_index
+      }))
+      .then((resp) => reply({ok: true, resp: resp}))
+      .catch((err) => reply(handleESError(err)));
+    }
+  });
+
+  server.route({
+    method: 'GET',
+    path: '/api/sentinl/get/scripts/{type}',
+    handler: function (request, reply) {
+      const callWithRequest = server.plugins.elasticsearch.callWithRequest;
+      server.log(['status', 'info', 'Sentinl'], `Get scripts with type: ${request.params.type}`);
+      callWithRequest(request, 'search', {
+        index: config.es.default_index,
+        type: request.params.type,
+        size: config.sentinl.scriptResults ? config.sentinl.scriptResults : 50,
+        q: 'title:*'
+      })
+      .then((resp) => reply(resp))
+      .catch((err) => {
+        server.log(['debug', 'Sentinl'], err);
+        reply(err);
+      });
+    }
+  });
+
+  server.route({
+    method: 'DELETE',
+    path: '/api/sentinl/remove/one_script/{type}/{id}',
+    handler: function (request, reply) {
+      const callWithRequest = server.plugins.elasticsearch.callWithRequest;
+      const body = {
+        index: config.es.default_index,
+        type: request.params.type,
+        id: request.params.id
+      };
+      server.log(['status', 'info', 'Sentinl'], `Delete script with type/id: ${request.params.type}/${request.params.id}`);
+      callWithRequest(request, 'delete', body)
+      .then(() => callWithRequest(request, 'indices.refresh', {
+        index: config.es.default_index
+      }))
+      .then((resp) => reply({ok: true, resp: resp}))
+      .catch((err) => reply(handleESError(err)));
+    }
+  });
+
 };
