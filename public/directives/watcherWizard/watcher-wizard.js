@@ -3,10 +3,10 @@ import Notifier from 'ui/notify/notifier';
 import _ from 'lodash';
 import confirmMessage from '../../templates/confirm-message.html';
 import watcherEmailAction from './watcher-wizard.html';
-
+import 'angular-ui-bootstrap';
 
 uiModules
-.get('api/sentinl', [])
+.get('api/sentinl', ['ui.bootstrap'])
 .directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, Notifier) {
   function wizardDirective($scope, element, attrs) {
 

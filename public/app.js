@@ -46,21 +46,9 @@ import elasticsearch from 'elasticsearch-browser';
 /* Ace editor */
 import ace from 'ace';
 
-/* Timepicker */
-import 'ui/timepicker';
-import 'ui/courier';
-import 'ui/filter_bar';
-
-// import TableVisTypeProvider from 'ui/template_vis_type/TemplateVisType';
-// import VisSchemasProvider from 'ui/vis/schemas';
-// import tableVisTemplate from 'plugins/table_vis/table_vis.html';
-// require('ui/registry/vis_types').register(TableVisTypeProvider);
-
-import AggResponseTabifyTabifyProvider from 'ui/agg_response/tabify/tabify';
-// import tableSpyModeTemplate from 'plugins/spy_modes/table_spy_mode.html';
+import 'angular-ui-bootstrap';
 
 import Notifier from 'ui/notify/notifier';
-// import 'ui/autoload/styles';
 
 /* Custom Template + CSS */
 import './less/main.less';
@@ -74,34 +62,34 @@ import confirmMessage from './templates/confirm-message.html';
 var impactLogo = require('plugins/sentinl/sentinl_logo.svg');
 var smallLogo = require('plugins/sentinl/sentinl.svg');
 
-chrome
-  .setBrand({
-    logo: 'url(' + impactLogo + ') left no-repeat',
-    smallLogo: 'url(' + smallLogo + ') left no-repeat'
-  })
-  .setNavBackground('#222222')
-  .setTabs([
-    {
-      id: '',
-      title: 'Watchers',
-      activeIndicatorColor: '#EFF0F2'
-    },
-    {
-      id: 'alarms',
-      title: 'Alarms',
-      activeIndicatorColor: '#EFF0F2'
-    },
-    {
-      id: 'reports',
-      title: 'Reports',
-      activeIndicatorColor: '#EFF0F2'
-    },
-    {
-      id: 'about',
-      title: 'About',
-      activeIndicatorColor: '#EFF0F2'
-    }
-  ]);
+//chrome
+//  .setBrand({
+//    logo: 'url(' + impactLogo + ') left no-repeat',
+//    smallLogo: 'url(' + smallLogo + ') left no-repeat'
+//  })
+//  .setNavBackground('#222222')
+//  .setTabs([
+//    {
+//      id: '',
+//      title: 'Watchers',
+//      activeIndicatorColor: '#EFF0F2'
+//    },
+//    {
+//      id: 'alarms',
+//      title: 'Alarms',
+//      activeIndicatorColor: '#EFF0F2'
+//    },
+//    {
+//      id: 'reports',
+//      title: 'Reports',
+//      activeIndicatorColor: '#EFF0F2'
+//    },
+//    {
+//      id: 'about',
+//      title: 'About',
+//      activeIndicatorColor: '#EFF0F2'
+//    }
+//  ]);
 
 uiRoutes.enable();
 
@@ -145,9 +133,9 @@ uiRoutes
   template: about
 });
 
-uiModules
-.get('api/sentinl', [])
-.filter('moment', function () {
+const module = uiModules.get('api/sentinl', ['ui.bootstrap']);
+
+module.filter('moment', function () {
   return function (dateString) {
     return moment(dateString).format('YYYY-MM-DD HH:mm:ss.sss');
   };
@@ -264,11 +252,8 @@ uiModules
 
 
 // WATCHERS CONTROLLER
-uiModules
-.get('api/sentinl', [])
-.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interval,
+module.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interval,
   $timeout, timefilter, Private, Notifier, $window, kbnUrl, $http, $modal, $log) {
-  const tabifyAggResponse = Private(AggResponseTabifyTabifyProvider);
 
   $scope.title = 'Sentinl: Watchers';
   $scope.description = 'Kibana Alert App for Elasticsearch';
@@ -517,9 +502,7 @@ uiModules
 
 // NEW END
 
-uiModules
-.get('api/sentinl', [])
-.controller('sentinlAbout', function ($scope, $route, $interval, timefilter, Notifier) {
+module.controller('sentinlAbout', function ($scope, $route, $interval, timefilter, Notifier) {
   $scope.title = 'Sentinl';
   $scope.description = 'Kibana Alert App for Elasticsearch';
   timefilter.enabled = false;
