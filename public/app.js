@@ -23,6 +23,7 @@ import chrome from 'ui/chrome';
 import uiModules from 'ui/modules';
 import uiRoutes from 'ui/routes';
 
+import 'ui/autoload/styles';
 import 'ui/kbn_top_nav';
 import 'angular-ui-bootstrap';
 
