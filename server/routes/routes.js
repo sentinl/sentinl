@@ -31,17 +31,15 @@ var getHandler = function (type, server, req, reply) {
     body: {
       size: config.sentinl.results ? config.sentinl.results : 50,
       query: {
-        filtered: {
-          query: {
-            match: {
-              report: type === 'report'
+        bool: {
+          filter: [
+            {
+              term: { report: type === 'report' }
+            },
+            {
+              range: { '@timestamp': qrange }
             }
-          },
-          filter: {
-            range: {
-              '@timestamp': qrange
-            }
-          }
+          ]
         }
       }
     }

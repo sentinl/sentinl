@@ -23,6 +23,9 @@ import chrome from 'ui/chrome';
 import uiModules from 'ui/modules';
 import uiRoutes from 'ui/routes';
 
+import 'ui/kbn_top_nav';
+import 'angular-ui-bootstrap';
+
 /* import controllers */
 import './controllers/reportController';
 import './controllers/confirmMessageController';
@@ -46,8 +49,6 @@ import elasticsearch from 'elasticsearch-browser';
 /* Ace editor */
 import ace from 'ace';
 
-import 'angular-ui-bootstrap';
-
 import Notifier from 'ui/notify/notifier';
 
 /* Custom Template + CSS */
@@ -62,34 +63,11 @@ import confirmMessage from './templates/confirm-message.html';
 var impactLogo = require('plugins/sentinl/sentinl_logo.svg');
 var smallLogo = require('plugins/sentinl/sentinl.svg');
 
-//chrome
-//  .setBrand({
-//    logo: 'url(' + impactLogo + ') left no-repeat',
-//    smallLogo: 'url(' + smallLogo + ') left no-repeat'
-//  })
-//  .setNavBackground('#222222')
-//  .setTabs([
-//    {
-//      id: '',
-//      title: 'Watchers',
-//      activeIndicatorColor: '#EFF0F2'
-//    },
-//    {
-//      id: 'alarms',
-//      title: 'Alarms',
-//      activeIndicatorColor: '#EFF0F2'
-//    },
-//    {
-//      id: 'reports',
-//      title: 'Reports',
-//      activeIndicatorColor: '#EFF0F2'
-//    },
-//    {
-//      id: 'about',
-//      title: 'About',
-//      activeIndicatorColor: '#EFF0F2'
-//    }
-//  ]);
+chrome.setBrand({
+  logo: 'url(' + impactLogo + ') left no-repeat',
+  smallLogo: 'url(' + smallLogo + ') left no-repeat'
+})
+.setNavBackground('#222222');
 
 uiRoutes.enable();
 
@@ -133,21 +111,59 @@ uiRoutes
   template: about
 });
 
-const module = uiModules.get('api/sentinl', ['ui.bootstrap']);
 
-module.filter('moment', function () {
+const app = uiModules.get('api/sentinl', ['ui.bootstrap']);
+
+
+app.filter('moment', function () {
   return function (dateString) {
     return moment(dateString).format('YYYY-MM-DD HH:mm:ss.sss');
   };
-})
-.controller('sentinlHelloWorld', function ($rootScope, $scope, $route, $interval,
-  $timeout, timefilter, Private, Notifier, $window, kbnUrl, $http, $modal) {
+});
+
+
+app.service('getTopNavMenu', ['kbnUrl', function (kbnUrl) {
+  return function () {
+    return [
+      {
+        key: 'watchers',
+        description: 'List of watchers',
+        run: function () { kbnUrl.change('/'); },
+        testId: 'sentinlWacthers'
+      },
+      {
+        key: 'alarms',
+        description: 'List of alarms',
+        run: function () { kbnUrl.change('/alarms'); },
+        testId: 'sentinlAlarms'
+      },
+      {
+        key: 'reports',
+        description: 'List of reports',
+        run: function () { kbnUrl.change('/reports'); },
+        testId: 'sentinlReports'
+      },
+      {
+        key: 'about',
+        description: 'About',
+        run: function () { kbnUrl.change('/about'); },
+        testId: 'sentinlAbout'
+      }
+    ];
+  };
+}]);
+
+
+app.controller('sentinlAlarms', function ($rootScope, $scope, $route, $interval,
+  $timeout, timefilter, Private, Notifier, $window, $http, $modal, getTopNavMenu) {
   $scope.title = 'Sentinl: Alarms';
   $scope.description = 'Kibana Alert App for Elasticsearch';
 
   $scope.notify = new Notifier();
 
   timefilter.enabled = true;
+
+  $scope.topNavMenu = getTopNavMenu();
 
   /* Update Time Filter */
   var updateFilter = function () {
@@ -252,26 +268,15 @@ module.filter('moment', function () {
 
 
 // WATCHERS CONTROLLER
-module.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interval,
-  $timeout, timefilter, Private, Notifier, $window, kbnUrl, $http, $modal, $log) {
+app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interval,
+  $timeout, timefilter, Private, Notifier, $window, $http, $modal, $log, getTopNavMenu) {
 
   $scope.title = 'Sentinl: Watchers';
   $scope.description = 'Kibana Alert App for Elasticsearch';
 
   $scope.notify = new Notifier();
 
-  $scope.topNavMenu = [
-    {
-      key: 'watchers',
-      description: 'WATCH',
-      run: function () { kbnUrl.change('/'); }
-    },
-    {
-      key: 'about',
-      description: 'ABOUT',
-      run: function () { kbnUrl.change('/about'); }
-    }
-  ];
+  $scope.topNavMenu = getTopNavMenu();
 
   timefilter.enabled = false;
 
@@ -502,11 +507,13 @@ module.controller('sentinlWatchers', function ($rootScope, $scope, $route, $inte
 
 // NEW END
 
-module.controller('sentinlAbout', function ($scope, $route, $interval, timefilter, Notifier) {
+app.controller('sentinlAbout', function ($scope, $route, $interval, timefilter, Notifier, getTopNavMenu) {
   $scope.title = 'Sentinl';
   $scope.description = 'Kibana Alert App for Elasticsearch';
   timefilter.enabled = false;
   $scope.notify = new Notifier();
+
+  $scope.topNavMenu = getTopNavMenu();
 
   if (!$scope.notified) {
     $scope.notify.warning('SENTINL is a work in progress! Use at your own risk!');

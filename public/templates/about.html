@@ -1,4 +1,5 @@
 <div class="container" ng-controller="sentinlAbout">
+  <kbn-top-nav name="sentinl" config="topNavMenu"></kbn-top-nav>
   <div class="row">
     <div class="col-12-sm">
       <p style="float:left;">UTC time is {{ utcTime }}</p>
@@ -6,7 +7,7 @@
       <br style="clear:both;"/>
 
       <div class="well">
-        <p class="aboutSentinlLogo">&nbsp;</p>
+        <p class="aboutSentinlLogo"></p>
         <p class="lead">{{ description }}</p>
         <p>Project Homepage: <a href="https://github.com/sirensolutions/sentinl">https://github.com/sirensolutions/sentinl</a></p>
         <p>Found a new Bug? <a href="https://github.com/sirensolutions/sentinl">https://github.com/sirensolutions/sentinl/issues</a></p>
