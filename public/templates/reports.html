@@ -1,9 +1,19 @@
 <div class="app-container" ng-controller="sentinlReports">
   <kbn-top-nav name="sentinl" config="topNavMenu">
-    <div class="kibana-nav-info">
-      <span ng-show="dash.id" class="kibana-nav-info-title">
-        <span ng-bind="::dash.title"></span>
-      </span>
+    <!-- Transcluded elements. -->
+    <div data-transclude-slots>
+
+      <!-- Tabs. -->
+      <div data-transclude-slot="bottomRow" class="kuiLocalTabs">
+        <a
+          ng-repeat="item in tabsMenu.list"
+          class="kuiLocalTab"
+          ng-class="{'kuiLocalTab-isSelected': tabsMenu.currentPath === item.url}"
+          kbn-href="{{::item.url}}"
+        >
+          {{::item.display}}
+        </a>
+      </div>
     </div>
   </kbn-top-nav>
 
@@ -14,7 +24,7 @@
       <br style="clear:both;"/>
 
       <div class="panel panel-default" ng-show="currentReports.length">
-        <div class="panel-heading"><h4>RECENT REPORTS<span class="edit-group pull-right"><a href="#"><i class="fa fa-plus"></i></a></span></h4></div>
+        <div><span class="edit-group pull-right"><a href="#"><i class="fa fa-plus"></i></a></span></div>
         <table class="table">
           <thead>
             <tr>

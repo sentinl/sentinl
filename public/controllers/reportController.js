@@ -6,11 +6,12 @@ import chrome from 'ui/chrome';
 uiModules
 .get('api/sentinl', [])
 .controller('sentinlReports', function ($rootScope, $scope, $route, $interval,
-  $timeout, timefilter, Private, createNotifier, $window, $http, getTopNavMenu) {
+  $timeout, timefilter, Private, createNotifier, $window, $http, NavMenu) {
   $scope.title = 'Sentinl: Reports';
   $scope.description = 'Kibi/Kibana Report App for Elasticsearch';
 
-  $scope.topNavMenu = getTopNavMenu();
+  $scope.topNavMenu = NavMenu.getTopNav('reports');
+  $scope.tabsMenu = NavMenu.getTabs('reports');
 
   const notify = createNotifier({
     location: 'Sentinl Reports'

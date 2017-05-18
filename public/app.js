@@ -60,6 +60,7 @@ import alarms from './templates/alarms.html';
 import reports from './templates/reports.html';
 import jsonHtml from './templates/json.html';
 import confirmMessage from './templates/confirm-message.html';
+import newWatcherMenu from './templates/new-watcher-top-nav.html';
 
 var impactLogo = require('plugins/sentinl/sentinl_logo.svg');
 var smallLogo = require('plugins/sentinl/sentinl.svg');
@@ -123,40 +124,46 @@ app.filter('moment', function () {
 });
 
 
-app.service('getTopNavMenu', ['kbnUrl', function (kbnUrl) {
-  return function () {
-    return [
-      {
-        key: 'watchers',
-        description: 'List of watchers',
-        run: function () { kbnUrl.change('/'); },
-        testId: 'sentinlWacthers'
-      },
-      {
-        key: 'alarms',
-        description: 'List of alarms',
-        run: function () { kbnUrl.change('/alarms'); },
-        testId: 'sentinlAlarms'
-      },
-      {
-        key: 'reports',
-        description: 'List of reports',
-        run: function () { kbnUrl.change('/reports'); },
-        testId: 'sentinlReports'
-      },
-      {
-        key: 'about',
-        description: 'About',
-        run: function () { kbnUrl.change('/about'); },
-        testId: 'sentinlAbout'
+app.service('NavMenu', ['kbnUrl', function (kbnUrl) {
+  return {
+    getTopNav: function (view) {
+      const nav = [
+        {
+          key: 'about',
+          description: 'About',
+          run: function () { kbnUrl.change('/about'); },
+          testId: 'sentinlAbout'
+        }
+      ];
+
+      if (view === 'watchers') {
+        nav.unshift({
+          key: 'new',
+          description: 'Create new watcher',
+          template: newWatcherMenu,
+          testId: 'sentinlNewWatcher'
+        });
+        return nav;
       }
-    ];
+
+      return nav;
+    },
+    getTabs: function (path = '#/') {
+      return {
+        currentPath: path.includes('#/') ? path : `#/${path}`,
+        list: [
+          { display: 'Watchers', url: '#/'},
+          { display: 'Alarms', url: '#/alarms'},
+          { display: 'Reports', url: '#/reports'}
+        ]
+      };
+    }
   };
 }]);
 
 
 app.controller('sentinlAlarms', function ($rootScope, $scope, $route, $interval,
-  $timeout, timefilter, Private, Notifier, $window, $http, $modal, getTopNavMenu) {
+  $timeout, timefilter, Private, Notifier, $window, $http, $modal, NavMenu) {
   $scope.title = 'Sentinl: Alarms';
   $scope.description = 'Kibana Alert App for Elasticsearch';
 
@@ -164,7 +171,8 @@ app.controller('sentinlAlarms', function ($rootScope, $scope, $route, $interval,
 
   timefilter.enabled = true;
 
-  $scope.topNavMenu = getTopNavMenu();
+  $scope.topNavMenu = NavMenu.getTopNav('alarms');
+  $scope.tabsMenu = NavMenu.getTabs('alarms');
 
   /* Update Time Filter */
   var updateFilter = function () {
@@ -270,17 +278,17 @@ app.controller('sentinlAlarms', function ($rootScope, $scope, $route, $interval,
 
 // WATCHERS CONTROLLER
 app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interval,
-  $timeout, timefilter, Private, Notifier, $window, $http, $modal, $log, getTopNavMenu) {
+  $timeout, timefilter, Private, Notifier, $window, $http, $modal, $log, NavMenu) {
 
   $scope.title = 'Sentinl: Watchers';
   $scope.description = 'Kibana Alert App for Elasticsearch';
 
   $scope.notify = new Notifier();
 
-  $scope.topNavMenu = getTopNavMenu();
+  $scope.topNavMenu = NavMenu.getTopNav('watchers');
+  $scope.tabsMenu = NavMenu.getTabs();
 
   timefilter.enabled = false;
-
   $scope.watchers = [];
 
   function importWatcherFromLocalStorage() {
@@ -508,13 +516,14 @@ app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interva
 
 // NEW END
 
-app.controller('sentinlAbout', function ($scope, $route, $interval, timefilter, Notifier, getTopNavMenu) {
+app.controller('sentinlAbout', function ($scope, $route, $interval, timefilter, Notifier, NavMenu) {
   $scope.title = 'Sentinl';
   $scope.description = 'Kibana Alert App for Elasticsearch';
   timefilter.enabled = false;
   $scope.notify = new Notifier();
 
-  $scope.topNavMenu = getTopNavMenu();
+  $scope.topNavMenu = NavMenu.getTopNav('about');
+  $scope.tabsMenu = NavMenu.getTabs('about');
 
   if (!$scope.notified) {
     $scope.notify.warning('SENTINL is a work in progress! Use at your own risk!');
