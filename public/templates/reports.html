@@ -1,4 +1,4 @@
-<div class="container" ng-controller="sentinlReports">
+<div class="app-container" ng-controller="sentinlReports">
   <kbn-top-nav name="sentinl" config="topNavMenu">
     <div class="kibana-nav-info">
       <span ng-show="dash.id" class="kibana-nav-info-title">
@@ -7,7 +7,7 @@
     </div>
   </kbn-top-nav>
 
-  <div class="row">
+  <div class="row container">
     <div class="col-12-sm">
       <p style="float:left;">UTC time is {{ utcTime }}</p>
       <p style="float:right;">Local time is {{ currentTime }}</p>
