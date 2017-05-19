@@ -29,16 +29,16 @@ import url from 'url';
 
 export default function (server, actions, payload, watcherTitle) {
 
-  const client = getElasticsearchClient(server);
+  const { callWithRequest } = getElasticsearchClient(server);
   const config = getConfiguration(server);
   const hlimit = config.sentinl.history ? config.sentinl.history : 10;
 
   /* ES Indexing Functions */
   var esHistory = function (watcherTitle, type, message, loglevel, payload, isReport, object) {
     if (isReport) {
-      logHistory(server, client, config, watcherTitle, type, message, loglevel, payload, isReport, object);
+      logHistory(server, callWithRequest, config, watcherTitle, type, message, loglevel, payload, isReport, object);
     } else {
-      logHistory(server, client, config, watcherTitle, type, message, loglevel, payload);
+      logHistory(server, callWithRequest, config, watcherTitle, type, message, loglevel, payload);
     }
   };
 

@@ -38,14 +38,14 @@ export default function getScheduler(server) {
   var Schedule = [];
 
   function getCount(client) {
-    return client.count({
+    return client({}, 'count', {
       index: config.es.default_index,
       type: config.es.type
     });
   }
 
   function getWatcher(count, client) {
-    return client.search({
+    return client({}, 'search', {
       index: config.es.default_index,
       type: config.es.type,
       size: count
@@ -135,8 +135,12 @@ export default function getScheduler(server) {
               }
             }
 
-            client[method](request)
+            client({}, method, {
+              index: request.indices,
+              body: request.body
+            })
             .then(function (payload) {
+              server.log(['status', 'info', 'Sentinl', 'PAYLOAD DEBUG'], payload);
               if (!payload || !condition || !actions) {
                 server.log(['status', 'debug', 'Sentinl', 'WATCHER TASK'], 'Watcher Malformed or Missing Key Parameters!');
                 return;
@@ -160,7 +164,10 @@ export default function getScheduler(server) {
                   }
                   doActions(server, actions, payload, watch.title);
                 } else if (transform.search) {
-                  client[method](transform.search.request).then(function (payload) {
+                  client({}, method, {
+                    index: transform.search.request.indices,
+                    body: transform.search.request.body
+                  }).then(function (payload) {
                     if (!payload) return;
                     doActions(server, actions, payload, watch.title);
                   });

@@ -13,6 +13,7 @@
  *
  * @return {String} Response.
  */
+
 export default function logEvent(server, client, config, watcherTitle, type, message, loglevel, payload, isReport, object) {
   if (!loglevel) {
     loglevel = 'INFO';
@@ -38,7 +39,7 @@ export default function logEvent(server, client, config, watcherTitle, type, mes
   if (object) {
     indexBody.attachment = object;
   }
-  client.create({
+  client({}, 'create', {
     index: indexName,
     type: type,
     body: indexBody

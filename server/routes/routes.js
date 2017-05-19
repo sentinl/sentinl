@@ -120,12 +120,9 @@ export default function routes(server) {
       };
 
       callWithRequest(req, 'delete', body)
-      .then(function () {
-        var es = server.plugins.elasticsearch.client;
-        return es.indices.refresh({
-          index: req.params.index
-        });
-      })
+      .then(() => callWithRequest(req, 'indices.refresh', {
+        index: req.params.index
+      }))
       .then((resp) => reply({ok: true, resp: resp}))
       .catch((err) => reply(handleESError(err)));
     }
