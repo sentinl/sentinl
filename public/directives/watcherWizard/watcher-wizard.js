@@ -252,6 +252,15 @@ uiModules
     const initScripts = function () {
       $scope.watcher.$scripts = {};
       _.forEach($scope.form.scripts, (script, field) => {
+        // for migration purposes
+        // add some fields if they don't exist in old watcher which was created under Sentinl v4
+        if (field !== 'input' && !_.has($scope.watcher._source[field], 'script.script')) {
+          $scope.watcher._source[field] = { script: { script: '' } };
+        }
+        if (!$scope.watcher._source.input) {
+          $scope.watcher._source.input = {};
+        }
+
         let value = field === 'input' ? $scope.watcher._source.input : $scope.watcher._source[field].script.script;
 
         $scope.watcher.$scripts[field] = {
