@@ -82,11 +82,14 @@ uiModules
         return str.match(/([0-9]?[0-9])s/i) ? +str.match(/([0-9]?[0-9])s/i)[1] : 0;
       };
 
-      _.forOwn($scope.watcher._source.actions, (actions) => {
-        actions._throttle = {
-          hours: getHours(actions.throttle_period),
-          mins: getMins(actions.throttle_period),
-          secs: getSecs(actions.throttle_period)
+      _.forOwn($scope.watcher._source.actions, (action) => {
+        if (!action.thottle_period) {
+          action.throttle_period = '30s';
+        }
+        action._throttle = {
+          hours: getHours(action.throttle_period),
+          mins: getMins(action.throttle_period),
+          secs: getSecs(action.throttle_period)
         };
       });
     };
