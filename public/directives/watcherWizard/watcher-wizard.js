@@ -84,7 +84,7 @@ uiModules
 
       _.forOwn($scope.watcher._source.actions, (action) => {
         if (!action.thottle_period) {
-          action.throttle_period = '1s';
+          action.throttle_period = '30s';
         }
         action._throttle = {
           hours: getHours(action.throttle_period),
