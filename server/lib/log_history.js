@@ -24,10 +24,10 @@ export default function logEvent(server, client, config, watcherTitle, type, mes
   if (!isReport) {
     isReport = false;
   }
-  server.log(['status', 'info', 'Sentinl'], 'Storing Alarm to ES with type:' + type);
-  var indexDate = '-' + new Date().toISOString().substr(0, 10).replace(/-/g, '.');
-  var indexName = config.es.alarm_index ? config.es.alarm_index + indexDate : 'watcher_alarms' + indexDate;
-  var indexBody = {
+  server.log(['status', 'info', 'Sentinl'], `Storing Alarm to ES with type: ${type}`);
+  const indexDate = '-' + new Date().toISOString().substr(0, 10).replace(/-/g, '.');
+  const indexName = config.es.alarm_index ? config.es.alarm_index + indexDate : `watcher_alarms${indexDate}`;
+  const indexBody = {
     '@timestamp': new Date().toISOString(),
     watcher: watcherTitle,
     level: loglevel,
@@ -36,16 +36,19 @@ export default function logEvent(server, client, config, watcherTitle, type, mes
     payload: payload,
     report: isReport
   };
+
   if (object) {
     indexBody.attachment = object;
   }
-  client({}, 'create', {
+
+  client({}, 'index', {
     index: indexName,
     type: type,
     body: indexBody
   }).then(function (resp) {
-    server.log(['status', 'info', 'Sentinl'], 'Alarm stored successfully to ES with type: [' + type + ']');
+    server.log(['status', 'info', 'Sentinl'], `Alarm stored successfully to ES with type: [${type}]`);
   }).catch(function (err) {
-    server.log(['status', 'info', 'Sentinl'], 'Error storing Alarm: ' + err);
+    server.log(['status', 'info', 'Sentinl'], `Error storing Alarm: ${err}`);
   });
+
 }

@@ -43,8 +43,8 @@ const init = _.once((server) => {
   masterRoute(server);
 
   // Create Sentinl Indices, if required
-  helpers.createSentinlIndex(server,config);
-  helpers.createSentinlAlarmIndex(server,config);
+  helpers.createSentinlIndex(server, config);
+  helpers.createSentinlAlarmIndex(server, config);
 
   /* Bird Watching and Duck Hunting */
   const { callWithRequest } = getElasticsearchClient(server);
