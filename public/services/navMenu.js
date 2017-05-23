@@ -1,9 +1,6 @@
-//import uiModules from 'ui/modules';
+import newWatcherMenu from '../templates/new-watcher-top-nav.html';
 import { app } from '../app.module';
 
-import newWatcherMenu from '../templates/new-watcher-top-nav.html';
-
-//const app = uiModules.get('api/sentinl', []);
 app.service('NavMenu', ['kbnUrl', function (kbnUrl) {
   return {
     getTopNav: function (view) {
