@@ -1,9 +1,7 @@
-import uiModules from 'ui/modules';
 import watcherConsoleAction from './console-action.html';
+import { app } from '../../app.module';
 
-uiModules
-.get('api/sentinl', [])
-.directive('consoleAction', function () {
+app.directive('consoleAction', function () {
   function actionDirective(scope, element, attrs) {
     scope.action = {
       type: 'console'

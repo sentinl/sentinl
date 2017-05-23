@@ -1,10 +1,7 @@
-import uiModules from 'ui/modules';
 import watcherReportAction from './report-action.html';
+import { app } from '../../app.module';
 
-
-uiModules
-.get('api/sentinl', [])
-.directive('reportAction', function () {
+app.directive('reportAction', function () {
   function actionDirective(scope, element, attrs) {
     scope.action = {
       type: 'report',

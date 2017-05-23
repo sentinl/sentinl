@@ -1,10 +1,8 @@
 import _ from 'lodash';
-import uiModules from 'ui/modules';
 import watcherWebhookAction from './webhook-action.html';
+import { app } from '../../app.module';
 
-uiModules
-.get('api/sentinl', [])
-.directive('webhookAction', function () {
+app.directive('webhookAction', function () {
 
   function actionDirective(scope, element, attrs) {
 

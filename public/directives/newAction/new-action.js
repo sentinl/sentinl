@@ -1,9 +1,7 @@
-import uiModules from 'ui/modules';
 import watcherNewAction from './new-action.html';
+import { app } from '../../app.module';
 
-uiModules
-.get('api/sentinl', [])
-.directive('newAction', function () {
+app.directive('newAction', function () {
   function actionDirective(scope, element, attrs) {
 
     scope.action = {

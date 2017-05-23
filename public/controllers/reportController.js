@@ -1,11 +1,9 @@
-import uiModules from 'ui/modules';
 import _ from 'lodash';
 import moment from 'moment';
-import chrome from 'ui/chrome';
 
-uiModules
-.get('api/sentinl', [])
-.controller('sentinlReports', function ($rootScope, $scope, $route, $interval,
+import { app } from '../app.module';
+
+app.controller('sentinlReports', function ($rootScope, $scope, $route, $interval,
   $timeout, timefilter, Private, createNotifier, $window, $http, NavMenu) {
   $scope.title = 'Sentinl: Reports';
   $scope.description = 'Kibi/Kibana Report App for Elasticsearch';

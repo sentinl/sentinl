@@ -1,13 +1,11 @@
-import uiModules from 'ui/modules';
-import Notifier from 'ui/notify/notifier';
 import _ from 'lodash';
+import Notifier from 'ui/notify/notifier';
 import confirmMessage from '../../templates/confirm-message.html';
 import watcherEmailAction from './watcher-wizard.html';
-import 'angular-ui-bootstrap';
 
-uiModules
-.get('api/sentinl', ['ui.bootstrap'])
-.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, Notifier) {
+import { app } from '../../app.module';
+
+app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, Notifier) {
   function wizardDirective($scope, element, attrs) {
 
     $scope.notify = new Notifier();
