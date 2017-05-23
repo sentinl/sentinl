@@ -4,7 +4,6 @@ import chrome from 'ui/chrome';
 import Notifier from 'ui/notify/notifier';
 
 import confirmMessage from '../templates/confirm-message.html';
-
 import { app } from '../app.module';
 
 app.controller('sentinlAlarms', function ($rootScope, $scope, $route, $interval,
@@ -91,7 +90,7 @@ app.controller('sentinlAlarms', function ($rootScope, $scope, $route, $interval,
 
     confirmModal.result.then((response) => {
       if (response === 'yes') {
-        return $http.delete('../api/sentinl/alarm/' + rmindex + '/' + rmtype + '/' + rmid)
+        return $http.delete(`../api/sentinl/alarm/${rmindex}/${rmtype}/${rmid}`)
         .then(() => {
           $timeout(() => {
             $scope.elasticAlarms.splice(index - 1, 1);

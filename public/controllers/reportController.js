@@ -1,10 +1,11 @@
 import _ from 'lodash';
 import moment from 'moment';
 
+import confirmMessage from '../templates/confirm-message.html';
 import { app } from '../app.module';
 
 app.controller('sentinlReports', function ($rootScope, $scope, $route, $interval,
-  $timeout, timefilter, Private, createNotifier, $window, $http, NavMenu) {
+  $timeout, timefilter, Private, createNotifier, $window, $http, $modal, NavMenu) {
   $scope.title = 'Sentinl: Reports';
   $scope.description = 'Kibi/Kibana Report App for Elasticsearch';
 
@@ -84,17 +85,25 @@ app.controller('sentinlReports', function ($rootScope, $scope, $route, $interval
   });
 
   $scope.deleteReport = function (index, rmindex, rmtype, rmid) {
-    if (confirm('Delete is Forever!\n Are you sure?')) {
-      return $http.delete('../api/sentinl/alarm/' + rmindex + '/' + rmtype + '/' + rmid)
-      .then(() => {
-        $scope.elasticReports.splice(index - 1, 1);
-        $timeout(() => {
-          notify.warning('SENTINL Report log successfully deleted!');
-          $route.reload();
-        }, 1000);
-      })
-      .catch(notify.error);
-    }
+    const confirmModal = $modal.open({
+      template: confirmMessage,
+      controller: 'ConfirmMessageController',
+      size: 'sm'
+    });
+
+    confirmModal.result.then((response) => {
+      if (response === 'yes') {
+        return $http.delete(`../api/sentinl/alarm/${rmindex}/${rmtype}/${rmid}`)
+        .then(() => {
+          $scope.elasticReports.splice(index - 1, 1);
+          $timeout(() => {
+            notify.warning('SENTINL Report log successfully deleted!');
+            $route.reload();
+          }, 1000);
+        })
+        .catch(notify.error);
+      }
+    });
   };
 
   $scope.deleteReportLocal = function (index) {
