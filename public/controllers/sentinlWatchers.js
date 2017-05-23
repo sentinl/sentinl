@@ -6,7 +6,7 @@ import ace from 'ace';
 import Notifier from 'ui/notify/notifier';
 
 import confirmMessage from '../templates/confirm-message.html';
-const impactLogo = require('plugins/sentinl/sentinl_logo.svg');
+const impactLogo = require('plugins/sentinl/sentinl-white-logo.svg');
 const smallLogo = require('plugins/sentinl/sentinl.svg');
 
 import { app } from '../app.module';
