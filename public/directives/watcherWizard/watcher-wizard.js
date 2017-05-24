@@ -288,14 +288,15 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
 
 
     const save = function () {
-      $scope.form.errors = [];
+      $scope.watcherForm.$valid = true;
+      $scope.watcherForm.$invalid = false;
 
       if ($scope.form.raw_enabled) {
         try {
           // All settings will have been overwritten if enable is checked and the watcher is saved.
           $scope.watcher = JSON.parse($scope.watcher.$raw);
         } catch (e) {
-          $scope.form.errors.push(`Raw settings: ${e}`);
+          $scope.notify.error(`Invalid Raw configuration: ${e}`);
           $scope.watcherForm.$valid = false;
           $scope.watcherForm.$invalid = true;
         }
@@ -303,20 +304,48 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
       }
 
       try {
-        if ($scope.watcher._source._input && $scope.watcher._source._input.length) {
-          JSON.parse($scope.watcher._source._input);
+        if ($scope.watcher.$scripts.input.body && $scope.watcher.$scripts.input.body.length) {
+          JSON.parse($scope.watcher.$scripts.input.body);
         }
       } catch (e) {
-        $scope.form.errors.push(`Input settings: ${e}`);
+        $scope.notify.error(`Invalid Input configuration: ${e}`);
         $scope.watcherForm.$valid = false;
         $scope.watcherForm.$invalid = true;
       }
 
       if ($scope.watcherForm.$valid) {
-        saveSchedule();
-        saveThrottle();
-        saveEditorsText();
-        $scope.watcher._source.actions = renameActions($scope.watcher._source.actions);
+        try {
+          saveSchedule();
+        } catch (e) {
+          $scope.notify.error(`Invalid schedule configuration: ${e}`);
+          $scope.watcherForm.$valid = false;
+          $scope.watcherForm.$invalid = true;
+        }
+
+        try {
+          saveThrottle();
+        } catch (e) {
+          $scope.notify.error(`Invalid throttle configuration: ${e}`);
+          $scope.watcherForm.$valid = false;
+          $scope.watcherForm.$invalid = true;
+        }
+
+        try {
+          saveEditorsText();
+        } catch (e) {
+          $scope.notify.error(`Invalid action, Transform or Condition configuration: ${e}`);
+          $scope.watcherForm.$valid = false;
+          $scope.watcherForm.$invalid = true;
+        }
+
+        try {
+          $scope.watcher._source.actions = renameActions($scope.watcher._source.actions);
+        } catch (e) {
+          $scope.notify.error(`Fail to rename action: ${e}`);
+          $scope.watcherForm.$valid = false;
+          $scope.watcherForm.$invalid = true;
+        }
+
         $scope.form.saved = true;
       }
     };
@@ -346,6 +375,8 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
             data.watcher = $scope.watcher;
           }
           $scope.$emit('wizardSaveConfirm', data);
+        } else {
+          $scope.notify.warning('Watcher settings are invalid.');
         }
       }
     });
