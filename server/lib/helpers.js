@@ -51,7 +51,8 @@ function createSentinlIndex(server, config) {
 
   callWithRequest({}, 'indices.exists', {
     index: config.es.default_index
-  }, function (error, exists) {
+  })
+  .then((exists) => {
     if (exists === true) {
       server.log(['status', 'debug', 'Sentinl'], 'Core Index exists!');
       return;
@@ -102,9 +103,10 @@ function createSentinlIndex(server, config) {
     .then(function (resp) {
       server.log(['status', 'debug', 'Sentinl'], 'Core Index response', resp);
     }, function (err) {
-      server.log(['status', 'warning', 'Sentinl'], err.message);
+      server.log(['status', 'error', 'Sentinl'], err.message);
     });
-  });
+  })
+  .catch((error) => server.log(['status', 'error', 'Sentinl'], 'Failed to check if core index exists', error));
 }
 
 var tryCount = 0;
@@ -130,7 +132,8 @@ function createSentinlAlarmIndex(server,config) {
 
   callWithRequest({}, 'indices.exists', {
     index: config.es.alarm_index
-  }, function (error, exists) {
+  })
+  .then((exists) => {
     if (exists === true) {
       server.log(['status', 'debug', 'Sentinl'], 'Alarms Index exists!');
       return;
@@ -163,7 +166,7 @@ function createSentinlAlarmIndex(server,config) {
     .then(function (resp) {
       server.log(['status', 'debug', 'Sentinl'], 'Alarm Template response', resp);
     }, function (err) {
-      server.log(['error', 'warning', 'Sentinl'], err.message);
+      server.log(['error', 'error', 'Sentinl'], err.message);
     });
 
     server.log(['status', 'info', 'Sentinl'], 'Creating Sentinl Alarms Index...');
@@ -182,7 +185,8 @@ function createSentinlAlarmIndex(server,config) {
     }, function (err) {
       server.log(['error', 'warning', 'Sentinl'], err.message);
     });
-  });
+  })
+  .catch((error) => server.log(['status', 'error', 'Sentinl'], 'Failed to check if core index exists', error));
 }
 
 var tryAlarmCount = 0;
