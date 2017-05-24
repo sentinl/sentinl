@@ -31,7 +31,7 @@ module.exports = function handleESError(error) {
     error instanceof esErrors.NoConnections ||
     error instanceof esErrors.RequestTimeout) {
     return Boom.serverTimeout(error);
-  } else if (error instanceof esErrors.Conflict || _.contains(error.message, 'index_template_already_exists')) {
+  } else if (error instanceof esErrors.Conflict || _.includes(error.message, 'index_template_already_exists')) {
     return Boom.conflict(error);
   } else if (error instanceof esErrors[403]) {
     return Boom.forbidden(error);
