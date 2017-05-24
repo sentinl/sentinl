@@ -12,6 +12,11 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
 
     $scope.form = {
       status: !$scope.watcher._source.disable ? 'Enabled' : 'Disable',
+      messages: {
+        success: null,
+        danger: null,
+        timeout: 3000
+      },
       scripts: {
         transform: {},
         input: {},
@@ -121,6 +126,23 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
     };
 
 
+    const displayFormMsg = function (type, msg) {
+      $scope.form.messages.success = null;
+      $scope.form.messages.danger = null;
+
+      if (type === 'success') {
+        $scope.form.messages.success = msg;
+      } else if (type === 'danger') {
+        $scope.form.messages.danger = msg;
+      }
+
+      $timeout(() => {
+        $scope.form.messages.success = null;
+        $scope.form.messages.danger = null;
+      }, $scope.form.messages.timeout);
+    };
+
+
     $scope.saveScript = function (type) {
       const title = `${type}Title`;
 
@@ -138,7 +160,15 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
           title: $scope.watcher.$scripts[type].title,
           body: $scope.watcher.$scripts[type].body
         };
-        $http.post(`../api/sentinl/save/one_script/${type}/${id}`, $scope.form.scripts[type][id]).catch($scope.notify.error);
+        $http.post(`../api/sentinl/save/one_script/${type}/${id}`, $scope.form.scripts[type][id])
+        .then((msg) => {
+          if (msg.data.ok) {
+            displayFormMsg('success', 'Script saved!');
+          } else {
+            displayFormMsg('danger', 'Fail to save the script!');
+          }
+        })
+        .catch($scope.notify.error);
       }
     };
 
@@ -154,7 +184,15 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
 
     $scope.removeScript = function (type) {
       const id = $scope.watcher.$scripts[type].id;
-      $http.delete(`../api/sentinl/remove/one_script/${type}/${id}`).catch($scope.notify.error);
+      $http.delete(`../api/sentinl/remove/one_script/${type}/${id}`)
+      .then((msg) => {
+        if (msg.data.ok) {
+          displayFormMsg('success', 'Script deleted!');
+        } else {
+          displayFormMsg('danger', 'Fail to delete the script!');
+        }
+      })
+      .catch($scope.notify.error);
       delete $scope.form.scripts[type][id];
     };
 
