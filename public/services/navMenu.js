@@ -1,8 +1,26 @@
+import chrome from 'ui/chrome';
+
 import newWatcherMenu from '../templates/new-watcher-top-nav.html';
 import { app } from '../app.module';
 
+const impactLogo = require('plugins/sentinl/sentinl-white-logo.svg');
+const smallLogo = require('plugins/sentinl/sentinl.svg');
+
 app.service('NavMenu', ['kbnUrl', function (kbnUrl) {
   return {
+    setKbnLogo: function (isOpen) {
+      if (isOpen) {
+        chrome.setBrand({
+          logo: `url(${impactLogo}) left no-repeat`,
+        })
+        .setNavBackground('#222222');
+      } else {
+        chrome.setBrand({
+          logo: `url(${smallLogo}) left no-repeat`
+        })
+        .setNavBackground('#222222');
+      }
+    },
     getTopNav: function (view) {
       const nav = [
         {

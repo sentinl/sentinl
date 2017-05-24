@@ -4,7 +4,7 @@ import moment from 'moment';
 
 import { app } from '../app.module';
 
-app.controller('sentinlAbout', function ($scope, $route, $interval, timefilter, Notifier, NavMenu) {
+app.controller('sentinlAbout', function ($scope, $route, $interval, timefilter, Notifier, NavMenu, globalNavState) {
   $scope.title = 'Sentinl';
   $scope.description = 'Kibana Alert App for Elasticsearch';
   timefilter.enabled = false;
@@ -12,6 +12,8 @@ app.controller('sentinlAbout', function ($scope, $route, $interval, timefilter, 
 
   $scope.topNavMenu = NavMenu.getTopNav('about');
   $scope.tabsMenu = NavMenu.getTabs('about');
+  NavMenu.setKbnLogo(globalNavState.isOpen());
+  $scope.$on('globalNavState:change', () => NavMenu.setKbnLogo(globalNavState.isOpen()));
 
   if (!$scope.notified) {
     $scope.notify.warning('SENTINL is a work in progress! Use at your own risk!');

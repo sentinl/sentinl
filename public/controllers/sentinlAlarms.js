@@ -7,7 +7,7 @@ import confirmMessage from '../templates/confirm-message.html';
 import { app } from '../app.module';
 
 app.controller('sentinlAlarms', function ($rootScope, $scope, $route, $interval,
-  $timeout, timefilter, Private, Notifier, $window, $http, $modal, NavMenu) {
+  $timeout, timefilter, Private, Notifier, $window, $http, $modal, NavMenu, globalNavState) {
   $scope.title = 'Sentinl: Alarms';
   $scope.description = 'Kibana Alert App for Elasticsearch';
 
@@ -17,6 +17,8 @@ app.controller('sentinlAlarms', function ($rootScope, $scope, $route, $interval,
 
   $scope.topNavMenu = NavMenu.getTopNav('alarms');
   $scope.tabsMenu = NavMenu.getTabs('alarms');
+  NavMenu.setKbnLogo(globalNavState.isOpen());
+  $scope.$on('globalNavState:change', () => NavMenu.setKbnLogo(globalNavState.isOpen()));
 
   /* Update Time Filter */
   var updateFilter = function () {

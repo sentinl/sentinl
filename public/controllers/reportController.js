@@ -5,12 +5,14 @@ import confirmMessage from '../templates/confirm-message.html';
 import { app } from '../app.module';
 
 app.controller('sentinlReports', function ($rootScope, $scope, $route, $interval,
-  $timeout, timefilter, Private, createNotifier, $window, $http, $modal, NavMenu) {
+  $timeout, timefilter, Private, createNotifier, $window, $http, $modal, NavMenu, globalNavState) {
   $scope.title = 'Sentinl: Reports';
   $scope.description = 'Kibi/Kibana Report App for Elasticsearch';
 
   $scope.topNavMenu = NavMenu.getTopNav('reports');
   $scope.tabsMenu = NavMenu.getTabs('reports');
+  NavMenu.setKbnLogo(globalNavState.isOpen());
+  $scope.$on('globalNavState:change', () => NavMenu.setKbnLogo(globalNavState.isOpen()));
 
   const notify = createNotifier({
     location: 'Sentinl Reports'
