@@ -166,7 +166,7 @@ function createSentinlAlarmIndex(server,config) {
     .then(function (resp) {
       server.log(['status', 'debug', 'Sentinl'], 'Alarm Template response', resp);
     }, function (err) {
-      server.log(['error', 'warning', 'Sentinl'], err.message);
+      server.log(['error', 'error', 'Sentinl'], err.message);
     });
 
     server.log(['status', 'info', 'Sentinl'], 'Creating Sentinl Alarms Index...');
