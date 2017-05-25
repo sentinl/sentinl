@@ -9,17 +9,17 @@ import { app } from '../app.module';
 
 // WATCHERS CONTROLLER
 app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interval,
-  $timeout, timefilter, Private, Notifier, $window, $http, $modal, $log, NavMenu, globalNavState) {
+  $timeout, timefilter, Private, Notifier, $window, $http, $modal, $log, navMenu, globalNavState) {
 
   $scope.title = 'Sentinl: Watchers';
   $scope.description = 'Kibana Alert App for Elasticsearch';
 
   $scope.notify = new Notifier();
 
-  $scope.topNavMenu = NavMenu.getTopNav('watchers');
-  $scope.tabsMenu = NavMenu.getTabs();
-  NavMenu.setKbnLogo(globalNavState.isOpen());
-  $scope.$on('globalNavState:change', () => NavMenu.setKbnLogo(globalNavState.isOpen()));
+  $scope.topNavMenu = navMenu.getTopNav('watchers');
+  $scope.tabsMenu = navMenu.getTabs();
+  navMenu.setKbnLogo(globalNavState.isOpen());
+  $scope.$on('globalNavState:change', () => navMenu.setKbnLogo(globalNavState.isOpen()));
 
   timefilter.enabled = false;
   $scope.watchers = [];
