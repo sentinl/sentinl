@@ -48,10 +48,11 @@ function createSentinlIndex(server, config) {
   }
 
   const { callWithRequest } = getElasticsearchClient(server);
-
+  
   callWithRequest({}, 'indices.exists', {
     index: config.es.default_index
-  }, function (error, exists) {
+  })
+  .then(function (exists) {
     if (exists === true) {
       server.log(['status', 'debug', 'Sentinl'], 'Core Index exists!');
       return;
@@ -104,6 +105,8 @@ function createSentinlIndex(server, config) {
     }, function (err) {
       server.log(['status', 'warning', 'Sentinl'], err.message);
     });
+  }, function (err) {
+      server.log(['status', 'warning', 'Sentinl'], err.message);
   });
 }
 
@@ -130,7 +133,8 @@ function createSentinlAlarmIndex(server,config) {
 
   callWithRequest({}, 'indices.exists', {
     index: config.es.alarm_index
-  }, function (error, exists) {
+  })
+  .then(function (exists) {
     if (exists === true) {
       server.log(['status', 'debug', 'Sentinl'], 'Alarms Index exists!');
       return;
@@ -182,6 +186,8 @@ function createSentinlAlarmIndex(server,config) {
     }, function (err) {
       server.log(['error', 'warning', 'Sentinl'], err.message);
     });
+  }, function (err) {
+    server.log(['status', 'warning', 'Sentinl'], err.message);
   });
 }
 
