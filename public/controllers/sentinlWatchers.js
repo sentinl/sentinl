@@ -1,50 +1,28 @@
 import _ from 'lodash';
 import moment from 'moment';
-import chrome from 'ui/chrome';
 import $ from 'jquery';
 import ace from 'ace';
 import Notifier from 'ui/notify/notifier';
 
 import confirmMessage from '../templates/confirm-message.html';
-const impactLogo = require('plugins/sentinl/sentinl-white-logo.svg');
-const smallLogo = require('plugins/sentinl/sentinl.svg');
-
 import { app } from '../app.module';
 
 // WATCHERS CONTROLLER
 app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interval,
-  $timeout, timefilter, Private, Notifier, $window, $http, $modal, $log, NavMenu, globalNavState) {
+  $timeout, timefilter, Private, Notifier, $window, $http, $modal, $log, navMenu, globalNavState) {
 
   $scope.title = 'Sentinl: Watchers';
   $scope.description = 'Kibana Alert App for Elasticsearch';
 
   $scope.notify = new Notifier();
 
-  $scope.topNavMenu = NavMenu.getTopNav('watchers');
-  $scope.tabsMenu = NavMenu.getTabs();
+  $scope.topNavMenu = navMenu.getTopNav('watchers');
+  $scope.tabsMenu = navMenu.getTabs();
+  navMenu.setKbnLogo(globalNavState.isOpen());
+  $scope.$on('globalNavState:change', () => navMenu.setKbnLogo(globalNavState.isOpen()));
 
   timefilter.enabled = false;
   $scope.watchers = [];
-
-  const setLogo = function () {
-    if (globalNavState.isOpen()) {
-      chrome.setBrand({
-        logo: `url(${impactLogo}) left no-repeat`,
-      })
-      .setNavBackground('#222222');
-    } else {
-      chrome.setBrand({
-        logo: `url(${smallLogo}) left no-repeat`
-      })
-      .setNavBackground('#222222');
-    }
-  };
-
-  setLogo();
-
-  $scope.$on('globalNavState:change', () => {
-    setLogo();
-  });
 
   function importWatcherFromLocalStorage() {
     /* New Entry from Saved Kibana Query */
