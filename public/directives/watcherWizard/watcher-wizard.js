@@ -11,6 +11,7 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
     $scope.notify = new Notifier();
 
     $scope.form = {
+      index: null,
       status: !$scope.watcher._source.disable ? 'Enabled' : 'Disable',
       messages: {
         success: null,
@@ -262,7 +263,7 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
 
     const saveEditorsText = function () {
       _.forEach($scope.watcher.$scripts, (script, field) => {
-        if ($scope.watcher._source[field]) {
+        if (script.body && script.body.length) {
           if (field === 'input') {
             $scope.watcher._source[field] = JSON.parse(script.body);
           } else {
@@ -288,8 +289,10 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
       });
     };
 
+
     const initScripts = function () {
       $scope.watcher.$scripts = {};
+
       _.forEach($scope.form.scripts, (script, field) => {
         // for migration purposes
         // add some fields if they don't exist in old watcher which was created under Sentinl v4
@@ -316,12 +319,46 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
       });
     };
 
+
+    const initRaw = function () {
+      const watcher = JSON.parse(JSON.stringify($scope.watcher));
+      delete watcher.$scripts;
+      $scope.watcher.$raw = JSON.stringify(watcher, null, 2);
+    };
+
+
     const init = function () {
-      $scope.watcher.$raw = JSON.stringify($scope.watcher, null, 2);
-      initScripts();
-      initActionTitles();
-      initSchedule();
-      initThrottlePeriods();
+      $scope.form.index = $scope.watcher.$index; // persist watcher index
+
+      try {
+        initScripts();
+      } catch (e) {
+        $scope.notify.error(`Fail to initialize scripts: ${e}`);
+      }
+
+      try {
+        initRaw();
+      } catch (e) {
+        $scope.notify.error(`Fail to initialize raw settings: ${e}`);
+      }
+
+      try {
+        initActionTitles();
+      } catch (e) {
+        $scope.notify.error(`Fail to initialize actions: ${e}`);
+      }
+
+      try {
+        initSchedule();
+      } catch (e) {
+        $scope.notify.error(`Fail to initialize schedule: ${e}`);
+      }
+
+      try {
+        initThrottlePeriods();
+      } catch (e) {
+        $scope.notify.error(`Fail to initialize throttle periods: ${e}`);
+      }
     };
 
 
@@ -338,6 +375,11 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
           $scope.watcherForm.$valid = false;
           $scope.watcherForm.$invalid = true;
         }
+
+        if ($scope.watcherForm.$valid) {
+          $scope.form.saved = true;
+        }
+
         return;
       }
 
@@ -384,6 +426,9 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
           $scope.watcherForm.$invalid = true;
         }
 
+      }
+
+      if ($scope.watcherForm.$valid) {
         $scope.form.saved = true;
       }
     };
@@ -392,27 +437,26 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
     $scope.$on('$destroy', () => {
       if (!$scope.form.saved) {
         const data = {
-          index: $scope.index,
+          index: $scope.form.index,
           watcher: JSON.parse($scope.watcher.$raw),
           collapse: true
         };
-        $scope.$emit('wizardSaveConfirm', data);
+        $scope.$emit('watcherWizard:save_confirmed', data);
       }
     });
 
 
-    $scope.$on('wizardSave', (event, index) => {
-      if (+index === +$scope.index) {
+    $scope.$on('sentinlWatchers:save', (event, index) => {
+      if (+index === +$scope.form.index) {
         save();
 
         if ($scope.watcherForm.$valid) {
           const data = {
-            index: index
+            index: $scope.form.index,
+            watcher: $scope.form.raw_enabled ? $scope.watcher : null
           };
-          if ($scope.form.raw_enabled) {
-            data.watcher = $scope.watcher;
-          }
-          $scope.$emit('wizardSaveConfirm', data);
+
+          $scope.$emit('watcherWizard:save_confirmed', data);
         } else {
           $scope.notify.warning('Watcher settings are invalid.');
         }
@@ -427,8 +471,7 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
     restrict: 'E',
     template: watcherEmailAction,
     scope: {
-      watcher: '=',
-      index: '='
+      watcher: '='
     },
     link: wizardDirective
   };

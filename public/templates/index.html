@@ -54,24 +54,24 @@
               <td class="text-right edit-group">
                 <span title="Show/Hide" class="show-rule" ng-click="collapse=!collapse"  ng-model="collapse"><i class="fa fa-ellipsis-h"></i></span>
                 <span ng-show="collapse"
-                      ng-click="wizardSave($index)"
+                      ng-click="wizardSave(watcher.$index)"
                       title="Save"
                       class="delete-rule">
                   <i class="fa fa-save"></i>
                 </span>
                 <span ng-hide="watcher._new == 'true'"
-                      ng-click="watcherDelete($index)"
+                      ng-click="watcherDelete(watcher.$index)"
                       title="Delete"
                       class="delete-rule">
                   <i class="fa fa-trash"></i>
                 </span>
                 <span ng-show="watcher._source.disable"
-                      ng-click="toggleWatcher($index);"
+                      ng-click="toggleWatcher(watcher.$index);"
                       title="Disabled" class="delete-rule">
                   <i class="fa fa-toggle-off"></i>
                 </span>
                 <span ng-show="!watcher._source.disable"
-                      ng-click="toggleWatcher($index);"
+                      ng-click="toggleWatcher(watcher.$index);"
                       title="Enabled" class="delete-rule">
                   <i class="fa fa-toggle-on"></i>
                 </span>
@@ -80,7 +80,7 @@
             </tr>
             <tr ng-if="collapse">
               <td colspan="100%">
-                <watcher-wizard watcher=watcher index=$index></watcher-wizard>
+                <watcher-wizard watcher=watcher></watcher-wizard>
               </td>
             </tr>
           </tbody>

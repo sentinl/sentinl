@@ -35,6 +35,10 @@ app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interva
   $http.get('../api/sentinl/list')
   .then((response) => {
     $scope.watchers = response.data.hits.hits;
+    // init static watcher indexes
+    // without it, search filter, if used, resets indexes
+    _.forEach($scope.watchers, (watcher, index) => watcher.$index = index);
+
     importWatcherFromLocalStorage();
   })
   .catch((error) => {
@@ -82,10 +86,10 @@ app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interva
   };
 
   $scope.wizardSave = function ($index) {
-    $scope.$broadcast('wizardSave', $index);
+    $scope.$broadcast('sentinlWatchers:save', $index);
   };
 
-  $scope.$on('wizardSaveConfirm', (event, wizard) => {
+  $scope.$on('watcherWizard:save_confirmed', (event, wizard) => {
     if (wizard.watcher) {
       $scope.watchers[wizard.index] = wizard.watcher;
     }
