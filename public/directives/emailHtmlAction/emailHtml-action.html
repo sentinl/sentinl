@@ -25,8 +25,8 @@
         value="{{actionName}}"
         class="form-control"
         placeholder="{{watcher._source.uuid}}"
-        ng-model="actionSettings._title"
-        ng-required="actionSettings.email_html._edit">
+        ng-model="actionSettings.$$title"
+        ng-required="actionSettings.email_html.$$edit">
     </div>
     <p ng-show="emailHtmlForm.emailHtmlTitle.$invalid && !emailHtmlForm.emailHtmlTitle.$pristine" class="help-block">
       <small>Action title is required.</small>
@@ -43,7 +43,7 @@
         class="form-control"
         placeholder="root@localhost"
         ng-model="actionSettings.email_html.to"
-        ng-required="actionSettings.email_html._edit">
+        ng-required="actionSettings.email_html.$$edit">
     </div>
     <p ng-show="emailHtmlForm.emailHtmlTo.$invalid && !emailHtmlForm.emailHtmlTo.$pristine" class="help-block">
       <small>Enter a valid emailHtml.</small>
@@ -60,7 +60,7 @@
         class="form-control"
         placeholder="sentinl@localhost"
         ng-model="actionSettings.email_html.from"
-        ng-required="actionSettings.email_html._edit">
+        ng-required="actionSettings.email_html.$$edit">
     </div>
     <p ng-show="emailHtmlForm.emailHtmlFrom.$invalid && !emailHtmlForm.emailHtmlFrom.$pristine" class="help-block">
       <small>Enter a valid emailHtml.</small>
@@ -77,7 +77,7 @@
         class="form-control"
         placeholder="Alarm Title"
         ng-model="actionSettings.email_html.subject"
-        ng-required="actionSettings.email_html._edit">
+        ng-required="actionSettings.email_html.$$edit">
     </div>
     <p ng-show="emailHtmlForm.emailHtmlSubject.$invalid && !emailHtmlForm.emailHtmlSubject.$pristine" class="help-block">
       <small>Enter a subject.</small>

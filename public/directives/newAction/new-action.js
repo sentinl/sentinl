@@ -26,12 +26,12 @@ app.directive('newAction', function () {
       if (type === 'webhook') {
         const title = `New webhook action ${Math.random().toString(36).slice(2)}`;
         scope.watcher._source.actions[title] = {
-          _title: title,
-          _throttle: throttle,
+          $$title: title,
+          $$throttle: throttle,
           throttle_period: '1s',
           webhook: {
-            _edit: false,
-            _proxy: false,
+            $$edit: false,
+            $$proxy: false,
             method: 'POST',
             host: '',
             port: 9200,
@@ -45,11 +45,11 @@ app.directive('newAction', function () {
       if (type === 'email') {
         const title = `New email action ${Math.random().toString(36).slice(2)}`;
         scope.watcher._source.actions[title] = {
-          _title: title,
-          _throttle: throttle,
+          $$title: title,
+          $$throttle: throttle,
           throttle_period: '1s',
           email: {
-            _edit: false,
+            $$edit: false,
             to: '',
             from: '',
             subject: '',
@@ -61,11 +61,11 @@ app.directive('newAction', function () {
       if (type === 'email html') {
         const title = `New HTML email action ${Math.random().toString(36).slice(2)}`;
         scope.watcher._source.actions[title] = {
-          _title: title,
-          _throttle: throttle,
+          $$title: title,
+          $$throttle: throttle,
           throttle_period: '1s',
           email_html: {
-            _edit: false,
+            $$edit: false,
             to: '',
             from: '',
             subject: '',
@@ -79,11 +79,11 @@ app.directive('newAction', function () {
         const title = `New report action ${Math.random().toString(36).slice(2)}`;
         scope.watcher._source.report = true;
         scope.watcher._source.actions[title] = {
-          _title: title,
-          _throttle: throttle,
+          $$title: title,
+          $$throttle: throttle,
           throttle_period: '1s',
           report: {
-            _edit: false,
+            $$edit: false,
             to: '',
             from: '',
             subject: '',
@@ -103,11 +103,11 @@ app.directive('newAction', function () {
       if (type === 'slack') {
         const title = `New slack action ${Math.random().toString(36).slice(2)}`;
         scope.watcher._source.actions[title] = {
-          _title: title,
-          _throttle: throttle,
+          $$title: title,
+          $$throttle: throttle,
           throttle_period: '1s',
           slack: {
-            _edit: false,
+            $$edit: false,
             channel: '',
             message: '',
             stateless: false
@@ -118,11 +118,11 @@ app.directive('newAction', function () {
       if (type === 'console') {
         const title = `New console action ${Math.random().toString(36).slice(2)}`;
         scope.watcher._source.actions[title] = {
-          _title: title,
-          _throttle: throttle,
+          $$title: title,
+          $$throttle: throttle,
           throttle_period: '1s',
           console: {
-            _edit: false,
+            $$edit: false,
             message: '',
           }
         };

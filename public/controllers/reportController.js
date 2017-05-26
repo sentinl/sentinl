@@ -1,3 +1,4 @@
+/* global angular */
 import _ from 'lodash';
 import moment from 'moment';
 
@@ -22,7 +23,7 @@ app.controller('sentinlReports', function ($rootScope, $scope, $route, $interval
 
   /* Update Time Filter */
   const updateFilter = function () {
-    return $http.get('../api/sentinl/set/interval/' + JSON.stringify($scope.timeInterval).replace(/\//g, '%2F'));
+    return $http.get('../api/sentinl/set/interval/' + angular.toJson($scope.timeInterval).replace(/\//g, '%2F'));
   };
 
   /* First Boot */

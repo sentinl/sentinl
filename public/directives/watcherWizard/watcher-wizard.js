@@ -1,3 +1,4 @@
+/* global angular */
 import _ from 'lodash';
 import Notifier from 'ui/notify/notifier';
 import confirmMessage from '../../templates/confirm-message.html';
@@ -28,7 +29,7 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
         },
         types: [ 'webhook', 'email', 'email_html', 'report', 'slack', 'console' ]
       },
-      raw_enabled: false
+      rawEnabled: false
     };
 
     $scope.aceOptions = function (mode, lines = 10) {
@@ -43,32 +44,32 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
         editorOptions: {
           autoScrollEditorIntoView: false
         },
-        onLoad: function (_editor) {
-          _editor.$blockScrolling = Infinity;
+        onLoad: function ($$editor) {
+          $$editor.$blockScrolling = Infinity;
         }
       };
     };
 
     const initActionTitles = function () {
-      _.forOwn($scope.watcher._source.actions, (settings, name) => { settings._title = name; });
+      _.forOwn($scope.watcher._source.actions, (settings, name) => { settings.$$title = name; });
     };
 
 
     const initSchedule = function () {
-      $scope.watcher._source._schedule = {
+      $scope.watcher._source.$$schedule = {
         hours: 0,
         mins: 0,
         secs: 0
       };
       _.each($scope.watcher._source.trigger.schedule.later.split(','), (period) => {
         if (period.match(/hour/i)) {
-          $scope.watcher._source._schedule.hours = +_.trim(period).split(' ')[1];
+          $scope.watcher._source.$$schedule.hours = +_.trim(period).split(' ')[1];
         }
         if (period.match(/min/i)) {
-          $scope.watcher._source._schedule.mins = +_.trim(period).split(' ')[1];
+          $scope.watcher._source.$$schedule.mins = +_.trim(period).split(' ')[1];
         }
         if (period.match(/sec/i)) {
-          $scope.watcher._source._schedule.secs = +_.trim(period).split(' ')[1];
+          $scope.watcher._source.$$schedule.secs = +_.trim(period).split(' ')[1];
         }
       });
     };
@@ -89,7 +90,7 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
         if (!action.thottle_period) {
           action.throttle_period = '30s';
         }
-        action._throttle = {
+        action.$$throttle = {
           hours: getHours(action.throttle_period),
           mins: getMins(action.throttle_period),
           secs: getSecs(action.throttle_period)
@@ -100,23 +101,23 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
 
     const saveSchedule = function () {
       let schedule = [];
-      _.forOwn($scope.watcher._source._schedule, (value, key) => {
+      _.forOwn($scope.watcher._source.$$schedule, (value, key) => {
         if (value) {
           schedule.push(`every ${value} ${key}`);
         }
       });
       $scope.watcher._source.trigger.schedule.later = schedule.join(', ');
-      delete $scope.watcher._source._schedule;
+      delete $scope.watcher._source.$$schedule;
     };
 
 
     const saveThrottle = function () {
       _.forOwn($scope.watcher._source.actions, (action) => {
-        _.forOwn(action._throttle, (value, key) => {
-          if (!value) action._throttle[key] = 0;
+        _.forOwn(action.$$throttle, (value, key) => {
+          if (!value) action.$$throttle[key] = 0;
         });
-        action.throttle_period = `${action._throttle.hours}h${action._throttle.mins}m${action._throttle.secs}s`;
-        delete action._throttle;
+        action.throttle_period = `${action.$$throttle.hours}h${action.$$throttle.mins}m${action.$$throttle.secs}s`;
+        delete action.$$throttle;
       });
     };
 
@@ -157,8 +158,8 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
       if ($scope.watcherForm[title].$valid) {
         const id = Math.random().toString(36).slice(2);
         $scope.form.scripts[type][id] = {
-          title: $scope.watcher.$scripts[type].title,
-          body: $scope.watcher.$scripts[type].body
+          title: $scope.watcher.$$scripts[type].title,
+          body: $scope.watcher.$$scripts[type].body
         };
         $http.post(`../api/sentinl/save/one_script/${type}/${id}`, $scope.form.scripts[type][id])
         .then((msg) => {
@@ -174,7 +175,7 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
 
 
     $scope.selectScript = function (type, id) {
-      $scope.watcher.$scripts[type] = {
+      $scope.watcher.$$scripts[type] = {
         id: id,
         title: $scope.form.scripts[type][id].title,
         body: $scope.form.scripts[type][id].body
@@ -183,7 +184,7 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
 
 
     $scope.removeScript = function (type) {
-      const id = $scope.watcher.$scripts[type].id;
+      const id = $scope.watcher.$$scripts[type].id;
       $http.delete(`../api/sentinl/remove/one_script/${type}/${id}`)
       .then((msg) => {
         if (msg.data.ok) {
@@ -234,7 +235,7 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
       // toggle edit for the selected action
       _.each($scope.form.actions.types, (type) => {
         if (_.has(actionSettings, type)) {
-          actionSettings[type]._edit = !actionSettings[type]._edit;
+          actionSettings[type].$$edit = !actionSettings[type].$$edit;
         }
       });
 
@@ -243,7 +244,7 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
       _.forOwn($scope.watcher._source.actions, (settings, name) => {
         _.each($scope.form.actions.types, (type) => {
           if (_.has(settings, type)) {
-            if (name !== actionName) settings[type]._edit = false;
+            if (name !== actionName) settings[type].$$edit = false;
           }
         });
       });
@@ -253,18 +254,18 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
     const renameActions = function (actions) {
       const newActions = {};
       _.forOwn(actions, (settings, name) => {
-        newActions[settings._title] = settings;
-        delete newActions[settings._title]._title;
+        newActions[settings.$$title] = settings;
+        delete newActions[settings.$$title].$$title;
       });
       return newActions;
     };
 
 
     const saveEditorsText = function () {
-      _.forEach($scope.watcher.$scripts, (script, field) => {
+      _.forEach($scope.watcher.$$scripts, (script, field) => {
         if (script.body && script.body.length) {
           if (field === 'input') {
-            $scope.watcher._source[field] = JSON.parse(script.body);
+            $scope.watcher._source[field] = angular.fromJson(script.body);
           } else {
             $scope.watcher._source[field].script.script = script.body;
           }
@@ -274,15 +275,15 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
       _.forOwn($scope.watcher._source.actions, (settings, name) => {
         _.each($scope.form.actions.types, (type) => {
           if (_.has(settings, type)) {
-            delete settings[type]._edit;
+            delete settings[type].$$edit;
           }
 
           if (type === 'webhook' && _.has(settings, type)) {
             if (settings[type]._headers) {
-              settings[type].headers = JSON.parse(settings[type]._headers);
+              settings[type].headers = angular.fromJson(settings[type]._headers);
               delete settings[type]._headers;
             }
-            delete settings[type]._proxy;
+            delete settings[type].$$proxy;
           }
         });
       });
@@ -290,7 +291,7 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
 
 
     const initScripts = function () {
-      $scope.watcher.$scripts = {};
+      $scope.watcher.$$scripts = {};
 
       _.forEach($scope.form.scripts, (script, field) => {
         // for migration purposes
@@ -304,10 +305,10 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
 
         let value = field === 'input' ? $scope.watcher._source.input : $scope.watcher._source[field].script.script;
 
-        $scope.watcher.$scripts[field] = {
+        $scope.watcher.$$scripts[field] = {
           id: null,
           title: null,
-          body: field === 'input' ? JSON.stringify(value, null, 2) : value
+          body: field === 'input' ? angular.toJson(value, 'pretty') : value
         };
 
         $http.get(`../api/sentinl/get/scripts/${field}`).then((resp) => {
@@ -320,9 +321,7 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
 
 
     const initRaw = function () {
-      const watcher = JSON.parse(JSON.stringify($scope.watcher));
-      delete watcher.$scripts;
-      $scope.watcher.$raw = JSON.stringify(watcher, null, 2);
+      $scope.watcher.$$raw = angular.toJson($scope.watcher, 'pretty');
     };
 
 
@@ -359,14 +358,14 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
     };
 
 
-    const save = function () {
+    const saveWizard = function () {
       $scope.watcherForm.$valid = true;
       $scope.watcherForm.$invalid = false;
 
-      if ($scope.form.raw_enabled) {
+      if ($scope.form.rawEnabled) {
         try {
           // All settings will have been overwritten if enable is checked and the watcher is saved.
-          $scope.watcher = JSON.parse($scope.watcher.$raw);
+          $scope.watcher = angular.fromJson($scope.watcher.$$raw);
         } catch (e) {
           $scope.notify.error(`Invalid Raw configuration: ${e}`);
           $scope.watcherForm.$valid = false;
@@ -378,16 +377,6 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
         }
 
         return;
-      }
-
-      try {
-        if ($scope.watcher.$scripts.input.body && $scope.watcher.$scripts.input.body.length) {
-          JSON.parse($scope.watcher.$scripts.input.body);
-        }
-      } catch (e) {
-        $scope.notify.error(`Invalid Input configuration: ${e}`);
-        $scope.watcherForm.$valid = false;
-        $scope.watcherForm.$invalid = true;
       }
 
       if ($scope.watcherForm.$valid) {
@@ -433,10 +422,9 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
 
     $scope.$on('$destroy', () => {
       if (!$scope.form.saved) {
-        const watcher = JSON.parse($scope.watcher.$raw);
         const data = {
-          id: watcher._id,
-          watcher: watcher,
+          id: $scope.watcher._id,
+          watcher: angular.fromJson($scope.watcher.$$raw),
           collapse: true
         };
         $scope.$emit('watcherWizard:save_confirmed', data);
@@ -445,12 +433,12 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
 
 
     $scope.$on('sentinlWatchers:save', (event) => {
-      save();
+      saveWizard();
 
       if ($scope.watcherForm.$valid) {
         const data = {
           id: $scope.watcher._id,
-          watcher: $scope.form.raw_enabled ? $scope.watcher : null
+          watcher: $scope.form.rawEnabled ? $scope.watcher : null
         };
 
         $scope.$emit('watcherWizard:save_confirmed', data);

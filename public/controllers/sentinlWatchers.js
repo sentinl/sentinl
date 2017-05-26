@@ -1,3 +1,4 @@
+/* global angular */
 import _ from 'lodash';
 import moment from 'moment';
 import $ from 'jquery';
@@ -27,7 +28,7 @@ app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interva
   function importWatcherFromLocalStorage() {
     /* New Entry from Saved Kibana Query */
     if ($window.localStorage.getItem('sentinl_saved_query')) {
-      $scope.watcherNew(JSON.parse($window.localStorage.getItem('sentinl_saved_query')));
+      $scope.watcherNew(angular.fromJson($window.localStorage.getItem('sentinl_saved_query')));
       $window.localStorage.removeItem('sentinl_saved_query');
     }
   };
@@ -74,6 +75,9 @@ app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interva
   $scope.$on('watcherWizard:save_confirmed', (event, wizard) => {
     const index = $scope.watchers.findIndex((watcher) => watcher._id === wizard.id);
 
+    // the two-way binding doesn't sync the watcher if you create a child object inside
+    // but but syncs if you change a property value
+    // related issue: https://github.com/sirensolutions/sentinl-private/issues/216
     if (wizard.watcher) {
       $scope.watchers[index] = wizard.watcher;
     }
@@ -91,7 +95,7 @@ app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interva
   $scope.watcherSave = function ($index, callFromWatcherEditorForm = false) {
     let watcher;
     if ($scope.editor && !callFromWatcherEditorForm) {
-      watcher = JSON.parse($scope.editor.getValue());
+      watcher = angular.fromJson($scope.editor.getValue());
     } else {
       watcher = $scope.watchers[$index];
     }
@@ -107,10 +111,6 @@ app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interva
       },
       $scope.notify.error
     );
-  };
-
-  $scope.getWatchers = function () {
-    return $scope.watchers;
   };
 
   /* New Entry */
