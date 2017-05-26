@@ -11,7 +11,6 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
     $scope.notify = new Notifier();
 
     $scope.form = {
-      index: null,
       status: !$scope.watcher._source.disable ? 'Enabled' : 'Disable',
       messages: {
         success: null,
@@ -328,8 +327,6 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
 
 
     const init = function () {
-      $scope.form.index = $scope.watcher.$index; // persist watcher index
-
       try {
         initScripts();
       } catch (e) {
@@ -436,9 +433,10 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
 
     $scope.$on('$destroy', () => {
       if (!$scope.form.saved) {
+        const watcher = JSON.parse($scope.watcher.$raw);
         const data = {
-          index: $scope.form.index,
-          watcher: JSON.parse($scope.watcher.$raw),
+          id: watcher._id,
+          watcher: watcher,
           collapse: true
         };
         $scope.$emit('watcherWizard:save_confirmed', data);
@@ -446,20 +444,18 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
     });
 
 
-    $scope.$on('sentinlWatchers:save', (event, index) => {
-      if (+index === +$scope.form.index) {
-        save();
+    $scope.$on('sentinlWatchers:save', (event) => {
+      save();
 
-        if ($scope.watcherForm.$valid) {
-          const data = {
-            index: $scope.form.index,
-            watcher: $scope.form.raw_enabled ? $scope.watcher : null
-          };
+      if ($scope.watcherForm.$valid) {
+        const data = {
+          id: $scope.watcher._id,
+          watcher: $scope.form.raw_enabled ? $scope.watcher : null
+        };
 
-          $scope.$emit('watcherWizard:save_confirmed', data);
-        } else {
-          $scope.notify.warning('Watcher settings are invalid.');
-        }
+        $scope.$emit('watcherWizard:save_confirmed', data);
+      } else {
+        $scope.notify.warning('Watcher settings are invalid.');
       }
     });
 

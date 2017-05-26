@@ -54,24 +54,24 @@
               <td class="text-right edit-group">
                 <span title="Show/Hide" class="show-rule" ng-click="collapse=!collapse"  ng-model="collapse"><i class="fa fa-ellipsis-h"></i></span>
                 <span ng-show="collapse"
-                      ng-click="wizardSave(watcher.$index)"
+                      ng-click="wizardSave(watcher._id)"
                       title="Save"
                       class="delete-rule">
                   <i class="fa fa-save"></i>
                 </span>
                 <span ng-hide="watcher._new == 'true'"
-                      ng-click="watcherDelete(watcher.$index)"
+                      ng-click="watcherDelete(watcher._id)"
                       title="Delete"
                       class="delete-rule">
                   <i class="fa fa-trash"></i>
                 </span>
                 <span ng-show="watcher._source.disable"
-                      ng-click="toggleWatcher(watcher.$index);"
+                      ng-click="toggleWatcher(watcher._id);"
                       title="Disabled" class="delete-rule">
                   <i class="fa fa-toggle-off"></i>
                 </span>
                 <span ng-show="!watcher._source.disable"
-                      ng-click="toggleWatcher(watcher.$index);"
+                      ng-click="toggleWatcher(watcher._id);"
                       title="Enabled" class="delete-rule">
                   <i class="fa fa-toggle-on"></i>
                 </span>

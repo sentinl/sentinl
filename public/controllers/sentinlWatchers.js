@@ -35,10 +35,6 @@ app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interva
   $http.get('../api/sentinl/list')
   .then((response) => {
     $scope.watchers = response.data.hits.hits;
-    // persist static watcher indexes
-    // without it, search filter, if used, resets indexes
-    _.forEach($scope.watchers, (watcher, index) => watcher.$index = index);
-
     importWatcherFromLocalStorage();
   })
   .catch((error) => {
@@ -46,23 +42,9 @@ app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interva
     importWatcherFromLocalStorage();
   });
 
-  /* ACE Editor */
-  $scope.editor;
-  $scope.editor_status = { readonly: false, undo: false, new: false };
-  $scope.setAce = function ($index, edit) {
-    $scope.editor = ace.edit('editor-' + $index);
-    var _session = $scope.editor.getSession();
-    $scope.editor.setReadOnly(edit);
-    $scope.editor_status.readonly = edit;
-    _session.setUndoManager(new ace.UndoManager());
+  $scope.watcherDelete = function (watcherId) {
+    const index = $scope.watchers.findIndex((watcher) => watcher._id === watcherId);
 
-    $scope.editor_status.undo = $scope.editor.session.getUndoManager().isClean();
-
-    if (!edit) { $scope.editor.getSession().setMode('ace/mode/json'); }
-    else { $scope.editor.getSession().setMode('ace/mode/text'); }
-  };
-
-  $scope.watcherDelete = function ($index) {
     const confirmModal = $modal.open({
       template: confirmMessage,
       controller: 'ConfirmMessageController',
@@ -71,7 +53,7 @@ app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interva
 
     confirmModal.result.then((response) => {
       if (response === 'yes') {
-        return $http.delete('../api/sentinl/watcher/' + $scope.watchers[$index]._id)
+        return $http.delete('../api/sentinl/watcher/' + $scope.watchers[index]._id)
         .then(
           (resp) => {
             $timeout(function () {
@@ -85,20 +67,23 @@ app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interva
     });
   };
 
-  $scope.wizardSave = function ($index) {
-    $scope.$broadcast('sentinlWatchers:save', $index);
+  $scope.wizardSave = function () {
+    $scope.$broadcast('sentinlWatchers:save');
   };
 
   $scope.$on('watcherWizard:save_confirmed', (event, wizard) => {
+    const index = $scope.watchers.findIndex((watcher) => watcher._id === wizard.id);
+
     if (wizard.watcher) {
-      $scope.watchers[wizard.index] = wizard.watcher;
+      $scope.watchers[index] = wizard.watcher;
     }
     if (!wizard.collapse) {
-      $scope.watcherSave(wizard.index);
+      $scope.watcherSave(index);
     }
   });
 
-  $scope.toggleWatcher = function (index) {
+  $scope.toggleWatcher = function (watcherId) {
+    const index = $scope.watchers.findIndex((watcher) => watcher._id === watcherId);
     $scope.watchers[index]._source.disable = !$scope.watchers[index]._source.disable;
     $scope.watcherSave(index);
   };
@@ -180,8 +165,6 @@ app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interva
       };
     }
     $scope.watchers.unshift(newwatcher);
-    // persist watcher index
-    _.forEach($scope.watchers, (watcher, index) => watcher.$index = index);
   };
   $scope.reporterNew = function (newwatcher) {
     if (!newwatcher) {
@@ -239,8 +222,6 @@ app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interva
       };
     }
     $scope.watchers.unshift(newwatcher);
-    // persist watcher index
-    _.forEach($scope.watchers, (watcher, index) => watcher.$index = index);
   };
 
   var currentTime = moment($route.current.locals.currentTime);
