@@ -35,7 +35,7 @@ app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interva
   $http.get('../api/sentinl/list')
   .then((response) => {
     $scope.watchers = response.data.hits.hits;
-    // init static watcher indexes
+    // persist static watcher indexes
     // without it, search filter, if used, resets indexes
     _.forEach($scope.watchers, (watcher, index) => watcher.$index = index);
 
@@ -180,6 +180,8 @@ app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interva
       };
     }
     $scope.watchers.unshift(newwatcher);
+    // persist watcher index
+    _.forEach($scope.watchers, (watcher, index) => watcher.$index = index);
   };
   $scope.reporterNew = function (newwatcher) {
     if (!newwatcher) {
@@ -237,6 +239,8 @@ app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interva
       };
     }
     $scope.watchers.unshift(newwatcher);
+    // persist watcher index
+    _.forEach($scope.watchers, (watcher, index) => watcher.$index = index);
   };
 
   var currentTime = moment($route.current.locals.currentTime);
