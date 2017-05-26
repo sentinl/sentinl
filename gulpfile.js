@@ -17,7 +17,7 @@ var packageName = pkg.name;
 // in their own sub-directory to not interfere with Gradle
 var buildDir = path.resolve(__dirname, 'build/gulp');
 var targetDir = path.resolve(__dirname, 'target/gulp');
-var buildTarget = path.resolve(buildDir, packageName);
+var buildTarget = path.resolve(buildDir, 'kibana', packageName);
 
 var include = [
   '*.json',
