@@ -1,9 +1,7 @@
-import uiModules from 'ui/modules';
 import scheduleTagTemplate from './schedule-tag.html';
+import { app } from '../../app.module';
 
-uiModules
-.get('api/sentinl', [])
-.directive('scheduleTag', function () {
+app.directive('scheduleTag', function () {
 
   function actionDirective(scope, element, attrs) {
     scope.action = {

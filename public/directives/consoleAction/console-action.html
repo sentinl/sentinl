@@ -18,8 +18,8 @@
         value="{{actionName}}"
         class="form-control"
         placeholder="{{watcher._source.uuid}}"
-        ng-model="actionSettings._title"
-        ng-required="actionSettings.console._edit">
+        ng-model="actionSettings.$$title"
+        ng-required="actionSettings.console.$$edit">
     </div>
     <p ng-show="consoleForm.consoleTitle.$invalid && !consoleForm.consoleTitle.$pristine" class="help-block">
       <small>Action title is required.</small>

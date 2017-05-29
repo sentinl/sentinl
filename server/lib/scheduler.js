@@ -135,10 +135,7 @@ export default function getScheduler(server) {
               }
             }
 
-            client({}, method, {
-              index: request.indices,
-              body: request.body
-            })
+            client({}, method, request)
             .then(function (payload) {
               server.log(['status', 'info', 'Sentinl', 'PAYLOAD DEBUG'], payload);
               if (!payload || !condition || !actions) {
@@ -164,10 +161,8 @@ export default function getScheduler(server) {
                   }
                   doActions(server, actions, payload, watch.title);
                 } else if (transform.search) {
-                  client({}, method, {
-                    index: transform.search.request.indices,
-                    body: transform.search.request.body
-                  }).then(function (payload) {
+                  client({}, method, transform.search.request)
+                  .then(function (payload) {
                     if (!payload) return;
                     doActions(server, actions, payload, watch.title);
                   });

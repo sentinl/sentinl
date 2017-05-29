@@ -1,9 +1,7 @@
-import uiModules from 'ui/modules';
 import watcherEmailHtmlAction from './emailHtml-action.html';
+import { app } from '../../app.module';
 
-uiModules
-.get('api/sentinl', [])
-.directive('emailHtmlAction', function () {
+app.directive('emailHtmlAction', function () {
   function actionDirective(scope, element, attrs) {
     scope.action = {
       type: 'email HTML'

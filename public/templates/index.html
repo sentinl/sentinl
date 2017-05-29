@@ -43,7 +43,7 @@
               <th>ACTIONS</th>
               <th></th>
             </tr>
-          <tbody ng-repeat='watcher in getWatchers() | filter:searchWatchers'>
+          <tbody ng-repeat='watcher in watchers | filter:searchWatchers'>
             <tr ng-class="{newRow: watcher._new == 'true' || watcher._source.title == 'watcher_title'}">
               <td>{{watcher._source.title}}</td>
               <td ng-show="watcher._source.trigger.schedule.interval" ng-hide="watcher._source.trigger.schedule.later">{{ watcher._source.trigger.schedule.interval }}</td>
@@ -54,24 +54,24 @@
               <td class="text-right edit-group">
                 <span title="Show/Hide" class="show-rule" ng-click="collapse=!collapse"  ng-model="collapse"><i class="fa fa-ellipsis-h"></i></span>
                 <span ng-show="collapse"
-                      ng-click="wizardSave($index)"
+                      ng-click="wizardSave(watcher._id)"
                       title="Save"
                       class="delete-rule">
                   <i class="fa fa-save"></i>
                 </span>
                 <span ng-hide="watcher._new == 'true'"
-                      ng-click="watcherDelete($index)"
+                      ng-click="watcherDelete(watcher._id)"
                       title="Delete"
                       class="delete-rule">
                   <i class="fa fa-trash"></i>
                 </span>
                 <span ng-show="watcher._source.disable"
-                      ng-click="toggleWatcher($index);"
+                      ng-click="toggleWatcher(watcher._id);"
                       title="Disabled" class="delete-rule">
                   <i class="fa fa-toggle-off"></i>
                 </span>
                 <span ng-show="!watcher._source.disable"
-                      ng-click="toggleWatcher($index);"
+                      ng-click="toggleWatcher(watcher._id);"
                       title="Enabled" class="delete-rule">
                   <i class="fa fa-toggle-on"></i>
                 </span>
@@ -80,7 +80,7 @@
             </tr>
             <tr ng-if="collapse">
               <td colspan="100%">
-                <watcher-wizard watcher=watcher index=$index></watcher-wizard>
+                <watcher-wizard watcher="watcher"></watcher-wizard>
               </td>
             </tr>
           </tbody>

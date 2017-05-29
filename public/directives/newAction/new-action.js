@@ -1,9 +1,7 @@
-import uiModules from 'ui/modules';
 import watcherNewAction from './new-action.html';
+import { app } from '../../app.module';
 
-uiModules
-.get('api/sentinl', [])
-.directive('newAction', function () {
+app.directive('newAction', function () {
   function actionDirective(scope, element, attrs) {
 
     scope.action = {
@@ -28,12 +26,12 @@ uiModules
       if (type === 'webhook') {
         const title = `New webhook action ${Math.random().toString(36).slice(2)}`;
         scope.watcher._source.actions[title] = {
-          _title: title,
-          _throttle: throttle,
+          $$title: title,
+          $$throttle: throttle,
           throttle_period: '1s',
           webhook: {
-            _edit: false,
-            _proxy: false,
+            $$edit: false,
+            $$proxy: false,
             method: 'POST',
             host: '',
             port: 9200,
@@ -47,11 +45,11 @@ uiModules
       if (type === 'email') {
         const title = `New email action ${Math.random().toString(36).slice(2)}`;
         scope.watcher._source.actions[title] = {
-          _title: title,
-          _throttle: throttle,
+          $$title: title,
+          $$throttle: throttle,
           throttle_period: '1s',
           email: {
-            _edit: false,
+            $$edit: false,
             to: '',
             from: '',
             subject: '',
@@ -63,11 +61,11 @@ uiModules
       if (type === 'email html') {
         const title = `New HTML email action ${Math.random().toString(36).slice(2)}`;
         scope.watcher._source.actions[title] = {
-          _title: title,
-          _throttle: throttle,
+          $$title: title,
+          $$throttle: throttle,
           throttle_period: '1s',
           email_html: {
-            _edit: false,
+            $$edit: false,
             to: '',
             from: '',
             subject: '',
@@ -81,11 +79,11 @@ uiModules
         const title = `New report action ${Math.random().toString(36).slice(2)}`;
         scope.watcher._source.report = true;
         scope.watcher._source.actions[title] = {
-          _title: title,
-          _throttle: throttle,
+          $$title: title,
+          $$throttle: throttle,
           throttle_period: '1s',
           report: {
-            _edit: false,
+            $$edit: false,
             to: '',
             from: '',
             subject: '',
@@ -105,11 +103,11 @@ uiModules
       if (type === 'slack') {
         const title = `New slack action ${Math.random().toString(36).slice(2)}`;
         scope.watcher._source.actions[title] = {
-          _title: title,
-          _throttle: throttle,
+          $$title: title,
+          $$throttle: throttle,
           throttle_period: '1s',
           slack: {
-            _edit: false,
+            $$edit: false,
             channel: '',
             message: '',
             stateless: false
@@ -120,11 +118,11 @@ uiModules
       if (type === 'console') {
         const title = `New console action ${Math.random().toString(36).slice(2)}`;
         scope.watcher._source.actions[title] = {
-          _title: title,
-          _throttle: throttle,
+          $$title: title,
+          $$throttle: throttle,
           throttle_period: '1s',
           console: {
-            _edit: false,
+            $$edit: false,
             message: '',
           }
         };

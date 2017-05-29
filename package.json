@@ -5,7 +5,10 @@
     "url": "http://github.com/sirensolutions/sentinl.git"
   },
   "name": "sentinl",
-  "version": "5.2.2-SNAPSHOT",
+  "version": "5.2.0-SNAPSHOT",
+  "kibana": {
+    "version": "5.2.2"
+  },
   "description": "Kibana Alert & Report App for Elasticsearch",
   "main": "index.js",
   "scripts": {
