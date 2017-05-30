@@ -1,10 +1,9 @@
+/* global angular */
 import _ from 'lodash';
-import uiModules from 'ui/modules';
 import watcherWebhookAction from './webhook-action.html';
+import { app } from '../../app.module';
 
-uiModules
-.get('api/sentinl', [])
-.directive('webhookAction', function () {
+app.directive('webhookAction', function () {
 
   function actionDirective(scope, element, attrs) {
 
@@ -14,9 +13,9 @@ uiModules
     };
 
     if (_.has(scope.watcher._source.actions[attrs.name].webhook, 'headers')) {
-      scope.watcher._source.actions[attrs.name].webhook._proxy = true;
+      scope.watcher._source.actions[attrs.name].webhook.$$proxy = true;
       let headers = scope.watcher._source.actions[attrs.name].webhook.headers;
-      scope.watcher._source.actions[attrs.name].webhook._headers = JSON.stringify(headers, null, 2);
+      scope.watcher._source.actions[attrs.name].webhook._headers = angular.toJson(headers, 'pretty');
     }
 
     scope.changeMethod = function (method) {
@@ -24,7 +23,7 @@ uiModules
     };
 
     scope.enableExtraFields = function () {
-      if (scope.watcher._source.actions[attrs.name].webhook._proxy) {
+      if (scope.watcher._source.actions[attrs.name].webhook.$$proxy) {
         scope.watcher._source.actions[attrs.name].webhook.headers = {};
         scope.watcher._source.actions[attrs.name].webhook._headers = '';
       } else {
