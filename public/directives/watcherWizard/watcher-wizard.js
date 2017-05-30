@@ -87,7 +87,7 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
       };
 
       _.forOwn($scope.watcher._source.actions, (action) => {
-        if (!action.thottle_period) {
+        if (!action.throttle_period) {
           action.throttle_period = '30s';
         }
         action.$$throttle = {
