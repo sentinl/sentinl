@@ -7,6 +7,7 @@ import Notifier from 'ui/notify/notifier';
 
 import confirmMessage from '../templates/confirm-message.html';
 import { app } from '../app.module';
+import WatcherHelper from '../classes/WatcherHelper';
 
 // WATCHERS CONTROLLER
 app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interval,
@@ -15,6 +16,7 @@ app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interva
   $scope.title = 'Sentinl: Watchers';
   $scope.description = 'Kibana Alert App for Elasticsearch';
 
+  const wHelper = new WatcherHelper();
   $scope.notify = new Notifier();
 
   $scope.topNavMenu = navMenu.getTopNav('watchers');
@@ -55,15 +57,18 @@ app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interva
     confirmModal.result.then((response) => {
       if (response === 'yes') {
         return $http.delete('../api/sentinl/watcher/' + $scope.watchers[index]._id)
-        .then(
-          (resp) => {
-            $timeout(function () {
-              $route.reload();
-              $scope.notify.warning('SENTINL Watcher successfully deleted!');
-            }, 1000);
-          },
-          $scope.notify.error
-        );
+        .then((resp) => {
+          $timeout(() => {
+            $route.reload();
+            $scope.notify.warning('SENTINL Watcher successfully deleted!');
+          }, 1000);
+        }).catch((error) => {
+          if (Number.isInteger(index)) {
+            $scope.watchers.splice(index, 1);
+          } else {
+            $scope.notify.error(error);
+          }
+        });
       }
     });
   };
