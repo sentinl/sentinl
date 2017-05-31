@@ -55,15 +55,18 @@ app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interva
     confirmModal.result.then((response) => {
       if (response === 'yes') {
         return $http.delete('../api/sentinl/watcher/' + $scope.watchers[index]._id)
-        .then(
-          (resp) => {
-            $timeout(function () {
-              $route.reload();
-              $scope.notify.warning('SENTINL Watcher successfully deleted!');
-            }, 1000);
-          },
-          $scope.notify.error
-        );
+        .then((resp) => {
+          $timeout(() => {
+            $route.reload();
+            $scope.notify.warning('SENTINL Watcher successfully deleted!');
+          }, 1000);
+        }).catch((error) => {
+          if (Number.isInteger(index)) {
+            $scope.watchers.splice(index, 1);
+          } else {
+            $scope.notify.error(error);
+          }
+        });
       }
     });
   };
