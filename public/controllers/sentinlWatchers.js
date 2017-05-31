@@ -7,7 +7,6 @@ import Notifier from 'ui/notify/notifier';
 
 import confirmMessage from '../templates/confirm-message.html';
 import { app } from '../app.module';
-import WatcherHelper from '../classes/WatcherHelper';
 
 // WATCHERS CONTROLLER
 app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interval,
@@ -16,7 +15,6 @@ app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interva
   $scope.title = 'Sentinl: Watchers';
   $scope.description = 'Kibana Alert App for Elasticsearch';
 
-  const wHelper = new WatcherHelper();
   $scope.notify = new Notifier();
 
   $scope.topNavMenu = navMenu.getTopNav('watchers');
