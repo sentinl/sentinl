@@ -7,6 +7,20 @@
       <label class="btn btn-warning btn-sm" ng-model="actionSettings.report.priority" btn-radio="'medium'">Medium</label>
       <label class="btn btn-info btn-sm" ng-model="actionSettings.report.priority" btn-radio="'low'">Low</label>
     </div>
+    <div class="col-md-2">
+      <label class="checkbox">
+        <input type="checkbox"
+          ng-model="actionSettings.report.stateless"
+          ng-checked="actionSettings.report.stateless"> stateless
+      </label>
+    </div>
+    <div class="col-md-2">
+      <label class="checkbox">
+        <input type="checkbox"
+          ng-model="actionSettings.report.snapshot.params.crop"
+          ng-checked="actionSettings.report.snapshot.params.crop"> crop
+      </label>
+    </div>
   </div>
   <div class="form-group" ng-class="{'has-error': reportForm.reportTitle.$invalid && !reportForm.reportTitle.$pristine}">
     <label class="col-md-2 control-label" for="reportTitle">Title:</label>
@@ -29,7 +43,7 @@
     <label class="col-md-2 control-label" for="reportTo">To:</label>
     <div class="col-md-6">
       <input
-        type="email"
+        type="text"
         id="reportTo"
         name="reportTo"
         value="{{actionSettings.report.to}}"
@@ -46,7 +60,7 @@
     <label class="col-md-2 control-label" for="reportFrom">From:</label>
     <div class="col-md-6">
       <input
-        type="email"
+        type="text"
         id="reportFrom"
         name="reportFrom"
         value="{{actionSettings.report.from}}"
@@ -115,7 +129,7 @@
     <label class="col-md-2 control-label" for="reportUrl">URL:</label>
     <div class="col-md-6">
       <input
-        type="url"
+        type="text"
         id="reportUrl"
         name="reportUrl"
         value="{{actionSettings.report.snapshot.url}}"
@@ -139,6 +153,30 @@
         class="form-control"
         placeholder="/tmp/"
         ng-model="actionSettings.report.snapshot.path">
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-md-2 control-label" for="reportUsername">Username:</label>
+    <div class="col-md-6">
+      <input
+        type="text"
+        id="reportUsername"
+        name="reportUsername"
+        value="{{actionSettings.report.snapshot.params.username}}"
+        class="form-control"
+        ng-model="actionSettings.report.snapshot.params.username">
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-md-2 control-label" for="reportPassword">Password:</label>
+    <div class="col-md-6">
+      <input
+        type="text"
+        id="reportPassword"
+        name="reportPassword"
+        value="{{actionSettings.report.snapshot.params.password}}"
+        class="form-control"
+        ng-model="actionSettings.report.snapshot.params.password">
     </div>
   </div>
   <div class="form-group" ng-class="{'has-error': reportForm.reportDelay.$invalid && !reportForm.reportDelay.$pristine}">
