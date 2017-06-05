@@ -17,7 +17,7 @@ export default function horsemanFactory(server, domain) {
   } else {
     try {
       const Horseman = require('node-horseman');
-      return Promise.resolve(new Horseman());
+      return Promise.resolve(new Horseman({ 'ignoreSSLErrors': true }));
     } catch (error) {
       return Promise.reject(error);
     }

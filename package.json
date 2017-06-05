@@ -20,15 +20,15 @@
     "archive": "tar cfz ./sentinl-latest.tar.gz --exclude .git --exclude .gitignore --exclude .github --exclude gradle --exclude build --exclude target --exclude sentinl-latest.tar.gz ./* && ls -alF sentinl-latest*"
   },
   "dependencies": {
-    "angular-ui-bootstrap": "^0.13.4",
+    "angular-ui-bootstrap": "0.13.4",
     "bluebird": "3.4.7",
-    "bootstrap": "^3.3.7",
+    "bootstrap": "3.3.7",
     "emailjs": "1.0.8",
     "later": "1.2.0",
     "mustache": "2.3.0",
-    "node-horseman": "3.2.0",
+    "node-horseman": "3.3.0",
     "node-slack": "0.0.7",
-    "phantomjs": "^2.1.7",
+    "phantomjs": "2.1.1",
     "sum-time": "1.0.0"
   },
   "devDependencies": {
