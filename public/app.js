@@ -24,8 +24,11 @@ import './controllers/sentinlAlarms.js';
 import './controllers/sentinlAbout.js';
 import './controllers/confirmMessageController';
 
+/* import factories */
+import './factories/navMenu.js';
+
 /* import services */
-import './services/navMenu.js';
+import './services/sentinlService.js';
 
 /* import filters */
 import './filters/moment.js';
@@ -47,6 +50,10 @@ import 'ui/autoload/styles';
 
 /* Libs */
 import 'ui/kbn_top_nav';
+import 'ui/listen';
+import 'ui/timepicker';
+import 'ui/timefilter';
+import 'ui/directives/pretty_duration';
 
 /* Routes */
 import './app.routes.js';

@@ -8,7 +8,7 @@ import confirmMessage from '../templates/confirm-message.html';
 import { app } from '../app.module';
 
 app.controller('sentinlAlarms', function ($rootScope, $scope, $route, $interval,
-  $timeout, timefilter, Private, Notifier, $window, $http, $modal, navMenu, globalNavState) {
+  $timeout, timefilter, Private, Notifier, $window, $http, $modal, navMenu, globalNavState, sentinlService) {
   $scope.title = 'Sentinl: Alarms';
   $scope.description = 'Kibana Alert App for Elasticsearch';
 
@@ -21,21 +21,17 @@ app.controller('sentinlAlarms', function ($rootScope, $scope, $route, $interval,
   navMenu.setKbnLogo(globalNavState.isOpen());
   $scope.$on('globalNavState:change', () => navMenu.setKbnLogo(globalNavState.isOpen()));
 
-  /* Update Time Filter */
-  var updateFilter = function () {
-    return $http.get('../api/sentinl/set/interval/' + angular.toJson($scope.timeInterval).replace(/\//g, '%2F'));
-  };
-
   /* First Boot */
 
   $scope.elasticAlarms = [];
   $scope.timeInterval = timefilter.time;
-  updateFilter();
-  $http.get('../api/sentinl/list/alarms')
-  .then(
-    (resp) => $scope.elasticAlarms = resp.data.hits.hits,
-    $scope.notify.error
-  );
+
+  sentinlService.updateFilter($scope.timeInterval)
+  .then((resp) => {
+    return sentinlService.listAlarms()
+          .then((resp) => $scope.elasticAlarms = resp.data.hits.hits);
+  })
+  .catch((error) => $scope.notify.error);
 
   /* Listen for refreshInterval changes */
 
@@ -44,8 +40,9 @@ app.controller('sentinlAlarms', function ($rootScope, $scope, $route, $interval,
     let timeInterval = _.get($rootScope, 'timefilter.time');
     if (timeInterval) {
       $scope.timeInterval = timeInterval;
-      updateFilter();
-      $route.reload();
+      sentinlService.updateFilter($scope.timeInterval)
+      .then(() => $route.reload())
+      .catch((error) => $scope.notify.error);
     }
   });
 
