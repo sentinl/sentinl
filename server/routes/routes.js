@@ -2,6 +2,7 @@ import _ from 'lodash';
 import handleESError from '../lib/handle_es_error';
 import getConfiguration from  '../lib/get_configuration';
 import Joi from 'joi';
+import dateMath from '@elastic/datemath';
 
 /* ES Functions */
 var getHandler = function (type, server, req, reply) {
@@ -19,8 +20,8 @@ var getHandler = function (type, server, req, reply) {
     };
   }
   var qrange = {
-    gte: timeInterval.from,
-    lt: timeInterval.to
+    from: dateMath.parse(timeInterval.from).valueOf(),
+    to: dateMath.parse(timeInterval.to, true).valueOf()
   };
 
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
