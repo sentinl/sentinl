@@ -131,7 +131,7 @@ export default function routes(server) {
   // Get/Set Time Interval
   server.route({
     method: 'GET',
-    path: '/api/sentinl/set/interval/{timefilter}',
+    path: '/api/sentinl/set/interval/{timefilter*}',
     handler: function (request, reply) {
       server.sentinlInterval = JSON.parse(request.params.timefilter);
       reply({ status: '200 OK' });
