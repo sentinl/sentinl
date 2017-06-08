@@ -31,7 +31,7 @@ app.controller('sentinlReports', function ($rootScope, $scope, $route, $interval
     return sentinlService.listReports()
           .then((resp) => $scope.elasticReports = resp.data.hits.hits);
   })
-  .catch((error) => $scope.notify.error);
+  .catch($scope.notify.error);
 
   /* Listen for refreshInterval changes */
 
@@ -42,7 +42,7 @@ app.controller('sentinlReports', function ($rootScope, $scope, $route, $interval
       $scope.timeInterval = timeInterval;
       sentinlService.updateFilter($scope.timeInterval)
       .then(() => $route.reload())
-      .catch((error) => $scope.notify.error);
+      .catch($scope.notify.error);
     }
 
   });
