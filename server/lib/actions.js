@@ -376,20 +376,21 @@ export default function (server, actions, payload, watcherTitle) {
     *      "host" : "remote.server",
     *      "port" : 9200,
     *      "path": "/{{payload.watcher_id}}",
-    *      "body" : "{{payload.watcher_id}}:{{payload.hits.total}}"
+    *      "body" : "{{payload.watcher_id}}:{{payload.hits.total}}",
+    *      "useHttps" : false
     *    }
     */
 
     var querystring = require('querystring');
-    var http = require('http');
     var webhookBody;
     var options;
     var req;
     if (_.has(action, 'webhook')) {
+      var http = action.webhook.useHttps ? require('https:') : require('http');
+      
       webhookBody = action.webhook.body ? mustache.render(action.webhook.body, {payload: payload}) : null;
 
       options = {
-        protocol: action.webhook.protocol ? action.webhook.protocol : 'http:',
         hostname: action.webhook.host ? action.webhook.host : 'localhost',
         port: action.webhook.port ? action.webhook.port : 80,
         path: action.webhook.path ? action.webhook.path : '/',
