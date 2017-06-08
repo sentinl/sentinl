@@ -20,8 +20,8 @@ var getHandler = function (type, server, req, reply) {
     };
   }
   var qrange = {
-    from: dateMath.parse(timeInterval.from).valueOf(),
-    to: dateMath.parse(timeInterval.to, true).valueOf()
+    gte: dateMath.parse(timeInterval.from).valueOf(),
+    lt: dateMath.parse(timeInterval.to, true).valueOf()
   };
 
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
