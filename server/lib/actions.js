@@ -396,8 +396,10 @@ export default function (server, actions, payload, watcherTitle) {
         auth: action.webhook.auth ? action.webhook.auth : undefined
       };
       
-      var dataToWrite = action.webhook.body ? mustache.render(action.webhook.body, {payload: payload}) : action.webhook.params;     
-      options.headers["Content-Length"] = Buffer.byteLength(dataToWrite);
+      var dataToWrite = action.webhook.body ? mustache.render(action.webhook.body, {payload: payload}) : action.webhook.params;
+      if (dataToWrite) {
+        options.headers["Content-Length"] = Buffer.byteLength(dataToWrite);
+      }
 
       // Log Alarm Event
       if (action.webhook.create_alert && payload.constructor === Object && Object.keys(payload).length) {
@@ -414,8 +416,9 @@ export default function (server, actions, payload, watcherTitle) {
       req.on('error', function (e) {
         server.log(['status', 'err', 'Sentinl'], 'Error shipping Webhook: ' + e.message);
       });
-
-      req.write(dataToWrite);
+      if (dataToWrite) {
+        req.write(dataToWrite);
+      }
       req.end();
     }
 
