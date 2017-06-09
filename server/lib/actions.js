@@ -385,7 +385,7 @@ export default function (server, actions, payload, watcherTitle) {
     var options;
     var req;
     if (_.has(action, 'webhook')) {
-      var http = action.webhook.useHttps ? require('https:') : require('http');
+      var http = action.webhook.useHttps ? require('https') : require('http');
           
       options = {
         hostname: action.webhook.host ? action.webhook.host : 'localhost',
