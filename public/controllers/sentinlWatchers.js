@@ -3,19 +3,20 @@ import _ from 'lodash';
 import moment from 'moment';
 import $ from 'jquery';
 import ace from 'ace';
-import Notifier from 'ui/notify/notifier';
 
 import confirmMessage from '../templates/confirm-message.html';
 import { app } from '../app.module';
 
 // WATCHERS CONTROLLER
 app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interval,
-  $timeout, timefilter, Private, Notifier, $window, $http, $modal, $log, navMenu, globalNavState) {
+  $timeout, timefilter, Private, createNotifier, $window, $http, $modal, $log, navMenu, globalNavState) {
 
   $scope.title = 'Sentinl: Watchers';
   $scope.description = 'Kibana Alert App for Elasticsearch';
 
-  $scope.notify = new Notifier();
+  const notify = createNotifier({
+    location: 'Sentinl Watchers'
+  });
 
   $scope.topNavMenu = navMenu.getTopNav('watchers');
   $scope.tabsMenu = navMenu.getTabs();
@@ -39,7 +40,7 @@ app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interva
     importWatcherFromLocalStorage();
   })
   .catch((error) => {
-    $scope.notify.error(error);
+    notify.error(error);
     importWatcherFromLocalStorage();
   });
 
@@ -58,13 +59,13 @@ app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interva
         .then((resp) => {
           $timeout(() => {
             $route.reload();
-            $scope.notify.warning('SENTINL Watcher successfully deleted!');
+            notify.warning('SENTINL Watcher successfully deleted!');
           }, 1000);
         }).catch((error) => {
           if (Number.isInteger(index)) {
             $scope.watchers.splice(index, 1);
           } else {
-            $scope.notify.error(error);
+            notify.error(error);
           }
         });
       }
@@ -109,10 +110,10 @@ app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interva
       () => {
         $timeout(() => {
           $route.reload();
-          $scope.notify.warning('SENTINL Watcher successfully saved!');
+          notify.warning('SENTINL Watcher successfully saved!');
         }, 1000);
       },
-      $scope.notify.error
+      notify.error
     );
   };
 

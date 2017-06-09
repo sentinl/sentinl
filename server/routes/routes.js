@@ -2,6 +2,7 @@ import _ from 'lodash';
 import handleESError from '../lib/handle_es_error';
 import getConfiguration from  '../lib/get_configuration';
 import Joi from 'joi';
+import dateMath from '@elastic/datemath';
 
 /* ES Functions */
 var getHandler = function (type, server, req, reply) {
@@ -19,8 +20,8 @@ var getHandler = function (type, server, req, reply) {
     };
   }
   var qrange = {
-    gte: timeInterval.from,
-    lt: timeInterval.to
+    gte: dateMath.parse(timeInterval.from).valueOf(),
+    lt: dateMath.parse(timeInterval.to, true).valueOf()
   };
 
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
@@ -131,7 +132,7 @@ export default function routes(server) {
   // Get/Set Time Interval
   server.route({
     method: 'GET',
-    path: '/api/sentinl/set/interval/{timefilter}',
+    path: '/api/sentinl/set/interval/{timefilter*}',
     handler: function (request, reply) {
       server.sentinlInterval = JSON.parse(request.params.timefilter);
       reply({ status: '200 OK' });

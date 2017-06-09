@@ -1,17 +1,19 @@
 /* global angular */
 import _ from 'lodash';
-import Notifier from 'ui/notify/notifier';
 import confirmMessage from '../../templates/confirm-message.html';
 import watcherEmailAction from './watcher-wizard.html';
 
 import { app } from '../../app.module';
 import WatcherHelper from '../../classes/WatcherHelper';
 
-app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, Notifier) {
+app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, createNotifier) {
   function wizardDirective($scope, element, attrs) {
 
+    const notify = createNotifier({
+      location: 'Sentinl Watcher Wizard'
+    });
+
     const wHelper = new WatcherHelper();
-    $scope.notify = new Notifier();
 
     $scope.form = {
       status: !$scope.watcher._source.disable ? 'Enabled' : 'Disable',
@@ -171,7 +173,7 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
             displayFormMsg('danger', 'Fail to save the script!');
           }
         })
-        .catch($scope.notify.error);
+        .catch(notify.error);
       }
     };
 
@@ -195,7 +197,7 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
           displayFormMsg('danger', 'Fail to delete the script!');
         }
       })
-      .catch($scope.notify.error);
+      .catch(notify.error);
       delete $scope.form.scripts[type][id];
     };
 
@@ -321,7 +323,7 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
           _.forEach(resp.data.hits.hits, (script) => {
             $scope.form.scripts[field][script._id] = script._source;
           });
-        }).catch($scope.notify.error);
+        }).catch(notify.error);
       });
     };
 
@@ -335,31 +337,31 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
       try {
         initScripts();
       } catch (e) {
-        $scope.notify.error(`Fail to initialize scripts: ${e}`);
+        notify.error(`Fail to initialize scripts: ${e}`);
       }
 
       try {
         initRaw();
       } catch (e) {
-        $scope.notify.error(`Fail to initialize raw settings: ${e}`);
+        notify.error(`Fail to initialize raw settings: ${e}`);
       }
 
       try {
         initActionTitles();
       } catch (e) {
-        $scope.notify.error(`Fail to initialize actions: ${e}`);
+        notify.error(`Fail to initialize actions: ${e}`);
       }
 
       try {
         initSchedule();
       } catch (e) {
-        $scope.notify.error(`Fail to initialize schedule: ${e}`);
+        notify.error(`Fail to initialize schedule: ${e}`);
       }
 
       try {
         initThrottlePeriods();
       } catch (e) {
-        $scope.notify.error(`Fail to initialize throttle periods: ${e}`);
+        notify.error(`Fail to initialize throttle periods: ${e}`);
       }
     };
 
@@ -373,7 +375,7 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
           // All settings will have been overwritten if enable is checked and the watcher is saved.
           $scope.watcher = angular.fromJson($scope.watcher.$$raw);
         } catch (e) {
-          $scope.notify.error(`Invalid Raw configuration: ${e}`);
+          notify.error(`Invalid Raw configuration: ${e}`);
           $scope.watcherForm.$valid = false;
           $scope.watcherForm.$invalid = true;
         }
@@ -389,7 +391,7 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
         try {
           saveSchedule();
         } catch (e) {
-          $scope.notify.error(`Invalid schedule configuration: ${e}`);
+          notify.error(`Invalid schedule configuration: ${e}`);
           $scope.watcherForm.$valid = false;
           $scope.watcherForm.$invalid = true;
         }
@@ -397,7 +399,7 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
         try {
           saveThrottle();
         } catch (e) {
-          $scope.notify.error(`Invalid throttle configuration: ${e}`);
+          notify.error(`Invalid throttle configuration: ${e}`);
           $scope.watcherForm.$valid = false;
           $scope.watcherForm.$invalid = true;
         }
@@ -405,7 +407,7 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
         try {
           saveEditorsText();
         } catch (e) {
-          $scope.notify.error(`Invalid action, Transform or Condition configuration: ${e}`);
+          notify.error(`Invalid action, Transform or Condition configuration: ${e}`);
           $scope.watcherForm.$valid = false;
           $scope.watcherForm.$invalid = true;
         }
@@ -413,7 +415,7 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
         try {
           $scope.watcher._source.actions = renameActions($scope.watcher._source.actions);
         } catch (e) {
-          $scope.notify.error(`Fail to rename action: ${e}`);
+          notify.error(`Fail to rename action: ${e}`);
           $scope.watcherForm.$valid = false;
           $scope.watcherForm.$invalid = true;
         }
@@ -449,7 +451,7 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
 
         $scope.$emit('watcherWizard:save_confirmed', data);
       } else {
-        $scope.notify.warning('Watcher settings are invalid.');
+        notify.warning('Watcher settings are invalid.');
       }
     });
 

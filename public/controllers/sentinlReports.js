@@ -6,7 +6,7 @@ import confirmMessage from '../templates/confirm-message.html';
 import { app } from '../app.module';
 
 app.controller('sentinlReports', function ($rootScope, $scope, $route, $interval,
-  $timeout, timefilter, Private, createNotifier, $window, $http, $modal, navMenu, globalNavState) {
+  $timeout, timefilter, Private, createNotifier, $window, $modal, navMenu, globalNavState, sentinlService) {
   $scope.title = 'Sentinl: Reports';
   $scope.description = 'Kibi/Kibana Report App for Elasticsearch';
 
@@ -21,19 +21,25 @@ app.controller('sentinlReports', function ($rootScope, $scope, $route, $interval
 
   timefilter.enabled = true;
 
-  /* Update Time Filter */
-  const updateFilter = function () {
-    return $http.get('../api/sentinl/set/interval/' + angular.toJson($scope.timeInterval).replace(/\//g, '%2F'));
-  };
-
   /* First Boot */
 
   $scope.elasticReports = [];
   $scope.timeInterval = timefilter.time;
-  updateFilter();
-  $http.get('../api/sentinl/list/reports')
-  .then((resp) => $scope.elasticReports = resp.data.hits.hits)
-  .catch(notify.error);
+
+  const getReports = function (interval) {
+    sentinlService.updateFilter(interval)
+    .then((resp) => {
+      return sentinlService.listReports()
+            .then((resp) => $scope.elasticReports = resp.data.hits.hits);
+    })
+    .catch(notify.error);
+  };
+
+  getReports($scope.timeInterval);
+
+  $scope.$listen(timefilter, 'fetch', (res) => {
+    getReports($scope.timeInterval);
+  });
 
   /* Listen for refreshInterval changes */
 
@@ -42,10 +48,9 @@ app.controller('sentinlReports', function ($rootScope, $scope, $route, $interval
     let timeInterval = _.get($rootScope, 'timefilter.time');
     if (timeInterval) {
       $scope.timeInterval = timeInterval;
-      updateFilter();
-      $route.reload();
+      sentinlService.updateFilter($scope.timeInterval)
+      .catch(notify.error);
     }
-
   });
 
   $rootScope.$watchCollection('timefilter.refreshInterval', function () {
@@ -96,12 +101,12 @@ app.controller('sentinlReports', function ($rootScope, $scope, $route, $interval
 
     confirmModal.result.then((response) => {
       if (response === 'yes') {
-        return $http.delete(`../api/sentinl/alarm/${rmindex}/${rmtype}/${rmid}`)
+        sentinlService.deleteAlarm(rmindex, rmtype, rmid)
         .then(() => {
           $scope.elasticReports.splice(index - 1, 1);
           $timeout(() => {
             notify.warning('SENTINL Report log successfully deleted!');
-            $route.reload();
+            getReports($scope.timeInterval);
           }, 1000);
         })
         .catch(notify.error);

@@ -6,7 +6,7 @@ import { app } from '../app.module';
 const impactLogo = require('plugins/sentinl/sentinl-white-logo.svg');
 const smallLogo = require('plugins/sentinl/sentinl.svg');
 
-app.service('navMenu', ['kbnUrl', function (kbnUrl) {
+app.factory('navMenu', ['kbnUrl', function (kbnUrl) {
   return {
     setKbnLogo: function (isOpen) {
       if (isOpen) {
