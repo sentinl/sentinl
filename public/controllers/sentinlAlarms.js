@@ -8,7 +8,7 @@ import confirmMessage from '../templates/confirm-message.html';
 import { app } from '../app.module';
 
 app.controller('sentinlAlarms', function ($rootScope, $scope, $route, $interval,
-  $timeout, timefilter, Private, Notifier, $window, $http, $modal, navMenu, globalNavState, sentinlService) {
+  $timeout, timefilter, Private, Notifier, $window, $modal, navMenu, globalNavState, sentinlService) {
   $scope.title = 'Sentinl: Alarms';
   $scope.description = 'Kibana Alert App for Elasticsearch';
 
@@ -26,12 +26,20 @@ app.controller('sentinlAlarms', function ($rootScope, $scope, $route, $interval,
   $scope.elasticAlarms = [];
   $scope.timeInterval = timefilter.time;
 
-  sentinlService.updateFilter($scope.timeInterval)
-  .then((resp) => {
-    return sentinlService.listAlarms()
-          .then((resp) => $scope.elasticAlarms = resp.data.hits.hits);
-  })
-  .catch((error) => $scope.notify.error(error));
+  const getAlarms = function (interval) {
+    sentinlService.updateFilter(interval)
+    .then((resp) => {
+      return sentinlService.listAlarms()
+            .then((resp) => $scope.elasticAlarms = resp.data.hits.hits);
+    })
+    .catch((error) => $scope.notify.error(error));
+  };
+
+  getAlarms($scope.timeInterval);
+
+  $scope.$listen(timefilter, 'fetch', (res) => {
+    getAlarms($scope.timeInterval);
+  });
 
   /* Listen for refreshInterval changes */
 
@@ -41,7 +49,6 @@ app.controller('sentinlAlarms', function ($rootScope, $scope, $route, $interval,
     if (timeInterval) {
       $scope.timeInterval = timeInterval;
       sentinlService.updateFilter($scope.timeInterval)
-      .then(() => $route.reload())
       .catch((error) => $scope.notify.error(error));
     }
   });
@@ -90,12 +97,12 @@ app.controller('sentinlAlarms', function ($rootScope, $scope, $route, $interval,
 
     confirmModal.result.then((response) => {
       if (response === 'yes') {
-        return $http.delete(`../api/sentinl/alarm/${rmindex}/${rmtype}/${rmid}`)
+        sentinlService.deleteAlarm(rmindex, rmtype, rmid)
         .then(() => {
           $timeout(() => {
             $scope.elasticAlarms.splice(index - 1, 1);
             $scope.notify.warning('SENTINL Alarm log successfully deleted!');
-            $route.reload();
+            getAlarms($scope.timeInterval);
           }, 1000);
         })
         .catch($scope.notify.error);

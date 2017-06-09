@@ -18,10 +18,10 @@
  */
 
 /* import controllers */
-import './controllers/sentinlWatchers.js';
-import './controllers/reportController';
-import './controllers/sentinlAlarms.js';
-import './controllers/sentinlAbout.js';
+import './controllers/sentinlWatchers';
+import './controllers/sentinlReports';
+import './controllers/sentinlAlarms';
+import './controllers/sentinlAbout';
 import './controllers/confirmMessageController';
 
 /* import factories */
