@@ -2,17 +2,19 @@
 import _ from 'lodash';
 import moment from 'moment';
 import chrome from 'ui/chrome';
-import Notifier from 'ui/notify/notifier';
 
 import confirmMessage from '../templates/confirm-message.html';
 import { app } from '../app.module';
 
 app.controller('sentinlAlarms', function ($rootScope, $scope, $route, $interval,
-  $timeout, timefilter, Private, Notifier, $window, $modal, navMenu, globalNavState, sentinlService) {
+  $timeout, $injector, timefilter, Private, createNotifier, $window, $modal, navMenu,
+  globalNavState, sentinlService) {
   $scope.title = 'Sentinl: Alarms';
   $scope.description = 'Kibana Alert App for Elasticsearch';
 
-  $scope.notify = new Notifier();
+  const notify = createNotifier({
+    location: 'Sentinl Alarms'
+  });
 
   timefilter.enabled = true;
 
@@ -32,7 +34,7 @@ app.controller('sentinlAlarms', function ($rootScope, $scope, $route, $interval,
       return sentinlService.listAlarms()
             .then((resp) => $scope.elasticAlarms = resp.data.hits.hits);
     })
-    .catch((error) => $scope.notify.error(error));
+    .catch(notify.error);
   };
 
   getAlarms($scope.timeInterval);
@@ -49,7 +51,7 @@ app.controller('sentinlAlarms', function ($rootScope, $scope, $route, $interval,
     if (timeInterval) {
       $scope.timeInterval = timeInterval;
       sentinlService.updateFilter($scope.timeInterval)
-      .catch((error) => $scope.notify.error(error));
+      .catch(notify.error);
     }
   });
 
@@ -101,17 +103,17 @@ app.controller('sentinlAlarms', function ($rootScope, $scope, $route, $interval,
         .then(() => {
           $timeout(() => {
             $scope.elasticAlarms.splice(index - 1, 1);
-            $scope.notify.warning('SENTINL Alarm log successfully deleted!');
+            notify.warning('SENTINL Alarm log successfully deleted!');
             getAlarms($scope.timeInterval);
           }, 1000);
         })
-        .catch($scope.notify.error);
+        .catch(notify.error);
       }
     });
   };
 
   $scope.deleteAlarmLocal = function (index) {
-    $scope.notify.warning('SENTINL function not yet implemented!');
+    notify.warning('SENTINL function not yet implemented!');
   };
 
   var currentTime = moment($route.current.locals.currentTime);

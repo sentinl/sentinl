@@ -1,14 +1,16 @@
 import _ from 'lodash';
-import Notifier from 'ui/notify/notifier';
 import moment from 'moment';
 
 import { app } from '../app.module';
 
-app.controller('sentinlAbout', function ($scope, $route, $interval, timefilter, Notifier, navMenu, globalNavState) {
+app.controller('sentinlAbout', function ($scope, $route, $interval, timefilter, createNotifier, navMenu, globalNavState) {
   $scope.title = 'Sentinl';
   $scope.description = 'Kibana Alert App for Elasticsearch';
   timefilter.enabled = false;
-  $scope.notify = new Notifier();
+
+  const notify = createNotifier({
+    location: 'Sentinl About'
+  });
 
   $scope.topNavMenu = navMenu.getTopNav('about');
   $scope.tabsMenu = navMenu.getTabs('about');
@@ -16,7 +18,7 @@ app.controller('sentinlAbout', function ($scope, $route, $interval, timefilter, 
   $scope.$on('globalNavState:change', () => navMenu.setKbnLogo(globalNavState.isOpen()));
 
   if (!$scope.notified) {
-    $scope.notify.warning('SENTINL is a work in progress! Use at your own risk!');
+    notify.warning('SENTINL is a work in progress! Use at your own risk!');
     $scope.notified = true;
   }
 
