@@ -309,13 +309,18 @@ export default function (server, actions, payload, watcherTitle) {
                 // Log Event
                 if (action.report.save) {
                   return fs.readFile(action.report.snapshot.path + filename, (err, data) => {
+                    if (err) server.log(['status', 'info', 'Sentinl', 'report'], `Fail to save the ${action.report.subject}`);
                     esHistory(watcherTitle, key, body, priority, payload, true, new Buffer(data).toString('base64'));
                   });
                 } else {
                   esHistory(watcherTitle, key, body, priority, payload, true);
                 }
               }
-              return fs.unlink(action.report.snapshot.path + filename, () => {
+              return fs.unlink(action.report.snapshot.path + filename, (err) => {
+                if (err) {
+                  server.log(['status', 'info', 'Sentinl', 'report'], 'Fail to delete file '
+                    + action.report.snapshot.path + filename);
+                }
                 payload.message = err || message;
               });
 
