@@ -51,7 +51,8 @@ export default function (server, actions, payload, watcherTitle) {
       user: config.settings.email.user,
       password: config.settings.email.password,
       host: config.settings.email.host,
-      ssl: config.settings.email.ssl
+      ssl: config.settings.email.ssl,
+      timeout: config.settings.email.timeout
     }, function (err, message) {
       server.log(['status', 'info', 'Sentinl', 'email'], err || message);
     });
@@ -279,7 +280,7 @@ export default function (server, actions, payload, watcherTitle) {
         var filename = 'report-' + Math.random().toString(36).substr(2, 9) + '.png';
         server.log(['status', 'info', 'Sentinl', 'report'], 'Creating Report for ' + action.report.snapshot.url);
         try {
-          horseman
+          return horseman
           .viewport(1280, 900)
           .open(action.report.snapshot.url)
           .wait(action.report.snapshot.params.delay)
@@ -287,14 +288,14 @@ export default function (server, actions, payload, watcherTitle) {
           //.pdf(action.report.snapshot.path + filename)
           .then(function () {
             server.log(['status', 'info', 'Sentinl', 'report'], 'Snapshot ready for url:' + action.report.snapshot.url);
-            emailServer.send({
+            return emailServer.send({
               text: body,
               from: action.report.from,
               to: action.report.to,
               subject: subject,
               attachment: [
                 // { path: action.report.snapshot.path + filename, type: "application/pdf", name: filename },
-                {data: '<html><img src=\'cid:my-report\' width=\'100%\'></html>'},
+                { data: '<html><img src=\'cid:my-report\' width=\'100%\'></html>' },
                 {
                   path: action.report.snapshot.path + filename,
                   type: 'image/png',
@@ -307,14 +308,16 @@ export default function (server, actions, payload, watcherTitle) {
               if (!action.report.stateless) {
                 // Log Event
                 if (action.report.save) {
-                  var attachment = fs.readFileSync(action.report.snapshot.path + filename);
-                  esHistory(watcherTitle, key, body, priority, payload, true, new Buffer(attachment).toString('base64'));
+                  return fs.readFile(action.report.snapshot.path + filename, (err, data) => {
+                    esHistory(watcherTitle, key, body, priority, payload, true, new Buffer(data).toString('base64'));
+                  });
                 } else {
                   esHistory(watcherTitle, key, body, priority, payload, true);
                 }
               }
-              fs.unlinkSync(action.report.snapshot.path + filename);
-              payload.message = err || message;
+              return fs.unlink(action.report.snapshot.path + filename, () => {
+                payload.message = err || message;
+              });
 
             });
           }).close();
