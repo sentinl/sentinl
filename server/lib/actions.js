@@ -309,8 +309,12 @@ export default function (server, actions, payload, watcherTitle) {
                 // Log Event
                 if (action.report.save) {
                   return fs.readFile(action.report.snapshot.path + filename, (err, data) => {
-                    if (err) server.log(['status', 'info', 'Sentinl', 'report'], `Failed to save the ${action.report.subject}`);
-                    esHistory(watcherTitle, key, body, priority, payload, true, new Buffer(data).toString('base64'));
+                    if (err) {
+                      server.log(['status', 'info', 'Sentinl', 'report'], `Failed to save the ${action.report.subject} file.`);
+                      esHistory(watcherTitle, key, `Error. Failed to save the ${action.report.subject} file. ${err}`, {});
+                    } else {
+                      esHistory(watcherTitle, key, body, priority, payload, true, new Buffer(data).toString('base64'));
+                    }
                   });
                 } else {
                   esHistory(watcherTitle, key, body, priority, payload, true);
