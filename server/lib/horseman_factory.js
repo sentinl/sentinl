@@ -17,7 +17,11 @@ export default function horsemanFactory(server, domain) {
   } else {
     try {
       const Horseman = require('node-horseman');
-      return Promise.resolve(new Horseman({ 'ignoreSSLErrors': true }));
+      const options = {
+        'ignoreSSLErrors': true,
+        'phantomPath': `${__dirname}/../../node_modules/phantomjs/bin/phantomjs`
+      };
+      return Promise.resolve(new Horseman(options));
     } catch (error) {
       return Promise.reject(error);
     }
