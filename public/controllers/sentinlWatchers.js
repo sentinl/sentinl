@@ -213,8 +213,6 @@ app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interva
                   url : 'http://127.0.0.1/app/kibana#/dashboard/Alerts',
                   path : '/tmp/',
                   params : {
-                    username : 'username',
-                    password : 'password',
                     delay : 5000,
                     crop : false
                   }
