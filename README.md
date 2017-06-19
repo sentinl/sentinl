@@ -6,23 +6,18 @@
 
 ---
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/77b040968c354d6597ff60a615195a1a)](https://www.codacy.com/app/lorenzo-mangani/sentinl?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=sirensolutions/sentinl&amp;utm_campaign=Badge_Grade)
-<img src="https://img.shields.io/badge/kibana-4.5+-green.svg"/>
-<img src="https://img.shields.io/badge/elasticsearch-2.*-green.svg"/>
+<img src="https://img.shields.io/badge/kibana-5+-green.svg"/>
+<img src="https://img.shields.io/badge/elasticsearch-5.*-green.svg"/>
 
 
-**SENTINL** extends *Kibi*/*Kibana* with **Alerting** and **Reporting** functionality to monitor, notify and report on data series changes using standard queries, programmable validators and a variety of configurable actions - Think of it as a free an independent ["Watcher"](https://www.elastic.co/guide/en/watcher/current/introduction.html) which also has scheduled ["Reporting"](https://www.elastic.co/products/reporting) capabilities (PNG/PDFs snapshots).
+**SENTINL 5** extends *Kibi*/*Kibana 5* with **Alerting** and **Reporting** functionality to monitor, notify and report on data series changes using standard queries, programmable validators and a variety of configurable actions - Think of it as a free an independent ["Watcher"](https://www.elastic.co/guide/en/watcher/current/introduction.html) which also has scheduled ["Reporting"](https://www.elastic.co/products/reporting) capabilities (PNG/PDFs snapshots).
 
 **SENTINL** is also designed to simplify the process of creating and managing alerts and reports in Kibi/Kibana via its App and Spy integration, directly in the Kibi/Kibana UI.
 
 <!--<img src="http://i.imgur.com/aDHvUxf.png" width="400" /> -->
 
-<img src="http://i.imgur.com/K7zwJKQ.gif" />
+<img src="http://i.imgur.com/PsNsAiy.png" />
 
----
-
-### Kibi/Kibana Plugin: SENTINL Spy
-The SENTINL integrated Kibi/Kibana plug-in extends the default Spy functionality to shape new prototype Watchers based on Visualize queries, and providing them to SENTINL for fine editing and deployment.
-<img src="http://i.imgur.com/bw9LFvU.png" />
 
 ---
 
@@ -42,24 +37,16 @@ Boss wants to see charts and reports? SENTINL can grab timed snapshots of Kibana
 /opt/kibana/bin/kibana-plugin install https://github.com/sirensolutions/sentinl/releases/download/tag-5.4.0/sentinl.zip
 </pre>
 
-#### Manual Plugin Install
-<pre>
-git clone https://github.com/sirensolutions/sentinl
-cd sentinl && npm install --production && npm run archive
-/opt/kibana/bin/kibana plugin --install sentinl -u file://`pwd`/sentinl-latest.tar.gz
-</pre>
-
 #### Gulp Plugin Install
 <pre>
 git clone https://github.com/sirensolutions/sentinl
 cd sentinl && npm install && gulp package
-/opt/kibana/bin/kibana plugin --install sentinl -u file://`pwd`/target/gulp/sentinl.zip
+/opt/kibana/bin/kibana-plugin install file://`pwd`/target/gulp/sentinl.zip
 </pre>
-
 
 #### Dev Plugin Remove
 <pre>
-/opt/kibana/bin/kibana plugin -r sentinl
+/opt/kibana/bin/kibana-plugin remove sentinl
 </pre>
 
 ## Configuration & Usage
@@ -80,7 +67,7 @@ Consult our [wiki](https://github.com/sirensolutions/sentinl/wiki) to learn how 
 This software is licensed under the Apache License, version 2 ("ALv2"), quoted below.
 
 Copyright 2016, 2017 Siren Solutions
-Copyright 2016, Lorenzo Mangani (lorenzo.mangani@gmail.com)
+Copyright 2016, 2017 QXIP BV, Lorenzo Mangani (lorenzo.mangani@gmail.com)
 Copyright 2015, Rao Chenlin (rao.chenlin@gmail.com)
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not
