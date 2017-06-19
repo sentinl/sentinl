@@ -26,7 +26,8 @@ var include = [
   'index.js',
   'init.js',
   'server',
-  'public'
+  'public',
+  '.phantomjs'
 ];
 
 var knownOptions = {

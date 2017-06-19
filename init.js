@@ -25,6 +25,7 @@ import helpers from './server/lib/helpers';
 import getElasticsearchClient from './server/lib/get_elasticsearch_client';
 import getConfiguration from './server/lib/get_configuration';
 import fs from 'fs';
+import phantom from './server/lib/phantom';
 
 const init = _.once((server) => {
   const config = getConfiguration(server);
@@ -39,6 +40,12 @@ const init = _.once((server) => {
 
   server.log(['status', 'info', 'Sentinl'], 'Sentinl Initializing');
   server.sentinlStore = [];
+
+  phantom.install(server)
+  .then((phantomPackage) => {
+    server.log(['satus', 'info', 'Sentinl', 'report'], `Phantom installed at ${phantomPackage.binary}`);
+  })
+  .catch((err) => server.log(['satus', 'error', 'Sentinl', 'report'], err));
 
   masterRoute(server);
 
