@@ -5,7 +5,7 @@ import decompress from 'decompress';
 
 const ver = '2.1.1';
 const baseName = `phantomjs-${ver}`;
-const phantomPath = path.resolve(__dirname, '..', '..', '.phantomjs');
+const phantomPath = path.resolve(__dirname, '..', '..', 'phantomjs');
 
 const getPackage = function (srcPath) {
   const platform = getPlatform();
