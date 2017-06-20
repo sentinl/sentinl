@@ -7,7 +7,7 @@ const ver = '2.1.1';
 const baseName = `phantomjs-${ver}`;
 const phantomPath = path.resolve(__dirname, '..', '..', '.phantomjs');
 
-const getPackage = function (server, srcPath) {
+const getPackage = function (srcPath) {
   const platform = getPlatform();
   const arch = getArch();
   let suffix;
@@ -26,8 +26,7 @@ const getPackage = function (server, srcPath) {
     binary = path.join(`${baseName}-windows`, 'phantomjs.exe');
     suffix = 'windows.zip';
   } else {
-    const msg = 'Platform ' + platform + ' ' + arch + ' is not supported';
-    throw new Error(msg);
+    throw new Error(`Platform ${platform} ${arch} is not supported`);
   }
 
   const filename = `${baseName}-${suffix}`;
@@ -36,19 +35,40 @@ const getPackage = function (server, srcPath) {
   return parsed;
 };
 
-const installPackage = function (server, srcPath = phantomPath) {
-  const phantomPackage = getPackage(server, srcPath);
+const installPackage = function (srcPath = phantomPath) {
+  let phantomPackage;
 
-  return fs.access(phantomPackage.binary, fs.constants.X_OK, (err) => {
-    if (err) {
-      // binary does not exist, install it
-      const fileType = phantomPackage.ext.substring(1);
-      const filePath = `${phantomPackage.dir}/${phantomPackage.base}`;
+  try {
+    phantomPackage = getPackage(srcPath);
+  } catch (err) {
+    return Promise.reject(err);
+  };
 
-      decompress(filePath, phantomPackage.dir)
-      .then(() => fs.chmod(phantomPackage.binary, 755, () => phantomPackage))
-      .catch((err) => server.log(['satus', 'error', 'Sentinl', 'report'], err));
-    }
+  const packageExists = function (path) {
+    return new Promise ((resolve, reject) => {
+      fs.access(path.binary, fs.constants.X_OK, (err) => {
+        if (err) reject(err);
+        resolve(true);
+      });
+    });
+  };
+
+  const changePermissions = function (path, permissions) {
+    return new Promise ((resolve, reject) => {
+      fs.chmod(path.binary, permissions, (err) => {
+        if (err) reject(err);
+        resolve(path);
+      });
+    });
+  };
+
+  return packageExists(phantomPackage)
+  .then((exists) => Promise.resolve(phantomPackage))
+  .catch(() => {
+    // not exists, install package
+    return decompress(`${phantomPackage.dir}/${phantomPackage.base}`, phantomPackage.dir)
+    .then(() => changePermissions(phantomPackage, '755'))
+    .catch((err) => Promise.reject(err));
   });
 };
 
