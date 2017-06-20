@@ -41,11 +41,13 @@ const init = _.once((server) => {
   server.log(['status', 'info', 'Sentinl'], 'Sentinl Initializing');
   server.sentinlStore = [];
 
-  phantom.install(server)
+  const phantomPath = _.has(config, 'settings.report.phantomjs_path') ? config.settings.report.phantomjs_path : undefined;
+  phantom.install(phantomPath)
   .then((phantomPackage) => {
-    server.log(['satus', 'info', 'Sentinl', 'report'], `Phantom installed at ${phantomPackage.binary}`);
+    server.log(['status', 'info', 'Sentinl', 'report'], `Phantom installed at ${phantomPackage.binary}`);
+    server.expose('phantomjs_path', phantomPackage.binary);
   })
-  .catch((err) => server.log(['satus', 'error', 'Sentinl', 'report'], err));
+  .catch((err) => server.log(['status', 'error', 'Sentinl', 'report'], `Failed to install phantomjs: ${err}`));
 
   masterRoute(server);
 
