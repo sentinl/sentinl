@@ -23,7 +23,7 @@ const getPackage = function (srcPath) {
     binary = path.join(`${baseName}-macosx`, 'bin', 'phantomjs');
     suffix = 'macosx.zip';
   } else if (platform === 'win32') {
-    binary = path.join(`${baseName}-windows`, 'phantomjs.exe');
+    binary = path.join(`${baseName}-windows`, 'bin', 'phantomjs.exe');
     suffix = 'windows.zip';
   } else {
     throw new Error(`Platform ${platform} ${arch} is not supported`);
