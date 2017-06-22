@@ -56,11 +56,12 @@ export default function getScheduler(server) {
     server.log(['status', 'debug', 'Sentinl'], 'Reloading Watchers...');
     getCount(client).then(function (resp) {
       getWatcher(resp.count, client).then(function (resp) {
+
         /* Orphanizer */
         var orphans = _.difference(_.each(Object.keys(Schedule)), _.map(resp.hits.hits, '_id'));
         _.each(orphans, function (orphan) {
           server.log(['status', 'info', 'Sentinl'], 'Deleting orphan watcher: ' + orphan);
-          if (Schedule[orphan].later) {
+          if (_.isObject(Schedule[orphan].later) && _.has(Schedule[orphan].later, 'clear')) {
             Schedule[orphan].later.clear();
           }
           delete Schedule[orphan];
@@ -94,20 +95,11 @@ export default function getScheduler(server) {
             Schedule[hit._id].interval = hit._source.trigger.schedule.interval;
           }
 
-          if (hit._source.report) {
-            /* Report */
-            Schedule[hit._id].later = later.setInterval(function () {
-              reporting(hit, interval);
-            }, interval);
-            server.log(['status', 'info', 'Sentinl'], 'Scheduled Report: ' + hit._id + ' every ' + Schedule[hit._id].interval);
-          } else {
-            /* Watcher */
-            Schedule[hit._id].later = later.setInterval(function () {
-              watching(hit, interval);
-            }, interval);
-            server.log(['status', 'info', 'Sentinl'], 'Scheduled Watch: ' + hit._id + ' every ' + Schedule[hit._id].interval);
-          }
-
+          /* Run Watcher in interval */
+          Schedule[hit._id].later = later.setInterval(function () {
+            watching(hit, interval);
+          }, interval);
+          server.log(['status', 'info', 'Sentinl'], 'Scheduled Watch: ' + hit._id + ' every ' + Schedule[hit._id].interval);
 
           function watching(task, interval) {
 
@@ -120,8 +112,8 @@ export default function getScheduler(server) {
             server.log(['status', 'debug', 'Sentinl', 'WATCHER DEBUG'], task);
 
             var watch = task._source;
-            var request = watch.input.search.request;
-            var condition = watch.condition.script.script;
+            var request = _.has(watch, 'input.search.request') ? watch.input.search.request : undefined;
+            var condition = _.has(watch, 'condition.script.script') ? watch.condition.script.script : undefined;
             var transform = watch.transform ? watch.transform : {};
             var actions = watch.actions;
 
@@ -138,8 +130,9 @@ export default function getScheduler(server) {
             client({}, method, request)
             .then(function (payload) {
               server.log(['status', 'info', 'Sentinl', 'PAYLOAD DEBUG'], payload);
-              if (!payload || !condition || !actions) {
-                server.log(['status', 'debug', 'Sentinl', 'WATCHER TASK'], 'Watcher Malformed or Missing Key Parameters!');
+              if (!payload || !condition || !actions || !request) {
+                server.log(['status', 'debug', 'Sentinl', 'WATCHER TASK'], `Watcher ${watch.uuid}` +
+                  ' Malformed or Missing Key Parameters!');
                 return;
               }
 
@@ -177,22 +170,10 @@ export default function getScheduler(server) {
 
           }
 
-          function reporting(task, interval) {
-            const watch = task._source;
-            if (!task._source || task._source.disable) {
-              server.log(['status', 'debug', 'Sentinl'], 'Non-Executing Disabled report: ' + task._id);
-              return;
-            }
-            server.log(['status', 'info', 'Sentinl'], 'Executing report: ' + task._id);
-            var actions = task._source.actions;
-            var payload = {_id: task._id};
-            if (!actions) {
-              server.log(['status', 'info', 'Sentinl'], 'Condition Error for ' + task._id);
-              return;
-            }
-            doActions(server, actions, payload, watch.title);
-          }
         });
+
+      }).catch((error) => {
+        server.log(['status', 'error', 'Sentinl'], 'Failed to get watchers.');
       });
     })
     .catch((error) => {
