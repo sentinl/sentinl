@@ -24,6 +24,7 @@ import getConfiguration from './get_configuration';
 
 export default function getScheduler(server) {
 
+
   const config = getConfiguration(server);
   let sirenJoinAvailable = false;
   try {
@@ -35,14 +36,17 @@ export default function getScheduler(server) {
     // 'elasticsearch.plugins' not available when running from kibana
   }
 
-  var Schedule = [];
+
+  let Schedule = [];
+
 
   function getCount(client) {
     return client({}, 'count', {
       index: config.es.default_index,
       type: config.es.type
     });
-  }
+  };
+
 
   function getWatcher(count, client) {
     return client({}, 'search', {
@@ -50,7 +54,28 @@ export default function getScheduler(server) {
       type: config.es.type,
       size: count
     });
-  }
+  };
+
+
+  function getReportActions(actions) {
+    //return _.filter(actions, (action) => _.has(action, 'report'));
+    const filteredActions = {};
+    _.forEach(actions, (settings, name) => {
+      if (_.has(settings, 'report')) filteredActions[name] = settings;
+    });
+    return filteredActions;
+  };
+
+
+  function getNonReportActions(actions) {
+    //return _.filter(actions, (action) => !_.has(action, 'report'));
+    const filteredActions = {};
+    _.forEach(actions, (settings, name) => {
+      if (!_.has(settings, 'report')) filteredActions[name] = settings;
+    });
+    return filteredActions;
+  };
+
 
   function doalert(server, client) {
     server.log(['status', 'debug', 'Sentinl'], 'Reloading Watchers...');
@@ -58,7 +83,7 @@ export default function getScheduler(server) {
       getWatcher(resp.count, client).then(function (resp) {
 
         /* Orphanizer */
-        var orphans = _.difference(_.each(Object.keys(Schedule)), _.map(resp.hits.hits, '_id'));
+        let orphans = _.difference(_.each(Object.keys(Schedule)), _.map(resp.hits.hits, '_id'));
         _.each(orphans, function (orphan) {
           server.log(['status', 'info', 'Sentinl'], 'Deleting orphan watcher: ' + orphan);
           if (_.isObject(Schedule[orphan].later) && _.has(Schedule[orphan].later, 'clear')) {
@@ -83,7 +108,7 @@ export default function getScheduler(server) {
           Schedule[hit._id] = {};
           Schedule[hit._id].hit = hit;
 
-          var interval;
+          let interval;
           if (hit._source.trigger.schedule.later) {
             // https://bunkat.github.io/later/parsers.html#text
             interval = later.parse.text(hit._source.trigger.schedule.later);
@@ -101,8 +126,8 @@ export default function getScheduler(server) {
           }, interval);
           server.log(['status', 'info', 'Sentinl'], 'Scheduled Watch: ' + hit._id + ' every ' + Schedule[hit._id].interval);
 
-          function watching(task, interval) {
 
+          function watching(task, interval) {
             if (!task._source || task._source.disable) {
               server.log(['status', 'debug', 'Sentinl'], 'Non-Executing Disabled Watch: ' + task._id);
               return;
@@ -111,63 +136,86 @@ export default function getScheduler(server) {
             server.log(['status', 'info', 'Sentinl'], 'Executing watch: ' + task._id);
             server.log(['status', 'debug', 'Sentinl', 'WATCHER DEBUG'], task);
 
-            var watch = task._source;
-            var request = _.has(watch, 'input.search.request') ? watch.input.search.request : undefined;
-            var condition = _.has(watch, 'condition.script.script') ? watch.condition.script.script : undefined;
-            var transform = watch.transform ? watch.transform : {};
-            var actions = watch.actions;
+            let watch = task._source;
+            if (!watch.actions || _.isEmpty(watch.actions)) {
+              server.log(['status', 'debug', 'Sentinl', 'WATCHER TASK'], `Watcher ${watch.uuid} has no actions.`);
+              return;
+            }
 
-            let method = 'search';
-            if (sirenJoinAvailable) {
-              for (let candidate of ['kibi_search', 'coordinate_search', 'search']) {
-                if (client[candidate]) {
-                  method = candidate;
-                  break;
-                }
+            let actions = [];
+
+            if (watch.report) {
+              server.log(['status', 'info', 'Sentinl'], 'Executing report: ' + task._id);
+              actions = getReportActions(watch.actions);
+              let payload = { _id: task._id };
+              if (_.keys(actions).length) {
+                doActions(server, actions, payload, watch);
               }
             }
 
-            client({}, method, request)
-            .then(function (payload) {
-              server.log(['status', 'info', 'Sentinl', 'PAYLOAD DEBUG'], payload);
-              if (!payload || !condition || !actions || !request) {
-                server.log(['status', 'debug', 'Sentinl', 'WATCHER TASK'], `Watcher ${watch.uuid}` +
-                  ' Malformed or Missing Key Parameters!');
+            actions = getNonReportActions(watch.actions);
+            if (_.keys(actions).length) {
+              let request = _.has(watch, 'input.search.request') ? watch.input.search.request : undefined;
+              let condition = _.has(watch, 'condition.script.script') ? watch.condition.script.script : undefined;
+              let transform = watch.transform ? watch.transform : {};
+
+              let method = 'search';
+              if (sirenJoinAvailable) {
+                for (let candidate of ['kibi_search', 'coordinate_search', 'search']) {
+                  if (client[candidate]) {
+                    method = candidate;
+                    break;
+                  }
+                }
+              }
+
+              if (!request || !condition) {
+                server.log(['status', 'debug', 'Sentinl', 'WATCHER TASK'], `Watcher ${watch.uuid} search request or condition malformed`);
                 return;
               }
 
-              server.log(['status', 'debug', 'Sentinl', 'PAYLOAD DEBUG'], payload);
+              client({}, method, request)
+              .then(function (payload) {
+                server.log(['status', 'info', 'Sentinl', 'PAYLOAD DEBUG'], payload);
 
-              /* Validate Condition */
-              var ret;
-              try {
-                ret = eval(condition); // eslint-disable-line no-eval
-              } catch (err) {
-                server.log(['status', 'info', 'Sentinl'], 'Condition Error for ' + task._id + ': ' + err);
-              }
-              if (ret) {
-                if (transform.script) {
-                  try {
-                    eval(transform.script.script); // eslint-disable-line no-eval
-                  } catch (err) {
-                    server.log(['status', 'info', 'Sentinl'], 'Transform Script Error for ' + task._id + ': ' + err);
-                  }
-                  doActions(server, actions, payload, watch.title);
-                } else if (transform.search) {
-                  client({}, method, transform.search.request)
-                  .then(function (payload) {
-                    if (!payload) return;
-                    doActions(server, actions, payload, watch.title);
-                  });
-                } else {
-                  doActions(server, actions, payload, watch.title);
+                if (!payload) {
+                  server.log(['status', 'debug', 'Sentinl', 'WATCHER TASK'], `Watcher ${watch.uuid}` +
+                    ' malformed or missing key parameters!');
+                  return;
                 }
-              }
-            })
-            .catch((error) => {
-              server.log(['error', 'Sentinl'], `An error occurred while executing the watch: ${error}`);
-            });
 
+                server.log(['status', 'debug', 'Sentinl', 'PAYLOAD DEBUG'], payload);
+
+                /* Validate Condition */
+                let ret;
+                try {
+                  ret = eval(condition); // eslint-disable-line no-eval
+                } catch (err) {
+                  server.log(['status', 'info', 'Sentinl'], 'Condition Error for ' + task._id + ': ' + err);
+                }
+                if (ret) {
+                  if (transform.script) {
+                    try {
+                      eval(transform.script.script); // eslint-disable-line no-eval
+                    } catch (err) {
+                      server.log(['status', 'info', 'Sentinl'], 'Transform Script Error for ' + task._id + ': ' + err);
+                    }
+                    doActions(server, actions, payload, watch);
+                  } else if (transform.search) {
+                    client({}, method, transform.search.request)
+                    .then(function (payload) {
+                      if (!payload) return;
+                      doActions(server, actions, payload, watch);
+                    });
+                  } else {
+                    doActions(server, actions, payload, watch);
+                  }
+                }
+              })
+              .catch((error) => {
+                server.log(['error', 'Sentinl'], `An error occurred while executing the watch: ${error}`);
+              });
+            }
           }
 
         });
