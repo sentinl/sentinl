@@ -34,6 +34,7 @@ export default function (server, actions, payload, watch) {
   const config = getConfiguration(server);
   const hlimit = config.sentinl.history ? config.sentinl.history : 10;
 
+
   /* ES Indexing Functions */
   var esHistory = function (watcherTitle, type, message, loglevel, payload, isReport, object) {
     if (isReport) {
@@ -42,6 +43,7 @@ export default function (server, actions, payload, watch) {
       logHistory(server, callWithRequest, config, watcherTitle, type, message, loglevel, payload);
     }
   };
+
 
   /* Email Settings */
   var emailServer;
@@ -59,12 +61,14 @@ export default function (server, actions, payload, watch) {
     });
   }
 
+
   /* Slack Settings */
   var slack;
   if (config.settings.slack.active) {
     var Slack = require('node-slack');
     slack = new Slack(config.settings.slack.hook);
   }
+
 
   /* Internal Support Functions */
   var tmpHistory = function (type, message) {
@@ -75,6 +79,7 @@ export default function (server, actions, payload, watch) {
       server.sentinlStore.shift();
     }
   };
+
 
   /* Debounce Function, returns true if throttled */
   var getDuration = require('sum-time');
@@ -103,6 +108,7 @@ export default function (server, actions, payload, watch) {
       return false;
     }
   };
+
 
   /* Loop Actions */
   _.forEach(actions, function (action, key) {
