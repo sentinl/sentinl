@@ -87,7 +87,7 @@ export default function (server, actions, payload, watch) {
     var duration = getDuration(period);
 
     var isInThrottlePeriod = function (id, now, duration) {
-      return (now - server.sentinlStore.actions[id]) <= duration;
+      return (now - server.sentinlStore.actions[id]) < duration;
     };
 
     if (duration) {
