@@ -27,7 +27,8 @@ import logHistory from './log_history';
 
 import url from 'url';
 
-export default function (server, actions, payload, watcherTitle) {
+
+export default function (server, actions, payload, watch) {
 
   const client = getElasticsearchClient(server);
   const config = getConfiguration(server);
@@ -79,25 +80,32 @@ export default function (server, actions, payload, watcherTitle) {
   var getDuration = require('sum-time');
   var debounce = function (id, period) {
     var duration = getDuration(period);
+
+    var isInThrottlePeriod = function (id, now, duration) {
+      return (now - server.sentinlStore.actions[id]) <= duration;
+    };
+
     if (duration) {
       var justNow = new Date().getTime();
-      if (server.sentinlStore[id] === undefined) {
-        server.sentinlStore[id] = justNow;
-        return false;
-      } else if ((justNow - server.sentinlStore[id]) > duration) {
-        server.sentinlStore[id] = justNow;
-        return false;
-      } else {
-        // reject action
-        return true;
+
+      if (!_.has(server.sentinlStore, 'actions')) {
+        server.sentinlStore.actions = {};
       }
+
+      if (!_.has(server.sentinlStore.actions, id) || !isInThrottlePeriod(id, justNow, duration)) {
+        server.sentinlStore.actions[id] = justNow;
+        return false;
+      }
+
+      // throttle action
+      return true;
     } else {
       return false;
     }
   };
 
   /* Loop Actions */
-  _.forOwn(actions, function (action, key) {
+  _.forEach(actions, function (action, key) {
     server.log(['status', 'info', 'Sentinl'], 'Processing action: ' + key);
 
     /* ***************************************************************************** */
@@ -116,7 +124,7 @@ export default function (server, actions, payload, watcherTitle) {
       formatterC = action.console.message ? action.console.message : '{{ payload }}';
       message = mustache.render(formatterC, {payload: payload});
       server.log(['status', 'info', 'Sentinl'], 'Console Payload: ' + JSON.stringify(payload));
-      esHistory(watcherTitle, key, message, priority, payload, false);
+      esHistory(watch.title, key, message, priority, payload, false);
     }
 
     /* ***************************************************************************** */
@@ -126,9 +134,10 @@ export default function (server, actions, payload, watcherTitle) {
     /*
     /* ***************************************************************************** */
     if (_.has(action, 'throttle_period')) {
-      if (debounce(key, action.throttle_period)) {
-        server.log(['status', 'info', 'Sentinl'], 'Action Throtthled: ' + key);
-        esHistory(watcherTitle, key, 'Action Throtthled for ' + action.throttle_period, priority, {});
+      const id = `${watch.uuid}_${key}`;
+      if (debounce(id, action.throttle_period)) {
+        server.log(['status', 'info', 'Sentinl'], `Action Throttled. Watcher id: ${watch.uuid}, action name: ${key}`);
+        esHistory(watch.title, id, `Action Throtthled for ${action.throttle_period}`, priority, {});
         return;
       }
     }
@@ -173,7 +182,7 @@ export default function (server, actions, payload, watcherTitle) {
       }
       if (!action.email.stateless) {
         // Log Event
-        esHistory(watcherTitle, key, body, priority, payload, false);
+        esHistory(watch.title, key, body, priority, payload, false);
       }
     }
 
@@ -218,7 +227,7 @@ export default function (server, actions, payload, watcherTitle) {
       }
       if (!action.email_html.stateless) {
         // Log Event
-        esHistory(watcherTitle, key, body, priority, payload, false);
+        esHistory(watch.title, key, body, priority, payload, false);
       }
     }
 
@@ -311,13 +320,13 @@ export default function (server, actions, payload, watcherTitle) {
                   return fs.readFile(action.report.snapshot.path + filename, (err, data) => {
                     if (err) {
                       server.log(['status', 'info', 'Sentinl', 'report'], `Failed to save the ${action.report.subject} file.`);
-                      esHistory(watcherTitle, key, `Error. Failed to save the ${action.report.subject} file. ${err}`, {});
+                      esHistory(watch.title, key, `Error. Failed to save the ${action.report.subject} file. ${err}`, {});
                     } else {
-                      esHistory(watcherTitle, key, body, priority, payload, true, new Buffer(data).toString('base64'));
+                      esHistory(watch.title, key, body, priority, payload, true, new Buffer(data).toString('base64'));
                     }
                   });
                 } else {
-                  esHistory(watcherTitle, key, body, priority, payload, true);
+                  esHistory(watch.title, key, body, priority, payload, true);
                 }
               }
               return fs.unlink(action.report.snapshot.path + filename, (err) => {
@@ -335,7 +344,7 @@ export default function (server, actions, payload, watcherTitle) {
           payload.message = err;
           if (!action.report.stateless) {
             // Log Event
-            esHistory(watcherTitle, key, body, priority, payload, true);
+            esHistory(watch.title, key, body, priority, payload, true);
           }
         }
       })
@@ -377,7 +386,7 @@ export default function (server, actions, payload, watcherTitle) {
 
       if (!action.slack.stateless) {
         // Log Event
-        esHistory(watcherTitle, key, message, priority, payload, false);
+        esHistory(watch.title, key, message, priority, payload, false);
       }
     }
 
@@ -410,7 +419,7 @@ export default function (server, actions, payload, watcherTitle) {
 
       // Log Alarm Event
       if (action.webhook.create_alert && payload.constructor === Object && Object.keys(payload).length) {
-        esHistory(watcherTitle, key, action.webhook.message, action.webhook.priority, payload, false);
+        esHistory(watch.title, key, action.webhook.message, action.webhook.priority, payload, false);
       }
 
       if (action.webhook.headers) options.headers = action.webhook.headers;
@@ -452,7 +461,7 @@ export default function (server, actions, payload, watcherTitle) {
       priority = action.local.priority ? action.local.priority : 'INFO';
       server.log(['status', 'info', 'Sentinl', 'local'], 'Logged Message: ' + esMessage);
       // Log Event
-      esHistory(watcherTitle, key, esMessage, priority, payload, false);
+      esHistory(watch.title, key, esMessage, priority, payload, false);
     }
 
 
