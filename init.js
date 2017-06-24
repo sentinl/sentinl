@@ -58,9 +58,9 @@ const init = _.once((server) => {
   /* Bird Watching and Duck Hunting */
   const client = getElasticsearchClient(server);
   var sched = later.parse.recur().on(25,55).second();
-  var t = later.setInterval(function () { scheduler.doalert(server,client); }, sched);
+  var t = later.setInterval(function () { scheduler.doalert(server, client); }, sched);
   /* run NOW, plus later */
-  scheduler.doalert(server,client);
+  scheduler.doalert(server, client);
 });
 
 export default function (server, options) {
