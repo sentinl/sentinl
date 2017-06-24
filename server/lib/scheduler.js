@@ -232,7 +232,11 @@ export default function getScheduler(server) {
       });
     })
     .catch((error) => {
-      server.log(['status', 'info', 'Sentinl'], 'No indices found, Initializing');
+      if (error.statusCode === 404) {
+        server.log(['status', 'info', 'Sentinl'], 'No indices found, initializing.');
+      } else {
+        server.log(['status', 'error', 'Sentinl'], `An error occurred while looking for indices: ${error}`);
+      }
     });
   }
 

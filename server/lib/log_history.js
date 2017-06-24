@@ -41,7 +41,7 @@ export default function logEvent(server, client, config, watcherTitle, type, mes
     indexBody.attachment = object;
   }
 
-  client({}, 'index', {
+  client.index({
     index: indexName,
     type: type,
     body: indexBody

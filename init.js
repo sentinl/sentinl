@@ -56,11 +56,11 @@ const init = _.once((server) => {
   helpers.createSentinlAlarmIndex(server, config);
 
   /* Bird Watching and Duck Hunting */
-  const { callWithRequest } = getElasticsearchClient(server);
+  const client = getElasticsearchClient(server);
   var sched = later.parse.recur().on(25,55).second();
-  var t = later.setInterval(function () { scheduler.doalert(server, callWithRequest); }, sched);
+  var t = later.setInterval(function () { scheduler.doalert(server, client); }, sched);
   /* run NOW, plus later */
-  scheduler.doalert(server, callWithRequest);
+  scheduler.doalert(server, client);
 });
 
 export default function (server, options) {
