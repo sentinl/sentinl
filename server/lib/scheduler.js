@@ -46,7 +46,7 @@ export default function getScheduler(server) {
       if (_.has(settings, 'report')) filteredActions[name] = settings;
     });
     return filteredActions;
-  };
+  }
 
 
   function getNonReportActions(actions) {
@@ -55,7 +55,7 @@ export default function getScheduler(server) {
       if (!_.has(settings, 'report')) filteredActions[name] = settings;
     });
     return filteredActions;
-  };
+  }
 
 
   function removeOrphans(resp) {
@@ -67,7 +67,7 @@ export default function getScheduler(server) {
       }
       delete Schedule[orphan];
     });
-  };
+  }
 
 
   function handleReports(task, watcherConfig) {
@@ -79,7 +79,7 @@ export default function getScheduler(server) {
     if (_.keys(actions).length) {
       doActions(server, actions, payload, watcherConfig);
     }
-  };
+  }
 
 
   function handleActions(watcher, client, task, watcherConfig) {
@@ -146,7 +146,7 @@ export default function getScheduler(server) {
     .catch((error) => {
       server.log(['error', 'Sentinl'], `An error occurred while executing the watcherConfig: ${error}`);
     });
-  };
+  }
 
 
   function watching(watcher, client, task, interval) {
