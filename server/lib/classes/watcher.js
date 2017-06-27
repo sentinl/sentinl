@@ -1,4 +1,4 @@
-class Watcher {
+export default class Watcher {
 
 
   constructor(client, config) {
@@ -8,7 +8,7 @@ class Watcher {
 
 
   getCount() {
-    return this.client({}, 'count', {
+    return this.client.count({
       index: this.config.es.default_index,
       type: this.config.es.type
     });
@@ -16,7 +16,7 @@ class Watcher {
 
 
   getWatchers(count) {
-    return this.client({}, 'search', {
+    return this.client.search({
       index: this.config.es.default_index,
       type: this.config.es.type,
       size: count
@@ -25,9 +25,7 @@ class Watcher {
 
 
   search(method, request) {
-    return this.client({}, method, request);
+    return this.client[method](request);
   }
 
 }
-
-export { Watcher as default };

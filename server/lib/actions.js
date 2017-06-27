@@ -30,7 +30,7 @@ import url from 'url';
 
 export default function (server, actions, payload, watch) {
 
-  const { callWithRequest } = getElasticsearchClient(server);
+  const client = getElasticsearchClient(server);
   const config = getConfiguration(server);
   const hlimit = config.sentinl.history ? config.sentinl.history : 10;
 
@@ -38,9 +38,9 @@ export default function (server, actions, payload, watch) {
   /* ES Indexing Functions */
   var esHistory = function (watcherTitle, type, message, loglevel, payload, isReport, object) {
     if (isReport) {
-      logHistory(server, callWithRequest, config, watcherTitle, type, message, loglevel, payload, isReport, object);
+      logHistory(server, client, config, watcherTitle, type, message, loglevel, payload, isReport, object);
     } else {
-      logHistory(server, callWithRequest, config, watcherTitle, type, message, loglevel, payload);
+      logHistory(server, client, config, watcherTitle, type, message, loglevel, payload);
     }
   };
 

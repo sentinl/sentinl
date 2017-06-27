@@ -47,9 +47,9 @@ function createSentinlIndex(server, config) {
     return;
   }
 
-  const { callWithRequest } = getElasticsearchClient(server);
+  const client = getElasticsearchClient(server);
 
-  callWithRequest({}, 'indices.exists', {
+  client.indices.exists({
     index: config.es.default_index
   })
   .then((exists) => {
@@ -59,7 +59,7 @@ function createSentinlIndex(server, config) {
     }
     server.log(['status', 'info', 'Sentinl'], 'Creating Sentinl core Index...');
 
-    callWithRequest({}, 'indices.create', {
+    client.indices.create({
       index: config.es.default_index,
       body: {
         settings: {
@@ -106,7 +106,7 @@ function createSentinlIndex(server, config) {
       server.log(['status', 'error', 'Sentinl'], err.message);
     });
   })
-  .catch((error) => server.log(['status', 'error', 'Sentinl'], 'Failed to check if core index exists', error));
+  .catch((error) => server.log(['status', 'error', 'Sentinl'], `Failed to check if core index exists: ${error}`));
 }
 
 var tryCount = 0;
@@ -128,9 +128,9 @@ function createSentinlAlarmIndex(server,config) {
     return;
   }
 
-  const { callWithRequest } = getElasticsearchClient(server);
+  const client = getElasticsearchClient(server);
 
-  callWithRequest({}, 'indices.exists', {
+  client.indices.exists({
     index: config.es.alarm_index
   })
   .then((exists) => {
@@ -140,7 +140,7 @@ function createSentinlAlarmIndex(server,config) {
     }
     server.log(['status', 'info', 'Sentinl'], 'Creating Sentinl Alarms Template...');
 
-    callWithRequest({}, 'indices.putTemplate', {
+    client.indices.putTemplate({
       name: config.es.alarm_index,
       body: {
         template: config.es.alarm_index + '-*',
@@ -171,7 +171,7 @@ function createSentinlAlarmIndex(server,config) {
 
     server.log(['status', 'info', 'Sentinl'], 'Creating Sentinl Alarms Index...');
 
-    callWithRequest({}, 'indices.create', {
+    client.indices.create({
       index: config.es.alarm_index,
       body: {
         settings: {

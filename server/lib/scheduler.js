@@ -27,11 +27,11 @@ export default function getScheduler(server) {
 
 
   const config = getConfiguration(server);
-  let sirenJoinAvailable = false;
+  let sirenVanguardAvailable = false;
   try {
     const elasticsearchPlugins = server.config().get('elasticsearch.plugins');
-    if (elasticsearchPlugins && elasticsearchPlugins.indexOf('siren-join') > -1) {
-      sirenJoinAvailable = true;
+    if (elasticsearchPlugins && elasticsearchPlugins.indexOf('siren-vanguard') > -1) {
+      sirenVanguardAvailable = true;
     }
   } catch (err) {
     // 'elasticsearch.plugins' not available when running from kibana
@@ -46,7 +46,7 @@ export default function getScheduler(server) {
       if (_.has(settings, 'report')) filteredActions[name] = settings;
     });
     return filteredActions;
-  };
+  }
 
 
   function getNonReportActions(actions) {
@@ -55,7 +55,7 @@ export default function getScheduler(server) {
       if (!_.has(settings, 'report')) filteredActions[name] = settings;
     });
     return filteredActions;
-  };
+  }
 
 
   function removeOrphans(resp) {
@@ -67,7 +67,7 @@ export default function getScheduler(server) {
       }
       delete Schedule[orphan];
     });
-  };
+  }
 
 
   function handleReports(task, watcherConfig) {
@@ -79,7 +79,7 @@ export default function getScheduler(server) {
     if (_.keys(actions).length) {
       doActions(server, actions, payload, watcherConfig);
     }
-  };
+  }
 
 
   function handleActions(watcher, client, task, watcherConfig) {
@@ -91,8 +91,8 @@ export default function getScheduler(server) {
     let transform = watcherConfig.transform ? watcherConfig.transform : {};
 
     let method = 'search';
-    if (sirenJoinAvailable) {
-      for (let candidate of ['kibi_search', 'coordinate_search', 'search']) {
+    if (sirenVanguardAvailable) {
+      for (let candidate of ['kibi_search', 'vanguard_search', 'search']) {
         if (client[candidate]) {
           method = candidate;
           break;
@@ -146,7 +146,7 @@ export default function getScheduler(server) {
     .catch((error) => {
       server.log(['error', 'Sentinl'], `An error occurred while executing the watcherConfig: ${error}`);
     });
-  };
+  }
 
 
   function watching(watcher, client, task, interval) {
@@ -232,7 +232,11 @@ export default function getScheduler(server) {
       });
     })
     .catch((error) => {
-      server.log(['status', 'info', 'Sentinl'], 'No indices found, Initializing');
+      if (error.statusCode === 404) {
+        server.log(['status', 'info', 'Sentinl'], 'No indices found, initializing.');
+      } else {
+        server.log(['status', 'error', 'Sentinl'], `An error occurred while looking for indices: ${error}`);
+      }
     });
   }
 
