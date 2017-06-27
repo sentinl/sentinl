@@ -4,12 +4,9 @@ import getConfiguration from  '../lib/get_configuration';
 import Joi from 'joi';
 import dateMath from '@elastic/datemath';
 
-import getElasticsearchClient from '../lib/get_elasticsearch_client';
-
 /* ES Functions */
 var getHandler = function (type, server, req, reply) {
   const config = getConfiguration(server);
-  const client = getElasticsearchClient(server);
 
   var timeInterval;
   // Use selected timefilter when available
@@ -27,7 +24,8 @@ var getHandler = function (type, server, req, reply) {
     lt: dateMath.parse(timeInterval.to, true).valueOf()
   };
 
-  const body = {
+  const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
+  callWithRequest(req, 'search', {
     index: config.es.alarm_index ? config.es.alarm_index + '*' : 'watcher_alarms*',
     sort: '@timestamp : asc',
     allowNoIndices: false,
@@ -46,9 +44,7 @@ var getHandler = function (type, server, req, reply) {
         }
       }
     }
-  };
-
-  client.search(body)
+  })
   .then((res) => reply(res))
   .catch((err) => reply(handleESError(err)));
 };
@@ -56,7 +52,7 @@ var getHandler = function (type, server, req, reply) {
 export default function routes(server) {
 
   const config = getConfiguration(server);
-  const client = getElasticsearchClient(server);
+  const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
 
   // Current Time
   server.route({
@@ -98,14 +94,12 @@ export default function routes(server) {
     path: '/api/sentinl/list',
     method: ['POST', 'GET'],
     handler: function (req, reply) {
-      const body = {
+      callWithRequest(req, 'search', {
         index: config.es.default_index,
         type: config.es.type,
         size: config.sentinl.results ? config.sentinl.results : 50,
         allowNoIndices: false
-      };
-
-      client.search(body)
+      })
       .then((res) => reply(res))
       .catch((err) => reply(handleESError(err)));
     }
@@ -120,15 +114,16 @@ export default function routes(server) {
         server.log(['status', 'err', 'Sentinl'], 'Forbidden Delete Request! ' + req.params);
         return;
       }
-
-      const body = {
+      var body = {
         index: req.params.index,
         type: req.params.type,
-        id: req.params.id,
-        refresh: true
+        id: req.params.id
       };
 
-      client.delete(body)
+      callWithRequest(req, 'delete', body)
+      .then(() => callWithRequest(req, 'indices.refresh', {
+        index: req.params.index
+      }))
       .then((resp) => reply({ok: true, resp: resp}))
       .catch((err) => reply(handleESError(err)));
     }
@@ -156,6 +151,7 @@ export default function routes(server) {
     method: 'GET',
     path: '/api/sentinl/test/{id}',
     handler: function (request, reply) {
+      var client = server.plugins.elasticsearch.client;
       server.log(['status', 'info', 'Sentinl'], 'Testing ES connection with param: ' + request.params.id);
       client.ping({
         requestTimeout: 5000,
@@ -178,14 +174,11 @@ export default function routes(server) {
     path: '/api/sentinl/get/watcher/{id}',
     handler: function (request, reply) {
       server.log(['status', 'info', 'Sentinl'], 'Get Watcher with ID: ' + request.params.id);
-
-      const body = {
+      callWithRequest(request, 'search', {
         index: config.es.default_index,
         type: config.es.type,
         q: request.params.id
-      };
-
-      client.search(body)
+      })
       .then((resp) => reply(resp))
       .catch((err) => {
         server.log(['debug', 'Sentinl'], err);
@@ -198,19 +191,19 @@ export default function routes(server) {
     method: 'POST',
     path: '/api/sentinl/watcher/{id}',
     handler: function (request, reply) {
-      const watcher = request.payload;
+      var watcher = request.payload;
       server.log(['status', 'info', 'Sentinl'], 'Saving Watcher with ID: ' + watcher._id);
-
-      const body = {
+      var body = {
         index: config.es.default_index,
         type: config.es.type,
         id: watcher._id,
-        body: watcher._source,
-        refresh: true
+        body: watcher._source
       };
-
-      client.index(body)
-      .then((resp) => reply({ ok: true, resp: resp }))
+      callWithRequest(request, 'index', body)
+      .then(() => callWithRequest(request, 'indices.refresh', {
+        index: config.es.default_index
+      }))
+      .then((resp) => reply({ok: true, resp: resp}))
       .catch((err) => reply(handleESError(err)));
     }
   });
@@ -219,14 +212,15 @@ export default function routes(server) {
     method: 'DELETE',
     path: '/api/sentinl/watcher/{id}',
     handler: function (request, reply) {
-      const body = {
+      var body = {
         index: config.es.default_index,
         type: config.es.type,
-        id: request.params.id,
-        refresh: true
+        id: request.params.id
       };
-
-      client.delete(body)
+      callWithRequest(request, 'delete', body)
+      .then(() => callWithRequest(request, 'indices.refresh', {
+        index: config.es.default_index
+      }))
       .then((resp) => reply({ok: true, resp: resp}))
       .catch((err) => reply(handleESError(err)));
     },
@@ -243,11 +237,10 @@ export default function routes(server) {
     method: 'GET',
     path: '/api/sentinl/validate/es',
     handler: function (request, reply) {
-      const body = {
+      var body = {
         index: config.es.default_index,
       };
-
-      client.fieldStats(body)
+      callWithRequest(request, 'fieldStats', body)
       .then(function (resp) {
         reply({
           ok: true,
@@ -266,16 +259,16 @@ export default function routes(server) {
     handler: function (request, reply) {
       const script = request.payload;
       server.log(['status', 'info', 'Sentinl'], `Saving scripts with type: ${request.params.type}`);
-
       const body = {
         index: config.es.default_index,
         type: request.params.type,
         id: request.params.id,
-        body: script,
-        refresh: true
+        body: script
       };
-
-      client.index(body)
+      callWithRequest(request, 'index', body)
+      .then(() => callWithRequest(request, 'indices.refresh', {
+        index: config.es.default_index
+      }))
       .then((resp) => reply({ok: true, resp: resp}))
       .catch((err) => reply(handleESError(err)));
     }
@@ -286,15 +279,12 @@ export default function routes(server) {
     path: '/api/sentinl/get/scripts/{type}',
     handler: function (request, reply) {
       server.log(['status', 'info', 'Sentinl'], `Get scripts with type: ${request.params.type}`);
-
-      const body = {
+      callWithRequest(request, 'search', {
         index: config.es.default_index,
         type: request.params.type,
         size: config.sentinl.scriptResults ? config.sentinl.scriptResults : 50,
         q: 'title:*'
-      };
-
-      client.search(body)
+      })
       .then((resp) => reply(resp))
       .catch((err) => {
         server.log(['debug', 'Sentinl'], err);
@@ -307,16 +297,16 @@ export default function routes(server) {
     method: 'DELETE',
     path: '/api/sentinl/remove/one_script/{type}/{id}',
     handler: function (request, reply) {
-      server.log(['status', 'info', 'Sentinl'], `Delete script with type/id: ${request.params.type}/${request.params.id}`);
-
       const body = {
         index: config.es.default_index,
         type: request.params.type,
-        id: request.params.id,
-        refresh: true
+        id: request.params.id
       };
-
-      client.delete(body)
+      server.log(['status', 'info', 'Sentinl'], `Delete script with type/id: ${request.params.type}/${request.params.id}`);
+      callWithRequest(request, 'delete', body)
+      .then(() => callWithRequest(request, 'indices.refresh', {
+        index: config.es.default_index
+      }))
       .then((resp) => reply({ok: true, resp: resp}))
       .catch((err) => reply(handleESError(err)));
     }
