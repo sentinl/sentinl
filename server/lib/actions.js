@@ -290,61 +290,82 @@ export default function (server, actions, payload, watch) {
         server.log(['status', 'info', 'Sentinl', 'report'], 'ERROR: ' + error);
       }
 
-      horsemanFactory(server, domain)
-      .then((horseman) => {
-        var filename = 'report-' + Math.random().toString(36).substr(2, 9) + '.png';
-        server.log(['status', 'info', 'Sentinl', 'report'], 'Creating Report for ' + action.report.snapshot.url);
-        try {
-          return horseman
+      const doScreenshot = function (horseman) {
+        const filename = `report-${Math.random().toString(36).substr(2, 9)}.png`;
+        server.log(['status', 'info', 'Sentinl', 'report'], `Creating Report for ${action.report.snapshot.url}`);
+
+        const deleteFile = function () {
+          fs.unlink(action.report.snapshot.path + filename, (err) => {
+            if (err) {
+              server.log(['status', 'info', 'Sentinl', 'report'], 'Failed to delete file '
+                + action.report.snapshot.path + filename);
+            }
+            payload.message = err || message;
+          });
+        };
+
+        const sendEmail = function () {
+          server.log(['status', 'info', 'Sentinl', 'report'], `Snapshot ready for url: ${action.report.snapshot.url}`);
+          emailServer.send({
+            text: body,
+            from: action.report.from,
+            to: action.report.to,
+            subject: subject,
+            attachment: [
+              // { path: action.report.snapshot.path + filename, type: "application/pdf", name: filename },
+              { data: '<html><img src=\'cid:my-report\' width=\'100%\'></html>' },
+              {
+                path: action.report.snapshot.path + filename,
+                type: 'image/png',
+                name: filename + '.png',
+                headers: {'Content-ID': '<my-report>'}
+              }
+            ]
+          }, (err, message) => {
+            let readingFile = false;
+            server.log(['status', 'info', 'Sentinl', 'report'], err || message);
+
+            if (!action.report.stateless) {
+              // Log Event
+              if (action.report.save) {
+                readingFile = true;
+                fs.readFile(action.report.snapshot.path + filename, (err, data) => {
+                  if (err) {
+                    server.log(['status', 'info', 'Sentinl', 'report'], `Failed to save the ${action.report.subject} file.`);
+                    esHistory(watch.title, key, `Error. Failed to save the ${action.report.subject} file. ${err}`, {});
+                  } else {
+                    esHistory(watch.title, key, body, priority, payload, true, new Buffer(data).toString('base64'));
+                  }
+
+                  deleteFile();
+                });
+              } else {
+                esHistory(watch.title, key, body, priority, payload, true);
+              }
+            }
+
+            if (!readingFile) {
+              fs.access(action.report.snapshot.path + filename, fs.constants.X_OK, (err) => {
+                if (!err) deleteFile();
+              });
+            }
+
+          });
+        };
+
+        horseman
           .viewport(1280, 900)
           .open(action.report.snapshot.url)
           .wait(action.report.snapshot.params.delay)
           .screenshot(action.report.snapshot.path + filename)
           //.pdf(action.report.snapshot.path + filename)
-          .then(function () {
-            server.log(['status', 'info', 'Sentinl', 'report'], 'Snapshot ready for url:' + action.report.snapshot.url);
-            return emailServer.send({
-              text: body,
-              from: action.report.from,
-              to: action.report.to,
-              subject: subject,
-              attachment: [
-                // { path: action.report.snapshot.path + filename, type: "application/pdf", name: filename },
-                { data: '<html><img src=\'cid:my-report\' width=\'100%\'></html>' },
-                {
-                  path: action.report.snapshot.path + filename,
-                  type: 'image/png',
-                  name: filename + '.png',
-                  headers: {'Content-ID': '<my-report>'}
-                }
-              ]
-            }, function (err, message) {
-              server.log(['status', 'info', 'Sentinl', 'report'], err || message);
-              if (!action.report.stateless) {
-                // Log Event
-                if (action.report.save) {
-                  return fs.readFile(action.report.snapshot.path + filename, (err, data) => {
-                    if (err) {
-                      server.log(['status', 'info', 'Sentinl', 'report'], `Failed to save the ${action.report.subject} file.`);
-                      esHistory(watch.title, key, `Error. Failed to save the ${action.report.subject} file. ${err}`, {});
-                    } else {
-                      esHistory(watch.title, key, body, priority, payload, true, new Buffer(data).toString('base64'));
-                    }
-                  });
-                } else {
-                  esHistory(watch.title, key, body, priority, payload, true);
-                }
-              }
-              return fs.unlink(action.report.snapshot.path + filename, (err) => {
-                if (err) {
-                  server.log(['status', 'info', 'Sentinl', 'report'], 'Failed to delete file '
-                    + action.report.snapshot.path + filename);
-                }
-                payload.message = err || message;
-              });
+          .then(() => sendEmail()).close();
+      };
 
-            });
-          }).close();
+      horsemanFactory(server, domain)
+      .then((horseman) => {
+        try {
+          doScreenshot(horseman);
         } catch (err) {
           server.log(['status', 'error', 'Sentinl', 'report'], 'ERROR: ' + err);
           payload.message = err;
