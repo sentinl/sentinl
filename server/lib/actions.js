@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+import moment from 'moment';
 import mustache from 'mustache';
 import getConfiguration from './get_configuration';
 import fs from 'fs';
@@ -291,7 +292,8 @@ export default function (server, actions, payload, watch) {
       }
 
       const doScreenshot = function (horseman) {
-        const filename = `report-${Math.random().toString(36).substr(2, 9)}.png`;
+        const nowTime = moment().format('DD-MM-YYYY-h-m-s');
+        const filename = `report-${Math.random().toString(36).substr(2, 9)}-${nowTime}.png`;
         server.log(['status', 'info', 'Sentinl', 'report'], `Creating Report for ${action.report.snapshot.url}`);
 
         const deleteFile = function () {
@@ -323,7 +325,7 @@ export default function (server, actions, payload, watch) {
             ]
           }, (err, message) => {
             let readingFile = false;
-            server.log(['status', 'info', 'Sentinl', 'report'], err || message);
+            server.log(['status', 'error', 'Sentinl', 'report'], err || message);
 
             if (!action.report.stateless) {
               // Log Event
@@ -331,7 +333,8 @@ export default function (server, actions, payload, watch) {
                 readingFile = true;
                 fs.readFile(action.report.snapshot.path + filename, (err, data) => {
                   if (err) {
-                    server.log(['status', 'info', 'Sentinl', 'report'], `Failed to save the ${action.report.subject} file.`);
+                    server.log(['status', 'error', 'Sentinl', 'report'], action.report.subject +
+                      ` failed to read the screenshot file ${filename}.`);
                     esHistory(watch.title, key, `Error. Failed to save the ${action.report.subject} file. ${err}`, {});
                   } else {
                     esHistory(watch.title, key, body, priority, payload, true, new Buffer(data).toString('base64'));
@@ -346,7 +349,12 @@ export default function (server, actions, payload, watch) {
 
             if (!readingFile) {
               fs.access(action.report.snapshot.path + filename, fs.constants.X_OK, (err) => {
-                if (!err) deleteFile();
+                if (err) {
+                  server.log(['status', 'error', 'Sentinl', 'report'], action.report.subject +
+                    ` failed to read the screenshot file ${filename}.`);
+                } else {
+                  deleteFile();
+                }
               });
             }
 
