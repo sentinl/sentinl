@@ -127,7 +127,7 @@ gulp.task('package', ['build'], function (done) {
   return gulp.src([
     path.join(buildDir, '**', '*')
   ])
-  .pipe(zip(packageName + '.zip'))
+  .pipe(zip(options.version ? packageName + '-v' + options.version  +'.zip' : packageName + '.zip'))
   .pipe(gulp.dest(targetDir));
 });
 
