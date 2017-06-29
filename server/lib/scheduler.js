@@ -178,12 +178,6 @@ export default function getScheduler(server) {
               .then(function (payload) {
                 server.log(['status', 'info', 'Sentinl', 'PAYLOAD DEBUG'], payload);
 
-                if (!payload) {
-                  server.log(['status', 'debug', 'Sentinl', 'WATCHER TASK'], `Watcher ${watcherConfig.uuid}` +
-                    ' malformed or missing key parameters!');
-                  return;
-                }
-
                 /* Validate Condition */
                 let ret;
                 try {
