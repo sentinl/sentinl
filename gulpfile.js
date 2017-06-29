@@ -85,7 +85,7 @@ function syncPluginTo(dest, done) {
 
 function applyVersion (path, version) {
   var pkgConfig = JSON.parse(fs.readFileSync(path, 'utf8'));
-  pkgConfig.kibana.version = options.version;
+  pkgConfig.kibana.version = version;
   fs.writeFileSync(path, JSON.stringify(pkgConfig, null, 2), 'utf8');
 }
 
