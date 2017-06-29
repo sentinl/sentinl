@@ -18,6 +18,7 @@ var packageName = pkg.name;
 var buildDir = path.resolve(__dirname, 'build/gulp');
 var targetDir = path.resolve(__dirname, 'target/gulp');
 var buildTarget = path.resolve(buildDir, 'kibana', packageName);
+var pathToPkgConfig = './package.json';
 
 var include = [
   '*.json',
@@ -32,11 +33,11 @@ var include = [
 
 var knownOptions = {
   string: 'kibanahomepath',
+  string: 'version',
   default: { kibanahomepath: '../kibi-internal' }
 };
 var options = minimist(process.argv.slice(2), knownOptions);
 var kibanaPluginDir = path.resolve(__dirname, options.kibanahomepath + '/plugins/' + packageName);
-
 
 function syncPluginTo(dest, done) {
   mkdirp(dest, function (err) {
@@ -82,6 +83,12 @@ function syncPluginTo(dest, done) {
   });
 }
 
+function applyVersion (path, version) {
+  var pkgConfig = JSON.parse(fs.readFileSync(path, 'utf8'));
+  pkgConfig.kibana.version = version;
+  fs.writeFileSync(path, JSON.stringify(pkgConfig, null, 2), 'utf8');
+}
+
 gulp.task('sync', function (done) {
   syncPluginTo(kibanaPluginDir, done);
 });
@@ -110,6 +117,9 @@ gulp.task('clean', function (done) {
 });
 
 gulp.task('build', ['clean'], function (done) {
+  if (options.version) {
+    applyVersion(pathToPkgConfig, options.version);
+  }
   syncPluginTo(buildTarget, done);
 });
 
@@ -117,7 +127,7 @@ gulp.task('package', ['build'], function (done) {
   return gulp.src([
     path.join(buildDir, '**', '*')
   ])
-  .pipe(zip(packageName + '.zip'))
+  .pipe(zip(options.version ? packageName + '-v' + options.version  +'.zip' : packageName + '.zip'))
   .pipe(gulp.dest(targetDir));
 });
 
