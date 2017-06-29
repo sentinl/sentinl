@@ -20,12 +20,12 @@
     "angular-ui-bootstrap": "0.13.4",
     "bluebird": "3.4.7",
     "bootstrap": "3.3.7",
+    "decompress": "^4.2.0",
     "emailjs": "1.0.8",
     "later": "1.2.0",
     "mustache": "2.3.0",
     "node-horseman": "3.3.0",
     "node-slack": "0.0.7",
-    "phantomjs": "2.1.1",
     "sum-time": "1.0.0"
   },
   "devDependencies": {
