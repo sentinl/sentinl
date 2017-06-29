@@ -52,6 +52,10 @@ function createSentinlIndex(server, config) {
   client.indices.exists({
     index: config.es.default_index
   }, function (error, exists) {
+    if (error) {
+      server.log(['status', 'error', 'Sentinl'], `Failed to check if core index exists: ${error}`);
+    }
+
     if (exists === true) {
       server.log(['status', 'debug', 'Sentinl'], 'Core Index exists!');
       return;
@@ -104,8 +108,7 @@ function createSentinlIndex(server, config) {
     }, function (err) {
       server.log(['status', 'warning', 'Sentinl'], err.message);
     });
-  })
-  .catch((error) => server.log(['status', 'error', 'Sentinl'], `Failed to check if core index exists: ${error}`));
+  });
 }
 
 var tryCount = 0;
