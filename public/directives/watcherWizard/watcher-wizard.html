@@ -43,10 +43,10 @@
                 </button>
                 <ul class="dropdown-menu" role="menu">
                   <li ng-repeat="(id, script) in form.scripts.input">
-                    <a href ng-click="selectScript('input', id)">{{ script.title }}</a>
+                    <a href="javascript:void(0)" ng-click="selectScript('input', id)">{{ script.title }}</a>
                   </li>
                   <li ng-show="isEmpty(form.scripts.input)">
-                    <a href>No scripts stored</a>
+                    <a href="javascript:void(0)">No scripts stored</a>
                   </li>
                 </ul>
               </div>
@@ -96,10 +96,10 @@
                 </button>
                 <ul class="dropdown-menu" role="menu">
                   <li ng-repeat="(id, script) in form.scripts.condition">
-                    <a href ng-click="selectScript('condition', id)">{{ script.title }}</a>
+                    <a href="javascript:void(0)" ng-click="selectScript('condition', id)">{{ script.title }}</a>
                   </li>
                   <li ng-show="isEmpty(form.scripts.condition)">
-                    <a href>No scripts stored</a>
+                    <a href="javascript:void(0)">No scripts stored</a>
                   </li>
                 </ul>
               </div>
@@ -149,10 +149,10 @@
                 </button>
                 <ul class="dropdown-menu" role="menu">
                   <li ng-repeat="(id, script) in form.scripts.transform">
-                    <a href ng-click="selectScript('transform', id)">{{ script.title }}</a>
+                    <a href="javascript:void(0)" ng-click="selectScript('transform', id)">{{ script.title }}</a>
                   </li>
                   <li ng-show="isEmpty(form.scripts.transform)">
-                    <a href>No scripts stored</a>
+                    <a href="javascript:void(0)">No scripts stored</a>
                   </li>
                 </ul>
               </div>
@@ -197,7 +197,7 @@
             <div class="col-md-1">
             </div>
             <div class="col-md-11">
-              <a href=""
+              <a href="javascript:void(0)"
                 ng-class="{
                   'fa': true,
                   'fa-plus': !form.actions.new.edit,
@@ -217,8 +217,8 @@
                 ng-repeat="(actionName, actionSettings) in watcher._source.actions"
                 style="list-style-type:none;">
                 <li>
-                  <a href="" class="fa fa-minus" ng-click="removeAction(actionName)"></a>&nbsp;
-                  <a href="" ng-click="editAction(actionName, actionSettings)">{{actionName}}</a>
+                  <a href="javascript:void(0)" class="fa fa-minus" ng-click="removeAction(actionName)"></a>&nbsp;
+                  <a href="javascript:void(0)" ng-click="editAction(actionName, actionSettings)">{{actionName}}</a>
                   <i class="fa fa-arrow-down"
                     ng-if="[
                       actionSettings.webhook.$$edit,
