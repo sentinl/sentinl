@@ -432,33 +432,35 @@ export default function (server, actions, payload, watch) {
     *      "host" : "remote.server",
     *      "port" : 9200,
     *      "path": "/{{payload.watcher_id}}",
-    *      "body" : "{{payload.watcher_id}}:{{payload.hits.total}}"
+    *      "body" : "{{payload.watcher_id}}:{{payload.hits.total}}",
+    *      "useHttps" : false
     *    }
     */
 
     var querystring = require('querystring');
-    var http = require('http');
-    var webhookBody;
     var options;
     var req;
     if (_.has(action, 'webhook')) {
-      webhookBody = action.webhook.body ? mustache.render(action.webhook.body, {payload: payload}) : null;
-
+      var http = action.webhook.useHttps ? require('https') : require('http');
+          
       options = {
-        protocol: action.webhook.protocol ? action.webhook.protocol : 'http:',
         hostname: action.webhook.host ? action.webhook.host : 'localhost',
         port: action.webhook.port ? action.webhook.port : 80,
         path: action.webhook.path ? action.webhook.path : '/',
-        method: action.webhook.method ? action.webhook.method : 'GET'
+        method: action.webhook.method ? action.webhook.method : 'GET',
+        headers: action.webhook.headers ? action.webhook.headers : {},
+        auth: action.webhook.auth ? action.webhook.auth : undefined
       };
+      
+      var dataToWrite = action.webhook.body ? mustache.render(action.webhook.body, {payload: payload}) : action.webhook.params;
+      if (dataToWrite) {
+        options.headers['Content-Length'] = Buffer.byteLength(dataToWrite);
+      }
 
       // Log Alarm Event
       if (action.webhook.create_alert && payload.constructor === Object && Object.keys(payload).length) {
         esHistory(watch.title, key, action.webhook.message, action.webhook.priority, payload, false);
       }
-
-      if (action.webhook.headers) options.headers = action.webhook.headers;
-      if (action.webhook.auth) options.auth = action.webhook.auth;
 
       req = http.request(options, function (res) {
         res.setEncoding('utf8');
@@ -470,12 +472,8 @@ export default function (server, actions, payload, watch) {
       req.on('error', function (e) {
         server.log(['status', 'err', 'Sentinl'], 'Error shipping Webhook: ' + e.message);
       });
-
-      if (webhookBody) {
-        req.write(webhookBody);
-      }
-      else if (action.webhook.params) {
-        req.write(action.webhook.params);
+      if (dataToWrite) {
+        req.write(dataToWrite);
       }
       req.end();
     }
