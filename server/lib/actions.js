@@ -442,7 +442,7 @@ export default function (server, actions, payload, watch) {
     var req;
     if (_.has(action, 'webhook')) {
       var http = action.webhook.useHttps ? require('https') : require('http');
-          
+
       options = {
         hostname: action.webhook.host ? action.webhook.host : 'localhost',
         port: action.webhook.port ? action.webhook.port : 80,
@@ -451,7 +451,7 @@ export default function (server, actions, payload, watch) {
         headers: action.webhook.headers ? action.webhook.headers : {},
         auth: action.webhook.auth ? action.webhook.auth : undefined
       };
-      
+
       var dataToWrite = action.webhook.body ? mustache.render(action.webhook.body, {payload: payload}) : action.webhook.params;
       if (dataToWrite) {
         options.headers['Content-Length'] = Buffer.byteLength(dataToWrite);
@@ -511,9 +511,10 @@ export default function (server, actions, payload, watch) {
     *    }
     */
 
-    var querystring = require('querystring');
-    var http = require('http');
     if (_.has(action, 'pushapps')) {
+      const querystring = require('querystring');
+      const http = require('http');
+
       options = {
         hostname: 'https://api.pushapps.mobi/v1',
         port: 443,
