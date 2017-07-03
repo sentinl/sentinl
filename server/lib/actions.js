@@ -398,7 +398,7 @@ export default function (server, actions, payload, watcherTitle) {
       
       var dataToWrite = action.webhook.body ? mustache.render(action.webhook.body, {payload: payload}) : action.webhook.params;
       if (dataToWrite) {
-        options.headers["Content-Length"] = Buffer.byteLength(dataToWrite);
+        options.headers['Content-Length'] = Buffer.byteLength(dataToWrite);
       }
 
       // Log Alarm Event
