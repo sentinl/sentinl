@@ -51,6 +51,13 @@
           ng-checked="actionSettings.webhook.create_alert"> create alert
       </label>
     </div>
+    <div class="col-md-2">
+      <label class="checkbox">
+        <input type="checkbox"
+          ng-model="actionSettings.webhook.use_https"
+          ng-checked="actionSettings.webhook.use_https"> https
+      </label>
+    </div>
   </div>
   <div class="form-group" ng-class="{'has-error': webhookForm.webhookHost.$invalid && !webhookForm.webhookHost.$pristine}">
     <label class="col-md-2 control-label" for="webhookHost">Host:</label>
