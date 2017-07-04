@@ -433,7 +433,7 @@ export default function (server, actions, payload, watch) {
     *      "port" : 9200,
     *      "path": "/{{payload.watcher_id}}",
     *      "body" : "{{payload.watcher_id}}:{{payload.hits.total}}",
-    *      "useHttps" : false
+    *      "use_https" : false
     *    }
     */
 
@@ -441,7 +441,7 @@ export default function (server, actions, payload, watch) {
     var options;
     var req;
     if (_.has(action, 'webhook')) {
-      var http = action.webhook.useHttps ? require('https') : require('http');
+      var http = action.webhook.use_https ? require('https') : require('http');
 
       options = {
         hostname: action.webhook.host ? action.webhook.host : 'localhost',

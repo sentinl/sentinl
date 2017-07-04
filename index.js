@@ -68,6 +68,7 @@ export default function (kibana) {
           }).default(),
           webhook: Joi.object({
             active: Joi.boolean().default(false),
+            use_https: Joi.boolean().default(false),
             method: Joi.string().default('POST'),
             host: Joi.string(),
             port: Joi.number(),
