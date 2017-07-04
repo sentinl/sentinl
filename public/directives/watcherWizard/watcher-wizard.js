@@ -287,11 +287,12 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
           }
 
           if (type === 'webhook' && _.has(settings, type)) {
-            if (settings[type]._headers) {
+            if (settings[type]._headers && settings[type]._headers.length) {
               settings[type].headers = angular.fromJson(settings[type]._headers);
-              delete settings[type]._headers;
+            } else {
+              delete settings[type].headers;
             }
-            delete settings[type].$$proxy;
+            delete settings[type]._headers;
           }
         });
       });
