@@ -211,13 +211,17 @@ const linkReqRespStats = function ($scope, config) {
       }
       // Patch Range
       if (indexPattern && indexPattern.hasTimeField()) {
-        $scope.alarm._source.input.search.request.body.query.filtered.filter = {
+        if (!$scope.alarm._source.input.search.request.body.query.bool.must) {
+          $scope.alarm._source.input.search.request.body.query.bool.must = [];
+        }
+
+        $scope.alarm._source.input.search.request.body.query.bool.must.push({
           range: {
             [indexPattern.timeFieldName]: {
               from: $scope.watcher_range ? $scope.watcher_range : 'now-1h'
             }
           }
-        };
+        });
       }
       // Store Watcher
       alarm = $scope.alarm;
@@ -332,7 +336,6 @@ const linkReqRespStats = function ($scope, config) {
         };
       }
     };
-    $scope.makeAlarm();
     $scope.updateAction();
 
   });
