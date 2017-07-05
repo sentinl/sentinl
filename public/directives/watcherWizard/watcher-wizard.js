@@ -243,6 +243,9 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
       // toggle edit for the selected action
       _.each($scope.form.actions.types, (type) => {
         if (_.has(actionSettings, type)) {
+          if (!_.has(actionSettings[type], '$$edit')) {
+            actionSettings[type].$$edit = false;
+          }
           actionSettings[type].$$edit = !actionSettings[type].$$edit;
         }
       });

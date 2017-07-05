@@ -18,6 +18,7 @@
  */
 
 import './alarm_spy.less';
+import _ from 'lodash';
 
 const linkReqRespStats = function ($scope, config) {
   $scope.$bind('req', 'searchSource.history[searchSource.history.length - 1]');
@@ -170,6 +171,17 @@ const linkReqRespStats = function ($scope, config) {
       config.savedWatcher = $scope.savedWatcher;
     };
 
+    const nameActions = function (actions) {
+      function createName(type) {
+        return `New ${type} action ${Math.random().toString(36).slice(2)}`;
+      };
+      const namedActions = {};
+      _.forEach(actions, (settings, type) => {
+        namedActions[createName(type)] = { [type]: settings };
+      });
+      return namedActions;
+    };
+
     $scope.makeAlarm = function () {
       $scope.watcherUpdate();
       $scope.alarm = {
@@ -197,9 +209,7 @@ const linkReqRespStats = function ($scope, config) {
             }
           },
           transform: {},
-          actions: {
-            kibi_actions: $scope.savedWatcher.actions
-          }
+          actions: nameActions($scope.savedWatcher.actions)
         }
       };
 
