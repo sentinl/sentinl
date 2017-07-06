@@ -1,6 +1,6 @@
 import uiRoutes from 'ui/routes';
 
-import template from './templates/index.html';
+import watchers from './templates/watchers.html';
 import wizard from './templates/wizard.html';
 import about from './templates/about.html';
 import alarms from './templates/alarms.html';
@@ -10,7 +10,7 @@ uiRoutes.enable();
 
 uiRoutes
 .when('/', {
-  template,
+  template: watchers,
   resolve: {
     currentTime($http) {
       return $http.get('../api/sentinl/time').then((resp) => resp.data.time);
