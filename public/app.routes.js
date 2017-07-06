@@ -19,7 +19,7 @@ uiRoutes
 });
 
 uiRoutes
-.when('/wizard', {
+.when('/wizard/:watcherId', {
   template: wizard,
   resolve: {
     currentTime($http) {

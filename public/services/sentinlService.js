@@ -21,4 +21,8 @@ app.service('sentinlService', ['$http', function ($http) {
     return $http.delete(`../api/sentinl/alarm/${index}/${type}/${id}`);
   };
 
+  this.getWatcher = function (id) {
+    return $http.get(`../api/sentinl/get/watcher/${id}`);
+  };
+
 }]);

@@ -9,7 +9,7 @@ import { app } from '../app.module';
 
 // WATCHERS CONTROLLER
 app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interval,
-  $timeout, timefilter, Private, createNotifier, $window, $http, $modal, $log, navMenu, globalNavState) {
+  $timeout, timefilter, Private, createNotifier, $window, $http, $modal, $log, navMenu, globalNavState, $location) {
 
   $scope.title = 'Sentinl: Watchers';
   $scope.description = 'Kibana Alert App for Elasticsearch';
@@ -26,6 +26,7 @@ app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interva
   timefilter.enabled = false;
   $scope.watchers = [];
 
+
   function importWatcherFromLocalStorage() {
     /* New Entry from Saved Kibana Query */
     if ($window.localStorage.getItem('sentinl_saved_query')) {
@@ -33,6 +34,7 @@ app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interva
       $window.localStorage.removeItem('sentinl_saved_query');
     }
   };
+
 
   $http.get('../api/sentinl/list')
   .then((response) => {
@@ -43,6 +45,12 @@ app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interva
     notify.error(error);
     importWatcherFromLocalStorage();
   });
+
+
+  $scope.startWizard = function (watcherId) {
+    $location.path(`/wizard/${watcherId}`);
+  };
+
 
   $scope.watcherDelete = function (watcherId) {
     const index = $scope.watchers.findIndex((watcher) => watcher._id === watcherId);
@@ -72,9 +80,11 @@ app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interva
     });
   };
 
+
   $scope.wizardSave = function () {
     $scope.$broadcast('sentinlWatchers:save');
   };
+
 
   $scope.$on('watcherWizard:save_confirmed', (event, wizard) => {
     const index = $scope.watchers.findIndex((watcher) => watcher._id === wizard.id);
@@ -90,11 +100,13 @@ app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interva
     }
   });
 
+
   $scope.toggleWatcher = function (watcherId) {
     const index = $scope.watchers.findIndex((watcher) => watcher._id === watcherId);
     $scope.watchers[index]._source.disable = !$scope.watchers[index]._source.disable;
     $scope.watcherSave(index);
   };
+
 
   $scope.watcherSave = function ($index, callFromWatcherEditorForm = false) {
     let watcher;
@@ -117,10 +129,11 @@ app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interva
     );
   };
 
+
   /* New Entry */
   $scope.watcherNew = function (newwatcher) {
     if (!newwatcher) {
-      var wid = 'new_watcher_' + Math.random().toString(36).substr(2, 9);
+      const wid = 'new_watcher_' + Math.random().toString(36).substr(2, 9);
       newwatcher = {
         _index: 'watcher',
         _type: 'watch',
@@ -170,9 +183,11 @@ app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interva
     }
     $scope.watchers.unshift(newwatcher);
   };
+
+
   $scope.reporterNew = function (newwatcher) {
     if (!newwatcher) {
-      var wid = 'reporter_' + Math.random().toString(36).substr(2, 9);
+      const wid = 'reporter_' + Math.random().toString(36).substr(2, 9);
       newwatcher = {
         _index: 'watcher',
         _type: 'watch',
@@ -226,11 +241,12 @@ app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interva
     $scope.watchers.unshift(newwatcher);
   };
 
-  var currentTime = moment($route.current.locals.currentTime);
+
+  const currentTime = moment($route.current.locals.currentTime);
   $scope.currentTime = currentTime.format('HH:mm:ss');
-  var utcTime = moment.utc($route.current.locals.currentTime);
+  const utcTime = moment.utc($route.current.locals.currentTime);
   $scope.utcTime = utcTime.format('HH:mm:ss');
-  var unsubscribe = $interval(function () {
+  const unsubscribe = $interval(function () {
     $scope.currentTime = currentTime.add(1, 'second').format('HH:mm:ss');
     $scope.utcTime = utcTime.add(1, 'second').format('HH:mm:ss');
   }, 1000);
