@@ -9,7 +9,8 @@ import { app } from '../app.module';
 
 // WATCHERS CONTROLLER
 app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interval,
-  $timeout, timefilter, Private, createNotifier, $window, $http, $modal, $log, navMenu, globalNavState, $location) {
+  $timeout, timefilter, Private, createNotifier, $window, $http, $modal, $log, navMenu,
+  globalNavState, $location, dataTransfer) {
 
   $scope.title = 'Sentinl: Watchers';
   $scope.description = 'Kibana Alert App for Elasticsearch';
@@ -27,11 +28,25 @@ app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interva
   $scope.watchers = [];
 
 
+  $scope.startWizard = function (watcher) {
+    let path = '/wizard';
+
+    if (_.isObject(watcher)) {
+      dataTransfer.setWatcher(watcher);
+    } else {
+      path += `/${watcher}`;
+    }
+
+    $location.path(path);
+  };
+
+
   function importWatcherFromLocalStorage() {
     /* New Entry from Saved Kibana Query */
     if ($window.localStorage.getItem('sentinl_saved_query')) {
-      $scope.watcherNew(angular.fromJson($window.localStorage.getItem('sentinl_saved_query')));
+      const spyPanelQuery = angular.fromJson($window.localStorage.getItem('sentinl_saved_query'));
       $window.localStorage.removeItem('sentinl_saved_query');
+      $scope.startWizard(spyPanelQuery);
     }
   };
 
@@ -45,11 +60,6 @@ app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interva
     notify.error(error);
     importWatcherFromLocalStorage();
   });
-
-
-  $scope.startWizard = function (watcherId) {
-    $location.path(`/wizard/${watcherId}`);
-  };
 
 
   $scope.watcherDelete = function (watcherId) {

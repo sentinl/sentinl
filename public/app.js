@@ -26,13 +26,14 @@ import './controllers/sentinlAbout';
 import './controllers/confirmMessageController';
 
 /* import factories */
-import './factories/navMenu.js';
+import './factories/navMenu';
+import './factories/dataTransfer';
 
 /* import services */
-import './services/sentinlService.js';
+import './services/sentinlService';
 
 /* import filters */
-import './filters/moment.js';
+import './filters/moment';
 
 /* import directives */
 import './directives/watcherWizard/watcher-wizard';
@@ -57,4 +58,4 @@ import 'ui/timefilter';
 import 'ui/directives/pretty_duration';
 
 /* Routes */
-import './app.routes.js';
+import './app.routes';

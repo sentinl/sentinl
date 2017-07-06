@@ -4,10 +4,10 @@ import _ from 'lodash';
 import confirmMessage from '../templates/confirm-message.html';
 import { app } from '../app.module';
 
-// WATCHERS CONTROLLER
+// WIZARD CONTROLLER
 app.controller('sentinlWizard', function ($rootScope, $scope, $route, $interval,
   $timeout, timefilter, Private, createNotifier, $window, $http, $modal,
-  $log, navMenu, globalNavState, $routeParams, sentinlService) {
+  $log, navMenu, globalNavState, $routeParams, sentinlService, dataTransfer) {
 
   $scope.topNavMenu = navMenu.getTopNav('wizard');
   $scope.tabsMenu = navMenu.getTabs('wizard');
@@ -18,12 +18,14 @@ app.controller('sentinlWizard', function ($rootScope, $scope, $route, $interval,
     location: 'Sentinl Wizard'
   });
 
-  $scope.watcher = {
-    _id: $routeParams.watcherId
-  };
+  $scope.watcher = {};
 
-  sentinlService.getWatcher($scope.watcher._id).then((resp) => {
-    $scope.watcher = resp.data.hits.hits[0];
-  });
+  if ($routeParams.watcherId && $routeParams.watcherId.length) { // edit existing watcher
+    sentinlService.getWatcher($routeParams.watcherId).then((resp) => {
+      $scope.watcher = resp.data.hits.hits[0];
+    });
+  } else { // forwarded from dashboard spy panel
+    $scope.watcher = dataTransfer.getWatcher();
+  }
 
 });
