@@ -56,7 +56,7 @@ export default function routes(server) {
 
   // Current Time
   server.route({
-    path: '/api/sentinl/example',
+    path: '/api/sentinl/time',
     method: 'GET',
     handler(req, reply) {
       reply({ time: new Date().toISOString() });

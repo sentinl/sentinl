@@ -19,6 +19,7 @@
 
 /* import controllers */
 import './controllers/sentinlWatchers';
+import './controllers/sentinlWizard';
 import './controllers/sentinlReports';
 import './controllers/sentinlAlarms';
 import './controllers/sentinlAbout';

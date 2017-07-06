@@ -49,7 +49,8 @@ app.factory('navMenu', ['kbnUrl', function (kbnUrl) {
         list: [
           { display: 'Watchers', url: '#/'},
           { display: 'Alarms', url: '#/alarms'},
-          { display: 'Reports', url: '#/reports'}
+          { display: 'Reports', url: '#/reports'},
+          { display: 'Wizard', url: '#/wizard'}
         ]
       };
     }

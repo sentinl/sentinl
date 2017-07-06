@@ -1,6 +1,7 @@
 import uiRoutes from 'ui/routes';
 
 import template from './templates/index.html';
+import wizard from './templates/wizard.html';
 import about from './templates/about.html';
 import alarms from './templates/alarms.html';
 import reports from './templates/reports.html';
@@ -12,8 +13,17 @@ uiRoutes
   template,
   resolve: {
     currentTime($http) {
-      return $http.get('../api/sentinl/example')
-      .then((resp) => resp.data.time);
+      return $http.get('../api/sentinl/time').then((resp) => resp.data.time);
+    }
+  }
+});
+
+uiRoutes
+.when('/wizard', {
+  template: wizard,
+  resolve: {
+    currentTime($http) {
+      return $http.get('../api/sentinl/time').then((resp) => resp.data.time);
     }
   }
 });
@@ -23,9 +33,7 @@ uiRoutes
   template: alarms,
   resolve: {
     currentTime($http) {
-      return $http.get('../api/sentinl/example').then(function (resp) {
-        return resp.data.time;
-      });
+      return $http.get('../api/sentinl/time').then((resp) => resp.data.time);
     }
   }
 });
@@ -35,9 +43,7 @@ uiRoutes
   template: reports,
   resolve: {
     currentTime($http) {
-      return $http.get('../api/sentinl/example').then(function (resp) {
-        return resp.data.time;
-      });
+      return $http.get('../api/sentinl/time').then((resp) => resp.data.time);
     }
   }
 });
