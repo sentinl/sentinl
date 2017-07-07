@@ -44,9 +44,9 @@ app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interva
   function importWatcherFromLocalStorage() {
     /* New Entry from Saved Kibana Query */
     if ($window.localStorage.getItem('sentinl_saved_query')) {
-      const spyPanelQuery = angular.fromJson($window.localStorage.getItem('sentinl_saved_query'));
+      const spyPanelWatcher = angular.fromJson($window.localStorage.getItem('sentinl_saved_query'));
       $window.localStorage.removeItem('sentinl_saved_query');
-      $scope.startWizard(spyPanelQuery);
+      $scope.startWizard(spyPanelWatcher);
     }
   };
 
@@ -192,6 +192,7 @@ app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interva
       };
     }
     $scope.watchers.unshift(newwatcher);
+    $scope.startWizard(newwatcher);
   };
 
 
@@ -249,6 +250,7 @@ app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interva
       };
     }
     $scope.watchers.unshift(newwatcher);
+    $scope.startWizard(newwatcher);
   };
 
 
