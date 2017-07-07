@@ -51,7 +51,7 @@
       <uib-tab index="1" heading="Input">
         <div class="tabContent">
           <div class="form-group">
-            <label class="col-md-1 control-label" for="inputTitle">Load existing:</label>
+            <label class="col-md-2 control-label" for="inputTitle">Load input:</label>
             <div class="col-md-4">
               <div class="btn-group" dropdown is-open="status.isopenInput">
                 <button type="button" class="btn btn-default dropdown-toggle" dropdown-toggle ng-disabled="disabled">
@@ -69,7 +69,7 @@
             </div>
           </div>
           <div class="form-group">
-            <label class="col-md-1 control-label" for="inputTitle">Title:</label>
+            <label class="col-md-2 control-label" for="inputTitle">Title:</label>
             <div class="col-md-3">
               <input
                 type="text"
@@ -83,7 +83,7 @@
             <p ng-show="watcherForm.inputTitle.$invalid" class="text-danger">Title is required.</p>
           </div>
           <div class="form-group">
-            <div class="col-md-1">
+            <div class="col-md-2">
             </div>
             <div class="col-md-10">
               <div id="inputEdit"
@@ -92,7 +92,7 @@
             </div>
           </div>
           <div class="form-group">
-            <div class="col-md-1">
+            <div class="col-md-2">
             </div>
             <div class="col-md-4">
               <button type="button" class="btn btn-default btn-sm" ng-click="saveScript('input')">Save</button>
@@ -104,7 +104,7 @@
       <uib-tab index="2" heading="Condition">
         <div class="tabContent">
           <div class="form-group">
-            <label class="col-md-1 control-label" for="inputTitle">Load existing:</label>
+            <label class="col-md-2 control-label" for="inputTitle">Load condition:</label>
             <div class="col-md-4">
               <div class="btn-group" dropdown is-open="status.isopenCondition">
                 <button type="button" class="btn btn-default dropdown-toggle" dropdown-toggle ng-disabled="disabled">
@@ -122,7 +122,7 @@
             </div>
           </div>
           <div class="form-group">
-            <label class="col-md-1 control-label" for="conditionTitle">Title:</label>
+            <label class="col-md-2 control-label" for="conditionTitle">Title:</label>
             <div class="col-md-3">
               <input
                 type="text"
@@ -136,7 +136,7 @@
             <p ng-show="watcherForm.conditionTitle.$invalid" class="text-danger">Title is required.</p>
           </div>
           <div class="form-group">
-            <div class="col-md-1">
+            <div class="col-md-2">
             </div>
             <div class="col-md-10">
               <div id="conditionEdit"
@@ -145,7 +145,7 @@
             </div>
           </div>
           <div class="form-group">
-            <div class="col-md-1">
+            <div class="col-md-2">
             </div>
             <div class="col-md-4">
               <button type="button" class="btn btn-default btn-sm" ng-click="saveScript('condition')">Save</button>
@@ -157,7 +157,7 @@
       <uib-tab index="3" heading="Transform">
         <div class="tabContent">
           <div class="form-group">
-            <label class="col-md-1 control-label" for="inputTitle">Load existing:</label>
+            <label class="col-md-2 control-label" for="inputTitle">Load transform:</label>
             <div class="col-md-4">
               <div class="btn-group" dropdown is-open="status.isopenTransform">
                 <button type="button" class="btn btn-default dropdown-toggle" dropdown-toggle ng-disabled="disabled">
@@ -175,7 +175,7 @@
             </div>
           </div>
           <div class="form-group">
-            <label class="col-md-1 control-label" for="transformTitle">Title:</label>
+            <label class="col-md-2 control-label" for="transformTitle">Title:</label>
             <div class="col-md-3">
               <input
                 type="text"
@@ -189,7 +189,7 @@
             <p ng-show="watcherForm.transformTitle.$invalid" class="text-danger">Title is required.</p>
           </div>
           <div class="form-group">
-            <div class="col-md-1">
+            <div class="col-md-2">
             </div>
             <div class="col-md-10">
               <div id="transformEdit"
@@ -198,7 +198,7 @@
             </div>
           </div>
           <div class="form-group">
-            <div class="col-md-1">
+            <div class="col-md-2">
             </div>
             <div class="col-md-4">
               <button type="button" class="btn btn-default btn-sm" ng-click="saveScript('transform')">Save</button>
@@ -208,10 +208,8 @@
         </div>
       </uib-tab>
       <uib-tab index="4" heading="Actions">
-        <div class="tabContent">
+        <div class="tabContent actions">
           <div class="form-group">
-            <div class="col-md-1">
-            </div>
             <div class="col-md-11">
               <a href="javascript:void(0)"
                 ng-class="{
@@ -226,8 +224,6 @@
             </div>
           </div>
           <div class="form-group">
-            <div class="col-md-1">
-            </div>
             <div class="col-md-11">
               <ul class="formActionsList"
                 ng-repeat="(actionName, actionSettings) in watcher._source.actions"
@@ -254,8 +250,8 @@
                       actionSettings.slack.$$edit,
                       actionSettings.console.$$edit
                       ].indexOf(true) != -1">
-                    <div class="formSubform">
-                      <label class="col-md-1 control-label" for="throttle_period">Throttle period:</label>
+                    <div class="throttlePeriod">
+                      <label class="col-md-2 control-label" for="throttle_period">Throttle period:</label>
                       <div class="col-md-4">
                         <schedule-tag timesrc="actionSettings.$$throttle"></schedule-tag>
                       </div>
@@ -288,17 +284,15 @@
       <uib-tab index="5" heading="Raw">
         <div class="tabContent">
           <div class="form-group">
-            <div class="col-md-1"></div>
-            <div class="col-md-11">
-              <label class="checkbox">
-                <input type="checkbox"
-                  ng-model="form.rawEnabled"
-                  ng-checked="form.rawEnabled"> enable
-              </label>ATTENTION! All settings will have been overwritten if enable is checked and the watcher is saved.
+            <div class="col-md-2">
+              <input type="checkbox" ng-model="form.rawEnabled" ng-checked="form.rawEnabled"> enable
+              <i class="fa fa-question-circle"
+                aria-hidden="true"
+                uib-popover="The settings below will be applied if enable is checked and the wizard is saved"
+                popover-trigger="'mouseenter'"></i>
             </div>
           </div>
           <div class="form-group">
-            <div class="col-md-1"></div>
             <div class="col-md-11">
               <div ui-ace="aceOptions('json', 30)" ng-model="watcher.$$raw"></div>
             </div>
