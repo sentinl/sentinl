@@ -1,4 +1,5 @@
 import chrome from 'ui/chrome';
+import _ from 'lodash';
 
 import newWatcherMenu from '../templates/new-watcher-top-nav.html';
 import { app } from '../app.module';
@@ -43,16 +44,23 @@ app.factory('navMenu', ['kbnUrl', function (kbnUrl) {
 
       return nav;
     },
-    getTabs: function (path = '#/') {
-      return {
+    getTabs: function (path = '#/', tmpTabs = null) {
+      const tabMenu = {
         currentPath: path.includes('#/') ? path : `#/${path}`,
         list: [
           { display: 'Watchers', url: '#/'},
           { display: 'Alarms', url: '#/alarms'},
-          { display: 'Reports', url: '#/reports'},
-          { display: 'Wizard', url: '#/wizard'}
+          { display: 'Reports', url: '#/reports'}
         ]
       };
+
+      if (tmpTabs) {
+        _.forEach(tmpTabs, (tab) => tabMenu.list.push({ display: tab.name, url: tab.url }));
+      } else {
+        tabMenu.list = _.filter(tabMenu.list, (tab) => _.includes(['Watchers', 'Alarms', 'Reports'], tab.display));
+      }
+
+      return tabMenu;
     }
   };
 }]);
