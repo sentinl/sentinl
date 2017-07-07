@@ -19,7 +19,6 @@ app.controller('sentinlWizard', function ($rootScope, $scope, $route, $interval,
     location: 'Sentinl Wizard'
   });
 
-
   // Init wizard form
   const initWizard = function () {
     const wHelper = new WatcherHelper();
@@ -44,7 +43,6 @@ app.controller('sentinlWizard', function ($rootScope, $scope, $route, $interval,
       },
       rawEnabled: false
     };
-
 
     $scope.aceOptions = function (mode, lines = 10) {
       return {
@@ -452,8 +450,11 @@ app.controller('sentinlWizard', function ($rootScope, $scope, $route, $interval,
     };
 
 
-    $scope.$on('navMenu:saveWizard', () => saveWizard());
     $scope.$on('navMenu:cancelWizard', () => cancelWizard());
+    $scope.$on('navMenu:saveWizard', () => {
+      saveWizard();
+      init();
+    });
 
 
     // fill wizard form
