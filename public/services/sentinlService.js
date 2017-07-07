@@ -25,4 +25,8 @@ app.service('sentinlService', ['$http', function ($http) {
     return $http.get(`../api/sentinl/get/watcher/${id}`);
   };
 
+  this.saveWatcher = function (watcher) {
+    return $http.post(`../api/sentinl/watcher/${watcher._id}`, watcher);
+  };
+
 }]);

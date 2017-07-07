@@ -7,7 +7,7 @@ import { app } from '../app.module';
 const impactLogo = require('plugins/sentinl/sentinl-white-logo.svg');
 const smallLogo = require('plugins/sentinl/sentinl.svg');
 
-app.factory('navMenu', ['kbnUrl', function (kbnUrl) {
+app.factory('navMenu', ['$rootScope', 'kbnUrl', function ($rootScope, kbnUrl) {
   return {
     setKbnLogo: function (isOpen) {
       if (isOpen) {
@@ -39,6 +39,27 @@ app.factory('navMenu', ['kbnUrl', function (kbnUrl) {
           template: newWatcherMenu,
           testId: 'sentinlNewWatcher'
         });
+        return nav;
+      }
+
+      if (view === 'wizard') {
+        const wizardMenu = [
+          {
+            key: 'Cancel',
+            description: 'Cancel wizard',
+            run: function () { $rootScope.$broadcast('navMenu:cancelWizard'); },
+            testId: 'cancelWizard'
+          },
+          {
+            key: 'Save',
+            description: 'Save wizard',
+            run: function () { $rootScope.$broadcast('navMenu:saveWizard'); },
+            testId: 'saveWizard'
+          }
+        ];
+
+        _.forEach(wizardMenu, (menu) => nav.unshift(menu));
+
         return nav;
       }
 

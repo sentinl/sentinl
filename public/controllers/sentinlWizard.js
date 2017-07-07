@@ -8,7 +8,7 @@ import WatcherHelper from '../classes/WatcherHelper';
 // WIZARD CONTROLLER
 app.controller('sentinlWizard', function ($rootScope, $scope, $route, $interval,
   $timeout, timefilter, Private, createNotifier, $window, $http, $modal,
-  $log, navMenu, globalNavState, $routeParams, sentinlService, dataTransfer) {
+  $log, navMenu, globalNavState, $routeParams, sentinlService, dataTransfer, $location) {
 
   $scope.topNavMenu = navMenu.getTopNav('wizard');
   $scope.tabsMenu = navMenu.getTabs('wizard', [{ name: 'Wizard', url: '#/wizard' }]);
@@ -22,7 +22,6 @@ app.controller('sentinlWizard', function ($rootScope, $scope, $route, $interval,
 
   // Init wizard form
   const initWizard = function () {
-
     const wHelper = new WatcherHelper();
 
     $scope.form = {
@@ -45,6 +44,7 @@ app.controller('sentinlWizard', function ($rootScope, $scope, $route, $interval,
       },
       rawEnabled: false
     };
+
 
     $scope.aceOptions = function (mode, lines = 10) {
       return {
@@ -378,6 +378,86 @@ app.controller('sentinlWizard', function ($rootScope, $scope, $route, $interval,
         notify.error(`Fail to initialize throttle periods: ${e}`);
       }
     };
+
+
+    const saveWizard = function () {
+      const saveTimeout = 1000;
+      $scope.watcherForm.$valid = true;
+      $scope.watcherForm.$invalid = false;
+
+      if ($scope.form.rawEnabled) {
+        try {
+          // All settings will have been overwritten if enable is checked and the watcher is saved.
+          $scope.watcher = angular.fromJson($scope.watcher.$$raw);
+        } catch (e) {
+          notify.error(`Invalid Raw configuration: ${e}`);
+          $scope.watcherForm.$valid = false;
+          $scope.watcherForm.$invalid = true;
+        }
+
+        if ($scope.watcherForm.$valid) {
+          sentinlService.saveWatcher($scope.watcher)
+          .then(() => $timeout(() => notify.warning('SENTINL Watcher successfully saved!'), saveTimeout))
+          .catch(notify.error);
+        }
+
+        return;
+      }
+
+      if ($scope.watcherForm.$valid) {
+        try {
+          saveSchedule();
+        } catch (e) {
+          notify.error(`Invalid schedule configuration: ${e}`);
+          $scope.watcherForm.$valid = false;
+          $scope.watcherForm.$invalid = true;
+        }
+
+        try {
+          saveThrottle();
+        } catch (e) {
+          notify.error(`Invalid throttle configuration: ${e}`);
+          $scope.watcherForm.$valid = false;
+          $scope.watcherForm.$invalid = true;
+        }
+
+        try {
+          saveEditorsText();
+        } catch (e) {
+          notify.error(`Invalid action, Transform or Condition configuration: ${e}`);
+          $scope.watcherForm.$valid = false;
+          $scope.watcherForm.$invalid = true;
+        }
+
+        try {
+          $scope.watcher._source.actions = renameActions($scope.watcher._source.actions);
+        } catch (e) {
+          notify.error(`Fail to rename action: ${e}`);
+          $scope.watcherForm.$valid = false;
+          $scope.watcherForm.$invalid = true;
+        }
+
+      }
+
+      if ($scope.watcherForm.$valid) {
+        sentinlService.saveWatcher($scope.watcher)
+        .then(() => $timeout(() => notify.warning('SENTINL Watcher successfully saved!'), saveTimeout))
+        .catch(notify.error);
+      }
+    };
+
+
+    const cancelWizard = function () {
+      $location.path('/');
+    };
+
+
+    $scope.$on('navMenu:saveWizard', () => saveWizard());
+    $scope.$on('navMenu:cancelWizard', () => cancelWizard());
+
+
+    // fill wizard form
+    init();
   };
 
 
