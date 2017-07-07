@@ -191,7 +191,6 @@ app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interva
         }
       };
     }
-    $scope.watchers.unshift(newwatcher);
     $scope.startWizard(newwatcher);
   };
 
@@ -249,7 +248,6 @@ app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interva
         }
       };
     }
-    $scope.watchers.unshift(newwatcher);
     $scope.startWizard(newwatcher);
   };
 
