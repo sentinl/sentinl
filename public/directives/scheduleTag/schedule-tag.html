@@ -5,46 +5,40 @@
       scheduleForm.secs.$invalid && !scheduleForm.secs.$pristine}">
       <tr>
         <td>
-          h:
-        </td>
-        <td>
           <input
             type="number"
-            min="0"
-            max="23"
+            min="action.time.min"
+            max="action.time.max"
             id="hours"
             name="hours"
-            ng-pattern="action.pattern.hours"
             ng-value="timesrc.hours"
             class="form-control"
             ng-model="timesrc.hours">
         </td>
         <td>
-          m:
+          :
         </td>
         <td>
           <input
             type="number"
-            min="0"
-            max="59"
+            min="action.time.min"
+            max="action.time.max"
             id="mins"
             name="mins"
-            ng-pattern="action.pattern.minsAndSecs"
             ng-value="timesrc.mins"
             class="form-control"
             ng-model="timesrc.mins">
         </td>
         <td>
-          s:
+          :
         </td>
         <td>
           <input
             type="number"
-            min="0"
-            max="59"
+            min="action.time.min"
+            max="action.time.max"
             id="secs"
             name="secs"
-            ng-pattern="action.pattern.minsAndSecs"
             ng-value="timesrc.secs"
             class="form-control"
             ng-model="timesrc.secs">

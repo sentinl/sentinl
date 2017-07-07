@@ -5,9 +5,9 @@ app.directive('scheduleTag', function () {
 
   function actionDirective(scope, element, attrs) {
     scope.action = {
-      pattern: {
-        hours: '^[01]?\\d|2[0-3]$',
-        minsAndSecs: '^[0-5]?\\d$'
+      time: {
+        max: 999,
+        min: 0
       }
     };
   };

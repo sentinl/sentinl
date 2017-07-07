@@ -20,12 +20,12 @@
   <div class="row container">
     <div class="col-12-sm">
 
-  <form name="watcherForm" class="form-horizontal" novalidate>
+  <form name="watcherForm" class="form-horizontal watcherWizard" novalidate>
     <uib-tabset>
       <uib-tab active index="0" heading="General">
         <div class="tabContent">
           <div class="form-group" ng-class="{'has-error': watcherForm.title.$invalid && !watcherForm.title.$pristine}">
-            <label class="col-md-1 control-label" for="title">Title:</label>
+            <label class="col-md-2 control-label" for="title">Title:</label>
             <div class="col-md-3">
               <input
                 type="text"
@@ -41,8 +41,8 @@
             </p>
           </div>
           <div class="form-group">
-            <label class="col-md-1 control-label">Run every:</label>
-            <div class="col-md-10">
+            <label class="col-md-2 control-label">Run every:</label>
+            <div class="col-md-9">
               <schedule-tag timesrc="watcher._source.$$schedule"></schedule-tag>
             </div>
           </div>
