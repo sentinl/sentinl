@@ -7,7 +7,7 @@ import confirmMessage from '../templates/confirm-message.html';
 import { app } from '../app.module';
 
 app.controller('sentinlAlarms', function ($rootScope, $scope, $route, $interval,
-  $timeout, $injector, timefilter, Private, createNotifier, $window, $modal, navMenu,
+  $timeout, $injector, timefilter, Private, createNotifier, $window, $uibModal, navMenu,
   globalNavState, sentinlService) {
   $scope.title = 'Sentinl: Alarms';
   $scope.description = 'Kibana Alert App for Elasticsearch';
@@ -91,7 +91,7 @@ app.controller('sentinlAlarms', function ($rootScope, $scope, $route, $interval,
   });
 
   $scope.deleteAlarm = function (index, rmindex, rmtype, rmid) {
-    const confirmModal = $modal.open({
+    const confirmModal = $uibModal.open({
       template: confirmMessage,
       controller: 'ConfirmMessageController',
       size: 'sm'

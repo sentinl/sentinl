@@ -6,7 +6,7 @@ import watcherEmailAction from './watcher-wizard.html';
 import { app } from '../../app.module';
 import WatcherHelper from '../../classes/WatcherHelper';
 
-app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, createNotifier) {
+app.directive('watcherWizard', function ($uibModal, $route, $log, $http, $timeout, createNotifier) {
   function wizardDirective($scope, element, attrs) {
 
     const notify = createNotifier({
@@ -214,7 +214,7 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
 
 
     $scope.removeAction = function (actionName) {
-      const confirmModal = $modal.open({
+      const confirmModal = $uibModal.open({
         template: confirmMessage,
         controller: 'ConfirmMessageController',
         size: 'sm'

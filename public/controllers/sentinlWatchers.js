@@ -9,7 +9,7 @@ import { app } from '../app.module';
 
 // WATCHERS CONTROLLER
 app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interval,
-  $timeout, timefilter, Private, createNotifier, $window, $http, $modal, $log, navMenu,
+  $timeout, timefilter, Private, createNotifier, $window, $http, $uibModal, $log, navMenu,
   globalNavState, $location, dataTransfer) {
 
   $scope.title = 'Sentinl: Watchers';
@@ -65,7 +65,7 @@ app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interva
   $scope.watcherDelete = function (watcherId) {
     const index = $scope.watchers.findIndex((watcher) => watcher._id === watcherId);
 
-    const confirmModal = $modal.open({
+    const confirmModal = $uibModal.open({
       template: confirmMessage,
       controller: 'ConfirmMessageController',
       size: 'sm'

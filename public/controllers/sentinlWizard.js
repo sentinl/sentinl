@@ -7,7 +7,7 @@ import WatcherHelper from '../classes/WatcherHelper';
 
 // WIZARD CONTROLLER
 app.controller('sentinlWizard', function ($rootScope, $scope, $route, $interval,
-  $timeout, timefilter, Private, createNotifier, $window, $http, $modal,
+  $timeout, timefilter, Private, createNotifier, $window, $http, $uibModal,
   $log, navMenu, globalNavState, $routeParams, sentinlService, dataTransfer, $location) {
 
   $scope.topNavMenu = navMenu.getTopNav('wizard');
@@ -222,7 +222,7 @@ app.controller('sentinlWizard', function ($rootScope, $scope, $route, $interval,
 
 
     $scope.removeAction = function (actionName) {
-      const confirmModal = $modal.open({
+      const confirmModal = $uibModal.open({
         template: confirmMessage,
         controller: 'ConfirmMessageController',
         size: 'sm'
