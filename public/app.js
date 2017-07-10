@@ -36,7 +36,6 @@ import './services/sentinlService';
 import './filters/moment';
 
 /* import directives */
-import './directives/watcherWizard/watcher-wizard';
 import './directives/newAction/new-action';
 import './directives/emailAction/email-action';
 import './directives/emailHtmlAction/emailHtml-action';

@@ -91,26 +91,6 @@ app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interva
   };
 
 
-  $scope.wizardSave = function () {
-    $scope.$broadcast('sentinlWatchers:save');
-  };
-
-
-  $scope.$on('watcherWizard:save_confirmed', (event, wizard) => {
-    const index = $scope.watchers.findIndex((watcher) => watcher._id === wizard.id);
-
-    // the two-way binding doesn't sync the watcher if you create a child object inside
-    // but but syncs if you change a property value
-    // related issue: https://github.com/sirensolutions/sentinl-private/issues/216
-    if (wizard.watcher) {
-      $scope.watchers[index] = wizard.watcher;
-    }
-    if (!wizard.collapse) {
-      $scope.watcherSave(index);
-    }
-  });
-
-
   $scope.toggleWatcher = function (watcherId) {
     const index = $scope.watchers.findIndex((watcher) => watcher._id === watcherId);
     $scope.watchers[index]._source.disable = !$scope.watchers[index]._source.disable;
