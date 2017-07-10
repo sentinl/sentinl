@@ -21,7 +21,7 @@ export default function (kibana) {
   return new kibana.Plugin({
     require: ['kibana', 'elasticsearch'],
     uiExports: {
-      spyModes: ['plugins/sentinl/button/alarm_button'],
+      spyModes: ['plugins/sentinl/dashboard_spy_button/alarm_button'],
       app: {
         title: 'Sentinl',
         description: 'Kibana Alert App for Elasticsearch',
