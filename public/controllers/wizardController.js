@@ -6,7 +6,7 @@ import { app } from '../app.module';
 import WatcherHelper from '../classes/WatcherHelper';
 
 // WIZARD CONTROLLER
-app.controller('sentinlWizard', function ($rootScope, $scope, $route, $interval,
+app.controller('WizardController', function ($rootScope, $scope, $route, $interval,
   $timeout, timefilter, Private, createNotifier, $window, $http, $uibModal,
   $log, navMenu, globalNavState, $routeParams, sentinlService, dataTransfer, $location) {
 

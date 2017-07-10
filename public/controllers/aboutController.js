@@ -3,7 +3,7 @@ import moment from 'moment';
 
 import { app } from '../app.module';
 
-app.controller('sentinlAbout', function ($scope, $route, $interval, timefilter, createNotifier, navMenu, globalNavState) {
+app.controller('AboutController', function ($scope, $route, $interval, timefilter, createNotifier, navMenu, globalNavState) {
   $scope.title = 'Sentinl';
   $scope.description = 'Kibana Alert App for Elasticsearch';
   timefilter.enabled = false;

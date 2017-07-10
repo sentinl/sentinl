@@ -8,7 +8,7 @@ import confirmMessage from '../templates/confirm-message.html';
 import { app } from '../app.module';
 
 // WATCHERS CONTROLLER
-app.controller('sentinlWatchers', function ($rootScope, $scope, $route, $interval,
+app.controller('WatchersController', function ($rootScope, $scope, $route, $interval,
   $timeout, timefilter, Private, createNotifier, $window, $http, $uibModal, $log, navMenu,
   globalNavState, $location, dataTransfer) {
 

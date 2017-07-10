@@ -18,11 +18,11 @@
  */
 
 /* import controllers */
-import './controllers/sentinlWatchers';
-import './controllers/sentinlWizard';
-import './controllers/sentinlReports';
-import './controllers/sentinlAlarms';
-import './controllers/sentinlAbout';
+import './controllers/watchersController';
+import './controllers/wizardController';
+import './controllers/reportsController';
+import './controllers/alarmsController';
+import './controllers/aboutController';
 import './controllers/confirmMessageController';
 
 /* import factories */
