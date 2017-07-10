@@ -10,7 +10,7 @@ import { app } from '../app.module';
 // WATCHERS CONTROLLER
 app.controller('WatchersController', function ($rootScope, $scope, $route, $interval,
   $timeout, timefilter, Private, createNotifier, $window, $http, $uibModal, $log, navMenu,
-  globalNavState, $location, dataTransfer) {
+  globalNavState, $location, dataTransfer, sentinlService) {
 
   $scope.title = 'Sentinl: Watchers';
   $scope.description = 'Kibana Alert App for Elasticsearch';
@@ -41,7 +41,7 @@ app.controller('WatchersController', function ($rootScope, $scope, $route, $inte
   };
 
 
-  function importWatcherFromLocalStorage() {
+  const importWatcherFromLocalStorage = function () {
     /* New Entry from Saved Kibana Query */
     if ($window.localStorage.getItem('sentinl_saved_query')) {
       const spyPanelWatcher = angular.fromJson($window.localStorage.getItem('sentinl_saved_query'));
@@ -50,16 +50,19 @@ app.controller('WatchersController', function ($rootScope, $scope, $route, $inte
     }
   };
 
+  const listWatchers = function () {
+    sentinlService.listWatchers()
+    .then((response) => {
+      $scope.watchers = response.data.hits.hits;
+      importWatcherFromLocalStorage();
+    })
+    .catch((error) => {
+      notify.error(error);
+      importWatcherFromLocalStorage();
+    });
+  };
 
-  $http.get('../api/sentinl/list')
-  .then((response) => {
-    $scope.watchers = response.data.hits.hits;
-    importWatcherFromLocalStorage();
-  })
-  .catch((error) => {
-    notify.error(error);
-    importWatcherFromLocalStorage();
-  });
+  listWatchers();
 
 
   $scope.watcherDelete = function (watcherId) {
@@ -73,10 +76,9 @@ app.controller('WatchersController', function ($rootScope, $scope, $route, $inte
 
     confirmModal.result.then((response) => {
       if (response === 'yes') {
-        return $http.delete('../api/sentinl/watcher/' + $scope.watchers[index]._id)
-        .then((resp) => {
+        return sentinlService.deleteWatcher($scope.watchers[index]._id).then((resp) => {
           $timeout(() => {
-            $route.reload();
+            listWatchers();
             notify.warning('SENTINL Watcher successfully deleted!');
           }, 1000);
         }).catch((error) => {
@@ -91,14 +93,7 @@ app.controller('WatchersController', function ($rootScope, $scope, $route, $inte
   };
 
 
-  $scope.toggleWatcher = function (watcherId) {
-    const index = $scope.watchers.findIndex((watcher) => watcher._id === watcherId);
-    $scope.watchers[index]._source.disable = !$scope.watchers[index]._source.disable;
-    $scope.watcherSave(index);
-  };
-
-
-  $scope.watcherSave = function ($index, callFromWatcherEditorForm = false) {
+  const watcherSave = function ($index, callFromWatcherEditorForm = false) {
     let watcher;
     if ($scope.editor && !callFromWatcherEditorForm) {
       watcher = angular.fromJson($scope.editor.getValue());
@@ -107,16 +102,19 @@ app.controller('WatchersController', function ($rootScope, $scope, $route, $inte
     }
 
     console.log('saving object:', watcher);
-    return $http.post(`../api/sentinl/watcher/${watcher._id}`, watcher)
-    .then(
-      () => {
-        $timeout(() => {
-          $route.reload();
-          notify.warning('SENTINL Watcher successfully saved!');
-        }, 1000);
-      },
-      notify.error
-    );
+    return sentinlService.saveWatcher(watcher).then(() => {
+      $timeout(() => {
+        listWatchers();
+        notify.warning('SENTINL Watcher successfully saved!');
+      }, 1000);
+    }).catch(notify.error);
+  };
+
+
+  $scope.toggleWatcher = function (watcherId) {
+    const index = $scope.watchers.findIndex((watcher) => watcher._id === watcherId);
+    $scope.watchers[index]._source.disable = !$scope.watchers[index]._source.disable;
+    watcherSave(index);
   };
 
 

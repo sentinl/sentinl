@@ -17,6 +17,10 @@ app.service('sentinlService', ['$http', function ($http) {
     return $http.get('../api/sentinl/list/reports');
   };
 
+  this.listWatchers = function () {
+    return $http.get('../api/sentinl/list');
+  };
+
   this.deleteAlarm = function (index, type, id) {
     return $http.delete(`../api/sentinl/alarm/${index}/${type}/${id}`);
   };
@@ -27,6 +31,10 @@ app.service('sentinlService', ['$http', function ($http) {
 
   this.saveWatcher = function (watcher) {
     return $http.post(`../api/sentinl/watcher/${watcher._id}`, watcher);
+  };
+
+  this.deleteWatcher = function (id) {
+    return $http.delete(`../api/sentinl/watcher/${id}`);
   };
 
 }]);
