@@ -1,4 +1,9 @@
-<div uib-accordion-group class="panel-default" heading="{{actionSettings.$$title}}">
+<div uib-accordion-group class="panel-default" heading="{{actionSettings.$$title}}"
+  ng-click="action.status.isHeaderOpen = !action.status.isHeaderOpen">
+  <uib-accordion-heading>
+    {{actionSettings.$$title}} <i class="pull-right glyphicon"
+    ng-class="{'glyphicon-chevron-down': action.status.isHeaderOpen, 'glyphicon-chevron-right': !action.status.isHeaderOpen}"></i>
+  </uib-accordion-heading>
 <h4>{{ action.type }}</h4>
 <div class="jumbotron" ng-form="slackForm">
   <div class="form-group">

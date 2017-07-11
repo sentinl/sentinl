@@ -4,7 +4,10 @@ import { app } from '../../app.module';
 app.directive('consoleAction', function () {
   function actionDirective(scope, element, attrs) {
     scope.action = {
-      type: 'console'
+      type: 'console',
+      status: {
+        isHeaderOpen: false
+      }
     };
   }
 

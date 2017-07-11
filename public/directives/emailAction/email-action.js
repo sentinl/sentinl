@@ -4,7 +4,10 @@ import { app } from '../../app.module';
 app.directive('emailAction', function () {
   function actionDirective(scope, element, attrs) {
     scope.action = {
-      type: 'email'
+      type: 'email',
+      status: {
+        isHeaderOpen: false
+      }
     };
   }
 

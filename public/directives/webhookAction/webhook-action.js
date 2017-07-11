@@ -9,7 +9,10 @@ app.directive('webhookAction', function () {
 
     scope.action = {
       type: 'webhook',
-      title: attrs.name
+      title: attrs.name,
+      status: {
+        isHeaderOpen: false
+      }
     };
 
     if (_.has(scope.watcher._source.actions[attrs.name].webhook, 'headers')) {
