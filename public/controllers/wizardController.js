@@ -39,10 +39,22 @@ app.controller('WizardController', function ($rootScope, $scope, $route, $interv
         new: {
           edit: false
         },
-        types: [ 'webhook', 'email', 'email_html', 'report', 'slack', 'console' ]
+        types: [ 'webhook', 'email', 'email_html', 'report', 'slack', 'console' ],
+        status: {}
       },
       rawEnabled: false
     };
+
+
+    $scope.actionOfType = function (action, type) {
+      return _.has(action, type);
+    };
+
+
+    $scope.actionsExist = function (actions) {
+      return _.keys(actions).length;
+    };
+
 
     $scope.aceOptions = function (mode, lines = 10) {
       return {

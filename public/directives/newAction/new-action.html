@@ -1,5 +1,10 @@
-<ul ng-repeat="(type, settings) in action.types">
-  <li>
-    <a href="javascript:void(0)" ng-click="addAction(type)">{{ type }}</a>
-  </li>
-</ul>
+<div class="btn-group" uib-dropdown is-open="action.addAction.isOpen">
+  <button type="button" class="btn btn-default dropdown-toggle" uib-dropdown-toggle ng-disabled="disabled">
+    Add action <span class="caret"></span>
+  </button>
+  <ul class="dropdown-menu" uib-dropdown-menu role="menu">
+    <li ng-repeat="(type, settings) in action.types">
+      <a href="javascript:void(0)" ng-click="addAction(type)">{{ type }}</a>
+    </li>
+  </ul>
+</div> <!-- end uib-dropdown -->

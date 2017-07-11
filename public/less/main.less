@@ -11,20 +11,23 @@
     max-height: 100%;
   }
 
-  .navbar-inverse .navbar-brand {
-    color: #ffffff;
-  }
-
   .container {
     margin-top: 30px;
     margin-left: 10px;
     width: 98%;
   }
 
-  .navbar-inverse .logo {
+  .logo {
     height: 45px;
     width: 100px !important;
     background-color: #3c3c3c;
+  }
+
+  .logo-about {
+    height: 170px;
+    margin-bottom: 20px;
+    background: url('../sentinl-orange-logo.svg') no-repeat;
+    background-size: contain;
   }
 
   pre {
@@ -36,16 +39,17 @@
     color: #337ab7;
     margin: 0 8px;
   }
+
   .show-rule, .edit-rule {
     margin-right: 15px;
   }
 
-  .alarmRow {
+  .alarm-row {
     color: black;
     background-color: #ffc000;
   }
 
-  .alarmRow-odd {
+  .alarm-row-odd {
     color: black;
     background-color: #ffd000;
   }
@@ -55,43 +59,28 @@
     min-height: 350px;
   }
 
-  .aboutSentinlLogo {
-    height: 170px;
-    margin-bottom: 20px;
-    background: url('../sentinl-orange-logo.svg') no-repeat;
-    background-size: contain;
-  }
-
-  .formActionsList {
-    padding-left: 0px !important;
-  }
-
-  .throttlePeriod {
-    padding-top: 20px !important;
-  }
-
-  .scheduleTag td {
+  .schedule-tag td {
     padding-right: 5px;
   }
 
-  .scheduleTag input {
+  .schedule-tag input {
     width: 74px;
   }
 
-  .watcherWizard {
+  #watcher-wizard {
     min-height: 400px;
   }
 
-  .watcherWizard .form-group a {
+  #watcher-wizard .form-group a {
     text-decoration: none;
   }
 
-  .watcherWizard .tabContent {
-    padding-top: 30px;
+  #watcher-wizard .form-group label {
+    text-align: left;
   }
 
-  .watcherWizard .tabContent .actions {
-    padding-top: 30px;
+  #watcher-wizard .tab-content {
+    padding-top: 20px;
   }
 
   .search-bar {
