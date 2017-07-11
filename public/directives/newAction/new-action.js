@@ -1,7 +1,7 @@
 import watcherNewAction from './new-action.html';
 import { app } from '../../app.module';
 
-app.directive('newAction', function () {
+app.directive('newAction', function ($rootScope) {
   function actionDirective(scope, element, attrs) {
 
     scope.action = {
@@ -130,6 +130,7 @@ app.directive('newAction', function () {
         };
       }
 
+      $rootScope.$broadcast('newAction:added');
 
     };
   };

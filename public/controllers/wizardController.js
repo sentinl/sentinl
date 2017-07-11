@@ -42,7 +42,12 @@ app.controller('WizardController', function ($rootScope, $scope, $route, $interv
         types: [ 'webhook', 'email', 'email_html', 'report', 'slack', 'console' ],
         status: {}
       },
-      rawEnabled: false
+      rawEnabled: false,
+      tabs: {
+        input: { disable: false },
+        condition: { disable: false },
+        transform: { disable: false }
+      }
     };
 
 
@@ -75,7 +80,7 @@ app.controller('WizardController', function ($rootScope, $scope, $route, $interv
     };
 
     const initActionTitles = function () {
-      _.forOwn($scope.watcher._source.actions, (settings, name) => { settings.$$title = name; });
+      _.forEach($scope.watcher._source.actions, (settings, name) => { settings.$$title = name; });
     };
 
 
@@ -85,7 +90,7 @@ app.controller('WizardController', function ($rootScope, $scope, $route, $interv
         mins: 0,
         secs: 0
       };
-      _.each($scope.watcher._source.trigger.schedule.later.split(','), (period) => {
+      _.forEach($scope.watcher._source.trigger.schedule.later.split(','), (period) => {
         if (period.match(/hour/i)) {
           $scope.watcher._source.$$schedule.hours = +_.trim(period).split(' ')[1];
         }
@@ -110,7 +115,7 @@ app.controller('WizardController', function ($rootScope, $scope, $route, $interv
         return str.match(/([0-9]?[0-9])s/i) ? +str.match(/([0-9]?[0-9])s/i)[1] : 0;
       };
 
-      _.forOwn($scope.watcher._source.actions, (action) => {
+      _.forEach($scope.watcher._source.actions, (action) => {
         if (!action.throttle_period) {
           action.throttle_period = '30s';
         }
@@ -125,7 +130,7 @@ app.controller('WizardController', function ($rootScope, $scope, $route, $interv
 
     const saveSchedule = function () {
       let schedule = [];
-      _.forOwn($scope.watcher._source.$$schedule, (value, key) => {
+      _.forEach($scope.watcher._source.$$schedule, (value, key) => {
         if (value) {
           schedule.push(`every ${value} ${key}`);
         }
@@ -136,8 +141,8 @@ app.controller('WizardController', function ($rootScope, $scope, $route, $interv
 
 
     const saveThrottle = function () {
-      _.forOwn($scope.watcher._source.actions, (action) => {
-        _.forOwn(action.$$throttle, (value, key) => {
+      _.forEach($scope.watcher._source.actions, (action) => {
+        _.forEach(action.$$throttle, (value, key) => {
           if (!value) action.$$throttle[key] = 0;
         });
         action.throttle_period = `${action.$$throttle.hours}h${action.$$throttle.mins}m${action.$$throttle.secs}s`;
@@ -254,37 +259,9 @@ app.controller('WizardController', function ($rootScope, $scope, $route, $interv
     };
 
 
-    $scope.addAction = function () {
-      $scope.form.actions.new.edit = !$scope.form.actions.new.edit;
-    };
-
-
-    $scope.editAction = function (actionName, actionSettings) {
-      // toggle edit for the selected action
-      _.each($scope.form.actions.types, (type) => {
-        if (_.has(actionSettings, type)) {
-          if (!_.has(actionSettings[type], '$$edit')) {
-            actionSettings[type].$$edit = false;
-          }
-          actionSettings[type].$$edit = !actionSettings[type].$$edit;
-        }
-      });
-
-      // edit one action at a time
-      // close all other actions
-      _.forOwn($scope.watcher._source.actions, (settings, name) => {
-        _.each($scope.form.actions.types, (type) => {
-          if (_.has(settings, type)) {
-            if (name !== actionName) settings[type].$$edit = false;
-          }
-        });
-      });
-    };
-
-
     const renameActions = function (actions) {
       const newActions = {};
-      _.forOwn(actions, (settings, name) => {
+      _.forEach(actions, (settings, name) => {
         newActions[settings.$$title] = settings;
         delete newActions[settings.$$title].$$title;
       });
@@ -303,8 +280,8 @@ app.controller('WizardController', function ($rootScope, $scope, $route, $interv
         }
       });
 
-      _.forOwn($scope.watcher._source.actions, (settings, name) => {
-        _.each($scope.form.actions.types, (type) => {
+      _.forEach($scope.watcher._source.actions, (settings, name) => {
+        _.forEach($scope.form.actions.types, (type) => {
           if (_.has(settings, type)) {
             delete settings[type].$$edit;
           }
@@ -352,12 +329,35 @@ app.controller('WizardController', function ($rootScope, $scope, $route, $interv
     };
 
 
+    // Disable tabs (Input, Condition and Transform) if there are only report actions
+    const initTabs = function () {
+      const actionTypes = {};
+      _.forEach($scope.watcher._source.actions, (settings, name) => {
+        _.forEach($scope.form.actions.types, (type) => {
+          if (settings[type]) actionTypes[type] = true;
+        });
+      });
+
+      if (_.keys(actionTypes).length === 1 && _.keys(actionTypes)[0] === 'report') {
+        _.forEach($scope.form.tabs, (tab) => { tab.disable = true; });
+      } else {
+        _.forEach($scope.form.tabs, (tab) => { tab.disable = false; });
+      }
+    };
+
+
     const initRaw = function () {
       $scope.watcher.$$raw = angular.toJson($scope.watcher, 'pretty');
     };
 
 
     const init = function () {
+      try {
+        initTabs();
+      } catch (e) {
+        notify.error(`Fail to initialize wizard tabs: ${e}`);
+      }
+
       try {
         initScripts();
       } catch (e) {
@@ -460,6 +460,15 @@ app.controller('WizardController', function ($rootScope, $scope, $route, $interv
     const cancelWizard = function () {
       $location.path('/');
     };
+
+
+    $scope.$on('newAction:added', () => {
+      try {
+        initTabs();
+      } catch (e) {
+        notify.error(`Fail to initialize wizard tabs: ${e}`);
+      }
+    });
 
 
     $scope.$on('navMenu:cancelWizard', () => cancelWizard());
