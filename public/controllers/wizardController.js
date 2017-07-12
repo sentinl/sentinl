@@ -7,7 +7,7 @@ import WatcherHelper from '../classes/WatcherHelper';
 
 // WIZARD CONTROLLER
 app.controller('WizardController', function ($rootScope, $scope, $route, $interval,
-  $timeout, timefilter, Private, createNotifier, $window, $http, $uibModal,
+  $timeout, timefilter, Private, createNotifier, $window, $uibModal,
   $log, navMenu, globalNavState, $routeParams, sentinlService, dataTransfer, $location) {
 
   $scope.topNavMenu = navMenu.getTopNav('wizard');
@@ -24,6 +24,7 @@ app.controller('WizardController', function ($rootScope, $scope, $route, $interv
     const wHelper = new WatcherHelper();
 
     $scope.form = {
+      saveTimeout: 1000,
       status: !$scope.watcher._source.disable ? 'Enabled' : 'Disable',
       messages: {
         success: null,
@@ -156,23 +157,6 @@ app.controller('WizardController', function ($rootScope, $scope, $route, $interv
     };
 
 
-    const displayFormMsg = function (type, msg) {
-      $scope.form.messages.success = null;
-      $scope.form.messages.danger = null;
-
-      if (type === 'success') {
-        $scope.form.messages.success = msg;
-      } else if (type === 'danger') {
-        $scope.form.messages.danger = msg;
-      }
-
-      $timeout(() => {
-        $scope.form.messages.success = null;
-        $scope.form.messages.danger = null;
-      }, $scope.form.messages.timeout);
-    };
-
-
     $scope.saveScript = function (type) {
       const title = `${type}Title`;
 
@@ -190,12 +174,12 @@ app.controller('WizardController', function ($rootScope, $scope, $route, $interv
           title: $scope.watcher.$$scripts[type].title,
           body: $scope.watcher.$$scripts[type].body
         };
-        $http.post(`../api/sentinl/save/one_script/${type}/${id}`, $scope.form.scripts[type][id])
-        .then((msg) => {
+
+        sentinlService.saveScript(type, id, $scope.form.scripts[type][id]).then((msg) => {
           if (msg.data.ok) {
-            displayFormMsg('success', 'Script saved!');
+            $timeout(() => notify.info('Script successfully saved!'), $scope.form.saveTimeout);
           } else {
-            displayFormMsg('danger', 'Fail to save the script!');
+            $timeout(() => notify.error('Fail to save the script!'), $scope.form.saveTimeout);
           }
         })
         .catch(notify.error);
@@ -214,12 +198,11 @@ app.controller('WizardController', function ($rootScope, $scope, $route, $interv
 
     $scope.removeScript = function (type) {
       const id = $scope.watcher.$$scripts[type].id;
-      $http.delete(`../api/sentinl/remove/one_script/${type}/${id}`)
-      .then((msg) => {
+      sentinlService.deleteScript(type, id).then((msg) => {
         if (msg.data.ok) {
-          displayFormMsg('success', 'Script deleted!');
+          $timeout(() => notify.info('Script deleted!'), $scope.form.saveTimeout);
         } else {
-          displayFormMsg('danger', 'Fail to delete the script!');
+          $timeout(() => notify.error('Fail to delete the script!'), $scope.form.saveTimeout);
         }
       })
       .catch(notify.error);
@@ -320,7 +303,7 @@ app.controller('WizardController', function ($rootScope, $scope, $route, $interv
           body: field === 'input' ? angular.toJson(value, 'pretty') : value
         };
 
-        $http.get(`../api/sentinl/get/scripts/${field}`).then((resp) => {
+        sentinlService.listScripts(field).then((resp) => {
           _.forEach(resp.data.hits.hits, (script) => {
             $scope.form.scripts[field][script._id] = script._source;
           });
@@ -391,7 +374,6 @@ app.controller('WizardController', function ($rootScope, $scope, $route, $interv
 
 
     const saveWizard = function () {
-      const saveTimeout = 1000;
       $scope.watcherForm.$valid = true;
       $scope.watcherForm.$invalid = false;
 
@@ -407,7 +389,7 @@ app.controller('WizardController', function ($rootScope, $scope, $route, $interv
 
         if ($scope.watcherForm.$valid) {
           sentinlService.saveWatcher($scope.watcher)
-          .then(() => $timeout(() => notify.warning('SENTINL Watcher successfully saved!'), saveTimeout))
+          .then(() => $timeout(() => notify.info('Watcher successfully saved!'), $scope.form.saveTimeout))
           .catch(notify.error);
         }
 
@@ -451,7 +433,7 @@ app.controller('WizardController', function ($rootScope, $scope, $route, $interv
 
       if ($scope.watcherForm.$valid) {
         sentinlService.saveWatcher($scope.watcher)
-        .then(() => $timeout(() => notify.warning('SENTINL Watcher successfully saved!'), saveTimeout))
+        .then(() => $timeout(() => notify.info('Watcher successfully saved!'), $scope.form.saveTimeout))
         .catch(notify.error);
       }
     };

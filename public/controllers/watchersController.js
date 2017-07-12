@@ -79,7 +79,7 @@ app.controller('WatchersController', function ($rootScope, $scope, $route, $inte
         return sentinlService.deleteWatcher($scope.watchers[index]._id).then((resp) => {
           $timeout(() => {
             listWatchers();
-            notify.warning('SENTINL Watcher successfully deleted!');
+            notify.info('Watcher successfully deleted!');
           }, 1000);
         }).catch((error) => {
           if (Number.isInteger(index)) {
@@ -105,7 +105,7 @@ app.controller('WatchersController', function ($rootScope, $scope, $route, $inte
     return sentinlService.saveWatcher(watcher).then(() => {
       $timeout(() => {
         listWatchers();
-        notify.warning('SENTINL Watcher successfully saved!');
+        notify.info('Watcher enabled!');
       }, 1000);
     }).catch(notify.error);
   };

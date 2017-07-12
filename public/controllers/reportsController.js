@@ -105,7 +105,7 @@ app.controller('ReportsController', function ($rootScope, $scope, $route, $inter
         .then(() => {
           $scope.elasticReports.splice(index - 1, 1);
           $timeout(() => {
-            notify.warning('SENTINL Report log successfully deleted!');
+            notify.info('Report log successfully deleted!');
             getReports($scope.timeInterval);
           }, 1000);
         })

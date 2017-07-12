@@ -103,7 +103,7 @@ app.controller('AlarmsController', function ($rootScope, $scope, $route, $interv
         .then(() => {
           $timeout(() => {
             $scope.elasticAlarms.splice(index - 1, 1);
-            notify.warning('SENTINL Alarm log successfully deleted!');
+            notify.notify('Alarm log successfully deleted!');
             getAlarms($scope.timeInterval);
           }, 1000);
         })

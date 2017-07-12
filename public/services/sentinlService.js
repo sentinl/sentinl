@@ -37,4 +37,16 @@ app.service('sentinlService', ['$http', function ($http) {
     return $http.delete(`../api/sentinl/watcher/${id}`);
   };
 
+  this.listScripts = function (field) {
+    return $http.get(`../api/sentinl/get/scripts/${field}`);
+  };
+
+  this.saveScript = function (type, id, doc) {
+    return $http.post(`../api/sentinl/save/one_script/${type}/${id}`, doc);
+  };
+
+  this.deleteScript = function (type, id) {
+    return $http.delete(`../api/sentinl/remove/one_script/${type}/${id}`);
+  };
+
 }]);
