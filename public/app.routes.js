@@ -1,7 +1,7 @@
 import uiRoutes from 'ui/routes';
 
 import watchers from './templates/watchers.html';
-import wizard from './templates/wizard.html';
+import editor from './templates/editor.html';
 import about from './templates/about.html';
 import alarms from './templates/alarms.html';
 import reports from './templates/reports.html';
@@ -19,8 +19,8 @@ uiRoutes
 });
 
 uiRoutes
-.when('/wizard/:watcherId?', {
-  template: wizard,
+.when('/editor/:watcherId?', {
+  template: editor,
   resolve: {
     currentTime($http) {
       return $http.get('../api/sentinl/time').then((resp) => resp.data.time);

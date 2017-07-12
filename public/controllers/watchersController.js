@@ -29,7 +29,7 @@ app.controller('WatchersController', function ($rootScope, $scope, $route, $inte
 
 
   $scope.startWizard = function (watcher) {
-    let path = '/wizard';
+    let path = '/editor';
 
     if (_.isObject(watcher)) {
       dataTransfer.setWatcher(watcher);

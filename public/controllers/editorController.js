@@ -6,20 +6,20 @@ import { app } from '../app.module';
 import WatcherHelper from '../classes/WatcherHelper';
 
 // WIZARD CONTROLLER
-app.controller('WizardController', function ($rootScope, $scope, $route, $interval,
+app.controller('EditorController', function ($rootScope, $scope, $route, $interval,
   $timeout, timefilter, Private, createNotifier, $window, $uibModal,
   $log, navMenu, globalNavState, $routeParams, sentinlService, dataTransfer, $location) {
 
-  $scope.topNavMenu = navMenu.getTopNav('wizard');
-  $scope.tabsMenu = navMenu.getTabs('wizard', [{ name: 'Wizard', url: '#/wizard' }]);
+  $scope.topNavMenu = navMenu.getTopNav('editor');
+  $scope.tabsMenu = navMenu.getTabs('editor', [{ name: 'Editor', url: '#/editor' }]);
   navMenu.setKbnLogo(globalNavState.isOpen());
   $scope.$on('globalNavState:change', () => navMenu.setKbnLogo(globalNavState.isOpen()));
 
   const notify = createNotifier({
-    location: 'Sentinl Wizard'
+    location: 'Sentinl Watcher Editor'
   });
 
-  // Init wizard form
+  // Init editor form
   const initWizard = function () {
     const wHelper = new WatcherHelper();
 
@@ -338,7 +338,7 @@ app.controller('WizardController', function ($rootScope, $scope, $route, $interv
       try {
         initTabs();
       } catch (e) {
-        notify.error(`Fail to initialize wizard tabs: ${e}`);
+        notify.error(`Fail to initialize editor tabs: ${e}`);
       }
 
       try {
@@ -448,7 +448,7 @@ app.controller('WizardController', function ($rootScope, $scope, $route, $interv
       try {
         initTabs();
       } catch (e) {
-        notify.error(`Fail to initialize wizard tabs: ${e}`);
+        notify.error(`Fail to initialize editor tabs: ${e}`);
       }
     });
 
@@ -460,7 +460,7 @@ app.controller('WizardController', function ($rootScope, $scope, $route, $interv
     });
 
 
-    // fill wizard form
+    // fill editor form
     init();
   };
 

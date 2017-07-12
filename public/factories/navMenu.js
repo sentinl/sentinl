@@ -42,23 +42,23 @@ app.factory('navMenu', ['$rootScope', 'kbnUrl', function ($rootScope, kbnUrl) {
         return nav;
       }
 
-      if (view === 'wizard') {
-        const wizardMenu = [
+      if (view === 'editor') {
+        const editorMenu = [
           {
             key: 'Cancel',
-            description: 'Cancel wizard',
+            description: 'Cancel editor',
             run: function () { $rootScope.$broadcast('navMenu:cancelWizard'); },
             testId: 'cancelWizard'
           },
           {
             key: 'Save',
-            description: 'Save wizard',
+            description: 'Save editor',
             run: function () { $rootScope.$broadcast('navMenu:saveWizard'); },
             testId: 'saveWizard'
           }
         ];
 
-        _.forEach(wizardMenu, (menu) => nav.unshift(menu));
+        _.forEach(editorMenu, (menu) => nav.unshift(menu));
 
         return nav;
       }

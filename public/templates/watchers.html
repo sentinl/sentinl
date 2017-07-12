@@ -55,12 +55,6 @@
                 <span title="Show/Hide" class="show-rule" ng-click="startWizard(watcher._id)"  ng-model="collapse">
                   <i class="fa fa-ellipsis-h"></i>
                 </span>
-                <span ng-show="collapse"
-                      ng-click="wizardSave(watcher._id)"
-                      title="Save"
-                      class="delete-rule">
-                  <i class="fa fa-save"></i>
-                </span>
                 <span ng-click="watcherDelete(watcher._id)"
                       title="Delete"
                       class="delete-rule">
@@ -77,11 +71,6 @@
                   <i class="fa fa-toggle-on"></i>
                 </span>
 
-              </td>
-            </tr>
-            <tr ng-if="collapse">
-              <td colspan="100%">
-                <watcher-wizard watcher="watcher"></watcher-wizard>
               </td>
             </tr>
           </tbody>
