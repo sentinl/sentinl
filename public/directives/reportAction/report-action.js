@@ -1,7 +1,7 @@
 import watcherReportAction from './report-action.html';
 import { app } from '../../app.module';
 
-app.directive('reportAction', function () {
+app.directive('reportAction', function ($rootScope) {
   function actionDirective(scope, element, attrs) {
     scope.action = {
       type: 'report',
@@ -10,6 +10,11 @@ app.directive('reportAction', function () {
         isHeaderOpen: false
       }
     };
+
+    scope.removeAction = function () {
+      $rootScope.$broadcast('action:removeAction', { name: attrs.name });
+    };
+
   }
 
   return {

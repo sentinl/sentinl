@@ -221,7 +221,7 @@ app.controller('WizardController', function ($rootScope, $scope, $route, $interv
     };
 
 
-    $scope.removeAction = function (actionName) {
+    const removeAction = function (actionName) {
       const confirmModal = $uibModal.open({
         template: confirmMessage,
         controller: 'ConfirmMessageController',
@@ -452,7 +452,7 @@ app.controller('WizardController', function ($rootScope, $scope, $route, $interv
       }
     });
 
-
+    $scope.$on('action:removeAction', (event, action) => removeAction(action.name));
     $scope.$on('navMenu:cancelWizard', () => cancelWizard());
     $scope.$on('navMenu:saveWizard', () => {
       saveWizard();

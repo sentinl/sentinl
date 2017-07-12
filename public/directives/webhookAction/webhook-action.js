@@ -3,10 +3,9 @@ import _ from 'lodash';
 import watcherWebhookAction from './webhook-action.html';
 import { app } from '../../app.module';
 
-app.directive('webhookAction', function () {
+app.directive('webhookAction', function ($rootScope) {
 
   function actionDirective(scope, element, attrs) {
-
     scope.action = {
       type: 'webhook',
       title: attrs.name,
@@ -22,6 +21,10 @@ app.directive('webhookAction', function () {
 
     scope.changeMethod = function (method) {
       scope.watcher._source.actions[attrs.name].webhook.method = method;
+    };
+
+    scope.removeAction = function () {
+      $rootScope.$broadcast('action:removeAction', { name: attrs.name });
     };
 
   };
