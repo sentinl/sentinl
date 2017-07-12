@@ -43,7 +43,7 @@ import './directives/webhookAction/webhook-action';
 import './directives/reportAction/report-action';
 import './directives/slackAction/slack-action';
 import './directives/consoleAction/console-action';
-import './directives/scheduleTag/schedule-tag';
+import './directives/periodTag/period-tag';
 
 /* Styles */
 import './less/main.less';

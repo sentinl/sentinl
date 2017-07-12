@@ -1,7 +1,7 @@
-import scheduleTagTemplate from './schedule-tag.html';
+import periodTagTemplate from './period-tag.html';
 import { app } from '../../app.module';
 
-app.directive('scheduleTag', function () {
+app.directive('periodTag', function () {
 
   function actionDirective(scope, element, attrs) {
     scope.action = {
@@ -14,7 +14,7 @@ app.directive('scheduleTag', function () {
 
   return {
     restrict: 'E',
-    template: scheduleTagTemplate,
+    template: periodTagTemplate,
     scope: {
       timesrc: '='
     },

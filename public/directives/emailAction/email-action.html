@@ -14,6 +14,15 @@
         </div> <!-- end page-header -->
 
         <div class="form-group">
+          <div class="col-md-2 period-tag-label">
+            <label>Throttle</label>
+          </div>
+          <div class="col-md-10">
+            <period-tag timesrc="actionSettings.$$throttle"></period-tag>
+          </div>
+        </div>
+
+        <div class="form-group">
           <label class="col-md-2 control-label">Priority</label>
           <div class="btn-group col-md-4">
             <label class="btn btn-danger btn-sm" ng-model="actionSettings.email.priority" btn-radio="'high'">High</label>
