@@ -20,6 +20,7 @@
 /* import controllers */
 import './controllers/watchersController';
 import './controllers/editorController';
+import './controllers/wizardController';
 import './controllers/reportsController';
 import './controllers/alarmsController';
 import './controllers/aboutController';

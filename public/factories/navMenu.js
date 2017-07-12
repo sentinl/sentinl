@@ -47,14 +47,14 @@ app.factory('navMenu', ['$rootScope', 'kbnUrl', function ($rootScope, kbnUrl) {
           {
             key: 'Cancel',
             description: 'Cancel editor',
-            run: function () { $rootScope.$broadcast('navMenu:cancelWizard'); },
-            testId: 'cancelWizard'
+            run: function () { $rootScope.$broadcast('navMenu:cancelEditor'); },
+            testId: 'cancelEditor'
           },
           {
             key: 'Save',
             description: 'Save editor',
-            run: function () { $rootScope.$broadcast('navMenu:saveWizard'); },
-            testId: 'saveWizard'
+            run: function () { $rootScope.$broadcast('navMenu:saveEditor'); },
+            testId: 'saveEditor'
           }
         ];
 

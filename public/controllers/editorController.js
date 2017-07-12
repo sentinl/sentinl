@@ -5,7 +5,7 @@ import confirmMessage from '../templates/confirm-message.html';
 import { app } from '../app.module';
 import WatcherHelper from '../classes/WatcherHelper';
 
-// WIZARD CONTROLLER
+// EDITOR CONTROLLER
 app.controller('EditorController', function ($rootScope, $scope, $route, $interval,
   $timeout, timefilter, Private, createNotifier, $window, $uibModal,
   $log, navMenu, globalNavState, $routeParams, sentinlService, dataTransfer, $location) {
@@ -20,7 +20,7 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
   });
 
   // Init editor form
-  const initWizard = function () {
+  const initEditor = function () {
     const wHelper = new WatcherHelper();
 
     $scope.form = {
@@ -373,7 +373,7 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
     };
 
 
-    const saveWizard = function () {
+    const saveEditor = function () {
       $scope.watcherForm.$valid = true;
       $scope.watcherForm.$invalid = false;
 
@@ -439,7 +439,7 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
     };
 
 
-    const cancelWizard = function () {
+    const cancelEditor = function () {
       $location.path('/');
     };
 
@@ -453,9 +453,9 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
     });
 
     $scope.$on('action:removeAction', (event, action) => removeAction(action.name));
-    $scope.$on('navMenu:cancelWizard', () => cancelWizard());
-    $scope.$on('navMenu:saveWizard', () => {
-      saveWizard();
+    $scope.$on('navMenu:cancelEditor', () => cancelEditor());
+    $scope.$on('navMenu:saveEditor', () => {
+      saveEditor();
       init();
     });
 
@@ -471,11 +471,11 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
   if ($routeParams.watcherId && $routeParams.watcherId.length) { // edit existing watcher
     sentinlService.getWatcher($routeParams.watcherId).then((resp) => {
       $scope.watcher = resp.data.hits.hits[0];
-      initWizard();
+      initEditor();
     });
   } else { // forwarded from dashboard spy panel
     $scope.watcher = dataTransfer.getWatcher();
-    initWizard();
+    initEditor();
   }
 
 });

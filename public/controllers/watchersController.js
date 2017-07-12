@@ -28,8 +28,8 @@ app.controller('WatchersController', function ($rootScope, $scope, $route, $inte
   $scope.watchers = [];
 
 
-  $scope.startWizard = function (watcher) {
-    let path = '/editor';
+  $scope.editWatcher = function (watcher, type) {
+    let path = `/${type}`;
 
     if (_.isObject(watcher)) {
       dataTransfer.setWatcher(watcher);
@@ -46,7 +46,7 @@ app.controller('WatchersController', function ($rootScope, $scope, $route, $inte
     if ($window.localStorage.getItem('sentinl_saved_query')) {
       const spyPanelWatcher = angular.fromJson($window.localStorage.getItem('sentinl_saved_query'));
       $window.localStorage.removeItem('sentinl_saved_query');
-      $scope.startWizard(spyPanelWatcher);
+      $scope.editWatcher(spyPanelWatcher, 'wizard');
     }
   };
 
@@ -169,7 +169,7 @@ app.controller('WatchersController', function ($rootScope, $scope, $route, $inte
         }
       };
     }
-    $scope.startWizard(newwatcher);
+    $scope.editWatcher(newwatcher, 'editor');
   };
 
 
@@ -226,7 +226,7 @@ app.controller('WatchersController', function ($rootScope, $scope, $route, $inte
         }
       };
     }
-    $scope.startWizard(newwatcher);
+    $scope.editWatcher(newwatcher, 'editor');
   };
 
 
