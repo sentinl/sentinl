@@ -24,10 +24,24 @@
 
         <div class="form-group">
           <label class="col-md-2 control-label">Priority</label>
-          <div class="btn-group col-md-4">
-            <label class="btn btn-danger btn-sm" ng-model="actionSettings.webhook.priority" btn-radio="'high'">High</label>
-            <label class="btn btn-warning btn-sm" ng-model="actionSettings.webhook.priority" btn-radio="'medium'">Medium</label>
-            <label class="btn btn-info btn-sm" ng-model="actionSettings.webhook.priority" btn-radio="'low'">Low</label>
+          <div class="btn-group col-md-6">
+            <label class="btn btn-danger" ng-model="actionSettings.webhook.priority" btn-radio="'high'">High</label>
+            <label class="btn btn-warning" ng-model="actionSettings.webhook.priority" btn-radio="'medium'">Medium</label>
+            <label class="btn btn-info" ng-model="actionSettings.webhook.priority" btn-radio="'low'">Low</label>
+          </div>
+          <div class="col-md-2">
+            <label class="checkbox">
+              <input type="checkbox"
+                ng-model="actionSettings.webhook.create_alert"
+                ng-checked="actionSettings.webhook.create_alert"> alert
+            </label>
+          </div>
+          <div class="col-md-2">
+            <label class="checkbox">
+              <input type="checkbox"
+                ng-model="actionSettings.webhook.use_https"
+                ng-checked="actionSettings.webhook.use_https"> https
+            </label>
           </div>
         </div> <!-- end form-group -->
 
@@ -52,27 +66,13 @@
         <div class="form-group">
           <label class="col-md-2 control-label" for="webhookHost">Method</label>
           <div class="btn-group col-md-4" uib-dropdown is-open="status.isopen">
-            <button type="button" class="btn btn-default btn-md dropdown-toggle" uib-dropdown-toggle>
+            <button type="button" class="btn btn-primary dropdown-toggle" uib-dropdown-toggle>
               {{actionSettings.webhook.method}} <span class="caret"></span>
             </button>
             <ul class="dropdown-menu" uib-dropdown-menu role="menu">
               <li><a href="javascript:void(0)" ng-click="changeMethod('POST')">POST</a></li>
               <li><a href="javascript:void(0)" ng-click="changeMethod('GET')">GET</a></li>
             </ul>
-          </div>
-          <div class="col-md-3">
-            <label class="checkbox">
-              <input type="checkbox"
-                ng-model="actionSettings.webhook.create_alert"
-                ng-checked="actionSettings.webhook.create_alert"> create alert
-            </label>
-          </div>
-          <div class="col-md-3">
-            <label class="checkbox">
-              <input type="checkbox"
-                ng-model="actionSettings.webhook.use_https"
-                ng-checked="actionSettings.webhook.use_https"> https
-            </label>
           </div>
         </div> <!-- end form-group -->
 
