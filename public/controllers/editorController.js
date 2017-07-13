@@ -10,13 +10,17 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
   $timeout, timefilter, Private, createNotifier, $window, $uibModal,
   $log, navMenu, globalNavState, $routeParams, sentinlService, dataTransfer, $location) {
 
-  $scope.topNavMenu = navMenu.getTopNav('editor');
-  $scope.tabsMenu = navMenu.getTabs('editor', [{ name: 'Editor', url: '#/editor' }]);
+  let editorMode = $location.$$path.slice(1); // modes: editor, wizard
+  if (_.includes(editorMode, '/')) editorMode = editorMode.split('/')[0];
+  const tabName = editorMode.slice(0, 1).toUpperCase() + editorMode.slice(1);
+
+  $scope.topNavMenu = navMenu.getTopNav(editorMode);
+  $scope.tabsMenu = navMenu.getTabs(editorMode, [{ name: tabName, url: `#/${editorMode}` }]);
   navMenu.setKbnLogo(globalNavState.isOpen());
   $scope.$on('globalNavState:change', () => navMenu.setKbnLogo(globalNavState.isOpen()));
 
   const notify = createNotifier({
-    location: 'Sentinl Watcher Editor'
+    location: `Sentinl Watcher ${tabName}`
   });
 
   // Init editor form
@@ -285,30 +289,36 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
     const initScripts = function () {
       $scope.watcher.$$scripts = {};
 
-      _.forEach($scope.form.scripts, (script, field) => {
-        // for migration purposes
-        // add some fields if they don't exist in old watcher which was created under Sentinl v4
-        if (field !== 'input' && !_.has($scope.watcher._source[field], 'script.script')) {
-          $scope.watcher._source[field] = { script: { script: '' } };
-        }
-        if (!$scope.watcher._source.input) {
-          $scope.watcher._source.input = {};
-        }
+      if (editorMode === 'wizard' && $scope.watcher._source.condition.script.script.length) {
+        $scope.watcher._source.$$condition_value = +$scope.watcher._source.condition.script.script.split(' ')[2];
+      }
 
-        let value = field === 'input' ? $scope.watcher._source.input : $scope.watcher._source[field].script.script;
+      if (editorMode !== 'wizard') {
+        _.forEach($scope.form.scripts, (script, field) => {
+          // for migration purposes
+          // add some fields if they don't exist in old watcher which was created under Sentinl v4
+          if (field !== 'input' && !_.has($scope.watcher._source[field], 'script.script')) {
+            $scope.watcher._source[field] = { script: { script: '' } };
+          }
+          if (!$scope.watcher._source.input) {
+            $scope.watcher._source.input = {};
+          }
 
-        $scope.watcher.$$scripts[field] = {
-          id: null,
-          title: null,
-          body: field === 'input' ? angular.toJson(value, 'pretty') : value
-        };
+          let value = field === 'input' ? $scope.watcher._source.input : $scope.watcher._source[field].script.script;
 
-        sentinlService.listScripts(field).then((resp) => {
-          _.forEach(resp.data.hits.hits, (script) => {
-            $scope.form.scripts[field][script._id] = script._source;
-          });
-        }).catch(notify.error);
-      });
+          $scope.watcher.$$scripts[field] = {
+            id: null,
+            title: null,
+            body: field === 'input' ? angular.toJson(value, 'pretty') : value
+          };
+
+          sentinlService.listScripts(field).then((resp) => {
+            _.forEach(resp.data.hits.hits, (script) => {
+              $scope.form.scripts[field][script._id] = script._source;
+            });
+          }).catch(notify.error);
+        });
+      }
     };
 
 
@@ -335,10 +345,12 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
 
 
     const init = function () {
-      try {
-        initTabs();
-      } catch (e) {
-        notify.error(`Fail to initialize editor tabs: ${e}`);
+      if (editorMode !== 'wizard') {
+        try {
+          initTabs();
+        } catch (e) {
+          notify.error(`Fail to initialize editor tabs: ${e}`);
+        }
       }
 
       try {
@@ -373,9 +385,16 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
     };
 
 
-    const saveEditor = function () {
+    $scope.saveEditor = function () {
       $scope.watcherForm.$valid = true;
       $scope.watcherForm.$invalid = false;
+
+      if (editorMode === 'wizard' && $scope.watcher._source.condition.script.script.length) {
+        const condition = $scope.watcher._source.condition.script.script.split(' ');
+        condition[2] = $scope.watcher._source.$$condition_value;
+        $scope.watcher._source.condition.script.script = condition.join(' ');
+        delete $scope.watcher._source.$$condition_value;
+      }
 
       if ($scope.form.rawEnabled) {
         try {
@@ -413,12 +432,14 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
           $scope.watcherForm.$invalid = true;
         }
 
-        try {
-          saveEditorsText();
-        } catch (e) {
-          notify.error(`Invalid action, Transform or Condition configuration: ${e}`);
-          $scope.watcherForm.$valid = false;
-          $scope.watcherForm.$invalid = true;
+        if (editorMode !== 'wizard') {
+          try {
+            saveEditorsText();
+          } catch (e) {
+            notify.error(`Invalid action, Transform or Condition configuration: ${e}`);
+            $scope.watcherForm.$valid = false;
+            $scope.watcherForm.$invalid = true;
+          }
         }
 
         try {
@@ -436,10 +457,12 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
         .then(() => $timeout(() => notify.info('Watcher successfully saved!'), $scope.form.saveTimeout))
         .catch(notify.error);
       }
+
+      if (editorMode === 'wizard') $scope.cancelEditor();
     };
 
 
-    const cancelEditor = function () {
+    $scope.cancelEditor = function () {
       $location.path('/');
     };
 
@@ -453,9 +476,9 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
     });
 
     $scope.$on('action:removeAction', (event, action) => removeAction(action.name));
-    $scope.$on('navMenu:cancelEditor', () => cancelEditor());
+    $scope.$on('navMenu:cancelEditor', () => $scope.cancelEditor());
     $scope.$on('navMenu:saveEditor', () => {
-      saveEditor();
+      $scope.saveEditor();
       init();
     });
 
@@ -470,12 +493,20 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
 
   if ($routeParams.watcherId && $routeParams.watcherId.length) { // edit existing watcher
     sentinlService.getWatcher($routeParams.watcherId).then((resp) => {
-      $scope.watcher = resp.data.hits.hits[0];
-      initEditor();
+      if (!_.isObject(resp.data) || _.isEmpty(resp.data)) {
+        $timeout(() => notify.error('Fail to get watcher data!'), 1000);
+      } else {
+        $scope.watcher = resp.data;
+        initEditor();
+      }
     });
   } else { // forwarded from dashboard spy panel
     $scope.watcher = dataTransfer.getWatcher();
-    initEditor();
+    if (!_.isObject($scope.watcher) || _.isEmpty($scope.watcher)) {
+      $timeout(() => notify.error('Fail to get watcher data!'), 1000);
+    } else {
+      initEditor();
+    }
   }
 
 });
