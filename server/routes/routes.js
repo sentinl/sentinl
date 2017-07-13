@@ -174,11 +174,13 @@ export default function routes(server) {
     path: '/api/sentinl/get/watcher/{id}',
     handler: function (request, reply) {
       server.log(['status', 'info', 'Sentinl'], 'Get Watcher with ID: ' + request.params.id);
-      callWithRequest(request, 'search', {
+      const body = {
         index: config.es.default_index,
         type: config.es.type,
-        q: request.params.id
-      })
+        id: request.params.id
+      };
+
+      callWithRequest(request, 'get', body)
       .then((resp) => reply(resp))
       .catch((err) => {
         server.log(['debug', 'Sentinl'], err);
