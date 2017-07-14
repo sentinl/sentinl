@@ -19,7 +19,7 @@
 
 import getElasticsearchClient from './get_elasticsearch_client';
 
-var dynamicTemplates = [ {
+const dynamicTemplates = [ {
   string_fields : {
     mapping : {
       type : 'string',
@@ -37,6 +37,56 @@ var dynamicTemplates = [ {
     match : '*'
   }
 }];
+
+const createIndex = function (server, config, indexName) {
+  server.log(['status', 'info', 'Sentinl'], `Checking ${indexName} index ...`);
+  if (!server.plugins.elasticsearch) {
+    server.log(['status', 'error', 'Sentinl'], 'Elasticsearch client not available, retrying in 5s');
+    tryCreate(server);
+    return;
+  }
+
+  const client = getElasticsearchClient(server);
+
+  const mappings = {
+    index: indexName,
+    body: {
+      settings: {
+        number_of_shards: 1,
+        number_of_replicas: 1
+      },
+      mappings: {
+        user: {
+          properties: {
+            username: {
+              type:  'string',
+              index: 'not_analyzed'
+            },
+            hash: {
+              type:  'string',
+              index: 'not_analyzed'
+            }
+          }
+        }
+      }
+    }
+  };
+
+  client.indices.exists({ index: indexName })
+  .then((exists) => {
+    if (exists === true) {
+      server.log(['status', 'debug', 'Sentinl'], `Index ${indexName} exists!`);
+      return;
+    }
+    server.log(['status', 'info', 'Sentinl'], `Creating ${indexName} index ...`);
+
+    client.indices.create(mappings[indexName])
+    .then(function (resp) {
+      server.log(['status', 'debug', 'Sentinl'], `Index ${indexName} response`, resp);
+    }).catch((err) => server.log(['status', 'error', 'Sentinl'], err.message));
+  })
+  .catch((error) => server.log(['status', 'error', 'Sentinl'], `Failed to check if core index exists: ${error}`));
+};
 
 
 function createSentinlIndex(server, config) {

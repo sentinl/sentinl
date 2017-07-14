@@ -7,7 +7,7 @@
   "name": "sentinl",
   "version": "5.4.0-SNAPSHOT",
   "kibana": {
-    "version": "5.4.0"
+    "version": "5.4.2"
   },
   "description": "Kibana Alert & Report App for Elasticsearch",
   "main": "index.js",
@@ -23,9 +23,11 @@
     "@elastic/datemath": "2.3.0",
     "angular": "1.4.8",
     "angular-ui-bootstrap": "2.5.0",
+    "bcrypt": "1.0.2",
     "bluebird": "3.4.7",
     "bootstrap": "3.3.7",
     "decompress": "4.2.0",
+    "elasticsearch": "13.2.0",
     "emailjs": "1.0.8",
     "later": "1.2.0",
     "mustache": "2.3.0",

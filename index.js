@@ -52,6 +52,11 @@ export default function (kibana) {
           scriptResults: Joi.number().default(50)
         }).default(),
         settings: Joi.object({
+          authentication: Joi.object({
+            mode: Joi.string().default('basic'),
+            user_index: Joi.string().default('sentinl_users'),
+            user_type: Joi.string().default('user')
+          }).default(),
           email: Joi.object({
             active: Joi.boolean().default(false),
             user: Joi.string(),

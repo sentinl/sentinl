@@ -55,6 +55,10 @@ const init = _.once((server) => {
   helpers.createSentinlIndex(server, config);
   helpers.createSentinlAlarmIndex(server, config);
 
+  if (!server.plugins.kibi_access_control) {
+    helpers.createIndex(server, config, config.settings.authentication.user_index);
+  }
+
   /* Bird Watching and Duck Hunting */
   const client = getElasticsearchClient(server);
   var sched = later.parse.recur().on(25,55).second();

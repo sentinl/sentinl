@@ -3,6 +3,8 @@ import handleESError from '../lib/handle_es_error';
 import getConfiguration from  '../lib/get_configuration';
 import Joi from 'joi';
 import dateMath from '@elastic/datemath';
+import getElasticsearchClient from '../lib/get_elasticsearch_client';
+import es from 'elasticsearch';
 
 /* ES Functions */
 var getHandler = function (type, server, req, reply) {
@@ -94,6 +96,27 @@ export default function routes(server) {
     path: '/api/sentinl/list',
     method: ['POST', 'GET'],
     handler: function (req, reply) {
+      const config = {
+        host: [
+          {
+            host: 'localhost',
+            auth: 'admin:admin',
+            protocol: 'https',
+            port: 9200
+          }
+        ]
+      };
+      const client = new es.Client(config);
+      client.get({
+        index: 'watcher',
+        type: 'watch',
+        id: 'reporter_ydbly3s5r'
+      }).then((res) => {
+        console.log(JSON.stringify(res, null, 2));
+      }).catch((err) => reply(handleESError(err)));
+      ////const client = getElasticsearchClient(server);
+      ////console.log('---------------');
+      ////console.log(_.keys(client));
       callWithRequest(req, 'search', {
         index: config.es.default_index,
         type: config.es.type,
