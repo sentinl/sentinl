@@ -96,17 +96,8 @@ export default function routes(server) {
     path: '/api/sentinl/list',
     method: ['POST', 'GET'],
     handler: function (req, reply) {
-      const config = {
-        host: [
-          {
-            host: 'localhost',
-            auth: 'admin:admin',
-            protocol: 'https',
-            port: 9200
-          }
-        ]
-      };
-      const client = new es.Client(config);
+      // TEMP example
+      const client = getElasticsearchClient(server, config);
       client.get({
         index: 'watcher',
         type: 'watch',
@@ -114,16 +105,20 @@ export default function routes(server) {
       }).then((res) => {
         console.log(JSON.stringify(res, null, 2));
       }).catch((err) => reply(handleESError(err)));
-      ////const client = getElasticsearchClient(server);
-      ////console.log('---------------');
-      ////console.log(_.keys(client));
-      callWithRequest(req, 'search', {
+      // end example
+
+      const body = {
         index: config.es.default_index,
         type: config.es.type,
         size: config.sentinl.results ? config.sentinl.results : 50,
         allowNoIndices: false
+      };
+
+      callWithRequest(req, 'search', body)
+      .then((res) => {
+        console.log(res);
+        reply(res);
       })
-      .then((res) => reply(res))
       .catch((err) => reply(handleESError(err)));
     }
   });
