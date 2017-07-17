@@ -44,9 +44,10 @@ export default function (kibana) {
           host: Joi.string().default('localhost'),
           port: Joi.number().default(9200),
           timefield: Joi.string().default('@timestamp'),
-          default_index: Joi.string().default('watcher'),
+          default_index: Joi.string().default('sentinl_watcher'),
           type: Joi.string().default('watch'),
-          alarm_index: Joi.string().default('watcher_alarms')
+          alarm_index: Joi.string().default('sentinl_watcher_alarms'),
+          alarm_type: Joi.string().default('alarm')
         }).default(),
         sentinl: Joi.object({
           history: Joi.number().default(20),
