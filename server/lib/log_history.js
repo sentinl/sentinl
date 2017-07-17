@@ -26,7 +26,7 @@ export default function logEvent(server, client, config, watcherTitle, type, mes
   }
   server.log(['status', 'info', 'Sentinl'], `Storing Alarm to ES with type: ${type}`);
   const indexDate = '-' + new Date().toISOString().substr(0, 10).replace(/-/g, '.');
-  const indexName = config.es.alarm_index ? config.es.alarm_index + indexDate : `watcher_alarms${indexDate}`;
+  const indexName = config.es.alarm_index ? config.es.alarm_index + indexDate : `${config.es.alarm_index}${indexDate}`;
   const indexBody = {
     '@timestamp': new Date().toISOString(),
     watcher: watcherTitle,

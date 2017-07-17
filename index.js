@@ -44,9 +44,9 @@ export default function (kibana) {
           host: Joi.string().default('localhost'),
           port: Joi.number().default(9200),
           timefield: Joi.string().default('@timestamp'),
-          default_index: Joi.string().default('sentinl_watcher'),
+          default_index: Joi.string().default('watcher'),
           type: Joi.string().default('watch'),
-          alarm_index: Joi.string().default('sentinl_watcher_alarms'),
+          alarm_index: Joi.string().default('watcher_alarms'),
           alarm_type: Joi.string().default('alarm')
         }).default(),
         sentinl: Joi.object({
@@ -59,7 +59,7 @@ export default function (kibana) {
             enabled: Joi.boolean().default(true),
             https: Joi.boolean().default(true),
             verify_certificate: Joi.boolean().default(false),
-            path_to_pem: Joi.string().default(''),
+            path_to_pem: Joi.string(),
             admin_username: Joi.string().default('admin'),
             admin_password: Joi.string().default('admin'),
             mode: Joi.string().default('basic'),

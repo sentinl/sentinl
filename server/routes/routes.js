@@ -28,7 +28,7 @@ var getHandler = function (type, server, req, reply) {
 
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
   callWithRequest(req, 'search', {
-    index: config.es.alarm_index ? config.es.alarm_index + '*' : 'watcher_alarms*',
+    index: `${config.es.alarm_index}*`,
     sort: '@timestamp : asc',
     allowNoIndices: false,
     body: {
@@ -96,17 +96,6 @@ export default function routes(server) {
     path: '/api/sentinl/list',
     method: ['POST', 'GET'],
     handler: function (req, reply) {
-      // TEMP example
-      const client = getElasticsearchClient(server, config);
-      client.get({
-        index: 'watcher',
-        type: 'watch',
-        id: 'reporter_ydbly3s5r'
-      }).then((res) => {
-        console.log(JSON.stringify(res, null, 2));
-      }).catch((err) => reply(handleESError(err)));
-      // end example
-
       const body = {
         index: config.es.default_index,
         type: config.es.type,
