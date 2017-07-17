@@ -1,0 +1,16 @@
+{
+  "mappings": {
+    "user": {
+      "properties": {
+        "username": {
+          "type":  "string",
+          "index": "not_analyzed"
+        },
+        "hash": {
+          "type":  "string",
+          "index": "not_analyzed"
+        }
+      }
+    }
+  }
+}

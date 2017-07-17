@@ -27,6 +27,8 @@ import getConfiguration from './server/lib/get_configuration';
 import fs from 'fs';
 import phantom from './server/lib/phantom';
 
+import userIndexMappings from './server/mappings/user_index';
+
 const init = _.once((server) => {
   const config = getConfiguration(server);
   const scheduler = getScheduler(server);
@@ -55,8 +57,9 @@ const init = _.once((server) => {
   helpers.createSentinlIndex(server, config);
   helpers.createSentinlAlarmIndex(server, config);
 
-  if (!server.plugins.kibi_access_control) {
-    helpers.createIndex(server, config, config.settings.authentication.user_index);
+  if (!server.plugins.kibi_access_control && config.settings.authentication.enabled) {
+    helpers.createIndex(server, config, config.settings.authentication.user_index,
+      config.settings.authentication.user_type, userIndexMappings);
   }
 
   /* Bird Watching and Duck Hunting */

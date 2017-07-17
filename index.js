@@ -41,6 +41,8 @@ export default function (kibana) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
         es: Joi.object({
+          host: Joi.string().default('localhost'),
+          port: Joi.number().default(9200),
           timefield: Joi.string().default('@timestamp'),
           default_index: Joi.string().default('watcher'),
           type: Joi.string().default('watch'),
@@ -53,6 +55,10 @@ export default function (kibana) {
         }).default(),
         settings: Joi.object({
           authentication: Joi.object({
+            enabled: Joi.boolean().default(true),
+            https: Joi.boolean().default(true),
+            admin_username: Joi.string().default('admin'),
+            admin_password: Joi.string().default('admin'),
             mode: Joi.string().default('basic'),
             user_index: Joi.string().default('sentinl_users'),
             user_type: Joi.string().default('user')
