@@ -58,6 +58,8 @@ export default function (kibana) {
           authentication: Joi.object({
             enabled: Joi.boolean().default(true),
             https: Joi.boolean().default(true),
+            verify_certificate: Joi.boolean().default(false),
+            path_to_pem: Joi.string().default(''),
             admin_username: Joi.string().default('admin'),
             admin_password: Joi.string().default('admin'),
             mode: Joi.string().default('basic'),
