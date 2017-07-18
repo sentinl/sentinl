@@ -57,7 +57,7 @@ app.service('sentinlService', ['$http', function ($http) {
     return $http.post(`../api/sentinl/user/${watcherId}/${username}/${password}`);
   };
 
-  this.getUser = function (watcherId, username, password) {
+  this.getUser = function (watcherId) {
     return $http.post(`../api/sentinl/get/user/${watcherId}`);
   };
 
