@@ -49,4 +49,16 @@ app.service('sentinlService', ['$http', function ($http) {
     return $http.delete(`../api/sentinl/remove/one_script/${type}/${id}`);
   };
 
+  this.getAuthInfo = function () {
+    return $http.get('../api/sentinl/config/auth_info');
+  };
+
+  this.addUser = function (watcherId, username, password) {
+    return $http.post(`../api/sentinl/user/${watcherId}/${username}/${password}`);
+  };
+
+  this.getUser = function (watcherId, username, password) {
+    return $http.post(`../api/sentinl/get/user/${watcherId}`);
+  };
+
 }]);

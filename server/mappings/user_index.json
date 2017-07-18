@@ -6,7 +6,7 @@
           "type":  "string",
           "index": "not_analyzed"
         },
-        "hash": {
+        "sha": {
           "type":  "string",
           "index": "not_analyzed"
         }

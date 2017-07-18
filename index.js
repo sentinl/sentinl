@@ -64,7 +64,12 @@ export default function (kibana) {
             admin_password: Joi.string().default('admin'),
             mode: Joi.string().default('basic'),
             user_index: Joi.string().default('sentinl_users'),
-            user_type: Joi.string().default('user')
+            user_type: Joi.string().default('user'),
+            encryption: Joi.object({
+              algorithm: Joi.string().default('aes256'),
+              password: Joi.string().default('3zTvzr3p67VC61jmV54rIYu1545x4TlY'),
+              iv_length: Joi.number().default(16)
+            }).default(),
           }).default(),
           email: Joi.object({
             active: Joi.boolean().default(false),

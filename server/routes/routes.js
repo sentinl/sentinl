@@ -5,6 +5,7 @@ import Joi from 'joi';
 import dateMath from '@elastic/datemath';
 import getElasticsearchClient from '../lib/get_elasticsearch_client';
 import es from 'elasticsearch';
+import Crypto from '../lib/classes/crypto';
 
 /* ES Functions */
 var getHandler = function (type, server, req, reply) {
@@ -88,6 +89,17 @@ export default function routes(server) {
     method: ['POST', 'GET'],
     handler:  function (req, reply) {
       getHandler('report', server, req, reply);
+    }
+  });
+
+  server.route({
+    path: '/api/sentinl/config/auth_info',
+    method: ['POST', 'GET'],
+    handler: function (req, reply) {
+      reply({
+        enabled: config.settings.authentication.enabled,
+        mode: config.settings.authentication.mode
+      });
     }
   });
 
@@ -258,6 +270,53 @@ export default function routes(server) {
           max: resp.index._all.fields[config.es.timefield].max_value
         });
       })
+      .catch((err) => reply(handleESError(err)));
+    }
+  });
+
+  server.route({
+    method: 'POST',
+    path: '/api/sentinl/get/user/{watcher_id}',
+    handler: function (request, reply) {
+      server.log(['status', 'info', 'Sentinl'], `Getting user for watcher ${request.params.watcher_id}`);
+
+      const message = {
+        index: config.settings.authentication.user_index,
+        type: config.settings.authentication.user_type,
+        id: request.params.watcher_id
+      };
+
+      callWithRequest(request, 'get', message)
+      .then((resp) => reply(resp))
+      .catch((err) => {
+        server.log(['debug', 'Sentinl'], err);
+        reply(err);
+      });
+    }
+  });
+
+  server.route({
+    method: 'POST',
+    path: '/api/sentinl/user/{watcher_id}/{username}/{password}',
+    handler: function (request, reply) {
+      server.log(['status', 'info', 'Sentinl'], `Saving user ${request.params.username} for watcher ${request.params.watcher_id}`);
+
+      const crypto = new Crypto(config.settings.authentication.encryption);
+      const message = {
+        index: config.settings.authentication.user_index,
+        type: config.settings.authentication.user_type,
+        id: request.params.watcher_id,
+        body: {
+          username: request.params.username,
+          sha: crypto.encrypt(request.params.password)
+        }
+      };
+
+      callWithRequest(request, 'index', message)
+      .then(() => callWithRequest(request, 'indices.refresh', {
+        index: config.es.default_index
+      }))
+      .then((resp) => reply({ok: true, resp: resp}))
       .catch((err) => reply(handleESError(err)));
     }
   });
