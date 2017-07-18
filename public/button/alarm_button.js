@@ -37,7 +37,7 @@ const linkReqRespStats = function ($scope, config) {
     if (req.fetchParams && req.fetchParams.index) {
       const idx = req.fetchParams.index.toString();
       indexPattern = $scope.searchSource.get('index');
-      if (indexPattern.hasTimeField()) {
+      if (null != indexPattern.getTimeField()) {
         const tmp = idx.replace(/\*/g, '');
         $scope.indices.push(`<${tmp}{now/d}>`);
         $scope.indices.push(`<${tmp}{now/d-1d}>`);
@@ -210,8 +210,8 @@ const linkReqRespStats = function ($scope, config) {
         $scope.alarm._source.input.search.request.body = req.fetchParams.body;
       }
       // Patch Range
-      if (indexPattern && indexPattern.hasTimeField()) {
-        $scope.alarm._source.input.search.request.body.query.filtered.filter = {
+      if (indexPattern && null != indexPattern.getTimeField()) {
+        $scope.alarm._source.input.search.request.body.query = {
           range: {
             [indexPattern.timeFieldName]: {
               from: $scope.watcher_range ? $scope.watcher_range : 'now-1h'
@@ -339,7 +339,8 @@ const linkReqRespStats = function ($scope, config) {
 };
 
 // Spy Placement
-require('ui/registry/spy_modes').register(function () {
+import { SpyModesRegistryProvider } from 'ui/registry/spy_modes';
+SpyModesRegistryProvider.register(function() {
   return {
     display: 'Set Watcher',
     name: 'setalarm',

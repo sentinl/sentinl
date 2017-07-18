@@ -1,4 +1,4 @@
-import chrome from 'ui/chrome';
+import uiChrome from 'ui/chrome';
 
 import newWatcherMenu from '../templates/new-watcher-top-nav.html';
 import { app } from '../app.module';
@@ -10,15 +10,13 @@ app.factory('navMenu', ['kbnUrl', function (kbnUrl) {
   return {
     setKbnLogo: function (isOpen) {
       if (isOpen) {
-        chrome.setBrand({
+        uiChrome.setBrand({
           logo: `url(${impactLogo}) left no-repeat`,
-        })
-        .setNavBackground('#222222');
+        });
       } else {
-        chrome.setBrand({
+        uiChrome.setBrand({
           logo: `url(${smallLogo}) left no-repeat`
-        })
-        .setNavBackground('#222222');
+        });
       }
     },
     getTopNav: function (view) {
