@@ -77,7 +77,7 @@ export default function (kibana) {
           }).default(),
           report: Joi.object({
             active: Joi.boolean().default(false),
-            phantomjs_path: Joi.string(undefined),
+            phantomjs_path: Joi.string().default(undefined),
             tmp_path: Joi.string().default('/tmp/')
           }).default(),
           pushapps: Joi.object({
