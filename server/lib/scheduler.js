@@ -22,6 +22,8 @@ import later from 'later';
 import doActions from './actions';
 import getConfiguration from './get_configuration';
 import Watcher from './classes/watcher';
+import getElasticsearchClient from './get_elasticsearch_client';
+
 
 export default function getScheduler(server) {
 
@@ -40,25 +42,25 @@ export default function getScheduler(server) {
   let Schedule = [];
 
 
-  function getReportActions(actions) {
+  const getReportActions = function (actions) {
     const filteredActions = {};
     _.forEach(actions, (settings, name) => {
       if (_.has(settings, 'report')) filteredActions[name] = settings;
     });
     return filteredActions;
-  }
+  };
 
 
-  function getNonReportActions(actions) {
+  const getNonReportActions = function (actions) {
     const filteredActions = {};
     _.forEach(actions, (settings, name) => {
       if (!_.has(settings, 'report')) filteredActions[name] = settings;
     });
     return filteredActions;
-  }
+  };
 
 
-  function removeOrphans(resp) {
+  const removeOrphans = function (resp) {
     let orphans = _.difference(_.each(Object.keys(Schedule)), _.map(resp.hits.hits, '_id'));
     _.each(orphans, function (orphan) {
       server.log(['status', 'info', 'Sentinl'], 'Deleting orphan watcher: ' + orphan);
@@ -67,10 +69,10 @@ export default function getScheduler(server) {
       }
       delete Schedule[orphan];
     });
-  }
+  };
 
 
-  function handleReports(task, watcherConfig) {
+  const handleReports = function (task, watcherConfig) {
     server.log(['status', 'info', 'Sentinl'], `Executing report action: ${task._id}`);
 
     const actions = getReportActions(watcherConfig.actions);
@@ -79,10 +81,10 @@ export default function getScheduler(server) {
     if (_.keys(actions).length) {
       doActions(server, actions, payload, watcherConfig);
     }
-  }
+  };
 
 
-  function handleActions(watcher, client, task, watcherConfig) {
+  const handleActions = function (watcher, client, task, watcherConfig) {
     server.log(['status', 'info', 'Sentinl'], `Executing action: ${task._id}`);
 
     const actions = getNonReportActions(watcherConfig.actions);
@@ -146,10 +148,10 @@ export default function getScheduler(server) {
     .catch((error) => {
       server.log(['error', 'Sentinl'], `An error occurred while executing the watcherConfig: ${error}`);
     });
-  }
+  };
 
 
-  function watching(watcher, client, task, interval) {
+  const watching = function (watcher, client, task, interval) {
     if (!task._source || task._source.disable) {
       server.log(['status', 'debug', 'Sentinl'], `Non-Executing Disabled Watch: ${task._id}`);
       return;
@@ -173,10 +175,44 @@ export default function getScheduler(server) {
     if (_.keys(getNonReportActions(watcherConfig.actions)).length) {
       handleActions(watcher, client, task, watcherConfig);
     }
-  }
+  };
 
 
-  function doalert(server, client) {
+  const executeWatcher = function (hit, watcher, client) {
+    if (Schedule[hit._id]) {
+      if (_.isEqual(Schedule[hit._id].hit, hit)) {
+        return;
+      }
+      else {
+        server.log(['status', 'info', 'Sentinl'], `Clearing watcher: ${hit._id}`);
+        Schedule[hit._id].later.clear();
+      }
+    }
+
+    Schedule[hit._id] = {};
+    Schedule[hit._id].hit = hit;
+
+    let interval;
+    if (hit._source.trigger.schedule.later) {
+      // https://bunkat.github.io/later/parsers.html#text
+      interval = later.parse.text(hit._source.trigger.schedule.later);
+      Schedule[hit._id].interval = hit._source.trigger.schedule.later;
+    }
+    else if (hit._source.trigger.schedule.interval % 1 === 0) {
+      // max 60 seconds!
+      interval = later.parse.recur().every(hit._source.trigger.schedule.interval).second();
+      Schedule[hit._id].interval = hit._source.trigger.schedule.interval;
+    }
+
+    /* Run Watcher in interval */
+    Schedule[hit._id].later = later.setInterval(function () {
+      watching(watcher, client, hit, interval);
+    }, interval);
+    server.log(['status', 'info', 'Sentinl'], `Scheduled Watch: ${hit._id} every ${Schedule[hit._id].interval}`);
+  };
+
+
+  const doalert = function (server, client) {
     server.log(['status', 'debug', 'Sentinl'], 'Reloading Watchers...');
 
     const watcher = new Watcher(client, config);
@@ -194,41 +230,31 @@ export default function getScheduler(server) {
         /* Scheduler */
         _.each(resp.hits.hits, function (hit) {
 
-          if (Schedule[hit._id]) {
-            if (_.isEqual(Schedule[hit._id].hit, hit)) {
-              return;
-            }
-            else {
-              server.log(['status', 'info', 'Sentinl'], `Clearing watcher: ${hit._id}`);
-              Schedule[hit._id].later.clear();
-            }
+          server.log(['status', 'debug', 'Sentinl', 'scheduler', 'auth'], `Enabled: ${config.settings.authentication.enabled}`);
+          server.log(['status', 'debug', 'Sentinl', 'scheduler', 'auth'], `Mode: ${config.settings.authentication.mode}`);
+
+          if (config.settings.authentication.impersonate) {
+            watcher.getUser(hit._id).then((resp) => {
+              if (resp.found) {
+                const impersonate = {
+                  username: resp._source.username,
+                  sha: resp._source.sha
+                };
+                server.log(['status', 'debug', 'Sentinl', 'scheduler', 'auth'],
+                  `Impersonate watcher ${hit._id} by ${JSON.stringify(impersonate)}`);
+                const impersonatedClient = getElasticsearchClient(server, config, 'data', impersonate);
+                executeWatcher(hit, watcher, impersonatedClient);
+              } else {
+                server.log(['status', 'warning', 'Sentinl'], `Unable to find an user for watcher ${hit._id}`);
+              }
+            });
+          } else {
+            executeWatcher(hit, watcher. client);
           }
-
-          Schedule[hit._id] = {};
-          Schedule[hit._id].hit = hit;
-
-          let interval;
-          if (hit._source.trigger.schedule.later) {
-            // https://bunkat.github.io/later/parsers.html#text
-            interval = later.parse.text(hit._source.trigger.schedule.later);
-            Schedule[hit._id].interval = hit._source.trigger.schedule.later;
-          }
-          else if (hit._source.trigger.schedule.interval % 1 === 0) {
-            // max 60 seconds!
-            interval = later.parse.recur().every(hit._source.trigger.schedule.interval).second();
-            Schedule[hit._id].interval = hit._source.trigger.schedule.interval;
-          }
-
-          /* Run Watcher in interval */
-          Schedule[hit._id].later = later.setInterval(function () {
-            watching(watcher, client, hit, interval);
-          }, interval);
-          server.log(['status', 'info', 'Sentinl'], `Scheduled Watch: ${hit._id} every ${Schedule[hit._id].interval}`);
-
         });
 
       }).catch((error) => {
-        server.log(['status', 'error', 'Sentinl'], 'Failed to get watchers.');
+        server.log(['status', 'error', 'Sentinl'], `Failed to get watchers: ${error}`);
       });
     })
     .catch((error) => {
@@ -238,7 +264,7 @@ export default function getScheduler(server) {
         server.log(['status', 'error', 'Sentinl'], `An error occurred while looking for indices: ${error}`);
       }
     });
-  }
+  };
 
 
   return {

@@ -276,27 +276,6 @@ export default function routes(server) {
 
   server.route({
     method: 'POST',
-    path: '/api/sentinl/get/user/{watcher_id}',
-    handler: function (request, reply) {
-      server.log(['status', 'info', 'Sentinl'], `Getting user for watcher ${request.params.watcher_id}`);
-
-      const message = {
-        index: config.settings.authentication.user_index,
-        type: config.settings.authentication.user_type,
-        id: request.params.watcher_id
-      };
-
-      callWithRequest(request, 'get', message)
-      .then((resp) => reply(resp))
-      .catch((err) => {
-        server.log(['debug', 'Sentinl'], err);
-        reply(err);
-      });
-    }
-  });
-
-  server.route({
-    method: 'POST',
     path: '/api/sentinl/user/{watcher_id}/{username}/{password}',
     handler: function (request, reply) {
       server.log(['status', 'info', 'Sentinl'], `Saving user ${request.params.username} for watcher ${request.params.watcher_id}`);

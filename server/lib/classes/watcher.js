@@ -1,11 +1,20 @@
 export default class Watcher {
 
-
   constructor(client, config) {
     this.client = client;
     this.config = config;
   }
 
+  getUser(watcherId) {
+    const options = {
+      index: this.config.settings.authentication.user_index,
+      type: this.config.settings.authentication.user_type,
+      id: watcherId
+    };
+    return this.client.get(options)
+    .then((resp) => resp)
+    .catch((err) => err);
+  }
 
   getCount() {
     return this.client.count({
@@ -14,7 +23,6 @@ export default class Watcher {
     });
   }
 
-
   getWatchers(count) {
     return this.client.search({
       index: this.config.es.default_index,
@@ -22,7 +30,6 @@ export default class Watcher {
       size: count
     });
   }
-
 
   search(method, request) {
     return this.client[method](request);
