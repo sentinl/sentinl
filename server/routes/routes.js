@@ -295,8 +295,15 @@ export default function routes(server) {
       .then(() => callWithRequest(request, 'indices.refresh', {
         index: config.es.default_index
       }))
-      .then((resp) => reply({ok: true, resp: resp}))
-      .catch((err) => reply(handleESError(err)));
+      .then((resp) => {
+        server.log(['status', 'debug', 'Sentinl', 'routes', 'AUTH'],
+          `Assign ${request.params.watcher_id} to user: ${JSON.stringify(message.body)}`);
+        reply({ok: true, resp: resp});
+      })
+      .catch((err) => {
+        server.log(['debug', 'Sentinl'], err);
+        reply(handleESError(err));
+      });
     }
   });
 
@@ -317,7 +324,10 @@ export default function routes(server) {
         index: config.es.default_index
       }))
       .then((resp) => reply({ok: true, resp: resp}))
-      .catch((err) => reply(handleESError(err)));
+      .catch((err) => {
+        server.log(['debug', 'Sentinl'], err);
+        reply(handleESError(err));
+      });
     }
   });
 

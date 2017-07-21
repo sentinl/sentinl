@@ -18,17 +18,23 @@
  */
 
 import _ from 'lodash';
+import Promise from 'bluebird';
 import later from 'later';
 import doActions from './actions';
 import getConfiguration from './get_configuration';
 import Watcher from './classes/watcher';
 import getElasticsearchClient from './get_elasticsearch_client';
 
-
-export default function getScheduler(server) {
-
+/**
+* Schedules and executes watchers in background
+*/
+export default function Scheduler(server) {
 
   const config = getConfiguration(server);
+
+  let watcher;
+  let client;
+
   let sirenVanguardAvailable = false;
   try {
     const elasticsearchPlugins = server.config().get('elasticsearch.plugins');
@@ -39,10 +45,12 @@ export default function getScheduler(server) {
     // 'elasticsearch.plugins' not available when running from kibana
   }
 
-  let Schedule = [];
-
-
-  const getReportActions = function (actions) {
+  /**
+  * Get all report actions.
+  *
+  * @param {object} actions - watcher actions.
+  */
+  function getReportActions(actions) {
     const filteredActions = {};
     _.forEach(actions, (settings, name) => {
       if (_.has(settings, 'report')) filteredActions[name] = settings;
@@ -50,8 +58,12 @@ export default function getScheduler(server) {
     return filteredActions;
   };
 
-
-  const getNonReportActions = function (actions) {
+  /**
+  * Get all actions except reports.
+  *
+  * @param {object} actions - watcher actions.
+  */
+  function getNonReportActions(actions) {
     const filteredActions = {};
     _.forEach(actions, (settings, name) => {
       if (!_.has(settings, 'report')) filteredActions[name] = settings;
@@ -59,38 +71,74 @@ export default function getScheduler(server) {
     return filteredActions;
   };
 
-
-  const removeOrphans = function (resp) {
-    let orphans = _.difference(_.each(Object.keys(Schedule)), _.map(resp.hits.hits, '_id'));
+  /**
+  * Remove unused watchers watcher.
+  *
+  * @param {object} resp - ES response, watchers list.
+  */
+  function removeOrphans(resp) {
+    let orphans = _.difference(_.each(_.keys(server.sentinlStore.schedule)), _.map(resp.hits.hits, '_id'));
     _.each(orphans, function (orphan) {
       server.log(['status', 'info', 'Sentinl'], 'Deleting orphan watcher: ' + orphan);
-      if (_.isObject(Schedule[orphan].later) && _.has(Schedule[orphan].later, 'clear')) {
-        Schedule[orphan].later.clear();
+      if (_.isObject(server.sentinlStore.schedule[orphan].later) && _.has(server.sentinlStore.schedule[orphan].later, 'clear')) {
+        server.sentinlStore.schedule[orphan].later.clear();
       }
-      delete Schedule[orphan];
+      delete server.sentinlStore.schedule[orphan];
     });
   };
 
+  /**
+  * Find user for a watcher. Get authenticated Elasticsearch client.
+  *
+  * @param {string} watcherId - watcher _id.
+  */
+  function impersonateEsClient(watcherId) {
+    return new Promise((resolve, reject) => {
+      watcher.getUser(watcherId).then((resp) => {
+        if (resp.found) {
+          const impersonate = {
+            username: resp._source.username,
+            sha: resp._source.sha
+          };
+          const client = getElasticsearchClient(server, config, 'data', impersonate);
+          server.log(['status', 'debug', 'Sentinl', 'scheduler', 'AUTH'],
+            `Impersonate watcher ${watcherId} by ${JSON.stringify(impersonate)}`);
+          resolve(client);
+        } else {
+          reject(new Error(`Unable to find an user to authenticate watcher ${watcherId}: ${JSON.stringify(resp)}`));
+        }
+      });
+    });
+  };
 
-  const handleReports = function (task, watcherConfig) {
+  /**
+  * Execute a watcher report actions.
+  *
+  * @param {object} task - watcher configuration.
+  */
+  function handleReports(task) {
     server.log(['status', 'info', 'Sentinl'], `Executing report action: ${task._id}`);
 
-    const actions = getReportActions(watcherConfig.actions);
+    const actions = getReportActions(task._source.actions);
     const payload = { _id: task._id };
 
     if (_.keys(actions).length) {
-      doActions(server, actions, payload, watcherConfig);
+      doActions(server, actions, payload, task._source);
     }
   };
 
-
-  const handleActions = function (watcher, client, task, watcherConfig) {
+  /**
+  * Execute all watcher actions except reports.
+  *
+  * @param {object} task - watcher configuration.
+  */
+  function handleActions(task) {
     server.log(['status', 'info', 'Sentinl'], `Executing action: ${task._id}`);
 
-    const actions = getNonReportActions(watcherConfig.actions);
-    let request = _.has(watcherConfig, 'input.search.request') ? watcherConfig.input.search.request : undefined;
-    let condition = _.has(watcherConfig, 'condition.script.script') ? watcherConfig.condition.script.script : undefined;
-    let transform = watcherConfig.transform ? watcherConfig.transform : {};
+    const actions = getNonReportActions(task._source.actions);
+    let request = _.has(task._source, 'input.search.request') ? task._source.input.search.request : undefined;
+    let condition = _.has(task._source, 'condition.script.script') ? task._source.condition.script.script : undefined;
+    let transform = task._source.transform ? task._source.transform : {};
 
     let method = 'search';
     if (sirenVanguardAvailable) {
@@ -103,159 +151,160 @@ export default function getScheduler(server) {
     }
 
     if (!request || !condition) {
-      server.log(['status', 'debug', 'Sentinl', 'WATCHER TASK'], `Watcher ${watcherConfig.uuid} search request or condition malformed`);
+      server.log(['status', 'debug', 'Sentinl', 'WATCHER TASK'],
+        `Watcher ${task._source.uuid} search request or condition malformed`);
+        //`Watcher ${watcherConfig.uuid} search request or condition malformed`);
       return;
     }
 
-    watcher.search(method, request).then((payload) => {
-      server.log(['status', 'info', 'Sentinl', 'PAYLOAD DEBUG'], payload);
+    function executeWatcher(watcher) {
+      watcher.search(method, request).then((payload) => {
+        server.log(['status', 'info', 'Sentinl', 'PAYLOAD DEBUG'], payload);
 
-      if (!payload) {
-        server.log(['status', 'debug', 'Sentinl', 'WATCHER TASK'], `Watcher ${watcherConfig.uuid}` +
-          ' malformed or missing key parameters!');
-        return;
-      }
-
-      server.log(['status', 'debug', 'Sentinl', 'PAYLOAD DEBUG'], payload);
-
-      /* Validate Condition */
-      let ret;
-      try {
-        ret = eval(condition); // eslint-disable-line no-eval
-      } catch (err) {
-        server.log(['status', 'info', 'Sentinl'], `Condition Error for ${task._id}: ${err}`);
-      }
-
-      if (ret) {
-        if (transform.script) {
-          try {
-            eval(transform.script.script); // eslint-disable-line no-eval
-          } catch (err) {
-            server.log(['status', 'info', 'Sentinl'], `Transform Script Error for ${task._id}: ${err}`);
-          }
-          doActions(server, actions, payload, watcherConfig);
-        } else if (transform.search) {
-          watcher.search(method, transform.search.request).then((payload) => {
-            if (!payload) return;
-            doActions(server, actions, payload, watcherConfig);
-          });
-        } else {
-          doActions(server, actions, payload, watcherConfig);
+        if (!payload) {
+          server.log(['status', 'debug', 'Sentinl', 'WATCHER TASK'], `Watcher ${task._source.uuid}` +
+            ' malformed or missing key parameters!');
+          return;
         }
-      }
 
-    })
-    .catch((error) => {
-      server.log(['error', 'Sentinl'], `An error occurred while executing the watcherConfig: ${error}`);
-    });
+        server.log(['status', 'debug', 'Sentinl', 'PAYLOAD DEBUG'], payload);
+
+        /* Validate Condition */
+        let ret;
+        try {
+          ret = eval(condition); // eslint-disable-line no-eval
+        } catch (err) {
+          server.log(['status', 'info', 'Sentinl'], `Condition Error for ${task._id}: ${err}`);
+        }
+
+        if (ret) {
+          if (transform.script) {
+            try {
+              eval(transform.script.script); // eslint-disable-line no-eval
+            } catch (err) {
+              server.log(['status', 'info', 'Sentinl'], `Transform Script Error for ${task._id}: ${err}`);
+            }
+            doActions(server, actions, payload, task._source);
+          } else if (transform.search) {
+            watcher.search(method, transform.search.request).then((payload) => {
+              if (!payload) return;
+              doActions(server, actions, payload, task._source);
+            });
+          } else {
+            doActions(server, actions, payload, task._source);
+          }
+        }
+      })
+      .catch((error) => {
+        server.log(['error', 'Sentinl'], `An error occurred while executing the task._source: ${error}`);
+      });
+    };
+
+    if (config.settings.authentication.impersonate) {
+      impersonateEsClient(task._id)
+      .then((clientImpersonated) => {
+        const watcherImpersonated = new Watcher(clientImpersonated, config);
+
+        scheduleWatcher(task);
+        executeWatcher(watcherImpersonated);
+      })
+      .catch((err) => server.log(['status', 'error', 'Sentinl'], err));
+    } else {
+      executeWatcher(watcher);
+    }
   };
 
-
-  const watching = function (watcher, client, task, interval) {
+  /**
+  * Process a watcher actions.
+  *
+  * @param {object} task - watcher configuration.
+  */
+  function watching(task) {
     if (!task._source || task._source.disable) {
       server.log(['status', 'debug', 'Sentinl'], `Non-Executing Disabled Watch: ${task._id}`);
       return;
     }
 
-    server.log(['status', 'info', 'Sentinl'], `Executing watcherConfig: ${task._id}`);
+    server.log(['status', 'info', 'Sentinl'], `Executing watcher: ${task._id}`);
     server.log(['status', 'debug', 'Sentinl', 'WATCHER DEBUG'], task);
 
-    let watcherConfig = task._source;
-    if (!watcherConfig.actions || _.isEmpty(watcherConfig.actions)) {
-      server.log(['status', 'debug', 'Sentinl', 'WATCHER TASK'], `Watcher ${watcherConfig.uuid} has no actions.`);
+    if (!task._source.actions || _.isEmpty(task._source.actions)) {
+      server.log(['status', 'debug', 'Sentinl', 'WATCHER TASK'], `Watcher ${task._source.uuid} has no actions.`);
       return;
     }
 
     let actions = [];
 
-    if (watcherConfig.report) {
-      handleReports(task, watcherConfig);
+    if (task._source.report) {
+      handleReports(task);
     }
 
-    if (_.keys(getNonReportActions(watcherConfig.actions)).length) {
-      handleActions(watcher, client, task, watcherConfig);
+    if (_.keys(getNonReportActions(task._source.actions)).length) {
+      handleActions(task);
     }
   };
 
-
-  const executeWatcher = function (hit, watcher, client) {
-    if (Schedule[hit._id]) {
-      if (_.isEqual(Schedule[hit._id].hit, hit)) {
-        return;
-      }
-      else {
-        server.log(['status', 'info', 'Sentinl'], `Clearing watcher: ${hit._id}`);
-        Schedule[hit._id].later.clear();
-      }
+  /**
+  * Schedule a watcher.
+  *
+  * @param {object} task - watcher configuration.
+  */
+  function scheduleWatcher(task) {
+    if (server.sentinlStore.schedule[task._id]) {
+      server.log(['status', 'info', 'Sentinl'], `Clearing watcher: ${task._id}`);
+      server.sentinlStore.schedule[task._id].later.clear();
     }
 
-    Schedule[hit._id] = {};
-    Schedule[hit._id].hit = hit;
+    server.sentinlStore.schedule[task._id] = {};
+    server.sentinlStore.schedule[task._id].task = task;
 
     let interval;
-    if (hit._source.trigger.schedule.later) {
+    if (task._source.trigger.schedule.later) {
       // https://bunkat.github.io/later/parsers.html#text
-      interval = later.parse.text(hit._source.trigger.schedule.later);
-      Schedule[hit._id].interval = hit._source.trigger.schedule.later;
-    }
-    else if (hit._source.trigger.schedule.interval % 1 === 0) {
+      interval = later.parse.text(task._source.trigger.schedule.later);
+      server.sentinlStore.schedule[task._id].interval = task._source.trigger.schedule.later;
+    } else if (task._source.trigger.schedule.interval % 1 === 0) {
       // max 60 seconds!
-      interval = later.parse.recur().every(hit._source.trigger.schedule.interval).second();
-      Schedule[hit._id].interval = hit._source.trigger.schedule.interval;
+      interval = later.parse.recur().every(task._source.trigger.schedule.interval).second();
+      server.sentinlStore.schedule[task._id].interval = task._source.trigger.schedule.interval;
     }
 
     /* Run Watcher in interval */
-    Schedule[hit._id].later = later.setInterval(function () {
-      watching(watcher, client, hit, interval);
-    }, interval);
-    server.log(['status', 'info', 'Sentinl'], `Scheduled Watch: ${hit._id} every ${Schedule[hit._id].interval}`);
+    server.sentinlStore.schedule[task._id].later = later.setInterval(() => watching(task), interval);
+    server.log(['status', 'info', 'Sentinl'],
+      `server.sentinlStore.scheduled Watch: ${task._id} every ${server.sentinlStore.schedule[task._id].interval}`);
   };
 
-
-  const doalert = function (server, client) {
+  /**
+  * Get all watchers and schedule them.
+  *
+  * @param {object} server - Kibana server instance.
+  */
+  function doalert(server) {
     server.log(['status', 'debug', 'Sentinl'], 'Reloading Watchers...');
+    server.log(['status', 'debug', 'Sentinl', 'scheduler', 'AUTH'], `Enabled: ${config.settings.authentication.enabled}`);
+    server.log(['status', 'debug', 'Sentinl', 'scheduler', 'AUTH'], `Mode: ${config.settings.authentication.mode}`);
 
-    const watcher = new Watcher(client, config);
+    if (!server.sentinlStore.schedule) {
+      server.sentinlStore.schedule = [];
+    }
 
-    watcher.getCount().then(function (resp) {
-      watcher.getWatchers(resp.count).then(function (resp) {
+    client = getElasticsearchClient(server, config);
+    watcher = new Watcher(client, config);
 
-        /* Orphanizer */
+    watcher.getCount().then((resp) => {
+      watcher.getWatchers(resp.count).then((resp) => {
+        /* Orphanize */
         try {
           removeOrphans(resp);
         } catch (err) {
           server.log(['status', 'debug', 'Sentinl'], `Failed to remove orphans`);
         }
 
-        /* Scheduler */
-        _.each(resp.hits.hits, function (hit) {
+        /* Schedule watchers */
+        _.each(resp.hits.hits, (hit) => scheduleWatcher(hit));
 
-          server.log(['status', 'debug', 'Sentinl', 'scheduler', 'auth'], `Enabled: ${config.settings.authentication.enabled}`);
-          server.log(['status', 'debug', 'Sentinl', 'scheduler', 'auth'], `Mode: ${config.settings.authentication.mode}`);
-
-          if (config.settings.authentication.impersonate) {
-            watcher.getUser(hit._id).then((resp) => {
-              if (resp.found) {
-                const impersonate = {
-                  username: resp._source.username,
-                  sha: resp._source.sha
-                };
-                server.log(['status', 'debug', 'Sentinl', 'scheduler', 'auth'],
-                  `Impersonate watcher ${hit._id} by ${JSON.stringify(impersonate)}`);
-                const impersonatedClient = getElasticsearchClient(server, config, 'data', impersonate);
-                executeWatcher(hit, watcher, impersonatedClient);
-              } else {
-                server.log(['status', 'warning', 'Sentinl'], `Unable to find an user for watcher ${hit._id}`);
-              }
-            });
-          } else {
-            executeWatcher(hit, watcher. client);
-          }
-        });
-
-      }).catch((error) => {
-        server.log(['status', 'error', 'Sentinl'], `Failed to get watchers: ${error}`);
-      });
+      }).catch((error) => server.log(['status', 'error', 'Sentinl'], `Failed to get watchers: ${error}`));
     })
     .catch((error) => {
       if (error.statusCode === 404) {
@@ -265,7 +314,6 @@ export default function getScheduler(server) {
       }
     });
   };
-
 
   return {
     doalert

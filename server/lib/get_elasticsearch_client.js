@@ -9,14 +9,21 @@ import Crypto from './classes/crypto';
 
 export default function getElasticsearchClient(server, config = false, type = 'data', impersonate = null) {
 
-  // basic auth with impersonation of watchers
+  // Basic authentication for watchers
   if (config && config.settings.authentication.enabled && config.settings.authentication.mode === 'basic') {
-    const getClient = function () {
+
+    /**
+    * Get Elasticsearch client.
+    *
+    * @param {string} authPair - authentication pair 'username:password'
+    */
+    const getClient = function (authPair) {
+      server.log(['status', 'debug', 'Sentinl', 'get_elasticsearch_client', 'AUTH'], `Impersonate ES client by ${authPair}`);
       const options = {
         hosts: [
           {
             host: config.es.host,
-            auth: `${config.settings.authentication.admin_username}:${config.settings.authentication.admin_password}`,
+            auth: authPair,
             protocol: config.settings.authentication.https ? 'https' : 'http',
             port: config.es.port
           }
@@ -33,26 +40,21 @@ export default function getElasticsearchClient(server, config = false, type = 'd
       return new es.Client(options);
     };
 
-    let auth;
+    let authPair;
     if (impersonate && config.settings.authentication.impersonate) {
-      server.log(['status', 'debug', 'Sentinl', 'get_elasticsearch_client', 'auth'],
+      server.log(['status', 'debug', 'Sentinl', 'get_elasticsearch_client', 'AUTH'],
         `Impersonate ES client by ${JSON.stringify(impersonate)}`);
 
       const crypto = new Crypto(config.settings.authentication.encryption);
-
-      try {
-        auth = `${impersonate.username}:${crypto.decrypt(impersonate.sha)}`;
-      } catch (err) {
-        server.log(['status', 'debug', 'Sentinl', 'get_elasticsearch_client', 'auth'],
-          `Failed to decrypt SHA ${JSON.stringify(impersonate)}: ${err}`);
-      }
-    } else {
-      auth = `${config.settings.authentication.admin_username}:${config.settings.authentication.admin_password}`;
+      authPair = `${impersonate.username}:${crypto.decrypt(impersonate.sha)}`;
+      return getClient(authPair);
     }
 
-    return getClient(auth);
+    authPair = `${config.settings.authentication.admin_username}:${config.settings.authentication.admin_password}`;
+    return getClient(authPair);
   }
 
+  // Authentication via Kibi Access Control app
   if (server.plugins.kibi_access_control) {
     return server.plugins.kibi_access_control.getSentinlClient();
   }

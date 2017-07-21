@@ -43,7 +43,7 @@ const init = _.once((server) => {
   }
 
   server.log(['status', 'info', 'Sentinl'], 'Sentinl Initializing');
-  server.sentinlStore = [];
+  server.sentinlStore = {};
 
   const phantomPath = _.has(config, 'settings.report.phantomjs_path') ? config.settings.report.phantomjs_path : undefined;
   phantom.install(phantomPath)
@@ -65,11 +65,8 @@ const init = _.once((server) => {
   }
 
   /* Bird Watching and Duck Hunting */
-  const client = getElasticsearchClient(server, config);
-  var sched = later.parse.recur().on(25,55).second();
-  var t = later.setInterval(function () { scheduler.doalert(server, client); }, sched);
-  /* run NOW, plus later */
-  scheduler.doalert(server, client);
+  const sched = later.parse.recur().on(25,55).second();
+  const handleWatchers = later.setInterval(() => scheduler.doalert(server), sched);
 });
 
 export default function (server, options) {
