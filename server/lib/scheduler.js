@@ -283,7 +283,9 @@ export default function Scheduler(server) {
   function doalert(server) {
     server.log(['status', 'debug', 'Sentinl'], 'Reloading Watchers...');
     server.log(['status', 'debug', 'Sentinl', 'scheduler', 'AUTH'], `Enabled: ${config.settings.authentication.enabled}`);
-    server.log(['status', 'debug', 'Sentinl', 'scheduler', 'AUTH'], `Mode: ${config.settings.authentication.mode}`);
+    if (config.settings.authentication.enabled) {
+      server.log(['status', 'debug', 'Sentinl', 'scheduler', 'AUTH'], `Mode: ${config.settings.authentication.mode}`);
+    }
 
     if (!server.sentinlStore.schedule) {
       server.sentinlStore.schedule = [];
