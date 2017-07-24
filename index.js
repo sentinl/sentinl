@@ -56,12 +56,12 @@ export default function (kibana) {
         }).default(),
         settings: Joi.object({
           authentication: Joi.object({
-            enabled: Joi.boolean().default(true),
+            enabled: Joi.boolean().default(false),
             https: Joi.boolean().default(true),
             verify_certificate: Joi.boolean().default(false),
             path_to_pem: Joi.string(),
-            admin_username: Joi.string().default('admin'),
-            admin_password: Joi.string().default('admin'),
+            admin_username: Joi.string().default('sentinl'),
+            admin_password: Joi.string().default('password'),
             mode: Joi.string().default('basic'),
             user_index: Joi.string().default('sentinl_users'),
             user_type: Joi.string().default('user'),
