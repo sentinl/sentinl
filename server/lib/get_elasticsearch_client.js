@@ -41,7 +41,7 @@ export default function getElasticsearchClient(server, config = false, type = 'd
     };
 
     let authPair;
-    if (impersonate && config.settings.authentication.impersonate) {
+    if (impersonate && config.settings.authentication.enabled) {
       server.log(['status', 'debug', 'Sentinl', 'get_elasticsearch_client', 'AUTH'],
         `Impersonate ES client by ${JSON.stringify(impersonate)}`);
 

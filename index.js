@@ -57,7 +57,6 @@ export default function (kibana) {
         settings: Joi.object({
           authentication: Joi.object({
             enabled: Joi.boolean().default(true),
-            impersonate: Joi.boolean().default(true),
             https: Joi.boolean().default(true),
             verify_certificate: Joi.boolean().default(false),
             path_to_pem: Joi.string(),

@@ -92,7 +92,7 @@ export default function Scheduler(server) {
   *
   * @param {string} watcherId - watcher _id.
   */
-  function impersonateEsClient(watcherId) {
+  function getImpersonatedEsClient(watcherId) {
     return new Promise((resolve, reject) => {
       watcher.getUser(watcherId).then((resp) => {
         if (resp.found) {
@@ -200,8 +200,8 @@ export default function Scheduler(server) {
       });
     };
 
-    if (config.settings.authentication.impersonate) {
-      impersonateEsClient(task._id)
+    if (config.settings.authentication.enabled) {
+      getImpersonatedEsClient(task._id)
       .then((clientImpersonated) => {
         const watcherImpersonated = new Watcher(clientImpersonated, config);
 
