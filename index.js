@@ -21,7 +21,7 @@ export default function (kibana) {
   return new kibana.Plugin({
     require: ['kibana', 'elasticsearch'],
     uiExports: {
-      spyModes: ['plugins/sentinl/button/alarm_button'],
+      spyModes: ['plugins/sentinl/dashboard_spy_button/alarm_button'],
       app: {
         title: 'Sentinl',
         description: 'Kibana Alert App for Elasticsearch',
@@ -41,10 +41,13 @@ export default function (kibana) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
         es: Joi.object({
+          host: Joi.string().default('localhost'),
+          port: Joi.number().default(9200),
           timefield: Joi.string().default('@timestamp'),
           default_index: Joi.string().default('watcher'),
           type: Joi.string().default('watch'),
-          alarm_index: Joi.string().default('watcher_alarms')
+          alarm_index: Joi.string().default('watcher_alarms'),
+          alarm_type: Joi.string().default('alarm')
         }).default(),
         sentinl: Joi.object({
           history: Joi.number().default(20),
@@ -52,6 +55,22 @@ export default function (kibana) {
           scriptResults: Joi.number().default(50)
         }).default(),
         settings: Joi.object({
+          authentication: Joi.object({
+            enabled: Joi.boolean().default(false),
+            https: Joi.boolean().default(true),
+            verify_certificate: Joi.boolean().default(false),
+            path_to_pem: Joi.string(),
+            admin_username: Joi.string().default('sentinl'),
+            admin_password: Joi.string().default('password'),
+            mode: Joi.string().default('basic'),
+            user_index: Joi.string().default('sentinl_users'),
+            user_type: Joi.string().default('user'),
+            encryption: Joi.object({
+              algorithm: Joi.string().default('aes256'),
+              password: Joi.string().default('3zTvzr3p67VC61jmV54rIYu1545x4TlY'),
+              iv_length: Joi.number().default(16)
+            }).default(),
+          }).default(),
           email: Joi.object({
             active: Joi.boolean().default(false),
             user: Joi.string(),

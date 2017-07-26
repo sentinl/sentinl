@@ -1,44 +1,46 @@
 /* global angular */
 import _ from 'lodash';
 import moment from 'moment';
+import chrome from 'ui/chrome';
 
 import confirmMessage from '../templates/confirm-message.html';
 import { app } from '../app.module';
 
-app.controller('sentinlReports', function ($rootScope, $scope, $route, $interval,
-  $timeout, timefilter, Private, createNotifier, $window, $modal, navMenu, globalNavState, sentinlService) {
-  $scope.title = 'Sentinl: Reports';
-  $scope.description = 'Kibi/Kibana Report App for Elasticsearch';
-
-  $scope.topNavMenu = navMenu.getTopNav('reports');
-  $scope.tabsMenu = navMenu.getTabs('reports');
-  navMenu.setKbnLogo(globalNavState.isOpen());
-  $scope.$on('globalNavState:change', () => navMenu.setKbnLogo(globalNavState.isOpen()));
+app.controller('AlarmsController', function ($rootScope, $scope, $route, $interval,
+  $timeout, $injector, timefilter, Private, createNotifier, $window, $uibModal, navMenu,
+  globalNavState, sentinlService) {
+  $scope.title = 'Sentinl: Alarms';
+  $scope.description = 'Kibana Alert App for Elasticsearch';
 
   const notify = createNotifier({
-    location: 'Sentinl Reports'
+    location: 'Sentinl Alarms'
   });
 
   timefilter.enabled = true;
 
+  $scope.topNavMenu = navMenu.getTopNav('alarms');
+  $scope.tabsMenu = navMenu.getTabs('alarms');
+  navMenu.setKbnLogo(globalNavState.isOpen());
+  $scope.$on('globalNavState:change', () => navMenu.setKbnLogo(globalNavState.isOpen()));
+
   /* First Boot */
 
-  $scope.elasticReports = [];
+  $scope.elasticAlarms = [];
   $scope.timeInterval = timefilter.time;
 
-  const getReports = function (interval) {
+  const getAlarms = function (interval) {
     sentinlService.updateFilter(interval)
     .then((resp) => {
-      return sentinlService.listReports()
-            .then((resp) => $scope.elasticReports = resp.data.hits.hits);
+      return sentinlService.listAlarms()
+            .then((resp) => $scope.elasticAlarms = resp.data.hits.hits);
     })
     .catch(notify.error);
   };
 
-  getReports($scope.timeInterval);
+  getAlarms($scope.timeInterval);
 
   $scope.$listen(timefilter, 'fetch', (res) => {
-    getReports($scope.timeInterval);
+    getAlarms($scope.timeInterval);
   });
 
   /* Listen for refreshInterval changes */
@@ -58,16 +60,14 @@ app.controller('sentinlReports', function ($rootScope, $scope, $route, $interval
     let refreshPause = _.get($rootScope, 'timefilter.refreshInterval.pause');
 
     // Kill any existing timer immediately
-    if ($scope.refreshreports) {
-      $timeout.cancel($scope.refreshreports);
-      $scope.refreshreports = undefined;
+    if ($scope.refreshalarms) {
+      $timeout.cancel($scope.refreshalarms);
+      $scope.refreshalarms = undefined;
     }
 
     // Check if Paused
     if (refreshPause) {
-      if ($scope.refreshreports) {
-        $timeout.cancel($scope.refreshreports);
-      }
+      if ($scope.refreshalarms) $timeout.cancel($scope.refreshalarms);
       return;
     }
 
@@ -77,23 +77,21 @@ app.controller('sentinlReports', function ($rootScope, $scope, $route, $interval
       if (_.isNumber(refreshValue) && !refreshPause) {
         $scope.newRefresh = refreshValue;
         // Reset Interval & Schedule Next
-        $scope.refreshreports = $timeout(function () {
+        $scope.refreshalarms = $timeout(function () {
           $route.reload();
         }, refreshValue);
-        $scope.$watch('$destroy', $scope.refreshreports);
+        $scope.$watch('$destroy', $scope.refreshalarms);
       } else {
         $scope.currentRefresh = 0;
-        $timeout.cancel($scope.refreshreports);
+        $timeout.cancel($scope.refreshalarms);
       }
-
     } else {
-      $timeout.cancel($scope.refreshreports);
+      $timeout.cancel($scope.refreshalarms);
     }
-
   });
 
-  $scope.deleteReport = function (index, rmindex, rmtype, rmid) {
-    const confirmModal = $modal.open({
+  $scope.deleteAlarm = function (index, rmindex, rmtype, rmid) {
+    const confirmModal = $uibModal.open({
       template: confirmMessage,
       controller: 'ConfirmMessageController',
       size: 'sm'
@@ -103,10 +101,10 @@ app.controller('sentinlReports', function ($rootScope, $scope, $route, $interval
       if (response === 'yes') {
         sentinlService.deleteAlarm(rmindex, rmtype, rmid)
         .then(() => {
-          $scope.elasticReports.splice(index - 1, 1);
           $timeout(() => {
-            notify.warning('SENTINL Report log successfully deleted!');
-            getReports($scope.timeInterval);
+            $scope.elasticAlarms.splice(index - 1, 1);
+            notify.info('Alarm log successfully deleted!');
+            getAlarms($scope.timeInterval);
           }, 1000);
         })
         .catch(notify.error);
@@ -114,15 +112,15 @@ app.controller('sentinlReports', function ($rootScope, $scope, $route, $interval
     });
   };
 
-  $scope.deleteReportLocal = function (index) {
+  $scope.deleteAlarmLocal = function (index) {
     notify.warning('SENTINL function not yet implemented!');
   };
 
-  const currentTime = moment($route.current.locals.currentTime);
+  var currentTime = moment($route.current.locals.currentTime);
   $scope.currentTime = currentTime.format('HH:mm:ss');
-  const utcTime = moment.utc($route.current.locals.currentTime);
+  var utcTime = moment.utc($route.current.locals.currentTime);
   $scope.utcTime = utcTime.format('HH:mm:ss');
-  const unsubscribe = $interval(function () {
+  var unsubscribe = $interval(function () {
     $scope.currentTime = currentTime.add(1, 'second').format('HH:mm:ss');
     $scope.utcTime = utcTime.add(1, 'second').format('HH:mm:ss');
   }, 1000);

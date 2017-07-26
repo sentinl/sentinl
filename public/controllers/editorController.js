@@ -1,21 +1,34 @@
 /* global angular */
 import _ from 'lodash';
-import confirmMessage from '../../templates/confirm-message.html';
-import watcherEmailAction from './watcher-wizard.html';
+import confirmMessage from '../templates/confirm-message.html';
 
-import { app } from '../../app.module';
-import WatcherHelper from '../../classes/WatcherHelper';
+import { app } from '../app.module';
+import WatcherHelper from '../classes/WatcherHelper';
 
-app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, createNotifier) {
-  function wizardDirective($scope, element, attrs) {
+// EDITOR CONTROLLER
+app.controller('EditorController', function ($rootScope, $scope, $route, $interval,
+  $timeout, timefilter, Private, createNotifier, $window, $uibModal,
+  $log, navMenu, globalNavState, $routeParams, sentinlService, dataTransfer, $location) {
 
-    const notify = createNotifier({
-      location: 'Sentinl Watcher Wizard'
-    });
+  let editorMode = $location.$$path.slice(1); // modes: editor, wizard
+  if (_.includes(editorMode, '/')) editorMode = editorMode.split('/')[0];
+  const tabName = editorMode.slice(0, 1).toUpperCase() + editorMode.slice(1);
 
+  $scope.topNavMenu = navMenu.getTopNav(editorMode);
+  $scope.tabsMenu = navMenu.getTabs(editorMode, [{ name: tabName, url: `#/${editorMode}` }]);
+  navMenu.setKbnLogo(globalNavState.isOpen());
+  $scope.$on('globalNavState:change', () => navMenu.setKbnLogo(globalNavState.isOpen()));
+
+  const notify = createNotifier({
+    location: `Sentinl Watcher ${tabName}`
+  });
+
+  // Init editor form
+  const initEditor = function () {
     const wHelper = new WatcherHelper();
 
     $scope.form = {
+      saveTimeout: 1000,
       status: !$scope.watcher._source.disable ? 'Enabled' : 'Disable',
       messages: {
         success: null,
@@ -31,10 +44,37 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
         new: {
           edit: false
         },
-        types: [ 'webhook', 'email', 'email_html', 'report', 'slack', 'console' ]
+        types: [ 'webhook', 'email', 'email_html', 'report', 'slack', 'console' ],
+        status: {}
       },
-      rawEnabled: false
+      rawEnabled: false,
+      tabs: {
+        input: { disable: false },
+        condition: { disable: false },
+        transform: { disable: false }
+      }
     };
+
+
+    sentinlService.getAuthInfo()
+    .then((resp) => {
+      $scope.watcher.$$authentication = {
+        mode: resp.data.mode,
+        enabled: resp.data.enabled
+      };
+    })
+    .catch((error) => notify.error(`Failed to get authentication info: ${error}`));
+
+
+    $scope.actionOfType = function (action, type) {
+      return _.has(action, type);
+    };
+
+
+    $scope.actionsExist = function (actions) {
+      return _.keys(actions).length;
+    };
+
 
     $scope.aceOptions = function (mode, lines = 10) {
       return {
@@ -55,7 +95,7 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
     };
 
     const initActionTitles = function () {
-      _.forOwn($scope.watcher._source.actions, (settings, name) => { settings.$$title = name; });
+      _.forEach($scope.watcher._source.actions, (settings, name) => { settings.$$title = name; });
     };
 
 
@@ -65,7 +105,7 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
         mins: 0,
         secs: 0
       };
-      _.each($scope.watcher._source.trigger.schedule.later.split(','), (period) => {
+      _.forEach($scope.watcher._source.trigger.schedule.later.split(','), (period) => {
         if (period.match(/hour/i)) {
           $scope.watcher._source.$$schedule.hours = +_.trim(period).split(' ')[1];
         }
@@ -90,7 +130,7 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
         return str.match(/([0-9]?[0-9])s/i) ? +str.match(/([0-9]?[0-9])s/i)[1] : 0;
       };
 
-      _.forOwn($scope.watcher._source.actions, (action) => {
+      _.forEach($scope.watcher._source.actions, (action) => {
         if (!action.throttle_period) {
           action.throttle_period = '30s';
         }
@@ -105,7 +145,7 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
 
     const saveSchedule = function () {
       let schedule = [];
-      _.forOwn($scope.watcher._source.$$schedule, (value, key) => {
+      _.forEach($scope.watcher._source.$$schedule, (value, key) => {
         if (value) {
           schedule.push(`every ${value} ${key}`);
         }
@@ -116,8 +156,8 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
 
 
     const saveThrottle = function () {
-      _.forOwn($scope.watcher._source.actions, (action) => {
-        _.forOwn(action.$$throttle, (value, key) => {
+      _.forEach($scope.watcher._source.actions, (action) => {
+        _.forEach(action.$$throttle, (value, key) => {
           if (!value) action.$$throttle[key] = 0;
         });
         action.throttle_period = `${action.$$throttle.hours}h${action.$$throttle.mins}m${action.$$throttle.secs}s`;
@@ -128,23 +168,6 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
 
     $scope.isEmpty = function (obj) {
       return _.isEmpty(obj);
-    };
-
-
-    const displayFormMsg = function (type, msg) {
-      $scope.form.messages.success = null;
-      $scope.form.messages.danger = null;
-
-      if (type === 'success') {
-        $scope.form.messages.success = msg;
-      } else if (type === 'danger') {
-        $scope.form.messages.danger = msg;
-      }
-
-      $timeout(() => {
-        $scope.form.messages.success = null;
-        $scope.form.messages.danger = null;
-      }, $scope.form.messages.timeout);
     };
 
 
@@ -165,12 +188,12 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
           title: $scope.watcher.$$scripts[type].title,
           body: $scope.watcher.$$scripts[type].body
         };
-        $http.post(`../api/sentinl/save/one_script/${type}/${id}`, $scope.form.scripts[type][id])
-        .then((msg) => {
+
+        sentinlService.saveScript(type, id, $scope.form.scripts[type][id]).then((msg) => {
           if (msg.data.ok) {
-            displayFormMsg('success', 'Script saved!');
+            $timeout(() => notify.info('Script successfully saved!'), $scope.form.saveTimeout);
           } else {
-            displayFormMsg('danger', 'Fail to save the script!');
+            $timeout(() => notify.error('Fail to save the script!'), $scope.form.saveTimeout);
           }
         })
         .catch(notify.error);
@@ -189,12 +212,11 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
 
     $scope.removeScript = function (type) {
       const id = $scope.watcher.$$scripts[type].id;
-      $http.delete(`../api/sentinl/remove/one_script/${type}/${id}`)
-      .then((msg) => {
+      sentinlService.deleteScript(type, id).then((msg) => {
         if (msg.data.ok) {
-          displayFormMsg('success', 'Script deleted!');
+          $timeout(() => notify.info('Script deleted!'), $scope.form.saveTimeout);
         } else {
-          displayFormMsg('danger', 'Fail to delete the script!');
+          $timeout(() => notify.error('Fail to delete the script!'), $scope.form.saveTimeout);
         }
       })
       .catch(notify.error);
@@ -213,8 +235,8 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
     };
 
 
-    $scope.removeAction = function (actionName) {
-      const confirmModal = $modal.open({
+    const removeAction = function (actionName) {
+      const confirmModal = $uibModal.open({
         template: confirmMessage,
         controller: 'ConfirmMessageController',
         size: 'sm'
@@ -234,34 +256,9 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
     };
 
 
-    $scope.addAction = function () {
-      $scope.form.actions.new.edit = !$scope.form.actions.new.edit;
-    };
-
-
-    $scope.editAction = function (actionName, actionSettings) {
-      // toggle edit for the selected action
-      _.each($scope.form.actions.types, (type) => {
-        if (_.has(actionSettings, type)) {
-          actionSettings[type].$$edit = !actionSettings[type].$$edit;
-        }
-      });
-
-      // edit one action at a time
-      // close all other actions
-      _.forOwn($scope.watcher._source.actions, (settings, name) => {
-        _.each($scope.form.actions.types, (type) => {
-          if (_.has(settings, type)) {
-            if (name !== actionName) settings[type].$$edit = false;
-          }
-        });
-      });
-    };
-
-
     const renameActions = function (actions) {
       const newActions = {};
-      _.forOwn(actions, (settings, name) => {
+      _.forEach(actions, (settings, name) => {
         newActions[settings.$$title] = settings;
         delete newActions[settings.$$title].$$title;
       });
@@ -280,8 +277,8 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
         }
       });
 
-      _.forOwn($scope.watcher._source.actions, (settings, name) => {
-        _.each($scope.form.actions.types, (type) => {
+      _.forEach($scope.watcher._source.actions, (settings, name) => {
+        _.forEach($scope.form.actions.types, (type) => {
           if (_.has(settings, type)) {
             delete settings[type].$$edit;
           }
@@ -302,30 +299,53 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
     const initScripts = function () {
       $scope.watcher.$$scripts = {};
 
-      _.forEach($scope.form.scripts, (script, field) => {
-        // for migration purposes
-        // add some fields if they don't exist in old watcher which was created under Sentinl v4
-        if (field !== 'input' && !_.has($scope.watcher._source[field], 'script.script')) {
-          $scope.watcher._source[field] = { script: { script: '' } };
-        }
-        if (!$scope.watcher._source.input) {
-          $scope.watcher._source.input = {};
-        }
+      if (editorMode === 'wizard' && $scope.watcher._source.condition.script.script.length) {
+        $scope.watcher._source.$$condition_value = +$scope.watcher._source.condition.script.script.split(' ')[2];
+      }
 
-        let value = field === 'input' ? $scope.watcher._source.input : $scope.watcher._source[field].script.script;
+      if (editorMode !== 'wizard') {
+        _.forEach($scope.form.scripts, (script, field) => {
+          // for migration purposes
+          // add some fields if they don't exist in old watcher which was created under Sentinl v4
+          if (field !== 'input' && !_.has($scope.watcher._source[field], 'script.script')) {
+            $scope.watcher._source[field] = { script: { script: '' } };
+          }
+          if (!$scope.watcher._source.input) {
+            $scope.watcher._source.input = {};
+          }
 
-        $scope.watcher.$$scripts[field] = {
-          id: null,
-          title: null,
-          body: field === 'input' ? angular.toJson(value, 'pretty') : value
-        };
+          let value = field === 'input' ? $scope.watcher._source.input : $scope.watcher._source[field].script.script;
 
-        $http.get(`../api/sentinl/get/scripts/${field}`).then((resp) => {
-          _.forEach(resp.data.hits.hits, (script) => {
-            $scope.form.scripts[field][script._id] = script._source;
-          });
-        }).catch(notify.error);
+          $scope.watcher.$$scripts[field] = {
+            id: null,
+            title: null,
+            body: field === 'input' ? angular.toJson(value, 'pretty') : value
+          };
+
+          sentinlService.listScripts(field).then((resp) => {
+            _.forEach(resp.data.hits.hits, (script) => {
+              $scope.form.scripts[field][script._id] = script._source;
+            });
+          }).catch(notify.error);
+        });
+      }
+    };
+
+
+    // Disable tabs (Input, Condition and Transform) if there are only report actions
+    const initTabs = function () {
+      const actionTypes = {};
+      _.forEach($scope.watcher._source.actions, (settings, name) => {
+        _.forEach($scope.form.actions.types, (type) => {
+          if (settings[type]) actionTypes[type] = true;
+        });
       });
+
+      if (_.keys(actionTypes).length === 1 && _.keys(actionTypes)[0] === 'report') {
+        _.forEach($scope.form.tabs, (tab) => { tab.disable = true; });
+      } else {
+        _.forEach($scope.form.tabs, (tab) => { tab.disable = false; });
+      }
     };
 
 
@@ -335,6 +355,14 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
 
 
     const init = function () {
+      if (editorMode !== 'wizard') {
+        try {
+          initTabs();
+        } catch (e) {
+          notify.error(`Fail to initialize editor tabs: ${e}`);
+        }
+      }
+
       try {
         initScripts();
       } catch (e) {
@@ -367,9 +395,16 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
     };
 
 
-    const saveWizard = function () {
+    $scope.saveEditor = function () {
       $scope.watcherForm.$valid = true;
       $scope.watcherForm.$invalid = false;
+
+      if (editorMode === 'wizard' && $scope.watcher._source.condition.script.script.length) {
+        const condition = $scope.watcher._source.condition.script.script.split(' ');
+        condition[2] = $scope.watcher._source.$$condition_value;
+        $scope.watcher._source.condition.script.script = condition.join(' ');
+        delete $scope.watcher._source.$$condition_value;
+      }
 
       if ($scope.form.rawEnabled) {
         try {
@@ -382,7 +417,9 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
         }
 
         if ($scope.watcherForm.$valid) {
-          $scope.form.saved = true;
+          sentinlService.saveWatcher($scope.watcher)
+          .then(() => $timeout(() => notify.info('Watcher successfully saved!'), $scope.form.saveTimeout))
+          .catch(notify.error);
         }
 
         return;
@@ -405,12 +442,14 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
           $scope.watcherForm.$invalid = true;
         }
 
-        try {
-          saveEditorsText();
-        } catch (e) {
-          notify.error(`Invalid action, Transform or Condition configuration: ${e}`);
-          $scope.watcherForm.$valid = false;
-          $scope.watcherForm.$invalid = true;
+        if (editorMode !== 'wizard') {
+          try {
+            saveEditorsText();
+          } catch (e) {
+            notify.error(`Invalid action, Transform or Condition configuration: ${e}`);
+            $scope.watcherForm.$valid = false;
+            $scope.watcherForm.$invalid = true;
+          }
         }
 
         try {
@@ -424,48 +463,80 @@ app.directive('watcherWizard', function ($modal, $route, $log, $http, $timeout, 
       }
 
       if ($scope.watcherForm.$valid) {
-        $scope.form.saved = true;
+        sentinlService.saveWatcher($scope.watcher)
+        .then(() => $timeout(() => notify.info('Watcher successfully saved!'), $scope.form.saveTimeout))
+        .catch(notify.error);
+      }
+
+      if (editorMode === 'wizard') $scope.cancelEditor();
+    };
+
+
+    $scope.cancelEditor = function () {
+      $location.path('/');
+    };
+
+
+    $scope.$on('newAction:added', () => {
+      try {
+        initTabs();
+      } catch (e) {
+        notify.error(`Fail to initialize editor tabs: ${e}`);
+      }
+    });
+
+
+    const saveAuthenticationPair = function () {
+      if ($scope.watcher.$$authentication) {
+        if ($scope.watcher.$$authentication.username && $scope.watcher.$$authentication.password) {
+          sentinlService.addUser(
+            $scope.watcher._id,
+            $scope.watcher.$$authentication.username,
+            $scope.watcher.$$authentication.password
+          ).then((resp) => {
+            if (resp.status === 200) {
+              console.log('User:${$scope.watcher.$$authentication.username} watcher:${$scope.watcher._id} pair was saved.');
+            }
+          })
+          .catch((error) => notify.error(`Failed to save authentication: ${error}`));
+        }
       }
     };
 
 
-    $scope.$on('$destroy', () => {
-      if (!$scope.form.saved) {
-        const data = {
-          id: $scope.watcher._id,
-          watcher: angular.fromJson($scope.watcher.$$raw),
-          collapse: true
-        };
-        $scope.$emit('watcherWizard:save_confirmed', data);
-      }
+    $scope.$on('action:removeAction', (event, action) => removeAction(action.name));
+    $scope.$on('navMenu:cancelEditor', () => $scope.cancelEditor());
+    $scope.$on('navMenu:saveEditor', () => {
+      $scope.saveEditor();
+      saveAuthenticationPair();
+      init();
     });
 
 
-    $scope.$on('sentinlWatchers:save', (event) => {
-      saveWizard();
-
-      if ($scope.watcherForm.$valid) {
-        const data = {
-          id: $scope.watcher._id,
-          watcher: $scope.form.rawEnabled ? $scope.watcher : null
-        };
-
-        $scope.$emit('watcherWizard:save_confirmed', data);
-      } else {
-        notify.warning('Watcher settings are invalid.');
-      }
-    });
-
-
+    // fill editor form
     init();
+  };
+
+
+  // Get watcher
+  $scope.watcher = {};
+
+  if ($routeParams.watcherId && $routeParams.watcherId.length) { // edit existing watcher
+    sentinlService.getWatcher($routeParams.watcherId).then((resp) => {
+      if (!_.isObject(resp.data) || _.isEmpty(resp.data)) {
+        $timeout(() => notify.error('Fail to get watcher data!'), 1000);
+      } else {
+        $scope.watcher = resp.data;
+        initEditor();
+      }
+    });
+  } else { // forwarded from dashboard spy panel
+    $scope.watcher = dataTransfer.getWatcher();
+    if (!_.isObject($scope.watcher) || _.isEmpty($scope.watcher)) {
+      $timeout(() => notify.error('Fail to get watcher data!'), 1000);
+    } else {
+      initEditor();
+    }
   }
 
-  return {
-    restrict: 'E',
-    template: watcherEmailAction,
-    scope: {
-      watcher: '='
-    },
-    link: wizardDirective
-  };
 });

@@ -1,0 +1,72 @@
+<div class="app-container sentinl" ng-controller="EditorController" id="main">
+  <kbn-top-nav name="sentinl" config="topNavMenu">
+    <!-- Transcluded elements. -->
+    <div data-transclude-slots>
+
+      <!-- Tabs. -->
+      <div data-transclude-slot="bottomRow" class="kuiLocalTabs">
+        <a
+          ng-repeat="item in tabsMenu.list"
+          class="kuiLocalTab"
+          ng-class="{'kuiLocalTab-isSelected': tabsMenu.currentPath === item.url}"
+          kbn-href="{{::item.url}}"
+        >
+          {{::item.display}}
+        </a>
+      </div>
+    </div>
+  </kbn-top-nav>
+
+  <div class="row container">
+    <div class="col-12">
+
+      <!-- WATCHER WIZARD  -->
+      <form name="watcherForm" class="form-horizontal" id="watcher-editor">
+        <div class="form-group">
+          <div class="col-md-8">
+            <label for="watcherTitle">Give a proper name for the new watcher</label>
+            <input type="text" class="form-control" id="watcherTitle" ng-model="watcher._source.title">
+          </div>
+        </div> <!-- end form-group -->
+        <div class="form-group">
+          <div class="col-md-8">
+            <label>Specify a period of execution (h:m:s)</label>
+            <period-tag timesrc="watcher._source.$$schedule"></period-tag>
+          </div>
+        </div> <!-- end form-group -->
+        <div class="form-group">
+          <div class="col-md-8">
+            <label for="watcherTitle">Enter number of search results there should be to execute this watcher</label>
+            <input type="number" min="0" class="form-control" id="watcherTitle" ng-model="watcher._source.$$condition_value">
+          </div>
+        </div> <!-- end form-group -->
+        <div class="form-group">
+          <div class="col-md-8">
+            <new-action></new-action>
+            <label>Multiple actions can be defined</label>
+          </div>
+        </div> <!-- end form-group -->
+        <div class="form-group" ng-if="actionsExist(watcher._source.actions)">
+          <div class="col-md-8">
+            <label>Actions:</label>
+            <uib-accordion close-others="true" ng-repeat="(actionName, actionSettings) in watcher._source.actions">
+              <webhook-action ng-if="actionOfType(actionSettings, 'webhook')" name="{{actionName}}"></webhook-action>
+              <email-action ng-if="actionOfType(actionSettings, 'email')" name="{{actionName}}"></email-action>
+              <report-action ng-if="actionOfType(actionSettings, 'report')" name="{{actionName}}"></report-action>
+              <email-html-action ng-if="actionOfType(actionSettings, 'email_html')" name="{{actionName}}"></email-html-action>
+              <slack-action ng-if="actionOfType(actionSettings, 'slack')" name="{{actionName}}"></slack-action>
+              <console-action ng-if="actionOfType(actionSettings, 'console')" name="{{actionName}}"></console-action>
+            </uib-accordion>
+          </div>
+        </div> <!-- end form-group -->
+        <div class="form-group">
+          <div class="col-md-8">
+            <button type="button" class="btn btn-success" ng-click="saveEditor()">Save</button>
+            <button type="button" class="btn btn-primary" ng-click="cancelEditor()">Cancel</button>
+          </div>
+        </div> <!-- end form-group -->
+      </form> <!-- end form -->
+
+    </div> <!-- end col-12 -->
+  </div> <!-- end row -->
+</div> <!-- end main -->

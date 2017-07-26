@@ -1,4 +1,4 @@
-<div class="app-container sentinl" ng-controller="sentinlAlarms">
+<div class="app-container sentinl" ng-controller="AlarmsController">
   <kbn-top-nav name="sentinl" config="topNavMenu">
     <!-- Transcluded elements. -->
     <div data-transclude-slots>
@@ -34,7 +34,7 @@
               <th></th>
             </tr>
           <tbody ng-repeat='alarm in currentAlarms'>
-            <tr class="alarmRow">
+            <tr class="alarm-row">
               <td>{{ alarm.id }}</td>
               <td>{{ alarm.action }}</td>
               <td>{{ alarm.message }}</td>
@@ -77,7 +77,7 @@
               <th></th>
             </tr>
           <tbody ng-repeat="alarm in elasticAlarms | orderBy:'_source[\'@timestamp\']':true">
-            <tr ng-class-odd="'alarmRow-odd'" ng-class-even="'alarmRow'">
+            <tr ng-class-odd="'alarm-row-odd'" ng-class-even="'alarm-row'">
               <td>{{ alarm._source['@timestamp'] | moment }}</td>
               <td>{{ alarm._source.level }}</td>
               <td>{{ alarm._type }}</td>

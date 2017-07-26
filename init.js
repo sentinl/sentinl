@@ -27,6 +27,10 @@ import getConfiguration from './server/lib/get_configuration';
 import fs from 'fs';
 import phantom from './server/lib/phantom';
 
+import userIndexMappings from './server/mappings/user_index';
+import coreIndexMappings from './server/mappings/core_index';
+import alarmIndexMappings from './server/mappings/alarm_index';
+
 const init = _.once((server) => {
   const config = getConfiguration(server);
   const scheduler = getScheduler(server);
@@ -39,7 +43,9 @@ const init = _.once((server) => {
   }
 
   server.log(['status', 'info', 'Sentinl'], 'Sentinl Initializing');
-  server.sentinlStore = [];
+  server.sentinlStore = {
+    schedule: {}
+  };
 
   const phantomPath = _.has(config, 'settings.report.phantomjs_path') ? config.settings.report.phantomjs_path : undefined;
   phantom.install(phantomPath)
@@ -52,15 +58,17 @@ const init = _.once((server) => {
   masterRoute(server);
 
   // Create Sentinl Indices, if required
-  helpers.createSentinlIndex(server, config);
-  helpers.createSentinlAlarmIndex(server, config);
+  helpers.createIndex(server, config, config.es.default_index, config.es.type, coreIndexMappings);
+  helpers.createIndex(server, config, config.es.alarm_index, config.es.alarm_type, alarmIndexMappings, 'alarm');
+
+  if (!server.plugins.kibi_access_control && config.settings.authentication.enabled) {
+    helpers.createIndex(server, config, config.settings.authentication.user_index,
+      config.settings.authentication.user_type, userIndexMappings);
+  }
 
   /* Bird Watching and Duck Hunting */
-  const client = getElasticsearchClient(server);
-  var sched = later.parse.recur().on(25,55).second();
-  var t = later.setInterval(function () { scheduler.doalert(server, client); }, sched);
-  /* run NOW, plus later */
-  scheduler.doalert(server, client);
+  const sched = later.parse.recur().on(25,55).second();
+  const handleWatchers = later.setInterval(() => scheduler.doalert(server), sched);
 });
 
 export default function (server, options) {

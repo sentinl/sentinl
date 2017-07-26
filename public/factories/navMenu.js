@@ -1,4 +1,5 @@
 import chrome from 'ui/chrome';
+import _ from 'lodash';
 
 import newWatcherMenu from '../templates/new-watcher-top-nav.html';
 import { app } from '../app.module';
@@ -6,7 +7,7 @@ import { app } from '../app.module';
 const impactLogo = require('plugins/sentinl/sentinl-white-logo.svg');
 const smallLogo = require('plugins/sentinl/sentinl.svg');
 
-app.factory('navMenu', ['kbnUrl', function (kbnUrl) {
+app.factory('navMenu', ['$rootScope', 'kbnUrl', function ($rootScope, kbnUrl) {
   return {
     setKbnLogo: function (isOpen) {
       if (isOpen) {
@@ -41,10 +42,31 @@ app.factory('navMenu', ['kbnUrl', function (kbnUrl) {
         return nav;
       }
 
+      if (view === 'editor') {
+        const editorMenu = [
+          {
+            key: 'Cancel',
+            description: 'Cancel editor',
+            run: function () { $rootScope.$broadcast('navMenu:cancelEditor'); },
+            testId: 'cancelEditor'
+          },
+          {
+            key: 'Save',
+            description: 'Save editor',
+            run: function () { $rootScope.$broadcast('navMenu:saveEditor'); },
+            testId: 'saveEditor'
+          }
+        ];
+
+        _.forEach(editorMenu, (menu) => nav.unshift(menu));
+
+        return nav;
+      }
+
       return nav;
     },
-    getTabs: function (path = '#/') {
-      return {
+    getTabs: function (path = '#/', tmpTabs = null) {
+      const tabMenu = {
         currentPath: path.includes('#/') ? path : `#/${path}`,
         list: [
           { display: 'Watchers', url: '#/'},
@@ -52,6 +74,14 @@ app.factory('navMenu', ['kbnUrl', function (kbnUrl) {
           { display: 'Reports', url: '#/reports'}
         ]
       };
+
+      if (tmpTabs) {
+        _.forEach(tmpTabs, (tab) => tabMenu.list.push({ display: tab.name, url: tab.url }));
+      } else {
+        tabMenu.list = _.filter(tabMenu.list, (tab) => _.includes(['Watchers', 'Alarms', 'Reports'], tab.display));
+      }
+
+      return tabMenu;
     }
   };
 }]);

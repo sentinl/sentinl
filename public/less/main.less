@@ -11,20 +11,23 @@
     max-height: 100%;
   }
 
-  .navbar-inverse .navbar-brand {
-    color: #ffffff;
-  }
-
   .container {
     margin-top: 30px;
     margin-left: 10px;
     width: 98%;
   }
 
-  .navbar-inverse .logo {
+  .logo {
     height: 45px;
     width: 100px !important;
     background-color: #3c3c3c;
+  }
+
+  .logo-about {
+    height: 170px;
+    margin-bottom: 20px;
+    background: url('../sentinl-orange-logo.svg') no-repeat;
+    background-size: contain;
   }
 
   pre {
@@ -36,23 +39,19 @@
     color: #337ab7;
     margin: 0 8px;
   }
+
   .show-rule, .edit-rule {
     margin-right: 15px;
   }
 
-  .alarmRow {
+  .alarm-row {
     color: black;
     background-color: #ffc000;
   }
 
-  .alarmRow-odd {
+  .alarm-row-odd {
     color: black;
     background-color: #ffd000;
-  }
-
-  .newRow {
-    color: black;
-    background-color: #ffc000;
   }
 
   .aceditor {
@@ -60,44 +59,96 @@
     min-height: 350px;
   }
 
-  .aboutSentinlLogo {
-    height: 170px;
-    margin-bottom: 20px;
-    background: url('../sentinl-orange-logo.svg') no-repeat;
-    background-size: contain;
-  }
-
-  .formActionsList {
-    padding-left: 0px !important;
-  }
-
-  .formSubform {
-    padding-top: 20px !important;
-  }
-
-  .scheduleTag td {
-    padding-right: 5px;
-  }
-
-  .throttleTag td {
-    padding-right: 5px;
-  }
-
-  #watcherWizard {
+  #watcher-editor {
     min-height: 400px;
   }
 
-  #watcherWizard .form-group a {
+  #watcher-editor .form-group a {
     text-decoration: none;
   }
 
-  #watcherWizard .tabContent {
-    padding-top: 30px;
-    padding-left: 20px;
+  #watcher-editor .form-group label {
+    text-align: left;
+  }
+
+  #watcher-editor .tab-content {
+    padding-top: 20px;
+  }
+
+  #watcher-editor .form-group .dropdown button {
+    width: 160px;
+  }
+
+  #watcher-editor .form-group button {
+    width: 80px;
+  }
+
+  #watcher-editor .control-actions button {
+    margin-right: 15px;
+    margin-top: 20px;
+    margin-bottom: 0px;
+  }
+
+  #watcher-editor .panel-group .panel-body {
+    margin-top: 0px;
+    padding-top: 0px;
+    margin-bottom: 0px;
+    padding-bottom: 0px;
+  }
+
+  #watcher-editor .panel-group .panel-body .well {
+    margin: 10px 10px 10px 10px;
+    padding-top: 5px;
+    padding-bottom: 0px;
+  }
+
+  #watcher-editor .panel-group .panel-body .well {
+    margin: 10px 10px 10px 10px;
+    padding-top: 5px;
+    padding-bottom: 0px;
+  }
+
+  #watcher-editor .panel-group .panel-body .well .page-header {
+    margin-top: 0px;
+  }
+
+  #watcher-editor .text-warning {
+    margin-left: 15px;
+  }
+
+  #watcher-editor .text-info {
+    margin-left: 15px;
+  }
+
+  #watcher-editor .text-danger {
+    margin-left: 15px;
+  }
+
+  #watcher-editor .text-success {
+    margin-left: 15px;
   }
 
   .search-bar {
     padding-bottom: 10px;
+  }
+
+  .period-tag {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .period-tag input {
+    display: block;
+    width: 80px;
+  }
+
+  .period-tag label {
+    display: block;
+    padding-top: 5px;
+  }
+
+  .period-tag-label {
+    padding-top: 5px;
   }
 
 }

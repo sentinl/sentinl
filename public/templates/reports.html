@@ -1,4 +1,4 @@
-<div class="app-container sentinl" ng-controller="sentinlReports">
+<div class="app-container sentinl" ng-controller="ReportsController">
   <kbn-top-nav name="sentinl" config="topNavMenu">
     <!-- Transcluded elements. -->
     <div data-transclude-slots>
@@ -34,7 +34,7 @@
               <th></th>
             </tr>ng-hide="!report._source['attachment']"
             <tbody ng-repeat='report in currentReports'>
-              <tr class="alarmRow">
+              <tr class="alarm-row">
                 <td>{{ report.id }}</td>
                 <td>{{ report.action }}</td>
                 <td>{{ report.message }}</td>
@@ -78,7 +78,7 @@
               <th></th>
             </tr>
           <tbody ng-repeat="report in elasticReports | orderBy:'_source[\'@timestamp\']':true">
-            <tr ng-class-odd="'alarmRow-odd'" ng-class-even="'alarmRow'">
+            <tr ng-class-odd="'alarm-row-odd'" ng-class-even="'alarm-row'">
               <td>{{ report._source['@timestamp'] | moment }}</td>
               <td>{{ report._source.level }}</td>
               <td>{{ report._type }}</td>

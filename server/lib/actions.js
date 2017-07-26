@@ -71,17 +71,6 @@ export default function (server, actions, payload, watch) {
   }
 
 
-  /* Internal Support Functions */
-  var tmpHistory = function (type, message) {
-    // Keep history stack of latest alarms (temp)
-    server.sentinlStore.push({id: new Date(), action: type, message: message});
-    // Rotate local stack
-    if (server.sentinlStore.length > hlimit) {
-      server.sentinlStore.shift();
-    }
-  };
-
-
   /* Debounce Function, returns true if throttled */
   var getDuration = require('sum-time');
   var debounce = function (id, period) {

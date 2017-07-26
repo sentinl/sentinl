@@ -1,10 +1,13 @@
 import watcherNewAction from './new-action.html';
 import { app } from '../../app.module';
 
-app.directive('newAction', function () {
+app.directive('newAction', function ($rootScope) {
   function actionDirective(scope, element, attrs) {
 
     scope.action = {
+      addAction: {
+        isOpen: false
+      },
       types: {
         webhook: {},
         email: {},
@@ -16,7 +19,6 @@ app.directive('newAction', function () {
     };
 
     scope.addAction = function (type) {
-
       const throttle = {
         hours: 0,
         mins: 0,
@@ -128,6 +130,7 @@ app.directive('newAction', function () {
         };
       }
 
+      $rootScope.$broadcast('newAction:added');
 
     };
   };

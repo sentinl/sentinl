@@ -1,13 +1,13 @@
 import { app } from '../app.module';
 
-app.controller('ConfirmMessageController', function ($scope, $modalInstance) {
+app.controller('ConfirmMessageController', function ($scope, $uibModalInstance) {
 
   $scope.yes = function () {
-    $modalInstance.close('yes');
+    $uibModalInstance.close('yes');
   };
 
   $scope.no = function () {
-    $modalInstance.dismiss('no');
+    $uibModalInstance.dismiss('no');
   };
 
 });

@@ -18,23 +18,24 @@
  */
 
 /* import controllers */
-import './controllers/sentinlWatchers';
-import './controllers/sentinlReports';
-import './controllers/sentinlAlarms';
-import './controllers/sentinlAbout';
+import './controllers/watchersController';
+import './controllers/editorController';
+import './controllers/reportsController';
+import './controllers/alarmsController';
+import './controllers/aboutController';
 import './controllers/confirmMessageController';
 
 /* import factories */
-import './factories/navMenu.js';
+import './factories/navMenu';
+import './factories/dataTransfer';
 
 /* import services */
-import './services/sentinlService.js';
+import './services/sentinlService';
 
 /* import filters */
-import './filters/moment.js';
+import './filters/moment';
 
 /* import directives */
-import './directives/watcherWizard/watcher-wizard';
 import './directives/newAction/new-action';
 import './directives/emailAction/email-action';
 import './directives/emailHtmlAction/emailHtml-action';
@@ -42,7 +43,7 @@ import './directives/webhookAction/webhook-action';
 import './directives/reportAction/report-action';
 import './directives/slackAction/slack-action';
 import './directives/consoleAction/console-action';
-import './directives/scheduleTag/schedule-tag';
+import './directives/periodTag/period-tag';
 
 /* Styles */
 import './less/main.less';
@@ -56,4 +57,4 @@ import 'ui/timefilter';
 import 'ui/directives/pretty_duration';
 
 /* Routes */
-import './app.routes.js';
+import './app.routes';
