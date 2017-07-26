@@ -43,7 +43,9 @@ const init = _.once((server) => {
   }
 
   server.log(['status', 'info', 'Sentinl'], 'Sentinl Initializing');
-  server.sentinlStore = {};
+  server.sentinlStore = {
+    schedule: {}
+  };
 
   const phantomPath = _.has(config, 'settings.report.phantomjs_path') ? config.settings.report.phantomjs_path : undefined;
   phantom.install(phantomPath)
