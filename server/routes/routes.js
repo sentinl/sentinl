@@ -3,6 +3,9 @@ import handleESError from '../lib/handle_es_error';
 import getConfiguration from  '../lib/get_configuration';
 import Joi from 'joi';
 import dateMath from '@elastic/datemath';
+import getElasticsearchClient from '../lib/get_elasticsearch_client';
+import es from 'elasticsearch';
+import Crypto from '../lib/classes/crypto';
 
 /* ES Functions */
 var getHandler = function (type, server, req, reply) {
@@ -26,7 +29,7 @@ var getHandler = function (type, server, req, reply) {
 
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
   callWithRequest(req, 'search', {
-    index: config.es.alarm_index ? config.es.alarm_index + '*' : 'watcher_alarms*',
+    index: `${config.es.alarm_index}*`,
     sort: '@timestamp : asc',
     allowNoIndices: false,
     body: {
@@ -89,18 +92,34 @@ export default function routes(server) {
     }
   });
 
+  server.route({
+    path: '/api/sentinl/config/auth_info',
+    method: ['POST', 'GET'],
+    handler: function (req, reply) {
+      reply({
+        enabled: config.settings.authentication.enabled,
+        mode: config.settings.authentication.mode
+      });
+    }
+  });
+
   // List Watchers
   server.route({
     path: '/api/sentinl/list',
     method: ['POST', 'GET'],
     handler: function (req, reply) {
-      callWithRequest(req, 'search', {
+      const body = {
         index: config.es.default_index,
         type: config.es.type,
         size: config.sentinl.results ? config.sentinl.results : 50,
         allowNoIndices: false
+      };
+
+      callWithRequest(req, 'search', body)
+      .then((res) => {
+        console.log(res);
+        reply(res);
       })
-      .then((res) => reply(res))
       .catch((err) => reply(handleESError(err)));
     }
   });
@@ -257,6 +276,39 @@ export default function routes(server) {
 
   server.route({
     method: 'POST',
+    path: '/api/sentinl/user/{watcher_id}/{username}/{password}',
+    handler: function (request, reply) {
+      server.log(['status', 'info', 'Sentinl'], `Saving user ${request.params.username} for watcher ${request.params.watcher_id}`);
+
+      const crypto = new Crypto(config.settings.authentication.encryption);
+      const message = {
+        index: config.settings.authentication.user_index,
+        type: config.settings.authentication.user_type,
+        id: request.params.watcher_id,
+        body: {
+          username: request.params.username,
+          sha: crypto.encrypt(request.params.password)
+        }
+      };
+
+      callWithRequest(request, 'index', message)
+      .then(() => callWithRequest(request, 'indices.refresh', {
+        index: config.es.default_index
+      }))
+      .then((resp) => {
+        server.log(['status', 'debug', 'Sentinl', 'routes', 'AUTH'],
+          `Assign ${request.params.watcher_id} to user: ${JSON.stringify(message.body)}`);
+        reply({ok: true, resp: resp});
+      })
+      .catch((err) => {
+        server.log(['debug', 'Sentinl'], err);
+        reply(handleESError(err));
+      });
+    }
+  });
+
+  server.route({
+    method: 'POST',
     path: '/api/sentinl/save/one_script/{type}/{id}',
     handler: function (request, reply) {
       const script = request.payload;
@@ -272,7 +324,10 @@ export default function routes(server) {
         index: config.es.default_index
       }))
       .then((resp) => reply({ok: true, resp: resp}))
-      .catch((err) => reply(handleESError(err)));
+      .catch((err) => {
+        server.log(['debug', 'Sentinl'], err);
+        reply(handleESError(err));
+      });
     }
   });
 

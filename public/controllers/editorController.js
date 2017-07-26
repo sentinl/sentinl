@@ -56,6 +56,16 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
     };
 
 
+    sentinlService.getAuthInfo()
+    .then((resp) => {
+      $scope.watcher.$$authentication = {
+        mode: resp.data.mode,
+        enabled: resp.data.enabled
+      };
+    })
+    .catch((error) => notify.error(`Failed to get authentication info: ${error}`));
+
+
     $scope.actionOfType = function (action, type) {
       return _.has(action, type);
     };
@@ -475,10 +485,30 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
       }
     });
 
+
+    const saveAuthenticationPair = function () {
+      if ($scope.watcher.$$authentication) {
+        if ($scope.watcher.$$authentication.username && $scope.watcher.$$authentication.password) {
+          sentinlService.addUser(
+            $scope.watcher._id,
+            $scope.watcher.$$authentication.username,
+            $scope.watcher.$$authentication.password
+          ).then((resp) => {
+            if (resp.status === 200) {
+              console.log('User:${$scope.watcher.$$authentication.username} watcher:${$scope.watcher._id} pair was saved.');
+            }
+          })
+          .catch((error) => notify.error(`Failed to save authentication: ${error}`));
+        }
+      }
+    };
+
+
     $scope.$on('action:removeAction', (event, action) => removeAction(action.name));
     $scope.$on('navMenu:cancelEditor', () => $scope.cancelEditor());
     $scope.$on('navMenu:saveEditor', () => {
       $scope.saveEditor();
+      saveAuthenticationPair();
       init();
     });
 

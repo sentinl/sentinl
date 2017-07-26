@@ -43,9 +43,47 @@
                   Watcher title is required.
                 </p>
               </div> <!-- end form-group -->
+              <div class="form-group" ng-if="watcher.$$authentication.mode === 'basic' && watcher.$$authentication.enabled">
+                <div class="col-md-2">
+                  <label class="control-label">Username</label>
+                  <i class="fa fa-question-circle"
+                    aria-hidden="true"
+                    uib-popover="This is an one-way field, you insert value but don't see it after save"
+                    popover-trigger="'mouseenter'"></i>
+                </div>
+                <div class="col-md-3">
+                  <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    class="form-control"
+                    ng-model="watcher.$$authentication.username">
+                </div>
+              </div> <!-- end form-group -->
+              <div class="form-group" ng-if="watcher.$$authentication.mode === 'basic' && watcher.$$authentication.enabled">
+                <div class="col-md-2">
+                  <label class="control-label">Password</label>
+                  <i class="fa fa-question-circle"
+                    aria-hidden="true"
+                    uib-popover="This is an one-way field, you insert value but don't see it after save"
+                    popover-trigger="'mouseenter'"></i>
+                </div>
+                <div class="col-md-3">
+                  <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    class="form-control"
+                    ng-model="watcher.$$authentication.password">
+                </div>
+              </div> <!-- end form-group -->
               <div class="form-group">
                 <div class="col-md-2 period-tag-label">
                   <label>Run every</label>
+                  <i class="fa fa-question-circle"
+                    aria-hidden="true"
+                    uib-popover="hours:minutes:seconds"
+                    popover-trigger="'mouseenter'"></i>
                 </div>
                 <div class="col-md-10">
                   <period-tag timesrc="watcher._source.$$schedule"></period-tag>
