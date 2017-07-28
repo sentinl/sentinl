@@ -1,5 +1,5 @@
-import chrome from 'ui/chrome';
 import _ from 'lodash';
+import uiChrome from 'ui/chrome';
 
 import newWatcherMenu from '../templates/new-watcher-top-nav.html';
 import { app } from '../app.module';
@@ -11,15 +11,13 @@ app.factory('navMenu', ['$rootScope', 'kbnUrl', function ($rootScope, kbnUrl) {
   return {
     setKbnLogo: function (isOpen) {
       if (isOpen) {
-        chrome.setBrand({
+        uiChrome.setBrand({
           logo: `url(${impactLogo}) left no-repeat`,
-        })
-        .setNavBackground('#222222');
+        });
       } else {
-        chrome.setBrand({
+        uiChrome.setBrand({
           logo: `url(${smallLogo}) left no-repeat`
-        })
-        .setNavBackground('#222222');
+        });
       }
     },
     getTopNav: function (view) {
