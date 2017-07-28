@@ -66,8 +66,8 @@ export default function (kibana) {
             user_index: Joi.string().default('sentinl_users'),
             user_type: Joi.string().default('user'),
             encryption: Joi.object({
-              algorithm: Joi.string().default('aes256'),
-              password: Joi.string().default('3zTvzr3p67VC61jmV54rIYu1545x4TlY'),
+              algorithm: Joi.string().default('AES-256-CBC'),
+              key: Joi.string().default('b9726b04608ac48ecb0b6918214ade54'),
               iv_length: Joi.number().default(16)
             }).default(),
           }).default(),
