@@ -18,7 +18,6 @@ export default function getElasticsearchClient(server, config = false, type = 'd
     * @param {string} authPair - authentication pair 'username:password'
     */
     const getClient = function (authPair) {
-      server.log(['status', 'debug', 'Sentinl', 'get_elasticsearch_client', 'AUTH'], `Impersonate ES client by ${authPair}`);
       const options = {
         hosts: [
           {
@@ -40,21 +39,16 @@ export default function getElasticsearchClient(server, config = false, type = 'd
       return new es.Client(options);
     };
 
-    server.log(['status', 'debug', 'Sentinl', 'get_elasticsearch_client', 'AUTH'],
-      `Impersonate ES client by ${JSON.stringify(impersonate)}`);
-
     const crypto = new Crypto(config.settings.authentication.encryption);
 
     let authPair;
     if (impersonate) {
-      if (impersonate.sha) {
-        authPair = `${impersonate.username}:${crypto.decrypt(impersonate.sha)}`;
-      } else {
-        authPair = `${impersonate.username}:${impersonate.password}`;
-      }
+      authPair = `${impersonate.username}:${crypto.decrypt(impersonate.sha)}`;
     } else {
-      authPair = `${config.settings.authentication.admin_username}:${config.settings.authentication.admin_username}`;
+      authPair = `${config.settings.authentication.admin_username}:${crypto.decrypt(config.settings.authentication.admin_sha)}`;
     }
+    server.log(['status', 'debug', 'Sentinl', 'get_elasticsearch_client', 'AUTH'],
+      `Impersonate ES client by ${authPair.split(':')[0]}`);
 
     return getClient(authPair);
   }

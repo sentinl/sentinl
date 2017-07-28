@@ -60,8 +60,8 @@ export default function (kibana) {
             https: Joi.boolean().default(true),
             verify_certificate: Joi.boolean().default(false),
             path_to_pem: Joi.string(),
-            admin_username: Joi.string().default('sentinl'),
-            admin_password: Joi.string().default('password'),
+            admin_username: Joi.string().default('admin'),
+            admin_sha: Joi.string().default('6859a748bc07b49ae761f5734db66848'),
             mode: Joi.string().default('basic'),
             user_index: Joi.string().default('sentinl_users'),
             user_type: Joi.string().default('user'),
@@ -96,7 +96,7 @@ export default function (kibana) {
           }).default(),
           report: Joi.object({
             active: Joi.boolean().default(false),
-            phantomjs_path: Joi.string(undefined),
+            phantomjs_path: Joi.string().default(undefined),
             tmp_path: Joi.string().default('/tmp/')
           }).default(),
           pushapps: Joi.object({
