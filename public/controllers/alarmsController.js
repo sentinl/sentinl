@@ -1,7 +1,7 @@
 /* global angular */
 import _ from 'lodash';
 import moment from 'moment';
-import chrome from 'ui/chrome';
+import uiChrome from 'ui/chrome';
 
 import confirmMessage from '../templates/confirm-message.html';
 import { app } from '../app.module';
