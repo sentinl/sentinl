@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+import { SpyModesRegistryProvider } from 'ui/registry/spy_modes';
 
 const dashboardSpyButton = function ($scope, config) {
   $scope.$bind('req', 'searchSource.history[searchSource.history.length - 1]');
@@ -37,7 +38,7 @@ const dashboardSpyButton = function ($scope, config) {
     if (req.fetchParams && req.fetchParams.index) {
       const idx = req.fetchParams.index.toString();
       indexPattern = $scope.searchSource.get('index');
-      if (indexPattern.hasTimeField()) {
+      if (indexPattern.getTimeField()) {
         const tmp = idx.replace(/\*/g, '');
         $scope.indices.push(`<${tmp}{now/d}>`);
         $scope.indices.push(`<${tmp}{now/d-1d}>`);
@@ -95,7 +96,7 @@ const dashboardSpyButton = function ($scope, config) {
         alarm._source.input.search.request.body = req.fetchParams.body;
       }
       // Patch Range
-      if (indexPattern && indexPattern.hasTimeField()) {
+      if (indexPattern && indexPattern.getTimeField()) {
         if (!alarm._source.input.search.request.body.query.bool.must) {
           alarm._source.input.search.request.body.query.bool.must = [];
         }
@@ -115,7 +116,7 @@ const dashboardSpyButton = function ($scope, config) {
 };
 
 // Spy Placement
-require('ui/registry/spy_modes').register(function () {
+SpyModesRegistryProvider.register(function () {
   return {
     display: 'Watcher',
     name: 'setalarm',
