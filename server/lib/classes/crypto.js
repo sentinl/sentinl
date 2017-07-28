@@ -15,25 +15,33 @@ export default class Crypto {
   /**
   * Encrypts password.
   *
-  * @param {string} text - password.
+  * @param {string} plainText - password.
   */
-  encrypt(text) {
-    const cipher = crypto.createCipher(this.config.algorithm, this.config.password);
-    let encrypted = cipher.update(text, 'utf8', 'hex');
-    encrypted += cipher.final('hex');
-    return encrypted;
+  encrypt(plainText) {
+    const IV = new Buffer(crypto.randomBytes(this.config.iv_length));
+    const encryptor = crypto.createCipheriv(this.config.algorithm, this.config.key, IV);
+    encryptor.setEncoding('hex');
+    encryptor.write(plainText);
+    encryptor.end();
+
+    const cipherText = encryptor.read();
+
+    return `${cipherText}:${IV.toString('hex')}`;
   };
 
   /**
   * Decrypts password.
   *
-  * @param {string} encrypted - SHA string.
+  * @param {string} cipherText - SHA string.
   */
-  decrypt(encrypted) {
-    const decipher = crypto.createDecipher(this.config.algorithm, this.config.password);
-    let decrypted = decipher.update(encrypted, 'hex', 'utf8');
-    decrypted += decipher.final('utf8');
-    return decrypted;
+  decrypt(cipherText) {
+    const cipherBlob = cipherText.split(':');
+    const encryptedText = cipherBlob[0];
+    const IV = new Buffer(cipherBlob[1], 'hex');
+
+    const decryptor = crypto.createDecipheriv(this.config.algorithm, this.config.key, IV);
+    let decryptedText = decryptor.update(encryptedText, 'hex', 'utf-8');
+    return decryptedText += decryptor.final('utf-8');
   };
 
 }
