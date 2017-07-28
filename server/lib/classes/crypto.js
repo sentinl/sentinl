@@ -35,12 +35,17 @@ export default class Crypto {
   * @param {string} cipherText - SHA string.
   */
   decrypt(cipherText) {
-    const cipherBlob = cipherText.split(':');
-    const encryptedText = cipherBlob[0];
-    const IV = new Buffer(cipherBlob[1], 'hex');
+    let decryptor;
+    if (cipherText.includes(':')) {
+      const cipherBlob = cipherText.split(':');
+      cipherText = cipherBlob[0];
+      const IV = new Buffer(cipherBlob[1], 'hex');
+      decryptor = crypto.createDecipheriv(this.config.algorithm, this.config.key, IV);
+    } else {
+      decryptor = crypto.createDecipher(this.config.algorithm, this.config.key);
+    }
 
-    const decryptor = crypto.createDecipheriv(this.config.algorithm, this.config.key, IV);
-    let decryptedText = decryptor.update(encryptedText, 'hex', 'utf-8');
+    let decryptedText = decryptor.update(cipherText, 'hex', 'utf-8');
 
     return decryptedText += decryptor.final('utf-8');
   };
