@@ -60,14 +60,14 @@ export default function (kibana) {
             https: Joi.boolean().default(true),
             verify_certificate: Joi.boolean().default(false),
             path_to_pem: Joi.string(),
-            admin_username: Joi.string().default('sentinl'),
-            admin_password: Joi.string().default('password'),
+            admin_username: Joi.string().default('admin'),
+            admin_sha: Joi.string().default('6859a748bc07b49ae761f5734db66848'),
             mode: Joi.string().default('basic'),
             user_index: Joi.string().default('sentinl_users'),
             user_type: Joi.string().default('user'),
             encryption: Joi.object({
-              algorithm: Joi.string().default('aes256'),
-              password: Joi.string().default('3zTvzr3p67VC61jmV54rIYu1545x4TlY'),
+              algorithm: Joi.string().default('AES-256-CBC'),
+              key: Joi.string().default('b9726b04608ac48ecb0b6918214ade54'),
               iv_length: Joi.number().default(16)
             }).default(),
           }).default(),
