@@ -4,7 +4,7 @@
     "number_of_replicas": 1
   },
   "mappings": {
-    "watch": {
+    "sentinl-watcher": {
       "properties": {
         "input": {
           "type": "object",

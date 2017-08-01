@@ -17,6 +17,9 @@
  * limitations under the License.
  */
 
+/* Watchers */
+import './watchers/saved_watcher/index';
+
 /* import controllers */
 import './controllers/watchersController';
 import './controllers/editorController';

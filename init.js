@@ -31,6 +31,8 @@ import userIndexMappings from './server/mappings/user_index';
 import coreIndexMappings from './server/mappings/core_index';
 import alarmIndexMappings from './server/mappings/alarm_index';
 
+import watchConfiguration from './server/lib/saved_objects/watch';
+
 const init = _.once((server) => {
   const config = getConfiguration(server);
   const scheduler = getScheduler(server);
@@ -43,6 +45,7 @@ const init = _.once((server) => {
   }
 
   server.log(['status', 'info', 'Sentinl'], 'Sentinl Initializing');
+  config.es.type = 'sentinl-watcher';
   server.sentinlStore = {
     schedule: {}
   };
@@ -64,6 +67,11 @@ const init = _.once((server) => {
   if (!server.plugins.kibi_access_control && config.settings.authentication.enabled) {
     helpers.createIndex(server, config, config.settings.authentication.user_index,
       config.settings.authentication.user_type, userIndexMappings);
+  }
+
+  // Kibi savedObjectsAPI
+  if (server.plugins.saved_objects_api) {
+    server.plugins.saved_objects_api.registerType(watchConfiguration);
   }
 
   /* Bird Watching and Duck Hunting */

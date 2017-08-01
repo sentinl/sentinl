@@ -51,7 +51,7 @@ const dashboardSpyButton = function ($scope, config) {
       const watcherRange = 'now-1h';
       const alarm = {
         _index: 'watcher',
-        _type: 'watch',
+        _type: 'sentinl-watcher',
         _id: `new_watcher_${Math.random().toString(36).substr(2, 9)}`,
         _new: 'true',
         _source: {

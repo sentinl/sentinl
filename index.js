@@ -19,7 +19,7 @@
 
 export default function (kibana) {
   return new kibana.Plugin({
-    require: ['kibana', 'elasticsearch'],
+    require: ['kibana', 'elasticsearch', 'saved_objects_api'],
     uiExports: {
       spyModes: ['plugins/sentinl/dashboard_spy_button/alarm_button'],
       app: {
@@ -45,7 +45,6 @@ export default function (kibana) {
           port: Joi.number().default(9200),
           timefield: Joi.string().default('@timestamp'),
           default_index: Joi.string().default('watcher'),
-          type: Joi.string().default('watch'),
           alarm_index: Joi.string().default('watcher_alarms'),
           alarm_type: Joi.string().default('alarm')
         }).default(),
