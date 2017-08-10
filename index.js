@@ -17,9 +17,31 @@
  * limitations under the License.
  */
 
+import fs from 'fs';
+import _ from 'lodash';
+
 export default function (kibana) {
+  let requirements = ['kibana', 'elasticsearch'];
+
+  // Kibi: check if saved objects api exists.
+  const savedObjectsAPI = `${kibana.rootDir}/src/kibi_plugins/saved_objects_api`;
+  if (fs.existsSync(savedObjectsAPI)) {
+    requirements.push('saved_objects_api');
+
+    // Kibi: import saved objects api related libs.
+    const pathForLibs = `${kibana.rootDir}/plugins/sentinl/public/app.js`;
+    const libsToImport = ['import \'./services/saved_watchers/index\';'];
+
+    const data = fs.readFileSync(pathForLibs);
+    const libs = data.toString().trim().split('\n');
+
+    _.forEach(_.difference(libsToImport, libs), (lib) => {
+      fs.appendFileSync(pathForLibs, `${lib}\n`);
+    });
+  }
+
   return new kibana.Plugin({
-    require: ['kibana', 'elasticsearch', 'saved_objects_api'],
+    require: requirements,
     uiExports: {
       spyModes: ['plugins/sentinl/dashboard_spy_button/alarm_button'],
       app: {
@@ -45,6 +67,7 @@ export default function (kibana) {
           port: Joi.number().default(9200),
           timefield: Joi.string().default('@timestamp'),
           default_index: Joi.string().default('watcher'),
+          type: Joi.string().default('sentinl-watcher'),
           alarm_index: Joi.string().default('watcher_alarms'),
           alarm_type: Joi.string().default('alarm')
         }).default(),

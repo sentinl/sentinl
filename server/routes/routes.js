@@ -103,6 +103,23 @@ export default function routes(server) {
     }
   });
 
+  /**
+  * Route to get some of Sentinl configurations.
+  */
+  server.route({
+    path: '/api/sentinl/config',
+    method: ['POST', 'GET'],
+    handler: function (req, reply) {
+      reply({
+        es: {
+          index: config.es.default_index,
+          type: config.es.type,
+          number_of_results: config.sentinl.results
+        }
+      });
+    }
+  });
+
   // List Watchers
   server.route({
     path: '/api/sentinl/list',

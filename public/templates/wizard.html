@@ -31,13 +31,13 @@
         <div class="form-group">
           <div class="col-md-8">
             <label>Specify a period of execution (h:m:s)</label>
-            <period-tag timesrc="watcher._source.$$schedule"></period-tag>
+            <period-tag timesrc="watcher.$$schedule"></period-tag>
           </div>
         </div> <!-- end form-group -->
         <div class="form-group">
           <div class="col-md-8">
             <label for="watcherTitle">Enter number of search results there should be to execute this watcher</label>
-            <input type="number" min="0" class="form-control" id="watcherTitle" ng-model="watcher._source.$$condition_value">
+            <input type="number" min="0" class="form-control" id="watcherTitle" ng-model="watcher.$$condition_value">
           </div>
         </div> <!-- end form-group -->
         <div class="form-group">
@@ -49,7 +49,7 @@
         <div class="form-group" ng-if="actionsExist(watcher._source.actions)">
           <div class="col-md-8">
             <label>Actions:</label>
-            <uib-accordion close-others="true" ng-repeat="(actionName, actionSettings) in watcher._source.actions">
+            <uib-accordion close-others="true" ng-repeat="(actionName, actionSettings) in watcher._source.actions track by $index">
               <webhook-action ng-if="actionOfType(actionSettings, 'webhook')" name="{{actionName}}"></webhook-action>
               <email-action ng-if="actionOfType(actionSettings, 'email')" name="{{actionName}}"></email-action>
               <report-action ng-if="actionOfType(actionSettings, 'report')" name="{{actionName}}"></report-action>

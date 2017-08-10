@@ -33,6 +33,11 @@ import alarmIndexMappings from './server/mappings/alarm_index';
 
 import watchConfiguration from './server/lib/saved_objects/watch';
 
+/**
+* Initializes Sentinl app.
+*
+* @param {object} server - Kibana server.
+*/
 const init = _.once((server) => {
   const config = getConfiguration(server);
   const scheduler = getScheduler(server);
@@ -45,11 +50,13 @@ const init = _.once((server) => {
   }
 
   server.log(['status', 'info', 'Sentinl'], 'Sentinl Initializing');
-  config.es.type = 'sentinl-watcher';
+
+  // Object to hold different runtime values.
   server.sentinlStore = {
     schedule: {}
   };
 
+  // Install PhantomJS lib. The lib is needed to take screenshots by report action.
   const phantomPath = _.has(config, 'settings.report.phantomjs_path') ? config.settings.report.phantomjs_path : undefined;
   phantom.install(phantomPath)
   .then((phantomPackage) => {
@@ -58,10 +65,19 @@ const init = _.once((server) => {
   })
   .catch((err) => server.log(['status', 'error', 'Sentinl', 'report'], `Failed to install phantomjs: ${err}`));
 
+  // Load Sentinl routes.
   masterRoute(server);
 
-  // Create Sentinl Indices, if required
-  helpers.createIndex(server, config, config.es.default_index, config.es.type, coreIndexMappings);
+  // Create indexes and doc types with mappings.
+  if (server.plugins.saved_objects_api) { // Kibi: savedObjectsAPI.
+    server.plugins.saved_objects_api.registerType(watchConfiguration);
+    config.es.default_index = '.kibi';
+    config.es.type = 'sentinl-watcher';
+    helpers.putMapping(server, config, config.es.default_index, config.es.type, coreIndexMappings);
+  } else { // Kibana.
+    helpers.createIndex(server, config, config.es.default_index, config.es.type, coreIndexMappings);
+  }
+
   helpers.createIndex(server, config, config.es.alarm_index, config.es.alarm_type, alarmIndexMappings, 'alarm');
 
   if (!server.plugins.kibi_access_control && config.settings.authentication.enabled) {
@@ -69,12 +85,7 @@ const init = _.once((server) => {
       config.settings.authentication.user_type, userIndexMappings);
   }
 
-  // Kibi savedObjectsAPI
-  if (server.plugins.saved_objects_api) {
-    server.plugins.saved_objects_api.registerType(watchConfiguration);
-  }
-
-  /* Bird Watching and Duck Hunting */
+  // Schedule watchers execution.
   const sched = later.parse.recur().on(25,55).second();
   const handleWatchers = later.setInterval(() => scheduler.doalert(server), sched);
 });

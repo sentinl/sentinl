@@ -1,4 +1,4 @@
-import watcherNewAction from './new-action.html';
+import newWatcherAction from './new-action.html';
 import { app } from '../../app.module';
 
 app.directive('newAction', function ($rootScope) {
@@ -137,7 +137,7 @@ app.directive('newAction', function ($rootScope) {
 
   return {
     restrict: 'E',
-    template: watcherNewAction,
+    template: newWatcherAction,
     scope: true,
     link: actionDirective
   };

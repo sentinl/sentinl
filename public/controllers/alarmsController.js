@@ -8,7 +8,7 @@ import { app } from '../app.module';
 
 app.controller('AlarmsController', function ($rootScope, $scope, $route, $interval,
   $timeout, $injector, timefilter, Private, createNotifier, $window, $uibModal, navMenu,
-  globalNavState, sentinlService) {
+  globalNavState, api) {
   $scope.title = 'Sentinl: Alarms';
   $scope.description = 'Kibana Alert App for Elasticsearch';
 
@@ -29,9 +29,9 @@ app.controller('AlarmsController', function ($rootScope, $scope, $route, $interv
   $scope.timeInterval = timefilter.time;
 
   const getAlarms = function (interval) {
-    sentinlService.updateFilter(interval)
+    api.updateFilter(interval)
     .then((resp) => {
-      return sentinlService.listAlarms()
+      return api.listAlarms()
             .then((resp) => $scope.elasticAlarms = resp.data.hits.hits);
     })
     .catch(notify.error);
@@ -50,7 +50,7 @@ app.controller('AlarmsController', function ($rootScope, $scope, $route, $interv
     let timeInterval = _.get($rootScope, 'timefilter.time');
     if (timeInterval) {
       $scope.timeInterval = timeInterval;
-      sentinlService.updateFilter($scope.timeInterval)
+      api.updateFilter($scope.timeInterval)
       .catch(notify.error);
     }
   });
@@ -99,7 +99,7 @@ app.controller('AlarmsController', function ($rootScope, $scope, $route, $interv
 
     confirmModal.result.then((response) => {
       if (response === 'yes') {
-        sentinlService.deleteAlarm(rmindex, rmtype, rmid)
+        api.deleteAlarm(rmindex, rmtype, rmid)
         .then(() => {
           $timeout(() => {
             $scope.elasticAlarms.splice(index - 1, 1);

@@ -6,7 +6,7 @@ import confirmMessage from '../templates/confirm-message.html';
 import { app } from '../app.module';
 
 app.controller('ReportsController', function ($rootScope, $scope, $route, $interval,
-  $timeout, timefilter, Private, createNotifier, $window, $uibModal, navMenu, globalNavState, sentinlService) {
+  $timeout, timefilter, Private, createNotifier, $window, $uibModal, navMenu, globalNavState, api) {
   $scope.title = 'Sentinl: Reports';
   $scope.description = 'Kibi/Kibana Report App for Elasticsearch';
 
@@ -27,9 +27,9 @@ app.controller('ReportsController', function ($rootScope, $scope, $route, $inter
   $scope.timeInterval = timefilter.time;
 
   const getReports = function (interval) {
-    sentinlService.updateFilter(interval)
+    api.updateFilter(interval)
     .then((resp) => {
-      return sentinlService.listReports()
+      return api.listReports()
             .then((resp) => $scope.elasticReports = resp.data.hits.hits);
     })
     .catch(notify.error);
@@ -48,7 +48,7 @@ app.controller('ReportsController', function ($rootScope, $scope, $route, $inter
     let timeInterval = _.get($rootScope, 'timefilter.time');
     if (timeInterval) {
       $scope.timeInterval = timeInterval;
-      sentinlService.updateFilter($scope.timeInterval)
+      api.updateFilter($scope.timeInterval)
       .catch(notify.error);
     }
   });
@@ -101,7 +101,7 @@ app.controller('ReportsController', function ($rootScope, $scope, $route, $inter
 
     confirmModal.result.then((response) => {
       if (response === 'yes') {
-        sentinlService.deleteAlarm(rmindex, rmtype, rmid)
+        api.deleteAlarm(rmindex, rmtype, rmid)
         .then(() => {
           $scope.elasticReports.splice(index - 1, 1);
           $timeout(() => {
