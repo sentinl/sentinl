@@ -10,7 +10,7 @@ import { app } from '../app.module';
 // WATCHERS CONTROLLER
 app.controller('WatchersController', function ($rootScope, $scope, $route, $interval,
   $timeout, timefilter, Private, createNotifier, $window, $http, $uibModal, $log, navMenu,
-  globalNavState, $location, dataTransfer, sentinlService) {
+  globalNavState, $location, dataTransfer, Watcher) {
 
   $scope.title = 'Sentinl: Watchers';
   $scope.description = 'Kibana Alert App for Elasticsearch';
@@ -27,7 +27,12 @@ app.controller('WatchersController', function ($rootScope, $scope, $route, $inte
   timefilter.enabled = false;
   $scope.watchers = [];
 
-
+  /**
+  * Opens watcher editor or wizard.
+  *
+  * @param {object} watcher - watcher object.
+  * @param {string} type - editor, wizard.
+  */
   $scope.editWatcher = function (watcher, type) {
     let path = `/${type}`;
 
@@ -40,7 +45,9 @@ app.controller('WatchersController', function ($rootScope, $scope, $route, $inte
     $location.path(path);
   };
 
-
+  /**
+  * Gets watcher object created by Kibana dashboard spy button.
+  */
   const importWatcherFromLocalStorage = function () {
     /* New Entry from Saved Kibana Query */
     if ($window.localStorage.getItem('sentinl_saved_query')) {
@@ -50,23 +57,27 @@ app.controller('WatchersController', function ($rootScope, $scope, $route, $inte
     }
   };
 
+  /**
+  * Lists all existing watchers.
+  */
   const listWatchers = function () {
-    sentinlService.listWatchers()
-    .then((response) => {
-      $scope.watchers = response.data.hits.hits;
-      importWatcherFromLocalStorage();
-    })
-    .catch((error) => {
-      notify.error(error);
-      importWatcherFromLocalStorage();
-    });
+    Watcher.list()
+      .then((response) => {
+        $scope.watchers = response;
+        importWatcherFromLocalStorage();
+      })
+      .catch(notify.error)
+      .then(importWatcherFromLocalStorage);
   };
-
   listWatchers();
 
-
-  $scope.watcherDelete = function (watcherId) {
-    const index = $scope.watchers.findIndex((watcher) => watcher._id === watcherId);
+  /**
+  * Deletes watcher.
+  *
+  * @param {string} id - watcher id.
+  */
+  $scope.deleteWatcher = function (id) {
+    const index = $scope.watchers.findIndex((watcher) => watcher._id === id);
 
     const confirmModal = $uibModal.open({
       template: confirmMessage,
@@ -76,11 +87,9 @@ app.controller('WatchersController', function ($rootScope, $scope, $route, $inte
 
     confirmModal.result.then((response) => {
       if (response === 'yes') {
-        return sentinlService.deleteWatcher($scope.watchers[index]._id).then((resp) => {
-          $timeout(() => {
-            listWatchers();
-            notify.info('Watcher successfully deleted!');
-          }, 1000);
+        Watcher.delete($scope.watchers[index]._id).then(() => {
+          $scope.watchers.splice(index, 1);
+          notify.info('Watcher successfully deleted!');
         }).catch((error) => {
           if (Number.isInteger(index)) {
             $scope.watchers.splice(index, 1);
@@ -92,143 +101,41 @@ app.controller('WatchersController', function ($rootScope, $scope, $route, $inte
     });
   };
 
-
-  const watcherSave = function ($index, callFromWatcherEditorForm = false) {
-    let watcher;
-    if ($scope.editor && !callFromWatcherEditorForm) {
-      watcher = angular.fromJson($scope.editor.getValue());
-    } else {
-      watcher = $scope.watchers[$index];
-    }
-
-    console.log('saving object:', watcher);
-    return sentinlService.saveWatcher(watcher).then(() => {
-      $timeout(() => {
-        listWatchers();
-        notify.info('Watcher enabled!');
-      }, 1000);
-    }).catch(notify.error);
+  /**
+  * Saves watcher.
+  *
+  * @param {integer} index - index number of watcher in $scope.watchers array.
+  */
+  const saveWatcher = function (index) {
+    Watcher.save($scope.watchers[index])
+      .then((id) => {
+        const status = $scope.watchers[index]._source.disable ? 'disabled' : 'enabled';
+        notify.info(`Watcher ${id} ${status}!`);
+      })
+      .catch(notify.error);
   };
 
-
-  $scope.toggleWatcher = function (watcherId) {
-    const index = $scope.watchers.findIndex((watcher) => watcher._id === watcherId);
+  /**
+  * Enables or disables watcher.
+  *
+  * @param {string} id - watcher id.
+  */
+  $scope.toggleWatcher = function (id) {
+    const index = $scope.watchers.findIndex((watcher) => watcher._id === id);
     $scope.watchers[index]._source.disable = !$scope.watchers[index]._source.disable;
-    watcherSave(index);
+    saveWatcher(index);
   };
 
-
-  /* New Entry */
-  $scope.watcherNew = function (newwatcher) {
-    if (!newwatcher) {
-      const wid = 'new_watcher_' + Math.random().toString(36).substr(2, 9);
-      newwatcher = {
-        _index: 'watcher',
-        _type: 'watch',
-        _id: wid,
-        _new: 'true',
-        _source: {
-          title: 'watcher_title',
-          disable: false,
-          uuid: wid,
-          trigger: {
-            schedule: {
-              later: 'every 5 minutes'
-            }
-          },
-          input: {
-            search: {
-              request: {
-                index: [],
-                body: {},
-              }
-            }
-          },
-          condition: {
-            script: {
-              script: 'payload.hits.total > 100'
-            }
-          },
-          transform: {
-            script: {
-              script: ''
-            }
-          },
-          actions: {
-            email_admin: {
-              throttle_period: '15m',
-              email: {
-                to: 'alarm@localhost',
-                from: 'sentinl@localhost',
-                subject: 'Sentinl Alarm',
-                priority: 'high',
-                body: 'Found {{payload.hits.total}} Events'
-              }
-            }
-          }
-        }
-      };
-    }
-    $scope.editWatcher(newwatcher, 'editor');
+  /**
+  * Creates new watcher.
+  *
+  * @param {string} type - action type (email, report).
+  */
+  $scope.newWatcher = function (type) {
+    Watcher.new(type)
+      .then((watcher) => $scope.editWatcher(watcher, 'editor'))
+      .catch(notify.error);
   };
-
-
-  $scope.reporterNew = function (newwatcher) {
-    if (!newwatcher) {
-      const wid = 'reporter_' + Math.random().toString(36).substr(2, 9);
-      newwatcher = {
-        _index: 'watcher',
-        _type: 'watch',
-        _id: wid,
-        _new: 'true',
-        _source: {
-          title: 'reporter_title',
-          disable: false,
-          uuid: wid,
-          trigger: {
-            schedule: {
-              later: 'every 1 hour'
-            }
-          },
-          condition: {
-            script: {
-              script: ''
-            }
-          },
-          transform: {
-            script: {
-              script: ''
-            }
-          },
-          report : true,
-          actions: {
-            report_admin: {
-              throttle_period: '15m',
-              report: {
-                to: 'report@localhost',
-                from: 'sentinl@localhost',
-                subject: 'Sentinl Report',
-                priority: 'high',
-                body: 'Sample Sentinl Screenshot Report',
-                save: true,
-                snapshot : {
-                  res : '1280x900',
-                  url : 'http://127.0.0.1/app/kibana#/dashboard/Alerts',
-                  path : '/tmp/',
-                  params : {
-                    delay : 5000,
-                    crop : false
-                  }
-                }
-              }
-            }
-          }
-        }
-      };
-    }
-    $scope.editWatcher(newwatcher, 'editor');
-  };
-
 
   const currentTime = moment($route.current.locals.currentTime);
   $scope.currentTime = currentTime.format('HH:mm:ss');

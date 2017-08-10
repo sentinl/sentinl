@@ -17,9 +17,6 @@
  * limitations under the License.
  */
 
-/* Watchers */
-import './watchers/saved_watcher/index';
-
 /* import controllers */
 import './controllers/watchersController';
 import './controllers/editorController';
@@ -33,7 +30,8 @@ import './factories/navMenu';
 import './factories/dataTransfer';
 
 /* import services */
-import './services/sentinlService';
+import './services/api';
+import './services/watcher';
 
 /* import filters */
 import './filters/moment';
@@ -61,3 +59,5 @@ import 'ui/directives/pretty_duration';
 
 /* Routes */
 import './app.routes';
+
+/* Dynamically inserted modules */

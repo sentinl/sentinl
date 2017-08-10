@@ -2,7 +2,7 @@
 import _ from 'lodash';
 import { app } from '../app.module';
 
-app.service('sentinlService', ['$http', function ($http) {
+app.service('api', ['$http', function ($http) {
 
   // update timepicker filter
   this.updateFilter = function (timeInterval) {
@@ -17,24 +17,8 @@ app.service('sentinlService', ['$http', function ($http) {
     return $http.get('../api/sentinl/list/reports');
   };
 
-  this.listWatchers = function () {
-    return $http.get('../api/sentinl/list');
-  };
-
   this.deleteAlarm = function (index, type, id) {
     return $http.delete(`../api/sentinl/alarm/${index}/${type}/${id}`);
-  };
-
-  this.getWatcher = function (id) {
-    return $http.get(`../api/sentinl/get/watcher/${id}`);
-  };
-
-  this.saveWatcher = function (watcher) {
-    return $http.post(`../api/sentinl/watcher/${watcher._id}`, watcher);
-  };
-
-  this.deleteWatcher = function (id) {
-    return $http.delete(`../api/sentinl/watcher/${id}`);
   };
 
   this.listScripts = function (field) {
