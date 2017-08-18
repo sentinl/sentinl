@@ -1,12 +1,13 @@
 import moment from 'moment';
 import sinon from 'auto-release-sinon';
 import Promise from 'bluebird';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import expect from 'expect.js';
 
-import '../reportController';
+import '../reportsController';
 
-describe('Report Controller', function () {
+describe('Reports Controller', function () {
+
   var $scope;
   var $httpBackend;
   var $route;
@@ -36,7 +37,11 @@ describe('Report Controller', function () {
         }
       };
       $scope = $rootScope;
-      $controller('sentinlReports', { $scope, $route });
+      $controller('ReportsController', {
+        $scope,
+        $route,
+        $uibModal: {}
+      });
       $scope.$digest();
       $httpBackend.flush();
     });

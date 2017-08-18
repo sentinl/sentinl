@@ -12,7 +12,10 @@
   "description": "Kibana Alert & Report App for Elasticsearch",
   "main": "index.js",
   "scripts": {
-    "lint": "eslint",
+    "test": "gulp test",
+    "testdev": "gulp testdev",
+    "testserver": "gulp testserver",
+    "test:coverage": "gulp coverage",
     "precommit": "gulp lint",
     "sentinl-install": "/opt/kibana/bin/kibi plugin --install sentinl -u file://`pwd`/sentinl-latest.tar.gz",
     "sentinl-remove": "/opt/kibana/bin/kibi plugin --remove sentinl",

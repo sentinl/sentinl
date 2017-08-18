@@ -8,7 +8,8 @@ import WatcherHelper from '../classes/WatcherHelper';
 // EDITOR CONTROLLER
 app.controller('EditorController', function ($rootScope, $scope, $route, $interval,
   $timeout, timefilter, Private, createNotifier, $window, $uibModal,
-  $log, navMenu, globalNavState, $routeParams, api, dataTransfer, $location, Watcher) {
+  $log, navMenu, globalNavState, $routeParams, dataTransfer, $location, Watcher, Script, User) {
+  $scope.title = 'Sentinl: Editor';
 
   let editorMode = $location.$$path.slice(1); // modes: editor, wizard
   if (_.includes(editorMode, '/')) editorMode = editorMode.split('/')[0];
@@ -57,13 +58,9 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
       }
     };
 
-
-    api.getAuthInfo()
-    .then((resp) => {
-      $scope.watcher.$$authentication = {
-        mode: resp.data.mode,
-        enabled: resp.data.enabled
-      };
+    Watcher.getConfiguration()
+    .then((response) => {
+      $scope.watcher.$$authentication = response.data.authentication;
     })
     .catch((error) => notify.error(`Failed to get authentication info: ${error}`));
 
@@ -213,17 +210,20 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
       }
 
       if ($scope.watcherForm[title].$valid) {
-        const id = Math.random().toString(36).slice(2);
+        //const id = Math.random().toString(36).slice(2);
+        const id = Script.createId();
         $scope.form.scripts[type][id] = {
-          title: $scope.watcher.$$scripts[type].title,
-          body: $scope.watcher.$$scripts[type].body
+          _id: id,
+          _source: {
+            script_type: type,
+            title: $scope.watcher.$$scripts[type].title,
+            body: $scope.watcher.$$scripts[type].body
+          }
         };
 
-        api.saveScript(type, id, $scope.form.scripts[type][id]).then((msg) => {
-          if (msg.data.ok) {
-            $timeout(() => notify.info('Script successfully saved!'), $scope.form.saveTimeout);
-          } else {
-            $timeout(() => notify.error('Fail to save the script!'), $scope.form.saveTimeout);
+        Script.new($scope.form.scripts[type][id]).then((id) => {
+          if (id.length) {
+            notify.info(`Script ${id} saved.`);
           }
         })
         .catch(notify.error);
@@ -239,8 +239,8 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
     $scope.selectScript = function (type, id) {
       $scope.watcher.$$scripts[type] = {
         id: id,
-        title: $scope.form.scripts[type][id].title,
-        body: $scope.form.scripts[type][id].body
+        title: $scope.form.scripts[type][id]._source.title,
+        body: $scope.form.scripts[type][id]._source.body
       };
     };
 
@@ -251,11 +251,9 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
     */
     $scope.removeScript = function (type) {
       const id = $scope.watcher.$$scripts[type].id;
-      api.deleteScript(type, id).then((msg) => {
-        if (msg.data.ok) {
-          $timeout(() => notify.info('Script deleted!'), $scope.form.saveTimeout);
-        } else {
-          $timeout(() => notify.error('Fail to delete the script!'), $scope.form.saveTimeout);
+      Script.delete(id).then((id) => {
+        if (id.length) {
+          notify.info(`Script ${id} deleted.`);
         }
       })
       .catch(notify.error);
@@ -362,8 +360,8 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
             body: field === 'input' ? angular.toJson(value, 'pretty') : value
           };
 
-          api.listScripts(field).then((resp) => {
-            _.forEach(resp.data.hits.hits, (script) => {
+          Script.list(field).then((scripts) => {
+            _.forEach(scripts, (script) => {
               $scope.form.scripts[field][script._id] = script;
             });
           }).catch(notify.error);
@@ -546,13 +544,13 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
     const saveAuthenticationPair = function () {
       if ($scope.watcher.$$authentication) {
         if ($scope.watcher.$$authentication.username && $scope.watcher.$$authentication.password) {
-          api.addUser(
+          User.new(
             $scope.watcher._id,
             $scope.watcher.$$authentication.username,
             $scope.watcher.$$authentication.password
           ).then((resp) => {
             if (resp.status === 200) {
-              console.log('User:${$scope.watcher.$$authentication.username} watcher:${$scope.watcher._id} pair was saved.');
+              console.log(`User:${$scope.watcher.$$authentication.username} watcher:${$scope.watcher._id} pair was saved.`);
             }
           })
           .catch((error) => notify.error(`Failed to save authentication: ${error}`));

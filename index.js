@@ -30,7 +30,11 @@ export default function (kibana) {
 
     // Kibi: import saved objects api related libs.
     const pathForLibs = `${kibana.rootDir}/plugins/sentinl/public/app.js`;
-    const libsToImport = ['import \'./services/saved_watchers/index\';'];
+    const libsToImport = [
+      'import \'./services/saved_watchers/index\';',
+      'import \'./services/saved_users/index\';',
+      'import \'./services/saved_scripts/index\';'
+    ];
 
     const data = fs.readFileSync(pathForLibs);
     const libs = data.toString().trim().split('\n');
@@ -69,7 +73,8 @@ export default function (kibana) {
           default_index: Joi.string().default('watcher'),
           type: Joi.string().default('sentinl-watcher'),
           alarm_index: Joi.string().default('watcher_alarms'),
-          alarm_type: Joi.string().default('alarm')
+          alarm_type: Joi.string().default('alarm'),
+          script_type: Joi.string().default('sentinl-script')
         }).default(),
         sentinl: Joi.object({
           history: Joi.number().default(20),
