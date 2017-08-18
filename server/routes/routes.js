@@ -92,17 +92,6 @@ export default function routes(server) {
     }
   });
 
-  server.route({
-    path: '/api/sentinl/config/auth_info',
-    method: ['POST', 'GET'],
-    handler: function (req, reply) {
-      reply({
-        enabled: config.settings.authentication.enabled,
-        mode: config.settings.authentication.mode
-      });
-    }
-  });
-
   /**
   * Route to get some of Sentinl configurations.
   */
@@ -115,6 +104,10 @@ export default function routes(server) {
           index: config.es.default_index,
           type: config.es.type,
           number_of_results: config.sentinl.results
+        },
+        authentication: {
+          enabled: config.settings.authentication.enabled,
+          mode: config.settings.authentication.mode
         }
       });
     }
@@ -324,15 +317,20 @@ export default function routes(server) {
     }
   });
 
+  /**
+  * Saves single watcher script of type: input, condition or transform.
+  *
+  * @param {string} id - script id.
+  */
   server.route({
     method: 'POST',
-    path: '/api/sentinl/save/one_script/{type}/{id}',
+    path: '/api/sentinl/save/script/{id}',
     handler: function (request, reply) {
       const script = request.payload;
       server.log(['status', 'info', 'Sentinl'], `Saving scripts with type: ${request.params.type}`);
       const body = {
         index: config.es.default_index,
-        type: request.params.type,
+        type: config.es.script_type,
         id: request.params.id,
         body: script
       };
@@ -348,18 +346,28 @@ export default function routes(server) {
     }
   });
 
+  /**
+  * Lists all watcher scripts of types: input, condition, transform.
+  *
+  * @param {string} type - script type
+  */
   server.route({
     method: 'GET',
-    path: '/api/sentinl/get/scripts/{type}',
+    path: '/api/sentinl/list/scripts/{type}',
     handler: function (request, reply) {
       server.log(['status', 'info', 'Sentinl'], `Get scripts with type: ${request.params.type}`);
-      callWithRequest(request, 'search', {
+      const body = {
         index: config.es.default_index,
-        type: request.params.type,
-        size: config.sentinl.scriptResults ? config.sentinl.scriptResults : 50,
-        q: 'title:*'
+        type: config.es.script_type,
+        size: config.sentinl.results ? config.sentinl.results : 50,
+        q: `script_type:${request.params.type}`
+      };
+      callWithRequest(request, 'search', body)
+      .then((resp) => {
+        console.log('resp');
+        console.log(JSON.stringify(resp, null, 2));
+        return reply(resp);
       })
-      .then((resp) => reply(resp))
       .catch((err) => {
         server.log(['debug', 'Sentinl'], err);
         reply(err);
@@ -367,13 +375,18 @@ export default function routes(server) {
     }
   });
 
+  /**
+  * Removes single watcher script (input, condition, transform).
+  *
+  * @param {string} id - script id.
+  */
   server.route({
     method: 'DELETE',
-    path: '/api/sentinl/remove/one_script/{type}/{id}',
+    path: '/api/sentinl/remove/script/{id}',
     handler: function (request, reply) {
       const body = {
         index: config.es.default_index,
-        type: request.params.type,
+        type: config.es.script_type,
         id: request.params.id
       };
       server.log(['status', 'info', 'Sentinl'], `Delete script with type/id: ${request.params.type}/${request.params.id}`);

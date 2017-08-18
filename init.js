@@ -32,6 +32,8 @@ import coreIndexMappings from './server/mappings/core_index';
 import alarmIndexMappings from './server/mappings/alarm_index';
 
 import watchConfiguration from './server/lib/saved_objects/watch';
+import scriptConfiguration from './server/lib/saved_objects/script';
+import userConfiguration from './server/lib/saved_objects/user';
 
 /**
 * Initializes Sentinl app.
@@ -70,7 +72,10 @@ const init = _.once((server) => {
 
   // Create indexes and doc types with mappings.
   if (server.plugins.saved_objects_api) { // Kibi: savedObjectsAPI.
-    server.plugins.saved_objects_api.registerType(watchConfiguration);
+    _.forEach([watchConfiguration, scriptConfiguration, userConfiguration], (schema) => {
+      server.plugins.saved_objects_api.registerType(schema);
+    });
+
     config.es.default_index = '.kibi';
     config.es.type = 'sentinl-watcher';
     helpers.putMapping(server, config, config.es.default_index, config.es.type, coreIndexMappings);

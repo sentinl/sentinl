@@ -1,4 +1,3 @@
-  /* global angular */
 import { app } from '../app.module';
 import Promise from 'bluebird';
 import _ from 'lodash';
@@ -19,8 +18,11 @@ app.factory('Watcher', ['$http', '$injector', function ($http, $injector) {
 
   return class Watcher {
 
-    static fieldsToParse = ['actions', 'input', 'condition', 'transform', 'trigger'];
-    static fieldsToNotParse = ['disable', 'report', 'title'];
+    static fields = [
+      'actions', 'input', 'condition',
+      'transform', 'trigger', 'disable',
+      'report', 'title'
+    ];
 
     /**
     * Creates id for a new watcher.
@@ -51,9 +53,9 @@ app.factory('Watcher', ['$http', '$injector', function ($http, $injector) {
     *
     * @param {object} watcher - watcher object.
     */
-    static nestedSource(watcher) {
+    static nestedSource(watcher, fields) {
       watcher._source = {};
-      _.forEach(this.fieldsToParse.concat(this.fieldsToNotParse), (field) => {
+      _.forEach(this.fields, (field) => {
         if (watcher[field]) watcher._source[field] = watcher[field];
         delete watcher[field];
       });
@@ -79,9 +81,10 @@ app.factory('Watcher', ['$http', '$injector', function ($http, $injector) {
       if (savedWatchers) { // Kibi
         return this.getConfiguration()
           .then((config) => {
-            return savedWatchers.find(string, config.data.es.number_of_results)
+            const removeReservedChars = false;
+            return savedWatchers.find(string, removeReservedChars, config.data.es.number_of_results)
               .then((response) => {
-                return _.map(response.hits, (watcher) => this.nestedSource(watcher));
+                return _.map(response.hits, (watcher) => this.nestedSource(watcher, this.fields));
               });
           });
       } else { // Kibana
@@ -101,7 +104,7 @@ app.factory('Watcher', ['$http', '$injector', function ($http, $injector) {
       if (savedWatchers) { // Kibi
         return savedWatchers.get(id)
           .then((watcher) => {
-            return this.nestedSource(watcher);
+            return this.nestedSource(watcher, this.fields);
           });
       } else { // Kibana
         return $http.get(`../api/sentinl/get/watcher/${id}`)
@@ -126,7 +129,7 @@ app.factory('Watcher', ['$http', '$injector', function ($http, $injector) {
 
         return savedWatchers.get()
           .then((watcher) => {
-            return this.nestedSource(watcher);
+            return this.nestedSource(watcher, this.fields);
           });
       } else { // Kibana
         let watcher = {
@@ -173,7 +176,7 @@ app.factory('Watcher', ['$http', '$injector', function ($http, $injector) {
             return $http.post(`../api/sentinl/watcher/${watcher._id}`, watcher)
               .then((data) => {
                 if (data.status !== 200) {
-                  Promise.reject(`Failed to save watcher ${watcher._id}`);
+                  throw new Error(`Failed to save watcher ${watcher._id}`);
                 }
                 return data.config.data._id;
               });

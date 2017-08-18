@@ -6,7 +6,7 @@ import confirmMessage from '../templates/confirm-message.html';
 import { app } from '../app.module';
 
 app.controller('ReportsController', function ($rootScope, $scope, $route, $interval,
-  $timeout, timefilter, Private, createNotifier, $window, $uibModal, navMenu, globalNavState, api) {
+  $timeout, timefilter, Private, createNotifier, $window, $uibModal, navMenu, globalNavState, Report) {
   $scope.title = 'Sentinl: Reports';
   $scope.description = 'Kibi/Kibana Report App for Elasticsearch';
 
@@ -27,10 +27,9 @@ app.controller('ReportsController', function ($rootScope, $scope, $route, $inter
   $scope.timeInterval = timefilter.time;
 
   const getReports = function (interval) {
-    api.updateFilter(interval)
+    Report.updateFilter(interval)
     .then((resp) => {
-      return api.listReports()
-            .then((resp) => $scope.elasticReports = resp.data.hits.hits);
+      return Report.list().then((resp) => $scope.elasticReports = resp.data.hits.hits);
     })
     .catch(notify.error);
   };
@@ -48,7 +47,7 @@ app.controller('ReportsController', function ($rootScope, $scope, $route, $inter
     let timeInterval = _.get($rootScope, 'timefilter.time');
     if (timeInterval) {
       $scope.timeInterval = timeInterval;
-      api.updateFilter($scope.timeInterval)
+      Report.updateFilter($scope.timeInterval)
       .catch(notify.error);
     }
   });
@@ -101,7 +100,7 @@ app.controller('ReportsController', function ($rootScope, $scope, $route, $inter
 
     confirmModal.result.then((response) => {
       if (response === 'yes') {
-        api.deleteAlarm(rmindex, rmtype, rmid)
+        Report.delete(rmindex, rmtype, rmid)
         .then(() => {
           $scope.elasticReports.splice(index - 1, 1);
           $timeout(() => {

@@ -103,7 +103,7 @@
                     </button>
                     <ul class="dropdown-menu" uib-dropdown-menu role="menu">
                       <li ng-repeat="(id, script) in form.scripts.input">
-                        <a href="javascript:void(0)" ng-click="selectScript('input', id)">{{ script.title }}</a>
+                        <a href="javascript:void(0)" ng-click="selectScript('input', id)">{{ script._source.title }}</a>
                       </li>
                       <li ng-show="isEmpty(form.scripts.input)">
                         <a href="javascript:void(0)">No scripts stored</a>
@@ -156,7 +156,7 @@
                     </button>
                     <ul class="dropdown-menu" uib-dropdown-menu role="menu">
                       <li ng-repeat="(id, script) in form.scripts.condition">
-                        <a href="javascript:void(0)" ng-click="selectScript('condition', id)">{{ script.title }}</a>
+                        <a href="javascript:void(0)" ng-click="selectScript('condition', id)">{{ script._source.title }}</a>
                       </li>
                       <li ng-show="isEmpty(form.scripts.condition)">
                         <a href="javascript:void(0)">No scripts stored</a>
@@ -209,7 +209,7 @@
                     </button>
                     <ul class="dropdown-menu" uib-dropdown-menu role="menu">
                       <li ng-repeat="(id, script) in form.scripts.transform">
-                        <a href="javascript:void(0)" ng-click="selectScript('transform', id)">{{ script.title }}</a>
+                        <a href="javascript:void(0)" ng-click="selectScript('transform', id)">{{ script._source.title }}</a>
                       </li>
                       <li ng-show="isEmpty(form.scripts.transform)">
                         <a href="javascript:void(0)">No scripts stored</a>
