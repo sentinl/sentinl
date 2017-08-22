@@ -18,6 +18,8 @@ app.factory('User', ['$http', '$injector', function ($http, $injector) {
   */
   return class User {
 
+    static savedObjectsAPIEnabled = _.isObject(savedObjectsAPI) && _.isObject(savedUsers);
+
     /**
     * Creates new user.
     *
@@ -26,7 +28,7 @@ app.factory('User', ['$http', '$injector', function ($http, $injector) {
     * @param {string} password - user password.
     */
     static new(id, username, password) {
-      if (savedUsers) {
+      if (this.savedObjectsAPIEnabled) {
         return savedUsers.get()
           .then((user) => {
             user.watcher_id = id;
@@ -35,7 +37,13 @@ app.factory('User', ['$http', '$injector', function ($http, $injector) {
             return user.save();
           });
       } else {
-        return $http.post(`../api/sentinl/user/${id}/${username}/${password}`);
+        return $http.post(`../api/sentinl/user/${id}/${username}/${password}`)
+          .then((response) => {
+            if (response.status !== 200) {
+              throw new Error(`Fail to create user ${username}/${id}`);
+            }
+            return id;
+          });
       }
     };
 

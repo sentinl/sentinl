@@ -10,6 +10,7 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
   $timeout, timefilter, Private, createNotifier, $window, $uibModal,
   $log, navMenu, globalNavState, $routeParams, dataTransfer, $location, Watcher, Script, User) {
   $scope.title = 'Sentinl: Editor';
+  $scope.description = 'Kibi/Kibana Report App for Elasticsearch';
 
   let editorMode = $location.$$path.slice(1); // modes: editor, wizard
   if (_.includes(editorMode, '/')) editorMode = editorMode.split('/')[0];
@@ -31,7 +32,6 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
     const wHelper = new WatcherHelper();
 
     $scope.form = {
-      saveTimeout: 1000,
       status: !$scope.watcher._source.disable ? 'Enabled' : 'Disable',
       messages: {
         success: null,
@@ -59,10 +59,10 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
     };
 
     Watcher.getConfiguration()
-    .then((response) => {
-      $scope.watcher.$$authentication = response.data.authentication;
-    })
-    .catch((error) => notify.error(`Failed to get authentication info: ${error}`));
+      .then((response) => {
+        $scope.watcher.$$authentication = response.data.authentication;
+      })
+      .catch(notify.error);
 
     /**
     * Checks action type.
@@ -210,23 +210,21 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
       }
 
       if ($scope.watcherForm[title].$valid) {
-        //const id = Math.random().toString(36).slice(2);
         const id = Script.createId();
         $scope.form.scripts[type][id] = {
           _id: id,
           _source: {
-            script_type: type,
+            description: type,
             title: $scope.watcher.$$scripts[type].title,
             body: $scope.watcher.$$scripts[type].body
           }
         };
 
-        Script.new($scope.form.scripts[type][id]).then((id) => {
-          if (id.length) {
+        Script.new($scope.form.scripts[type][id])
+          .then((id) => {
             notify.info(`Script ${id} saved.`);
-          }
-        })
-        .catch(notify.error);
+          })
+          .catch(notify.error);
       }
     };
 
@@ -251,12 +249,11 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
     */
     $scope.removeScript = function (type) {
       const id = $scope.watcher.$$scripts[type].id;
-      Script.delete(id).then((id) => {
-        if (id.length) {
-          notify.info(`Script ${id} deleted.`);
-        }
-      })
-      .catch(notify.error);
+      Script.delete(id)
+        .then((id) => {
+          notify.info(`Script ${id} deleted`);
+        })
+        .catch(notify.error);
       delete $scope.form.scripts[type][id];
     };
 
@@ -360,11 +357,14 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
             body: field === 'input' ? angular.toJson(value, 'pretty') : value
           };
 
-          Script.list(field).then((scripts) => {
-            _.forEach(scripts, (script) => {
-              $scope.form.scripts[field][script._id] = script;
+          Script.list(field)
+            .then((scripts) => {
+              _.forEach(scripts, (script) => {
+                $scope.form.scripts[field][script._id] = script;
+              });
+            }).catch((error) => {
+              notify.error(error);
             });
-          }).catch(notify.error);
         });
       }
     };
@@ -463,11 +463,11 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
 
         if ($scope.watcherForm.$valid) {
           Watcher.save($scope.watcher)
-            .then((id) => {
-              $timeout(notify.info(`Watcher ${id} successfully saved!`), $scope.form.saveTimeout);
+            .then((response) => {
+              notify.info(`Watcher ${response} successfully saved!`);
               $scope.cancelEditor();
             })
-            .catch(notify.server);
+            .catch(notify.error);
         }
 
         return;
@@ -513,10 +513,13 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
       if ($scope.watcherForm.$valid) {
         Watcher.save($scope.watcher)
           .then((id) => {
-            $timeout(notify.info(`Watcher ${id} successfully saved!`), $scope.form.saveTimeout);
+            notify.info(`Watcher ${id} successfully saved!`);
             $scope.cancelEditor();
           })
-          .catch(notify.server);
+          .then(() => {
+            $rootScope.$broadcast('editorCtrl-Watcher.save');
+          })
+          .catch(notify.error);
       }
 
       if (editorMode === 'wizard') $scope.cancelEditor();
@@ -548,12 +551,10 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
             $scope.watcher._id,
             $scope.watcher.$$authentication.username,
             $scope.watcher.$$authentication.password
-          ).then((resp) => {
-            if (resp.status === 200) {
-              console.log(`User:${$scope.watcher.$$authentication.username} watcher:${$scope.watcher._id} pair was saved.`);
-            }
+          ).then((response) => {
+            notify.info(` User ${response} saved.`);
           })
-          .catch((error) => notify.error(`Failed to save authentication: ${error}`));
+          .catch(notify.error);
         }
       }
     };
@@ -582,7 +583,7 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
   } else { // new watcher
     $scope.watcher = dataTransfer.getWatcher();
     if (!_.isObject($scope.watcher) || _.isEmpty($scope.watcher)) {
-      $timeout(() => notify.error('Fail to get watcher data!'), 1000);
+      notify.error('Fail to get watcher data!');
     } else {
       initEditor();  // start editing the watcher
     }

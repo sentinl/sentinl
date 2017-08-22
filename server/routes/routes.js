@@ -364,8 +364,6 @@ export default function routes(server) {
       };
       callWithRequest(request, 'search', body)
       .then((resp) => {
-        console.log('resp');
-        console.log(JSON.stringify(resp, null, 2));
         return reply(resp);
       })
       .catch((err) => {

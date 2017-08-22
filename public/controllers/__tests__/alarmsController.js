@@ -4,9 +4,9 @@ import Promise from 'bluebird';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 
-import '../reportsController';
+import '../alarmsController';
 
-describe('Reports Controller', function () {
+describe('Alarms Controller', function () {
 
   var $scope;
   var $httpBackend;
@@ -20,7 +20,7 @@ describe('Reports Controller', function () {
       $httpBackend.whenGET(/\.\.\/api\/sentinl\/set\/interval\/.+/).respond(200, {
         status: '200 OK'
       });
-      $httpBackend.whenGET('../api/sentinl/list/reports').respond(200, {
+      $httpBackend.whenGET('../api/sentinl/list/alarms').respond(200, {
         hits: {
           hits: hits
         }
@@ -33,7 +33,7 @@ describe('Reports Controller', function () {
         }
       };
       $scope = $rootScope;
-      $controller('ReportsController', {
+      $controller('AlarmsController', {
         $scope,
         $route,
         $uibModal: {}
@@ -51,14 +51,14 @@ describe('Reports Controller', function () {
 
   it('Title and description', function () {
     init({});
-    expect($scope.title).to.equal('Sentinl: Reports');
+    expect($scope.title).to.equal('Sentinl: Alarms');
     expect($scope.description).to.be('Kibi/Kibana Report App for Elasticsearch');
   });
 
   it('2 http requests should be made when controller is created', function () {
     init({hits: [{id: 1}, {id: 2}]});
-    expect($scope.reports.length).to.equal(2);
-    expect($scope.reports).to.eql([{id: 1}, {id: 2}]);
+    expect($scope.alarms.length).to.equal(2);
+    expect($scope.alarms).to.eql([{id: 1}, {id: 2}]);
   });
 
 });

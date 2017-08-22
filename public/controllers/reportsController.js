@@ -23,15 +23,15 @@ app.controller('ReportsController', function ($rootScope, $scope, $route, $inter
 
   /* First Boot */
 
-  $scope.elasticReports = [];
+  $scope.reports = [];
   $scope.timeInterval = timefilter.time;
 
   const getReports = function (interval) {
     Report.updateFilter(interval)
-    .then((resp) => {
-      return Report.list().then((resp) => $scope.elasticReports = resp.data.hits.hits);
-    })
-    .catch(notify.error);
+      .then((resp) => {
+        return Report.list().then((resp) => $scope.reports = resp.data.hits.hits);
+      })
+      .catch(notify.error);
   };
 
   getReports($scope.timeInterval);
@@ -48,7 +48,7 @@ app.controller('ReportsController', function ($rootScope, $scope, $route, $inter
     if (timeInterval) {
       $scope.timeInterval = timeInterval;
       Report.updateFilter($scope.timeInterval)
-      .catch(notify.error);
+        .catch(notify.error);
     }
   });
 
@@ -101,14 +101,12 @@ app.controller('ReportsController', function ($rootScope, $scope, $route, $inter
     confirmModal.result.then((response) => {
       if (response === 'yes') {
         Report.delete(rmindex, rmtype, rmid)
-        .then(() => {
-          $scope.elasticReports.splice(index - 1, 1);
-          $timeout(() => {
-            notify.info('Report log successfully deleted!');
+          .then((response) => {
+            $scope.reports.splice(index - 1, 1);
+            notify.info(`Report log ${response} successfully deleted!`);
             getReports($scope.timeInterval);
-          }, 1000);
-        })
-        .catch(notify.error);
+          })
+          .catch(notify.error);
       }
     });
   };

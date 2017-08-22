@@ -19,6 +19,7 @@
 
 import _ from 'lodash';
 import { SpyModesRegistryProvider } from 'ui/registry/spy_modes';
+import defaultEmailWatcher from '../defaults/email_watcher';
 
 const dashboardSpyButton = function ($scope, config) {
   $scope.$bind('req', 'searchSource.history[searchSource.history.length - 1]');
@@ -47,47 +48,15 @@ const dashboardSpyButton = function ($scope, config) {
       }
     }
 
-    $scope.makeAlarm = function () {
+    $scope.createWatcher = function () {
       const watcherInterval = 'every 5 minutes';
       const watcherRange = 'now-1h';
       const alarm = {
         _index: 'watcher',
         _type: 'sentinl-watcher',
-        _id: Math.random().toString(36).substr(2, 10) + '-'
-          + Math.random().toString(36).substr(2, 10) + '-'
-          + Math.random().toString(36).substr(2, 10),
+        _id: undefined,
         _new: 'true',
-        _source: {
-          title: 'new_title',
-          disable: false,
-          trigger: {
-            schedule: {
-              later: watcherInterval
-            }
-          },
-          input: {
-            search: {
-              request: {}
-            }
-          },
-          condition: {
-            script: {
-              script: 'payload.hits.total > 100'
-            }
-          },
-          transform: {},
-          actions: {
-            email_data: {
-              throttle_period: '0h15m0s',
-              email: {
-                to: 'root@localhost',
-                from: 'sentinl@localhost',
-                subject: 'SENTINL ALARM {{payload._id}}',
-                body: 'Series Alarm {{payload._id}}: {{payload.hits.total}}'
-              }
-            }
-          }
-        }
+        _source: _.cloneDeep(defaultEmailWatcher)
       };
 
       // Set Index

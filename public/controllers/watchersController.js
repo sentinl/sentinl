@@ -13,7 +13,7 @@ app.controller('WatchersController', function ($rootScope, $scope, $route, $inte
   globalNavState, $location, dataTransfer, Watcher) {
 
   $scope.title = 'Sentinl: Watchers';
-  $scope.description = 'Kibana Alert App for Elasticsearch';
+  $scope.description = 'Kibi/Kibana Report App for Elasticsearch';
 
   const notify = createNotifier({
     location: 'Sentinl Watchers'
@@ -67,9 +67,16 @@ app.controller('WatchersController', function ($rootScope, $scope, $route, $inte
         importWatcherFromLocalStorage();
       })
       .catch(notify.error)
-      .then(importWatcherFromLocalStorage);
+      .finally(importWatcherFromLocalStorage);
   };
+
   listWatchers();
+
+  // List the saved watcher.
+  $scope.$on('editorCtrl-Watcher.save', () => {
+    listWatchers();
+  });
+
 
   /**
   * Deletes watcher.
@@ -87,9 +94,9 @@ app.controller('WatchersController', function ($rootScope, $scope, $route, $inte
 
     confirmModal.result.then((response) => {
       if (response === 'yes') {
-        Watcher.delete($scope.watchers[index]._id).then(() => {
+        Watcher.delete($scope.watchers[index]._id).then((id) => {
           $scope.watchers.splice(index, 1);
-          notify.info('Watcher successfully deleted!');
+          notify.info(`Watcher ${id} deleted`);
         }).catch((error) => {
           if (Number.isInteger(index)) {
             $scope.watchers.splice(index, 1);

@@ -27,6 +27,7 @@ var include = [
   'index.js',
   'init.js',
   'server',
+  'lib',
   'public',
   'phantomjs'
 ];

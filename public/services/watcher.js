@@ -18,9 +18,12 @@ app.factory('Watcher', ['$http', '$injector', function ($http, $injector) {
 
   return class Watcher {
 
+    static savedObjectsAPIEnabled = _.isObject(savedObjectsAPI) && _.isObject(savedWatchers);
+
     static fields = [
-      'actions', 'input', 'condition',
-      'transform', 'trigger', 'disable',
+      'actions', 'input',
+      'condition', 'transform',
+      'trigger', 'disable',
       'report', 'title'
     ];
 
@@ -56,7 +59,7 @@ app.factory('Watcher', ['$http', '$injector', function ($http, $injector) {
     static nestedSource(watcher, fields) {
       watcher._source = {};
       _.forEach(this.fields, (field) => {
-        if (watcher[field]) watcher._source[field] = watcher[field];
+        if (_.has(watcher, field)) watcher._source[field] = watcher[field];
         delete watcher[field];
       });
       watcher._id = watcher.id;
@@ -68,7 +71,13 @@ app.factory('Watcher', ['$http', '$injector', function ($http, $injector) {
     * Gets some of Sentinl configuration settings.
     */
     static getConfiguration() {
-      return $http.get('../api/sentinl/config');
+      return $http.get('../api/sentinl/config')
+        .then((response) => {
+          if (response.status !== 200) {
+            throw new Error('Fail to get Sentinl configuration');
+          }
+          return response;
+        });
     }
 
     /**
@@ -78,7 +87,7 @@ app.factory('Watcher', ['$http', '$injector', function ($http, $injector) {
     * @param {integer} number - number of results to return.
     */
     static list(string = null) {
-      if (savedWatchers) { // Kibi
+      if (this.savedObjectsAPIEnabled) { // Kibi
         return this.getConfiguration()
           .then((config) => {
             const removeReservedChars = false;
@@ -90,6 +99,9 @@ app.factory('Watcher', ['$http', '$injector', function ($http, $injector) {
       } else { // Kibana
         return $http.get('../api/sentinl/list')
           .then((response) => {
+            if (response.status !== 200) {
+              throw new Error('Fail to list watchers');
+            }
             return response.data.hits.hits;
           });
       }
@@ -101,7 +113,7 @@ app.factory('Watcher', ['$http', '$injector', function ($http, $injector) {
     * @param {string} id - watcher id.
     */
     static get(id) {
-      if (savedWatchers) { // Kibi
+      if (this.savedObjectsAPIEnabled) { // Kibi
         return savedWatchers.get(id)
           .then((watcher) => {
             return this.nestedSource(watcher, this.fields);
@@ -109,6 +121,9 @@ app.factory('Watcher', ['$http', '$injector', function ($http, $injector) {
       } else { // Kibana
         return $http.get(`../api/sentinl/get/watcher/${id}`)
           .then((response) => {
+            if (response.status !== 200) {
+              throw new Error(`Fail to get watcher ${id}`);
+            }
             return response.data;
           });
       }
@@ -120,7 +135,7 @@ app.factory('Watcher', ['$http', '$injector', function ($http, $injector) {
     * @param {string} type - watcher, reporter.
     */
     static new(type) {
-      if (savedWatchers) { // Kibi
+      if (this.savedObjectsAPIEnabled) { // Kibi
         if (type === 'report') {
           savedWatchers.Class.defaults = reportWatcherDefaults;
         } else {
@@ -153,32 +168,32 @@ app.factory('Watcher', ['$http', '$injector', function ($http, $injector) {
     * @param {object} watcher - watcher object.
     */
     static save(watcher) {
-      if (savedWatchers) { // Kibi
+      if (this.savedObjectsAPIEnabled) { // Kibi
         if (watcher.hasOwnProperty('save')) {
           return this.flatSource(watcher).save();
         }
 
-        return this.get(watcher._id)
+        return savedWatchers.get(watcher._id)
           .then((savedWatcher) => {
             _.forEach(watcher._source, (val, key) => {
-              savedWatcher._source[key] = val;
+              savedWatcher[key] = val;
             });
-            return this.flatSource(savedWatcher).save();
+            return savedWatcher.save();
           });
       } else { // Kibana
         return this.getConfiguration()
-          .then((config) => {
-            watcher._index = config.data.es.index;
-            watcher._type = config.data.es.type;
+          .then((response) => {
+            watcher._index = response.data.es.index;
+            watcher._type = response.data.es.type;
             return watcher;
           })
           .then((watcher) => {
             return $http.post(`../api/sentinl/watcher/${watcher._id}`, watcher)
-              .then((data) => {
-                if (data.status !== 200) {
-                  throw new Error(`Failed to save watcher ${watcher._id}`);
+              .then((response) => {
+                if (response.status !== 200) {
+                  throw new Error(`Fail to save watcher ${watcher._id}`);
                 }
-                return data.config.data._id;
+                return watcher._id;
               });
           });
       }
@@ -190,10 +205,16 @@ app.factory('Watcher', ['$http', '$injector', function ($http, $injector) {
     * @param {string} id - watcher id.
     */
     static delete(id) {
-      if (savedWatchers) { // Kibi
-        return savedWatchers.delete(id);
+      if (this.savedObjectsAPIEnabled) { // Kibi
+        return savedWatchers.delete(id).then(() => id);
       } else { // Kibana
-        return $http.delete(`../api/sentinl/watcher/${id}`);
+        return $http.delete(`../api/sentinl/watcher/${id}`)
+          .then((response) => {
+            if (response.status !== 200) {
+              throw new Error(`Fail to delete watcher ${id}`);
+            }
+            return id;
+          });
       }
     }
 

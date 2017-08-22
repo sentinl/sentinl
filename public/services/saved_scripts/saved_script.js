@@ -16,7 +16,7 @@ app.factory('SavedScript', function (courier) {
 
         mapping: {
           title: 'string',
-          script_type: 'string',
+          description: 'string',
           body: 'string'
         },
         // if this is null/undefined then the SavedObject will be assigned the defaults
