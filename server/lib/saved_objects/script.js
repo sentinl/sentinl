@@ -5,7 +5,7 @@ const ScriptConfiguration = {
   type: 'sentinl-script',
   schema: Joi.object().keys({
     title: Joi.string(),
-    script_type: Joi.string(),
+    description: Joi.string(),
     body: Joi.string()
   })
 };

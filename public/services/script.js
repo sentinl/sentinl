@@ -18,7 +18,9 @@ app.factory('Script', ['$http', '$injector', 'Watcher', function ($http, $inject
   */
   return class Script extends Watcher {
 
-    static fields = ['title', 'script_type', 'body'];
+    static savedObjectsAPIEnabled = _.isObject(savedObjectsAPI) && _.isObject(savedScripts);
+
+    static fields = ['title', 'description', 'body'];
 
     /**
     * Lists all available scripts.
@@ -26,8 +28,8 @@ app.factory('Script', ['$http', '$injector', 'Watcher', function ($http, $inject
     * @param {string} type - script type (input, condition or transform).
     */
     static list(type) {
-      if (savedScripts) { // Kibi
-        const query = `script_type:${type}`;
+      if (this.savedObjectsAPIEnabled) { // Kibi
+        const query = type;
         return this.getConfiguration()
           .then((config) => {
             const removeReservedChars = false;
@@ -39,11 +41,10 @@ app.factory('Script', ['$http', '$injector', 'Watcher', function ($http, $inject
       } else { // Kibana
         return $http.get(`../api/sentinl/list/scripts/${type}`)
           .then((response) => {
-            if (response.data.ok) {
-              return response.data.hits.hits;
-            } else {
-              throw new Error(`Fail to load watcher scripts.`);
+            if (response.status !== 200) {
+              throw new Error(`Fail to list scripts of type ${type}`);
             }
+            return response.data.hits.hits;
           });
       }
     };
@@ -54,7 +55,7 @@ app.factory('Script', ['$http', '$injector', 'Watcher', function ($http, $inject
     * @param {object} doc - script document.
     */
     static new(doc) {
-      if (savedScripts) { //Kibi
+      if (this.savedObjectsAPIEnabled) { //Kibi
         return savedScripts.get()
           .then((script) => {
             _.forEach(doc._source, (val, key) => {
@@ -65,11 +66,10 @@ app.factory('Script', ['$http', '$injector', 'Watcher', function ($http, $inject
       } else { // Kibana
         return $http.post(`../api/sentinl/save/script/${doc._id}`, doc._source)
           .then((response) => {
-            if (response.data.ok) {
-              return doc._id;
-            } else {
-              throw new Error(`Fail to create new script ${doc._id}.`);
+            if (response.status !== 200) {
+              throw new Error(`Fail to create new script ${doc._id}`);
             }
+            return doc._id;
           });
       }
     };
@@ -80,16 +80,16 @@ app.factory('Script', ['$http', '$injector', 'Watcher', function ($http, $inject
     * @param {string} id - script document id.
     */
     static delete(id) {
-      if (savedScripts) { // Kibi
-        return savedScripts.delete(id);
+      if (this.savedObjectsAPIEnabled) { // Kibi
+        return savedScripts.delete(id)
+          .then(() => id);
       } else { // Kibana
         return $http.delete(`../api/sentinl/remove/script/${id}`)
           .then((response) => {
-            if (response.data.ok) {
-              return id;
-            } else {
-              throw new Error(`Fail to delete script ${id}.`);
+            if (response.status !== 200) {
+              throw new Error(`Fail to delete script ${id}`);
             }
+            return id;
           });
       }
     };

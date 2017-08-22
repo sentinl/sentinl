@@ -12,7 +12,13 @@ app.factory('Report', ['$http', 'Alarm', function ($http, Alarm) {
     * Lists all available reports.
     */
     static list() {
-      return $http.get('../api/sentinl/list/reports');
+      return $http.get('../api/sentinl/list/reports')
+        .then((response) => {
+          if (response.status !== 200) {
+            throw new Error('Fail to list reports');
+          }
+          return response;
+        });
     };
 
   };
