@@ -86,7 +86,7 @@
                     popover-trigger="'mouseenter'"></i>
                 </div>
                 <div class="col-md-10">
-                  <period-tag timesrc="watcher._source.$$schedule"></period-tag>
+                  <period-tag timesrc="watcher.$$schedule"></period-tag>
                 </div>
               </div> <!-- end form-group -->
             </div> <!-- end tab-content -->
@@ -103,7 +103,7 @@
                     </button>
                     <ul class="dropdown-menu" uib-dropdown-menu role="menu">
                       <li ng-repeat="(id, script) in form.scripts.input">
-                        <a href="javascript:void(0)" ng-click="selectScript('input', id)">{{ script.title }}</a>
+                        <a href="javascript:void(0)" ng-click="selectScript('input', id)">{{ script._source.title }}</a>
                       </li>
                       <li ng-show="isEmpty(form.scripts.input)">
                         <a href="javascript:void(0)">No scripts stored</a>
@@ -156,7 +156,7 @@
                     </button>
                     <ul class="dropdown-menu" uib-dropdown-menu role="menu">
                       <li ng-repeat="(id, script) in form.scripts.condition">
-                        <a href="javascript:void(0)" ng-click="selectScript('condition', id)">{{ script.title }}</a>
+                        <a href="javascript:void(0)" ng-click="selectScript('condition', id)">{{ script._source.title }}</a>
                       </li>
                       <li ng-show="isEmpty(form.scripts.condition)">
                         <a href="javascript:void(0)">No scripts stored</a>
@@ -209,7 +209,7 @@
                     </button>
                     <ul class="dropdown-menu" uib-dropdown-menu role="menu">
                       <li ng-repeat="(id, script) in form.scripts.transform">
-                        <a href="javascript:void(0)" ng-click="selectScript('transform', id)">{{ script.title }}</a>
+                        <a href="javascript:void(0)" ng-click="selectScript('transform', id)">{{ script._source.title }}</a>
                       </li>
                       <li ng-show="isEmpty(form.scripts.transform)">
                         <a href="javascript:void(0)">No scripts stored</a>
@@ -260,7 +260,7 @@
               </div> <!-- end form-group -->
               <div class="form-group" ng-if="actionsExist(watcher._source.actions)">
                 <div class="col-md-8">
-                  <uib-accordion close-others="true" ng-repeat="(actionName, actionSettings) in watcher._source.actions">
+                  <uib-accordion close-others="true" ng-repeat="(actionName, actionSettings) in watcher._source.actions track by $index">
                     <webhook-action ng-if="actionOfType(actionSettings, 'webhook')" name="{{actionName}}"></webhook-action>
                     <email-action ng-if="actionOfType(actionSettings, 'email')" name="{{actionName}}"></email-action>
                     <report-action ng-if="actionOfType(actionSettings, 'report')" name="{{actionName}}"></report-action>

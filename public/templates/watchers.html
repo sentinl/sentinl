@@ -28,11 +28,6 @@
       </div>
 
       <div class="panel panel-default">
-        <div>
-          <div class="edit-group pull-right">
-            <span ng-show="watcherSaved" ng-click="watcherNew(watcherSaved);watcherNew=undefined;" title="Paste Kibana query to new Watcher"><i class="fa fa-paste"></i></span>
-          </div>
-        </div>
         <table class="table">
           <thead>
             <tr>
@@ -55,7 +50,7 @@
                 <span title="Show watcher editor" class="show-rule" ng-click="editWatcher(watcher._id, 'editor')"  ng-model="collapse">
                   <i class="fa fa-ellipsis-h"></i>
                 </span>
-                <span ng-click="watcherDelete(watcher._id)"
+                <span ng-click="deleteWatcher(watcher._id)"
                       title="Delete"
                       class="delete-rule">
                   <i class="fa fa-trash"></i>

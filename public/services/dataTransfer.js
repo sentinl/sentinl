@@ -8,8 +8,8 @@ app.factory('dataTransfer', [function () {
     getWatcher: function () {
       return watcher;
     },
-    setWatcher: function (watcherNew) {
-      watcher = watcherNew;
+    setWatcher: function (newWatcher) {
+      watcher = newWatcher;
     }
   };
 

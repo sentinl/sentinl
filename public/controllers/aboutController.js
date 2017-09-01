@@ -4,8 +4,8 @@ import moment from 'moment';
 import { app } from '../app.module';
 
 app.controller('AboutController', function ($scope, $route, $interval, timefilter, createNotifier, navMenu, globalNavState) {
-  $scope.title = 'Sentinl';
-  $scope.description = 'Kibana Alert App for Elasticsearch';
+  $scope.title = 'Sentinl: About';
+  $scope.description = 'Kibi/Kibana Report App for Elasticsearch';
   timefilter.enabled = false;
 
   const notify = createNotifier({

@@ -31,6 +31,15 @@ import userIndexMappings from './server/mappings/user_index';
 import coreIndexMappings from './server/mappings/core_index';
 import alarmIndexMappings from './server/mappings/alarm_index';
 
+import watchConfiguration from './server/lib/saved_objects/watch';
+import scriptConfiguration from './server/lib/saved_objects/script';
+import userConfiguration from './server/lib/saved_objects/user';
+
+/**
+* Initializes Sentinl app.
+*
+* @param {object} server - Kibana server.
+*/
 const init = _.once((server) => {
   const config = getConfiguration(server);
   const scheduler = getScheduler(server);
@@ -43,10 +52,13 @@ const init = _.once((server) => {
   }
 
   server.log(['status', 'info', 'Sentinl'], 'Sentinl Initializing');
+
+  // Object to hold different runtime values.
   server.sentinlStore = {
     schedule: {}
   };
 
+  // Install PhantomJS lib. The lib is needed to take screenshots by report action.
   const phantomPath = _.has(config, 'settings.report.phantomjs_path') ? config.settings.report.phantomjs_path : undefined;
   phantom.install(phantomPath)
   .then((phantomPackage) => {
@@ -55,10 +67,22 @@ const init = _.once((server) => {
   })
   .catch((err) => server.log(['status', 'error', 'Sentinl', 'report'], `Failed to install phantomjs: ${err}`));
 
+  // Load Sentinl routes.
   masterRoute(server);
 
-  // Create Sentinl Indices, if required
-  helpers.createIndex(server, config, config.es.default_index, config.es.type, coreIndexMappings);
+  // Create indexes and doc types with mappings.
+  if (server.plugins.saved_objects_api) { // Kibi: savedObjectsAPI.
+    _.forEach([watchConfiguration, scriptConfiguration, userConfiguration], (schema) => {
+      server.plugins.saved_objects_api.registerType(schema);
+    });
+
+    config.es.default_index = '.kibi';
+    config.es.type = 'sentinl-watcher';
+    helpers.putMapping(server, config, config.es.default_index, config.es.type, coreIndexMappings);
+  } else { // Kibana.
+    helpers.createIndex(server, config, config.es.default_index, config.es.type, coreIndexMappings);
+  }
+
   helpers.createIndex(server, config, config.es.alarm_index, config.es.alarm_type, alarmIndexMappings, 'alarm');
 
   if (!server.plugins.kibi_access_control && config.settings.authentication.enabled) {
@@ -66,7 +90,7 @@ const init = _.once((server) => {
       config.settings.authentication.user_type, userIndexMappings);
   }
 
-  /* Bird Watching and Duck Hunting */
+  // Schedule watchers execution.
   const sched = later.parse.recur().on(25,55).second();
   const handleWatchers = later.setInterval(() => scheduler.doalert(server), sched);
 });

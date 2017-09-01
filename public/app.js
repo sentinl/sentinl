@@ -25,12 +25,14 @@ import './controllers/alarmsController';
 import './controllers/aboutController';
 import './controllers/confirmMessageController';
 
-/* import factories */
-import './factories/navMenu';
-import './factories/dataTransfer';
-
 /* import services */
-import './services/sentinlService';
+import './services/watcher';
+import './services/script';
+import './services/user';
+import './services/alarm';
+import './services/report';
+import './services/navMenu';
+import './services/dataTransfer';
 
 /* import filters */
 import './filters/moment';
@@ -58,3 +60,5 @@ import 'ui/directives/pretty_duration';
 
 /* Routes */
 import './app.routes';
+
+/* Dynamically inserted modules */

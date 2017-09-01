@@ -6,7 +6,7 @@ import confirmMessage from '../templates/confirm-message.html';
 import { app } from '../app.module';
 
 app.controller('ReportsController', function ($rootScope, $scope, $route, $interval,
-  $timeout, timefilter, Private, createNotifier, $window, $uibModal, navMenu, globalNavState, sentinlService) {
+  $timeout, timefilter, Private, createNotifier, $window, $uibModal, navMenu, globalNavState, Report) {
   $scope.title = 'Sentinl: Reports';
   $scope.description = 'Kibi/Kibana Report App for Elasticsearch';
 
@@ -23,16 +23,15 @@ app.controller('ReportsController', function ($rootScope, $scope, $route, $inter
 
   /* First Boot */
 
-  $scope.elasticReports = [];
+  $scope.reports = [];
   $scope.timeInterval = timefilter.time;
 
   const getReports = function (interval) {
-    sentinlService.updateFilter(interval)
-    .then((resp) => {
-      return sentinlService.listReports()
-            .then((resp) => $scope.elasticReports = resp.data.hits.hits);
-    })
-    .catch(notify.error);
+    Report.updateFilter(interval)
+      .then((resp) => {
+        return Report.list().then((resp) => $scope.reports = resp.data.hits.hits);
+      })
+      .catch(notify.error);
   };
 
   getReports($scope.timeInterval);
@@ -48,8 +47,8 @@ app.controller('ReportsController', function ($rootScope, $scope, $route, $inter
     let timeInterval = _.get($rootScope, 'timefilter.time');
     if (timeInterval) {
       $scope.timeInterval = timeInterval;
-      sentinlService.updateFilter($scope.timeInterval)
-      .catch(notify.error);
+      Report.updateFilter($scope.timeInterval)
+        .catch(notify.error);
     }
   });
 
@@ -101,15 +100,13 @@ app.controller('ReportsController', function ($rootScope, $scope, $route, $inter
 
     confirmModal.result.then((response) => {
       if (response === 'yes') {
-        sentinlService.deleteAlarm(rmindex, rmtype, rmid)
-        .then(() => {
-          $scope.elasticReports.splice(index - 1, 1);
-          $timeout(() => {
-            notify.info('Report log successfully deleted!');
+        Report.delete(rmindex, rmtype, rmid)
+          .then((response) => {
+            $scope.reports.splice(index - 1, 1);
+            notify.info(`Report log ${response} successfully deleted!`);
             getReports($scope.timeInterval);
-          }, 1000);
-        })
-        .catch(notify.error);
+          })
+          .catch(notify.error);
       }
     });
   };
