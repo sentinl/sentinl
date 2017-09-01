@@ -1,5 +1,5 @@
 import moment from 'moment';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 import Promise from 'bluebird';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
@@ -17,9 +17,9 @@ describe('Watcher', function () {
   const init = function () {
     ngMock.module('kibana');
 
-    ngMock.inject((_Watcher_, _savedWatchers_, _$httpBackend_) => {
+    ngMock.inject(($injector, _Watcher_, _$httpBackend_) => {
       Watcher = _Watcher_;
-      savedWatchers = _savedWatchers_;
+      savedWatchers = $injector.has('savedWatchers') ? $injector.get('savedWatchers') : undefined;
       $httpBackend = _$httpBackend_;
     });
   };
@@ -83,6 +83,10 @@ describe('Watcher', function () {
     });
 
     it('list watchers', function (done) {
+      if (!savedWatchers) {
+        done();
+      }
+
       this.timeout(30000);
       sinon.stub(savedWatchers, 'find', () => {
         return Promise.resolve({
@@ -105,6 +109,10 @@ describe('Watcher', function () {
     });
 
     it('get watcher', function (done) {
+      if (!savedWatchers) {
+        done();
+      }
+
       const id = '123';
 
       sinon.stub(savedWatchers, 'get', () => {
@@ -124,6 +132,10 @@ describe('Watcher', function () {
     });
 
     it('create new watcher', function (done) {
+      if (!savedWatchers) {
+        done();
+      }
+
       const id = '123';
       const type = 'email';
 
@@ -143,6 +155,10 @@ describe('Watcher', function () {
     });
 
     it('save watcher', function (done) {
+      if (!savedWatchers) {
+        done();
+      }
+
       const id = '123';
       const watcher = {
         _id: id,
@@ -159,6 +175,10 @@ describe('Watcher', function () {
     });
 
     it('delete watcher', function (done) {
+      if (!savedWatchers) {
+        done();
+      }
+
       const id = '123';
 
       sinon.stub(savedWatchers, 'delete', () => {

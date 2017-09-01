@@ -1,5 +1,5 @@
 import moment from 'moment';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 import Promise from 'bluebird';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
@@ -16,9 +16,9 @@ describe('Script', () => {
   const init = function () {
     ngMock.module('kibana');
 
-    ngMock.inject((_Script_, _savedScripts_, _$httpBackend_) => {
+    ngMock.inject(($injector, _Script_, _$httpBackend_) => {
       Script = _Script_;
-      savedScripts = _savedScripts_;
+      savedScripts = $injector.has('savedScripts') ? $injector.get('savedScripts') : undefined;
       $httpBackend = _$httpBackend_;
     });
   };
@@ -54,6 +54,10 @@ describe('Script', () => {
     });
 
     it('list scripts', function (done) {
+      if (!savedScripts) {
+        done();
+      }
+
       this.timeout(30000);
 
       sinon.stub(savedScripts, 'find', () => {
@@ -78,6 +82,10 @@ describe('Script', () => {
     });
 
     it('create new script', function (done) {
+      if (!savedScripts) {
+        done();
+      }
+
       const id = '123';
       const script = _.cloneDeep(defaultWatcherScript);
       script.id = id;
@@ -96,6 +104,10 @@ describe('Script', () => {
     });
 
     it('delete script', function (done) {
+      if (!savedScripts) {
+        done();
+      }
+
       const id = '123';
 
       sinon.stub(savedScripts, 'delete', () => {
