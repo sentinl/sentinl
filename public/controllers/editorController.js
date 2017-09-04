@@ -33,12 +33,13 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
 
     $scope.form = {
       status: !$scope.watcher._source.disable ? 'Enabled' : 'Disable',
+      templates: dataTransfer.getTemplates(),
       messages: {
         success: null,
         danger: null,
         timeout: 3000
       },
-      scripts: {
+      fields: {
         transform: {},
         input: {},
         condition: {}
@@ -194,12 +195,12 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
     };
 
     /**
-    * Saves watcher scripts.
+    * Saves watcher templates.
     *
-    * @param {string} type - input, condition, transform.
+    * @param {string} field - field name (input, condition, transform).
     */
-    $scope.saveScript = function (type) {
-      const title = `${type}Title`;
+    $scope.saveScript = function (field) {
+      const title = `${field}Title`;
 
       if ($scope.watcherForm[title].$viewValue && $scope.watcherForm[title].$viewValue.length) {
         $scope.watcherForm[title].$valid = true;
@@ -211,16 +212,16 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
 
       if ($scope.watcherForm[title].$valid) {
         const id = Script.createId();
-        $scope.form.scripts[type][id] = {
+        $scope.form.templates[field][id] = {
           _id: id,
           _source: {
-            description: type,
-            title: $scope.watcher.$$scripts[type].title,
-            body: $scope.watcher.$$scripts[type].body
+            description: field,
+            title: $scope.watcher['$$' + field].title,
+            body: $scope.watcher['$$' + field].body
           }
         };
 
-        Script.new($scope.form.scripts[type][id])
+        Script.new($scope.form.templates[field][id])
           .then((id) => {
             notify.info(`Script ${id} saved.`);
           })
@@ -231,30 +232,54 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
     /**
     * Selects watcher script.
     *
-    * @param {string} type - input, condition, transform.
-    * @param {string} id - script id.
+    * @param {string} field - field name (input, condition, transform).
+    * @param {string} id - template id.
     */
-    $scope.selectScript = function (type, id) {
-      $scope.watcher.$$scripts[type] = {
-        id: id,
-        title: $scope.form.scripts[type][id]._source.title,
-        body: $scope.form.scripts[type][id]._source.body
+    $scope.selectScript = function (field, id) {
+      $scope.watcher['$$' + field] = {
+        id: $scope.form.templates[field][id]._id,
+        title: $scope.form.templates[field][id]._source.title,
+        body: $scope.form.templates[field][id]._source.body
       };
     };
 
     /**
     * Removes selected script.
     *
-    * @param {string} type - input, condition, transform.
+    * @param {string} field - field name (input, condition, transform).
     */
-    $scope.removeScript = function (type) {
-      const id = $scope.watcher.$$scripts[type].id;
+    $scope.removeScript = function (field) {
+      const id = $scope.watcher['$$' + field].id;
       Script.delete(id)
         .then((id) => {
+          delete $scope.form.templates[field][id];
+          $scope.watcher['$$' + field].id = undefined;
+          $scope.watcher['$$' + field].title = undefined;
           notify.info(`Script ${id} deleted`);
         })
         .catch(notify.error);
-      delete $scope.form.scripts[type][id];
+    };
+
+    /**
+    * Initializes watcher field.
+    *
+    * @param {string} name - field name (input, condition, transform).
+    */
+    const initField = function (name) {
+      $scope.watcher['$$' + name] = {
+        id: undefined,
+        title: undefined,
+        body: angular.toJson($scope.watcher._source[name], 'pretty')
+      };
+    };
+
+    /**
+    * Saves watcher field.
+    *
+    * @param {string} name - field name (input, condition, transform).
+    */
+    const saveField = function (name) {
+      $scope.watcher._source[name] = angular.fromJson($scope.watcher['$$' + name].body);
     };
 
     /**
@@ -299,17 +324,7 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
     /**
     * Saves all available ace editors text as watcher properties.
     */
-    const saveEditorsText = function () {
-      _.forEach($scope.watcher.$$scripts, (script, field) => {
-        if (script.body && script.body.length) {
-          if (field === 'input') {
-            $scope.watcher._source[field] = angular.fromJson(script.body);
-          } else {
-            $scope.watcher._source[field].script.script = script.body;
-          }
-        }
-      });
-
+    const saveActions = function () {
       _.forEach($scope.watcher._source.actions, (settings, name) => {
         _.forEach($scope.form.actions.types, (type) => {
           if (_.has(settings, type)) {
@@ -326,47 +341,6 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
           }
         });
       });
-    };
-
-    /**
-    * Initializes watcher scripts (input, condition, transform).
-    */
-    const initScripts = function () {
-      $scope.watcher.$$scripts = {};
-
-      if (editorMode === 'wizard' && $scope.watcher._source.condition.script.script.length) {
-        $scope.watcher.$$condition_value = +$scope.watcher._source.condition.script.script.split(' ')[2];
-      }
-
-      if (editorMode !== 'wizard') {
-        _.forEach($scope.form.scripts, (script, field) => {
-          // for migration purposes
-          // add some fields if they don't exist in old watcher which was created under Sentinl v4
-          if (field !== 'input' && !_.has($scope.watcher._source[field], 'script.script')) {
-            $scope.watcher._source[field] = { script: { script: '' } };
-          }
-          if (!$scope.watcher._source.input) {
-            $scope.watcher._source.input = {};
-          }
-
-          let value = field === 'input' ? $scope.watcher._source.input : $scope.watcher._source[field].script.script;
-
-          $scope.watcher.$$scripts[field] = {
-            id: null,
-            title: null,
-            body: field === 'input' ? angular.toJson(value, 'pretty') : value
-          };
-
-          Script.list(field)
-            .then((scripts) => {
-              _.forEach(scripts, (script) => {
-                $scope.form.scripts[field][script._id] = script;
-              });
-            }).catch((error) => {
-              notify.error(error);
-            });
-        });
-      }
     };
 
     /**
@@ -407,9 +381,11 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
       }
 
       try {
-        initScripts();
+        _.forEach(_.keys($scope.form.fields), function (field) {
+          initField(field);
+        });
       } catch (e) {
-        notify.error(`Fail to initialize scripts: ${e}`);
+        notify.error(`Fail to initialize fields: ${e}`);
       }
 
       try {
@@ -492,9 +468,19 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
 
         if (editorMode !== 'wizard') {
           try {
-            saveEditorsText();
+            saveActions();
           } catch (e) {
             notify.error(`Invalid action, Transform or Condition configuration: ${e}`);
+            $scope.watcherForm.$valid = false;
+            $scope.watcherForm.$invalid = true;
+          }
+
+          try {
+            _.forEach(_.keys($scope.form.fields), function (field) {
+              saveField(field);
+            });
+          } catch (e) {
+            notify.error(`Fail to save field: ${e}`);
             $scope.watcherForm.$valid = false;
             $scope.watcherForm.$invalid = true;
           }
