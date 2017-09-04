@@ -30,6 +30,7 @@ import phantom from './server/lib/phantom';
 import userIndexMappings from './server/mappings/user_index';
 import coreIndexMappings from './server/mappings/core_index';
 import alarmIndexMappings from './server/mappings/alarm_index';
+import templateMappings from './server/mappings/template';
 
 import watchConfiguration from './server/lib/saved_objects/watch';
 import scriptConfiguration from './server/lib/saved_objects/script';
@@ -79,8 +80,10 @@ const init = _.once((server) => {
     config.es.default_index = '.kibi';
     config.es.type = 'sentinl-watcher';
     helpers.putMapping(server, config, config.es.default_index, config.es.type, coreIndexMappings);
+    helpers.putMapping(server, config, config.es.default_index, config.es.script_type, templateMappings);
   } else { // Kibana.
     helpers.createIndex(server, config, config.es.default_index, config.es.type, coreIndexMappings);
+    helpers.putMapping(server, config, config.es.default_index, config.es.script_type, templateMappings);
   }
 
   helpers.createIndex(server, config, config.es.alarm_index, config.es.alarm_type, alarmIndexMappings, 'alarm');
