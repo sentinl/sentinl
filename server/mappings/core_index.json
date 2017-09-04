@@ -1,19 +1,24 @@
 {
   "properties": {
     "input": {
-      "type": "object"
+      "type": "object",
+      "dynamic": true
     },
     "actions": {
-      "type": "object"
+      "type": "object",
+      "dynamic": true
     },
     "transform": {
-      "type": "object"
+      "type": "object",
+      "dynamic": true
     },
     "condition": {
-      "type": "object"
+      "type": "object",
+      "dynamic": true
     },
     "trigger": {
-      "type": "object"
+      "type": "object",
+      "dynamic": true
     },
     "report": {
       "type": "boolean"
