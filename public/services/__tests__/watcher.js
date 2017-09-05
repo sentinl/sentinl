@@ -97,8 +97,7 @@ describe('Watcher', function () {
         .then((response) => {
           expect(response.length).to.eql(2);
         })
-        .catch(done)
-        .finally(done);
+        .catch(done);
 
       $httpBackend.flush();
       setTimeout(done, 25000);

@@ -70,8 +70,7 @@ describe('Script', () => {
           expect(response[0]._source).to.be.an('object');
           expect(_.isEqual(response[0]._source, defaultWatcherScript)).to.be(true);
         })
-        .catch(done)
-        .finally(done);
+        .catch(done);
 
       $httpBackend.flush();
       setTimeout(done, 25000);
