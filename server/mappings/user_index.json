@@ -1,10 +1,10 @@
 {
   "properties": {
     "username": {
-      "type":  "string"
+      "type":  "text"
     },
     "sha": {
-      "type":  "string"
+      "type":  "text"
     }
   }
 }

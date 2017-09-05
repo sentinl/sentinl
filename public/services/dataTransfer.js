@@ -11,12 +11,12 @@ class DataTransfer {
     return this.watcher;
   }
 
-  setWatcher(_watcher_) {
-    this.watcher = _watcher_;
+  setWatcher(watcher) {
+    this.watcher = watcher;
   }
 
-  setTemplates(_templates_) {
-    this.templates = _templates_;
+  setTemplates(templates) {
+    this.templates = templates;
   }
 
   getTemplates() {
