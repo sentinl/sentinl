@@ -116,9 +116,6 @@ describe('editorController', function () {
 
     it('templates have been loaded', function (done) {
       setTimeout(function () { // catch promise response
-        //_.forEach(_.keys(templates), function (field) {
-        //  expect(_.keys($scope.form.templates[field]).length).to.equal(1);
-        //});
         _.forEach($scope.form.templates, function (field) {
           expect(_.keys(field).length).to.equal(1);
         });
