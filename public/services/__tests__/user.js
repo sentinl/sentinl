@@ -1,6 +1,5 @@
 import moment from 'moment';
 import sinon from 'auto-release-sinon';
-import Promise from 'bluebird';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import _ from 'lodash';

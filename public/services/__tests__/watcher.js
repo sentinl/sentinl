@@ -1,9 +1,9 @@
 import moment from 'moment';
 import sinon from 'auto-release-sinon';
-import Promise from 'bluebird';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import _ from 'lodash';
+import noDigestPromises from 'test_utils/no_digest_promises';
 
 import defaultEmailSource from '../../defaults/email_watcher';
 import defaultReportSource from '../../defaults/report_watcher';
@@ -13,11 +13,13 @@ describe('Watcher', function () {
   let Watcher;
   let $httpBackend;
   let savedWatchers;
+  let Promise;
 
   const init = function () {
     ngMock.module('kibana');
 
-    ngMock.inject((_Watcher_, _savedWatchers_, _$httpBackend_) => {
+    ngMock.inject((_Watcher_, _savedWatchers_, _$httpBackend_, _Promise_) => {
+      Promise = _Promise_;
       Watcher = _Watcher_;
       savedWatchers = _savedWatchers_;
       $httpBackend = _$httpBackend_;
@@ -25,6 +27,7 @@ describe('Watcher', function () {
   };
 
   beforeEach(function () {
+    noDigestPromises.activate();
     init();
   });
 

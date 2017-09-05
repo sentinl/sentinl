@@ -1,9 +1,9 @@
 import moment from 'moment';
 import sinon from 'auto-release-sinon';
-import Promise from 'bluebird';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import _ from 'lodash';
+import noDigestPromises from 'test_utils/no_digest_promises';
 
 import defaultEmailSource from '../../defaults/email_watcher';
 
@@ -16,12 +16,14 @@ describe('watchersController', function () {
   let $location;
   let Watcher;
   let Script;
+  let Promise;
   let dataTransfer;
 
   const init = function (done) {
     ngMock.module('kibana');
 
-    ngMock.inject(function ($rootScope, $controller, _$location_, _$httpBackend_, _$route_, _Watcher_, _Script_, _dataTransfer_) {
+    ngMock.inject(function ($rootScope, $controller, _$location_, _$httpBackend_, _$route_, _Watcher_,
+      _Script_, _dataTransfer_, _Promise_) {
       $scope = $rootScope;
       $route = _$route_;
       $location = _$location_;
@@ -29,6 +31,7 @@ describe('watchersController', function () {
       Watcher = _Watcher_;
       Script = _Script_;
       dataTransfer = _dataTransfer_;
+      Promise = _Promise_;
 
       $httpBackend.when('GET', '../api/sentinl/config').respond(200, {
         es: {
@@ -76,6 +79,7 @@ describe('watchersController', function () {
 
   beforeEach(function () {
     init();
+    noDigestPromises.activate();
   });
 
   afterEach(function () {
@@ -98,9 +102,12 @@ describe('watchersController', function () {
 
   it('templates have been loaded', function (done) {
     setTimeout(function () { // catch promise response
-      expect(_.keys(dataTransfer.getTemplates().condition).length).to.equal(2);
-      expect(_.keys(dataTransfer.getTemplates().input).length).to.equal(2);
-      expect(_.keys(dataTransfer.getTemplates().transform).length).to.equal(2);
+      const templates = dataTransfer.getTemplates();
+
+      _.forEach(_.keys(templates), function (field) {
+        expect(_.keys(templates[field]).length).to.equal(2);
+      });
+
       done();
       $httpBackend.flush();
     });
