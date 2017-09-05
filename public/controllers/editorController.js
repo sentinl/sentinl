@@ -211,9 +211,8 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
       }
 
       if ($scope.watcherForm[title].$valid) {
-        const id = Script.createId();
-        $scope.form.templates[field][id] = {
-          _id: id,
+        const template = {
+          _id: Script.createId(),
           _source: {
             description: field,
             title: $scope.watcher['$$' + field].title,
@@ -221,8 +220,11 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
           }
         };
 
-        Script.new($scope.form.templates[field][id])
+        Script.new(template)
           .then((id) => {
+            template._id = id;
+            $scope.form.templates[field][id] = template;
+            $scope.watcher['$$' + field].id = id;
             notify.info(`Script ${id} saved.`);
           })
           .catch(notify.error);
