@@ -15,20 +15,39 @@ describe('watchersController', function () {
   let $route;
   let $location;
   let Watcher;
+  let Script;
   let dataTransfer;
 
   const init = function (done) {
     ngMock.module('kibana');
 
-    ngMock.inject(function ($rootScope, $controller, _$location_, _$httpBackend_, _$route_, _Watcher_, _dataTransfer_) {
+    ngMock.inject(function ($rootScope, $controller, _$location_, _$httpBackend_, _$route_, _Watcher_, _Script_, _dataTransfer_) {
       $scope = $rootScope;
       $route = _$route_;
       $location = _$location_;
       $httpBackend = _$httpBackend_;
       Watcher = _Watcher_;
+      Script = _Script_;
       dataTransfer = _dataTransfer_;
 
+      $httpBackend.when('GET', '../api/sentinl/config').respond(200, {
+        es: {
+          numer_of_results: 50
+        },
+        authentication: {
+          enabled: false,
+          mode: ''
+        }
+      });
+
       sinon.stub(Watcher, 'list', () => {
+        return Promise.resolve([
+          { _id: '123' },
+          { _id: '456' }
+        ]);
+      });
+
+      sinon.stub(Script, 'list', () => {
         return Promise.resolve([
           { _id: '123' },
           { _id: '456' }
@@ -73,6 +92,17 @@ describe('watchersController', function () {
     setTimeout(function () { // catch promise response
       expect($scope.watchers.length).to.equal(2);
       done();
+      $httpBackend.flush();
+    });
+  });
+
+  it('templates have been loaded', function (done) {
+    setTimeout(function () { // catch promise response
+      expect(_.keys(dataTransfer.getTemplates().condition).length).to.equal(2);
+      expect(_.keys(dataTransfer.getTemplates().input).length).to.equal(2);
+      expect(_.keys(dataTransfer.getTemplates().transform).length).to.equal(2);
+      done();
+      $httpBackend.flush();
     });
   });
 
