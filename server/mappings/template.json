@@ -1,13 +1,13 @@
 {
   "properties": {
     "title": {
-      "type": "string"
+      "type": "text"
     },
     "description": {
-      "type": "string"
+      "type": "text"
     },
     "body": {
-      "type": "string"
+      "type": "text"
     }
   }
 }
