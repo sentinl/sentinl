@@ -1,9 +1,9 @@
 import moment from 'moment';
 import sinon from 'sinon';
-import Promise from 'bluebird';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import _ from 'lodash';
+import noDigestPromises from 'test_utils/no_digest_promises';
 
 import defaultWatcherScript from '../../defaults/watcher_script';
 
@@ -12,11 +12,13 @@ describe('Script', () => {
   let Script;
   let savedScripts;
   let $httpBackend;
+  let Promise;
 
   const init = function () {
     ngMock.module('kibana');
 
-    ngMock.inject(($injector, _Script_, _$httpBackend_) => {
+    ngMock.inject(($injector, _Script_, _savedScripts_, _$httpBackend_, _Promise_) => {
+      Promise = _Promise_;
       Script = _Script_;
       savedScripts = $injector.has('savedScripts') ? $injector.get('savedScripts') : undefined;
       $httpBackend = _$httpBackend_;
@@ -24,6 +26,7 @@ describe('Script', () => {
   };
 
   beforeEach(function () {
+    noDigestPromises.activate();
     init();
   });
 

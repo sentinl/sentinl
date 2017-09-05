@@ -3,7 +3,6 @@ import _ from 'lodash';
 import moment from 'moment';
 import $ from 'jquery';
 import ace from 'ace';
-import Promise from 'bluebird';
 
 import confirmMessage from '../templates/confirm-message.html';
 import { app } from '../app.module';
@@ -11,7 +10,7 @@ import { app } from '../app.module';
 // WATCHERS CONTROLLER
 app.controller('WatchersController', function ($rootScope, $scope, $route, $interval,
   $timeout, timefilter, Private, createNotifier, $window, $http, $uibModal, $log, navMenu,
-  globalNavState, $location, dataTransfer, Watcher, Script) {
+  globalNavState, $location, dataTransfer, Watcher, Script, Promise) {
 
   $scope.title = 'Sentinl: Watchers';
   $scope.description = 'Kibi/Kibana Report App for Elasticsearch';

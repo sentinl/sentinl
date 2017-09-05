@@ -1,10 +1,9 @@
 import { app } from '../app.module';
-import Promise from 'bluebird';
 import _ from 'lodash';
 import emailWatcherDefaults from '../defaults/email_watcher';
 import reportWatcherDefaults from '../defaults/report_watcher';
 
-app.factory('Watcher', ['$http', '$injector', function ($http, $injector) {
+app.factory('Watcher', ['$http', '$injector', 'Promise', function ($http, $injector, Promise) {
 
   let savedObjectsAPI = undefined;
   let savedWatchers = undefined;

@@ -1,9 +1,9 @@
 import moment from 'moment';
 import sinon from 'sinon';
-import Promise from 'bluebird';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import _ from 'lodash';
+import noDigestPromises from 'test_utils/no_digest_promises';
 
 import defaultEmailSource from '../../defaults/email_watcher';
 
@@ -20,6 +20,7 @@ describe('editorController', function () {
   let dataTransfer;
   let Notifier;
   let watcher;
+  let Promise;
 
   let templates = {
     condition: {
@@ -50,7 +51,7 @@ describe('editorController', function () {
       ngMock.module('kibana');
 
       ngMock.inject(function ($rootScope, $controller, _$location_, _$httpBackend_, _$route_,
-        _Watcher_, _Script_, _dataTransfer_, _Notifier_, _$routeParams_) {
+        _Watcher_, _Script_, _dataTransfer_, _Notifier_, _$routeParams_, _Promise_) {
         $scope = $rootScope;
         $route = _$route_;
         $location = _$location_;
@@ -60,6 +61,7 @@ describe('editorController', function () {
         Script = _Script_;
         dataTransfer = _dataTransfer_;
         Notifier = _Notifier_;
+        Promise = _Promise_;
 
         $route.current = {
           locals: {
@@ -101,6 +103,7 @@ describe('editorController', function () {
 
     beforeEach(function () {
       initNew();
+      noDigestPromises.activate();
     });
 
     afterEach(function () {
