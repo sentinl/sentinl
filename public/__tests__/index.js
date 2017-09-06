@@ -1,4 +1,5 @@
 describe('Sentinl', function () {
+  require('../controllers/__tests__/editorController');
   require('../controllers/__tests__/watchersController');
   require('../controllers/__tests__/reportsController');
   require('../controllers/__tests__/alarmsController');

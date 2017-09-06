@@ -1,8 +1,8 @@
 import moment from 'moment';
 import sinon from 'sinon';
-import Promise from 'bluebird';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
+import noDigestPromises from 'test_utils/no_digest_promises';
 
 import '../reportsController';
 
@@ -11,11 +11,13 @@ describe('Reports Controller', function () {
   var $scope;
   var $httpBackend;
   var $route;
+  let Promise;
 
   function init({hits = []}) {
     ngMock.module('kibana');
 
-    ngMock.inject(function ($rootScope, $controller, _$route_, $injector, _$httpBackend_) {
+    ngMock.inject(function ($rootScope, $controller, _$route_, $injector, _$httpBackend_, _Promise_) {
+      Promise = _Promise_;
       $httpBackend = _$httpBackend_;
       $httpBackend.whenGET(/\.\.\/api\/sentinl\/set\/interval\/.+/).respond(200, {
         status: '200 OK'
@@ -43,6 +45,9 @@ describe('Reports Controller', function () {
     });
   }
 
+  beforeEach(function () {
+    noDigestPromises.activate();
+  });
 
   afterEach(function () {
     $httpBackend.verifyNoOutstandingExpectation();

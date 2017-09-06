@@ -1,7 +1,8 @@
 {
   "properties": {
     "payload": {
-      "type": "object"
+      "type": "object",
+      "dynamic": true
     },
     "attachment": {
       "type": "binary"

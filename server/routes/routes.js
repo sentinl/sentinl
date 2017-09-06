@@ -334,6 +334,7 @@ export default function routes(server) {
         id: request.params.id,
         body: script
       };
+
       callWithRequest(request, 'index', body)
       .then(() => callWithRequest(request, 'indices.refresh', {
         index: config.es.default_index
@@ -360,8 +361,9 @@ export default function routes(server) {
         index: config.es.default_index,
         type: config.es.script_type,
         size: config.sentinl.results ? config.sentinl.results : 50,
-        q: `script_type:${request.params.type}`
+        q: `description:${request.params.type}`
       };
+
       callWithRequest(request, 'search', body)
       .then((resp) => {
         return reply(resp);
@@ -388,6 +390,7 @@ export default function routes(server) {
         id: request.params.id
       };
       server.log(['status', 'info', 'Sentinl'], `Delete script with type/id: ${request.params.type}/${request.params.id}`);
+
       callWithRequest(request, 'delete', body)
       .then(() => callWithRequest(request, 'indices.refresh', {
         index: config.es.default_index
