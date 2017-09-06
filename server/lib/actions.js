@@ -133,7 +133,7 @@ export default function (server, actions, payload, watch) {
       const id = `${watch.uuid}_${key}`;
       if (debounce(id, action.throttle_period)) {
         server.log(['status', 'info', 'Sentinl'], `Action Throttled. Watcher id: ${watch.uuid}, action name: ${key}`);
-        esHistory(watch.title, id, `Action Throtthled for ${action.throttle_period}`, priority, {});
+        esHistory(watch.title, id, `Action Throttled for ${action.throttle_period}`, priority, {});
         return;
       }
     }

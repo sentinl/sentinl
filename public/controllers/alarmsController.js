@@ -8,9 +8,9 @@ import { app } from '../app.module';
 
 app.controller('AlarmsController', function ($rootScope, $scope, $route, $interval,
   $timeout, $injector, timefilter, Private, createNotifier, $window, $uibModal, navMenu,
-  globalNavState, sentinlService) {
+  globalNavState, Alarm) {
   $scope.title = 'Sentinl: Alarms';
-  $scope.description = 'Kibana Alert App for Elasticsearch';
+  $scope.description = 'Kibi/Kibana Report App for Elasticsearch';
 
   const notify = createNotifier({
     location: 'Sentinl Alarms'
@@ -25,16 +25,15 @@ app.controller('AlarmsController', function ($rootScope, $scope, $route, $interv
 
   /* First Boot */
 
-  $scope.elasticAlarms = [];
+  $scope.alarms = [];
   $scope.timeInterval = timefilter.time;
 
   const getAlarms = function (interval) {
-    sentinlService.updateFilter(interval)
-    .then((resp) => {
-      return sentinlService.listAlarms()
-            .then((resp) => $scope.elasticAlarms = resp.data.hits.hits);
-    })
-    .catch(notify.error);
+    Alarm.updateFilter(interval)
+      .then((resp) => {
+        return Alarm.list().then((resp) => $scope.alarms = resp.data.hits.hits);
+      })
+      .catch(notify.error);
   };
 
   getAlarms($scope.timeInterval);
@@ -50,8 +49,8 @@ app.controller('AlarmsController', function ($rootScope, $scope, $route, $interv
     let timeInterval = _.get($rootScope, 'timefilter.time');
     if (timeInterval) {
       $scope.timeInterval = timeInterval;
-      sentinlService.updateFilter($scope.timeInterval)
-      .catch(notify.error);
+      Alarm.updateFilter($scope.timeInterval)
+        .catch(notify.error);
     }
   });
 
@@ -99,15 +98,13 @@ app.controller('AlarmsController', function ($rootScope, $scope, $route, $interv
 
     confirmModal.result.then((response) => {
       if (response === 'yes') {
-        sentinlService.deleteAlarm(rmindex, rmtype, rmid)
-        .then(() => {
-          $timeout(() => {
-            $scope.elasticAlarms.splice(index - 1, 1);
-            notify.info('Alarm log successfully deleted!');
+        Alarm.delete(rmindex, rmtype, rmid)
+          .then((response) => {
+            $scope.alarms.splice(index - 1, 1);
+            notify.info(`Alarm ${response} deleted`);
             getAlarms($scope.timeInterval);
-          }, 1000);
-        })
-        .catch(notify.error);
+          })
+          .catch(notify.error);
       }
     });
   };

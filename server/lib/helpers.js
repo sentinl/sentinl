@@ -20,26 +20,69 @@
 import getElasticsearchClient from './get_elasticsearch_client';
 import _ from 'lodash';
 
+/**
+* Puts mapping for a new type in an existent index.
+*
+* @param {object} server - Kibana server.
+* @param {object} config - Sentinl configuration.
+* @param {string} indexName - ES index name.
+* @param {string} docType - New document type.
+* @param {object} mappings - Mapping to apply.
+*/
+const putMapping = function (server, config, indexName, docType, mappings) {
+  server.log(['status', 'info', 'Sentinl'], `Checking ${indexName} index type ${docType} ...`);
+  if (!server.plugins.elasticsearch) {
+    server.log(['status', 'error', 'Sentinl'], 'Elasticsearch client not available, retrying in 5s');
+    retryPutMapping(server, config, indexName, docType, mappings);
+    return;
+  }
+
+  const client = getElasticsearchClient(server, config);
+
+  client.indices.putMapping({
+    index: indexName,
+    type: docType,
+    body: mappings
+  })
+  .then(function (resp) {
+    server.log(['status', 'debug', 'Sentinl'], `Index ${indexName} response`, resp);
+  }).catch((err) => server.log(['status', 'error', 'Sentinl'], err.message));
+};
+
+/**
+* Creates index with provided mapping.
+*
+* @param {object} server - Kibana server.
+* @param {object} config - Sentinl configuration.
+* @param {string} indexName - ES index name.
+* @param {string} docType - New document type.
+* @param {object} mappings - Mapping to apply.
+* @param {string} mode - alarm template.
+*/
 const createIndex = function (server, config, indexName, docType, mappings, mode) {
   server.log(['status', 'info', 'Sentinl'], `Checking ${indexName} index ...`);
   if (!server.plugins.elasticsearch) {
     server.log(['status', 'error', 'Sentinl'], 'Elasticsearch client not available, retrying in 5s');
-    tryCreate(server, config, indexName, docType, mappings, mode);
+    retryCreateIndex(server, config, indexName, docType, mappings, mode);
     return;
   }
 
-  // if doc type is not default
-  if (docType !== _.keys(mappings.mappings)[0]) {
-    const body = mappings.mappings.user;
-    delete mappings.mappings.user;
-    mappings.mappings[docType] = body;
-  }
+  const client = getElasticsearchClient(server, config);
 
   if (mode === 'alarm') {
-    mappings.template = `${config.es.alarm_index}-*`;
+    mappings = {
+      template: `${config.es.alarm_index}-*`,
+      'mappings': {
+        [config.es.alarm_type]: mappings
+      }
+    };
+  } else {
+    mappings = {
+      'mappings': {
+        [config.es.type]: mappings
+      }
+    };
   }
-
-  const client = getElasticsearchClient(server, config);
 
   client.indices.exists({
     index: indexName
@@ -62,16 +105,27 @@ const createIndex = function (server, config, indexName, docType, mappings, mode
   .catch((error) => server.log(['status', 'error', 'Sentinl'], `Failed to check if core index exists: ${error}`));
 };
 
-let tryCount = 0;
-function tryCreate(server, config, indexName, docType, mappings, mode) {
-  if (tryCount > 5) {
-    server.log(['status', 'warning', 'Sentinl'], 'Failed creating Indices mapping!');
+let retryCreateIndexCount = 0;
+function retryCreateIndex(server, config, indexName, docType, mappings, mode) {
+  if (retryCreateIndexCount > 5) {
+    server.log(['status', 'error', 'Sentinl'], `Failed creating index ${indexName} mapping!`);
     return;
   }
   setTimeout(createIndex(server, config, indexName, docType, mappings, mode), 5000);
-  tryCount++;
+  retryCreateIndexCount++;
+}
+
+let retryPutMappingCount = 0;
+function retryPutMapping(server, config, indexName, docType, mappings) {
+  if (retryPutMappingCount > 5) {
+    server.log(['status', 'error', 'Sentinl'], `Failed putting ${indexName}/${docType} mapping!`);
+    return;
+  }
+  setTimeout(createIndex(server, config, indexName, docType, mappings), 5000);
+  retryPutMappingCount++;
 }
 
 module.exports = {
-  createIndex: createIndex
+  createIndex: createIndex,
+  putMapping: putMapping
 };

@@ -1,38 +1,33 @@
 {
-  "settings": {
-    "number_of_shards": 1,
-    "number_of_replicas": 1
-  },
-  "mappings": {
-    "watch": {
-      "properties": {
-        "input": {
-          "type": "object",
-          "enabled": false
-        },
-        "action": {
-          "type": "object",
-          "enabled": false
-        },
-        "transform": {
-          "type": "object",
-          "enabled": false
-        },
-        "condition": {
-          "type": "object",
-          "enabled": false
-        },
-        "uuid": {
-          "type":  "string",
-          "index": "not_analyzed"
-        },
-        "report": {
-          "type": "boolean"
-        },
-        "disable": {
-          "type": "boolean"
-        }
-      }
+  "properties": {
+    "input": {
+      "type": "object",
+      "dynamic": true
+    },
+    "actions": {
+      "type": "object",
+      "dynamic": true
+    },
+    "transform": {
+      "type": "object",
+      "dynamic": true
+    },
+    "condition": {
+      "type": "object",
+      "dynamic": true
+    },
+    "trigger": {
+      "type": "object",
+      "dynamic": true
+    },
+    "report": {
+      "type": "boolean"
+    },
+    "disable": {
+      "type": "boolean"
+    },
+    "title": {
+      "type": "text"
     }
   }
 }

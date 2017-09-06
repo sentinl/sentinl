@@ -27,6 +27,7 @@ var include = [
   'index.js',
   'init.js',
   'server',
+  'lib',
   'public',
   'phantomjs'
 ];
@@ -142,9 +143,29 @@ gulp.task('dev', ['sync'], function (done) {
 });
 
 gulp.task('test', ['sync'], function(done) {
+  spawn('grunt', ['test:server', 'test:browser', '--grep=Sentinl'], {
+    cwd: options.kibanahomepath,
+    stdio: 'inherit'
+  }).on('error', (err) => {
+    throw err;
+  }).on('close', done);
+});
+
+gulp.task('testserver', ['sync'], function(done) {
   spawn('grunt', ['test:server', '--grep=Sentinl'], {
     cwd: options.kibanahomepath,
     stdio: 'inherit'
+  }).on('error', (err) => {
+    throw err;
+  }).on('close', done);
+});
+
+gulp.task('testbrowser', ['sync'], function(done) {
+  spawn('grunt', ['test:browser', '--grep=Sentinl'], {
+    cwd: options.kibanahomepath,
+    stdio: 'inherit'
+  }).on('error', (err) => {
+    throw err;
   }).on('close', done);
 });
 
@@ -152,6 +173,8 @@ gulp.task('testdev', ['sync'], function(done) {
   spawn('grunt', ['test:dev', '--browser=Chrome'], {
     cwd: options.kibanahomepath,
     stdio: 'inherit'
+  }).on('error', (err) => {
+    throw err;
   }).on('close', done);
 });
 
@@ -159,5 +182,7 @@ gulp.task('coverage', ['sync'], function(done) {
   spawn('grunt', ['test:coverage', '--grep=Sentinl'], {
     cwd: options.kibanahomepath,
     stdio: 'inherit'
+  }).on('error', (err) => {
+    throw err;
   }).on('close', done);
 });

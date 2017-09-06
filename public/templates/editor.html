@@ -86,7 +86,7 @@
                     popover-trigger="'mouseenter'"></i>
                 </div>
                 <div class="col-md-10">
-                  <period-tag timesrc="watcher._source.$$schedule"></period-tag>
+                  <period-tag timesrc="watcher.$$schedule"></period-tag>
                 </div>
               </div> <!-- end form-group -->
             </div> <!-- end tab-content -->
@@ -102,11 +102,11 @@
                       Load input <span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu" uib-dropdown-menu role="menu">
-                      <li ng-repeat="(id, script) in form.scripts.input">
-                        <a href="javascript:void(0)" ng-click="selectScript('input', id)">{{ script.title }}</a>
+                      <li ng-repeat="(id, script) in form.templates.input">
+                        <a href="javascript:void(0)" ng-click="selectScript('input', id)">{{ script._source.title }}</a>
                       </li>
-                      <li ng-show="isEmpty(form.scripts.input)">
-                        <a href="javascript:void(0)">No scripts stored</a>
+                      <li ng-show="isEmpty(form.templates.input)">
+                        <a href="javascript:void(0)">No values stored</a>
                       </li>
                     </ul>
                   </div>
@@ -119,10 +119,10 @@
                     type="text"
                     id="inputTitle"
                     name="inputTitle"
-                    value="{{watcher.$$scripts.input.title}}"
+                    value="{{watcher.$$input.title}}"
                     class="form-control"
                     placeholder="title"
-                    ng-model="watcher.$$scripts.input.title">
+                    ng-model="watcher.$$input.title">
                 </div>
                 <p ng-show="watcherForm.inputTitle.$invalid" class="text-danger">Title is required.</p>
               </div> <!-- end form-group -->
@@ -130,8 +130,8 @@
                 <label class="col-md-2 control-label" for="inputTitle">Body</label>
                 <div class="col-md-6">
                   <div id="inputEdit"
-                    ng-model="watcher.$$scripts.input.body"
-                    ui-ace="aceOptions('json', 30)">{{ watcher.$$scripts.input.body }}</div>
+                    ng-model="watcher.$$input.body"
+                    ui-ace="aceOptions('json', 30)">{{ watcher.$$input.body }}</div>
                 </div>
               </div> <!-- end form-group -->
               <div class="form-group">
@@ -155,11 +155,11 @@
                       Load condition <span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu" uib-dropdown-menu role="menu">
-                      <li ng-repeat="(id, script) in form.scripts.condition">
-                        <a href="javascript:void(0)" ng-click="selectScript('condition', id)">{{ script.title }}</a>
+                      <li ng-repeat="(id, script) in form.templates.condition">
+                        <a href="javascript:void(0)" ng-click="selectScript('condition', id)">{{ script._source.title }}</a>
                       </li>
-                      <li ng-show="isEmpty(form.scripts.condition)">
-                        <a href="javascript:void(0)">No scripts stored</a>
+                      <li ng-show="isEmpty(form.templates.condition)">
+                        <a href="javascript:void(0)">No values stored</a>
                       </li>
                     </ul>
                   </div>
@@ -172,10 +172,10 @@
                     type="text"
                     id="conditionTitle"
                     name="conditionTitle"
-                    value="{{watcher.$$scripts.condition.title}}"
+                    value="{{watcher.$$condition.title}}"
                     class="form-control"
                     placeholder="title"
-                    ng-model="watcher.$$scripts.condition.title">
+                    ng-model="watcher.$$condition.title">
                 </div>
                 <p ng-show="watcherForm.conditionTitle.$invalid" class="text-danger">Title is required.</p>
               </div> <!-- end form-group -->
@@ -183,8 +183,8 @@
                 <label class="col-md-2 control-label" for="conditionTitle">Body</label>
                 <div class="col-md-6">
                   <div id="conditionEdit"
-                    ng-model="watcher.$$scripts.condition.body"
-                    ui-ace="aceOptions('javascript', 30)">{{ watcher.$$scripts.condition.body }}</div>
+                    ng-model="watcher.$$condition.body"
+                    ui-ace="aceOptions('javascript', 30)">{{ watcher.$$condition.body }}</div>
                 </div>
               </div> <!-- end form-group -->
               <div class="form-group">
@@ -208,11 +208,11 @@
                       Load transform <span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu" uib-dropdown-menu role="menu">
-                      <li ng-repeat="(id, script) in form.scripts.transform">
-                        <a href="javascript:void(0)" ng-click="selectScript('transform', id)">{{ script.title }}</a>
+                      <li ng-repeat="(id, script) in form.templates.transform">
+                        <a href="javascript:void(0)" ng-click="selectScript('transform', id)">{{ script._source.title }}</a>
                       </li>
-                      <li ng-show="isEmpty(form.scripts.transform)">
-                        <a href="javascript:void(0)">No scripts stored</a>
+                      <li ng-show="isEmpty(form.templates.transform)">
+                        <a href="javascript:void(0)">No values stored</a>
                       </li>
                     </ul>
                   </div>
@@ -225,10 +225,10 @@
                     type="text"
                     id="transformTitle"
                     name="transformTitle"
-                    value="{{watcher.$$scripts.transform.title}}"
+                    value="{{watcher.$$transform.title}}"
                     class="form-control"
                     placeholder="title"
-                    ng-model="watcher.$$scripts.transform.title">
+                    ng-model="watcher.$$transform.title">
                 </div>
                 <p ng-show="watcherForm.transformTitle.$invalid" class="text-danger">Title is required.</p>
               </div> <!-- end form-group -->
@@ -236,8 +236,8 @@
                 <label class="col-md-2 control-label" for="transformTitle">Body</label>
                 <div class="col-md-6">
                   <div id="transformEdit"
-                    ng-model="watcher.$$scripts.transform.body"
-                    ui-ace="aceOptions('javascript', 30)">{{ watcher.$$scripts.transform.body }}</div>
+                    ng-model="watcher.$$transform.body"
+                    ui-ace="aceOptions('javascript', 30)">{{ watcher.$$transform.body }}</div>
                 </div>
               </div> <!-- end form-group -->
               <div class="form-group">
@@ -260,7 +260,7 @@
               </div> <!-- end form-group -->
               <div class="form-group" ng-if="actionsExist(watcher._source.actions)">
                 <div class="col-md-8">
-                  <uib-accordion close-others="true" ng-repeat="(actionName, actionSettings) in watcher._source.actions">
+                  <uib-accordion close-others="true" ng-repeat="(actionName, actionSettings) in watcher._source.actions track by $index">
                     <webhook-action ng-if="actionOfType(actionSettings, 'webhook')" name="{{actionName}}"></webhook-action>
                     <email-action ng-if="actionOfType(actionSettings, 'email')" name="{{actionName}}"></email-action>
                     <report-action ng-if="actionOfType(actionSettings, 'report')" name="{{actionName}}"></report-action>
