@@ -7,6 +7,7 @@
 releases=(
 "5.5.0"
 "5.5.1"
+"5.5.2"
 )
 
 for i in "${releases[@]}"

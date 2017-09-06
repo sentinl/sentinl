@@ -53,7 +53,7 @@
 
       <br/>
 
-      <div class="panel" ng-show="!elasticAlarms.length">
+      <div class="panel" ng-show="!alarms.length">
         <div class="well">
           No Alarms found - That's great, right? <i class="fa fa-smile-o" aria-hidden="true"></i><br>
         </div>
@@ -66,7 +66,7 @@
         </div>
       </div>
 
-      <div class="panel panel-default" ng-show="elasticAlarms.length">
+      <div class="panel panel-default" ng-show="alarms.length">
         <table class="table">
           <thead>
             <tr>
@@ -76,7 +76,7 @@
               <th>MESSAGE</th>
               <th></th>
             </tr>
-          <tbody ng-repeat="alarm in elasticAlarms | orderBy:'_source[\'@timestamp\']':true">
+          <tbody ng-repeat="alarm in alarms | orderBy:'_source[\'@timestamp\']':true">
             <tr ng-class-odd="'alarm-row-odd'" ng-class-even="'alarm-row'">
               <td>{{ alarm._source['@timestamp'] | moment }}</td>
               <td>{{ alarm._source.level }}</td>

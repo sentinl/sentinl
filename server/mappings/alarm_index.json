@@ -1,19 +1,10 @@
 {
-  "mappings": {
-    "_default_": {
-      "properties": {
-        "payload": {
-          "type": "object",
-          "enabled":  false
-        },
-        "attachment": {
-          "type": "binary"
-        },
-        "uuid": {
-          "type":  "string",
-          "index": "not_analyzed"
-        }
-      }
+  "properties": {
+    "payload": {
+      "type": "object"
+    },
+    "attachment": {
+      "type": "binary"
     }
   }
 }

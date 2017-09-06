@@ -54,7 +54,7 @@
 
       <br/>
 
-      <div class="panel" ng-show="!elasticReports.length">
+      <div class="panel" ng-show="!reports.length">
         <div class="well">
           No Reports found - That's great, right? <i class="fa fa-smile-o" aria-hidden="true"></i><br/>
         </div>
@@ -67,7 +67,7 @@
         </div>
       </div>
 
-      <div class="panel panel-default" ng-show="elasticReports.length">
+      <div class="panel panel-default" ng-show="reports.length">
         <table class="table">
           <thead>
             <tr>
@@ -77,7 +77,7 @@
               <th>MESSAGE</th>
               <th></th>
             </tr>
-          <tbody ng-repeat="report in elasticReports | orderBy:'_source[\'@timestamp\']':true">
+          <tbody ng-repeat="report in reports | orderBy:'_source[\'@timestamp\']':true">
             <tr ng-class-odd="'alarm-row-odd'" ng-class-even="'alarm-row'">
               <td>{{ report._source['@timestamp'] | moment }}</td>
               <td>{{ report._source.level }}</td>
