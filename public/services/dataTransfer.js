@@ -1,18 +1,28 @@
 import { app } from '../app.module';
 
-app.factory('dataTransfer', [function () {
+class DataTransfer {
 
-  let watcher;
+  constructor() {
+    this.watcher;
+    this.templates;
+  }
 
-  const dataTransfer = {
-    getWatcher: function () {
-      return watcher;
-    },
-    setWatcher: function (newWatcher) {
-      watcher = newWatcher;
-    }
-  };
+  getWatcher() {
+    return this.watcher;
+  }
 
-  return dataTransfer;
+  setWatcher(watcher) {
+    this.watcher = watcher;
+  }
 
-}]);
+  setTemplates(templates) {
+    this.templates = templates;
+  }
+
+  getTemplates() {
+    return this.templates;
+  }
+
+};
+
+app.factory('dataTransfer', () => new DataTransfer());

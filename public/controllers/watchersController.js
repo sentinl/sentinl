@@ -10,7 +10,7 @@ import { app } from '../app.module';
 // WATCHERS CONTROLLER
 app.controller('WatchersController', function ($rootScope, $scope, $route, $interval,
   $timeout, timefilter, Private, createNotifier, $window, $http, $uibModal, $log, navMenu,
-  globalNavState, $location, dataTransfer, Watcher) {
+  globalNavState, $location, dataTransfer, Watcher, Script, Promise) {
 
   $scope.title = 'Sentinl: Watchers';
   $scope.description = 'Kibi/Kibana Report App for Elasticsearch';
@@ -143,6 +143,34 @@ app.controller('WatchersController', function ($rootScope, $scope, $route, $inte
       .then((watcher) => $scope.editWatcher(watcher, 'editor'))
       .catch(notify.error);
   };
+
+  const templates = {
+    input: {},
+    condition: {},
+    transform: {}
+  };
+
+  /**
+  * Load templates for watcher fields.
+  *
+  * @param {array} templates - list of field names for templates
+  */
+  Promise.map(_.keys(templates), function (field) {
+    return Script.list(field)
+      .then(function (_templates_) {
+        if (_templates_.length) {
+          _.forEach(_templates_, function (template) {
+            templates[field][template._id] = template;
+          });
+        }
+        return null;
+      });
+  })
+  .then(function () {
+    dataTransfer.setTemplates(templates);
+    return null;
+  })
+  .catch(notify.error);
 
   const currentTime = moment($route.current.locals.currentTime);
   $scope.currentTime = currentTime.format('HH:mm:ss');
