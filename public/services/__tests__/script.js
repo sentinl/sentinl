@@ -17,7 +17,7 @@ describe('Script', () => {
   const init = function () {
     ngMock.module('kibana');
 
-    ngMock.inject(($injector, _Script_, _savedScripts_, _$httpBackend_, _Promise_) => {
+    ngMock.inject(($injector, _Script_, _$httpBackend_, _Promise_) => {
       Promise = _Promise_;
       Script = _Script_;
       savedScripts = $injector.has('savedScripts') ? $injector.get('savedScripts') : undefined;

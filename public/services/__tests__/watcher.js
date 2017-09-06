@@ -18,7 +18,7 @@ describe('Watcher', function () {
   const init = function () {
     ngMock.module('kibana');
 
-    ngMock.inject(($injector, _Watcher_, _savedWatchers_, _$httpBackend_, _Promise_) => {
+    ngMock.inject(($injector, _Watcher_, _$httpBackend_, _Promise_) => {
       Promise = _Promise_;
       Watcher = _Watcher_;
       savedWatchers = $injector.has('savedWatchers') ? $injector.get('savedWatchers') : undefined;
