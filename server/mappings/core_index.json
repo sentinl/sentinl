@@ -28,6 +28,10 @@
     },
     "title": {
       "type": "text"
+    },
+    "sentinl": {
+      "type": "object",
+      "dynamic": true
     }
   }
 }

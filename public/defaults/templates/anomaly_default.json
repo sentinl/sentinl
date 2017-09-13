@@ -1,0 +1,9 @@
+{
+  "script": {
+    "script": "payload.hits.total > 0"
+  },
+  "anomaly": {
+    "field_to_check": "fieldName",
+    "normal_values": [ 5, 10, 15, 20, 25, 30 ]
+  }
+}
