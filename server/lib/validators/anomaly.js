@@ -1,0 +1,49 @@
+import _ from 'lodash';
+import AnomalyFinder from 'anomaly-finder';
+
+/**
+* Finding anomaly.
+*
+* @param {object} payload - elasticsearch response with hits
+* @param {object} condition - condition settings
+* @returns {objects} payload - payload with hits inside 'anomaly' property
+*/
+const check = function (payload, condition) {
+  const hound = new AnomalyFinder();
+
+  // static mode
+  if (condition.anomaly.normal_values) {
+    _.forEach(payload.hits.hits, function (hit) {
+      let value = hit._source[condition.anomaly.field_to_check];
+      if (hound.find(condition.anomaly.normal_values, value)) {
+        if (!_.has(payload, 'anomaly')) {
+          payload.anomaly = [];
+        }
+        payload.anomaly.push(hit);
+      }
+    });
+  }
+
+  // dynamic mode
+  if (!condition.anomaly.normal_values) {
+    const anomaly = [];
+    const field = condition.anomaly.field_to_check;
+    const values = _.pluck(payload.hits.hits, `_source.${field}`);
+    _.forEach(payload.hits.hits, function (hit) {
+      let otherValues = _.filter(values, v => v !== hit._source[field]);
+      if (hound.find(otherValues, hit._source[field])) {
+        anomaly.push(hit);
+      }
+    });
+
+    if (anomaly.length) {
+      payload.anomaly = anomaly;
+    }
+  }
+
+  return payload;
+};
+
+module.exports = {
+  check
+};
