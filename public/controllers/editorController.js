@@ -7,6 +7,12 @@ import WatcherHelper from '../classes/WatcherHelper';
 
 import anomalyTemplate from '../defaults/templates/anomaly_default';
 
+const defaultTemplates = {
+  condition: {
+    anomaly: anomalyTemplate
+  }
+};
+
 // EDITOR CONTROLLER
 app.controller('EditorController', function ($rootScope, $scope, $route, $interval,
   $timeout, timefilter, Private, createNotifier, $window, $uibModal,
@@ -386,16 +392,20 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
     *
     * @param {array} templates - list of templates
     */
-    const initDefaultTemplate = function (template, description, title) {
-      let id = Script.createId();
-      $scope.form.templates[description][id] = {
-        _id: id,
-        _source: {
-          title,
-          description,
-          body: angular.toJson(template, 'pretty')
-        }
-      };
+    const initDefaultTemplates = function (templates) {
+      _.forEach(templates, function (type, typeName) {
+        _.forEach(type, function (template, templateName) {
+          let id = Script.createId();
+          $scope.form.templates[typeName][id] = {
+            _id: id,
+            _source: {
+              title: templateName,
+              description: typeName,
+              body: angular.toJson(template, 'pretty')
+            }
+          };
+        });
+      });
     };
 
     /**
@@ -442,7 +452,7 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
       }
 
       try {
-        initDefaultTemplate(anomalyTemplate, 'condition', 'find anomaly');
+        initDefaultTemplates(defaultTemplates);
       } catch (e) {
         notify.error(`Fail to initialize default templates: ${e}`);
       }

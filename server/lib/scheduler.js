@@ -24,6 +24,7 @@ import doActions from './actions';
 import getConfiguration from './get_configuration';
 import Watcher from './classes/watcher';
 import getElasticsearchClient from './get_elasticsearch_client';
+import AnomalyFinder from 'anomaly-finder';
 
 /**
 * Schedules and executes watchers in background
@@ -137,7 +138,7 @@ export default function Scheduler(server) {
 
     const actions = getNonReportActions(task._source.actions);
     let request = _.has(task._source, 'input.search.request') ? task._source.input.search.request : undefined;
-    let condition = _.has(task._source, 'condition.script.script') ? task._source.condition.script.script : undefined;
+    let condition = _.keys(task._source.condition).length ? task._source.condition : undefined;
     let transform = task._source.transform ? task._source.transform : {};
 
     let method = 'search';
@@ -156,6 +157,46 @@ export default function Scheduler(server) {
       return;
     }
 
+    /**
+    * Finding anomaly.
+    */
+    function findAnomaly(payload, condition) {
+      const hound = new AnomalyFinder();
+
+      _.forEach(payload.hits.hits, function (hit) {
+        if (condition.anomaly.normal_values) { // static anomaly search
+          if (hound.find(condition.anomaly.normal_values, hit[condition.anomaly.field_to_check])) {
+            if (!_.has(payload, 'anomaly')) {
+              payload.anomaly = [];
+            }
+            payload.anomaly.push(hit);
+          }
+        } else { // dynamic anomaly search based on the received response
+          const anomaly = [];
+          const field = condition.anomaly.field_to_check;
+          const values = _.pluck(payload.hits.hits, `_source.${field}`);
+
+          _.forEach(payload.hits.hits, function (hit) {
+            let otherValues = _.filter(values, v => v !== hit._source[field]);
+            if (hound.find(otherValues, hit._source[field])) {
+              anomaly.push(hit);
+            }
+          });
+
+          if (anomaly.length) {
+            payload.anomaly = anomaly;
+          }
+        }
+      });
+
+      return payload;
+    };
+
+    /**
+    * Executing watcher search request.
+    *
+    * @param {object} watcher - watcher API object
+    */
     function executeWatcher(watcher) {
       watcher.search(method, request).then((payload) => {
         server.log(['status', 'info', 'Sentinl', 'scheduler', 'payload'], payload);
@@ -167,6 +208,11 @@ export default function Scheduler(server) {
         }
 
         server.log(['status', 'debug', 'Sentinl', 'scheduler'], payload);
+
+        // find anomalies in search response
+        if (_.has(task._source, 'sentinl.condition.anomaly')) {
+          payload = findAnomaly(payload, task._source.sentinl.condition);
+        }
 
         /* Validate Condition */
         let ret;
@@ -294,7 +340,7 @@ export default function Scheduler(server) {
     watcher = new Watcher(client, config);
 
     watcher.getCount().then((resp) => {
-      watcher.getWatchers(resp.count).then((resp) => {
+      return watcher.getWatchers(resp.count).then((resp) => {
         /* Orphanize */
         try {
           removeOrphans(resp);
@@ -304,14 +350,13 @@ export default function Scheduler(server) {
 
         /* Schedule watchers */
         _.each(resp.hits.hits, (hit) => scheduleWatcher(hit));
-
-      }).catch((error) => server.log(['status', 'error', 'Sentinl', 'scheduler'], `Failed to get watchers: ${error}`));
+      });
     })
     .catch((error) => {
       if (error.statusCode === 404) {
         server.log(['status', 'info', 'Sentinl', 'scheduler'], 'No indices found, initializing.');
       } else {
-        server.log(['status', 'error', 'Sentinl', 'scheduler'], `An error occurred while looking for indices: ${error}`);
+        server.log(['status', 'error', 'Sentinl', 'scheduler'], `An error occurred while looking for data in indices: ${error}`);
       }
     });
   };
