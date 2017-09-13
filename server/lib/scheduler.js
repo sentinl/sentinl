@@ -24,7 +24,8 @@ import doActions from './actions';
 import getConfiguration from './get_configuration';
 import Watcher from './classes/watcher';
 import getElasticsearchClient from './get_elasticsearch_client';
-import AnomalyFinder from 'anomaly-finder';
+import range from './validators/range';
+import anomaly from './validators/anomaly';
 
 /**
 * Schedules and executes watchers in background
@@ -158,41 +159,6 @@ export default function Scheduler(server) {
     }
 
     /**
-    * Finding anomaly.
-    */
-    function findAnomaly(payload, condition) {
-      const hound = new AnomalyFinder();
-
-      _.forEach(payload.hits.hits, function (hit) {
-        if (condition.anomaly.normal_values) { // static anomaly search
-          if (hound.find(condition.anomaly.normal_values, hit[condition.anomaly.field_to_check])) {
-            if (!_.has(payload, 'anomaly')) {
-              payload.anomaly = [];
-            }
-            payload.anomaly.push(hit);
-          }
-        } else { // dynamic anomaly search based on the received response
-          const anomaly = [];
-          const field = condition.anomaly.field_to_check;
-          const values = _.pluck(payload.hits.hits, `_source.${field}`);
-
-          _.forEach(payload.hits.hits, function (hit) {
-            let otherValues = _.filter(values, v => v !== hit._source[field]);
-            if (hound.find(otherValues, hit._source[field])) {
-              anomaly.push(hit);
-            }
-          });
-
-          if (anomaly.length) {
-            payload.anomaly = anomaly;
-          }
-        }
-      });
-
-      return payload;
-    };
-
-    /**
     * Executing watcher search request.
     *
     * @param {object} watcher - watcher API object
@@ -211,7 +177,20 @@ export default function Scheduler(server) {
 
         // find anomalies in search response
         if (_.has(task._source, 'sentinl.condition.anomaly')) {
-          payload = findAnomaly(payload, task._source.sentinl.condition);
+          try {
+            payload = anomaly.check(payload, task._source.sentinl.condition);
+          } catch (err) {
+            server.log(['error', 'Sentinl', 'scheduler'], `Fail to apply anomaly validator ${task._id}: ${err}`);
+          }
+        }
+
+        // find hits outside range
+        if (_.has(task._source, 'sentinl.condition.range')) {
+          try {
+            payload = range.check(payload, task._source.sentinl.condition);
+          } catch (err) {
+            server.log(['error', 'Sentinl', 'scheduler'], `Fail to apply range validator ${task._id}: ${err}`);
+          }
         }
 
         /* Validate Condition */
@@ -219,7 +198,7 @@ export default function Scheduler(server) {
         try {
           ret = eval(condition); // eslint-disable-line no-eval
         } catch (err) {
-          server.log(['status', 'info', 'Sentinl', 'scheduler'], `Condition Error for ${task._id}: ${err}`);
+          server.log(['error', 'Sentinl', 'scheduler'], `Condition Error for ${task._id}: ${err}`);
         }
 
         if (ret) {
@@ -227,7 +206,7 @@ export default function Scheduler(server) {
             try {
               eval(transform.script.script); // eslint-disable-line no-eval
             } catch (err) {
-              server.log(['status', 'info', 'Sentinl', 'scheduler'], `Transform Script Error for ${task._id}: ${err}`);
+              server.log(['error', 'Sentinl', 'scheduler'], `Transform Script Error for ${task._id}: ${err}`);
             }
             doActions(server, actions, payload, task._source);
           } else if (transform.search) {

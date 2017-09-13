@@ -5,11 +5,13 @@ import confirmMessage from '../templates/confirm-message.html';
 import { app } from '../app.module';
 import WatcherHelper from '../classes/WatcherHelper';
 
-import anomalyTemplate from '../defaults/templates/anomaly_default';
+import anomalyTemplate from '../defaults/templates/anomaly';
+import rangeTemplate from '../defaults/templates/range';
 
 const defaultTemplates = {
   condition: {
-    anomaly: anomalyTemplate
+    anomaly: anomalyTemplate,
+    range: rangeTemplate
   }
 };
 
@@ -291,9 +293,10 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
     */
     const saveField = function (name) {
       if (name === 'condition') {
-        if (_.has($scope.watcher._source[name], 'anomaly')) {
+        if (_.has($scope.watcher._source[name], 'anomaly') || _.has($scope.watcher._source[name], 'range')) {
           const field = angular.fromJson($scope.watcher['$$' + name].body);
           delete field.anomaly;
+          delete field.range;
           $scope.watcher._source[name] = field;
           return;
         }
@@ -413,7 +416,7 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
     */
     const saveSentinlCustomSettings = function () {
       const condition = angular.fromJson($scope.watcher.$$condition.body);
-      if (_.has(condition, 'anomaly')) {
+      if (_.has(condition, 'anomaly') || _.has(condition, 'range')) {
         $scope.watcher._source.sentinl = {
           condition
         };
@@ -426,7 +429,7 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
     * Initilizes Sentinl custom settings.
     */
     const initSentinlCustomSettings = function () {
-      if (_.has($scope.watcher._source, 'sentinl.condition.anomaly')) {
+      if (_.has($scope.watcher._source, 'sentinl.condition')) {
         $scope.watcher.$$condition.body = angular.toJson($scope.watcher._source.sentinl.condition, 'pretty');
       }
     };
