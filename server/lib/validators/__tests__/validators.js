@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import { pluck, isEqual } from 'lodash';
 import expect from 'expect.js';
 import anomaly from '../anomaly';
 import range from '../range';
@@ -50,7 +50,8 @@ describe('Validators', function () {
       }
     };
     const result = anomaly.check(payload, condition);
-    expect(result.anomaly.length).to.equal(4);
+    const values = pluck(result.anomaly, '_source.amount');
+    expect(isEqual(values.sort(), [ -57, 55, -20, -10 ].sort())).to.be(true);
   });
 
   it('check anomaly (dynamic mode)', function () {
@@ -60,7 +61,8 @@ describe('Validators', function () {
       }
     };
     const result = anomaly.check(payload, condition);
-    expect(result.anomaly.length).to.equal(2);
+    const values = pluck(result.anomaly, '_source.amount');
+    expect(isEqual(values.sort(), [ -57, 55 ].sort())).to.be(true);
   });
 
   it('check range', function () {
@@ -73,7 +75,8 @@ describe('Validators', function () {
       }
     };
     const result = range.check(payload, condition);
-    expect(result.outside_the_range.length).to.equal(3);
+    const values = pluck(result.outside_the_range, '_source.amount');
+    expect(isEqual(values.sort(), [ -57, 55, -20 ].sort())).to.be(true);
   });
 
 });
