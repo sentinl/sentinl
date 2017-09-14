@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import { forEach } from 'lodash';
 
 /**
 * Checks if value is outside the range.
@@ -26,7 +26,7 @@ const test = function (value, condition) {
 * @returns {objects} payload - payload with hits inside 'outside_the_range' property
 */
 const check = function (payload, condition) {
-  _.forEach(payload.hits.hits, function (hit) {
+  forEach(payload.hits.hits, function (hit) {
     if (test(hit._source[condition.range.field_to_check], condition.range)) {
       if (!payload.outside_the_range) {
         payload.outside_the_range = [];

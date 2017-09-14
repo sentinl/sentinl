@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import { forEach, filter, has, pluck} from 'lodash';
 import AnomalyFinder from 'anomaly-finder';
 
 /**
@@ -13,10 +13,10 @@ const check = function (payload, condition) {
 
   // static mode
   if (condition.anomaly.normal_values) {
-    _.forEach(payload.hits.hits, function (hit) {
+    forEach(payload.hits.hits, function (hit) {
       let value = hit._source[condition.anomaly.field_to_check];
       if (hound.find(condition.anomaly.normal_values, value)) {
-        if (!_.has(payload, 'anomaly')) {
+        if (!has(payload, 'anomaly')) {
           payload.anomaly = [];
         }
         payload.anomaly.push(hit);
@@ -28,9 +28,9 @@ const check = function (payload, condition) {
   if (!condition.anomaly.normal_values) {
     const anomaly = [];
     const field = condition.anomaly.field_to_check;
-    const values = _.pluck(payload.hits.hits, `_source.${field}`);
-    _.forEach(payload.hits.hits, function (hit) {
-      let otherValues = _.filter(values, v => v !== hit._source[field]);
+    const values = pluck(payload.hits.hits, `_source.${field}`);
+    forEach(payload.hits.hits, function (hit) {
+      let otherValues = filter(values, v => v !== hit._source[field]);
       if (hound.find(otherValues, hit._source[field])) {
         anomaly.push(hit);
       }
