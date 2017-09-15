@@ -80,6 +80,25 @@ app.factory('Watcher', ['$http', '$injector', 'Promise', function ($http, $injec
     }
 
     /**
+    * Runs watcher on demand.
+    *
+    * @param {string} id - watcher id
+    */
+    static play(id) {
+      if (this.savedObjectsAPIEnabled) { // Kibi
+        return Promise.resolve(id); // To-do: add Saved Objects API support here.
+      } else { // Kibana
+        return $http.post(`../api/sentinl/watcher/_execute/${id}`)
+        .then(function (response) {
+          if (response.status !== 200) {
+            throw new Error(`Fail to execute watcher ${id}`);
+          }
+          return response.data;
+        });
+      }
+    }
+
+    /**
     * Lists existing watchers.
     *
     * @param {string} string - search string.

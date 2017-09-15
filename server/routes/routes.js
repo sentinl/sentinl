@@ -7,6 +7,12 @@ import getElasticsearchClient from '../lib/get_elasticsearch_client';
 import es from 'elasticsearch';
 import Crypto from '../lib/classes/crypto';
 
+const delay = function (ms) {
+  return new Promise(function (resolve) {
+    setTimeout(resolve, ms);
+  });
+};
+
 /* ES Functions */
 var getHandler = function (type, server, req, reply) {
   const config = getConfiguration(server);
@@ -236,6 +242,72 @@ export default function routes(server) {
       }))
       .then((resp) => reply({ok: true, resp: resp}))
       .catch((err) => reply(handleESError(err)));
+    }
+  });
+
+  /**
+  * Executing watcher "now" (depends on schedule).
+  *
+  * @param {string} id - watcher id
+  * @param (optional) {object} payload
+  *   {integer} trigger - run watcher in 'trigger' seconds
+  *   {integer} throttle - throttle all watcher actions for 'throttle' seconds
+  *   {integer} recover - after this time pass, the original watcher settings will be restored
+  */
+  server.route({
+    method: 'POST',
+    path: '/api/sentinl/watcher/_execute/{id}',
+    handler: function (request, reply) {
+      const type = config.es.type;
+      const index = config.es.default_index;
+      const id = request.params.id;
+      const trigger = !request.payload || !request.payload.trigger ? config.es.watcher.trigger : request.payload.trigger;
+      const throttle = !request.payload || !request.payload.throttle ? config.es.watcher.throttle : request.payload.throttle;
+      const recover = !request.payload || !request.payload.recover ? config.es.watcher.recover : request.payload.recover;
+      let originalWatcher;
+
+      server.log(['status', 'info', 'Sentinl'], `Execute watcher ${id}`);
+
+      callWithRequest(request, 'get', {
+        index,
+        type,
+        id
+      })
+      .then(function (watcher) { // modify trigger and throttle
+        originalWatcher = _.cloneDeep(watcher);
+        watcher._source.disable = false;
+        watcher._source.trigger.schedule.later = `every ${trigger} secs`;
+        _.forEach(watcher._source.actions, function (action) {
+          action.throttle_period = `${throttle}s`;
+        });
+        return watcher;
+      })
+      .then(function (watcher) {
+        return callWithRequest(request, 'index', {
+          index,
+          type,
+          id,
+          body: watcher._source,
+          refresh: 'true'
+        });
+      })
+      .then(function () {
+        // recover - delay value (ms) to give the watcher time to be executed.
+        // Original watcher settings are restored after the delay.
+        return delay(recover).then(function () {
+          return callWithRequest(request, 'index', {
+            index,
+            type,
+            id,
+            body: originalWatcher._source,
+            refresh: 'true'
+          });
+        });
+      })
+      .then(reply(id))
+      .catch(function (error) {
+        return reply(handleESError(error));
+      });
     }
   });
 
