@@ -292,6 +292,8 @@ export default function routes(server) {
         });
       })
       .then(function () {
+        // recover - delay value (ms) to give the watcher time to be executed.
+        // Original watcher settings are restored after the delay.
         return delay(recover).then(function () {
           return callWithRequest(request, 'index', {
             index,
