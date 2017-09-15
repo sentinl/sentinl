@@ -74,7 +74,12 @@ export default function (kibana) {
           type: Joi.string().default('sentinl-watcher'),
           alarm_index: Joi.string().default('watcher_alarms'),
           alarm_type: Joi.string().default('alarm'),
-          script_type: Joi.string().default('sentinl-script')
+          script_type: Joi.string().default('sentinl-script'),
+          watcher: Joi.object({
+            trigger: Joi.number().default(3),
+            throttle: Joi.number().default(1),
+            recover: Joi.number().default(15000)
+          }).default(),
         }).default(),
         sentinl: Joi.object({
           history: Joi.number().default(20),

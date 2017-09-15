@@ -261,9 +261,9 @@ export default function routes(server) {
       const type = config.es.type;
       const index = config.es.default_index;
       const id = request.params.id;
-      const trigger = !request.payload || !request.payload.trigger ? 3 : request.payload.trigger;
-      const throttle = !request.payload || !request.payload.throttle ? 1 : request.payload.throttle;
-      const recover = !request.payload || !request.payload.recover ? 10000 : request.payload.recover;
+      const trigger = !request.payload || !request.payload.trigger ? config.es.watcher.trigger : request.payload.trigger;
+      const throttle = !request.payload || !request.payload.throttle ? config.es.watcher.throttle : request.payload.throttle;
+      const recover = !request.payload || !request.payload.recover ? config.es.watcher.recover : request.payload.recover;
       let originalWatcher;
 
       server.log(['status', 'info', 'Sentinl'], `Execute watcher ${id}`);
