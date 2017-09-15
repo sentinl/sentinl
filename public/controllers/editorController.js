@@ -5,6 +5,16 @@ import confirmMessage from '../templates/confirm-message.html';
 import { app } from '../app.module';
 import WatcherHelper from '../classes/WatcherHelper';
 
+import anomalyTemplate from '../defaults/templates/anomaly';
+import rangeTemplate from '../defaults/templates/range';
+
+const defaultTemplates = {
+  condition: {
+    anomaly: anomalyTemplate,
+    range: rangeTemplate
+  }
+};
+
 // EDITOR CONTROLLER
 app.controller('EditorController', function ($rootScope, $scope, $route, $interval,
   $timeout, timefilter, Private, createNotifier, $window, $uibModal,
@@ -59,6 +69,7 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
       }
     };
 
+    // get authentication config info
     Watcher.getConfiguration()
       .then((response) => {
         $scope.watcher.$$authentication = response.data.authentication;
@@ -281,6 +292,15 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
     * @param {string} name - field name (input, condition, transform).
     */
     const saveField = function (name) {
+      if (name === 'condition') {
+        if (_.has($scope.watcher._source[name], 'anomaly') || _.has($scope.watcher._source[name], 'range')) {
+          const field = angular.fromJson($scope.watcher['$$' + name].body);
+          delete field.anomaly;
+          delete field.range;
+          $scope.watcher._source[name] = field;
+          return;
+        }
+      }
       $scope.watcher._source[name] = angular.fromJson($scope.watcher['$$' + name].body);
     };
 
@@ -367,7 +387,51 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
     * Initilizes raw property for the Raw tab.
     */
     const initRaw = function () {
-      $scope.watcher.$$raw = angular.toJson($scope.watcher._source, 'pretty');
+      $scope.watcher.$$raw = angular.toJson($scope.watcher, 'pretty');
+    };
+
+    /**
+    * Adds default templates to the editor form.
+    *
+    * @param {array} templates - list of templates
+    */
+    const initDefaultTemplates = function (templates) {
+      _.forEach(templates, function (type, typeName) {
+        _.forEach(type, function (template, templateName) {
+          let id = Script.createId();
+          $scope.form.templates[typeName][id] = {
+            _id: id,
+            _source: {
+              title: templateName,
+              description: typeName,
+              body: angular.toJson(template, 'pretty')
+            }
+          };
+        });
+      });
+    };
+
+    /**
+    * Saves Sentinl custom settings.
+    */
+    const saveSentinlCustomSettings = function () {
+      const condition = angular.fromJson($scope.watcher.$$condition.body);
+      if (_.has(condition, 'anomaly') || _.has(condition, 'range')) {
+        $scope.watcher._source.sentinl = {
+          condition
+        };
+      } else {
+        delete $scope.watcher._source.sentinl;
+      }
+    };
+
+    /**
+    * Initilizes Sentinl custom settings.
+    */
+    const initSentinlCustomSettings = function () {
+      if (_.has($scope.watcher._source, 'sentinl.condition')) {
+        $scope.watcher.$$condition.body = angular.toJson($scope.watcher._source.sentinl.condition, 'pretty');
+      }
     };
 
     /**
@@ -388,6 +452,18 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
         });
       } catch (e) {
         notify.error(`Fail to initialize fields: ${e}`);
+      }
+
+      try {
+        initDefaultTemplates(defaultTemplates);
+      } catch (e) {
+        notify.error(`Fail to initialize default templates: ${e}`);
+      }
+
+      try {
+        initSentinlCustomSettings();
+      } catch (e) {
+        notify.error(`Fail to initialize Sentinl custom settings: ${e}`);
       }
 
       try {
@@ -432,7 +508,7 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
       if ($scope.form.rawEnabled) {
         try {
           // All settings will have been overwritten if enable is checked and the watcher is saved.
-          $scope.watcher._source = angular.fromJson($scope.watcher.$$raw);
+          $scope.watcher = angular.fromJson($scope.watcher.$$raw);
         } catch (e) {
           notify.error(`Invalid Raw configuration: ${e}`);
           $scope.watcherForm.$valid = false;
@@ -475,6 +551,12 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
             notify.error(`Invalid action, Transform or Condition configuration: ${e}`);
             $scope.watcherForm.$valid = false;
             $scope.watcherForm.$invalid = true;
+          }
+
+          try {
+            saveSentinlCustomSettings();
+          } catch (e) {
+            notify.error(`Fail to save Sentinl custom settings: ${e}`);
           }
 
           try {
