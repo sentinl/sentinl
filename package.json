@@ -26,6 +26,7 @@
     "@elastic/datemath": "2.3.0",
     "angular": "1.4.8",
     "angular-ui-bootstrap": "2.5.0",
+    "anomaly-finder": "1.0.1",
     "bluebird": "3.4.7",
     "bootstrap": "3.3.7",
     "crypto": "0.0.3",

@@ -120,7 +120,7 @@ describe('editorController', function () {
     it('templates have been loaded', function (done) {
       setTimeout(function () { // catch promise response
         _.forEach($scope.form.templates, function (field) {
-          expect(_.keys(field).length).to.equal(1);
+          expect(_.keys(field).length).not.to.equal(0); // we have Sentinl default templates too
         });
         done();
         $httpBackend.flush();

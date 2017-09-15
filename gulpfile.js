@@ -10,6 +10,7 @@ var zip = require('gulp-zip');
 var fs = require('fs');
 var spawn = require('child_process').spawn;
 var minimist = require('minimist');
+var util = require('gulp-util');
 
 var pkg = require('./package.json');
 var packageName = pkg.name;
@@ -143,7 +144,7 @@ gulp.task('dev', ['sync'], function (done) {
 });
 
 gulp.task('test', ['sync'], function(done) {
-  spawn('grunt', ['test:server', 'test:browser', '--grep=Sentinl'], {
+  spawn('grunt', ['test:server', 'test:browser', '--grep=' + (util.env.grep ? util.env.grep : 'Sentinl')], {
     cwd: options.kibanahomepath,
     stdio: 'inherit'
   }).on('error', (err) => {
@@ -152,7 +153,7 @@ gulp.task('test', ['sync'], function(done) {
 });
 
 gulp.task('testserver', ['sync'], function(done) {
-  spawn('grunt', ['test:server', '--grep=Sentinl'], {
+  spawn('grunt', ['test:server', '--grep=' + (util.env.grep ? util.env.grep : 'Sentinl')], {
     cwd: options.kibanahomepath,
     stdio: 'inherit'
   }).on('error', (err) => {
@@ -161,7 +162,7 @@ gulp.task('testserver', ['sync'], function(done) {
 });
 
 gulp.task('testbrowser', ['sync'], function(done) {
-  spawn('grunt', ['test:browser', '--grep=Sentinl'], {
+  spawn('grunt', ['test:browser', '--grep=' + (util.env.grep ? util.env.grep : 'Sentinl')], {
     cwd: options.kibanahomepath,
     stdio: 'inherit'
   }).on('error', (err) => {

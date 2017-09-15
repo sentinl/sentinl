@@ -24,6 +24,8 @@ import doActions from './actions';
 import getConfiguration from './get_configuration';
 import Watcher from './classes/watcher';
 import getElasticsearchClient from './get_elasticsearch_client';
+import range from './validators/range';
+import anomaly from './validators/anomaly';
 
 /**
 * Schedules and executes watchers in background
@@ -137,7 +139,7 @@ export default function Scheduler(server) {
 
     const actions = getNonReportActions(task._source.actions);
     let request = _.has(task._source, 'input.search.request') ? task._source.input.search.request : undefined;
-    let condition = _.has(task._source, 'condition.script.script') ? task._source.condition.script.script : undefined;
+    let condition = _.keys(task._source.condition).length ? task._source.condition : undefined;
     let transform = task._source.transform ? task._source.transform : {};
 
     let method = 'search';
@@ -156,6 +158,11 @@ export default function Scheduler(server) {
       return;
     }
 
+    /**
+    * Executing watcher search request.
+    *
+    * @param {object} watcher - watcher API object
+    */
     function executeWatcher(watcher) {
       watcher.search(method, request).then((payload) => {
         server.log(['status', 'info', 'Sentinl', 'scheduler', 'payload'], payload);
@@ -168,12 +175,30 @@ export default function Scheduler(server) {
 
         server.log(['status', 'debug', 'Sentinl', 'scheduler'], payload);
 
+        // find anomalies in search response
+        if (_.has(task._source, 'sentinl.condition.anomaly')) {
+          try {
+            payload = anomaly.check(payload, task._source.sentinl.condition);
+          } catch (err) {
+            server.log(['error', 'Sentinl', 'scheduler'], `Fail to apply anomaly validator ${task._id}: ${err}`);
+          }
+        }
+
+        // find hits outside range
+        if (_.has(task._source, 'sentinl.condition.range')) {
+          try {
+            payload = range.check(payload, task._source.sentinl.condition);
+          } catch (err) {
+            server.log(['error', 'Sentinl', 'scheduler'], `Fail to apply range validator ${task._id}: ${err}`);
+          }
+        }
+
         /* Validate Condition */
         let ret;
         try {
           ret = eval(condition); // eslint-disable-line no-eval
         } catch (err) {
-          server.log(['status', 'info', 'Sentinl', 'scheduler'], `Condition Error for ${task._id}: ${err}`);
+          server.log(['error', 'Sentinl', 'scheduler'], `Condition Error for ${task._id}: ${err}`);
         }
 
         if (ret) {
@@ -181,7 +206,7 @@ export default function Scheduler(server) {
             try {
               eval(transform.script.script); // eslint-disable-line no-eval
             } catch (err) {
-              server.log(['status', 'info', 'Sentinl', 'scheduler'], `Transform Script Error for ${task._id}: ${err}`);
+              server.log(['error', 'Sentinl', 'scheduler'], `Transform Script Error for ${task._id}: ${err}`);
             }
             doActions(server, actions, payload, task._source);
           } else if (transform.search) {
@@ -294,7 +319,7 @@ export default function Scheduler(server) {
     watcher = new Watcher(client, config);
 
     watcher.getCount().then((resp) => {
-      watcher.getWatchers(resp.count).then((resp) => {
+      return watcher.getWatchers(resp.count).then((resp) => {
         /* Orphanize */
         try {
           removeOrphans(resp);
@@ -304,14 +329,13 @@ export default function Scheduler(server) {
 
         /* Schedule watchers */
         _.each(resp.hits.hits, (hit) => scheduleWatcher(hit));
-
-      }).catch((error) => server.log(['status', 'error', 'Sentinl', 'scheduler'], `Failed to get watchers: ${error}`));
+      });
     })
     .catch((error) => {
       if (error.statusCode === 404) {
         server.log(['status', 'info', 'Sentinl', 'scheduler'], 'No indices found, initializing.');
       } else {
-        server.log(['status', 'error', 'Sentinl', 'scheduler'], `An error occurred while looking for indices: ${error}`);
+        server.log(['status', 'error', 'Sentinl', 'scheduler'], `An error occurred while looking for data in indices: ${error}`);
       }
     });
   };
