@@ -28,6 +28,19 @@ app.controller('WatchersController', function ($rootScope, $scope, $route, $inte
   $scope.watchers = [];
 
   /**
+  * Run watcher on demand.
+  *
+  * @param {string} id - watcher id
+  */
+  $scope.playWatcher = function (id) {
+    Watcher.play(id)
+      .then(function (response) {
+        notify.info(`Pending watcher ${response} execution.`);
+      })
+      .catch(notify.error);
+  };
+
+  /**
   * Opens watcher editor or wizard.
   *
   * @param {object} watcher - watcher object.
