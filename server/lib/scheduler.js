@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-import _ from 'lodash';
+import { get, has, forEach, difference, map, keys, isObject, isEmpty } from 'lodash';
 import Promise from 'bluebird';
 import later from 'later';
 import doActions from './actions';
@@ -26,6 +26,7 @@ import Watcher from './classes/watcher';
 import getElasticsearchClient from './get_elasticsearch_client';
 import range from './validators/range';
 import anomaly from './validators/anomaly';
+import compare from './validators/compare';
 
 /**
 * Schedules and executes watchers in background
@@ -54,8 +55,8 @@ export default function Scheduler(server) {
   */
   function getReportActions(actions) {
     const filteredActions = {};
-    _.forEach(actions, (settings, name) => {
-      if (_.has(settings, 'report')) filteredActions[name] = settings;
+    forEach(actions, (settings, name) => {
+      if (has(settings, 'report')) filteredActions[name] = settings;
     });
     return filteredActions;
   };
@@ -67,8 +68,8 @@ export default function Scheduler(server) {
   */
   function getNonReportActions(actions) {
     const filteredActions = {};
-    _.forEach(actions, (settings, name) => {
-      if (!_.has(settings, 'report')) filteredActions[name] = settings;
+    forEach(actions, (settings, name) => {
+      if (!has(settings, 'report')) filteredActions[name] = settings;
     });
     return filteredActions;
   };
@@ -79,10 +80,10 @@ export default function Scheduler(server) {
   * @param {object} resp - ES response, watchers list.
   */
   function removeOrphans(resp) {
-    let orphans = _.difference(_.each(_.keys(server.sentinlStore.schedule)), _.map(resp.hits.hits, '_id'));
-    _.each(orphans, function (orphan) {
+    let orphans = difference(forEach(keys(server.sentinlStore.schedule)), map(resp.hits.hits, '_id'));
+    forEach(orphans, function (orphan) {
       server.log(['status', 'info', 'Sentinl', 'scheduler'], 'Deleting orphan watcher: ' + orphan);
-      if (_.isObject(server.sentinlStore.schedule[orphan].later) && _.has(server.sentinlStore.schedule[orphan].later, 'clear')) {
+      if (isObject(server.sentinlStore.schedule[orphan].later) && has(server.sentinlStore.schedule[orphan].later, 'clear')) {
         server.sentinlStore.schedule[orphan].later.clear();
       }
       delete server.sentinlStore.schedule[orphan];
@@ -124,7 +125,7 @@ export default function Scheduler(server) {
     const actions = getReportActions(task._source.actions);
     const payload = { _id: task._id };
 
-    if (_.keys(actions).length) {
+    if (keys(actions).length) {
       doActions(server, actions, payload, task._source);
     }
   };
@@ -138,8 +139,8 @@ export default function Scheduler(server) {
     server.log(['status', 'info', 'Sentinl', 'scheduler'], `Executing action: ${task._id}`);
 
     const actions = getNonReportActions(task._source.actions);
-    let request = _.has(task._source, 'input.search.request') ? task._source.input.search.request : undefined;
-    let condition = _.keys(task._source.condition).length ? task._source.condition : undefined;
+    let request = has(task._source, 'input.search.request') ? task._source.input.search.request : undefined;
+    let condition = keys(task._source.condition).length ? task._source.condition : undefined;
     let transform = task._source.transform ? task._source.transform : {};
 
     let method = 'search';
@@ -159,11 +160,12 @@ export default function Scheduler(server) {
     }
 
     /**
-    * Executing watcher search request.
+    * Executing watcher search request, condition and transform.
     *
     * @param {object} watcher - watcher API object
     */
     function executeWatcher(watcher) {
+      /* INPUT */
       watcher.search(method, request).then((payload) => {
         server.log(['status', 'info', 'Sentinl', 'scheduler', 'payload'], payload);
 
@@ -175,8 +177,37 @@ export default function Scheduler(server) {
 
         server.log(['status', 'debug', 'Sentinl', 'scheduler'], payload);
 
-        // find anomalies in search response
-        if (_.has(task._source, 'sentinl.condition.anomaly')) {
+        /* CONDITION */
+
+        // never execute actions
+        if (condition.never) {
+          return;
+        }
+
+        // script
+        if (has(condition, 'script.script')) {
+          try {
+            if (!eval(condition.script.script)) { // eslint-disable-line no-eval
+              return;
+            }
+          } catch (err) {
+            server.log(['error', 'Sentinl', 'scheduler'], `Condition Error for ${task._id}: ${err}`);
+          }
+        }
+
+        // compare
+        if (condition.compare) {
+          try {
+            if (!compare.valid(payload, condition)) {
+              return;
+            }
+          } catch (err) {
+            server.log(['error', 'Sentinl', 'scheduler'], `Condition Error for ${task._id}: ${err}`);
+          }
+        }
+
+        // find anomalies
+        if (has(task._source, 'sentinl.condition.anomaly')) {
           try {
             payload = anomaly.check(payload, task._source.sentinl.condition);
           } catch (err) {
@@ -185,7 +216,7 @@ export default function Scheduler(server) {
         }
 
         // find hits outside range
-        if (_.has(task._source, 'sentinl.condition.range')) {
+        if (has(task._source, 'sentinl.condition.range')) {
           try {
             payload = range.check(payload, task._source.sentinl.condition);
           } catch (err) {
@@ -193,30 +224,28 @@ export default function Scheduler(server) {
           }
         }
 
-        /* Validate Condition */
-        let ret;
-        try {
-          ret = eval(condition); // eslint-disable-line no-eval
-        } catch (err) {
-          server.log(['error', 'Sentinl', 'scheduler'], `Condition Error for ${task._id}: ${err}`);
+        /* TRANSFORM */
+
+        // validate JS script in transform
+        if (has(transform, 'script.script')) {
+          try {
+            if (!eval(transform.script.script)) { // eslint-disable-line no-eval
+              return;
+            }
+          } catch (err) {
+            server.log(['error', 'Sentinl', 'scheduler'], `Transform Script Error for ${task._id}: ${err}`);
+          }
         }
 
-        if (ret) {
-          if (transform.script) {
-            try {
-              eval(transform.script.script); // eslint-disable-line no-eval
-            } catch (err) {
-              server.log(['error', 'Sentinl', 'scheduler'], `Transform Script Error for ${task._id}: ${err}`);
-            }
-            doActions(server, actions, payload, task._source);
-          } else if (transform.search) {
-            watcher.search(method, transform.search.request).then((payload) => {
+        // search in transform
+        if (has(transform, 'search.request')) {
+          watcher.search(method, transform.search.request)
+            .then((payload) => {
               if (!payload) return;
               doActions(server, actions, payload, task._source);
             });
-          } else {
-            doActions(server, actions, payload, task._source);
-          }
+        } else {
+          doActions(server, actions, payload, task._source);
         }
       })
       .catch((error) => {
@@ -250,9 +279,9 @@ export default function Scheduler(server) {
     }
 
     server.log(['status', 'info', 'Sentinl', 'scheduler'], `Executing watcher: ${task._id}`);
-    server.log(['status', 'debug', 'Sentinl', 'scheduler'], task);
+    server.log(['status', 'debug', 'Sentinl', 'scheduler'], JSON.stringify(task, null, 2));
 
-    if (!task._source.actions || _.isEmpty(task._source.actions)) {
+    if (!task._source.actions || isEmpty(task._source.actions)) {
       server.log(['status', 'debug', 'Sentinl', 'scheduler'], `Watcher ${task._source.uuid} has no actions.`);
       return;
     }
@@ -263,7 +292,7 @@ export default function Scheduler(server) {
       handleReports(task);
     }
 
-    if (_.keys(getNonReportActions(task._source.actions)).length) {
+    if (keys(getNonReportActions(task._source.actions)).length) {
       handleActions(task);
     }
   };
@@ -274,7 +303,7 @@ export default function Scheduler(server) {
   * @param {object} task - watcher configuration.
   */
   function scheduleWatcher(task) {
-    if (_.has(server.sentinlStore.schedule, `[${task._id}].later`)) {
+    if (has(server.sentinlStore.schedule, `[${task._id}].later`)) {
       server.log(['status', 'info', 'Sentinl', 'scheduler'], `Clearing watcher: ${task._id}`);
       server.sentinlStore.schedule[task._id].later.clear();
     }
@@ -328,7 +357,7 @@ export default function Scheduler(server) {
         }
 
         /* Schedule watchers */
-        _.each(resp.hits.hits, (hit) => scheduleWatcher(hit));
+        forEach(resp.hits.hits, (hit) => scheduleWatcher(hit));
       });
     })
     .catch((error) => {
