@@ -1,4 +1,5 @@
 import { keys, get, forEach } from 'lodash';
+import CompareDate from './compare_date';
 
 /**
 * Simple comparison.
@@ -24,11 +25,19 @@ const valid = function (payload, condition) {
 
   let comparisons = operators.length;
 
-  forEach(operators, function (op) {
-    if (eval(value + operator[op] + condition.compare[`payload.${key}`][op])) { // eslint-disable-line no-eval
-      comparisons--;
-    }
-  });
+  if (typeof value === 'number') {
+    forEach(operators, function (op) {
+      if (eval(value + operator[op] + condition.compare[`payload.${key}`][op])) { // eslint-disable-line no-eval
+        comparisons--;
+      }
+    });
+  } else {
+    forEach(operators, function (op) {
+      if (CompareDate.valid(value, operator[op], condition.compare[`payload.${key}`][op])) {
+        comparisons--;
+      }
+    });
+  }
 
   if (comparisons) {
     return false;

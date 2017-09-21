@@ -3,12 +3,14 @@ import expect from 'expect.js';
 import anomaly from '../anomaly';
 import range from '../range';
 import compare from '../compare';
+import moment from 'moment';
 
 describe('Validators', function () {
   let payload;
 
   const init = function () {
     payload = {
+      time: moment().subtract(moment.duration(10, 'm')).format(), // time 10 min ago
       hits: {
         total: 285133,
         hits: [
@@ -81,7 +83,19 @@ describe('Validators', function () {
     expect(isEqual(values.sort(), [ -57, 55, -20 ].sort())).to.be(true);
   });
 
-  it('compare values, success', function () {
+  it('compare single value', function () {
+    const condition = {
+      compare: {
+        'payload.hits.total': {
+          gt: 2851330
+        }
+      }
+    };
+
+    expect(compare.valid(payload, condition)).to.be(false);
+  });
+
+  it('compare multiple values', function () {
     const condition = {
       compare: {
         'payload.hits.total': {
@@ -94,11 +108,11 @@ describe('Validators', function () {
     expect(compare.valid(payload, condition)).to.be(true);
   });
 
-  it('compare values, fail', function () {
+  it('compare date', function () {
     const condition = {
       compare: {
-        'payload.hits.total': {
-          gt: 2851330
+        'payload.time': {
+          gt: '<{now-5m}>'
         }
       }
     };
