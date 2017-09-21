@@ -27,6 +27,7 @@ import getElasticsearchClient from './get_elasticsearch_client';
 import range from './validators/range';
 import anomaly from './validators/anomaly';
 import compare from './validators/compare';
+import compareArray from './validators/compare_array';
 
 /**
 * Schedules and executes watchers in background
@@ -199,6 +200,17 @@ export default function Scheduler(server) {
         if (condition.compare) {
           try {
             if (!compare.valid(payload, condition)) {
+              return;
+            }
+          } catch (err) {
+            server.log(['error', 'Sentinl', 'scheduler'], `Condition Error for ${task._id}: ${err}`);
+          }
+        }
+
+        // compare array
+        if (condition.compare) {
+          try {
+            if (!compareArray.valid(payload, condition)) {
               return;
             }
           } catch (err) {

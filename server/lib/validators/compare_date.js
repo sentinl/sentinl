@@ -33,7 +33,7 @@ class CompareDate {
     period = {
       text: period.match(/[^{}]+(?=})/g)[0],
       operator: period.includes('+') ? '+' : '-'
-    }
+    };
 
     period.value = +period.text.split(period.operator)[1].match(/\d+/g)[0];
     period.unit = period.text.split(period.operator)[1].match(/[yMwdhms]+/g)[0];

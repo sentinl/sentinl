@@ -3,6 +3,7 @@ import expect from 'expect.js';
 import anomaly from '../anomaly';
 import range from '../range';
 import compare from '../compare';
+import compareArray from '../compare_array';
 import moment from 'moment';
 
 describe('Validators', function () {
@@ -11,6 +12,15 @@ describe('Validators', function () {
   const init = function () {
     payload = {
       time: moment().subtract(moment.duration(10, 'm')).format(), // time 10 min ago
+      aggregations: {
+        top_amounts: {
+          buckets: [
+            { doc_count: 5 },
+            { doc_count: 1 },
+            { doc_count: 2 }
+          ]
+        }
+      },
       hits: {
         total: 285133,
         hits: [
@@ -120,4 +130,35 @@ describe('Validators', function () {
     expect(compare.valid(payload, condition)).to.be(false);
   });
 
+  it('compare array, some', function () {
+    const condition = {
+      array_compare: {
+        'payload.aggregations.top_amounts.buckets': {
+          path: 'doc_count',
+          gte: {
+            value: 5,
+            quantifier: 'some'
+          }
+        }
+      }
+    };
+
+    expect(compareArray.valid(payload, condition)).to.be(true);
+  });
+
+  it('compare array, all', function () {
+    const condition = {
+      array_compare: {
+        'payload.aggregations.top_amounts.buckets': {
+          path: 'doc_count',
+          gte: {
+            value: 5,
+            quantifier: 'all'
+          }
+        }
+      }
+    };
+
+    expect(compareArray.valid(payload, condition)).to.be(false);
+  });
 });
