@@ -192,7 +192,7 @@ export default function Scheduler(server) {
               return;
             }
           } catch (err) {
-            server.log(['error', 'Sentinl', 'scheduler'], `Condition Error for ${task._id}: ${err}`);
+            server.log(['error', 'Sentinl', 'scheduler'], `Condition 'script' error for ${task._id}: ${err}`);
           }
         }
 
@@ -203,18 +203,18 @@ export default function Scheduler(server) {
               return;
             }
           } catch (err) {
-            server.log(['error', 'Sentinl', 'scheduler'], `Condition Error for ${task._id}: ${err}`);
+            server.log(['error', 'Sentinl', 'scheduler'], `Condition 'compare' error for ${task._id}: ${err}`);
           }
         }
 
         // compare array
-        if (condition.compare) {
+        if (condition.array_compare) {
           try {
             if (!compareArray.valid(payload, condition)) {
               return;
             }
           } catch (err) {
-            server.log(['error', 'Sentinl', 'scheduler'], `Condition Error for ${task._id}: ${err}`);
+            server.log(['error', 'Sentinl', 'scheduler'], `Condition 'array compare' error for ${task._id}: ${err}`);
           }
         }
 
@@ -223,7 +223,7 @@ export default function Scheduler(server) {
           try {
             payload = anomaly.check(payload, task._source.sentinl.condition);
           } catch (err) {
-            server.log(['error', 'Sentinl', 'scheduler'], `Fail to apply anomaly validator ${task._id}: ${err}`);
+            server.log(['error', 'Sentinl', 'scheduler'], `Condition 'anomaly' error for ${task._id}: ${err}`);
           }
         }
 
@@ -232,33 +232,65 @@ export default function Scheduler(server) {
           try {
             payload = range.check(payload, task._source.sentinl.condition);
           } catch (err) {
-            server.log(['error', 'Sentinl', 'scheduler'], `Fail to apply range validator ${task._id}: ${err}`);
+            server.log(['error', 'Sentinl', 'scheduler'], `Condition 'range' error for ${task._id}: ${err}`);
           }
         }
 
         /* TRANSFORM */
 
-        // validate JS script in transform
-        if (has(transform, 'script.script')) {
-          try {
-            if (!eval(transform.script.script)) { // eslint-disable-line no-eval
-              return;
+        const execTransform = function (link) {
+          return new Promise(function (resolve, reject) {
+            // validate JS script in transform
+            if (has(link, 'script.script')) {
+              try {
+                if (!eval(link.script.script)) { // eslint-disable-line no-eval
+                  reject(`Evaluated to false in transform script: ${task._id}`);
+                }
+                resolve();
+              } catch (err) {
+                reject(`Transform 'script' error for ${task._id}: ${err}`);
+              }
             }
-          } catch (err) {
-            server.log(['error', 'Sentinl', 'scheduler'], `Transform Script Error for ${task._id}: ${err}`);
-          }
+
+            // search in transform
+            if (has(link, 'search.request')) {
+              resolve(watcher.search(method, link.search.request)
+                .then(function (_payload_) {
+                  payload = _payload_;
+                })
+                .catch(function (err) {
+                  throw new Error(`Transform 'search' error for ${task._id}: ${err}`);
+                }));
+            }
+          });
+        };
+
+        if (transform.chain) { // transform chain
+          Promise.each(transform.chain, function (link) {
+            return execTransform(link);
+          })
+            .then(function () {
+              if (!payload) {
+                throw new Error(`No payload after passing transform chain: ${task._id}!`);
+              }
+              doActions(server, actions, payload, task._source);
+            })
+            .catch(function (err) {
+              server.log(['info', 'Sentinl', 'scheduler'], `Transform 'chain' error: ${err}`);
+            });
+        } else { // transform search
+          execTransform(transform)
+            .then(function (payload) {
+              if (!payload) {
+                throw new Error(`No payload after passing transform search: ${task._id}!`);
+              }
+              doActions(server, actions, payload, task._source);
+            })
+            .catch(function (err) {
+              server.log(['info', 'Sentinl', 'scheduler'], err);
+            });
         }
 
-        // search in transform
-        if (has(transform, 'search.request')) {
-          watcher.search(method, transform.search.request)
-            .then((payload) => {
-              if (!payload) return;
-              doActions(server, actions, payload, task._source);
-            });
-        } else {
-          doActions(server, actions, payload, task._source);
-        }
       })
       .catch((error) => {
         server.log(['error', 'Sentinl', 'scheduler'], `An error occurred while executing the task._source: ${error}`);
