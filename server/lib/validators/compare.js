@@ -25,7 +25,7 @@ const valid = function (payload, condition) {
 
   let comparisons = operators.length;
 
-  if (typeof value === 'number') {
+  if (/^\d+$/.test(value)) {
     forEach(operators, function (op) {
       if (eval(value + operator[op] + condition.compare[`payload.${key}`][op])) { // eslint-disable-line no-eval
         comparisons--;
