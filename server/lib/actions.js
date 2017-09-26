@@ -199,7 +199,7 @@ export default function (server, actions, payload, watch) {
     if (_.has(action, 'email_html')) {
       formatterS = action.email_html.subject ? action.email_html.subject : 'SENTINL: ' + key;
       formatterB = action.email_html.body ? action.email_html.body : 'Series Alarm {{ payload._id}}: {{payload.hits.total}}';
-      formatterC = action.email_html.body ? action.email_html.body : '<p>Series Alarm {{ payload._id}}: {{payload.hits.total}}</p>';
+      formatterC = action.email_html.html ? action.email_html.html : '<p>Series Alarm {{ payload._id}}: {{payload.hits.total}}</p>';
       subject = mustache.render(formatterS, {payload: payload});
       body = mustache.render(formatterB, {payload: payload});
       html = mustache.render(formatterC, {payload: payload});
