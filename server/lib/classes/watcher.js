@@ -133,7 +133,7 @@ export default class Watcher {
       const payload = { _id: task._id };
 
       if (keys(actions).length) {
-        return Promise.resolve(this.doActions(this.server, actions, payload, task._source))
+        return Promise.resolve(this.doActions(this.server, actions, payload, task))
         .then(() => response);
       }
 
@@ -296,7 +296,7 @@ export default class Watcher {
                 return response;
               }
 
-              return Promise.resolve(self.doActions(self.server, actions, payload, task._source))
+              return Promise.resolve(self.doActions(self.server, actions, payload, task))
               .then(function () {
                 return response;
               });
@@ -312,13 +312,13 @@ export default class Watcher {
                 return response;
               }
 
-              return Promise.resolve(self.doActions(self.server, actions, payload, task._source))
+              return Promise.resolve(self.doActions(self.server, actions, payload, task))
               .then(function () {
                 return response;
               });
             });
           } else { // no transform
-            return Promise.resolve(self.doActions(self.server, actions, payload, task._source))
+            return Promise.resolve(self.doActions(self.server, actions, payload, task))
             .then(function () {
               return response;
             });
