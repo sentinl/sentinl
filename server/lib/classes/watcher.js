@@ -133,7 +133,8 @@ export default class Watcher {
       const payload = { _id: task._id };
 
       if (keys(actions).length) {
-        return Promise.resolve(this.doActions(this.server, actions, payload, task._source)).then(() => task._id);
+        return Promise.resolve(this.doActions(this.server, actions, payload, task._source))
+        .then(() => response);
       }
 
     } else { // other watcher kinds
@@ -301,7 +302,7 @@ export default class Watcher {
               });
             })
             .catch(function (err) {
-              throw new Error(`Transform 'chain' error ${task._id}: ${err}`);
+              throw new Error(`Transform 'chain': ${err}`);
             });
           } else if (transform) { // transform
             return execTransform(transform)
