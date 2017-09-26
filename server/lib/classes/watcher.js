@@ -140,7 +140,7 @@ export default class Watcher {
     } else { // other watcher kinds
       let sirenVanguardAvailable = false;
       try {
-        const elasticsearchPlugins = this.server.config().get('elasticsearch.plugins');
+        const elasticsearchPlugins = this.server.config().get('kibi_core.clusterplugins');
         if (elasticsearchPlugins && elasticsearchPlugins.indexOf('siren-vanguard') > -1) {
           sirenVanguardAvailable = true;
         }
