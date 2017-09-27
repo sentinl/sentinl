@@ -345,7 +345,7 @@ export default class Watcher {
   * @return {promise} client - impersonated client
   */
   getImpersonatedClient(id) {
-    this.getUser(id)
+    return this.getUser(id)
     .then((resp) => {
       if (resp.found) {
         const impersonate = {
