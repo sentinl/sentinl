@@ -29,7 +29,6 @@
     "anomaly-finder": "1.0.1",
     "bluebird": "3.4.7",
     "bootstrap": "3.3.7",
-    "crypto": "0.0.3",
     "decompress": "4.2.0",
     "elasticsearch": "13.2.0",
     "emailjs": "1.0.8",
