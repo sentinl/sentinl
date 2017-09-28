@@ -35,6 +35,7 @@ import templateMappings from './server/mappings/template';
 import watchConfiguration from './server/lib/saved_objects/watch';
 import scriptConfiguration from './server/lib/saved_objects/script';
 import userConfiguration from './server/lib/saved_objects/user';
+import SavedObjectsAPIMiddleware from './server/lib/saved_objects_api';
 
 /**
 * Initializes Sentinl app.
@@ -82,6 +83,9 @@ const init = _.once((server) => {
     config.settings.authentication.user_index = server.config().get('kibana.index');
     config.settings.authentication.user_type = 'sentinl-user';
     helpers.putMapping(server, config, config.es.default_index, config.es.type, coreIndexMappings);
+
+    const middleware = new SavedObjectsAPIMiddleware(server);
+    server.plugins.saved_objects_api.registerMiddleware(middleware);
   } else { // Kibana.
     helpers.createIndex(server, config, config.es.default_index, config.es.type, coreIndexMappings);
   }
