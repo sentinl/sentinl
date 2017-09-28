@@ -90,6 +90,7 @@ app.directive('newAction', function ($rootScope) {
             from: '',
             subject: '',
             body: '',
+            save: true,
             snapshot: {
               res: '1280x900',
               url: 'http://www.google.com',
