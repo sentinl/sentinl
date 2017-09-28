@@ -79,6 +79,8 @@ const init = _.once((server) => {
 
     config.es.default_index = server.config().get('kibana.index');
     config.es.type = 'sentinl-watcher';
+    config.settings.authentication.user_index = server.config().get('kibana.index');
+    config.settings.authentication.user_type = 'sentinl-user';
     helpers.putMapping(server, config, config.es.default_index, config.es.type, coreIndexMappings);
   } else { // Kibana.
     helpers.createIndex(server, config, config.es.default_index, config.es.type, coreIndexMappings);
