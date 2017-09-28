@@ -20,11 +20,6 @@
       "script": "payload.hits.total > 100"
     }
   },
-  "transform": {
-    "script": {
-      "script": ""
-    }
-  },
   "actions": {
     "email_admin": {
       "throttle_period": "15m",

@@ -29,7 +29,7 @@ import logHistory from './log_history';
 import url from 'url';
 
 
-export default function (server, actions, payload, watch) {
+export default function (server, actions, payload, task) {
 
   const client = getElasticsearchClient(server);
   const config = getConfiguration(server);
@@ -58,7 +58,10 @@ export default function (server, actions, payload, watch) {
       ssl: config.settings.email.ssl,
       timeout: config.settings.email.timeout
     }, function (err, message) {
-      server.log(['status', 'info', 'Sentinl', 'email'], err || message);
+      if (err) {
+        server.log(['status', 'error', 'Sentinl', 'email'], `Watcher ${task._id}: ${err}`);
+      }
+      server.log(['status', 'debug', 'Sentinl', 'email'], `Watcher ${task._id}: ${message}`);
     });
   }
 
@@ -119,8 +122,8 @@ export default function (server, actions, payload, watch) {
       priority = action.console.priority ? action.console.priority : 'INFO';
       formatterC = action.console.message ? action.console.message : '{{ payload }}';
       message = mustache.render(formatterC, {payload: payload});
-      server.log(['status', 'info', 'Sentinl'], 'Console Payload: ' + JSON.stringify(payload));
-      esHistory(watch.title, key, message, priority, payload, false);
+      server.log(['status', 'debug', 'Sentinl'], 'Console Payload: ' + JSON.stringify(payload));
+      esHistory(task._source.title, key, message, priority, payload, false);
     }
 
     /* ***************************************************************************** */
@@ -130,10 +133,10 @@ export default function (server, actions, payload, watch) {
     /*
     /* ***************************************************************************** */
     if (_.has(action, 'throttle_period')) {
-      const id = `${watch.uuid}_${key}`;
+      const id = `${task._id}_${key}`;
       if (debounce(id, action.throttle_period)) {
-        server.log(['status', 'info', 'Sentinl'], `Action Throttled. Watcher id: ${watch.uuid}, action name: ${key}`);
-        esHistory(watch.title, id, `Action Throtthled for ${action.throttle_period}`, priority, {});
+        server.log(['status', 'info', 'Sentinl'], `Action Throttled. Watcher id: ${task._id}, action name: ${key}`);
+        esHistory(task._source.title, id, `Action Throttled for ${action.throttle_period}`, priority, {});
         return;
       }
     }
@@ -160,7 +163,7 @@ export default function (server, actions, payload, watch) {
       subject = mustache.render(formatterS, {payload: payload});
       body = mustache.render(formatterB, {payload: payload});
       priority = action.email.priority ? action.email.priority : 'INFO';
-      server.log(['status', 'info', 'Sentinl', 'email'], 'Subject: ' + subject + ', Body: ' + body);
+      server.log(['status', 'debug', 'Sentinl', 'email'], 'Subject: ' + subject + ', Body: ' + body);
 
       if (!emailServer || !config.settings.email.active) {
         server.log(['status', 'info', 'Sentinl', 'email'], 'Delivery Disabled!');
@@ -173,12 +176,15 @@ export default function (server, actions, payload, watch) {
           to: action.email.to,
           subject: subject
         }, function (err, message) {
-          server.log(['status', 'info', 'Sentinl', 'email'], err || message);
+          if (err) {
+            server.log(['status', 'error', 'Sentinl', 'email'], `Watcher ${task._id}: ${err}`);
+          }
+          server.log(['status', 'debug', 'Sentinl', 'email'], `Watcher ${task._id}: ${message}`);
         });
       }
       if (!action.email.stateless) {
         // Log Event
-        esHistory(watch.title, key, body, priority, payload, false);
+        esHistory(task._source.title, key, body, priority, payload, false);
       }
     }
 
@@ -199,12 +205,12 @@ export default function (server, actions, payload, watch) {
     if (_.has(action, 'email_html')) {
       formatterS = action.email_html.subject ? action.email_html.subject : 'SENTINL: ' + key;
       formatterB = action.email_html.body ? action.email_html.body : 'Series Alarm {{ payload._id}}: {{payload.hits.total}}';
-      formatterC = action.email_html.body ? action.email_html.body : '<p>Series Alarm {{ payload._id}}: {{payload.hits.total}}</p>';
+      formatterC = action.email_html.html ? action.email_html.html : '<p>Series Alarm {{ payload._id}}: {{payload.hits.total}}</p>';
       subject = mustache.render(formatterS, {payload: payload});
       body = mustache.render(formatterB, {payload: payload});
       html = mustache.render(formatterC, {payload: payload});
       priority = action.email_html.priority ? action.email_html.priority : 'INFO';
-      server.log(['status', 'info', 'Sentinl', 'email_html'], 'Subject: ' + subject + ', Body: ' + body + ', HTML:' + html);
+      server.log(['status', 'debug', 'Sentinl', 'email_html'], 'Subject: ' + subject + ', Body: ' + body + ', HTML:' + html);
 
       if (!emailServer || !config.settings.email.active) {
         server.log(['status', 'info', 'Sentinl', 'email_html'], 'Delivery Disabled!');
@@ -218,12 +224,15 @@ export default function (server, actions, payload, watch) {
           subject: subject,
           attachment: [{data: html, alternative: true}]
         }, function (err, message) {
-          server.log(['status', 'info', 'Sentinl', 'email_html'], err || message);
+          if (err) {
+            server.log(['status', 'error', 'Sentinl', 'email_html'], `Watcher ${task._id}: ${err}`);
+          }
+          server.log(['status', 'debug', 'Sentinl', 'email_html'], `Watcher ${task._id}: ${message}`);
         });
       }
       if (!action.email_html.stateless) {
         // Log Event
-        esHistory(watch.title, key, body, priority, payload, false);
+        esHistory(task._source.title, key, body, priority, payload, false);
       }
     }
 
@@ -256,7 +265,7 @@ export default function (server, actions, payload, watch) {
       subject = mustache.render(formatterS, {payload: payload});
       body = mustache.render(formatterB, {payload: payload});
       priority = action.report.priority ? action.report.priority : 'INFO';
-      server.log(['status', 'info', 'Sentinl', 'report'], 'Subject: ' + subject + ', Body: ' + body);
+      server.log(['status', 'debug', 'Sentinl', 'report'], 'Subject: ' + subject + ', Body: ' + body);
       if (!emailServer) {
         server.log(['status', 'info', 'Sentinl', 'report'], 'Reporting Disabled! Email Required!');
         return;
@@ -277,7 +286,7 @@ export default function (server, actions, payload, watch) {
         const parts = url.parse(action.report.snapshot.url);
         domain = parts.hostname;
       } catch (error) {
-        server.log(['status', 'info', 'Sentinl', 'report'], 'ERROR: ' + error);
+        server.log(['status', 'error', 'Sentinl', 'report'], error);
       }
 
       const doScreenshot = function (horseman) {
@@ -288,7 +297,7 @@ export default function (server, actions, payload, watch) {
         const deleteFile = function () {
           fs.unlink(action.report.snapshot.path + filename, (err) => {
             if (err) {
-              server.log(['status', 'info', 'Sentinl', 'report'], 'Failed to delete file '
+              server.log(['status', 'error', 'Sentinl', 'report'], 'Failed to delete file '
                 + action.report.snapshot.path + filename);
             }
             payload.message = err || message;
@@ -314,7 +323,10 @@ export default function (server, actions, payload, watch) {
             ]
           }, (err, message) => {
             let readingFile = false;
-            server.log(['status', 'error', 'Sentinl', 'report'], err || message);
+            if (err) {
+              server.log(['status', 'error', 'Sentinl', 'report'], `Watcher ${task._id}: ${err}`);
+            }
+            server.log(['status', 'debug', 'Sentinl', 'report'], `Watcher ${task._id}: ${message}`);
 
             if (!action.report.stateless) {
               // Log Event
@@ -324,15 +336,15 @@ export default function (server, actions, payload, watch) {
                   if (err) {
                     server.log(['status', 'error', 'Sentinl', 'report'], action.report.subject +
                       ` failed to read the screenshot file ${filename}.`);
-                    esHistory(watch.title, key, `Error. Failed to save the ${action.report.subject} file. ${err}`, {});
+                    esHistory(task._source.title, key, `Error. Failed to save the ${action.report.subject} file. ${err}`, {});
                   } else {
-                    esHistory(watch.title, key, body, priority, payload, true, new Buffer(data).toString('base64'));
+                    esHistory(task._source.title, key, body, priority, payload, true, new Buffer(data).toString('base64'));
                   }
 
                   deleteFile();
                 });
               } else {
-                esHistory(watch.title, key, body, priority, payload, true);
+                esHistory(task._source.title, key, body, priority, payload, true);
               }
             }
 
@@ -368,7 +380,7 @@ export default function (server, actions, payload, watch) {
           payload.message = err;
           if (!action.report.stateless) {
             // Log Event
-            esHistory(watch.title, key, body, priority, payload, true);
+            esHistory(task._source.title, key, body, priority, payload, true);
           }
         }
       })
@@ -391,7 +403,7 @@ export default function (server, actions, payload, watch) {
       formatter = action.slack.message ? action.slack.message : 'Series Alarm {{ payload._id}}: {{payload.hits.total}}';
       message = mustache.render(formatter, {payload: payload});
       priority = action.slack.priority ? action.slack.priority : 'INFO';
-      server.log(['status', 'info', 'Sentinl', 'Slack'], 'Webhook to #' + action.slack.channel + ' msg: ' + message);
+      server.log(['status', 'debug', 'Sentinl', 'Slack'], 'Webhook to #' + action.slack.channel + ' msg: ' + message);
 
       if (!slack || !config.settings.slack.active) {
         server.log(['status', 'info', 'Sentinl', 'slack'], 'Delivery Disabled!');
@@ -404,13 +416,13 @@ export default function (server, actions, payload, watch) {
             username: config.settings.slack.username
           });
         } catch (err) {
-          server.log(['status', 'info', 'Sentinl', 'slack'], 'Failed sending to: ' + config.settings.slack.hook);
+          server.log(['status', 'error', 'Sentinl', 'slack'], 'Failed sending to: ' + config.settings.slack.hook);
         }
       }
 
       if (!action.slack.stateless) {
         // Log Event
-        esHistory(watch.title, key, message, priority, payload, false);
+        esHistory(task._source.title, key, message, priority, payload, false);
       }
     }
 
@@ -448,7 +460,7 @@ export default function (server, actions, payload, watch) {
 
       // Log Alarm Event
       if (action.webhook.create_alert && payload.constructor === Object && Object.keys(payload).length) {
-        esHistory(watch.title, key, action.webhook.message, action.webhook.priority, payload, false);
+        esHistory(task._source.title, key, action.webhook.message, action.webhook.priority, payload, false);
       }
 
       req = http.request(options, function (res) {
@@ -459,7 +471,7 @@ export default function (server, actions, payload, watch) {
       });
 
       req.on('error', function (e) {
-        server.log(['status', 'err', 'Sentinl'], 'Error shipping Webhook: ' + e.message);
+        server.log(['status', 'error', 'Sentinl'], 'Error shipping Webhook: ' + e.message);
       });
       if (dataToWrite) {
         req.write(dataToWrite);
@@ -481,9 +493,9 @@ export default function (server, actions, payload, watch) {
       esFormatter = action.local.message ? action.local.message : '{{ payload }}';
       esMessage = mustache.render(esFormatter, {payload: payload});
       priority = action.local.priority ? action.local.priority : 'INFO';
-      server.log(['status', 'info', 'Sentinl', 'local'], 'Logged Message: ' + esMessage);
+      server.log(['status', 'debug', 'Sentinl', 'local'], 'Logged Message: ' + esMessage);
       // Log Event
-      esHistory(watch.title, key, esMessage, priority, payload, false);
+      esHistory(task._source.title, key, esMessage, priority, payload, false);
     }
 
 
@@ -532,7 +544,7 @@ export default function (server, actions, payload, watch) {
       });
 
       req.on('error', function (e) {
-        server.log(['status', 'err', 'Sentinl'], 'Error creating a PushApps notification: ' + e);
+        server.log(['status', 'error', 'Sentinl'], 'Error creating a PushApps notification: ' + e);
       });
       req.write(postData);
       req.end();

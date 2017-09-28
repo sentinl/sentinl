@@ -133,13 +133,14 @@ export default class Watcher {
       const payload = { _id: task._id };
 
       if (keys(actions).length) {
-        return Promise.resolve(this.doActions(this.server, actions, payload, task._source)).then(() => task._id);
+        return Promise.resolve(this.doActions(this.server, actions, payload, task))
+        .then(() => response);
       }
 
     } else { // other watcher kinds
       let sirenVanguardAvailable = false;
       try {
-        const elasticsearchPlugins = this.server.config().get('elasticsearch.plugins');
+        const elasticsearchPlugins = this.server.config().get('kibi_core.clusterplugins');
         if (elasticsearchPlugins && elasticsearchPlugins.indexOf('siren-vanguard') > -1) {
           sirenVanguardAvailable = true;
         }
@@ -152,7 +153,7 @@ export default class Watcher {
       const actions = this.getNonReportActions(task._source.actions);
       let request = has(task._source, 'input.search.request') ? task._source.input.search.request : undefined;
       let condition = keys(task._source.condition).length ? task._source.condition : undefined;
-      let transform = task._source.transform ? task._source.transform : {};
+      let transform = task._source.transform ? task._source.transform : undefined;
 
       let method = 'search';
       if (sirenVanguardAvailable) {
@@ -164,8 +165,11 @@ export default class Watcher {
         }
       }
 
-      if (!request || !condition) {
-        throw new Error(`Watcher ${task._source.uuid} search request or condition malformed`);
+      if (!request) {
+        throw new Error(`Watcher search request is malformed: ${task._id}`);
+      }
+      if (!condition) {
+        throw new Error(`Watcher condition is malformed: ${task._id}`);
       }
 
       /**
@@ -257,9 +261,8 @@ export default class Watcher {
                   // update global payload
                   if (!eval(link.script.script)) { // eslint-disable-line no-eval
                     response.message = `Transform 'script' evaluated to false: ${task._id}`;
-                    return null;
                   }
-                  resolve(task._id);
+                  resolve(null);
                 } catch (err) {
                   reject(`Transform 'script' error for ${task._id}: ${err}`);
                 }
@@ -279,7 +282,7 @@ export default class Watcher {
             });
           };
 
-          if (transform.chain) { // transform chain
+          if (transform && transform.chain) { // transform chain
             return Promise.each(transform.chain, function (link) {
               return execTransform(link);
             })
@@ -293,15 +296,15 @@ export default class Watcher {
                 return response;
               }
 
-              return Promise.resolve(self.doActions(self.server, actions, payload, task._source))
+              return Promise.resolve(self.doActions(self.server, actions, payload, task))
               .then(function () {
                 return response;
               });
             })
             .catch(function (err) {
-              throw new Error(`Transform 'chain' error ${task._id}: ${err}`);
+              throw new Error(`Transform 'chain': ${err}`);
             });
-          } else { // transform search
+          } else if (transform) { // transform
             return execTransform(transform)
             .then(function () {
               if (!payload) {
@@ -309,10 +312,15 @@ export default class Watcher {
                 return response;
               }
 
-              return Promise.resolve(self.doActions(self.server, actions, payload, task._source))
+              return Promise.resolve(self.doActions(self.server, actions, payload, task))
               .then(function () {
                 return response;
               });
+            });
+          } else { // no transform
+            return Promise.resolve(self.doActions(self.server, actions, payload, task))
+            .then(function () {
+              return response;
             });
           }
         });
@@ -337,7 +345,7 @@ export default class Watcher {
   * @return {promise} client - impersonated client
   */
   getImpersonatedClient(id) {
-    this.getUser(id)
+    return this.getUser(id)
     .then((resp) => {
       if (resp.found) {
         const impersonate = {
