@@ -2,7 +2,7 @@ import moment from 'moment';
 import sinon from 'sinon';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import _ from 'lodash';
+import { cloneDeep, keys, forEach, include, isEqual } from 'lodash';
 import noDigestPromises from 'test_utils/no_digest_promises';
 
 import defaultEmailSource from '../../defaults/email_watcher';
@@ -43,26 +43,30 @@ describe('Watcher', function () {
   it('make _source flat', function () {
     let watcher = {
       _id: Watcher.createId(),
-      _source: _.cloneDeep(defaultEmailSource)
+      _source: cloneDeep(defaultEmailSource)
     };
 
     watcher = Watcher.flatSource(watcher);
-    const flattedFields = _.keys(watcher).filter((field) => field !== 'id');
+    const flattedFields = keys(watcher).filter((field) => field !== 'id');
 
-    expect(_.isEqual(flattedFields.sort(), Watcher.fields.sort())).to.be(true);
+    forEach(flattedFields.sort(), function (field) {
+      expect(include(Watcher.fields.sort(), field)).to.be(true);
+    });
     expect(watcher._source).to.be(undefined);
     expect(watcher._id).to.be(undefined);
     expect(watcher.id).to.be.a('string');
   });
 
   it('make _source nested', function () {
-    let watcher = _.cloneDeep(defaultEmailSource);
+    let watcher = cloneDeep(defaultEmailSource);
     watcher.id = Watcher.createId();
 
     watcher = Watcher.nestedSource(watcher);
-    const nestedFields = _.keys(watcher._source);
+    const nestedFields = keys(watcher._source);
 
-    expect(_.isEqual(nestedFields.sort(), Watcher.fields.sort())).to.be(true);
+    forEach(nestedFields.sort(), function (field) {
+      expect(include(Watcher.fields.sort(), field)).to.be(true);
+    });
     expect(watcher._source).to.be.an('object');
     expect(watcher.id).to.be(undefined);
     expect(watcher._id).to.be.a('string');
@@ -118,7 +122,7 @@ describe('Watcher', function () {
       const id = '123';
 
       sinon.stub(savedWatchers, 'get', () => {
-        const watcher = _.cloneDeep(defaultEmailSource);
+        const watcher = cloneDeep(defaultEmailSource);
         watcher.id = id;
         return Promise.resolve(watcher);
       });
@@ -127,7 +131,7 @@ describe('Watcher', function () {
         .then((watcher) => {
           expect(watcher._id).to.eql(id);
           expect(watcher._source).to.be.an('object');
-          expect(_.isEqual(_.keys(watcher._source).sort(), _.keys(defaultEmailSource).sort())).to.be(true);
+          expect(isEqual(keys(watcher._source).sort(), keys(defaultEmailSource).sort())).to.be(true);
         })
         .catch(done)
         .finally(done);
@@ -142,7 +146,7 @@ describe('Watcher', function () {
       const type = 'email';
 
       sinon.stub(savedWatchers, 'get', () => {
-        const watcher = _.cloneDeep(defaultEmailSource);
+        const watcher = cloneDeep(defaultEmailSource);
         watcher.id = id;
         return Promise.resolve(watcher);
       });
@@ -150,7 +154,7 @@ describe('Watcher', function () {
       Watcher.new(type)
         .then((watcher) => {
           expect(watcher._source).to.be.an('object');
-          expect(_.isEqual(_.keys(watcher._source).sort(), _.keys(defaultEmailSource).sort())).to.be(true);
+          expect(isEqual(keys(watcher._source).sort(), keys(defaultEmailSource).sort())).to.be(true);
         })
         .catch(done)
         .finally(done);
@@ -164,7 +168,7 @@ describe('Watcher', function () {
       const id = '123';
       const watcher = {
         _id: id,
-        _source: _.cloneDeep(defaultEmailSource),
+        _source: cloneDeep(defaultEmailSource),
         save: function () { return Promise.resolve(id); }
       };
 
@@ -253,7 +257,7 @@ describe('Watcher', function () {
       Watcher.new(type)
         .then((watcher) => {
           expect(watcher._id.length > 0).to.be(true);
-          expect(_.isEqual(watcher._source, defaultEmailSource)).to.eql(true);
+          expect(isEqual(watcher._source, defaultEmailSource)).to.eql(true);
         })
         .catch(done)
         .finally(done);
@@ -264,7 +268,7 @@ describe('Watcher', function () {
       Watcher.new(type)
         .then((watcher) => {
           expect(watcher._id.length > 0).to.be(true);
-          expect(_.isEqual(watcher._source, defaultReportSource)).to.eql(true);
+          expect(isEqual(watcher._source, defaultReportSource)).to.eql(true);
         })
         .catch(done)
         .finally(done);
@@ -273,7 +277,7 @@ describe('Watcher', function () {
     it('save watcher', function (done) {
       const watcher = {
         _id: Watcher.createId(),
-        _source: _.cloneDeep(defaultEmailSource)
+        _source: cloneDeep(defaultEmailSource)
       };
 
       $httpBackend.when('GET', '../api/sentinl/config').respond(200, {

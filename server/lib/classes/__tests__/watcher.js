@@ -1,4 +1,4 @@
-import { pluck, isEqual } from 'lodash';
+import { pluck, isEqual, cloneDeep } from 'lodash';
 import Promise from 'bluebird';
 import expect from 'expect.js';
 import Watcher from '../watcher';
@@ -181,10 +181,37 @@ describe('Watcher', function () {
     init();
   });
 
+  it('execute with condition script evaluated to false', function (done) {
+    const localTask = cloneDeep(task);
+    localTask._source.condition.script.script = 'payload.hits.total > 999999';
+
+    watcher.execute(localTask)
+    .then(function (response) {
+      expect(response.task.id).to.eql(task._id);
+      expect(response.message).to.eql(`Condition 'script' evaluated to false: ${task._id}`);
+      done();
+    })
+    .catch(done);
+  });
+
+  it('execute with no transform', function (done) {
+    const localTask = cloneDeep(task);
+    delete localTask._source.transform;
+
+    watcher.execute(localTask)
+    .then(function (response) {
+      expect(response.task.id).to.eql(task._id);
+      expect(response.message).to.be(undefined);
+      done();
+    })
+    .catch(done);
+  });
+
   it('execute transform chain', function (done) {
     watcher.execute(task)
     .then(function (response) {
       expect(response.task.id).to.eql(task._id);
+      expect(response.message).to.be(undefined);
       done();
     })
     .catch(done);
