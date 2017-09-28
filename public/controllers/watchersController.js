@@ -12,7 +12,7 @@ app.controller('WatchersController', function ($rootScope, $scope, $route, $inte
   $timeout, timefilter, Private, createNotifier, $window, $http, $uibModal, $log, navMenu,
   globalNavState, $location, dataTransfer, Watcher, Script, Promise) {
 
-  $scope.title = 'Sentinl: Watchers';
+  $scope.title = 'Sentinl: ';
   $scope.description = 'Kibi/Kibana Report App for Elasticsearch';
 
   const notify = createNotifier({
@@ -32,10 +32,13 @@ app.controller('WatchersController', function ($rootScope, $scope, $route, $inte
   *
   * @param {string} id - watcher id
   */
-  $scope.playWatcher = function (id) {
-    Watcher.play(id)
+  $scope.playWatcher = function (task) {
+    Watcher.play(task._id)
       .then(function (response) {
-        notify.info(`Pending watcher ${response} execution.`);
+        if (response.message) {
+          notify.error(response.message);
+        }
+        notify.info(`Executed watcher: ${task._source.title}`);
       })
       .catch(notify.error);
   };

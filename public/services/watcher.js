@@ -86,14 +86,14 @@ app.factory('Watcher', ['$http', '$injector', 'Promise', function ($http, $injec
     */
     static play(id) {
       if (this.savedObjectsAPIEnabled) { // Kibi
-        return Promise.resolve(id); // To-do: add Saved Objects API support here.
+        return Promise.resolve({ task: { id } }); // To-do: add Saved Objects API support here.
       } else { // Kibana
-        return $http.post(`../api/sentinl/watcher/_execute/${id}`)
-        .then(function (response) {
-          if (response.status !== 200) {
-            throw new Error(`Fail to execute watcher ${id}`);
-          }
-          return response.data;
+        return this.get(id)
+        .then(function (task) {
+          return $http.post(`../api/sentinl/watcher/_execute`, task)
+          .then(function (response) {
+            return response.data;
+          });
         });
       }
     }
