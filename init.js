@@ -77,7 +77,7 @@ const init = _.once((server) => {
       server.plugins.saved_objects_api.registerType(schema);
     });
 
-    config.es.default_index = '.kibi';
+    config.es.default_index = server.config().get('kibana.index');
     config.es.type = 'sentinl-watcher';
     helpers.putMapping(server, config, config.es.default_index, config.es.type, coreIndexMappings);
   } else { // Kibana.
