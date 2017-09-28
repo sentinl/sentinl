@@ -67,33 +67,16 @@ export default function Scheduler(server) {
       return;
     }
 
-    let actions = [];
-
-    if (task._source.report) {
-      watcher.execute(task, 'report')
-      .then(function (response) {
-        server.log(['status', 'info', 'Sentinl', 'watcher'], `SUCCESS! Watcher has been executed: ${response.task.id}.`);
-        if (response.message) {
-          server.log(['status', 'info', 'Sentinl', 'watcher'], response.message);
-        }
-      })
-      .catch(function (error) {
-        server.log(['status', 'error', 'Sentinl', 'watcher'], `Watcher ${task._id}: ${error}`);
-      });
-    }
-
-    if (keys(watcher.getNonReportActions(task._source.actions)).length) {
-      watcher.execute(task)
-      .then(function (response) {
-        server.log(['status', 'info', 'Sentinl', 'watcher'], `SUCCESS! Watcher has been executed: ${response.task.id}.`);
-        if (response.message) {
-          server.log(['status', 'info', 'Sentinl', 'watcher'], response.message);
-        }
-      })
-      .catch(function (error) {
-        server.log(['status', 'error', 'Sentinl', 'watcher'], `Watcher ${task._id}: ${error}`);
-      });
-    }
+    watcher.execute(task)
+    .then(function (response) {
+      server.log(['status', 'info', 'Sentinl', 'watcher'], `SUCCESS! Watcher has been executed: ${response.task.id}.`);
+      if (response.message) {
+        server.log(['status', 'info', 'Sentinl', 'watcher'], response.message);
+      }
+    })
+    .catch(function (error) {
+      server.log(['status', 'error', 'Sentinl', 'watcher'], `Watcher ${task._id}: ${error}`);
+    });
   };
 
   /**
