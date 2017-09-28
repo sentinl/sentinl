@@ -39,6 +39,14 @@ module.exports = function handleESError(error) {
     return Boom.notFound(error);
   } else if (error instanceof esErrors.BadRequest) {
     return Boom.badRequest(error);
+  } else if (error.status) {
+    switch (error.status) {
+      case 403:
+        return Boom.forbidden(error);
+      case 401:
+        return Boom.unauthorized(error);
+    }
+    return error;
   } else {
     return error;
   }
