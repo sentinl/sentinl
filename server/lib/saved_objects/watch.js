@@ -6,13 +6,13 @@ const WatchConfiguration = {
   title: 'watcher_title',
   schema: Joi.object().keys({
     title: Joi.string(),
-    input: Joi.object(),
-    actions: Joi.object(),
-    transform: Joi.object(),
-    condition: Joi.object(),
+    input: Joi.any(),
+    actions: Joi.any(),
+    transform: Joi.any(),
+    condition: Joi.any(),
     report: Joi.boolean(),
     disable: Joi.boolean(),
-    trigger: Joi.object()
+    trigger: Joi.any()
   })
 };
 
