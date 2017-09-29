@@ -37,8 +37,9 @@ app.controller('WatchersController', function ($rootScope, $scope, $route, $inte
       .then(function (response) {
         if (response.message) {
           notify.error(response.message);
+        } else {
+          notify.info(`Executed watcher: ${task._source.title}`);
         }
-        notify.info(`Executed watcher: ${task._source.title}`);
       })
       .catch(notify.error);
   };
