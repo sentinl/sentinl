@@ -19,6 +19,7 @@
 
 import later from 'later';
 import _ from 'lodash';
+import url from 'url';
 import masterRoute from './server/routes/routes';
 import getScheduler from './server/lib/scheduler';
 import helpers from './server/lib/helpers';
@@ -72,6 +73,16 @@ const init = _.once((server) => {
   // Load Sentinl routes.
   masterRoute(server);
 
+  // auto detect elasticsearch host, protocol and port
+  const esUrl = url.parse(server.config().get('elasticsearch.url'));
+  config.es.host = esUrl.hostname;
+  config.es.port = +esUrl.port;
+  config.es.protocol = esUrl.protocol.substring(0, esUrl.protocol.length - 1);
+
+  if (config.settings.authentication.enabled && config.es.protocol === 'https') {
+    config.settings.authentication.https = true;
+  }
+
   // Create indexes and doc types with mappings.
   if (server.plugins.saved_objects_api) { // Kibi: savedObjectsAPI.
     _.forEach([watchConfiguration, scriptConfiguration, userConfiguration], (schema) => {
@@ -79,9 +90,7 @@ const init = _.once((server) => {
     });
 
     config.es.default_index = server.config().get('kibana.index');
-    config.es.type = 'sentinl-watcher';
     config.settings.authentication.user_index = server.config().get('kibana.index');
-    config.settings.authentication.user_type = 'sentinl-user';
 
     const middleware = new SavedObjectsAPIMiddleware(server);
     server.plugins.saved_objects_api.registerMiddleware(middleware);
