@@ -119,25 +119,32 @@ export default class Watcher {
   * @param {string} type - watcher type: report, action
   * @return {promise} id - successfully executed watcher id
   */
-  execute(task, type = 'action') {
+  execute(task) {
     const response = {
       task: {
         id: task._id
       }
     };
 
-    if (type === 'report') { // report watcher
+    if (task._source.report) { // report watcher
       this.server.log(['status', 'info', 'Sentinl', 'watcher'], `Executing report action: ${task._id}`);
 
       const actions = this.getReportActions(task._source.actions);
       const payload = { _id: task._id };
 
       if (keys(actions).length) {
-        return Promise.resolve(this.doActions(this.server, actions, payload, task))
-        .then(() => response);
+        if (!isEmpty(this.getNonReportActions(task._source.actions))) {
+          Promise.resolve(this.doActions(this.server, actions, payload, task))
+          .then(() => response);
+        } else {
+          return Promise.resolve(this.doActions(this.server, actions, payload, task))
+          .then(() => response);
+        }
       }
 
-    } else { // other watcher kinds
+    }
+
+    if (!(task._source.report && isEmpty(this.getNonReportActions(task._source.actions)))) { // other watcher kinds
       let sirenVanguardAvailable = false;
       try {
         const elasticsearchPlugins = this.server.config().get('kibi_core.clusterplugins');

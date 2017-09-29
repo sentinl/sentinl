@@ -88,7 +88,7 @@ describe('watchersController', function () {
   });
 
   it('title and description', function () {
-    expect($scope.title).to.equal('Sentinl: Watchers');
+    expect($scope.title).to.equal('Sentinl: ');
     expect($scope.description).to.be('Kibi/Kibana Report App for Elasticsearch');
   });
 
