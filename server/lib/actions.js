@@ -31,8 +31,8 @@ import url from 'url';
 
 export default function (server, actions, payload, task) {
 
-  const client = getElasticsearchClient(server);
   const config = getConfiguration(server);
+  const client = getElasticsearchClient(server, config);
   const hlimit = config.sentinl.history ? config.sentinl.history : 10;
 
 

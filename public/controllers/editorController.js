@@ -618,7 +618,7 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
       if ($scope.watcher.$$authentication) {
         if ($scope.watcher.$$authentication.username && $scope.watcher.$$authentication.password) {
           User.new(
-            $scope.watcher._id,
+            $scope.watcher.id,
             $scope.watcher.$$authentication.username,
             $scope.watcher.$$authentication.password
           ).then((response) => {

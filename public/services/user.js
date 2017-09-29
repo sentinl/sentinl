@@ -31,6 +31,7 @@ app.factory('User', ['$http', '$injector', function ($http, $injector) {
       if (this.savedObjectsAPIEnabled) {
         return savedUsers.get()
           .then((user) => {
+            user.id = id;
             user.watcher_id = id;
             user.username = username;
             user.password = password;
