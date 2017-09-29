@@ -317,11 +317,11 @@ export default function (server, actions, payload, task) {
               {
                 path: action.report.snapshot.path + filename,
                 type: 'image/png',
-                name: filename + '.png',
+                name: filename,
                 headers: {'Content-ID': '<my-report>'}
               }
             ]
-          }, (err, message) => {
+          }, function (err, message) {
             let readingFile = false;
             if (err) {
               server.log(['status', 'error', 'Sentinl', 'report'], `Watcher ${task._id}: ${err}`);
@@ -330,12 +330,12 @@ export default function (server, actions, payload, task) {
 
             if (!action.report.stateless) {
               // Log Event
-              if (action.report.save) {
+              if (action.report.save) { // save screenshot
                 readingFile = true;
-                fs.readFile(action.report.snapshot.path + filename, (err, data) => {
+                fs.readFile(action.report.snapshot.path + filename, function (err, data) {
                   if (err) {
                     server.log(['status', 'error', 'Sentinl', 'report'], action.report.subject +
-                      ` failed to read the screenshot file ${filename}.`);
+                      ` failed to read the screenshot file ${filename}`);
                     esHistory(task._source.title, key, `Error. Failed to save the ${action.report.subject} file. ${err}`, {});
                   } else {
                     esHistory(task._source.title, key, body, priority, payload, true, new Buffer(data).toString('base64'));
@@ -349,7 +349,7 @@ export default function (server, actions, payload, task) {
             }
 
             if (!readingFile) {
-              fs.access(action.report.snapshot.path + filename, fs.constants.X_OK, (err) => {
+              fs.access(action.report.snapshot.path + filename, fs.constants.X_OK, function (err) {
                 if (err) {
                   server.log(['status', 'error', 'Sentinl', 'report'], action.report.subject +
                     ` failed to read the screenshot file ${filename}.`);
