@@ -88,13 +88,14 @@ const init = _.once((server) => {
   } else { // Kibana.
     helpers.createIndex(server, config, config.es.default_index, config.es.type, coreIndexMappings);
     helpers.putMapping(server, config, config.es.default_index, config.es.script_type, templateMappings);
+
+    if (config.settings.authentication.enabled) {
+      helpers.createIndex(server, config, config.settings.authentication.user_index,
+        config.settings.authentication.user_type, userIndexMappings);
+    }
+
   }
   helpers.createIndex(server, config, config.es.alarm_index, config.es.alarm_type, alarmIndexMappings, 'alarm');
-
-  if (!server.plugins.kibi_access_control && config.settings.authentication.enabled) {
-    helpers.createIndex(server, config, config.settings.authentication.user_index,
-      config.settings.authentication.user_type, userIndexMappings);
-  }
 
   // Schedule watchers execution.
   const sched = later.parse.recur().on(25,55).second();
