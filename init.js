@@ -82,14 +82,13 @@ const init = _.once((server) => {
     config.es.type = 'sentinl-watcher';
     config.settings.authentication.user_index = server.config().get('kibana.index');
     config.settings.authentication.user_type = 'sentinl-user';
-    helpers.putMapping(server, config, config.es.default_index, config.es.type, coreIndexMappings);
 
     const middleware = new SavedObjectsAPIMiddleware(server);
     server.plugins.saved_objects_api.registerMiddleware(middleware);
   } else { // Kibana.
     helpers.createIndex(server, config, config.es.default_index, config.es.type, coreIndexMappings);
+    helpers.putMapping(server, config, config.es.default_index, config.es.script_type, templateMappings);
   }
-  helpers.putMapping(server, config, config.es.default_index, config.es.script_type, templateMappings);
   helpers.createIndex(server, config, config.es.alarm_index, config.es.alarm_type, alarmIndexMappings, 'alarm');
 
   if (!server.plugins.kibi_access_control && config.settings.authentication.enabled) {
