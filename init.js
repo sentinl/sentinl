@@ -21,7 +21,7 @@ import later from 'later';
 import _ from 'lodash';
 import masterRoute from './server/routes/routes';
 import getScheduler from './server/lib/scheduler';
-import helpers from './server/lib/helpers';
+import initIndices from './server/lib/initIndices';
 import getElasticsearchClient from './server/lib/get_elasticsearch_client';
 import getConfiguration from './server/lib/get_configuration';
 import fs from 'fs';
