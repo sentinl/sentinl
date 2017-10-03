@@ -398,8 +398,8 @@ export default function (server, actions, payload, task) {
     *    }
     */
 
-    var formatter;
     if (_.has(action, 'slack')) {
+      let formatter;
       formatter = action.slack.message ? action.slack.message : 'Series Alarm {{ payload._id}}: {{payload.hits.total}}';
       message = mustache.render(formatter, {payload: payload});
       priority = action.slack.priority ? action.slack.priority : 'INFO';
@@ -434,16 +434,16 @@ export default function (server, actions, payload, task) {
     *      "port" : 9200,
     *      "path": "/{{payload.watcher_id}}",
     *      "body" : "{{payload.watcher_id}}:{{payload.hits.total}}",
+    *      "headers": {'Content-Type': 'text/plain'},
     *      "use_https" : false
     *    }
     */
 
-    var querystring = require('querystring');
-    var options;
-    var req;
     if (_.has(action, 'webhook')) {
-      var http = action.webhook.use_https ? require('https') : require('http');
-
+      const http = action.webhook.use_https ? require('https') : require('http');
+      let options;
+      let req;
+      
       options = {
         hostname: action.webhook.host ? action.webhook.host : 'localhost',
         port: action.webhook.port ? action.webhook.port : 80,
@@ -453,7 +453,7 @@ export default function (server, actions, payload, task) {
         auth: action.webhook.auth ? action.webhook.auth : undefined
       };
 
-      var dataToWrite = action.webhook.body ? mustache.render(action.webhook.body, {payload: payload}) : action.webhook.params;
+      let dataToWrite = action.webhook.body ? mustache.render(action.webhook.body, {payload: payload}) : action.webhook.params;
       if (dataToWrite) {
         options.headers['Content-Length'] = Buffer.byteLength(dataToWrite);
       }
@@ -487,9 +487,9 @@ export default function (server, actions, payload, task) {
     *    }
     */
 
-    var esMessage;
-    var esFormatter;
     if (_.has(action, 'elastic')) {
+      let esMessage;
+      let esFormatter;
       esFormatter = action.local.message ? action.local.message : '{{ payload }}';
       esMessage = mustache.render(esFormatter, {payload: payload});
       priority = action.local.priority ? action.local.priority : 'INFO';
@@ -515,6 +515,8 @@ export default function (server, actions, payload, task) {
     if (_.has(action, 'pushapps')) {
       const querystring = require('querystring');
       const http = require('http');
+      let options;
+      let req;
 
       options = {
         hostname: 'https://api.pushapps.mobi/v1',
