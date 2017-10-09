@@ -18,7 +18,6 @@
  */
 
 import getElasticsearchClient from './get_elasticsearch_client';
-import _ from 'lodash';
 
 /**
 * Puts mapping for a new type in an existent index.

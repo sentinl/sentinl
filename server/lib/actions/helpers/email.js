@@ -1,8 +1,16 @@
 import emailjs from 'emailjs';
 import Promise from 'bluebird';
 
+/**
+* Email server
+*/
 export default class Email {
 
+  /**
+  * Instantiate email server object
+  *
+  * @param {object} args - init server connection settings (user, password, host, ssl, timeout)
+  */
   constructor(args) {
     const { user, password, host, ssl, timeout } = args;
     this.server = emailjs.server.connect({
@@ -14,6 +22,11 @@ export default class Email {
     });
   }
 
+  /**
+  * Send email
+  *
+  * @param {object} args - email parameters (text, from, to, subject, attachment)
+  */
   send(args) {
     const { text, from, to, subject, attachment } = args;
     return new Promise((resolve, reject) => {

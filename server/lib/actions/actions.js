@@ -107,12 +107,12 @@ export default function (server, actions, payload, task) {
     */
 
     var priority;
-    var formatterC;
+    var formatterConsole;
     var message;
     if (_.has(action, 'console')) {
       priority = action.console.priority ? action.console.priority : 'INFO';
-      formatterC = action.console.message ? action.console.message : '{{ payload }}';
-      message = mustache.render(formatterC, {payload: payload});
+      formatterConsole = action.console.message ? action.console.message : '{{ payload }}';
+      message = mustache.render(formatterConsole, {payload: payload});
       server.log(['status', 'debug', 'Sentinl'], 'Console Payload: ' + JSON.stringify(payload));
       esHistory(task._source.title, actionName, message, priority, payload, false);
     }
@@ -144,15 +144,15 @@ export default function (server, actions, payload, task) {
     *	    }
     */
 
-    var formatterS;
-    var formatterB;
+    var formatterSubject;
+    var formatterBody;
     var subject;
     var text;
     if (_.has(action, 'email')) {
-      formatterS = action.email.subject ? action.email.subject : 'SENTINL: ' + actionName;
-      formatterB = action.email.body ? action.email.body : 'Series Alarm {{ payload._id}}: {{payload.hits.total}}';
-      subject = mustache.render(formatterS, {payload: payload});
-      text = mustache.render(formatterB, {payload: payload});
+      formatterSubject = action.email.subject ? action.email.subject : 'SENTINL: ' + actionName;
+      formatterBody = action.email.body ? action.email.body : 'Series Alarm {{ payload._id}}: {{payload.hits.total}}';
+      subject = mustache.render(formatterSubject, {payload: payload});
+      text = mustache.render(formatterBody, {payload: payload});
       priority = action.email.priority ? action.email.priority : 'INFO';
       server.log(['status', 'debug', 'Sentinl', 'email'], 'Subject: ' + subject + ', Body: ' + text);
 
@@ -195,12 +195,12 @@ export default function (server, actions, payload, task) {
     */
     var html;
     if (_.has(action, 'email_html')) {
-      formatterS = action.email_html.subject ? action.email_html.subject : 'SENTINL: ' + actionName;
-      formatterB = action.email_html.body ? action.email_html.body : 'Series Alarm {{ payload._id}}: {{payload.hits.total}}';
-      formatterC = action.email_html.html ? action.email_html.html : '<p>Series Alarm {{ payload._id}}: {{payload.hits.total}}</p>';
-      subject = mustache.render(formatterS, {payload: payload});
-      text = mustache.render(formatterB, {payload: payload});
-      html = mustache.render(formatterC, {payload: payload});
+      formatterSubject = action.email_html.subject ? action.email_html.subject : 'SENTINL: ' + actionName;
+      formatterBody = action.email_html.body ? action.email_html.body : 'Series Alarm {{ payload._id}}: {{payload.hits.total}}';
+      formatterConsole = action.email_html.html ? action.email_html.html : '<p>Series Alarm {{ payload._id}}: {{payload.hits.total}}</p>';
+      subject = mustache.render(formatterSubject, {payload: payload});
+      text = mustache.render(formatterBody, {payload: payload});
+      html = mustache.render(formatterConsole, {payload: payload});
       priority = action.email_html.priority ? action.email_html.priority : 'INFO';
       server.log(['status', 'debug', 'Sentinl', 'email_html'], 'Subject: ' + subject + ', Body: ' + text + ', HTML:' + html);
 
@@ -211,8 +211,8 @@ export default function (server, actions, payload, task) {
         server.log(['status', 'info', 'Sentinl', 'email'], 'Delivering to Mail Server');
         email.send({
           text,
-          from: action.email.from,
-          to: action.email.to,
+          from: action.email_html.from,
+          to: action.email_html.to,
           subject,
           attachment: [
             {
