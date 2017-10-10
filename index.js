@@ -96,7 +96,7 @@ export default function (kibana) {
             admin_sha: Joi.string().default('6859a748bc07b49ae761f5734db66848'),
             mode: Joi.string().default('basic'),
             user_index: Joi.string().default('sentinl_users'),
-            user_type: Joi.string().default('user'),
+            user_type: Joi.string().default('sentinl-user'),
             encryption: Joi.object({
               algorithm: Joi.string().default('AES-256-CBC'),
               key: Joi.string().default('b9726b04608ac48ecb0b6918214ade54'),
@@ -127,6 +127,8 @@ export default function (kibana) {
             body: Joi.string().default('{{payload.watcher_id}}{payload.hits.total}}')
           }).default(),
           report: Joi.object({
+            search_guard: Joi.boolean().default(true),
+            simple_authentication: Joi.boolean().default(false),
             active: Joi.boolean().default(false),
             phantomjs_path: Joi.string().default(undefined),
             tmp_path: Joi.string().default('/tmp/')

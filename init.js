@@ -18,10 +18,11 @@
  */
 
 import later from 'later';
-import _ from 'lodash';
+import { once, has, forEach } from 'lodash';
+import url from 'url';
 import masterRoute from './server/routes/routes';
 import getScheduler from './server/lib/scheduler';
-import helpers from './server/lib/helpers';
+import initIndices from './server/lib/initIndices';
 import getElasticsearchClient from './server/lib/get_elasticsearch_client';
 import getConfiguration from './server/lib/get_configuration';
 import fs from 'fs';
@@ -35,13 +36,14 @@ import templateMappings from './server/mappings/template';
 import watchConfiguration from './server/lib/saved_objects/watch';
 import scriptConfiguration from './server/lib/saved_objects/script';
 import userConfiguration from './server/lib/saved_objects/user';
+import SavedObjectsAPIMiddleware from './server/lib/saved_objects_api';
 
 /**
 * Initializes Sentinl app.
 *
 * @param {object} server - Kibana server.
 */
-const init = _.once((server) => {
+const init = once(function (server) {
   const config = getConfiguration(server);
   const scheduler = getScheduler(server);
 
@@ -60,7 +62,7 @@ const init = _.once((server) => {
   };
 
   // Install PhantomJS lib. The lib is needed to take screenshots by report action.
-  const phantomPath = _.has(config, 'settings.report.phantomjs_path') ? config.settings.report.phantomjs_path : undefined;
+  const phantomPath = has(config, 'settings.report.phantomjs_path') ? config.settings.report.phantomjs_path : undefined;
   phantom.install(phantomPath)
   .then((phantomPackage) => {
     server.log(['status', 'info', 'Sentinl', 'report'], `Phantom installed at ${phantomPackage.binary}`);
@@ -71,25 +73,37 @@ const init = _.once((server) => {
   // Load Sentinl routes.
   masterRoute(server);
 
+  // auto detect elasticsearch host, protocol and port
+  const esUrl = url.parse(server.config().get('elasticsearch.url'));
+  config.es.host = esUrl.hostname;
+  config.es.port = +esUrl.port;
+  config.es.protocol = esUrl.protocol.substring(0, esUrl.protocol.length - 1);
+
+  if (config.settings.authentication.enabled && config.es.protocol === 'https') {
+    config.settings.authentication.https = true;
+  }
+
   // Create indexes and doc types with mappings.
   if (server.plugins.saved_objects_api) { // Kibi: savedObjectsAPI.
-    _.forEach([watchConfiguration, scriptConfiguration, userConfiguration], (schema) => {
+    forEach([watchConfiguration, scriptConfiguration, userConfiguration], (schema) => {
       server.plugins.saved_objects_api.registerType(schema);
     });
 
-    config.es.default_index = '.kibi';
-    config.es.type = 'sentinl-watcher';
-    helpers.putMapping(server, config, config.es.default_index, config.es.type, coreIndexMappings);
-  } else { // Kibana.
-    helpers.createIndex(server, config, config.es.default_index, config.es.type, coreIndexMappings);
-  }
-  helpers.putMapping(server, config, config.es.default_index, config.es.script_type, templateMappings);
-  helpers.createIndex(server, config, config.es.alarm_index, config.es.alarm_type, alarmIndexMappings, 'alarm');
+    config.es.default_index = server.config().get('kibana.index');
+    config.settings.authentication.user_index = server.config().get('kibana.index');
 
-  if (!server.plugins.kibi_access_control && config.settings.authentication.enabled) {
-    helpers.createIndex(server, config, config.settings.authentication.user_index,
-      config.settings.authentication.user_type, userIndexMappings);
+    const middleware = new SavedObjectsAPIMiddleware(server);
+    server.plugins.saved_objects_api.registerMiddleware(middleware);
+  } else { // Kibana.
+    initIndices.createIndex(server, config, config.es.default_index, config.es.type, coreIndexMappings);
+    initIndices.putMapping(server, config, config.es.default_index, config.es.script_type, templateMappings);
+
+    if (config.settings.authentication.enabled) {
+      initIndices.createIndex(server, config, config.settings.authentication.user_index,
+        config.settings.authentication.user_type, userIndexMappings);
+    }
   }
+  initIndices.createIndex(server, config, config.es.alarm_index, config.es.alarm_type, alarmIndexMappings, 'alarm');
 
   // Schedule watchers execution.
   const sched = later.parse.recur().on(25,55).second();
