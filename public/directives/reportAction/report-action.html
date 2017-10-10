@@ -189,7 +189,13 @@
         </div> <!-- end form-group -->
 
         <div class="form-group">
-          <label class="col-md-2 control-label" for="reportPath">Path</label>
+          <div class="col-md-2">
+            <label class="control-label" for="reportPath">Path</label>
+            <i class="fa fa-question-circle"
+              aria-hidden="true"
+              uib-popover="Screenshot filename will be generated automatically. You can specify the filename, for example, myreport.png"
+              popover-trigger="'mouseenter'"></i>
+          </div>
           <div class="col-md-10">
             <input
               type="text"
