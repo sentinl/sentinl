@@ -38,7 +38,7 @@ app.controller('WatchersController', function ($rootScope, $scope, $route, $inte
         if (response.message) {
           notify.error(response.message);
         } else {
-          notify.info(`Executed watcher: ${task._source.title}`);
+          notify.info(`Executed watcher "${task._source.title}"`);
         }
       })
       .catch(notify.error);
@@ -109,12 +109,12 @@ app.controller('WatchersController', function ($rootScope, $scope, $route, $inte
       size: 'sm'
     });
 
-    confirmModal.result.then((response) => {
+    confirmModal.result.then(function (response) {
       if (response === 'yes') {
-        Watcher.delete($scope.watchers[index]._id).then((id) => {
+        Watcher.delete($scope.watchers[index]._id).then(function (id) {
+          notify.info(`Deleted watcher "${$scope.watchers[index]._source.title}"`);
           $scope.watchers.splice(index, 1);
-          notify.info(`Watcher ${id} deleted`);
-        }).catch((error) => {
+        }).catch(function (error) {
           if (Number.isInteger(index)) {
             $scope.watchers.splice(index, 1);
           } else {
@@ -132,9 +132,10 @@ app.controller('WatchersController', function ($rootScope, $scope, $route, $inte
   */
   const saveWatcher = function (index) {
     Watcher.save($scope.watchers[index])
-      .then((id) => {
-        const status = $scope.watchers[index]._source.disable ? 'disabled' : 'enabled';
-        notify.info(`Watcher ${id} ${status}!`);
+      .then(function (id) {
+        const status = $scope.watchers[index]._source.disable ? 'Disabled' : 'Enabled';
+        const watcher = _.find($scope.watchers, (watcher) => watcher._id === id);
+        notify.info(`${status} watcher "${watcher._source.title}"`);
       })
       .catch(notify.error);
   };

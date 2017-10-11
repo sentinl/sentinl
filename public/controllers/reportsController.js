@@ -101,9 +101,9 @@ app.controller('ReportsController', function ($rootScope, $scope, $route, $inter
     confirmModal.result.then((response) => {
       if (response === 'yes') {
         Report.delete(rmindex, rmtype, rmid)
-          .then((response) => {
+          .then(function (response) {
             $scope.reports.splice(index - 1, 1);
-            notify.info(`Report log ${response} successfully deleted!`);
+            notify.info(`Deleted report "${response}"`);
             getReports($scope.timeInterval);
           })
           .catch(notify.error);
