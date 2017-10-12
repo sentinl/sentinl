@@ -24,23 +24,37 @@
 
         <div class="form-group">
           <label class="col-md-2 control-label">Priority</label>
-          <div class="btn-group col-md-6">
+          <div class="btn-group col-md-4">
             <label class="btn btn-danger" ng-model="actionSettings.webhook.priority" btn-radio="'high'">High</label>
             <label class="btn btn-warning" ng-model="actionSettings.webhook.priority" btn-radio="'medium'">Medium</label>
             <label class="btn btn-info" ng-model="actionSettings.webhook.priority" btn-radio="'low'">Low</label>
           </div>
-          <div class="col-md-2">
-            <label class="checkbox">
-              <input type="checkbox"
-                ng-model="actionSettings.webhook.create_alert"
-                ng-checked="actionSettings.webhook.create_alert"> alert
-            </label>
-          </div>
-          <div class="col-md-2">
+          <div class="col-md-1">
             <label class="checkbox">
               <input type="checkbox"
                 ng-model="actionSettings.webhook.use_https"
-                ng-checked="actionSettings.webhook.use_https"> https
+                ng-checked="actionSettings.webhook.use_https"
+              /> https
+            </label>
+          </div>
+          <div class="col-md-1">
+            <label class="checkbox">
+              <input type="checkbox"
+                ng-model="actionSettings.webhook.create_alert"
+                ng-checked="actionSettings.webhook.create_alert"
+              /> alarm
+            </label>
+          </div>
+          <div class="col-md-3">
+            <label class="checkbox">
+              <input type="checkbox"
+                ng-model="actionSettings.webhook.save_payload"
+                ng-checked="actionSettings.webhook.save_payload"
+              /> save payload
+              <i class="fa fa-question-circle"
+                aria-hidden="true"
+                uib-popover="{{help.action.save_payload}}"
+                popover-trigger="'mouseenter'"></i>
             </label>
           </div>
         </div> <!-- end form-group -->
@@ -56,7 +70,8 @@
               class="form-control"
               placeholder="{{watcher._id}}"
               ng-model="actionSettings.$$title"
-              ng-required="actionSettings.webhook.$$edit">
+              ng-required="actionSettings.webhook.$$edit"
+            />
           </div>
           <p ng-show="webhookForm.webhookTitle.$invalid && !webhookForm.webhookTitle.$pristine" class="help-block">
             Action title is required.
@@ -87,7 +102,8 @@
               class="form-control"
               placeholder="remote.server"
               ng-model="actionSettings.webhook.host"
-              ng-required="actionSettings.webhook.$$edit">
+              ng-required="actionSettings.webhook.$$edit"
+            />
           </div> <!-- end webhookHost -->
           <label class="col-md-2 control-label" for="webhookPort">Port</label>
           <div class="col-md-2">
@@ -101,7 +117,8 @@
               ng-value="actionSettings.webhook.port"
               placeholder="9200"
               ng-model="actionSettings.webhook.port"
-              ng-required="actionSettings.webhook.$$edit">
+              ng-required="actionSettings.webhook.$$edit"
+            />
           </div> <!-- end webhookPort -->
           <p ng-show="webhookForm.webhookHost.$invalid && !webhookForm.webhookHost.$pristine" class="help-block">
             Host is required.
@@ -121,7 +138,8 @@
               value="{{actionSettings.webhook.path}}"
               class="form-control"
               placeholder=":/{{payload.watcher_id}"
-              ng-model="actionSettings.webhook.path">
+              ng-model="actionSettings.webhook.path"
+            />
           </div>
         </div> <!-- end form-group -->
 

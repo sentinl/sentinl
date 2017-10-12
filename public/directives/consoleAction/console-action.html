@@ -24,10 +24,22 @@
 
         <div class="form-group">
           <label class="col-md-2 control-label">Priority</label>
-          <div class="btn-group col-md-6">
+          <div class="btn-group col-md-4">
             <label class="btn btn-danger" ng-model="actionSettings.console.priority" btn-radio="'high'">High</label>
             <label class="btn btn-warning" ng-model="actionSettings.console.priority" btn-radio="'medium'">Medium</label>
             <label class="btn btn-info" ng-model="actionSettings.console.priority" btn-radio="'low'">Low</label>
+          </div>
+          <div class="col-md-3">
+            <label class="checkbox">
+              <input type="checkbox"
+                ng-model="actionSettings.console.save_payload"
+                ng-checked="actionSettings.console.save_payload"
+              /> save payload
+              <i class="fa fa-question-circle"
+                aria-hidden="true"
+                uib-popover="{{help.action.save_payload}}"
+                popover-trigger="'mouseenter'"></i>
+            </label>
           </div>
         </div> <!-- end form-group -->
 
@@ -42,7 +54,8 @@
               class="form-control"
               placeholder="{{watcher._id}}"
               ng-model="actionSettings.$$title"
-              ng-required="actionSettings.console.$$edit">
+              ng-required="actionSettings.console.$$edit"
+            />
           </div>
           <p ng-show="consoleForm.consoleTitle.$invalid && !consoleForm.consoleTitle.$pristine" class="help-block">
             Action title is required.
