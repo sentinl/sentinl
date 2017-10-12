@@ -2,10 +2,11 @@
 import _ from 'lodash';
 import watcherWebhookAction from './webhook-action.html';
 import { app } from '../../app.module';
+import help from '../../messages/help';
 
 app.directive('webhookAction', function ($rootScope) {
-
   function actionDirective(scope, element, attrs) {
+    scope.help = help;
     scope.action = {
       type: 'webhook',
       title: attrs.name,
