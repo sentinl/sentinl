@@ -24,7 +24,7 @@
 
         <div class="form-group">
           <label class="col-md-2 control-label">Priority</label>
-          <div class="btn-group col-md-6">
+          <div class="btn-group col-md-4">
             <label class="btn btn-danger" ng-model="actionSettings.email.priority" btn-radio="'high'">High</label>
             <label class="btn btn-warning" ng-model="actionSettings.email.priority" btn-radio="'medium'">Medium</label>
             <label class="btn btn-info" ng-model="actionSettings.email.priority" btn-radio="'low'">Low</label>
@@ -33,7 +33,20 @@
             <label class="checkbox">
               <input type="checkbox"
                 ng-model="actionSettings.email.stateless"
-                ng-checked="actionSettings.email.stateless"> stateless
+                ng-checked="actionSettings.email.stateless"
+              /> stateless
+            </label>
+          </div>
+          <div class="col-md-3">
+            <label class="checkbox">
+              <input type="checkbox"
+                ng-model="actionSettings.email.save_payload"
+                ng-checked="actionSettings.email.save_payload"
+              /> save payload
+              <i class="fa fa-question-circle"
+                aria-hidden="true"
+                uib-popover="{{help.action.save_payload}}"
+                popover-trigger="'mouseenter'"></i>
             </label>
           </div>
         </div> <!-- end form-group -->
@@ -49,7 +62,8 @@
               class="form-control"
               placeholder="{{watcher._id}}"
               ng-model="actionSettings.$$title"
-              ng-required="actionSettings.email.$$edit">
+              ng-required="actionSettings.email.$$edit"
+            />
           </div>
           <p ng-show="emailForm.emailTitle.$invalid && !emailForm.emailTitle.$pristine" class="help-block">
             Action title is required.
@@ -67,7 +81,8 @@
               class="form-control"
               placeholder="root@localhost"
               ng-model="actionSettings.email.to"
-              ng-required="actionSettings.email.$$edit">
+              ng-required="actionSettings.email.$$edit"
+            />
           </div>
           <p ng-show="emailForm.emailTo.$invalid && !emailForm.emailTo.$pristine" class="help-block">
             Enter a valid email.
@@ -85,7 +100,8 @@
               class="form-control"
               placeholder="sentinl@localhost"
               ng-model="actionSettings.email.from"
-              ng-required="actionSettings.email.$$edit">
+              ng-required="actionSettings.email.$$edit"
+            />
           </div>
           <p ng-show="emailForm.emailFrom.$invalid && !emailForm.emailFrom.$pristine" class="help-block">
             Enter a valid email.
@@ -103,7 +119,8 @@
               class="form-control"
               placeholder="Alarm Title"
               ng-model="actionSettings.email.subject"
-              ng-required="actionSettings.email.$$edit">
+              ng-required="actionSettings.email.$$edit"
+            />
           </div>
           <p ng-show="emailForm.emailSubject.$invalid && !emailForm.emailSubject.$pristine" class="help-block">
             Enter a subject.
