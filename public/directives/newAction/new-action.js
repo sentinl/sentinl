@@ -95,6 +95,7 @@ app.directive('newAction', function ($rootScope) {
               res: '1280x900',
               url: 'http://www.google.com',
               path: '/tmp/',
+              type: 'png',
               params: {
                 delay: 5000
               }
