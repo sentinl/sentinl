@@ -241,18 +241,18 @@ export default class Watcher {
           }
 
           // find anomalies
-          if (has(task._source, 'sentinl.condition.anomaly')) {
+          if (task._source.condition.anomaly) {
             try {
-              payload = anomaly.check(payload, task._source.sentinl.condition);
+              payload = anomaly.check(payload, task._source.condition);
             } catch (err) {
               throw new Error(`Condition 'anomaly' error for ${task._id}: ${err}`);
             }
           }
 
           // find hits outside range
-          if (has(task._source, 'sentinl.condition.range')) {
+          if (task._source.condition.range) {
             try {
-              payload = range.check(payload, task._source.sentinl.condition);
+              payload = range.check(payload, task._source.condition);
             } catch (err) {
               throw new Error(`Condition 'range' error for ${task._id}: ${err}`);
             }
