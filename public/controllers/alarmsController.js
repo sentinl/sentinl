@@ -99,9 +99,9 @@ app.controller('AlarmsController', function ($rootScope, $scope, $route, $interv
     confirmModal.result.then((response) => {
       if (response === 'yes') {
         Alarm.delete(rmindex, rmtype, rmid)
-          .then((response) => {
+          .then(function (response) {
             $scope.alarms.splice(index - 1, 1);
-            notify.info(`Alarm ${response} deleted`);
+            notify.info(`Deleted alarm "${response}"`);
             getAlarms($scope.timeInterval);
           })
           .catch(notify.error);

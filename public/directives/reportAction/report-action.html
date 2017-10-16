@@ -24,30 +24,33 @@
 
         <div class="form-group">
           <label class="col-md-2 control-label">Priority</label>
-          <div class="btn-group col-md-6">
+          <div class="btn-group col-md-4">
             <label class="btn btn-danger" ng-model="actionSettings.report.priority" btn-radio="'high'">High</label>
             <label class="btn btn-warning" ng-model="actionSettings.report.priority" btn-radio="'medium'">Medium</label>
             <label class="btn btn-info" ng-model="actionSettings.report.priority" btn-radio="'low'">Low</label>
           </div>
-          <div class="col-md-2">
+          <div class="col-md-1">
             <label class="checkbox">
               <input type="checkbox"
                 ng-model="actionSettings.report.save"
-                ng-checked="actionSettings.report.save" /> save
+                ng-checked="actionSettings.report.save"
+              /> save
             </label>
           </div>
-          <div class="col-md-2">
-            <label class="checkbox">
-              <input type="checkbox"
-                ng-model="actionSettings.report.stateless"
-                ng-checked="actionSettings.report.stateless" /> stateless
-            </label>
-          </div>
-          <div class="col-md-2">
+          <div class="col-md-1">
             <label class="checkbox">
               <input type="checkbox"
                 ng-model="actionSettings.report.snapshot.params.crop"
-                ng-checked="actionSettings.report.snapshot.params.crop" /> crop
+                ng-checked="actionSettings.report.snapshot.params.crop"
+              /> crop
+            </label>
+          </div>
+          <div class="col-md-1">
+            <label class="checkbox">
+              <input type="checkbox"
+                ng-model="actionSettings.report.stateless"
+                ng-checked="actionSettings.report.stateless"
+              /> stateless
             </label>
           </div>
         </div> <!-- end form-group -->
@@ -63,7 +66,8 @@
               class="form-control"
               placeholder="{{watcher._id}}"
               ng-model="actionSettings.$$title"
-              ng-required="actionSettings.report.$$edit" />
+              ng-required="actionSettings.report.$$edit"
+            />
           </div>
           <p ng-show=" reportForm.reportTitle.$invalid && !reportForm.reportTitle.$pristine" class="help-block">
             Action title is required.
@@ -81,7 +85,8 @@
               class="form-control"
               placeholder="reports@localhost"
               ng-model="actionSettings.report.to"
-              ng-required="actionSettings.report.$$edit" />
+              ng-required="actionSettings.report.$$edit"
+            />
           </div>
           <p ng-show="reportForm.reportTo.$invalid && !reportForm.reportTo.$pristine" class="help-block">
             Enter a valid email.
@@ -99,7 +104,8 @@
               class="form-control"
               placeholder="sentinl@localhost"
               ng-model="actionSettings.report.from"
-              ng-required="actionSettings.report.$$edit" />
+              ng-required="actionSettings.report.$$edit"
+            />
           </div>
           <p ng-show="reportForm.reportFrom.$invalid && !reportForm.reportFrom.$pristine" class="help-block">
             Enter a valid email.
@@ -117,7 +123,8 @@
               class="form-control"
               placeholder="SENTINL Report"
               ng-model="actionSettings.report.subject"
-              ng-required="actionSettings.report.$$edit" />
+              ng-required="actionSettings.report.$$edit"
+            />
           </div>
         </div> <!-- end form-group -->
 
@@ -148,7 +155,8 @@
               placeholder="1280x900"
               ng-model="actionSettings.report.snapshot.res"
               ng-pattern="action.resolutionPattern"
-              ng-required="actionSettings.report.$$edit" />
+              ng-required="actionSettings.report.$$edit"
+            />
           </div>
           <label class="col-md-2 control-label" for="reportDelay">Delay</label>
           <div class="col-md-4">
@@ -160,7 +168,8 @@
               ng-value="actionSettings.report.snapshot.params.delay"
               class="form-control"
               placeholder="5000"
-              ng-model="actionSettings.report.snapshot.params.delay" />
+              ng-model="actionSettings.report.snapshot.params.delay"
+            />
           </div>
           <p ng-show="reportForm.reportResolution.$invalid && !reportForm.reportResolution.$pristine" class="help-block">
             Enter a valid resolution pattern.
@@ -181,7 +190,8 @@
               class="form-control"
               placeholder="http://www.google.com"
               ng-model="actionSettings.report.snapshot.url"
-              ng-required="actionSettings.report.$$edit" />
+              ng-required="actionSettings.report.$$edit"
+            />
           </div>
           <p ng-show="reportForm.reportUrl.$invalid && !reportForm.reportUrl.$pristine" class="help-block">
             Enter a valid URL.
@@ -193,7 +203,7 @@
             <label class="control-label" for="reportPath">Path</label>
             <i class="fa fa-question-circle"
               aria-hidden="true"
-              uib-popover="Screenshot filename will be generated automatically. You can specify the filename, for example, myreport.png"
+              uib-popover="{{help.action.report.path}}"
               popover-trigger="'mouseenter'"></i>
           </div>
           <div class="col-md-10">
@@ -204,7 +214,8 @@
               value="{{actionSettings.report.snapshot.path}}"
               class="form-control"
               placeholder="/tmp/"
-              ng-model="actionSettings.report.snapshot.path" />
+              ng-model="actionSettings.report.snapshot.path"
+            />
           </div>
         </div> <!-- end form-group -->
 
@@ -217,7 +228,8 @@
               name="reportUsername"
               value="{{actionSettings.report.snapshot.params.username}}"
               class="form-control"
-              ng-model="actionSettings.report.snapshot.params.username" />
+              ng-model="actionSettings.report.snapshot.params.username"
+            />
           </div>
         </div> <!-- end form-group -->
 
@@ -230,7 +242,8 @@
               name="reportPassword"
               value="{{actionSettings.report.snapshot.params.password}}"
               class="form-control"
-              ng-model="actionSettings.report.snapshot.params.password" />
+              ng-model="actionSettings.report.snapshot.params.password"
+            />
           </div>
         </div> <!-- end form-group -->
 

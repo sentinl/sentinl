@@ -1,5 +1,5 @@
 /* global angular */
-import _ from 'lodash';
+import { get, keys, trim, has, includes, forEach, isObject, isEmpty } from 'lodash';
 import confirmMessage from '../templates/confirm-message.html';
 
 import { app } from '../app.module';
@@ -8,22 +8,15 @@ import WatcherHelper from '../classes/WatcherHelper';
 import anomalyTemplate from '../defaults/templates/anomaly';
 import rangeTemplate from '../defaults/templates/range';
 
-const defaultTemplates = {
-  condition: {
-    anomaly: anomalyTemplate,
-    range: rangeTemplate
-  }
-};
-
 // EDITOR CONTROLLER
 app.controller('EditorController', function ($rootScope, $scope, $route, $interval,
-  $timeout, timefilter, Private, createNotifier, $window, $uibModal,
+  $timeout, timefilter, Private, createNotifier, $window, $uibModal, Promise,
   $log, navMenu, globalNavState, $routeParams, dataTransfer, $location, Watcher, Script, User) {
   $scope.title = 'Sentinl: Editor';
   $scope.description = 'Kibi/Kibana Report App for Elasticsearch';
 
   let editorMode = $location.$$path.slice(1); // modes: editor, wizard
-  if (_.includes(editorMode, '/')) editorMode = editorMode.split('/')[0];
+  if (includes(editorMode, '/')) editorMode = editorMode.split('/')[0];
   const tabName = editorMode.slice(0, 1).toUpperCase() + editorMode.slice(1);
 
   $scope.topNavMenu = navMenu.getTopNav(editorMode);
@@ -69,6 +62,18 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
       }
     };
 
+    if (!$scope.form.templates) {
+      $scope.form.templates = {};
+    }
+
+    // set default templates
+    const defaultTemplates = {
+      condition: {
+        anomaly: anomalyTemplate,
+        range: rangeTemplate
+      }
+    };
+
     // get authentication config info
     Watcher.getConfiguration()
       .then((response) => {
@@ -83,7 +88,7 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
     * @param {string} type - type (email, report, webhook, slack) of action
     */
     $scope.actionOfType = function (action, type) {
-      return _.has(action, type);
+      return has(action, type);
     };
 
     /**
@@ -92,7 +97,7 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
     * @param {object} actions - all actions.
     */
     $scope.actionsExist = function (actions) {
-      return _.keys(actions).length;
+      return keys(actions).length;
     };
 
     /**
@@ -123,7 +128,7 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
     * Initilizes action titles.
     */
     const initActionTitles = function () {
-      _.forEach($scope.watcher._source.actions, (settings, name) => { settings.$$title = name; });
+      forEach($scope.watcher._source.actions, (settings, name) => { settings.$$title = name; });
     };
 
     /**
@@ -135,15 +140,15 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
         mins: 0,
         secs: 0
       };
-      _.forEach($scope.watcher._source.trigger.schedule.later.split(','), (period) => {
+      forEach($scope.watcher._source.trigger.schedule.later.split(','), (period) => {
         if (period.match(/hour/i)) {
-          $scope.watcher.$$schedule.hours = +_.trim(period).split(' ')[1];
+          $scope.watcher.$$schedule.hours = +trim(period).split(' ')[1];
         }
         if (period.match(/min/i)) {
-          $scope.watcher.$$schedule.mins = +_.trim(period).split(' ')[1];
+          $scope.watcher.$$schedule.mins = +trim(period).split(' ')[1];
         }
         if (period.match(/sec/i)) {
-          $scope.watcher.$$schedule.secs = +_.trim(period).split(' ')[1];
+          $scope.watcher.$$schedule.secs = +trim(period).split(' ')[1];
         }
       });
     };
@@ -162,7 +167,7 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
         return str.match(/([0-9]?[0-9])s/i) ? +str.match(/([0-9]?[0-9])s/i)[1] : 0;
       };
 
-      _.forEach($scope.watcher._source.actions, (action) => {
+      forEach($scope.watcher._source.actions, (action) => {
         if (!action.throttle_period) {
           action.throttle_period = '30s';
         }
@@ -179,7 +184,7 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
     */
     const saveSchedule = function () {
       let schedule = [];
-      _.forEach($scope.watcher.$$schedule, (value, key) => {
+      forEach($scope.watcher.$$schedule, (value, key) => {
         if (value) {
           schedule.push(`every ${value} ${key}`);
         }
@@ -192,8 +197,8 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
     * Saves all throttle periods to the relative actions.
     */
     const saveThrottle = function () {
-      _.forEach($scope.watcher._source.actions, (action) => {
-        _.forEach(action.$$throttle, (value, key) => {
+      forEach($scope.watcher._source.actions, (action) => {
+        forEach(action.$$throttle, (value, key) => {
           if (!value) action.$$throttle[key] = 0;
         });
         action.throttle_period = `${action.$$throttle.hours}h${action.$$throttle.mins}m${action.$$throttle.secs}s`;
@@ -202,7 +207,7 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
     };
 
     $scope.isEmpty = function (obj) {
-      return _.isEmpty(obj);
+      return isEmpty(obj);
     };
 
     /**
@@ -232,11 +237,11 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
         };
 
         Script.new(template)
-          .then((id) => {
+          .then(function (id) {
             template._id = id;
             $scope.form.templates[field][id] = template;
             $scope.watcher['$$' + field].id = id;
-            notify.info(`Script ${id} saved.`);
+            notify.info(`Saved template "${template._source.title}"`);
           })
           .catch(notify.error);
       }
@@ -264,11 +269,11 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
     $scope.removeScript = function (field) {
       const id = $scope.watcher['$$' + field].id;
       Script.delete(id)
-        .then((id) => {
+        .then(function (id) {
+          notify.info(`Deleting "${$scope.form.templates[field][id]._source.title}"`);
           delete $scope.form.templates[field][id];
           $scope.watcher['$$' + field].id = undefined;
           $scope.watcher['$$' + field].title = undefined;
-          notify.info(`Script ${id} deleted`);
         })
         .catch(notify.error);
     };
@@ -292,16 +297,11 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
     * @param {string} name - field name (input, condition, transform).
     */
     const saveField = function (name) {
-      if (name === 'condition') {
-        if (_.has($scope.watcher._source[name], 'anomaly') || _.has($scope.watcher._source[name], 'range')) {
-          const field = angular.fromJson($scope.watcher['$$' + name].body);
-          delete field.anomaly;
-          delete field.range;
-          $scope.watcher._source[name] = field;
-          return;
-        }
+      const key = '$$' + `${name}.body`;
+      const body = get($scope.watcher, key);
+      if (has($scope.watcher, key) && body.length) {
+        $scope.watcher._source[name] = angular.fromJson(body);
       }
-      $scope.watcher._source[name] = angular.fromJson($scope.watcher['$$' + name].body);
     };
 
     /**
@@ -336,7 +336,7 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
     */
     const renameActions = function (actions) {
       const newActions = {};
-      _.forEach(actions, (settings, name) => {
+      forEach(actions, (settings, name) => {
         newActions[settings.$$title] = settings;
         delete newActions[settings.$$title].$$title;
       });
@@ -347,13 +347,13 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
     * Saves all available ace editors text as watcher properties.
     */
     const saveActions = function () {
-      _.forEach($scope.watcher._source.actions, (settings, name) => {
-        _.forEach($scope.form.actions.types, (type) => {
-          if (_.has(settings, type)) {
+      forEach($scope.watcher._source.actions, (settings, name) => {
+        forEach($scope.form.actions.types, (type) => {
+          if (has(settings, type)) {
             delete settings[type].$$edit;
           }
 
-          if (type === 'webhook' && _.has(settings, type)) {
+          if (type === 'webhook' && has(settings, type)) {
             if (settings[type]._headers && settings[type]._headers.length) {
               settings[type].headers = angular.fromJson(settings[type]._headers);
             } else {
@@ -370,16 +370,16 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
     */
     const initTabs = function () {
       const actionTypes = {};
-      _.forEach($scope.watcher._source.actions, (settings, name) => {
-        _.forEach($scope.form.actions.types, (type) => {
+      forEach($scope.watcher._source.actions, (settings, name) => {
+        forEach($scope.form.actions.types, (type) => {
           if (settings[type]) actionTypes[type] = true;
         });
       });
 
-      if (_.keys(actionTypes).length === 1 && _.keys(actionTypes)[0] === 'report') {
-        _.forEach($scope.form.tabs, (tab) => { tab.disable = true; });
+      if (keys(actionTypes).length === 1 && keys(actionTypes)[0] === 'report') {
+        forEach($scope.form.tabs, (tab) => { tab.disable = true; });
       } else {
-        _.forEach($scope.form.tabs, (tab) => { tab.disable = false; });
+        forEach($scope.form.tabs, (tab) => { tab.disable = false; });
       }
     };
 
@@ -396,9 +396,13 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
     * @param {array} templates - list of templates
     */
     const initDefaultTemplates = function (templates) {
-      _.forEach(templates, function (type, typeName) {
-        _.forEach(type, function (template, templateName) {
+      forEach(templates, function (type, typeName) {
+        if (!$scope.form.templates[typeName]) {
+          $scope.form.templates[typeName] = {};
+        }
+        forEach(type, function (template, templateName) {
           let id = Script.createId();
+
           $scope.form.templates[typeName][id] = {
             _id: id,
             _source: {
@@ -412,33 +416,19 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
     };
 
     /**
-    * Saves Sentinl custom settings.
-    */
-    const saveSentinlCustomSettings = function () {
-      const condition = angular.fromJson($scope.watcher.$$condition.body);
-      if (_.has(condition, 'anomaly') || _.has(condition, 'range')) {
-        $scope.watcher._source.sentinl = {
-          condition
-        };
-      } else {
-        delete $scope.watcher._source.sentinl;
-      }
-    };
-
-    /**
-    * Initilizes Sentinl custom settings.
-    */
-    const initSentinlCustomSettings = function () {
-      if (_.has($scope.watcher._source, 'sentinl.condition')) {
-        $scope.watcher.$$condition.body = angular.toJson($scope.watcher._source.sentinl.condition, 'pretty');
-      }
-    };
-
-    /**
     * Initializes all watcher values.
     */
-    const init = function () {
-      if (editorMode !== 'wizard') {
+    const init = function ({
+      tabs = true,
+      fields = true,
+      templates = true,
+      raw = true,
+      actions = true,
+      schedule = true,
+      throttle = true
+    } = {}) {
+
+      if (editorMode !== 'wizard' && tabs) {
         try {
           initTabs();
         } catch (e) {
@@ -446,49 +436,71 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
         }
       }
 
-      try {
-        _.forEach(_.keys($scope.form.fields), function (field) {
-          initField(field);
+      if (fields) {
+        try {
+          forEach(keys($scope.form.fields), function (field) {
+            initField(field);
+          });
+        } catch (e) {
+          notify.error(`Fail to initialize fields: ${e}`);
+        }
+      }
+
+      if (templates) {
+        try {
+          initDefaultTemplates(defaultTemplates);
+        } catch (e) {
+          notify.error(`Fail to initialize default templates: ${e}`);
+        }
+      }
+
+      if (raw) {
+        try {
+          initRaw();
+        } catch (e) {
+          notify.error(`Fail to initialize raw settings: ${e}`);
+        }
+      }
+
+      if (actions) {
+        try {
+          initActionTitles();
+        } catch (e) {
+          notify.error(`Fail to initialize actions: ${e}`);
+        }
+      }
+
+      if (schedule) {
+        try {
+          initSchedule();
+        } catch (e) {
+          notify.error(`Fail to initialize schedule: ${e}`);
+        }
+      }
+
+      if (throttle) {
+        try {
+          initThrottlePeriods();
+        } catch (e) {
+          notify.error(`Fail to initialize throttle periods: ${e}`);
+        }
+      }
+    };
+
+    /**
+    * Saves authentication pair (username/password) for watcher authentication.
+    */
+    const saveUser = function (auth) {
+      if (auth) {
+        return User.new(
+          $scope.watcher.id,
+          $scope.watcher.$$authentication.username,
+          $scope.watcher.$$authentication.password
+        ).then(function (user) {
+          notify.info(`Saved user "${user}"`);
         });
-      } catch (e) {
-        notify.error(`Fail to initialize fields: ${e}`);
       }
-
-      try {
-        initDefaultTemplates(defaultTemplates);
-      } catch (e) {
-        notify.error(`Fail to initialize default templates: ${e}`);
-      }
-
-      try {
-        initSentinlCustomSettings();
-      } catch (e) {
-        notify.error(`Fail to initialize Sentinl custom settings: ${e}`);
-      }
-
-      try {
-        initRaw();
-      } catch (e) {
-        notify.error(`Fail to initialize raw settings: ${e}`);
-      }
-
-      try {
-        initActionTitles();
-      } catch (e) {
-        notify.error(`Fail to initialize actions: ${e}`);
-      }
-
-      try {
-        initSchedule();
-      } catch (e) {
-        notify.error(`Fail to initialize schedule: ${e}`);
-      }
-
-      try {
-        initThrottlePeriods();
-      } catch (e) {
-        notify.error(`Fail to initialize throttle periods: ${e}`);
-      }
+      return Promise.resolve();
     };
 
     /**
@@ -511,14 +523,15 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
           $scope.watcher = angular.fromJson($scope.watcher.$$raw);
         } catch (e) {
           notify.error(`Invalid Raw configuration: ${e}`);
-          $scope.watcherForm.$valid = false;
-          $scope.watcherForm.$invalid = true;
+          init(); // init form again
+          return;
         }
 
         if ($scope.watcherForm.$valid) {
           Watcher.save($scope.watcher)
-            .then((response) => {
-              notify.info(`Watcher ${response} successfully saved!`);
+            .then(function (id) {
+              const title = $scope.watcher.title ? $scope.watcher.title : get($scope.watcher, '_source.title');
+              notify.info(`Saved watcher "${title}"`);
               $scope.cancelEditor();
             })
             .catch(notify.error);
@@ -534,6 +547,8 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
           notify.error(`Invalid schedule configuration: ${e}`);
           $scope.watcherForm.$valid = false;
           $scope.watcherForm.$invalid = true;
+          init(); // init form again
+          return;
         }
 
         try {
@@ -542,6 +557,8 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
           notify.error(`Invalid throttle configuration: ${e}`);
           $scope.watcherForm.$valid = false;
           $scope.watcherForm.$invalid = true;
+          init(); // init form again
+          return;
         }
 
         if (editorMode !== 'wizard') {
@@ -549,24 +566,20 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
             saveActions();
           } catch (e) {
             notify.error(`Invalid action, Transform or Condition configuration: ${e}`);
-            $scope.watcherForm.$valid = false;
-            $scope.watcherForm.$invalid = true;
+            init(); // init form again
+            return;
           }
 
           try {
-            saveSentinlCustomSettings();
-          } catch (e) {
-            notify.error(`Fail to save Sentinl custom settings: ${e}`);
-          }
-
-          try {
-            _.forEach(_.keys($scope.form.fields), function (field) {
+            forEach(keys($scope.form.fields), function (field) {
               saveField(field);
             });
           } catch (e) {
             notify.error(`Fail to save field: ${e}`);
-            $scope.watcherForm.$valid = false;
-            $scope.watcherForm.$invalid = true;
+            init({
+              fields: false
+            });
+            return;
           }
         }
 
@@ -574,22 +587,26 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
           $scope.watcher._source.actions = renameActions($scope.watcher._source.actions);
         } catch (e) {
           notify.error(`Fail to rename action: ${e}`);
-          $scope.watcherForm.$valid = false;
-          $scope.watcherForm.$invalid = true;
+          init(); // init form again
+          return;
         }
 
       }
 
       if ($scope.watcherForm.$valid) {
-        Watcher.save($scope.watcher)
-          .then((id) => {
-            notify.info(`Watcher ${id} successfully saved!`);
+        saveUser($scope.watcher.$$authentication.enabled)
+        .then(function () {
+          return Watcher.save($scope.watcher)
+          .then(function (id) {
+            const title = $scope.watcher.title ? $scope.watcher.title : get($scope.watcher, '_source.title');
+            notify.info(`Saved watcher "${title}"`);
             $scope.cancelEditor();
           })
-          .then(() => {
+          .then(function () {
             $rootScope.$broadcast('editorCtrl-Watcher.save');
-          })
-          .catch(notify.error);
+          });
+        })
+        .catch(notify.error);
       }
 
       if (editorMode === 'wizard') $scope.cancelEditor();
@@ -611,29 +628,10 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
       }
     });
 
-    /**
-    * Saves authentication pair (username/password) for watcher authentication.
-    */
-    const saveAuthenticationPair = function () {
-      if ($scope.watcher.$$authentication) {
-        if ($scope.watcher.$$authentication.username && $scope.watcher.$$authentication.password) {
-          User.new(
-            $scope.watcher.id,
-            $scope.watcher.$$authentication.username,
-            $scope.watcher.$$authentication.password
-          ).then((response) => {
-            notify.info(` User ${response} saved.`);
-          })
-          .catch(notify.error);
-        }
-      }
-    };
-
     $scope.$on('action:removeAction', (event, action) => removeAction(action.name));
     $scope.$on('navMenu:cancelEditor', () => $scope.cancelEditor());
     $scope.$on('navMenu:saveEditor', () => {
       $scope.saveEditor();
-      saveAuthenticationPair();
     });
 
     // Init form
@@ -652,7 +650,7 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
       .catch(notify.error);
   } else { // new watcher
     $scope.watcher = dataTransfer.getWatcher();
-    if (!_.isObject($scope.watcher) || _.isEmpty($scope.watcher)) {
+    if (!isObject($scope.watcher) || isEmpty($scope.watcher)) {
       notify.error('Fail to get watcher data!');
     } else {
       initEditor();  // start editing the watcher

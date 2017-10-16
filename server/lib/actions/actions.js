@@ -102,7 +102,8 @@ export default function (server, actions, payload, task) {
     /*
     *   "console" : {
     *      "priority" : "DEBUG",
-    *      "message" : "Average {{payload.aggregations.avg.value}}"
+    *      "message" : "Average {{payload.aggregations.avg.value}}",
+    *      "save_payload" : false
     *    }
     */
 
@@ -114,7 +115,7 @@ export default function (server, actions, payload, task) {
       formatterConsole = action.console.message ? action.console.message : '{{ payload }}';
       message = mustache.render(formatterConsole, {payload: payload});
       server.log(['status', 'debug', 'Sentinl'], 'Console Payload: ' + JSON.stringify(payload));
-      esHistory(task._source.title, actionName, message, priority, payload, false);
+      esHistory(task._source.title, actionName, message, priority, action.console.save_payload ? {} : payload, false);
     }
 
     /* ***************************************************************************** */
@@ -140,7 +141,8 @@ export default function (server, actions, payload, task) {
     *      "subject" : "Alarm Title",
     *      "priority" : "high",
     *      "body" : "Series Alarm {{ payload._id}}: {{payload.hits.total}}",
-    *      "stateless" : false
+    *      "stateless" : false,
+    *      "save_payload" : false
     *	    }
     */
 
@@ -176,7 +178,7 @@ export default function (server, actions, payload, task) {
       }
       if (!action.email.stateless) {
         // Log Event
-        esHistory(task._source.title, actionName, text, priority, payload, false);
+        esHistory(task._source.title, actionName, text, priority, action.email.save_payload ? {} : payload, false);
       }
     }
 
@@ -190,7 +192,8 @@ export default function (server, actions, payload, task) {
     *      "priority" : "high",
     *      "body" : "Series Alarm {{ payload._id}}: {{payload.hits.total}}",
     *      "html" : "<p>Series Alarm {{ payload._id}}: {{payload.hits.total}}</p>",
-    *      "stateless" : false
+    *      "stateless" : false,
+    *      "save_payload" : false
     *	    }
     */
     var html;
@@ -231,7 +234,7 @@ export default function (server, actions, payload, task) {
 
       if (!action.email_html.stateless) {
         // Log Event
-        esHistory(task._source.title, actionName, text, priority, payload, false);
+        esHistory(task._source.title, actionName, text, priority, action.email_html.save_payload ? {} : payload, false);
       }
     }
 
@@ -261,7 +264,9 @@ export default function (server, actions, payload, task) {
     if (_.has(action, 'report')) {
       return reportAction(server, email, task, action, actionName, payload)
       .then(function (file) {
-        esHistory(task._source.title, actionName, text, priority, payload, true, file);
+        if (!action.report.stateless) {
+          esHistory(task._source.title, actionName, text, priority, {}, true, file);
+        }
         return null;
       })
       .catch(function (error) {
@@ -277,7 +282,8 @@ export default function (server, actions, payload, task) {
     *   "slack" : {
     *      "channel": '#<channel>',
     *      "message" : "Series Alarm {{ payload._id}}: {{payload.hits.total}}",
-    *      "stateless" : false
+    *      "stateless" : false,
+    *      "save_payload" : false
     *    }
     */
 
@@ -305,7 +311,7 @@ export default function (server, actions, payload, task) {
 
       if (!action.slack.stateless) {
         // Log Event
-        esHistory(task._source.title, actionName, message, priority, payload, false);
+        esHistory(task._source.title, actionName, message, priority, action.slack.save_payload ? {} : payload, false);
       }
     }
 
@@ -317,7 +323,9 @@ export default function (server, actions, payload, task) {
     *      "port" : 9200,
     *      "path": "/{{payload.watcher_id}}",
     *      "body" : "{{payload.watcher_id}}:{{payload.hits.total}}",
-    *      "use_https" : false
+    *      "use_https" : false,
+    *      "stateless" : false,
+    *      "save_payload" : false
     *    }
     */
 
@@ -343,7 +351,10 @@ export default function (server, actions, payload, task) {
 
       // Log Alarm Event
       if (action.webhook.create_alert && payload.constructor === Object && Object.keys(payload).length) {
-        esHistory(task._source.title, actionName, action.webhook.message, action.webhook.priority, payload, false);
+        if (!action.webhook.stateless) {
+          esHistory(task._source.title, actionName, action.webhook.message, action.webhook.priority,
+            action.webhook.save_payload ? {} : payload, false);
+        }
       }
 
       req = http.request(options, function (res) {
@@ -367,6 +378,7 @@ export default function (server, actions, payload, task) {
     *   "elastic" : {
     *      "priority" : "DEBUG",
     *      "message" : "Avg {{payload.aggregations.avg.value}} measurements in 5 minutes"
+    *      "save_payload" : false,
     *    }
     */
 
@@ -378,7 +390,7 @@ export default function (server, actions, payload, task) {
       priority = action.local.priority ? action.local.priority : 'INFO';
       server.log(['status', 'debug', 'Sentinl', 'local'], 'Logged Message: ' + esMessage);
       // Log Event
-      esHistory(task._source.title, actionName, esMessage, priority, payload, false);
+      esHistory(task._source.title, actionName, esMessage, priority, action.local.save_payload ? {} : payload, false);
     }
 
 

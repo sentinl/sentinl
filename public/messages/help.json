@@ -1,0 +1,8 @@
+{
+  "action": {
+    "report": {
+      "path": "Screenshot filename will be generated automatically. You can specify the filename, for example, myreport.png."
+    },
+    "save_payload": "Store all Elasticsearch documents found by Input query inside alarm document. Attention, this can freeze your browser if you store a lot of documents!"
+  }
+}
