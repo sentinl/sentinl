@@ -299,7 +299,7 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
     const saveField = function (name) {
       const key = '$$' + `${name}.body`;
       const body = get($scope.watcher, key);
-      if (has($scope.watcher, key) && body.length) {
+      if (get($scope.watcher, key) && body.length) {
         $scope.watcher._source[name] = angular.fromJson(body);
       }
     };
