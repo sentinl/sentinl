@@ -160,7 +160,7 @@ export default class Watcher {
       const actions = this.getNonReportActions(task._source.actions);
       let request = has(task._source, 'input.search.request') ? task._source.input.search.request : undefined;
       let condition = keys(task._source.condition).length ? task._source.condition : undefined;
-      let transform = task._source.transform ? task._source.transform : undefined;
+      let transform = task._source.transform && !isEmpty(task._source.transform) ? task._source.transform : undefined;
 
       let method = 'search';
       if (sirenVanguardAvailable) {
