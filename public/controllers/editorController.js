@@ -301,6 +301,8 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
       const body = get($scope.watcher, key);
       if (get($scope.watcher, key) && body.length) {
         $scope.watcher._source[name] = angular.fromJson(body);
+      } else {
+        $scope.watcher._source[name] = angular.fromJson('{}');
       }
     };
 
