@@ -87,7 +87,7 @@
                 <span ng-click="deleteAlarm($index,alarm._index,alarm._type,alarm._id)" class="delete-rule"><i class="fa fa-trash"></i></span>
               </td>
             </tr>
-            <tr ng-show=collapse>
+            <tr ng-if=collapse>
               <td colspan="100%">
                 <pre><code>{{ alarm._source | json }}</code></pre>
               </td>

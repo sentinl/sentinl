@@ -17,6 +17,10 @@ app.directive('reportAction', function ($rootScope) {
       $rootScope.$broadcast('action:removeAction', { name: attrs.name });
     };
 
+    scope.applyReportType = function (name) {
+      scope.watcher._source.actions[attrs.name].report.snapshot.type = name;
+    };
+
   }
 
   return {
