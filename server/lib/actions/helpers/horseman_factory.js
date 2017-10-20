@@ -30,91 +30,54 @@ const horsemanFactory = function (server, domain) {
 };
 
 /**
-* Do screenshot accessing URL with simple authentication
+* Do report (pdf or png)
 *
-* @param {object} horseman - phantomjs helper
-* @param {string} username
-* @param {string} password
-* @param {string} url
-* @param {integer} delay - time to wait after URL was opened
-* @param {string} resolution - image size
-* @param {string} file - screenshot image full path
+* @property {object} horseman - phantomjs helper
+* @property {object} action - current report action properties
+* @property {string} file - report file full system path
+* @property {string} authentication - authentication type
 */
-const horsemanSimpleAuth = function (horseman, username, password, url, delay, resolution, file) {
-  return horseman
-  .viewport(resolution.split('x')[0], resolution.split('x')[1])
-  .authentication(username, password)
-  .open(url)
-  .wait(delay)
-  .screenshot(file);
-};
+const horsemanReport = function (horseman, action, file, authentication = null) {
+  const { url, res, type } = action.report.snapshot;
+  const { username, password, delay } = action.report.snapshot.params;
 
-/**
-* Do screenshot accessing URL with no authentication
-*
-* @param {object} horseman - phantomjs helper
-* @param {string} url
-* @param {integer} delay - time to wait after URL was opened
-* @param {string} resolution - image size
-* @param {string} file - screenshot image full path
-*/
-const horsemanNoAuth = function (horseman, url, delay, resolution, file) {
   return horseman
-  .viewport(resolution.split('x')[0], resolution.split('x')[1])
+  .viewport(res.split('x')[0], res.split('x')[1])
+  .then(function () {
+    if (authentication === 'simple') {
+      return horseman.authentication(username, password);
+    }
+    return null;
+  })
   .open(url)
+  .then(function () {
+    if (authentication === 'search_guard_kibana' || authentication === 'search_guard_kibi') {
+      return horseman.waitForNextPage()
+      .type('input[id="username"]', username)
+      .type('input[id="password"]', password)
+      .then(function () {
+        if (authentication === 'search_guard_kibana') {
+          return horseman.click('button[id="login"]');
+        }
+        return null;
+      });
+    }
+    return null;
+  })
   .wait(delay)
-  .screenshot(file);
-};
-
-/**
-* Do screenshot accessing Kibana URL protected by Search Guard
-*
-* @param {object} horseman - phantomjs helper
-* @param {string} username
-* @param {string} password
-* @param {string} url
-* @param {integer} delay - time to wait after URL was opened
-* @param {string} resolution - image size
-* @param {string} file - screenshot image full path
-*/
-const horsemanSearchGuardKibana = function (horseman, username, password, url, delay, resolution, file) {
-  return horseman
-  .viewport(resolution.split('x')[0], resolution.split('x')[1])
-  .open(url)
-  .waitForNextPage()
-  .type('input[id="username"]', username)
-  .type('input[id="password"]', password)
-  .click('button[id="login"]')
-  .wait(delay)
-  .screenshot(file);
-};
-
-/**
-* Do screenshot accessing Kibi URL protected by Search Guard
-*
-* @param {object} horseman - phantomjs helper
-* @param {string} username
-* @param {string} password
-* @param {string} url
-* @param {integer} delay - time to wait after URL was opened
-* @param {string} resolution - image size
-* @param {string} file - screenshot image full path
-*/
-const horsemanSearchGuardKibi = function (horseman, username, password, url, delay, resolution, file) {
-  return horseman
-  .viewport(resolution.split('x')[0], resolution.split('x')[1])
-  .open(url)
-  .waitForNextPage()
-  .type('input[id="username"]', username)
-  .type('input[id="password"]', password)
-  .wait(delay)
-  .screenshot(file);
+  .then(function () {
+    if (action.report.snapshot.type === 'pdf') {
+      return horseman.pdf(file, {
+        width: res.split('x')[0] + 'px',
+        height: res.split('x')[1] + 'px',
+        margin: '1px'
+      });
+    }
+    return horseman.screenshot(file);
+  });
 };
 
 module.exports = {
   horsemanFactory,
-  horsemanSimpleAuth,
-  horsemanNoAuth,
-  horsemanSearchGuardKibana,
-  horsemanSearchGuardKibi
+  horsemanReport
 };

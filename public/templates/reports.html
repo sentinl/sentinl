@@ -89,15 +89,18 @@
                 <span ng-click="deleteReport($index, report._index, report._type, report._id)" class="delete-rule"><i class="fa fa-trash"></i></span>
               </td>
             </tr>
-            <tr ng-show=collapse>
+            <tr ng-if=collapse>
               <td colspan="100%">
                 <pre><code>{{ report._source | json }}</code></pre>
               </td>
             </tr>
-            <tr ng-show=collapseimg >
+            <tr ng-if=collapseimg >
               <td colspan="100%">
-                <div ng-if="report._source.attachment">
-                  <img ng-src="data:image/png;base64,{{ report._source.attachment }}" />
+                <div ng-if="report._source.attachment && report._source.attachment.charAt(0) === 'i'">
+                  <object data="data:image/png;base64,{{ report._source.attachment }}"></object>
+                </div>
+                <div ng-if="report._source.attachment && report._source.attachment.charAt(0) !== 'i'">
+                  <object height="600" data="data:application/pdf;base64,{{ report._source.attachment }}"></object>
                 </div>
               </td>
             </tr>

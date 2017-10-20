@@ -206,7 +206,7 @@
               uib-popover="{{help.action.report.path}}"
               popover-trigger="'mouseenter'"></i>
           </div>
-          <div class="col-md-10">
+          <div class="col-md-7">
             <input
               type="text"
               id="reportPath"
@@ -216,6 +216,15 @@
               placeholder="/tmp/"
               ng-model="actionSettings.report.snapshot.path"
             />
+          </div>
+          <div class="btn-group col-md-2" uib-dropdown is-open="status.isopen">
+            <button type="button" class="btn btn-primary dropdown-toggle" uib-dropdown-toggle>
+              {{actionSettings.report.snapshot.type || 'report type'}} <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" uib-dropdown-menu role="menu">
+              <li><a href="javascript:void(0)" ng-click="applyReportType('png')">PNG</a></li>
+              <li><a href="javascript:void(0)" ng-click="applyReportType('pdf')">PDF</a></li>
+            </ul>
           </div>
         </div> <!-- end form-group -->
 
