@@ -8,13 +8,7 @@ import { resolve, promisify, reject } from 'bluebird';
 import { isKibi } from '../helpers';
 import getConfiguration from '../get_configuration';
 import getElasticsearchClient from '../get_elasticsearch_client';
-import {
-  horsemanFactory,
-  horsemanSimpleAuth,
-  horsemanNoAuth,
-  horsemanSearchGuardKibana,
-  horsemanSearchGuardKibi
-} from './helpers/horseman_factory';
+import { horsemanFactory, horsemanReport } from './helpers/horseman_factory';
 import uuid from 'uuid/v4';
 
 const readFile = promisify(fs.readFile);
@@ -29,7 +23,7 @@ const existFile = promisify(fs.access);
 * @return {string} file - stringified buffer
 * @return null
 */
-const getScreenshot = function (file, save = true) {
+const getFile = function (file, save = true) {
   if (save) {
     return readFile(file)
     .then(function (data) {
@@ -92,79 +86,61 @@ export default function report(server, email, task, action, actionName, payload)
   const text = mustache.render(formatterText, { payload });
   server.log(['status', 'debug', 'Sentinl', 'report'], `Subject: ${subject}, Body: ${text}`);
 
+  // Set report file name
   let file = action.report.snapshot.path;
   let filename = path.parse(file).name;
-
-  if (path.parse(file).ext !== '.png') {
+  if (path.parse(file).ext !== '.png' && path.parse(file).ext !== '.pdf') {
     if (!file.length) {
       file = os.tmpdir();
     }
-    filename = `report-${uuid()}-${moment().format('DD-MM-YYYY-h-m-s')}.png`;
+    filename = `report-${uuid()}-${moment().format('DD-MM-YYYY-h-m-s')}`;
+    if (action.report.snapshot.type === 'pdf') {
+      filename += '.pdf';
+    } else {
+      filename += '.png';
+    }
     file = path.join(file, filename);
   }
 
-  const attachment = [
-    {
-      data: '<html><img src=\'cid:my-report\' width=\'100%\'></html>'
-    },
-    {
-      path: file,
-      type: 'image/png',
-      name: filename,
-      headers: {
-        'Content-ID': '<my-report>'
-      }
-    }
-  ];
-
+  // Do report
   return horsemanFactory(server, domain)
   .then(function (horseman) {
     if (config.settings.report.simple_authentication) {
-      return horsemanSimpleAuth(
-        horseman,
-        action.report.snapshot.params.username,
-        action.report.snapshot.params.password,
-        action.report.snapshot.url,
-        action.report.snapshot.params.delay,
-        action.report.snapshot.res,
-        file
-      )
-      .close();
+      return horsemanReport(horseman, action, file, 'simple').close();
     } else if (isKibi(server) && config.settings.report.search_guard) {
-      return horsemanSearchGuardKibi(
-        horseman,
-        action.report.snapshot.params.username,
-        action.report.snapshot.params.password,
-        action.report.snapshot.url,
-        action.report.snapshot.params.delay,
-        action.report.snapshot.res,
-        file
-      )
-      .close();
+      return horsemanReport(horseman, action, file, 'search_guard_kibi').close();
     } else if (config.settings.report.search_guard) {
-      return horsemanSearchGuardKibana(
-        horseman,
-        action.report.snapshot.params.username,
-        action.report.snapshot.params.password,
-        action.report.snapshot.url,
-        action.report.snapshot.params.delay,
-        action.report.snapshot.res,
-        file
-      )
-      .close();
-    } else {
-      return horsemanNoAuth(
-        horseman,
-        action.report.snapshot.url,
-        action.report.snapshot.params.delay,
-        action.report.snapshot.res,
-        file
-      )
-      .close();
+      return horsemanReport(horseman, action, file, 'search_guard_kibana').close();
     }
+    return horsemanReport(horseman, action, file).close();
   })
   .then(function () {
+    // Send email
     if (!action.report.stateless) {
+      let type = 'image/png';
+      let data = '<html><img src=\'cid:my-report\' width=\'100%\'></html>';
+      if (action.report.snapshot.type === 'pdf') {
+        type = 'application/pdf';
+        data = '<html><p>Find PDF report in the attachment.</p></html>';
+      }
+
+      const attachment = [
+        {
+          data,
+          alternative: true
+        },
+        {
+          path: file,
+          type,
+          name: filename,
+          headers: {
+            'Content-ID': '<my-report>',
+            'Content-Type': `${type}; name="${filename}"`,
+            'content-disposition': 'attachment; filename=cid:my-report'
+          }
+        }
+      ];
+
       return email.send({
         text,
         from: action.report.from,
@@ -180,6 +156,6 @@ export default function report(server, email, task, action, actionName, payload)
     }
   })
   .then(function () {
-    return getScreenshot(file, action.report.save);
+    return getFile(file, action.report.save);
   });
 }
