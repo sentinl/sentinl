@@ -2,23 +2,23 @@
   "properties": {
     "input": {
       "type": "object",
-      "dynamic": true
+      "enabled": false
     },
     "actions": {
       "type": "object",
-      "dynamic": true
+      "enabled": false
     },
     "transform": {
       "type": "object",
-      "dynamic": true
+      "enabled": false
     },
     "condition": {
       "type": "object",
-      "dynamic": true
+      "enabled": false
     },
     "trigger": {
       "type": "object",
-      "dynamic": true
+      "enabled": false
     },
     "report": {
       "type": "boolean"
@@ -31,7 +31,7 @@
     },
     "sentinl": {
       "type": "object",
-      "dynamic": true
+      "enabled": false
     }
   }
 }
