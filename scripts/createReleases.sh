@@ -5,9 +5,7 @@
 #     ./createReleases.sh ~/Downloads/5-release/
 
 releases=(
-"5.6.0"
-"5.6.1"
-"5.6.2"
+"6.0.0"
 )
 
 for i in "${releases[@]}"
