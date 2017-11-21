@@ -17,6 +17,9 @@
  * limitations under the License.
  */
 
+/* styles */
+import 'bootstrap/dist/css/bootstrap.min.css';
+
 /* import controllers */
 import './controllers/watchersController';
 import './controllers/editorController';
