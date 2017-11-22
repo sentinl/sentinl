@@ -29,9 +29,22 @@
           </div>
         </div> <!-- end form-group -->
         <div class="form-group">
-          <div class="col-md-8">
-            <label>Specify a period of execution (h:m:s)</label>
-            <period-tag timesrc="watcher.$$schedule"></period-tag>
+          <div class="col-md-2">
+            <label>Schedule</label>
+            <i class="fa fa-question-circle"
+              aria-hidden="true"
+              popover-placement="bottom"
+              uib-popover-html="help.schedule"
+              popover-trigger="'outsideClick'"></i>
+          </div>
+          <div class="col-md-6">
+            <input
+              type="text"
+              id="watcher-schedule"
+              name="watcher-schedule"
+              class="form-control"
+              placeholder="every 5 mins"
+              ng-model="watcher._source.trigger.schedule.later"/>
           </div>
         </div> <!-- end form-group -->
         <div class="form-group">

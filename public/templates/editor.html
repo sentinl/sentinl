@@ -50,7 +50,7 @@
                   <i class="fa fa-question-circle"
                     aria-hidden="true"
                     uib-popover="This is an one-way field, you insert value but don't see it after save"
-                    popover-trigger="'mouseenter'"></i>
+                    popover-trigger="'outsideClick'"></i>
                 </div>
                 <div class="col-md-3">
                   <input
@@ -68,7 +68,7 @@
                   <i class="fa fa-question-circle"
                     aria-hidden="true"
                     uib-popover="This is an one-way field, you insert value but don't see it after save"
-                    popover-trigger="'mouseenter'"></i>
+                    popover-trigger="'outsideClick'"></i>
                 </div>
                 <div class="col-md-3">
                   <input
@@ -81,15 +81,22 @@
                 </div>
               </div> <!-- end form-group -->
               <div class="form-group">
-                <div class="col-md-2 period-tag-label">
-                  <label>Run every</label>
+                <div class="col-md-2">
+                  <label>Schedule</label>
                   <i class="fa fa-question-circle"
                     aria-hidden="true"
-                    uib-popover="hours:minutes:seconds"
-                    popover-trigger="'mouseenter'"></i>
+                    popover-placement="bottom"
+                    uib-popover-html="help.schedule"
+                    popover-trigger="'outsideClick'"></i>
                 </div>
-                <div class="col-md-10">
-                  <period-tag timesrc="watcher.$$schedule"></period-tag>
+                <div class="col-md-6">
+                  <input
+                    type="text"
+                    id="watcher-schedule"
+                    name="watcher-schedule"
+                    class="form-control"
+                    placeholder="every 5 mins"
+                    ng-model="watcher._source.trigger.schedule.later"/>
                 </div>
               </div> <!-- end form-group -->
             </div> <!-- end tab-content -->
@@ -287,7 +294,7 @@
                   <i class="fa fa-question-circle"
                     aria-hidden="true"
                     uib-popover="The settings below will be applied if enable is checked and the editor is saved"
-                    popover-trigger="'mouseenter'"></i>
+                    popover-trigger="'outsideClick'"></i>
                 </div>
               </div> <!-- end form-group -->
               <div class="form-group">

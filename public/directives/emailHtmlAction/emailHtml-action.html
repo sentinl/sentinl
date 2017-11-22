@@ -38,16 +38,14 @@
             </label>
           </div>
           <div class="col-md-3">
-            <label class="checkbox">
-              <input type="checkbox"
-                ng-model="actionSettings.email_html.save_payload"
-                ng-checked="actionSettings.email_html.save_payload"
-              /> save payload
-              <i class="fa fa-question-circle"
-                aria-hidden="true"
-                uib-popover="{{help.action.save_payload}}"
-                popover-trigger="'mouseenter'"></i>
-            </label>
+            <input type="checkbox"
+              ng-model="actionSettings.email_html.save_payload"
+              ng-checked="actionSettings.email_html.save_payload"
+            /> save payload
+            <i class="fa fa-question-circle"
+              aria-hidden="true"
+              uib-popover="{{help.action.save_payload}}"
+              popover-trigger="'outsideClick'"></i>
           </div>
         </div> <!-- end form-group -->
 

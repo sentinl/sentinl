@@ -8,6 +8,8 @@ import WatcherHelper from '../classes/WatcherHelper';
 import anomalyTemplate from '../defaults/templates/anomaly';
 import rangeTemplate from '../defaults/templates/range';
 
+import help from '../messages/help.json';
+
 // EDITOR CONTROLLER
 app.controller('EditorController', function ($rootScope, $scope, $route, $interval,
   $timeout, timefilter, Private, createNotifier, $window, $uibModal, Promise,
@@ -27,6 +29,10 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
   const notify = createNotifier({
     location: `Sentinl Watcher ${tabName}`
   });
+
+  $scope.help = {
+    schedule: help.schedule
+  };
 
   /**
   * Initializes watcher editor page.
@@ -132,28 +138,6 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
     };
 
     /**
-    * Initilizes watcher execution schedule.
-    */
-    const initSchedule = function () {
-      $scope.watcher.$$schedule = {
-        hours: 0,
-        mins: 0,
-        secs: 0
-      };
-      forEach($scope.watcher._source.trigger.schedule.later.split(','), (period) => {
-        if (period.match(/hour/i)) {
-          $scope.watcher.$$schedule.hours = +trim(period).split(' ')[1];
-        }
-        if (period.match(/min/i)) {
-          $scope.watcher.$$schedule.mins = +trim(period).split(' ')[1];
-        }
-        if (period.match(/sec/i)) {
-          $scope.watcher.$$schedule.secs = +trim(period).split(' ')[1];
-        }
-      });
-    };
-
-    /**
     * Initilizes actions throttle periods.
     */
     const initThrottlePeriods = function () {
@@ -177,20 +161,6 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
           secs: getSecs(action.throttle_period)
         };
       });
-    };
-
-    /**
-    * Saves schedule.
-    */
-    const saveSchedule = function () {
-      let schedule = [];
-      forEach($scope.watcher.$$schedule, (value, key) => {
-        if (value) {
-          schedule.push(`every ${value} ${key}`);
-        }
-      });
-      $scope.watcher._source.trigger.schedule.later = schedule.join(', ');
-      delete $scope.watcher.$$schedule;
     };
 
     /**
@@ -426,7 +396,6 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
       templates = true,
       raw = true,
       actions = true,
-      schedule = true,
       throttle = true
     } = {}) {
 
@@ -469,14 +438,6 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
           initActionTitles();
         } catch (e) {
           notify.error(`Fail to initialize actions: ${e}`);
-        }
-      }
-
-      if (schedule) {
-        try {
-          initSchedule();
-        } catch (e) {
-          notify.error(`Fail to initialize schedule: ${e}`);
         }
       }
 
@@ -543,16 +504,6 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
       }
 
       if ($scope.watcherForm.$valid) {
-        try {
-          saveSchedule();
-        } catch (e) {
-          notify.error(`Invalid schedule configuration: ${e}`);
-          $scope.watcherForm.$valid = false;
-          $scope.watcherForm.$invalid = true;
-          init(); // init form again
-          return;
-        }
-
         try {
           saveThrottle();
         } catch (e) {

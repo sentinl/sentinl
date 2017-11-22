@@ -17,10 +17,7 @@
  * limitations under the License.
  */
 
-/* styles */
-import 'bootstrap/dist/css/bootstrap.min.css';
-
-/* import controllers */
+/* controllers */
 import './controllers/watchersController';
 import './controllers/editorController';
 import './controllers/reportsController';
@@ -28,7 +25,7 @@ import './controllers/alarmsController';
 import './controllers/aboutController';
 import './controllers/confirmMessageController';
 
-/* import services */
+/* services */
 import './services/watcher';
 import './services/script';
 import './services/user';
@@ -37,10 +34,10 @@ import './services/report';
 import './services/navMenu';
 import './services/dataTransfer';
 
-/* import filters */
+/* filters */
 import './filters/moment';
 
-/* import directives */
+/* directives */
 import './directives/newAction/new-action';
 import './directives/emailAction/email-action';
 import './directives/emailHtmlAction/emailHtml-action';
@@ -50,18 +47,19 @@ import './directives/slackAction/slack-action';
 import './directives/consoleAction/console-action';
 import './directives/periodTag/period-tag';
 
-/* Styles */
+/* styles */
+import 'bootstrap/dist/css/bootstrap.min.css';
 import './less/main.less';
 import 'ui/autoload/styles';
 
-/* Libs */
+/* libs */
 import 'ui/kbn_top_nav';
 import 'ui/listen';
 import 'ui/timepicker';
 import 'ui/timefilter';
 import 'ui/directives/pretty_duration';
 
-/* Routes */
+/* routes */
 import './app.routes';
 
-/* Dynamically inserted modules */
+/* dynamically inserted modules */
