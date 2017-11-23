@@ -10,7 +10,7 @@ import reports from './templates/reports.html';
 uiRoutes.enable();
 
 uiRoutes
-.when('/', {
+.when('/?', {
   template: watchers,
   resolve: {
     currentTime($http) {
