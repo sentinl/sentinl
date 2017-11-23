@@ -34,14 +34,16 @@ app.controller('WatchersController', function ($rootScope, $scope, $route, $inte
   */
   $scope.playWatcher = function (task) {
     Watcher.play(task._id)
-      .then(function (response) {
-        if (response.resp.message) {
-          notify.warning(response.resp.message);
+      .then(function (data) {
+        if (data.resp.message) {
+          notify.warning(data.resp.message);
         } else {
           notify.info(`Executed watcher "${task._source.title}"`);
         }
       })
-      .catch(notify.error);
+      .catch(function (error) {
+        notify.error(error);
+      });
   };
 
   /**
