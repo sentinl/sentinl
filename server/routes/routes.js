@@ -7,6 +7,7 @@ import getElasticsearchClient from '../lib/get_elasticsearch_client';
 import es from 'elasticsearch';
 import Crypto from '../lib/classes/crypto';
 import Watcher from '../lib/classes/watcher';
+import Boom from 'boom';
 
 const delay = function (ms) {
   return new Promise(function (resolve) {
@@ -256,10 +257,10 @@ export default function routes(server) {
     path: '/api/sentinl/watcher/_execute',
     handler: function (request, reply) {
       const watcher = new Watcher(server);
-      watcher.execute(request.payload).then(function (resp) {
+      return watcher.execute(request.payload).then(function (resp) {
         reply({ok: true, resp});
       }).catch(function (err) {
-        reply(handleESError(err));
+        reply(Boom.notAcceptable(err.message));
       });
     }
   });
