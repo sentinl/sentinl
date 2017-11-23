@@ -256,7 +256,11 @@ export default function routes(server) {
     path: '/api/sentinl/watcher/_execute',
     handler: function (request, reply) {
       const watcher = new Watcher(server);
-      reply(watcher.execute(request.payload));
+      watcher.execute(request.payload).then(function (resp) {
+        reply({ok: true, resp});
+      }).catch(function (err) {
+        reply(handleESError(err));
+      });
     }
   });
 

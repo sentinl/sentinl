@@ -35,8 +35,8 @@ app.controller('WatchersController', function ($rootScope, $scope, $route, $inte
   $scope.playWatcher = function (task) {
     Watcher.play(task._id)
       .then(function (response) {
-        if (response.message) {
-          notify.error(response.message);
+        if (response.resp.message) {
+          notify.warning(response.resp.message);
         } else {
           notify.info(`Executed watcher "${task._source.title}"`);
         }
