@@ -1,5 +1,6 @@
 /* global angular */
 import { get, keys, trim, has, includes, forEach, isObject, isEmpty } from 'lodash';
+import later from 'later';
 import confirmMessage from '../templates/confirm-message.html';
 
 import { app } from '../app.module';
@@ -168,11 +169,13 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
     */
     const saveThrottle = function () {
       forEach($scope.watcher._source.actions, (action) => {
-        forEach(action.$$throttle, (value, key) => {
-          if (!value) action.$$throttle[key] = 0;
-        });
-        action.throttle_period = `${action.$$throttle.hours}h${action.$$throttle.mins}m${action.$$throttle.secs}s`;
-        delete action.$$throttle;
+        if (action.$$throttle) {
+          forEach(action.$$throttle, (value, key) => {
+            if (!value) action.$$throttle[key] = 0;
+          });
+          action.throttle_period = `${action.$$throttle.hours}h${action.$$throttle.mins}m${action.$$throttle.secs}s`;
+          delete action.$$throttle;
+        }
       });
     };
 
@@ -480,7 +483,7 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
         delete $scope.watcher.$$condition_value;
       }
 
-      if ($scope.form.rawEnabled) {
+      if ($scope.form.rawEnabled) { // Raw
         try {
           // All settings will have been overwritten if enable is checked and the watcher is saved.
           $scope.watcher = angular.fromJson($scope.watcher.$$raw);
@@ -507,7 +510,7 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
         try {
           saveThrottle();
         } catch (e) {
-          notify.error(`Invalid throttle configuration: ${e}`);
+          notify.error(`Invalid throttle configuration.`);
           $scope.watcherForm.$valid = false;
           $scope.watcherForm.$invalid = true;
           init(); // init form again
@@ -549,6 +552,14 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
       if ($scope.watcherForm.$valid) {
         saveUser($scope.watcher.$$authentication.enabled)
         .then(function () {
+          if (later.parse.text($scope.watcher._source.trigger.schedule.later).error > -1) {
+            notify.error('Schedule is invalid.');
+            init({
+              fields: false
+            });
+            return;
+          }
+
           return Watcher.save($scope.watcher)
           .then(function (id) {
             const title = $scope.watcher.title ? $scope.watcher.title : get($scope.watcher, '_source.title');
