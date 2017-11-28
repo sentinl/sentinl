@@ -47,7 +47,7 @@ describe('editorController', function () {
 
   describe('new watcher', function () {
 
-    const initNew = function (done) {
+    const initNew = function ($provide) {
       ngMock.module('kibana');
 
       ngMock.inject(function ($rootScope, $controller, _$location_, _$httpBackend_, _$route_,
@@ -102,6 +102,10 @@ describe('editorController', function () {
     };
 
     beforeEach(function () {
+      ngMock.module('kibana', function ($provide) {
+        $provide.constant('sentinlConfig', {});
+      });
+
       initNew();
       noDigestPromises.activate();
     });
@@ -181,7 +185,6 @@ describe('editorController', function () {
     });
   });
 
-
   describe('edit watcher', function () {
 
     const initEdit = function (done) {
@@ -237,6 +240,10 @@ describe('editorController', function () {
     };
 
     beforeEach(function () {
+      ngMock.module('kibana', function ($provide) {
+        $provide.constant('sentinlConfig', {});
+      });
+
       initEdit();
     });
 

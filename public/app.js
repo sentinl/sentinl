@@ -17,9 +17,10 @@
  * limitations under the License.
  */
 
+/* routes */
+import './app.routes';
+
 /* controllers */
-import './controllers/watchersController';
-import './controllers/editorController';
 import './controllers/reportsController';
 import './controllers/alarmsController';
 import './controllers/aboutController';
@@ -33,9 +34,6 @@ import './services/alarm';
 import './services/report';
 import './services/navMenu';
 import './services/dataTransfer';
-
-/* filters */
-import './filters/moment';
 
 /* directives */
 import './directives/newAction/new-action';
@@ -58,8 +56,5 @@ import 'ui/listen';
 import 'ui/timepicker';
 import 'ui/timefilter';
 import 'ui/directives/pretty_duration';
-
-/* routes */
-import './app.routes';
 
 /* dynamically inserted modules */

@@ -12,6 +12,7 @@ uiRoutes.enable();
 uiRoutes
 .when('/?', {
   template: watchers,
+  controller: 'WatchersController',
   resolve: {
     currentTime($http) {
       return $http.get('../api/sentinl/time').then((resp) => resp.data.time);
@@ -22,8 +23,9 @@ uiRoutes
 uiRoutes
 .when('/editor/:watcherId?', {
   template: editor,
+  controller: 'EditorController',
   resolve: {
-    currentTime($http) {
+    currentTime: function ($http) {
       return $http.get('../api/sentinl/time').then((resp) => resp.data.time);
     }
   }
@@ -32,8 +34,9 @@ uiRoutes
 uiRoutes
 .when('/wizard/:watcherId?', {
   template: wizard,
+  controller: 'EditorController',
   resolve: {
-    currentTime($http) {
+    currentTime: function ($http) {
       return $http.get('../api/sentinl/time').then((resp) => resp.data.time);
     }
   }
@@ -43,7 +46,7 @@ uiRoutes
 .when('/alarms', {
   template: alarms,
   resolve: {
-    currentTime($http) {
+    currentTime: function ($http) {
       return $http.get('../api/sentinl/time').then((resp) => resp.data.time);
     }
   }
@@ -53,7 +56,7 @@ uiRoutes
 .when('/reports', {
   template: reports,
   resolve: {
-    currentTime($http) {
+    currentTime: function ($http) {
       return $http.get('../api/sentinl/time').then((resp) => resp.data.time);
     }
   }
@@ -61,5 +64,10 @@ uiRoutes
 
 uiRoutes
 .when('/about', {
-  template: about
+  template: about,
+  resolve: {
+    currentTime: function ($http) {
+      return $http.get('../api/sentinl/time').then((resp) => resp.data.time);
+    }
+  }
 });

@@ -5,10 +5,9 @@ import $ from 'jquery';
 import ace from 'ace';
 
 import confirmMessage from '../templates/confirm-message.html';
-import { app } from '../app.module';
 
 // WATCHERS CONTROLLER
-app.controller('WatchersController', function ($rootScope, $scope, $route, $interval,
+const WatchersController = function ($rootScope, $scope, $route, $interval,
   $timeout, timefilter, Private, createNotifier, $window, $http, $uibModal, $log, navMenu,
   globalNavState, $location, dataTransfer, Watcher, Script, Promise) {
 
@@ -202,4 +201,10 @@ app.controller('WatchersController', function ($rootScope, $scope, $route, $inte
   }, 1000);
   $scope.$watch('$destroy', unsubscribe);
 
-});
+};
+
+WatchersController.$inject = ['$rootScope', '$scope', '$route', '$interval',
+'$timeout', 'timefilter', 'Private', 'createNotifier', '$window', '$http', '$uibModal', '$log', 'navMenu',
+'globalNavState', '$location', 'dataTransfer', 'Watcher', 'Script', 'Promise'];
+export default angular.module('WatchersController', [])
+.controller('WatchersController', WatchersController);

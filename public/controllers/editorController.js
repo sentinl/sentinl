@@ -3,7 +3,6 @@ import { get, keys, trim, has, includes, forEach, isObject, isEmpty } from 'loda
 import later from 'later';
 import confirmMessage from '../templates/confirm-message.html';
 
-import { app } from '../app.module';
 import WatcherHelper from '../classes/WatcherHelper';
 
 import anomalyTemplate from '../defaults/templates/anomaly';
@@ -12,11 +11,12 @@ import rangeTemplate from '../defaults/templates/range';
 import help from '../messages/help.json';
 
 // EDITOR CONTROLLER
-app.controller('EditorController', function ($rootScope, $scope, $route, $interval,
+const EditorController = function (sentinlConfig, $rootScope, $scope, $route, $interval,
   $timeout, timefilter, Private, createNotifier, $window, $uibModal, Promise,
   $log, navMenu, globalNavState, $routeParams, dataTransfer, $location, Watcher, Script, User) {
   $scope.title = 'Sentinl: Editor';
   $scope.description = 'Kibi/Kibana Report App for Elasticsearch';
+  $scope.sentinlConfig = sentinlConfig;
 
   let editorMode = $location.$$path.slice(1); // modes: editor, wizard
   if (includes(editorMode, '/')) editorMode = editorMode.split('/')[0];
@@ -620,5 +620,10 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
       initEditor();  // start editing the watcher
     }
   }
+};
 
-});
+EditorController.$inject = ['sentinlConfig', '$rootScope', '$scope', '$route', '$interval',
+'$timeout', 'timefilter', 'Private', 'createNotifier', '$window', '$uibModal', 'Promise',
+'$log', 'navMenu', 'globalNavState', '$routeParams', 'dataTransfer', '$location', 'Watcher', 'Script', 'User'];
+export default angular.module('EditorController', [])
+.controller('EditorController', EditorController);

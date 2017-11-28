@@ -18,7 +18,7 @@
  */
 
 import fs from 'fs';
-import _ from 'lodash';
+import { forEach, difference } from 'lodash';
 
 export default function (kibana) {
   let requirements = ['kibana', 'elasticsearch'];
@@ -39,7 +39,7 @@ export default function (kibana) {
     const data = fs.readFileSync(pathForLibs);
     const libs = data.toString().trim().split('\n');
 
-    _.forEach(_.difference(libsToImport, libs), (lib) => {
+    forEach(difference(libsToImport, libs), (lib) => {
       fs.appendFileSync(pathForLibs, `${lib}\n`);
     });
   }
@@ -58,10 +58,17 @@ export default function (kibana) {
           return {
             kbnIndex: config.get('kibana.index'),
             esShardTimeout: config.get('elasticsearch.shardTimeout'),
-            esApiVersion: config.get('elasticsearch.apiVersion')
+            esApiVersion: config.get('elasticsearch.apiVersion'),
+            sentinlConfig: {
+              es: {
+                watcher: {
+                  schedule_timezone: config.get('sentinl.es.watcher.schedule_timezone')
+                }
+              }
+            }
           };
         }
-      }
+      },
     },
     config: function (Joi) {
       return Joi.object({

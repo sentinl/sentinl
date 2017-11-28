@@ -79,7 +79,7 @@
             </tr>
           <tbody ng-repeat="report in reports | orderBy:'_source[\'@timestamp\']':true">
             <tr ng-class-odd="'alarm-row-odd'" ng-class-even="'alarm-row'">
-              <td>{{ report._source['@timestamp'] | moment }}</td>
+              <td>{{ report._source['@timestamp'] | dateFormat }}</td>
               <td>{{ report._source.level }}</td>
               <td>{{ report._type }}</td>
               <td>{{ report._source.message }}</td>

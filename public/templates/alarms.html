@@ -78,7 +78,7 @@
             </tr>
           <tbody ng-repeat="alarm in alarms | orderBy:'_source[\'@timestamp\']':true">
             <tr ng-class-odd="'alarm-row-odd'" ng-class-even="'alarm-row'">
-              <td>{{ alarm._source['@timestamp'] | moment }}</td>
+              <td>{{ alarm._source['@timestamp'] | dateFormat }}</td>
               <td>{{ alarm._source.level }}</td>
               <td>{{ alarm._type }}</td>
               <td>{{ alarm._source.message }}</td>

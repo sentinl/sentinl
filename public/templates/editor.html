@@ -1,4 +1,4 @@
-<div class="app-container sentinl" ng-controller="EditorController" id="main">
+<div class="app-container sentinl" id="main">
   <kbn-top-nav name="sentinl" config="topNavMenu">
     <!-- Transcluded elements. -->
     <div data-transclude-slots>
@@ -96,7 +96,11 @@
                     name="watcher-schedule"
                     class="form-control"
                     placeholder="every 5 mins"
-                    ng-model="watcher._source.trigger.schedule.later"/>
+                    ng-model="watcher._source.trigger.schedule.later"
+                    ng-model-options="{ debounce: 1000 }"/>
+                </div>
+                <div class="col-md-4">
+                  <p>Next execution: {{watcher._source.trigger.schedule.later | nextScheduleOccurrence: sentinlConfig}}</p>
                 </div>
               </div> <!-- end form-group -->
             </div> <!-- end tab-content -->
