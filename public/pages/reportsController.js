@@ -1,11 +1,10 @@
 /* global angular */
-import _ from 'lodash';
+import { get, isNumber } from 'lodash';
 import moment from 'moment';
 
 import confirmMessage from '../templates/confirm-message.html';
-import { app } from '../app.module';
 
-app.controller('ReportsController', function ($rootScope, $scope, $route, $interval,
+const ReportsController = function ($rootScope, $scope, $route, $interval,
   $timeout, timefilter, Private, createNotifier, $window, $uibModal, navMenu, globalNavState, Report) {
   $scope.title = 'Sentinl: Reports';
   $scope.description = 'Kibi/Kibana Report App for Elasticsearch';
@@ -44,7 +43,7 @@ app.controller('ReportsController', function ($rootScope, $scope, $route, $inter
 
   $rootScope.$watchCollection('timefilter.time', function (newvar, oldvar) {
     if (newvar === oldvar) { return; }
-    let timeInterval = _.get($rootScope, 'timefilter.time');
+    let timeInterval = get($rootScope, 'timefilter.time');
     if (timeInterval) {
       $scope.timeInterval = timeInterval;
       Report.updateFilter($scope.timeInterval)
@@ -53,8 +52,8 @@ app.controller('ReportsController', function ($rootScope, $scope, $route, $inter
   });
 
   $rootScope.$watchCollection('timefilter.refreshInterval', function () {
-    let refreshValue = _.get($rootScope, 'timefilter.refreshInterval.value');
-    let refreshPause = _.get($rootScope, 'timefilter.refreshInterval.pause');
+    let refreshValue = get($rootScope, 'timefilter.refreshInterval.value');
+    let refreshPause = get($rootScope, 'timefilter.refreshInterval.pause');
 
     // Kill any existing timer immediately
     if ($scope.refreshreports) {
@@ -73,7 +72,7 @@ app.controller('ReportsController', function ($rootScope, $scope, $route, $inter
     // Process New Filter
     if (refreshValue !== $scope.currentRefresh && refreshValue !== 0) {
       // new refresh value
-      if (_.isNumber(refreshValue) && !refreshPause) {
+      if (isNumber(refreshValue) && !refreshPause) {
         $scope.newRefresh = refreshValue;
         // Reset Interval & Schedule Next
         $scope.refreshreports = $timeout(function () {
@@ -124,5 +123,8 @@ app.controller('ReportsController', function ($rootScope, $scope, $route, $inter
     $scope.utcTime = utcTime.add(1, 'second').format('HH:mm:ss');
   }, 1000);
   $scope.$watch('$destroy', unsubscribe);
+};
 
-});
+ReportsController.$inject = ['$rootScope', '$scope', '$route', '$interval',
+'$timeout', 'timefilter', 'Private', 'createNotifier', '$window', '$uibModal', 'navMenu', 'globalNavState', 'Report'];
+export default angular.module('apps/sentinl.reportsPage', []).controller('ReportsController', ReportsController);

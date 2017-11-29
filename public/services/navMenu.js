@@ -1,13 +1,13 @@
-import _ from 'lodash';
+/*global angular*/
+import { forEach, filter, includes } from 'lodash';
 import uiChrome from 'ui/chrome';
 
 import newWatcherMenu from '../templates/new-watcher-top-nav.html';
-import { app } from '../app.module';
 
 const impactLogo = require('plugins/sentinl/sentinl-white-logo.svg');
 const smallLogo = require('plugins/sentinl/sentinl.svg');
 
-app.factory('navMenu', ['$rootScope', 'kbnUrl', function ($rootScope, kbnUrl) {
+const navMenu = function ($rootScope, kbnUrl) {
   return {
     setKbnLogo: function (isOpen) {
       if (isOpen) {
@@ -56,7 +56,7 @@ app.factory('navMenu', ['$rootScope', 'kbnUrl', function ($rootScope, kbnUrl) {
           }
         ];
 
-        _.forEach(editorMenu, (menu) => nav.unshift(menu));
+        forEach(editorMenu, (menu) => nav.unshift(menu));
 
         return nav;
       }
@@ -74,12 +74,15 @@ app.factory('navMenu', ['$rootScope', 'kbnUrl', function ($rootScope, kbnUrl) {
       };
 
       if (tmpTabs) {
-        _.forEach(tmpTabs, (tab) => tabMenu.list.push({ display: tab.name, url: tab.url }));
+        forEach(tmpTabs, (tab) => tabMenu.list.push({ display: tab.name, url: tab.url }));
       } else {
-        tabMenu.list = _.filter(tabMenu.list, (tab) => _.includes(['Watchers', 'Alarms', 'Reports'], tab.display));
+        tabMenu.list = filter(tabMenu.list, (tab) => includes(['Watchers', 'Alarms', 'Reports'], tab.display));
       }
 
       return tabMenu;
     }
   };
-}]);
+};
+
+navMenu.$inject = ['$rootScope', 'kbnUrl'];
+export default angular.module('apps/sentinl.navMenu', []).factory('navMenu', navMenu);

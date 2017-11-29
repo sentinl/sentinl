@@ -1,5 +1,5 @@
 /* global angular */
-import _ from 'lodash';
+import { isObject, find, keys, forEach } from 'lodash';
 import moment from 'moment';
 import $ from 'jquery';
 import ace from 'ace';
@@ -54,7 +54,7 @@ const WatchersController = function ($rootScope, $scope, $route, $interval,
   $scope.editWatcher = function (watcher, type) {
     let path = `/${type}`;
 
-    if (_.isObject(watcher)) {
+    if (isObject(watcher)) {
       dataTransfer.setWatcher(watcher);
     } else {
       path += `/${watcher}`;
@@ -135,7 +135,7 @@ const WatchersController = function ($rootScope, $scope, $route, $interval,
     Watcher.save($scope.watchers[index])
       .then(function (id) {
         const status = $scope.watchers[index]._source.disable ? 'Disabled' : 'Enabled';
-        const watcher = _.find($scope.watchers, (watcher) => watcher._id === id);
+        const watcher = find($scope.watchers, (watcher) => watcher._id === id);
         notify.info(`${status} watcher "${watcher._source.title}"`);
       })
       .catch(notify.error);
@@ -174,11 +174,11 @@ const WatchersController = function ($rootScope, $scope, $route, $interval,
   *
   * @param {array} templates - list of field names for templates
   */
-  Promise.map(_.keys(templates), function (field) {
+  Promise.map(keys(templates), function (field) {
     return Script.list(field)
       .then(function (_templates_) {
         if (_templates_.length) {
-          _.forEach(_templates_, function (template) {
+          forEach(_templates_, function (template) {
             templates[field][template._id] = template;
           });
         }
@@ -206,5 +206,4 @@ const WatchersController = function ($rootScope, $scope, $route, $interval,
 WatchersController.$inject = ['$rootScope', '$scope', '$route', '$interval',
 '$timeout', 'timefilter', 'Private', 'createNotifier', '$window', '$http', '$uibModal', '$log', 'navMenu',
 'globalNavState', '$location', 'dataTransfer', 'Watcher', 'Script', 'Promise'];
-export default angular.module('WatchersController', [])
-.controller('WatchersController', WatchersController);
+export default angular.module('apps/sentinl.watchersPage', []).controller('WatchersController', WatchersController);

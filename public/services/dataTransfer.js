@@ -1,4 +1,4 @@
-import { app } from '../app.module';
+/*global angular*/
 
 class DataTransfer {
 
@@ -25,4 +25,4 @@ class DataTransfer {
 
 };
 
-app.factory('dataTransfer', () => new DataTransfer());
+export default angular.module('apps/sentinl.dataTransfer', []).factory('dataTransfer', () => new DataTransfer());

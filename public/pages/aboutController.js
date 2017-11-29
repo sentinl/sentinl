@@ -1,9 +1,7 @@
-import _ from 'lodash';
+/*global angular*/
 import moment from 'moment';
 
-import { app } from '../app.module';
-
-app.controller('AboutController', function ($scope, $route, $interval, timefilter, createNotifier, navMenu, globalNavState) {
+const AboutController = function ($scope, $route, $interval, timefilter, createNotifier, navMenu, globalNavState) {
   $scope.title = 'Sentinl: About';
   $scope.description = 'Kibi/Kibana Report App for Elasticsearch';
   timefilter.enabled = false;
@@ -31,4 +29,7 @@ app.controller('AboutController', function ($scope, $route, $interval, timefilte
     $scope.utcTime = utcTime.add(1, 'second').format('HH:mm:ss');
   }, 1000);
   $scope.$watch('$destroy', unsubscribe);
-});
+};
+
+AboutController.$inject = ['$scope', '$route', '$interval', 'timefilter', 'createNotifier', 'navMenu', 'globalNavState'];
+export default angular.module('apps/sentinl.aboutPage', []).controller('AboutController', AboutController);

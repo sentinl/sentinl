@@ -1,8 +1,7 @@
 import watcherEmailHtmlAction from './emailHtml-action.html';
-import { app } from '../../app.module';
 import help from '../../messages/help';
 
-app.directive('emailHtmlAction', function ($rootScope) {
+const emailHtmlAction = function ($rootScope) {
   function actionDirective(scope, element, attrs) {
     scope.help = help;
     scope.action = {
@@ -24,4 +23,7 @@ app.directive('emailHtmlAction', function ($rootScope) {
     scope: true,
     link: actionDirective
   };
-});
+};
+
+emailHtmlAction.$inject = ['$rootScope'];
+export default emailHtmlAction;

@@ -1,8 +1,8 @@
 describe('Sentinl', function () {
-  require('../controllers/__tests__/editorController');
-  require('../controllers/__tests__/watchersController');
-  require('../controllers/__tests__/reportsController');
-  require('../controllers/__tests__/alarmsController');
+  require('../pages/__tests__/editorController');
+  require('../pages/__tests__/watchersController');
+  require('../pages/__tests__/reportsController');
+  require('../pages/__tests__/alarmsController');
   require('../services/__tests__/watcher');
   require('../services/__tests__/alarm');
   require('../services/__tests__/user');

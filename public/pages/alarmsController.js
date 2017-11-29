@@ -1,12 +1,11 @@
 /* global angular */
-import _ from 'lodash';
+import { get, isNumber } from 'lodash';
 import moment from 'moment';
 import uiChrome from 'ui/chrome';
 
 import confirmMessage from '../templates/confirm-message.html';
-import { app } from '../app.module';
 
-app.controller('AlarmsController', function ($rootScope, $scope, $route, $interval,
+const AlarmsController = function ($rootScope, $scope, $route, $interval,
   $timeout, $injector, timefilter, Private, createNotifier, $window, $uibModal, navMenu,
   globalNavState, Alarm) {
   $scope.title = 'Sentinl: Alarms';
@@ -46,7 +45,7 @@ app.controller('AlarmsController', function ($rootScope, $scope, $route, $interv
 
   $rootScope.$watchCollection('timefilter.time', function (newvar, oldvar) {
     if (newvar === oldvar) { return; }
-    let timeInterval = _.get($rootScope, 'timefilter.time');
+    let timeInterval = get($rootScope, 'timefilter.time');
     if (timeInterval) {
       $scope.timeInterval = timeInterval;
       Alarm.updateFilter($scope.timeInterval)
@@ -55,8 +54,8 @@ app.controller('AlarmsController', function ($rootScope, $scope, $route, $interv
   });
 
   $rootScope.$watchCollection('timefilter.refreshInterval', function () {
-    let refreshValue = _.get($rootScope, 'timefilter.refreshInterval.value');
-    let refreshPause = _.get($rootScope, 'timefilter.refreshInterval.pause');
+    let refreshValue = get($rootScope, 'timefilter.refreshInterval.value');
+    let refreshPause = get($rootScope, 'timefilter.refreshInterval.pause');
 
     // Kill any existing timer immediately
     if ($scope.refreshalarms) {
@@ -73,7 +72,7 @@ app.controller('AlarmsController', function ($rootScope, $scope, $route, $interv
     // Process New Filter
     if (refreshValue !== $scope.currentRefresh && refreshValue !== 0) {
       // new refresh value
-      if (_.isNumber(refreshValue) && !refreshPause) {
+      if (isNumber(refreshValue) && !refreshPause) {
         $scope.newRefresh = refreshValue;
         // Reset Interval & Schedule Next
         $scope.refreshalarms = $timeout(function () {
@@ -122,5 +121,9 @@ app.controller('AlarmsController', function ($rootScope, $scope, $route, $interv
     $scope.utcTime = utcTime.add(1, 'second').format('HH:mm:ss');
   }, 1000);
   $scope.$watch('$destroy', unsubscribe);
+};
 
-});
+AlarmsController.$inject = ['$rootScope', '$scope', '$route', '$interval',
+  '$timeout', '$injector', 'timefilter', 'Private', 'createNotifier', '$window', '$uibModal', 'navMenu',
+  'globalNavState', 'Alarm'];
+export default angular.module('apps/sentinl.alarmsPage', []).controller('AlarmsController', AlarmsController);

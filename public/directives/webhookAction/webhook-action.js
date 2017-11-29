@@ -1,10 +1,9 @@
-/* global angular */
-import _ from 'lodash';
+/*global angular*/
+import { has } from 'lodash';
 import watcherWebhookAction from './webhook-action.html';
-import { app } from '../../app.module';
 import help from '../../messages/help';
 
-app.directive('webhookAction', function ($rootScope) {
+const webhookAction = function ($rootScope) {
   function actionDirective(scope, element, attrs) {
     scope.help = help;
     scope.action = {
@@ -15,7 +14,7 @@ app.directive('webhookAction', function ($rootScope) {
       }
     };
 
-    if (_.has(scope.watcher._source.actions[attrs.name].webhook, 'headers')) {
+    if (has(scope.watcher._source.actions[attrs.name].webhook, 'headers')) {
       let headers = scope.watcher._source.actions[attrs.name].webhook.headers;
       scope.watcher._source.actions[attrs.name].webhook._headers = angular.toJson(headers, 'pretty');
     }
@@ -36,4 +35,7 @@ app.directive('webhookAction', function ($rootScope) {
     scope: true,
     link: actionDirective
   };
-});
+};
+
+webhookAction.$inject = ['$rootScope'];
+export default webhookAction;

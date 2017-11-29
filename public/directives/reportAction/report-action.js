@@ -1,8 +1,7 @@
 import watcherReportAction from './report-action.html';
-import { app } from '../../app.module';
 import help from '../../messages/help';
 
-app.directive('reportAction', function ($rootScope) {
+const reportAction = function ($rootScope) {
   function actionDirective(scope, element, attrs) {
     scope.help = help;
     scope.action = {
@@ -29,4 +28,7 @@ app.directive('reportAction', function ($rootScope) {
     scope: true,
     link: actionDirective
   };
-});
+};
+
+reportAction.$inject = ['$rootScope'];
+export default reportAction;

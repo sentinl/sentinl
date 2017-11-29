@@ -45,6 +45,7 @@ uiRoutes
 uiRoutes
 .when('/alarms', {
   template: alarms,
+  controller: 'AlarmsController',
   resolve: {
     currentTime: function ($http) {
       return $http.get('../api/sentinl/time').then((resp) => resp.data.time);
@@ -55,6 +56,7 @@ uiRoutes
 uiRoutes
 .when('/reports', {
   template: reports,
+  controller: 'ReportsController',
   resolve: {
     currentTime: function ($http) {
       return $http.get('../api/sentinl/time').then((resp) => resp.data.time);
@@ -65,6 +67,7 @@ uiRoutes
 uiRoutes
 .when('/about', {
   template: about,
+  controller: 'AboutController',
   resolve: {
     currentTime: function ($http) {
       return $http.get('../api/sentinl/time').then((resp) => resp.data.time);

@@ -1,7 +1,7 @@
-import { app } from '../app.module';
-import _ from 'lodash';
+/*global angular*/
+import { isObject } from 'lodash';
 
-app.factory('User', ['$http', '$injector', function ($http, $injector) {
+const User = function ($http, $injector) {
 
   let savedObjectsAPI = undefined;
   let savedUsers = undefined;
@@ -18,7 +18,7 @@ app.factory('User', ['$http', '$injector', function ($http, $injector) {
   */
   return class User {
 
-    static savedObjectsAPIEnabled = _.isObject(savedObjectsAPI) && _.isObject(savedUsers);
+    static savedObjectsAPIEnabled = isObject(savedObjectsAPI) && isObject(savedUsers);
 
     /**
     * Creates new user.
@@ -50,4 +50,7 @@ app.factory('User', ['$http', '$injector', function ($http, $injector) {
 
   };
 
-}]);
+};
+
+User.$inject = ['$http', '$injector'];
+export default angular.module('apps/sentinl.user', []).factory('User', User);

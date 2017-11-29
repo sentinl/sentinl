@@ -1,8 +1,7 @@
 import watcherSlackAction from './slack-action.html';
-import { app } from '../../app.module';
 import help from '../../messages/help';
 
-app.directive('slackAction', function ($rootScope) {
+const slackAction = function ($rootScope) {
   function actionDirective(scope, element, attrs) {
     scope.help = help;
     scope.action = {
@@ -24,4 +23,7 @@ app.directive('slackAction', function ($rootScope) {
     scope: true,
     link: actionDirective
   };
-});
+};
+
+slackAction.$inject = ['$rootScope'];
+export default slackAction;

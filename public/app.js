@@ -17,33 +17,10 @@
  * limitations under the License.
  */
 
+import './app.module';
+
 /* routes */
 import './app.routes';
-
-/* controllers */
-import './controllers/reportsController';
-import './controllers/alarmsController';
-import './controllers/aboutController';
-import './controllers/confirmMessageController';
-
-/* services */
-import './services/watcher';
-import './services/script';
-import './services/user';
-import './services/alarm';
-import './services/report';
-import './services/navMenu';
-import './services/dataTransfer';
-
-/* directives */
-import './directives/newAction/new-action';
-import './directives/emailAction/email-action';
-import './directives/emailHtmlAction/emailHtml-action';
-import './directives/webhookAction/webhook-action';
-import './directives/reportAction/report-action';
-import './directives/slackAction/slack-action';
-import './directives/consoleAction/console-action';
-import './directives/periodTag/period-tag';
 
 /* styles */
 import 'bootstrap/dist/css/bootstrap.min.css';

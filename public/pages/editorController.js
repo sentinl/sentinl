@@ -625,5 +625,4 @@ const EditorController = function (sentinlConfig, $rootScope, $scope, $route, $i
 EditorController.$inject = ['sentinlConfig', '$rootScope', '$scope', '$route', '$interval',
 '$timeout', 'timefilter', 'Private', 'createNotifier', '$window', '$uibModal', 'Promise',
 '$log', 'navMenu', 'globalNavState', '$routeParams', 'dataTransfer', '$location', 'Watcher', 'Script', 'User'];
-export default angular.module('EditorController', [])
-.controller('EditorController', EditorController);
+export default angular.module('apps/sentinl.editorPage', []).controller('EditorController', EditorController);

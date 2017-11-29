@@ -1,7 +1,5 @@
-import { app } from '../app.module';
-import _ from 'lodash';
-
-app.factory('Report', ['$http', 'Alarm', function ($http, Alarm) {
+/*global angular*/
+const Report = function ($http, Alarm) {
 
   /**
   * Handles report documents.
@@ -23,4 +21,7 @@ app.factory('Report', ['$http', 'Alarm', function ($http, Alarm) {
 
   };
 
-}]);
+};
+
+Report.$inject = ['$http', 'Alarm'];
+export default angular.module('apps/sentinl.report', []).factory('Report', Report);

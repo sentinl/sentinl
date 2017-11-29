@@ -1,7 +1,5 @@
-import { app } from '../app.module';
-import _ from 'lodash';
-
-app.factory('Alarm', ['$http', function ($http) {
+/*global angular*/
+const Alarm = function ($http) {
 
   /**
   * Handles alarm documents.
@@ -56,4 +54,7 @@ app.factory('Alarm', ['$http', function ($http) {
 
   };
 
-}]);
+};
+
+Alarm.$inject = ['$http'];
+export default angular.module('apps/sentinl.alarm', []).factory('Alarm', Alarm);

@@ -1,7 +1,6 @@
 import periodTagTemplate from './period-tag.html';
-import { app } from '../../app.module';
 
-app.directive('periodTag', function () {
+const periodTag = function () {
 
   function actionDirective(scope, element, attrs) {
     scope.action = {
@@ -20,4 +19,7 @@ app.directive('periodTag', function () {
     },
     link: actionDirective
   };
-});
+};
+
+periodTag.$inject = [];
+export default periodTag;

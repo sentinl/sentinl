@@ -2,12 +2,16 @@
 import { uiModules } from 'ui/modules';
 import 'angular-ui-bootstrap';
 import Filters from './filters';
-import Controllers from './controllers';
+import Pages from './pages';
+import Services from './services';
+import Directives from './directives';
 
 const app = uiModules.get('apps/sentinl', [
   'ui.bootstrap',
   Filters.name,
-  Controllers.name
+  Pages.name,
+  Services.name,
+  Directives.name
 ]);
 
 export { app };

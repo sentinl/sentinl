@@ -1,7 +1,6 @@
 import newWatcherAction from './new-action.html';
-import { app } from '../../app.module';
 
-app.directive('newAction', function ($rootScope) {
+const newAction = function ($rootScope) {
   function actionDirective(scope, element, attrs) {
 
     scope.action = {
@@ -143,4 +142,7 @@ app.directive('newAction', function ($rootScope) {
     scope: true,
     link: actionDirective
   };
-});
+};
+
+newAction.$inject = ['$rootScope'];
+export default newAction;
