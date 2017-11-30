@@ -23,6 +23,7 @@ class NextScheduleOccurrence {
     if (this.timezone === 'local') {
       later.date.localTime();
     }
+    this.schedule = this.schedule || '0';
     return moment(later.schedule(later.parse.text(this.schedule)).next()).format('D/M/YYYY H:m:s');
   }
 
