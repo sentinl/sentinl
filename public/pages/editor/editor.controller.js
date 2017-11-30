@@ -300,7 +300,7 @@ const EditorController = function (sentinlConfig, $rootScope, $scope, $route, $i
           }
         }
       }, () => {
-        $log.info(`You choose not deleting the action "${actionName}"`);
+        $log.info('Sentinl.', `You choose not deleting the action "${actionName}"`);
       });
     };
 
@@ -554,7 +554,7 @@ const EditorController = function (sentinlConfig, $rootScope, $scope, $route, $i
         .then(function () {
           if (later.parse.text($scope.watcher._source.trigger.schedule.later).error > -1) {
             notify.error('Schedule is invalid.');
-            $log.error('Schedule is invalid:', $scope.watcher._source.trigger.schedule.later);
+            $log.error('Sentinl.', 'Schedule is invalid:', $scope.watcher._source.trigger.schedule.later);
             init({
               fields: false
             });
