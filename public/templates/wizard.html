@@ -23,8 +23,10 @@
       <!-- WATCHER WIZARD  -->
       <form name="watcherForm" class="form-horizontal" id="watcher-editor">
         <div class="form-group">
-          <div class="col-md-8">
-            <label for="watcherTitle">Give a proper name for the new watcher</label>
+          <div class="col-md-2">
+            <label>Name</label>
+          </div>
+          <div class="col-md-6">
             <input type="text" class="form-control" id="watcherTitle" ng-model="watcher._source.title">
           </div>
         </div> <!-- end form-group -->
@@ -46,17 +48,21 @@
               placeholder="every 5 mins"
               ng-model="watcher._source.trigger.schedule.later"/>
           </div>
+          <div class="col-md-4">
+            <p>Next execution: {{watcher._source.trigger.schedule.later | nextScheduleOccurrence: sentinlConfig}}</p>
+          </div>
         </div> <!-- end form-group -->
         <div class="form-group">
-          <div class="col-md-8">
-            <label for="watcherTitle">Enter number of search results there should be to execute this watcher</label>
+          <div class="col-md-2">
+            <label>Number of results</label>
+          </div>
+          <div class="col-md-6">
             <input type="number" min="0" class="form-control" id="watcherTitle" ng-model="watcher.$$condition_value">
           </div>
         </div> <!-- end form-group -->
         <div class="form-group">
           <div class="col-md-8">
             <new-action></new-action>
-            <label>Multiple actions can be defined</label>
           </div>
         </div> <!-- end form-group -->
         <div class="form-group" ng-if="actionsExist(watcher._source.actions)">
