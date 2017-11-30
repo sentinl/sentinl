@@ -4,7 +4,7 @@ import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import noDigestPromises from 'test_utils/no_digest_promises';
 
-import '../alarmsController';
+import '../alarms/alarms.controller';
 
 describe('Alarms Controller', function () {
 

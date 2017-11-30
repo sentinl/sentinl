@@ -7,7 +7,7 @@ import noDigestPromises from 'test_utils/no_digest_promises';
 
 import defaultEmailSource from '../../defaults/email_watcher';
 
-import '../watchersController';
+import '../watchers/watchers.controller';
 
 describe('watchersController', function () {
   let $httpBackend;

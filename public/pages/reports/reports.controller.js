@@ -1,8 +1,7 @@
-/* global angular */
 import { get, isNumber } from 'lodash';
 import moment from 'moment';
 
-import confirmMessage from '../templates/confirm-message.html';
+import confirmMessageTemplate from '../../confirm_message/confirm_message.html';
 
 const ReportsController = function ($rootScope, $scope, $route, $interval,
   $timeout, timefilter, Private, createNotifier, $window, $uibModal, navMenu, globalNavState, Report) {
@@ -92,7 +91,7 @@ const ReportsController = function ($rootScope, $scope, $route, $interval,
 
   $scope.deleteReport = function (index, rmindex, rmtype, rmid) {
     const confirmModal = $uibModal.open({
-      template: confirmMessage,
+      template: confirmMessageTemplate,
       controller: 'ConfirmMessageController',
       size: 'sm'
     });
@@ -127,4 +126,4 @@ const ReportsController = function ($rootScope, $scope, $route, $interval,
 
 ReportsController.$inject = ['$rootScope', '$scope', '$route', '$interval',
 '$timeout', 'timefilter', 'Private', 'createNotifier', '$window', '$uibModal', 'navMenu', 'globalNavState', 'Report'];
-export default angular.module('apps/sentinl.reportsPage', []).controller('ReportsController', ReportsController);
+export default ReportsController;

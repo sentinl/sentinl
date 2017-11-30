@@ -24,7 +24,7 @@ import './app.routes';
 
 /* styles */
 import 'bootstrap/dist/css/bootstrap.min.css';
-import './less/main.less';
+import './style/main.less';
 import 'ui/autoload/styles';
 
 /* libs */

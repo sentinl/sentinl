@@ -1,9 +1,8 @@
-/* global angular */
 import { get, isNumber } from 'lodash';
 import moment from 'moment';
 import uiChrome from 'ui/chrome';
 
-import confirmMessage from '../templates/confirm-message.html';
+import confirmMessageTemplate from '../../confirm_message/confirm_message.html';
 
 const AlarmsController = function ($rootScope, $scope, $route, $interval,
   $timeout, $injector, timefilter, Private, createNotifier, $window, $uibModal, navMenu,
@@ -90,7 +89,7 @@ const AlarmsController = function ($rootScope, $scope, $route, $interval,
 
   $scope.deleteAlarm = function (index, rmindex, rmtype, rmid) {
     const confirmModal = $uibModal.open({
-      template: confirmMessage,
+      template: confirmMessageTemplate,
       controller: 'ConfirmMessageController',
       size: 'sm'
     });
@@ -126,4 +125,4 @@ const AlarmsController = function ($rootScope, $scope, $route, $interval,
 AlarmsController.$inject = ['$rootScope', '$scope', '$route', '$interval',
   '$timeout', '$injector', 'timefilter', 'Private', 'createNotifier', '$window', '$uibModal', 'navMenu',
   'globalNavState', 'Alarm'];
-export default angular.module('apps/sentinl.alarmsPage', []).controller('AlarmsController', AlarmsController);
+export default AlarmsController;

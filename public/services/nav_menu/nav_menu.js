@@ -1,8 +1,7 @@
-/*global angular*/
 import { forEach, filter, includes } from 'lodash';
 import uiChrome from 'ui/chrome';
 
-import newWatcherMenu from '../templates/new-watcher-top-nav.html';
+import template from './nav_menu.html';
 
 const impactLogo = require('plugins/sentinl/sentinl-white-logo.svg');
 const smallLogo = require('plugins/sentinl/sentinl.svg');
@@ -34,7 +33,7 @@ const navMenu = function ($rootScope, kbnUrl) {
         nav.unshift({
           key: 'new',
           description: 'Create new watcher',
-          template: newWatcherMenu,
+          template,
           testId: 'sentinlNewWatcher'
         });
         return nav;
@@ -85,4 +84,4 @@ const navMenu = function ($rootScope, kbnUrl) {
 };
 
 navMenu.$inject = ['$rootScope', 'kbnUrl'];
-export default angular.module('apps/sentinl.navMenu', []).factory('navMenu', navMenu);
+export default navMenu;

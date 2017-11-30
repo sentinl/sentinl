@@ -1,14 +1,14 @@
 /* global angular */
 import { get, keys, trim, has, includes, forEach, isObject, isEmpty } from 'lodash';
 import later from 'later';
-import confirmMessage from '../templates/confirm-message.html';
+import confirmMessageTemplate from '../../confirm_message/confirm_message.html';
 
-import WatcherHelper from '../classes/WatcherHelper';
+import WatcherHelper from './classes/WatcherHelper';
 
-import anomalyTemplate from '../defaults/templates/anomaly';
-import rangeTemplate from '../defaults/templates/range';
+import anomalyTemplate from './templates/anomaly';
+import rangeTemplate from './templates/range';
 
-import help from '../messages/help.json';
+import help from '../../messages/help.json';
 
 // EDITOR CONTROLLER
 const EditorController = function (sentinlConfig, $rootScope, $scope, $route, $interval,
@@ -286,7 +286,7 @@ const EditorController = function (sentinlConfig, $rootScope, $scope, $route, $i
     */
     const removeAction = function (actionName) {
       const confirmModal = $uibModal.open({
-        template: confirmMessage,
+        template: confirmMessageTemplate,
         controller: 'ConfirmMessageController',
         size: 'sm'
       });
@@ -625,4 +625,4 @@ const EditorController = function (sentinlConfig, $rootScope, $scope, $route, $i
 EditorController.$inject = ['sentinlConfig', '$rootScope', '$scope', '$route', '$interval',
 '$timeout', 'timefilter', 'Private', 'createNotifier', '$window', '$uibModal', 'Promise',
 '$log', 'navMenu', 'globalNavState', '$routeParams', 'dataTransfer', '$location', 'Watcher', 'Script', 'User'];
-export default angular.module('apps/sentinl.editorPage', []).controller('EditorController', EditorController);
+export default EditorController;

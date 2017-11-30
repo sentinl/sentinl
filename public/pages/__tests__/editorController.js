@@ -7,7 +7,7 @@ import noDigestPromises from 'test_utils/no_digest_promises';
 
 import defaultEmailSource from '../../defaults/email_watcher';
 
-import '../editorController';
+import '../editor/editor.controller';
 
 describe('editorController', function () {
   let $httpBackend;

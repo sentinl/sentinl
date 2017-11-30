@@ -1,4 +1,3 @@
-/*global angular*/
 import moment from 'moment';
 
 const AboutController = function ($scope, $route, $interval, timefilter, createNotifier, navMenu, globalNavState) {
@@ -32,4 +31,4 @@ const AboutController = function ($scope, $route, $interval, timefilter, createN
 };
 
 AboutController.$inject = ['$scope', '$route', '$interval', 'timefilter', 'createNotifier', 'navMenu', 'globalNavState'];
-export default angular.module('apps/sentinl.aboutPage', []).controller('AboutController', AboutController);
+export default AboutController;

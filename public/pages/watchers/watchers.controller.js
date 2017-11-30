@@ -4,7 +4,7 @@ import moment from 'moment';
 import $ from 'jquery';
 import ace from 'ace';
 
-import confirmMessage from '../templates/confirm-message.html';
+import confirmMessageTemplate from '../../confirm_message/confirm_message.html';
 
 // WATCHERS CONTROLLER
 const WatchersController = function ($rootScope, $scope, $route, $interval,
@@ -105,7 +105,7 @@ const WatchersController = function ($rootScope, $scope, $route, $interval,
     const index = $scope.watchers.findIndex((watcher) => watcher._id === id);
 
     const confirmModal = $uibModal.open({
-      template: confirmMessage,
+      template: confirmMessageTemplate,
       controller: 'ConfirmMessageController',
       size: 'sm'
     });
@@ -206,4 +206,4 @@ const WatchersController = function ($rootScope, $scope, $route, $interval,
 WatchersController.$inject = ['$rootScope', '$scope', '$route', '$interval',
 '$timeout', 'timefilter', 'Private', 'createNotifier', '$window', '$http', '$uibModal', '$log', 'navMenu',
 'globalNavState', '$location', 'dataTransfer', 'Watcher', 'Script', 'Promise'];
-export default angular.module('apps/sentinl.watchersPage', []).controller('WatchersController', WatchersController);
+export default WatchersController;

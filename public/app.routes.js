@@ -1,11 +1,11 @@
 import uiRoutes from 'ui/routes';
 
-import watchers from './templates/watchers.html';
-import editor from './templates/editor.html';
-import wizard from './templates/wizard.html';
-import about from './templates/about.html';
-import alarms from './templates/alarms.html';
-import reports from './templates/reports.html';
+import watchers from './pages/watchers/watchers.html';
+import editor from './pages/editor/editor.html';
+import wizard from './pages/editor/wizard.html';
+import about from './pages/about/about.html';
+import alarms from './pages/alarms/alarms.html';
+import reports from './pages/reports/reports.html';
 
 uiRoutes.enable();
 
