@@ -24,7 +24,7 @@ class NextScheduleOccurrence {
       later.date.localTime();
     }
     this.schedule = this.schedule || '0';
-    return moment(later.schedule(later.parse.text(this.schedule)).next()).format('D/M/YYYY H:m:s');
+    return moment(later.schedule(later.parse.text(this.schedule)).next()).format('D/M/YYYY HH:mm:ss');
   }
 
   /*
