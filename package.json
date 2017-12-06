@@ -28,6 +28,7 @@
     "angular-ui-bootstrap": "2.5.0",
     "anomaly-finder": "1.0.1",
     "bluebird": "3.4.7",
+    "boom": "7.1.1",
     "bootstrap": "3.3.7",
     "decompress": "4.2.0",
     "elasticsearch": "13.2.0",

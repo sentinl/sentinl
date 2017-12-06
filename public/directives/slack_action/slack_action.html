@@ -1,0 +1,107 @@
+<div uib-accordion-group class="panel-default" is-open="action.status.isHeaderOpen">
+
+  <uib-accordion-heading>
+    {{actionSettings.$$title}} <i class="pull-right glyphicon"
+    ng-class="{'glyphicon-chevron-down': action.status.isHeaderOpen, 'glyphicon-chevron-right': !action.status.isHeaderOpen}"></i>
+  </uib-accordion-heading>
+
+  <div class="row" id="slack-action" class="action-panel">
+    <div class="col-12">
+      <div class="well" ng-form="slackForm">
+
+        <div class="page-header">
+          <h4><small>{{action.type}} action</small></h4>
+        </div> <!-- end page-header -->
+
+        <div class="form-group">
+          <div class="col-md-2 period-tag-label">
+            <label>Throttle</label>
+          </div>
+          <div class="col-md-10">
+            <period-tag timesrc="actionSettings.$$throttle"></period-tag>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="col-md-2 control-label">Priority</label>
+          <div class="btn-group col-md-4">
+            <label class="btn btn-danger" ng-model="actionSettings.slack.priority" btn-radio="'high'">High</label>
+            <label class="btn btn-warning" ng-model="actionSettings.slack.priority" btn-radio="'medium'">Medium</label>
+            <label class="btn btn-info" ng-model="actionSettings.slack.priority" btn-radio="'low'">Low</label>
+          </div>
+          <div class="col-md-2">
+            <label class="checkbox">
+              <input type="checkbox"
+                ng-model="actionSettings.slack.stateless"
+                ng-checked="actionSettings.slack.stateless"
+              /> stateless
+            </label>
+          </div>
+          <div class="col-md-3">
+            <input type="checkbox"
+              ng-model="actionSettings.slack.save_payload"
+              ng-checked="actionSettings.slack.save_payload"
+            /> save payload
+            <i class="fa fa-question-circle"
+              aria-hidden="true"
+              uib-popover="{{help.action.save_payload}}"
+              popover-trigger="'outsideClick'"></i>
+          </div>
+        </div>
+        <div class="form-group" ng-class="{'has-error': slackForm.slackTitle.$invalid && !slackForm.slackTitle.$pristine}">
+          <label class="col-md-2 control-label" for="slackTitle">Title</label>
+          <div class="col-md-10">
+            <input
+              type="text"
+              id="slackTitle"
+              name="slackTitle"
+              value="{{actionName}}"
+              class="form-control"
+              placeholder="{{watcher._id}}"
+              ng-model="actionSettings.$$title"
+              ng-required="actionSettings.slack.$$edit"
+            />
+          </div>
+          <p ng-show="slackForm.slackTitle.$invalid && !slackForm.slackTitle.$pristine" class="help-block">
+            Action title is required.
+          </p>
+        </div>
+        <div class="form-group" ng-class="{'has-error': slackForm.slackChannel.$invalid && !slackForm.slackChannel.$pristine}">
+          <label class="col-md-2 control-label" for="slackChannel">Channel</label>
+          <div class="col-md-10">
+            <input
+              type="text"
+              id="slackChannel"
+              name="slackChannel"
+              value="{{actionSettings.slack.channel}}"
+              class="form-control"
+              placeholder="#channel"
+              ng-model="actionSettings.slack.channel"
+              ng-required="actionSettings.slack.$$edit"
+            />
+          </div>
+          <p ng-show="slackForm.slackChannel.$invalid && !slackForm.slackChannel.$pristine" class="help-block">
+            Channel name is required.
+          </p>
+        </div>
+        <div class="form-group" ng-class="{'has-error': !actionSettings.slack.message.length}">
+          <label class="col-md-2 control-label" for="slackMessage">Message</label>
+          <div class="col-md-10">
+            <div id="slackMessage"
+              ng-model="actionSettings.slack.message"
+              ui-ace="aceOptions('behaviour')">
+            </div>
+          </div>
+          <p ng-show="!actionSettings.slack.message.length" class="text-warning">
+            Write a message.
+          </p>
+        </div>
+
+        <div class="form-group control-actions">
+          <button type="button" class="btn btn-danger pull-right" ng-click="removeAction()">Delete</button>
+        </div> <!-- end form-group -->
+
+      </div> <!-- end well -->
+    </div> <!-- end col-12 -->
+  </div> <!-- end email-action -->
+</div> <!-- end uib-accordion-group -->

@@ -1,0 +1,317 @@
+<div class="app-container sentinl" id="main">
+  <kbn-top-nav name="sentinl" config="topNavMenu">
+    <!-- Transcluded elements. -->
+    <div data-transclude-slots>
+
+      <!-- Tabs. -->
+      <div data-transclude-slot="bottomRow" class="kuiLocalTabs">
+        <a
+          ng-repeat="item in tabsMenu.list"
+          class="kuiLocalTab"
+          ng-class="{'kuiLocalTab-isSelected': tabsMenu.currentPath === item.url}"
+          kbn-href="{{::item.url}}"
+        >
+          {{::item.display}}
+        </a>
+      </div>
+    </div>
+  </kbn-top-nav>
+
+  <div class="row container">
+    <div class="col-12">
+
+      <!-- WATCHER EDITOR  -->
+      <form name="watcherForm" class="form-horizontal" id="watcher-editor" novalidate>
+
+        <uib-tabset>
+
+          <uib-tab active index="0" heading="General">
+            <div class="tab-content">
+              <div class="form-group" ng-class="{'has-error': watcherForm.title.$invalid && !watcherForm.title.$pristine}">
+                <label class="control-label col-md-2" for="title">Title</label>
+                <div class="col-md-6">
+                  <input
+                    type="text"
+                    id="title"
+                    name="title"
+                    value="{{watcher._source.title}}"
+                    class="form-control"
+                    ng-model="watcher._source.title"
+                    required
+                  />
+                </div>
+                <p ng-if="watcherForm.title.$invalid && !watcherForm.title.$pristine" class="help-block">
+                  Watcher title is required.
+                </p>
+              </div> <!-- end form-group -->
+              <div class="form-group" ng-if="watcher.$$authentication.mode === 'basic' && watcher.$$authentication.enabled">
+                <div class="col-md-2">
+                  <label class="control-label">Username</label>
+                  <i class="fa fa-question-circle"
+                    aria-hidden="true"
+                    uib-popover="This is an one-way field, you insert value but don't see it after save"
+                    popover-trigger="'outsideClick'"></i>
+                </div>
+                <div class="col-md-3">
+                  <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    class="form-control"
+                    ng-model="watcher.$$authentication.username"
+                  />
+                </div>
+              </div> <!-- end form-group -->
+              <div class="form-group" ng-if="watcher.$$authentication.mode === 'basic' && watcher.$$authentication.enabled">
+                <div class="col-md-2">
+                  <label class="control-label">Password</label>
+                  <i class="fa fa-question-circle"
+                    aria-hidden="true"
+                    uib-popover="This is an one-way field, you insert value but don't see it after save"
+                    popover-trigger="'outsideClick'"></i>
+                </div>
+                <div class="col-md-3">
+                  <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    class="form-control"
+                    ng-model="watcher.$$authentication.password"
+                  />
+                </div>
+              </div> <!-- end form-group -->
+              <div class="form-group">
+                <div class="col-md-2">
+                  <label>Schedule</label>
+                  <i class="fa fa-question-circle"
+                    aria-hidden="true"
+                    popover-placement="bottom"
+                    uib-popover-html="help.schedule"
+                    popover-trigger="'outsideClick'"></i>
+                </div>
+                <div class="col-md-6">
+                  <input
+                    type="text"
+                    id="watcher-schedule"
+                    name="watcher-schedule"
+                    class="form-control"
+                    placeholder="every 5 mins"
+                    ng-model="watcher._source.trigger.schedule.later"
+                    ng-model-options="{ debounce: 1000 }"/>
+                </div>
+                <div class="col-md-4">
+                  <p>Next execution: {{watcher._source.trigger.schedule.later | nextScheduleOccurrence: sentinlConfig}}</p>
+                </div>
+              </div> <!-- end form-group -->
+            </div> <!-- end tab-content -->
+          </uib-tab> <!-- end general -->
+
+          <uib-tab index="1" heading="Input" disable="form.tabs.input.disable">
+            <div class="tab-content">
+              <div class="form-group">
+                <div class="col-md-2"></div>
+                <div class="col-md-6">
+                  <div class="btn-group" uib-dropdown is-open="status.isopenInput">
+                    <button type="button" class="btn btn-primary" uib-dropdown-toggle>
+                      Load input <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" uib-dropdown-menu role="menu">
+                      <li ng-repeat="(id, script) in form.templates.input">
+                        <a href="javascript:void(0)" ng-click="selectScript('input', id)">{{ script._source.title }}</a>
+                      </li>
+                      <li ng-show="isEmpty(form.templates.input)">
+                        <a href="javascript:void(0)">No values stored</a>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div> <!-- end form-group -->
+              <div class="form-group">
+                <label class="col-md-2 control-label" for="inputTitle">Title</label>
+                <div class="col-md-6">
+                  <input
+                    type="text"
+                    id="inputTitle"
+                    name="inputTitle"
+                    value="{{watcher.$$input.title}}"
+                    class="form-control"
+                    placeholder="title"
+                    ng-model="watcher.$$input.title"
+                  />
+                </div>
+                <p ng-show="watcherForm.inputTitle.$invalid" class="text-danger">Title is required.</p>
+              </div> <!-- end form-group -->
+              <div class="form-group">
+                <label class="col-md-2 control-label" for="inputTitle">Body</label>
+                <div class="col-md-6">
+                  <div id="inputEdit"
+                    ng-model="watcher.$$input.body"
+                    ui-ace="aceOptions('json', 30)">{{ watcher.$$input.body }}</div>
+                </div>
+              </div> <!-- end form-group -->
+              <div class="form-group">
+                <div class="col-md-2">
+                </div>
+                <div class="col-md-6">
+                  <button type="button" class="btn btn-primary" ng-click="saveScript('input')">Save</button>
+                  <button type="button" class="btn btn-primary" ng-click="removeScript('input')">Delete</button>
+                </div>
+              </div> <!-- end form-group -->
+            </div> <!-- end tab-content -->
+          </uib-tab> <!-- end input -->
+
+          <uib-tab index="2" heading="Condition" disable="form.tabs.condition.disable">
+            <div class="tab-content">
+              <div class="form-group">
+                <div class="col-md-2"></div>
+                <div class="col-md-6">
+                  <div class="btn-group" uib-dropdown is-open="status.isopenCondition">
+                    <button type="button" class="btn btn-primary dropdown-toggle" uib-dropdown-toggle>
+                      Load condition <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" uib-dropdown-menu role="menu">
+                      <li ng-repeat="(id, script) in form.templates.condition">
+                        <a href="javascript:void(0)" ng-click="selectScript('condition', id)">{{ script._source.title }}</a>
+                      </li>
+                      <li ng-show="isEmpty(form.templates.condition)">
+                        <a href="javascript:void(0)">No values stored</a>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div> <!-- end form-group -->
+              <div class="form-group">
+                <label class="col-md-2 control-label" for="conditionTitle">Title</label>
+                <div class="col-md-6">
+                  <input
+                    type="text"
+                    id="conditionTitle"
+                    name="conditionTitle"
+                    value="{{watcher.$$condition.title}}"
+                    class="form-control"
+                    placeholder="title"
+                    ng-model="watcher.$$condition.title"
+                  />
+                </div>
+                <p ng-show="watcherForm.conditionTitle.$invalid" class="text-danger">Title is required.</p>
+              </div> <!-- end form-group -->
+              <div class="form-group">
+                <label class="col-md-2 control-label" for="conditionTitle">Body</label>
+                <div class="col-md-6">
+                  <div id="conditionEdit"
+                    ng-model="watcher.$$condition.body"
+                    ui-ace="aceOptions('javascript', 30)">{{ watcher.$$condition.body }}</div>
+                </div>
+              </div> <!-- end form-group -->
+              <div class="form-group">
+                <div class="col-md-2">
+                </div>
+                <div class="col-md-6">
+                  <button type="button" class="btn btn-primary" ng-click="saveScript('condition')">Save</button>
+                  <button type="button" class="btn btn-primary" ng-click="removeScript('condition')">Delete</button>
+                </div>
+              </div> <!-- end form-group -->
+            </div> <!-- end tab-content -->
+          </uib-tab> <!-- end condition -->
+
+          <uib-tab index="3" heading="Transform" disable="form.tabs.transform.disable">
+            <div class="tab-content">
+              <div class="form-group">
+                <div class="col-md-2"></div>
+                <div class="col-md-4">
+                  <div class="btn-group" uib-dropdown is-open="status.isopenTransform">
+                    <button type="button" class="btn btn-primary dropdown-toggle" uib-dropdown-toggle>
+                      Load transform <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" uib-dropdown-menu role="menu">
+                      <li ng-repeat="(id, script) in form.templates.transform">
+                        <a href="javascript:void(0)" ng-click="selectScript('transform', id)">{{ script._source.title }}</a>
+                      </li>
+                      <li ng-show="isEmpty(form.templates.transform)">
+                        <a href="javascript:void(0)">No values stored</a>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div> <!-- end form-group -->
+              <div class="form-group">
+                <label class="col-md-2 control-label" for="transformTitle">Title</label>
+                <div class="col-md-6">
+                  <input
+                    type="text"
+                    id="transformTitle"
+                    name="transformTitle"
+                    value="{{watcher.$$transform.title}}"
+                    class="form-control"
+                    placeholder="title"
+                    ng-model="watcher.$$transform.title"
+                  />
+                </div>
+                <p ng-show="watcherForm.transformTitle.$invalid" class="text-danger">Title is required.</p>
+              </div> <!-- end form-group -->
+              <div class="form-group">
+                <label class="col-md-2 control-label" for="transformTitle">Body</label>
+                <div class="col-md-6">
+                  <div id="transformEdit"
+                    ng-model="watcher.$$transform.body"
+                    ui-ace="aceOptions('javascript', 30)">{{ watcher.$$transform.body }}</div>
+                </div>
+              </div> <!-- end form-group -->
+              <div class="form-group">
+                <div class="col-md-2">
+                </div>
+                <div class="col-md-6">
+                  <button type="button" class="btn btn-primary" ng-click="saveScript('transform')">Save</button>
+                  <button type="button" class="btn btn-primary" ng-click="removeScript('transform')">Delete</button>
+                </div>
+              </div> <!-- end form-group -->
+            </div> <!-- end tab-content -->
+          </uib-tab> <!-- end transform -->
+
+          <uib-tab index="4" heading="Actions">
+            <div class="tab-content">
+              <div class="form-group">
+                <div class="col-md-6">
+                  <new-action></new-action>
+                </div>
+              </div> <!-- end form-group -->
+              <div class="form-group" ng-if="actionsExist(watcher._source.actions)">
+                <div class="col-md-8">
+                  <uib-accordion close-others="true" ng-repeat="(actionName, actionSettings) in watcher._source.actions track by $index">
+                    <webhook-action ng-if="actionOfType(actionSettings, 'webhook')" name="{{actionName}}"></webhook-action>
+                    <email-action ng-if="actionOfType(actionSettings, 'email')" name="{{actionName}}"></email-action>
+                    <report-action ng-if="actionOfType(actionSettings, 'report')" name="{{actionName}}"></report-action>
+                    <email-html-action ng-if="actionOfType(actionSettings, 'email_html')" name="{{actionName}}"></email-html-action>
+                    <slack-action ng-if="actionOfType(actionSettings, 'slack')" name="{{actionName}}"></slack-action>
+                    <console-action ng-if="actionOfType(actionSettings, 'console')" name="{{actionName}}"></console-action>
+                  </uib-accordion>
+                </div>
+              </div> <!-- end form-group -->
+            </div> <!-- end tab-content -->
+          </uib-tab> <!-- end actions -->
+
+          <uib-tab index="5" heading="Raw">
+            <div class="tab-content">
+              <div class="form-group">
+                <div class="col-md-2">
+                  <input type="checkbox" ng-model="form.rawEnabled" ng-checked="form.rawEnabled"/> enable
+                  <i class="fa fa-question-circle"
+                    aria-hidden="true"
+                    uib-popover="The settings below will be applied if enable is checked and the editor is saved"
+                    popover-trigger="'outsideClick'"></i>
+                </div>
+              </div> <!-- end form-group -->
+              <div class="form-group">
+                <div class="col-md-8">
+                  <div ui-ace="aceOptions('json', 30)" ng-model="watcher.$$raw"></div>
+                </div>
+              </div> <!-- end form-group -->
+            </div> <!-- end tab-content -->
+          </uib-tab> <!-- end raw -->
+
+        </uib-tabset>
+
+      </form> <!-- end watcher-editor -->
+    </div> <!-- end col-12 -->
+  </div> <!-- end row -->
+</div> <!-- end main -->

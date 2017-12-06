@@ -1,0 +1,112 @@
+<div class="app-container sentinl">
+  <kbn-top-nav name="sentinl" config="topNavMenu">
+    <!-- Transcluded elements. -->
+    <div data-transclude-slots>
+
+      <!-- Tabs. -->
+      <div data-transclude-slot="bottomRow" class="kuiLocalTabs">
+        <a
+          ng-repeat="item in tabsMenu.list"
+          class="kuiLocalTab"
+          ng-class="{'kuiLocalTab-isSelected': tabsMenu.currentPath === item.url}"
+          kbn-href="{{::item.url}}"
+        >
+          {{::item.display}}
+        </a>
+      </div>
+    </div>
+  </kbn-top-nav>
+
+  <div class="row container">
+    <div class="col-12-sm">
+      <p style="float:left;">UTC time is {{ utcTime }}</p>
+      <p style="float:right;">Local time is {{ currentTime }}</p>
+      <br style="clear:both;"/>
+
+      <div class="panel panel-default" ng-show="currentReports.length">
+        <div><span class="edit-group pull-right"><a href="#"><i class="fa fa-plus"></i></a></span></div>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>TIMESTAMP</th>
+              <th>ACTION</th>
+              <th>MESSAGE</th>
+              <th></th>
+            </tr>ng-hide="!report._source['attachment']"
+            <tbody ng-repeat='report in currentReports'>
+              <tr class="alarm-row">
+                <td>{{ report.id }}</td>
+                <td>{{ report.action }}</td>
+                <td>{{ report.message }}</td>
+                <td class="text-center edit-group">
+                  <span ng-click="collapse=!collapse" ng-model="collapse" class="show-rule"><i class="fa fa-ellipsis-h"></i></span>
+                  <span ng-click="deleteReportLocal($index)" class="delete-rule"><i class="fa fa-trash"></i></span>
+                </td>
+              </tr>
+              <tr ng-show=collapse>
+                <td colspan="100%">
+                  <pre><code>{{ alarm | json }}</code></pre>
+                </td>
+              </tr>
+            </tbody>
+        </table>
+      </div>
+
+      <br/>
+
+      <div class="panel" ng-show="!reports.length">
+        <div class="well">
+          No Reports found - That's great, right? <i class="fa fa-smile-o" aria-hidden="true"></i><br/>
+        </div>
+        <br/>
+
+        <div class="panel">
+          <h4>Expand time range</h4>
+          <p>Reports are indexed with a date field. It is possible your query does not match anything in the current time range, or that there is no data at all in the currently selected time range.<br>
+          Click the button below to open the time picker. For future reference you can open the time picker by clicking on the <a class="btn btn-xs navbtn" ng-click="kbnTopNav.toggle('filter')" aria-expanded="kbnTopNav.is('filter')" aria-label="time picker" data-test-subj="discoverNoResultsTimefilter"><i aria-hidden="true" class="fa fa-clock-o"></i> time picker</a> button in the top right corner of your screen.</p>
+        </div>
+      </div>
+
+      <div class="panel panel-default" ng-show="reports.length">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>TIMESTAMP</th>
+              <th>LEVEL</th>
+              <th>ACTION</th>
+              <th>MESSAGE</th>
+              <th></th>
+            </tr>
+          <tbody ng-repeat="report in reports | orderBy:'_source[\'@timestamp\']':true">
+            <tr ng-class-odd="'alarm-row-odd'" ng-class-even="'alarm-row'">
+              <td>{{ report._source['@timestamp'] | dateFormat }}</td>
+              <td>{{ report._source.level }}</td>
+              <td>{{ report._type }}</td>
+              <td>{{ report._source.message }}</td>
+              <td class="text-center edit-group">
+                <span ng-click="collapse=!collapse" ng-model="collapse" class="show-rule"><i class="fa fa-ellipsis-h"></i></span>
+                <span ng-show="report._source.attachment" ng-click="collapseimg=!collapseimg" ng-model="collapseimg" class="show-rule"><i class="fa fa-eye"></i></span>
+                <span ng-click="deleteReport($index, report._index, report._type, report._id)" class="delete-rule"><i class="fa fa-trash"></i></span>
+              </td>
+            </tr>
+            <tr ng-if=collapse>
+              <td colspan="100%">
+                <pre><code>{{ report._source | json }}</code></pre>
+              </td>
+            </tr>
+            <tr ng-if=collapseimg >
+              <td colspan="100%">
+                <div ng-if="report._source.attachment && report._source.attachment.charAt(0) === 'i'">
+                  <object data="data:image/png;base64,{{ report._source.attachment }}"></object>
+                </div>
+                <div ng-if="report._source.attachment && report._source.attachment.charAt(0) !== 'i'">
+                  <object height="600" data="data:application/pdf;base64,{{ report._source.attachment }}"></object>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
