@@ -1,6 +1,6 @@
 /*global angular*/
 import { has } from 'lodash';
-import watcherWebhookAction from './webhook-action.html';
+import template from './webhook_action.html';
 import help from '../../messages/help';
 
 const webhookAction = function ($rootScope) {
@@ -31,7 +31,7 @@ const webhookAction = function ($rootScope) {
 
   return {
     restrict: 'E',
-    template: watcherWebhookAction,
+    template,
     scope: true,
     link: actionDirective
   };

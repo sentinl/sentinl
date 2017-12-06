@@ -1,11 +1,11 @@
-import watcherEmailAction from './email-action.html';
+import template from './slack_action.html';
 import help from '../../messages/help';
 
-const emailAction = function ($rootScope) {
+const slackAction = function ($rootScope) {
   function actionDirective(scope, element, attrs) {
     scope.help = help;
     scope.action = {
-      type: 'email',
+      type: 'slack',
       status: {
         isHeaderOpen: false
       }
@@ -19,11 +19,11 @@ const emailAction = function ($rootScope) {
 
   return {
     restrict: 'E',
-    template: watcherEmailAction,
+    template,
     scope: true,
     link: actionDirective
   };
 };
 
-emailAction.$inject = ['$rootScope'];
-export default emailAction;
+slackAction.$inject = ['$rootScope'];
+export default slackAction;

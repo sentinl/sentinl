@@ -1,11 +1,11 @@
-import watcherEmailHtmlAction from './emailHtml-action.html';
+import template from './email_action.html';
 import help from '../../messages/help';
 
-const emailHtmlAction = function ($rootScope) {
+const emailAction = function ($rootScope) {
   function actionDirective(scope, element, attrs) {
     scope.help = help;
     scope.action = {
-      type: 'email HTML',
+      type: 'email',
       status: {
         isHeaderOpen: false
       }
@@ -19,11 +19,11 @@ const emailHtmlAction = function ($rootScope) {
 
   return {
     restrict: 'E',
-    template: watcherEmailHtmlAction,
+    template,
     scope: true,
     link: actionDirective
   };
 };
 
-emailHtmlAction.$inject = ['$rootScope'];
-export default emailHtmlAction;
+emailAction.$inject = ['$rootScope'];
+export default emailAction;

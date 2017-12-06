@@ -1,4 +1,4 @@
-import periodTagTemplate from './period-tag.html';
+import template from './period_tag.html';
 
 const periodTag = function () {
 
@@ -13,7 +13,7 @@ const periodTag = function () {
 
   return {
     restrict: 'E',
-    template: periodTagTemplate,
+    template,
     scope: {
       timesrc: '='
     },

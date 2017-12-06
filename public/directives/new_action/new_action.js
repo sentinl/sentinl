@@ -1,4 +1,4 @@
-import newWatcherAction from './new-action.html';
+import template from './new_action.html';
 
 const newAction = function ($rootScope) {
   function actionDirective(scope, element, attrs) {
@@ -138,7 +138,7 @@ const newAction = function ($rootScope) {
 
   return {
     restrict: 'E',
-    template: newWatcherAction,
+    template,
     scope: true,
     link: actionDirective
   };
