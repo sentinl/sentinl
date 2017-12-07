@@ -10,7 +10,7 @@
 <img src="https://img.shields.io/badge/elasticsearch-5.*-green.svg"/>
 
 
-**SENTINL 5** extends *Kibi*/*Kibana 5* with **Alerting** and **Reporting** functionality to monitor, notify and report on data series changes using standard queries, programmable validators and a variety of configurable actions - Think of it as a free an independent ["Watcher"](https://www.elastic.co/guide/en/watcher/current/introduction.html) which also has scheduled ["Reporting"](https://www.elastic.co/products/reporting) capabilities (PNG/PDFs snapshots).
+**SENTINL 5** extends *Kibi*/*Kibana 5* with **Alerting** and **Reporting** functionality to monitor, notify and report on data series changes using standard queries, programmable validators and a variety of configurable actions - Think of it as a free an independent ["Watcher"](https://github.com/sirensolutions/sentinl/wiki/SENTINL-Introduction#what-is-a-watcher) which also has scheduled ["Reporting"](https://github.com/sirensolutions/sentinl/wiki/SENTINL-Report-Example) capabilities (PNG/PDFs snapshots).
 
 **SENTINL** is also designed to simplify the process of creating and managing alerts and reports in Kibi/Kibana via its App and Spy integration, directly in the Kibi/Kibana UI.
 
@@ -22,11 +22,13 @@
 ---
 
 ### Kibi/Kibana Alerts Display
-SENTINL alerts can easily be displayed back in Kibana dashboards using [saved search](https://github.com/sirensolutions/sentinl/wiki/KAAE-Alerts-in-Dashboard) visualizations
+SENTINL alerts can easily be displayed back in Kibana dashboards using [saved search](https://github.com/sirensolutions/sentinl/wiki/SENTINL-Alerts-in-Dashboard) visualizations
 
 ### Kibi/Kibana Report Snapshots
-Boss wants to see charts and reports? SENTINL can grab timed snapshots of Kibana dashboards _(or any other website)_ and deliver them via email using the [report](https://github.com/sirensolutions/sentinl/wiki/KAAE-Report-Example) action
+Boss wants to see charts and reports? SENTINL can grab timed snapshots of Kibana dashboards _(or any other website)_ and deliver them via email using the [report](https://github.com/sirensolutions/sentinl/wiki/SENTINL-Report-Example) action
 
+### Configuration & Usage
+Consult our [wiki](https://github.com/sirensolutions/sentinl/wiki) to learn how to configure and use **SENTINL** and program awesome Watchers
 
 --------------
 
@@ -51,8 +53,7 @@ cd sentinl && npm install && gulp package --version=5.5.1
 /opt/kibana/bin/kibana-plugin remove sentinl
 </pre>
 
-## Configuration & Usage
-Consult our [wiki](https://github.com/sirensolutions/sentinl/wiki) to learn how to configure and use **SENTINL** and program awesome Watchers
+
 
 
 ## Project Status 
