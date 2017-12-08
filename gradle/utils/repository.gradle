@@ -1,0 +1,15 @@
+def getArtifactoryRepository() {
+  return {
+    maven {
+      url project.artifactory_url + "/" + (project.version.contains('SNAPSHOT') ? 'libs-snapshot-local' : 'libs-release-local')
+      credentials {
+        username project.artifactory_username
+        password project.artifactory_password
+      }
+    }
+  }
+}
+
+project.ext {
+  getArtifactoryRepository = this.&getArtifactoryRepository
+}
