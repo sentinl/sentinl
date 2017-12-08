@@ -26,20 +26,10 @@ apply plugin: 'com.moowork.grunt'
 apply plugin: 'com.moowork.node'
 apply plugin: 'org.ajoberstar.grgit'
 apply plugin: 'maven-publish'
+apply from: "$rootDir/gradle/utils/repository.gradle"
+apply from: "$rootDir/gradle/utils/loadPackageJson.gradle"
 
-import groovy.json.JsonSlurper
 import org.ajoberstar.grgit.Grgit
-
-///////////////////////////////////////////////////
-//                                               //
-//                Package Json                   //
-//                                               //
-///////////////////////////////////////////////////
-
-def loadPackageJson() {
-  File packageJson = new File(projectDir, "package.json")
-  return new JsonSlurper().parseText(packageJson.text)
-}
 
 def packageJson = loadPackageJson()
 
@@ -259,15 +249,14 @@ clean.dependsOn 'gulp_clean'
 ///////////////////////////////////////////////////
 
 publishing {
+  repositories getArtifactoryRepository()
   publications {
-
     zipDist(MavenPublication) {
       artifact(new File("${projectDir}/target/gulp", "${packageJson.name}.zip"))
       groupId project.group
       artifactId "sentinl"
       version packageJson.version
     }
-
   }
 }
 
