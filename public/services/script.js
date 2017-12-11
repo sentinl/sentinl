@@ -1,7 +1,7 @@
-import { app } from '../app.module';
-import _ from 'lodash';
+/*global angular*/
+import { isObject, map, forEach } from 'lodash';
 
-app.factory('Script', ['$http', '$injector', 'Watcher', function ($http, $injector, Watcher) {
+const Script = function ($http, $injector, Watcher) {
 
   let savedObjectsAPI = undefined;
   let savedScripts = undefined;
@@ -18,7 +18,7 @@ app.factory('Script', ['$http', '$injector', 'Watcher', function ($http, $inject
   */
   return class Script extends Watcher {
 
-    static savedObjectsAPIEnabled = _.isObject(savedObjectsAPI) && _.isObject(savedScripts);
+    static savedObjectsAPIEnabled = isObject(savedObjectsAPI) && isObject(savedScripts);
 
     static fields = ['title', 'description', 'body'];
 
@@ -35,7 +35,7 @@ app.factory('Script', ['$http', '$injector', 'Watcher', function ($http, $inject
             const removeReservedChars = false;
             return savedScripts.find(query, removeReservedChars, config.data.es.number_of_results)
               .then((response) => {
-                return _.map(response.hits, (watcher) => this.nestedSource(watcher, this.fields));
+                return map(response.hits, (watcher) => this.nestedSource(watcher, this.fields));
               });
           });
       } else { // Kibana
@@ -58,7 +58,7 @@ app.factory('Script', ['$http', '$injector', 'Watcher', function ($http, $inject
       if (this.savedObjectsAPIEnabled) { //Kibi
         return savedScripts.get()
           .then((script) => {
-            _.forEach(doc._source, (val, key) => {
+            forEach(doc._source, (val, key) => {
               script[key] = val;
             });
             return script.save();
@@ -95,4 +95,7 @@ app.factory('Script', ['$http', '$injector', 'Watcher', function ($http, $inject
     };
   };
 
-}]);
+};
+
+Script.$inject = ['$http', '$injector', 'Watcher'];
+export default angular.module('apps/sentinl.script', []).factory('Script', Script);

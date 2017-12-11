@@ -188,7 +188,7 @@ describe('Watcher', function () {
     watcher.execute(localTask)
     .then(function (response) {
       expect(response.task.id).to.eql(task._id);
-      expect(response.message).to.eql(`Condition 'script' evaluated to false: ${task._id}`);
+      expect(response.message).to.eql(`No results for current condition: ${task._id}`);
       done();
     })
     .catch(done);
