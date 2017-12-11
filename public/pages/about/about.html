@@ -1,0 +1,36 @@
+<div class="app-container sentinl">
+  <kbn-top-nav name="sentinl" config="topNavMenu">
+    <!-- Transcluded elements. -->
+    <div data-transclude-slots>
+
+      <!-- Tabs. -->
+      <div data-transclude-slot="bottomRow" class="kuiLocalTabs">
+        <a
+          ng-repeat="item in tabsMenu.list"
+          class="kuiLocalTab"
+          ng-class="{'kuiLocalTab-isSelected': tabsMenu.currentPath === item.url}"
+          kbn-href="{{::item.url}}"
+        >
+          {{::item.display}}
+        </a>
+      </div>
+    </div>
+  </kbn-top-nav>
+
+  <div class="row container">
+    <div class="col-12-sm">
+      <p style="float:left;">UTC time is {{ utcTime }}</p>
+      <p style="float:right;">Local time is {{ currentTime }}</p>
+      <br style="clear:both;"/>
+
+      <div class="well">
+        <p class="logo-about"></p>
+        <p class="lead">{{ description }}</p>
+        <p>Project Homepage: <a href="https://github.com/sirensolutions/sentinl">https://github.com/sirensolutions/sentinl</a></p>
+        <p>Found a new Bug? <a href="https://github.com/sirensolutions/sentinl">https://github.com/sirensolutions/sentinl/issues</a></p>
+        <br/>
+        <p>{{ title }} is an Open Source software released under the Apache Software License, Version 2.0 ("Apache 2.0")</p>
+      </div>
+    </div>
+  </div>
+</div>
