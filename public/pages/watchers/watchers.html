@@ -1,0 +1,79 @@
+<div class="app-container sentinl">
+  <kbn-top-nav name="sentinl" config="topNavMenu">
+    <!-- Transcluded elements. -->
+    <div data-transclude-slots>
+
+      <!-- Tabs. -->
+      <div data-transclude-slot="bottomRow" class="kuiLocalTabs">
+        <a
+          ng-repeat="item in tabsMenu.list"
+          class="kuiLocalTab"
+          ng-class="{'kuiLocalTab-isSelected': tabsMenu.currentPath === item.url}"
+          kbn-href="{{::item.url}}"
+        >
+          {{::item.display}}
+        </a>
+      </div>
+    </div>
+  </kbn-top-nav>
+
+  <div class="row container">
+    <div class="col-12-sm">
+      <p style="float:left;">UTC time is {{ utcTime }}</p>
+      <p style="float:right;">Local time is {{ currentTime }}</p>
+      <br style="clear:both;">
+
+      <div class="search-bar">
+        <input type="text" class="form-control" ng-model="searchWatchers" placeholder="Search">
+      </div>
+
+      <div class="panel panel-default">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>TITLE</th>
+              <th>INTERVAL</th>
+              <th>INPUT</th>
+              <th>SCRIPT</th>
+              <th>ACTIONS</th>
+              <th></th>
+            </tr>
+          <tbody ng-repeat='watcher in watchers | filter:searchWatchers'>
+            <tr>
+              <td>{{watcher._source.title}}</td>
+              <td ng-show="watcher._source.trigger.schedule.interval" ng-hide="watcher._source.trigger.schedule.later">{{ watcher._source.trigger.schedule.interval }}</td>
+              <td ng-show="watcher._source.trigger.schedule.later">{{ watcher._source.trigger.schedule.later }}</td>
+              <td>{{watcher._source.input.search.request.index.join(',')}}</td>
+              <td>{{watcher._source.condition.script.script}}</td>
+              <td><span ng-repeat="(key,value) in watcher._source.actions"><p>{{ key }}</p></span> </td>
+              <td class="text-right edit-group">
+                <span title="Show watcher editor" class="show-rule" ng-click="editWatcher(watcher._id, 'editor')">
+                  <i class="fa fa-ellipsis-h"></i>
+                </span>
+                <span title="Execute watcher" class="show-rule" ng-click="playWatcher(watcher)">
+                  <i class="fa fa-play-circle"></i>
+                </span>
+                <span ng-click="deleteWatcher(watcher._id)"
+                      title="Delete"
+                      class="delete-rule">
+                  <i class="fa fa-trash"></i>
+                </span>
+                <span ng-show="watcher._source.disable"
+                      ng-click="toggleWatcher(watcher._id);"
+                      title="Disabled" class="delete-rule">
+                  <i class="fa fa-toggle-off"></i>
+                </span>
+                <span ng-show="!watcher._source.disable"
+                      ng-click="toggleWatcher(watcher._id);"
+                      title="Enabled" class="delete-rule">
+                  <i class="fa fa-toggle-on"></i>
+                </span>
+
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

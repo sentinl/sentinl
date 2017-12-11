@@ -1,0 +1,83 @@
+<div uib-accordion-group class="panel-default" is-open="action.status.isHeaderOpen">
+
+  <uib-accordion-heading>
+    {{actionSettings.$$title}} <i class="pull-right glyphicon"
+    ng-class="{'glyphicon-chevron-down': action.status.isHeaderOpen, 'glyphicon-chevron-right': !action.status.isHeaderOpen}"></i>
+  </uib-accordion-heading>
+
+  <div class="row" id="console-action" class="action-panel">
+    <div class="col-12">
+      <div class="well" ng-form="consoleForm">
+
+        <div class="page-header">
+          <h4><small>{{action.type}} action</small></h4>
+        </div> <!-- end page-header -->
+
+        <div class="form-group">
+          <div class="col-md-2 period-tag-label">
+            <label>Throttle</label>
+          </div>
+          <div class="col-md-10">
+            <period-tag timesrc="actionSettings.$$throttle"></period-tag>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="col-md-2 control-label">Priority</label>
+          <div class="btn-group col-md-4">
+            <label class="btn btn-danger" ng-model="actionSettings.console.priority" btn-radio="'high'">High</label>
+            <label class="btn btn-warning" ng-model="actionSettings.console.priority" btn-radio="'medium'">Medium</label>
+            <label class="btn btn-info" ng-model="actionSettings.console.priority" btn-radio="'low'">Low</label>
+          </div>
+          <div class="col-md-3">
+            <input type="checkbox"
+              ng-model="actionSettings.console.save_payload"
+              ng-checked="actionSettings.console.save_payload"
+            /> save payload
+            <i class="fa fa-question-circle"
+              aria-hidden="true"
+              uib-popover="{{help.action.save_payload}}"
+              popover-trigger="'outsideClick'"></i>
+          </div>
+        </div> <!-- end form-group -->
+
+        <div class="form-group" ng-class="{'has-error': consoleForm.consoleTitle.$invalid && !consoleForm.consoleTitle.$pristine}">
+          <label class="col-md-2 control-label" for="consoleTitle">Title</label>
+          <div class="col-md-10">
+            <input
+              type="text"
+              id="consoleTitle"
+              name="consoleTitle"
+              value="{{actionName}}"
+              class="form-control"
+              placeholder="{{watcher._id}}"
+              ng-model="actionSettings.$$title"
+              ng-required="actionSettings.console.$$edit"
+            />
+          </div>
+          <p ng-show="consoleForm.consoleTitle.$invalid && !consoleForm.consoleTitle.$pristine" class="help-block">
+            Action title is required.
+          </p>
+        </div> <!-- end form-group -->
+
+        <div class="form-group" ng-class="{'has-error': !actionSettings.console.message.length}">
+          <label class="col-md-2 control-label" for="consoleMessage">Message</label>
+          <div class="col-md-10">
+            <div id="consoleMessage"
+              ng-model="actionSettings.console.message"
+              ui-ace="aceOptions('behaviour')">
+            </div>
+          </div>
+          <p ng-show="!actionSettings.console.message.length" class="text-warning">
+            Write a message.
+          </p>
+        </div>
+
+        <div class="form-group control-actions">
+          <button type="button" class="btn btn-danger pull-right" ng-click="removeAction()">Delete</button>
+        </div> <!-- end form-group -->
+
+      </div> <!-- end well -->
+    </div> <!-- end col-12 -->
+  </div> <!-- end email-action -->
+</div> <!-- end uib-accordion-group -->

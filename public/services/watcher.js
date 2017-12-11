@@ -1,9 +1,9 @@
-import { app } from '../app.module';
-import _ from 'lodash';
+/*global angular*/
+import { isObject, forEach, has, map } from 'lodash';
 import emailWatcherDefaults from '../defaults/email_watcher';
 import reportWatcherDefaults from '../defaults/report_watcher';
 
-app.factory('Watcher', ['$http', '$injector', 'Promise', function ($http, $injector, Promise) {
+const Watcher = function ($http, $injector, Promise) {
 
   let savedObjectsAPI = undefined;
   let savedWatchers = undefined;
@@ -17,7 +17,7 @@ app.factory('Watcher', ['$http', '$injector', 'Promise', function ($http, $injec
 
   return class Watcher {
 
-    static savedObjectsAPIEnabled = _.isObject(savedObjectsAPI) && _.isObject(savedWatchers);
+    static savedObjectsAPIEnabled = isObject(savedObjectsAPI) && isObject(savedWatchers);
 
     static fields = [
       'actions', 'input',
@@ -41,7 +41,7 @@ app.factory('Watcher', ['$http', '$injector', 'Promise', function ($http, $injec
     * @param {object} watcher - watcher object.
     */
     static flatSource(watcher) {
-      _.forEach(watcher._source, (val, key) => {
+      forEach(watcher._source, (val, key) => {
         watcher[key] = val;
       });
       watcher.id = watcher._id;
@@ -57,8 +57,8 @@ app.factory('Watcher', ['$http', '$injector', 'Promise', function ($http, $injec
     */
     static nestedSource(watcher, fields) {
       watcher._source = {};
-      _.forEach(this.fields, (field) => {
-        if (_.has(watcher, field)) watcher._source[field] = watcher[field];
+      forEach(this.fields, (field) => {
+        if (has(watcher, field)) watcher._source[field] = watcher[field];
         delete watcher[field];
       });
       watcher._id = watcher.id;
@@ -107,7 +107,7 @@ app.factory('Watcher', ['$http', '$injector', 'Promise', function ($http, $injec
             const removeReservedChars = false;
             return savedWatchers.find(string, removeReservedChars, config.data.es.number_of_results)
               .then((response) => {
-                return _.map(response.hits, (watcher) => this.nestedSource(watcher, this.fields));
+                return map(response.hits, (watcher) => this.nestedSource(watcher, this.fields));
               });
           });
       } else { // Kibana
@@ -189,7 +189,7 @@ app.factory('Watcher', ['$http', '$injector', 'Promise', function ($http, $injec
 
         return savedWatchers.get(watcher._id)
           .then((savedWatcher) => {
-            _.forEach(watcher._source, (val, key) => {
+            forEach(watcher._source, (val, key) => {
               savedWatcher[key] = val;
             });
             return savedWatcher.save();
@@ -233,4 +233,7 @@ app.factory('Watcher', ['$http', '$injector', 'Promise', function ($http, $injec
     }
 
   };
-}]);
+};
+
+Watcher.$inject = ['$http', '$injector', 'Promise'];
+export default angular.module('apps/sentinl.watcher', []).factory('Watcher', Watcher);

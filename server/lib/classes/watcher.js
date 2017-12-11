@@ -123,7 +123,8 @@ export default class Watcher {
     const response = {
       task: {
         id: task._id
-      }
+      },
+      error: false
     };
 
     if (task._source.report) { // report watcher
@@ -208,7 +209,7 @@ export default class Watcher {
             try {
               // update global payload
               if (!eval(condition.script.script)) { // eslint-disable-line no-eval
-                response.message = `Condition 'script' evaluated to false: ${task._id}`;
+                response.message = `No results for current condition: ${task._id}`;
                 return response;
               }
             } catch (err) {
@@ -220,7 +221,7 @@ export default class Watcher {
           if (condition.compare) {
             try {
               if (!compare.valid(payload, condition)) {
-                response.message = `Condition 'compare' evaluated to false: ${task._id}`;
+                response.message = `Payload data does not mutch the compare criteria: ${task._id}`;
                 return response;
               }
             } catch (err) {
@@ -232,7 +233,7 @@ export default class Watcher {
           if (condition.array_compare) {
             try {
               if (!compareArray.valid(payload, condition)) {
-                response.message = `Condition 'array compare' evaluated to false: ${task._id}`;
+                response.message = `Payload data does not mutch the compare criteria: ${task._id}`;
                 return response;
               }
             } catch (err) {
@@ -266,9 +267,7 @@ export default class Watcher {
               if (has(link, 'script.script')) {
                 try {
                   // update global payload
-                  if (!eval(link.script.script)) { // eslint-disable-line no-eval
-                    response.message = `Transform 'script' evaluated to false: ${task._id}`;
-                  }
+                  eval(link.script.script); // eslint-disable-line no-eval
                   resolve(null);
                 } catch (err) {
                   reject(`Transform 'script' error for ${task._id}: ${err}`);
@@ -300,6 +299,7 @@ export default class Watcher {
 
               if (!payload) {
                 response.message = `Transform chain, no payload after execution: ${task._id}!`;
+                response.warning = true;
                 return response;
               }
 

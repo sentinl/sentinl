@@ -1,0 +1,173 @@
+<div uib-accordion-group class="panel-default" is-open="action.status.isHeaderOpen">
+
+  <uib-accordion-heading>
+    {{actionSettings.$$title}} <i class="pull-right glyphicon"
+    ng-class="{'glyphicon-chevron-down': action.status.isHeaderOpen, 'glyphicon-chevron-right': !action.status.isHeaderOpen}"></i>
+  </uib-accordion-heading>
+
+  <div class="row" id="webhook-action" class="action-panel">
+    <div class="col-12">
+      <div class="well" ng-form="webhookForm">
+
+        <div class="page-header">
+          <h4><small>{{action.type}} action</small></h4>
+        </div> <!-- end page-header -->
+
+        <div class="form-group">
+          <div class="col-md-2 period-tag-label">
+            <label>Throttle</label>
+          </div>
+          <div class="col-md-10">
+            <period-tag timesrc="actionSettings.$$throttle"></period-tag>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="col-md-2 control-label">Priority</label>
+          <div class="btn-group col-md-4">
+            <label class="btn btn-danger" ng-model="actionSettings.webhook.priority" btn-radio="'high'">High</label>
+            <label class="btn btn-warning" ng-model="actionSettings.webhook.priority" btn-radio="'medium'">Medium</label>
+            <label class="btn btn-info" ng-model="actionSettings.webhook.priority" btn-radio="'low'">Low</label>
+          </div>
+          <div class="col-md-1">
+            <label class="checkbox">
+              <input type="checkbox"
+                ng-model="actionSettings.webhook.use_https"
+                ng-checked="actionSettings.webhook.use_https"
+              /> https
+            </label>
+          </div>
+          <div class="col-md-1">
+            <label class="checkbox">
+              <input type="checkbox"
+                ng-model="actionSettings.webhook.create_alert"
+                ng-checked="actionSettings.webhook.create_alert"
+              /> alarm
+            </label>
+          </div>
+          <div class="col-md-3">
+            <input type="checkbox"
+              ng-model="actionSettings.webhook.save_payload"
+              ng-checked="actionSettings.webhook.save_payload"
+            /> save payload
+            <i class="fa fa-question-circle"
+              aria-hidden="true"
+              uib-popover="{{help.action.save_payload}}"
+              popover-trigger="'outsideClick'"></i>
+          </div>
+        </div> <!-- end form-group -->
+
+        <div class="form-group" ng-class="{'has-error': webhookForm.webhookTitle.$invalid && !webhookForm.webhookTitle.$pristine}">
+          <label class="col-md-2 control-label" for="webhookTitle">Title</label>
+          <div class="col-md-10">
+            <input
+              type="text"
+              id="webhookTitle"
+              name="webhookTitle"
+              value="{{actionName}}"
+              class="form-control"
+              placeholder="{{watcher._id}}"
+              ng-model="actionSettings.$$title"
+              ng-required="actionSettings.webhook.$$edit"
+            />
+          </div>
+          <p ng-show="webhookForm.webhookTitle.$invalid && !webhookForm.webhookTitle.$pristine" class="help-block">
+            Action title is required.
+          </p>
+        </div> <!-- end form-group -->
+
+        <div class="form-group">
+          <label class="col-md-2 control-label" for="webhookHost">Method</label>
+          <div class="btn-group col-md-4" uib-dropdown is-open="status.isopen">
+            <button type="button" class="btn btn-primary dropdown-toggle" uib-dropdown-toggle>
+              {{actionSettings.webhook.method}} <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" uib-dropdown-menu role="menu">
+              <li><a href="javascript:void(0)" ng-click="changeMethod('POST')">POST</a></li>
+              <li><a href="javascript:void(0)" ng-click="changeMethod('GET')">GET</a></li>
+            </ul>
+          </div>
+        </div> <!-- end form-group -->
+
+        <div class="form-group" ng-class="{'has-error': webhookForm.webhookHost.$invalid && !webhookForm.webhookHost.$pristine}">
+          <label class="col-md-2 control-label" for="webhookHost">Host</label>
+          <div class="col-md-6">
+            <input
+              type="text"
+              id="webhookHost"
+              name="webhookHost"
+              value="{{actionSettings.webhook.host}}"
+              class="form-control"
+              placeholder="remote.server"
+              ng-model="actionSettings.webhook.host"
+              ng-required="actionSettings.webhook.$$edit"
+            />
+          </div> <!-- end webhookHost -->
+          <label class="col-md-2 control-label" for="webhookPort">Port</label>
+          <div class="col-md-2">
+            <input
+              type="number"
+              min="0"
+              max="65535"
+              id="webhookPort"
+              name="webhookPort"
+              class="form-control"
+              ng-value="actionSettings.webhook.port"
+              placeholder="9200"
+              ng-model="actionSettings.webhook.port"
+              ng-required="actionSettings.webhook.$$edit"
+            />
+          </div> <!-- end webhookPort -->
+          <p ng-show="webhookForm.webhookHost.$invalid && !webhookForm.webhookHost.$pristine" class="help-block">
+            Host is required.
+          </p>
+          <p ng-show="webhookForm.webhookPort.$invalid && !webhookForm.webhookPort.$pristine" class="help-block">
+            Port is a number from 0 to 65535.
+          </p>
+        </div> <!-- end form-group -->
+
+        <div class="form-group">
+          <label class="col-md-2 control-label" for="webhookPath">Path</label>
+          <div class="col-md-10">
+            <input
+              type="text"
+              id="webhookPath"
+              name="webhookPath"
+              value="{{actionSettings.webhook.path}}"
+              class="form-control"
+              placeholder=":/{{payload.watcher_id}"
+              ng-model="actionSettings.webhook.path"
+            />
+          </div>
+        </div> <!-- end form-group -->
+
+        <div class="form-group" ng-class="{'has-error': !actionSettings.webhook.body.length}">
+          <label class="col-md-2 control-label" for="webhookBody">Body</label>
+          <div class="col-md-10">
+            <div id="webhookBody"
+              ng-model="actionSettings.webhook.body"
+              ui-ace="aceOptions('behaviour')">
+            </div>
+          </div>
+          <p ng-show="!actionSettings.webhook.body.length" class="text-warning">
+            Insert a bulk query into body.
+          </p>
+        </div> <!-- end form-group -->
+
+        <div class="form-group">
+          <label class="col-md-2 control-label" for="webhookHeaders">Headers</label>
+          <div class="col-md-10">
+            <div id="webhookHeaders"
+              ng-model="actionSettings.webhook._headers"
+              ui-ace="aceOptions('json')"></div>
+          </div>
+        </div> <!-- end form-group -->
+
+        <div class="form-group control-actions">
+          <button type="button" class="btn btn-danger pull-right" ng-click="removeAction()">Delete</button>
+        </div> <!-- end form-group -->
+
+      </div> <!-- end well -->
+    </div> <!-- end col-12 -->
+  </div> <!-- end email-action -->
+</div> <!-- end uib-accordion-group -->

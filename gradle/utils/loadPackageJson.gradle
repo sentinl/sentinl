@@ -1,0 +1,14 @@
+/**
+ * Required for the loadPackageJson method
+ */
+apply plugin: 'groovy'
+import groovy.json.JsonSlurper
+
+def loadPackageJson() {
+  File packageJson = new File(projectDir, "package.json")
+  return new JsonSlurper().parseText(packageJson.text)
+}
+
+project.ext {
+  loadPackageJson = this.&loadPackageJson
+}

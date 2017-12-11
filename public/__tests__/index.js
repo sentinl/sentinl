@@ -1,11 +1,12 @@
 describe('Sentinl', function () {
-  require('../controllers/__tests__/editorController');
-  require('../controllers/__tests__/watchersController');
-  require('../controllers/__tests__/reportsController');
-  require('../controllers/__tests__/alarmsController');
+  require('../pages/__tests__/editor.controller');
+  require('../pages/__tests__/watchers.controller');
+  require('../pages/__tests__/reports.controller');
+  require('../pages/__tests__/alarms.controller');
   require('../services/__tests__/watcher');
   require('../services/__tests__/alarm');
   require('../services/__tests__/user');
   require('../services/__tests__/script');
   require('../services/__tests__/report');
+  require('../filters/__tests__/filters');
 });
