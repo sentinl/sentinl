@@ -148,7 +148,7 @@ export default class Watcher {
     if (!(task._source.report && isEmpty(this.getNonReportActions(task._source.actions)))) { // other watcher kinds
       let sirenVanguardAvailable = false;
       try {
-        const elasticsearchPlugins = this.server.config().get('kibi_core.clusterplugins');
+        const elasticsearchPlugins = this.server.config().get('investigate_core.clusterplugins');
         if (elasticsearchPlugins && elasticsearchPlugins.indexOf('siren-vanguard') > -1) {
           sirenVanguardAvailable = true;
         }
