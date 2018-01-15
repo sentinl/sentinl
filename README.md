@@ -69,8 +69,8 @@ cd sentinl && npm install && gulp package --version=5.5.1
 <pre>
 This software is licensed under the Apache License, version 2 ("ALv2"), quoted below.
 
-Copyright 2016, 2017 Siren Solutions
-Copyright 2016, 2017 QXIP BV, Lorenzo Mangani (lorenzo.mangani@gmail.com)
+Copyright 2016, 2017, 2018 Siren Solutions
+Copyright 2016, 2017, 2018 QXIP BV, Lorenzo Mangani (lorenzo.mangani@gmail.com)
 Copyright 2015, Rao Chenlin (rao.chenlin@gmail.com)
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not
