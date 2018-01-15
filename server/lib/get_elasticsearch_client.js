@@ -58,6 +58,11 @@ export default function getElasticsearchClient(server, config = false, type = 'd
     return server.plugins.kibi_access_control.getSentinlClient();
   }
 
+  // Authentication via Investigate Access Control app pre Sentinl rename
+  if (server.plugins.investigate_access_control) {
+    return server.plugins.investigate_access_control.getSentinlClient();
+  }
+
   if (type === 'data') {
     return server.plugins.elasticsearch.getCluster('data').getClient();
   }
