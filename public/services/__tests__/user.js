@@ -28,7 +28,7 @@ describe('User', function () {
   });
 
   it('can get an instance of the factory', function () {
-    expect(User).to.be.a('function');
+    expect(User).to.be.a('object');
   });
 
 

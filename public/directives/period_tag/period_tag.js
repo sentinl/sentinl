@@ -1,6 +1,7 @@
 import template from './period_tag.html';
 
-const periodTag = function () {
+function periodTag() {
+  'ngInject';
 
   function actionDirective(scope, element, attrs) {
     scope.action = {
@@ -21,5 +22,4 @@ const periodTag = function () {
   };
 };
 
-periodTag.$inject = [];
 export default periodTag;

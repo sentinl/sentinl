@@ -1,4 +1,5 @@
-const confirmMessageController = function ($scope, $uibModalInstance) {
+function confirmMessageController($scope, $uibModalInstance) {
+  'ngInject';
 
   $scope.yes = function () {
     $uibModalInstance.close('yes');
@@ -9,5 +10,4 @@ const confirmMessageController = function ($scope, $uibModalInstance) {
   };
 };
 
-confirmMessageController.$nject = ['$scope', '$uibModalInstance'];
 export default confirmMessageController;

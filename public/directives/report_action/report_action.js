@@ -1,7 +1,9 @@
 import template from './report_action.html';
 import help from '../../messages/help';
 
-const reportAction = function ($rootScope) {
+function reportAction($rootScope) {
+  'ngInject';
+
   function actionDirective(scope, element, attrs) {
     scope.help = help;
     scope.action = {
@@ -30,5 +32,4 @@ const reportAction = function ($rootScope) {
   };
 };
 
-reportAction.$inject = ['$rootScope'];
 export default reportAction;

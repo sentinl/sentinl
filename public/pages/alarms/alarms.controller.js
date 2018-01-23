@@ -4,9 +4,11 @@ import uiChrome from 'ui/chrome';
 
 import confirmMessageTemplate from '../../confirm_message/confirm_message.html';
 
-const AlarmsController = function ($rootScope, $scope, $route, $interval,
+function AlarmsController($rootScope, $scope, $route, $interval,
   $timeout, $injector, timefilter, Private, createNotifier, $window, $uibModal, navMenu,
   globalNavState, Alarm) {
+  'ngInject';
+
   $scope.title = 'Sentinl: Alarms';
   $scope.description = 'Kibi/Kibana Report App for Elasticsearch';
 
@@ -122,7 +124,4 @@ const AlarmsController = function ($rootScope, $scope, $route, $interval,
   $scope.$watch('$destroy', unsubscribe);
 };
 
-AlarmsController.$inject = ['$rootScope', '$scope', '$route', '$interval',
-  '$timeout', '$injector', 'timefilter', 'Private', 'createNotifier', '$window', '$uibModal', 'navMenu',
-  'globalNavState', 'Alarm'];
 export default AlarmsController;

@@ -1,6 +1,7 @@
 /* global angular */
 import { get, keys, trim, has, includes, forEach, isObject, isEmpty } from 'lodash';
 import later from 'later';
+import uuid from 'uuid/v4';
 import confirmMessageTemplate from '../../confirm_message/confirm_message.html';
 
 import WatcherHelper from './classes/WatcherHelper';
@@ -11,9 +12,11 @@ import rangeTemplate from './templates/range';
 import help from '../../messages/help.json';
 
 // EDITOR CONTROLLER
-const EditorController = function (sentinlConfig, $rootScope, $scope, $route, $interval,
+function EditorController(sentinlConfig, $rootScope, $scope, $route, $interval,
   $timeout, timefilter, Private, createNotifier, $window, $uibModal, Promise,
-  $log, navMenu, globalNavState, $routeParams, dataTransfer, $location, Watcher, Script, User) {
+  $log, navMenu, globalNavState, $routeParams, dataTransfer, $location, Watcher, Script, User, ServerConfig) {
+  'ngInject';
+
   $scope.title = 'Sentinl: Editor';
   $scope.description = 'Kibi/Kibana Report App for Elasticsearch';
   $scope.sentinlConfig = sentinlConfig;
@@ -82,7 +85,7 @@ const EditorController = function (sentinlConfig, $rootScope, $scope, $route, $i
     };
 
     // get authentication config info
-    Watcher.getConfiguration()
+    ServerConfig.get()
       .then((response) => {
         $scope.watcher.$$authentication = response.data.authentication;
       })
@@ -125,9 +128,9 @@ const EditorController = function (sentinlConfig, $rootScope, $scope, $route, $i
         editorOptions: {
           autoScrollEditorIntoView: false
         },
-        onLoad: function ($$editor) {
-          $$editor.$blockScrolling = Infinity;
-        }
+        //onLoad: function ($$editor) {
+        //  $$editor.$blockScrolling = Infinity;
+        //}
       };
     };
 
@@ -201,7 +204,7 @@ const EditorController = function (sentinlConfig, $rootScope, $scope, $route, $i
 
       if ($scope.watcherForm[title].$valid) {
         const template = {
-          _id: Script.createId(),
+          _id: uuid(),
           _source: {
             description: field,
             title: $scope.watcher['$$' + field].title,
@@ -376,7 +379,7 @@ const EditorController = function (sentinlConfig, $rootScope, $scope, $route, $i
           $scope.form.templates[typeName] = {};
         }
         forEach(type, function (template, templateName) {
-          let id = Script.createId();
+          let id = uuid();
 
           $scope.form.templates[typeName][id] = {
             _id: id,
@@ -510,7 +513,7 @@ const EditorController = function (sentinlConfig, $rootScope, $scope, $route, $i
         try {
           saveThrottle();
         } catch (e) {
-          notify.error(`Invalid throttle configuration.`);
+          notify.error('Invalid throttle configuration.');
           $scope.watcherForm.$valid = false;
           $scope.watcherForm.$invalid = true;
           init(); // init form again
@@ -550,8 +553,7 @@ const EditorController = function (sentinlConfig, $rootScope, $scope, $route, $i
       }
 
       if ($scope.watcherForm.$valid) {
-        saveUser($scope.watcher.$$authentication.enabled)
-        .then(function () {
+        saveUser($scope.watcher.$$authentication.enabled).then(function () {
           if (later.parse.text($scope.watcher._source.trigger.schedule.later).error > -1) {
             notify.error('Schedule is invalid.');
             $log.error('Sentinl.', 'Schedule is invalid:', $scope.watcher._source.trigger.schedule.later);
@@ -561,17 +563,14 @@ const EditorController = function (sentinlConfig, $rootScope, $scope, $route, $i
             return;
           }
 
-          return Watcher.save($scope.watcher)
-          .then(function (id) {
+          return Watcher.save($scope.watcher).then(function (id) {
             const title = $scope.watcher.title ? $scope.watcher.title : get($scope.watcher, '_source.title');
             notify.info(`Saved watcher "${title}"`);
             $scope.cancelEditor();
-          })
-          .then(function () {
+          }).then(function () {
             $rootScope.$broadcast('editorCtrl-Watcher.save');
           });
-        })
-        .catch(notify.error);
+        }).catch(notify.error);
       }
 
       if (editorMode === 'wizard') $scope.cancelEditor();
@@ -623,7 +622,4 @@ const EditorController = function (sentinlConfig, $rootScope, $scope, $route, $i
   }
 };
 
-EditorController.$inject = ['sentinlConfig', '$rootScope', '$scope', '$route', '$interval',
-'$timeout', 'timefilter', 'Private', 'createNotifier', '$window', '$uibModal', 'Promise',
-'$log', 'navMenu', 'globalNavState', '$routeParams', 'dataTransfer', '$location', 'Watcher', 'Script', 'User'];
 export default EditorController;

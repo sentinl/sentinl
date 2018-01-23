@@ -23,6 +23,6 @@ class DataTransfer {
     return this.templates;
   }
 
-};
+}
 
-export default angular.module('apps/sentinl.dataTransfer', []).factory('dataTransfer', () => new DataTransfer());
+export default DataTransfer;
