@@ -3,7 +3,6 @@ import sinon from 'sinon';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import _ from 'lodash';
-import uuid from 'uuid/v4';
 import noDigestPromises from 'test_utils/no_digest_promises';
 
 import defaultEmailSource from '../../defaults/email_watcher';
