@@ -7,9 +7,10 @@ import ace from 'ace';
 import confirmMessageTemplate from '../../confirm_message/confirm_message.html';
 
 // WATCHERS CONTROLLER
-const WatchersController = function ($rootScope, $scope, $route, $interval,
+function  WatchersController($rootScope, $scope, $route, $interval,
   $timeout, timefilter, Private, createNotifier, $window, $http, $uibModal, $log, navMenu,
   globalNavState, $location, dataTransfer, Watcher, Script, Promise) {
+  'ngInject';
 
   $scope.title = 'Sentinl: ';
   $scope.description = 'Kibi/Kibana Report App for Elasticsearch';
@@ -175,21 +176,18 @@ const WatchersController = function ($rootScope, $scope, $route, $interval,
   * @param {array} templates - list of field names for templates
   */
   Promise.map(keys(templates), function (field) {
-    return Script.list(field)
-      .then(function (_templates_) {
-        if (_templates_.length) {
-          forEach(_templates_, function (template) {
-            templates[field][template._id] = template;
-          });
-        }
-        return null;
-      });
-  })
-  .then(function () {
+    return Script.list(field).then(function (_templates_) {
+      if (_templates_.length) {
+        forEach(_templates_, function (template) {
+          templates[field][template._id] = template;
+        });
+      }
+      return null;
+    });
+  }).then(function () {
     dataTransfer.setTemplates(templates);
     return null;
-  })
-  .catch(notify.error);
+  }).catch(notify.error);
 
   const currentTime = moment($route.current.locals.currentTime);
   $scope.currentTime = currentTime.format('HH:mm:ss');
@@ -203,7 +201,4 @@ const WatchersController = function ($rootScope, $scope, $route, $interval,
 
 };
 
-WatchersController.$inject = ['$rootScope', '$scope', '$route', '$interval',
-'$timeout', 'timefilter', 'Private', 'createNotifier', '$window', '$http', '$uibModal', '$log', 'navMenu',
-'globalNavState', '$location', 'dataTransfer', 'Watcher', 'Script', 'Promise'];
 export default WatchersController;

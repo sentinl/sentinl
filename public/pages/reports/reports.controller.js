@@ -3,8 +3,10 @@ import moment from 'moment';
 
 import confirmMessageTemplate from '../../confirm_message/confirm_message.html';
 
-const ReportsController = function ($rootScope, $scope, $route, $interval,
+function ReportsController($rootScope, $scope, $route, $interval,
   $timeout, timefilter, Private, createNotifier, $window, $uibModal, navMenu, globalNavState, Report) {
+  'ngInject';
+
   $scope.title = 'Sentinl: Reports';
   $scope.description = 'Kibi/Kibana Report App for Elasticsearch';
 
@@ -124,6 +126,4 @@ const ReportsController = function ($rootScope, $scope, $route, $interval,
   $scope.$watch('$destroy', unsubscribe);
 };
 
-ReportsController.$inject = ['$rootScope', '$scope', '$route', '$interval',
-'$timeout', 'timefilter', 'Private', 'createNotifier', '$window', '$uibModal', 'navMenu', 'globalNavState', 'Report'];
 export default ReportsController;

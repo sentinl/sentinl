@@ -1,7 +1,9 @@
 import template from './email_html_action.html';
 import help from '../../messages/help';
 
-const emailHtmlAction = function ($rootScope) {
+function emailHtmlAction($rootScope) {
+  'ngInject';
+
   function actionDirective(scope, element, attrs) {
     scope.help = help;
     scope.action = {
@@ -25,5 +27,4 @@ const emailHtmlAction = function ($rootScope) {
   };
 };
 
-emailHtmlAction.$inject = ['$rootScope'];
 export default emailHtmlAction;

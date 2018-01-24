@@ -3,6 +3,7 @@ import sinon from 'sinon';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import _ from 'lodash';
+import uuid from 'uuid/v4';
 import noDigestPromises from 'test_utils/no_digest_promises';
 
 import defaultWatcherScript from '../../defaults/watcher_script';
@@ -36,7 +37,7 @@ describe('Script', () => {
   });
 
   it('can get an instance of the factory', function () {
-    expect(Script).to.be.a('function');
+    expect(Script).to.be.a('object');
   });
 
 
@@ -159,7 +160,7 @@ describe('Script', () => {
     });
 
     it('create new script', function (done) {
-      const script = { _id: Script.createId() };
+      const script = { _id: uuid() };
       $httpBackend.expectPOST(`../api/sentinl/save/script/${script._id}`).respond(200, {});
 
       Script.new(script)
@@ -173,7 +174,7 @@ describe('Script', () => {
     });
 
     it('delete script', function (done) {
-      const id = Script.createId();
+      const id = uuid();
       $httpBackend.expectDELETE(`../api/sentinl/remove/script/${id}`).respond(200, {});
 
       Script.delete(id)

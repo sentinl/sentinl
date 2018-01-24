@@ -2,6 +2,7 @@ import moment from 'moment';
 import sinon from 'sinon';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
+import uuid from 'uuid/v4';
 import { cloneDeep, keys, forEach, include, isEqual } from 'lodash';
 import noDigestPromises from 'test_utils/no_digest_promises';
 
@@ -37,12 +38,12 @@ describe('Watcher', function () {
   });
 
   it('can get an instance of the factory', function () {
-    expect(Watcher).to.be.a('function');
+    expect(Watcher).to.be.a('object');
   });
 
   it('make _source flat', function () {
     let watcher = {
-      _id: Watcher.createId(),
+      _id: uuid(),
       _source: cloneDeep(defaultEmailSource)
     };
 
@@ -59,7 +60,7 @@ describe('Watcher', function () {
 
   it('make _source nested', function () {
     let watcher = cloneDeep(defaultEmailSource);
-    watcher.id = Watcher.createId();
+    watcher.id = uuid();
 
     watcher = Watcher.nestedSource(watcher);
     const nestedFields = keys(watcher._source);
@@ -276,7 +277,7 @@ describe('Watcher', function () {
 
     it('save watcher', function (done) {
       const watcher = {
-        _id: Watcher.createId(),
+        _id: uuid(),
         _source: cloneDeep(defaultEmailSource)
       };
 
@@ -299,7 +300,7 @@ describe('Watcher', function () {
     });
 
     it('delete watcher', function (done) {
-      const id = Watcher.createId();
+      const id = uuid();
       $httpBackend.expectDELETE(`../api/sentinl/watcher/${id}`).respond(200, { ok: true });
 
       Watcher.delete(id)

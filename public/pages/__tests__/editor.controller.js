@@ -140,8 +140,6 @@ describe('editorController', function () {
         }
       };
 
-      sinon.stub(Script, 'createId', () => id);
-
       sinon.stub(Script, 'new', () => {
         return Promise.resolve(id);
       });

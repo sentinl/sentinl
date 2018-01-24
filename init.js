@@ -63,12 +63,10 @@ const init = once(function (server) {
 
   // Install PhantomJS lib. The lib is needed to take screenshots by report action.
   const phantomPath = has(config, 'settings.report.phantomjs_path') ? config.settings.report.phantomjs_path : undefined;
-  phantom.install(phantomPath)
-  .then((phantomPackage) => {
+  phantom.install(phantomPath).then((phantomPackage) => {
     server.log(['status', 'info', 'Sentinl', 'report'], `Phantom installed at ${phantomPackage.binary}`);
     server.expose('phantomjs_path', phantomPackage.binary);
-  })
-  .catch((err) => server.log(['status', 'error', 'Sentinl', 'report'], `Failed to install phantomjs: ${err}`));
+  }).catch((err) => server.log(['status', 'error', 'Sentinl', 'report'], `Failed to install phantomjs: ${err}`));
 
   // Load Sentinl routes.
   masterRoute(server);

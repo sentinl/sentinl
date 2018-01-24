@@ -1,6 +1,8 @@
 import moment from 'moment';
 
-const AboutController = function ($scope, $route, $interval, timefilter, createNotifier, navMenu, globalNavState) {
+function AboutController($scope, $route, $interval, timefilter, createNotifier, navMenu, globalNavState) {
+  'ngInject';
+
   $scope.title = 'Sentinl: About';
   $scope.description = 'Kibi/Kibana Report App for Elasticsearch';
   timefilter.enabled = false;
@@ -30,5 +32,4 @@ const AboutController = function ($scope, $route, $interval, timefilter, createN
   $scope.$watch('$destroy', unsubscribe);
 };
 
-AboutController.$inject = ['$scope', '$route', '$interval', 'timefilter', 'createNotifier', 'navMenu', 'globalNavState'];
 export default AboutController;

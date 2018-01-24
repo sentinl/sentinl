@@ -1,12 +1,13 @@
 /* global angular */
 
-import Alarm from './alarm';
-import Report from './report';
-import Script from './script';
-import User from './user';
-import Watcher from './watcher';
-import dataTransfer from './data_transfer';
-import navMenu from './nav_menu';
+import Alarm from './alarm/index';
+import Report from './report/index';
+import Script from './script/index';
+import User from './user/index';
+import Watcher from './watcher/index';
+import DataTransfer from './data_transfer/index';
+import NavMenu from './nav_menu/index';
+import ServerConfig from './server_config/index';
 
 export default angular.module('apps/sentinl.services', [
   Alarm.name,
@@ -14,6 +15,7 @@ export default angular.module('apps/sentinl.services', [
   Script.name,
   User.name,
   Watcher.name,
-  navMenu.name,
-  dataTransfer.name
+  NavMenu.name,
+  DataTransfer.name,
+  ServerConfig.name
 ]);
