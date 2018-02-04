@@ -1,8 +1,10 @@
 import { isObject, map, forEach } from 'lodash';
+import Watcher from '../watcher/watcher';
 
-class Script {
+class Script extends Watcher {
 
-  constructor($http, $injector, ServerConfig) {
+  constructor($http, $injector, Promise, ServerConfig) {
+    super($http, $injector, Promise, ServerConfig);
     this.$http = $http;
     this.$injector = $injector;
     this.ServerConfig = ServerConfig;
