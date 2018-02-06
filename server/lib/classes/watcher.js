@@ -145,11 +145,12 @@ export default class Watcher {
     }
 
     if (!(task._source.report && isEmpty(this.getNonReportActions(task._source.actions)))) { // other watcher kinds
-      let sirenVanguardAvailable = false;
+      let sirenFederateAvailable = false;
       try {
         const elasticsearchPlugins = this.server.config().get('kibi_core.clusterplugins');
-        if (elasticsearchPlugins && elasticsearchPlugins.indexOf('siren-vanguard') > -1) {
-          sirenVanguardAvailable = true;
+        if (elasticsearchPlugins && (elasticsearchPlugins.indexOf('siren-vanguard') > -1 ||
+        elasticsearchPlugins.indexOf('siren-federate') > -1)) {
+          sirenFederateAvailable = true;
         }
       } catch (err) {
         // 'elasticsearch.plugins' not available when running from kibana
@@ -163,8 +164,8 @@ export default class Watcher {
       let transform = task._source.transform ? task._source.transform : undefined;
 
       let method = 'search';
-      if (sirenVanguardAvailable) {
-        for (let candidate of ['kibi_search', 'vanguard_search', 'search']) {
+      if (sirenFederateAvailable) {
+        for (let candidate of ['investigate_search', 'kibi_search', 'vanguard_search', 'search']) {
           if (this.client[candidate]) {
             method = candidate;
             break;
