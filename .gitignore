@@ -5,3 +5,4 @@ node_modules
 /target
 /build
 package-lock.json
+*.swp
