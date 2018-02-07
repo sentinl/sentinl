@@ -1,10 +1,20 @@
 import { isObject, map, forEach } from 'lodash';
-import Watcher from '../watcher/watcher';
+import Worker from '../worker/worker';
 
-class Script extends Watcher {
-
+/**
+* A class to manage Sentinl scripts (input, condition and transform)
+*/
+class Script extends Worker {
+  /**
+  * Constructor
+  *
+  * @param {object} $http service
+  * @param {object} $injector service
+  * @param {object} Promise
+  * @param {object} ServerConfig service
+  */
   constructor($http, $injector, Promise, ServerConfig) {
-    super($http, $injector, Promise, ServerConfig);
+    super($http, $injector, Promise, ServerConfig, 'script');
     this.$http = $http;
     this.$injector = $injector;
     this.ServerConfig = ServerConfig;
@@ -22,72 +32,52 @@ class Script extends Watcher {
   }
 
   /**
-  * Lists all available scripts.
+  * List all available scripts
   *
-  * @param {string} type - script type (input, condition or transform).
+  * @param {string} query string (input, condition or transform).
+  * @return {array} list of scrips
   */
-  list(type) {
-    if (this.savedObjectsAPIEnabled) { // Kibi
-      const query = type;
-      return this.ServerConfig.get().then((config) => {
-        const removeReservedChars = false;
-        return this.savedScripts.find(query, removeReservedChars, config.data.es.number_of_results).then((response) => {
-          return map(response.hits, (watcher) => this.nestedSource(watcher, this.fields));
-        });
-      });
-    } else { // Kibana
-      return this.$http.get(`../api/sentinl/list/scripts/${type}`).then((response) => {
-        if (response.status !== 200) {
-          throw new Error(`Fail to list scripts of type ${type}`);
-        }
-        return response.data.hits.hits;
-      });
-    }
+  list(query) {
+    return super.list(this.savedScripts, '../api/sentinl/list/scripts/', query);
   }
 
   /**
-  * Creates new script of type: input, condition or transform.
+  * Create new script (input, condition or transform)
   *
-  * @param {object} doc - script document.
+  * @param {object} script doc
+  * @return {string} script id
   */
-  new(doc) {
-    if (this.savedObjectsAPIEnabled) { //Kibi
-      return this.savedScripts.get()
-        .then((script) => {
-          forEach(doc._source, (val, key) => {
-            script[key] = val;
-          });
-          return script.save();
+  new(script) {
+    // Kibi
+    if (this.savedObjectsAPIEnabled) {
+      return this.savedScripts.get().then((script) => {
+        forEach(script._source, (val, key) => {
+          script[key] = val;
         });
-    } else { // Kibana
-      return this.$http.post(`../api/sentinl/save/script/${doc._id}`, doc._source)
-        .then((response) => {
-          if (response.status !== 200) {
-            throw new Error(`Fail to create new script ${doc._id}`);
-          }
-          return doc._id;
+        return script.save().then(() => {
+          return script.id;
         });
+      }).catch(() => {
+        throw new Error('fail to create script ' + script.id);
+      });
     }
+    // Kibana
+    return this.$http.post(`../api/sentinl/save/script/${script._id}`, script._source).then((response) => {
+      if (response.status !== 200) {
+        throw new Error('fail to create script ' + script._id);
+      }
+      return script._id;
+    });
   }
 
   /**
   * Deletes single script of type: input, condition or transform.
   *
-  * @param {string} id - script document id.
+  * @param {string} script id
+  * @return {string} script id
   */
   delete(id) {
-    if (this.savedObjectsAPIEnabled) { // Kibi
-      return this.savedScripts.delete(id)
-        .then(() => id);
-    } else { // Kibana
-      return this.$http.delete(`../api/sentinl/remove/script/${id}`)
-        .then((response) => {
-          if (response.status !== 200) {
-            throw new Error(`Fail to delete script ${id}`);
-          }
-          return id;
-        });
-    }
+    return super.delete(this.savedScripts, '../api/sentinl/remove/script/', id);
   }
 }
 

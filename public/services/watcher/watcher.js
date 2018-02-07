@@ -1,11 +1,23 @@
-import { isObject, forEach, has, map } from 'lodash';
+import {isObject, forEach, has} from 'lodash';
 import uuid from 'uuid/v4';
+import Worker from '../worker/worker';
 import emailWatcherDefaults from '../../defaults/email_watcher';
 import reportWatcherDefaults from '../../defaults/report_watcher';
 
-class Watcher {
-
+/**
+* A class to manage Sentinl watchers
+*/
+class Watcher extends Worker {
+  /**
+  * Constructor
+  *
+  * @param {object} $http service
+  * @param {object} $injector service
+  * @param {object} Promise
+  * @param {object} ServerConfig service
+  */
   constructor($http, $injector, Promise, ServerConfig) {
+    super($http, $injector, Promise, ServerConfig, 'watcher');
     this.$http = $http;
     this.$injector = $injector;
     this.Promise = Promise;
@@ -29,170 +41,124 @@ class Watcher {
   }
 
   /**
-  * Move watcher._source properties 1 level up, under watcher.
-  *
-  * @param {object} watcher - watcher object.
-  */
-  flatSource(watcher) {
-    forEach(watcher._source, (val, key) => {
-      watcher[key] = val;
-    });
-    watcher.id = watcher._id;
-    delete watcher._id;
-    delete watcher._source;
-    return watcher;
-  }
-
-  /**
-  * Move watcher properties (filedsToParse and fieldsToNotParse) 1 level down, under watcher._source.
-  *
-  * @param {object} watcher - watcher object.
-  */
-  nestedSource(watcher, fields) {
-    watcher._source = {};
-    forEach(this.fields, (field) => {
-      if (has(watcher, field)) watcher._source[field] = watcher[field];
-      delete watcher[field];
-    });
-    watcher._id = watcher.id;
-    delete watcher.id;
-    return watcher;
-  }
-
-  /**
-  * Runs watcher on demand.
+  * Run watcher on demand
   *
   * @param {string} id - watcher id
+  * @return {object} ack
   */
   play(id) {
     return this.get(id).then((task) => {
-      return this.$http.post('../api/sentinl/watcher/_execute', task).then(function (response) {
-        return response.data;
+      return this.$http.post('../api/sentinl/watcher/_execute', task).then((resp) => {
+        if (resp.status !== 200) {
+          throw new Error(`fail to get watcher ${id}`);
+        }
+        return resp.data;
       });
     });
   }
 
   /**
-  * Lists existing watchers.
+  * List existing watchers
   *
-  * @param {string} string - search string.
-  * @param {integer} number - number of results to return.
+  * @param {string} quert search string
+  * @return {array} list of all watchers
   */
-  list(string = null) {
-    if (this.savedObjectsAPIEnabled) { // Kibi
-      return this.ServerConfig.get().then((config) => {
-        const removeReservedChars = false;
-        return this.savedWatchers.find(string, removeReservedChars, config.data.es.number_of_results).then((response) => {
-          return map(response.hits, (watcher) => this.nestedSource(watcher, this.fields));
-        });
-      });
-    } else { // Kibana
-      return this.$http.get('../api/sentinl/list').then((response) => {
-        if (response.status !== 200) {
-          throw new Error('Fail to list watchers');
-        }
-        return response.data.hits.hits;
-      });
-    }
+  list(query = null) {
+    return super.list(this.savedWatchers, '../api/sentinl/list', query);
   }
 
   /**
-  * Gets watcher object.
+  * Get watcher object
   *
-  * @param {string} id - watcher id.
+  * @param {string} id of watcher
+  * @return {object} watcher doc
   */
   get(id) {
-    if (this.savedObjectsAPIEnabled) { // Kibi
+    // Kibi
+    if (this.savedObjectsAPIEnabled) {
       return this.savedWatchers.get(id).then((watcher) => {
         return this.nestedSource(watcher, this.fields);
-      });
-    } else { // Kibana
-      return this.$http.get(`../api/sentinl/get/watcher/${id}`).then((response) => {
-        if (response.status !== 200) {
-          throw new Error(`Fail to get watcher ${id}`);
-        }
-        return response.data;
+      }).catch(() => {
+        throw new Error(`fail to get watcher ${id}`);
       });
     }
+    // Kibana
+    return this.$http.get(`../api/sentinl/get/watcher/${id}`).then((response) => {
+      if (response.status !== 200) {
+        throw new Error(`fail to get watcher ${id}`);
+      }
+      return response.data;
+    });
   }
 
   /**
-  * Creates new watcher object.
+  * Create new watcher object
   *
-  * @param {string} type - watcher, reporter.
+  * @param {string} type of watcher (email watcher, reporter)
+  * @return {object} watcher doc
   */
   new(type) {
-    if (this.savedObjectsAPIEnabled) { // Kibi
-      if (type === 'report') {
-        this.savedWatchers.Class.defaults = reportWatcherDefaults;
-      } else {
-        this.savedWatchers.Class.defaults = emailWatcherDefaults;
-      }
-      return this.savedWatchers.get().then((watcher) => this.nestedSource(watcher, this.fields));
-    } else { // Kibana
-      let watcher = {
-        _id: uuid(),
-        _source: {}
-      };
-
-      if (type === 'report') {
-        watcher._source = reportWatcherDefaults;
-      } else {
-        watcher._source = emailWatcherDefaults;
-      }
-      return this.Promise.resolve(watcher);
+    // Kibi
+    if (this.savedObjectsAPIEnabled) {
+      this.savedWatchers.Class.defaults = type === 'report' ? reportWatcherDefaults : emailWatcherDefaults;
+      return this.savedWatchers.get().then((watcher) => {
+        return this.nestedSource(watcher, this.fields);
+      }).catch(() => {
+        throw new Error('fail to create new watcher');
+      });
     }
+    // Kibana
+    return this.Promise.resolve({
+      _id: uuid(),
+      _source: type === 'report' ? reportWatcherDefaults : emailWatcherDefaults,
+    });
   }
 
   /**
-  * Saves watcher object.
+  * Save watcher doc
   *
-  * @param {object} watcher - watcher object.
+  * @param {object} watcher object
+  * @return {string} watcher id
   */
   save(watcher) {
-    if (this.savedObjectsAPIEnabled) { // Kibi
+    // Kibi
+    if (this.savedObjectsAPIEnabled) {
       if (watcher.hasOwnProperty('save')) {
-        return this.flatSource(watcher).save();
+        return this.flatSource(watcher).save().catch(() => {
+          throw new Error(`fail to save watcher ${watcher._id}`);
+        });
       }
-
       return this.savedWatchers.get(watcher._id).then((savedWatcher) => {
         forEach(watcher._source, (val, key) => {
           savedWatcher[key] = val;
         });
         return savedWatcher.save();
-      });
-    } else { // Kibana
-      return this.ServerConfig.get().then((response) => {
-        watcher._index = response.data.es.index;
-        watcher._type = response.data.es.type;
-        return watcher;
-      }).then((watcher) => {
-        return this.$http.post(`../api/sentinl/watcher/${watcher._id}`, watcher).then((response) => {
-          if (response.status !== 200) {
-            throw new Error(`Fail to save watcher ${watcher._id}`);
-          }
-          return watcher._id;
-        });
+      }).catch(() => {
+        throw new Error(`fail to save watcher ${watcher._id}`);
       });
     }
+    // Kibana
+    return this.ServerConfig.get().then((response) => {
+      watcher._index = response.data.es.index;
+      watcher._type = response.data.es.type;
+      return watcher;
+    }).then((watcher) => {
+      return this.$http.post(`../api/sentinl/watcher/${watcher._id}`, watcher).then((response) => {
+        if (response.status !== 200) {
+          throw new Error(`fail to save watcher ${watcher._id}`);
+        }
+        return watcher._id;
+      });
+    });
   }
 
   /**
-  * Deletes watcher object.
+  * Delete watcher doc
   *
-  * @param {string} id - watcher id.
+  * @param {string} id of deleted watcher
   */
   delete(id) {
-    if (this.savedObjectsAPIEnabled) { // Kibi
-      return this.savedWatchers.delete(id).then(() => id);
-    } else { // Kibana
-      return this.$http.delete(`../api/sentinl/watcher/${id}`).then((response) => {
-        if (response.status !== 200) {
-          throw new Error(`Fail to delete watcher ${id}`);
-        }
-        return id;
-      });
-    }
+    return super.delete(this.savedWatchers, '../api/sentinl/watcher/', id);
   }
 }
 
