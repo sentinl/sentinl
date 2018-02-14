@@ -27,7 +27,6 @@ import getElasticsearchClient from './server/lib/get_elasticsearch_client';
 import getConfiguration from './server/lib/get_configuration';
 import fs from 'fs';
 import phantom from './server/lib/phantom';
-import GunMaster from 'gun-master';
 
 import userIndexMappings from './server/mappings/user_index';
 import coreIndexMappings from './server/mappings/core_index';
@@ -107,6 +106,7 @@ const init = once(function (server) {
   // Start cluster
   let node;
   if (config.settings.cluster.enabled) {
+    const GunMaster = require('gun-master');
     node = new GunMaster(config.settings.cluster);
     node.run().catch(function (err) {
       server.log(['status', 'error', 'Sentinl', 'cluster'], err);
