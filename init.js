@@ -27,6 +27,7 @@ import getElasticsearchClient from './server/lib/get_elasticsearch_client';
 import getConfiguration from './server/lib/get_configuration';
 import fs from 'fs';
 import phantom from './server/lib/phantom';
+import GunMaster from 'gun-master';
 
 import userIndexMappings from './server/mappings/user_index';
 import coreIndexMappings from './server/mappings/core_index';
@@ -103,9 +104,18 @@ const init = once(function (server) {
   }
   initIndices.createIndex(server, config, config.es.alarm_index, config.es.alarm_type, alarmIndexMappings, 'alarm');
 
+  // Start cluster
+  let node;
+  if (config.settings.cluster.enabled) {
+    node = new GunMaster(config.settings.cluster);
+    node.run().catch(function (err) {
+      server.log(['status', 'error', 'Sentinl', 'cluster'], err);
+    });
+  }
+
   // Schedule watchers execution.
   const sched = later.parse.recur().on(25,55).second();
-  const handleWatchers = later.setInterval(() => scheduler.doalert(server), sched);
+  const handleWatchers = later.setInterval(() => scheduler.doalert(server, node), sched);
 });
 
 export default function (server, options) {

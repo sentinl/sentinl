@@ -67,14 +67,12 @@ export default function Scheduler(server) {
       return;
     }
 
-    watcher.execute(task)
-    .then(function (response) {
+    watcher.execute(task).then(function (response) {
       server.log(['status', 'info', 'Sentinl', 'watcher'], `SUCCESS! Watcher has been executed: ${response.task.id}.`);
       if (response.message) {
         server.log(['status', 'info', 'Sentinl', 'watcher'], response.message);
       }
-    })
-    .catch(function (error) {
+    }).catch(function (error) {
       server.log(['status', 'error', 'Sentinl', 'watcher'], `Watcher ${task._id}: ${error}`);
     });
   };
@@ -108,12 +106,7 @@ export default function Scheduler(server) {
       `server.sentinlStore.scheduled Watch: ${task._id} every ${server.sentinlStore.schedule[task._id].schedule}`);
   };
 
-  /**
-  * Get all watchers and schedule them.
-  *
-  * @param {object} server - Kibana server instance.
-  */
-  function doalert(server) {
+  function alert(server) {
     server.log(['status', 'debug', 'Sentinl', 'scheduler'], 'Reloading Watchers...');
     server.log(['status', 'debug', 'Sentinl', 'scheduler', 'auth'], `Enabled: ${config.settings.authentication.enabled}`);
     if (config.settings.authentication.enabled) {
@@ -126,30 +119,47 @@ export default function Scheduler(server) {
 
     watcher = new Watcher(server);
 
-    watcher.getCount()
-    .then(function (resp) {
-      return watcher.getWatchers(resp.count)
-      .then(function (resp) {
+    watcher.getCount().then(function (resp) {
+      return watcher.getWatchers(resp.count).then(function (resp) {
         /* Orphanize */
         try {
           removeOrphans(resp);
         } catch (err) {
-          server.log(['status', 'debug', 'Sentinl', 'scheduler'], `Failed to remove orphans`);
+          server.log(['status', 'debug', 'Sentinl', 'scheduler'], 'Failed to remove orphans');
         }
-
         /* Schedule watchers */
         forEach(resp.hits.hits, function (hit) {
           scheduleWatcher(hit, config);
         });
       });
-    })
-    .catch((error) => {
+    }).catch((error) => {
       if (error.statusCode === 404) {
         server.log(['status', 'info', 'Sentinl', 'scheduler'], 'No indices found, initializing.');
       } else {
         server.log(['status', 'error', 'Sentinl', 'scheduler'], `An error occurred while looking for data in indices: ${error}`);
       }
     });
+  }
+
+  /**
+  * Get all watchers and schedule them.
+  *
+  * @param {object} server - Kibana server instance.
+  */
+  function doalert(server, node = null) {
+    if (config.settings.cluster.enabled && node) {
+      return node.getMaster().then((master) => {
+        if (master.id === config.settings.cluster.host.id || !master.id) {
+          server.log(['status', 'info', 'Sentinl', 'scheduler', 'cluster'], 'this node is the master, executing watchers');
+          alert(server);
+        } else {
+          server.log(['status', 'info', 'Sentinl', 'scheduler', 'cluster'], 'this node is a slave, do not execute watchers');
+        }
+      });
+    } else {
+      server.log(['status', 'info', 'Sentinl', 'scheduler', 'cluster'], 'disabled');
+      alert(server);
+    }
   };
 
   return {
