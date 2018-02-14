@@ -34,7 +34,6 @@
     "elasticsearch": "13.2.0",
     "emailjs": "1.0.8",
     "gun": "0.9.93",
-    "gun-master": "git@github.com:sirensolutions/gun-master.git",
     "later": "1.2.0",
     "mustache": "2.3.0",
     "node-horseman": "3.3.0",

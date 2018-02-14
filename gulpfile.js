@@ -65,27 +65,28 @@ function syncPluginTo(dest, done) {
           resolve();
         });
       });
-    }))
-    .then(function () {
+    })).then(function () {
       return new Promise(function (resolve, reject) {
         mkdirp(path.join(buildTarget, 'node_modules'), function (err) {
           if (err) return reject(err);
           resolve();
         });
       });
-    })
-    .then(function () {
+    }).then(function () {
       spawn('npm', ['install', '--production'], {
         cwd: dest,
         stdio: 'inherit'
-      })
-      .on('close', done);
-    })
-    .catch(done);
+      });
+    }).then(function () {
+      spawn('npm', ['install', 'https://@github.com:sirensolutions/gun-master.git'], {
+        cwd: dest,
+        stdio: 'inherit'
+      }).on('close', done);
+    }).catch(done);
   });
 }
 
-function applyVersion (path, version) {
+function applyVersion(path, version) {
   var pkgConfig = JSON.parse(fs.readFileSync(path, 'utf8'));
   pkgConfig.kibana.version = version;
   fs.writeFileSync(path, JSON.stringify(pkgConfig, null, 2), 'utf8');
@@ -102,9 +103,7 @@ gulp.task('lint', function (done) {
     'public/**/*.js',
     'server/**/*.js',
     '!**/webpackShims/**'
-  ]).pipe(eslint())
-  .pipe(eslint.formatEach())
-  .pipe(eslint.failOnError());
+  ]).pipe(eslint()).pipe(eslint.formatEach()).pipe(eslint.failOnError());
 });
 
 gulp.task('clean', function (done) {
@@ -129,8 +128,8 @@ gulp.task('package', ['build'], function (done) {
   return gulp.src([
     path.join(buildDir, '**', '*')
   ])
-  .pipe(zip(options.version ? packageName + '-v' + options.version  +'.zip' : packageName + '.zip'))
-  .pipe(gulp.dest(targetDir));
+    .pipe(zip(options.version ? packageName + '-v' + options.version  + '.zip' : packageName + '.zip'))
+    .pipe(gulp.dest(targetDir));
 });
 
 gulp.task('dev', ['sync'], function (done) {
@@ -143,7 +142,7 @@ gulp.task('dev', ['sync'], function (done) {
   ], ['sync', 'lint']);
 });
 
-gulp.task('test', ['sync'], function(done) {
+gulp.task('test', ['sync'], function (done) {
   spawn('grunt', ['test:server', 'test:browser', '--grep=' + (util.env.grep ? util.env.grep : 'Sentinl')], {
     cwd: options.kibanahomepath,
     stdio: 'inherit'
@@ -152,7 +151,7 @@ gulp.task('test', ['sync'], function(done) {
   }).on('close', done);
 });
 
-gulp.task('testserver', ['sync'], function(done) {
+gulp.task('testserver', ['sync'], function (done) {
   spawn('grunt', ['test:server', '--grep=' + (util.env.grep ? util.env.grep : 'Sentinl')], {
     cwd: options.kibanahomepath,
     stdio: 'inherit'
@@ -161,7 +160,7 @@ gulp.task('testserver', ['sync'], function(done) {
   }).on('close', done);
 });
 
-gulp.task('testbrowser', ['sync'], function(done) {
+gulp.task('testbrowser', ['sync'], function (done) {
   spawn('grunt', ['test:browser', '--grep=' + (util.env.grep ? util.env.grep : 'Sentinl')], {
     cwd: options.kibanahomepath,
     stdio: 'inherit'
@@ -170,7 +169,7 @@ gulp.task('testbrowser', ['sync'], function(done) {
   }).on('close', done);
 });
 
-gulp.task('testdev', ['sync'], function(done) {
+gulp.task('testdev', ['sync'], function (done) {
   spawn('grunt', ['test:dev', '--browser=Chrome'], {
     cwd: options.kibanahomepath,
     stdio: 'inherit'
@@ -179,7 +178,7 @@ gulp.task('testdev', ['sync'], function(done) {
   }).on('close', done);
 });
 
-gulp.task('coverage', ['sync'], function(done) {
+gulp.task('coverage', ['sync'], function (done) {
   spawn('grunt', ['test:coverage', '--grep=Sentinl'], {
     cwd: options.kibanahomepath,
     stdio: 'inherit'
