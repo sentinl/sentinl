@@ -103,9 +103,19 @@ const init = once(function (server) {
   }
   initIndices.createIndex(server, config, config.es.alarm_index, config.es.alarm_type, alarmIndexMappings, 'alarm');
 
+  // Start cluster
+  let node;
+  if (config.settings.cluster.enabled) {
+    const GunMaster = require('gun-master');
+    node = new GunMaster(config.settings.cluster);
+    node.run().catch(function (err) {
+      server.log(['status', 'error', 'Sentinl', 'cluster'], err);
+    });
+  }
+
   // Schedule watchers execution.
   const sched = later.parse.recur().on(25,55).second();
-  const handleWatchers = later.setInterval(() => scheduler.doalert(server), sched);
+  const handleWatchers = later.setInterval(() => scheduler.doalert(server, node), sched);
 });
 
 export default function (server, options) {

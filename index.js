@@ -95,6 +95,33 @@ export default function (kibana) {
           scriptResults: Joi.number().default(50)
         }).default(),
         settings: Joi.object({
+          cluster: Joi.object({
+            enabled: Joi.boolean().default(false),
+            debug: Joi.boolean().default(false),
+            name: Joi.string().default('sentinl'),
+            priority_for_master: Joi.number().default(0),
+            loop_delay: Joi.number().default(5),
+            absent_time: Joi.number().default(15),
+            absent_time_for_delete: Joi.number().default(86400),
+            cert: Joi.object({
+              selfsigned: Joi.boolean().default(true),
+              valid: Joi.number().default(10),
+              key: Joi.string().default(undefined),
+              cert: Joi.string().default(undefined),
+            }).default(),
+            gun: Joi.object({
+              port: Joi.number().default(9000),
+              host: Joi.string().default('localhost'),
+              cache: Joi.string().default('data.json'),
+              peers: Joi.array(),
+            }).default(),
+            host: Joi.object({
+              id: Joi.string().default('123'),
+              name: Joi.string().default('trex'),
+              node: Joi.string().default('hosts'),
+              priority: Joi.number().default(0),
+            }).default(),
+          }).default(),
           authentication: Joi.object({
             enabled: Joi.boolean().default(false),
             https: Joi.boolean().default(true),
