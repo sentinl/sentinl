@@ -41,6 +41,10 @@ var knownOptions = {
 var options = minimist(process.argv.slice(2), knownOptions);
 var kibanaPluginDir = path.resolve(__dirname, options.kibanahomepath + '/plugins/' + packageName);
 
+const lib = {
+  gun_master: !!process.argv.filter((arg) => arg.match(/(--lib-install)=.*(gun-master).*/g)).length,
+};
+
 function syncPluginTo(dest, done) {
   mkdirp(dest, function (err) {
     if (err) return done(err);
@@ -73,15 +77,19 @@ function syncPluginTo(dest, done) {
         });
       });
     }).then(function () {
-      spawn('npm', ['install', '--production'], {
+      const prod = spawn('npm', ['install', '--production'], {
         cwd: dest,
         stdio: 'inherit'
       });
-    }).then(function () {
-      spawn('npm', ['install', 'sirensolutions/gun-master.git'], {
-        cwd: dest,
-        stdio: 'inherit'
-      }).on('close', done);
+
+      if (!lib.gun_master) {
+        prod.on('close', done);
+      } else {
+        spawn('npm', ['install', 'sirensolutions/gun-master.git'], {
+          cwd: dest,
+          stdio: 'inherit'
+        }).on('close', done);
+      }
     }).catch(done);
   });
 }
