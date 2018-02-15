@@ -78,7 +78,7 @@ function syncPluginTo(dest, done) {
         stdio: 'inherit'
       });
     }).then(function () {
-      spawn('npm', ['install', 'https://@github.com:sirensolutions/gun-master.git'], {
+      spawn('npm', ['install', 'sirensolutions/gun-master.git'], {
         cwd: dest,
         stdio: 'inherit'
       }).on('close', done);
