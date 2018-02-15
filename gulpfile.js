@@ -43,7 +43,7 @@ var options = minimist(process.argv.slice(2), knownOptions);
 var kibanaPluginDir = path.resolve(__dirname, options.kibanahomepath + '/plugins/' + packageName);
 
 const lib = {
-  gun_master: !options['lib-install'] ? null : options['lib-install'].match(/gun-master(\#([a-zA-Z\d-_]+\b))?/gi)[0],
+  gun_master: !options['lib-install'] ? null : options['lib-install'].match(/gun-master(\#([a-zA-Z\d-_.]+\b))?/gi)[0],
 };
 
 function syncPluginTo(dest, done) {
