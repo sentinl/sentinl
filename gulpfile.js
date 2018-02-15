@@ -35,6 +35,7 @@ var include = [
 
 var knownOptions = {
   string: 'kibanahomepath',
+  string: 'lib-install',
   string: 'version',
   default: { kibanahomepath: '../kibi-internal' }
 };
@@ -42,7 +43,7 @@ var options = minimist(process.argv.slice(2), knownOptions);
 var kibanaPluginDir = path.resolve(__dirname, options.kibanahomepath + '/plugins/' + packageName);
 
 const lib = {
-  gun_master: !!process.argv.filter((arg) => arg.match(/(--lib-install)=.*(gun-master).*/g)).length,
+  gun_master: !options['lib-install'] ? null : options['lib-install'].match(/gun-master(\#([a-zA-Z\d-_]+\b))?/gi)[0],
 };
 
 function syncPluginTo(dest, done) {
@@ -85,7 +86,7 @@ function syncPluginTo(dest, done) {
       if (!lib.gun_master) {
         prod.on('close', done);
       } else {
-        spawn('npm', ['install', 'sirensolutions/gun-master.git'], {
+        spawn('npm', ['install', 'sirensolutions/' + lib.gun_master], {
           cwd: dest,
           stdio: 'inherit'
         }).on('close', done);
