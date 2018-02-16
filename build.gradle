@@ -122,7 +122,10 @@ node {
 //                                               //
 ///////////////////////////////////////////////////
 
-task gulpPackage(dependsOn: ['gulp_package']) << {}
+task gulpPackage(type: GulpTask) {
+    args = ["package", "--lib-install=gun-master#${gun_master_version}"]
+}
+
 
 // run npm install
 gulp_package.dependsOn 'npmInstall'
@@ -150,10 +153,12 @@ task gulpDev(type: GulpTask) {
     args = ["dev"]
     if (project.hasProperty('kibiHomePath')) {
         args << "--kibanahomepath=${kibiHomePath}"
+        args << "--lib-install=gun-master#${gun_master_version}"
     }
     else {
         dependsOn installKibi
         args << "--kibanahomepath=${new File(extractKibi.destinationDir, "kibi-core-${project.version}-sources").getAbsolutePath()}"
+        args << "--lib-install=gun-master#${gun_master_version}"
     }
 }
 
@@ -178,10 +183,12 @@ task gulpTest(type: GulpTask) {
     args = ["test"]
     if (project.hasProperty('kibiHomePath')) {
         args << "--kibanahomepath=${kibiHomePath}"
+        args << "--lib-install=gun-master#${gun_master_version}"
     }
     else {
         dependsOn installKibi
         args << "--kibanahomepath=${new File(extractKibi.destinationDir, "kibi-core-${project.version}-sources").getAbsolutePath()}"
+        args << "--lib-install=gun-master#${gun_master_version}"
     }
 }
 
@@ -206,10 +213,12 @@ task gulpTestDev(type: GulpTask) {
     args = ["testdev"]
     if (project.hasProperty('kibiHomePath')) {
         args << "--kibanahomepath=${kibiHomePath}"
+        args << "--lib-install=gun-master#${gun_master_version}"
     }
     else {
         dependsOn installKibi
         args << "--kibanahomepath=${new File(extractKibi.destinationDir, "kibi-core-${project.version}-sources").getAbsolutePath()}"
+        args << "--lib-install=gun-master#${gun_master_version}"
     }
 }
 
