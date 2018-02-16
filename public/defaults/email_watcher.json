@@ -26,7 +26,7 @@
       "email": {
         "to": "alarm@localhost",
         "from": "sentinl@localhost",
-        "subject": "Sentinl Alarm",
+        "subject": "Alarm",
         "priority": "high",
         "body": "Found {{payload.hits.total}} Events"
       }

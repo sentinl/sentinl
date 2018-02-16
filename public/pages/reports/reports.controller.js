@@ -4,11 +4,11 @@ import moment from 'moment';
 import confirmMessageTemplate from '../../confirm_message/confirm_message.html';
 
 function ReportsController($rootScope, $scope, $route, $interval,
-  $timeout, timefilter, Private, createNotifier, $window, $uibModal, navMenu, globalNavState, Report) {
+  $timeout, timefilter, Private, createNotifier, $window, $uibModal, navMenu, globalNavState, Report, COMMON) {
   'ngInject';
 
-  $scope.title = 'Sentinl: Reports';
-  $scope.description = 'Kibi/Kibana Report App for Elasticsearch';
+  $scope.title = COMMON.reports.title;
+  $scope.description = COMMON.description;
 
   $scope.topNavMenu = navMenu.getTopNav('reports');
   $scope.tabsMenu = navMenu.getTabs('reports');
@@ -16,7 +16,7 @@ function ReportsController($rootScope, $scope, $route, $interval,
   $scope.$on('globalNavState:change', () => navMenu.setKbnLogo(globalNavState.isOpen()));
 
   const notify = createNotifier({
-    location: 'Sentinl Reports'
+    location: COMMON.reports.title,
   });
 
   timefilter.enabled = true;

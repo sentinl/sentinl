@@ -54,12 +54,6 @@ describe('Alarms Controller', function () {
     $httpBackend.verifyNoOutstandingRequest();
   });
 
-  it('Title and description', function () {
-    init({});
-    expect($scope.title).to.equal('Sentinl: Alarms');
-    expect($scope.description).to.be('Kibi/Kibana Report App for Elasticsearch');
-  });
-
   it('2 http requests should be made when controller is created', function () {
     init({hits: [{id: 1}, {id: 2}]});
     expect($scope.alarms.length).to.equal(2);
