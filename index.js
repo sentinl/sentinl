@@ -72,8 +72,10 @@ export default function (kibana) {
     },
     config: function (Joi) {
       return Joi.object({
+        app_name: Joi.string().default('sentinl'),
         enabled: Joi.boolean().default(true),
         es: Joi.object({
+          results: Joi.number().default(50),
           host: Joi.string().default('localhost'),
           port: Joi.number().default(9200),
           timefield: Joi.string().default('@timestamp'),
@@ -88,11 +90,6 @@ export default function (kibana) {
             throttle: Joi.number().default(1),
             recover: Joi.number().default(15000)
           }).default(),
-        }).default(),
-        sentinl: Joi.object({
-          history: Joi.number().default(20),
-          results: Joi.number().default(50),
-          scriptResults: Joi.number().default(50)
         }).default(),
         settings: Joi.object({
           cluster: Joi.object({

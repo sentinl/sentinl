@@ -27,6 +27,7 @@ import getElasticsearchClient from './server/lib/get_elasticsearch_client';
 import getConfiguration from './server/lib/get_configuration';
 import fs from 'fs';
 import phantom from './server/lib/phantom';
+import Log from './server/lib/log';
 
 import userIndexMappings from './server/mappings/user_index';
 import coreIndexMappings from './server/mappings/core_index';
@@ -46,6 +47,7 @@ import SavedObjectsAPIMiddleware from './server/lib/saved_objects_api';
 const init = once(function (server) {
   const config = getConfiguration(server);
   const scheduler = getScheduler(server);
+  const log = new Log(config.app_name, server, 'init');
 
   if (fs.existsSync('/etc/sentinl.json')) {
     server.plugins.sentinl.status.red('Setting configuration values in /etc/sentinl.json is not supported anymore, please copy ' +
@@ -54,7 +56,7 @@ const init = once(function (server) {
     return;
   }
 
-  server.log(['status', 'info', 'Sentinl'], 'Sentinl Initializing');
+  log.info('initializing ...');
 
   // Object to hold different runtime values.
   server.sentinlStore = {
@@ -64,9 +66,9 @@ const init = once(function (server) {
   // Install PhantomJS lib. The lib is needed to take screenshots by report action.
   const phantomPath = has(config, 'settings.report.phantomjs_path') ? config.settings.report.phantomjs_path : undefined;
   phantom.install(phantomPath).then((phantomPackage) => {
-    server.log(['status', 'info', 'Sentinl', 'report'], `Phantom installed at ${phantomPackage.binary}`);
+    log.info(`phantom installed at ${phantomPackage.binary}`);
     server.expose('phantomjs_path', phantomPackage.binary);
-  }).catch((err) => server.log(['status', 'error', 'Sentinl', 'report'], `Failed to install phantomjs: ${err}`));
+  }).catch((err) => log.error(`fail to install phantomjs: ${err}`));
 
   // Load Sentinl routes.
   masterRoute(server);
@@ -109,7 +111,7 @@ const init = once(function (server) {
     const GunMaster = require('gun-master');
     node = new GunMaster(config.settings.cluster);
     node.run().catch(function (err) {
-      server.log(['status', 'error', 'Sentinl', 'cluster'], err);
+      log.error(`fail to run cluster node, ${err}`);
     });
   }
 

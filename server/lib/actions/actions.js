@@ -26,6 +26,7 @@ import getConfiguration from '../get_configuration';
 import getElasticsearchClient from '../get_elasticsearch_client';
 import logHistory from '../log_history';
 import Email from './helpers/email';
+import Log from '../log';
 
 // actions
 import reportAction from './report_action';
@@ -33,9 +34,8 @@ import reportAction from './report_action';
 export default function (server, actions, payload, task) {
 
   const config = getConfiguration(server);
+  const log = new Log(config.app_name, server, 'action');
   const client = getElasticsearchClient(server, config);
-  const hlimit = config.sentinl.history ? config.sentinl.history : 10;
-
 
   /* ES Indexing Functions */
   var esHistory = function (watcherTitle, type, message, loglevel, payload, isReport, object) {
@@ -96,7 +96,7 @@ export default function (server, actions, payload, task) {
 
   /* Loop Actions */
   _.forEach(actions, function (action, actionName) {
-    server.log(['status', 'info', 'Sentinl'], 'Processing action: ' + actionName);
+    log.debug(`processing action: ${actionName}`);
 
     /* ***************************************************************************** */
     /*
@@ -114,7 +114,7 @@ export default function (server, actions, payload, task) {
       priority = action.console.priority ? action.console.priority : 'INFO';
       formatterConsole = action.console.message ? action.console.message : '{{ payload }}';
       message = mustache.render(formatterConsole, {payload: payload});
-      server.log(['status', 'debug', 'Sentinl'], 'Console Payload: ' + JSON.stringify(payload));
+      log.debug('console payload', payload);
       esHistory(task._source.title, actionName, message, priority, !action.console.save_payload ? {} : payload, false);
     }
 
@@ -127,7 +127,7 @@ export default function (server, actions, payload, task) {
     if (_.has(action, 'throttle_period')) {
       const id = `${task._id}_${actionName}`;
       if (debounce(id, action.throttle_period)) {
-        server.log(['status', 'info', 'Sentinl'], `Action Throttled. Watcher id: ${task._id}, action name: ${actionName}`);
+        log.info(`action throttled, watcher id: ${task._id}, action name: ${actionName}`);
         esHistory(task._source.title, id, `Action Throttled for ${action.throttle_period}`, priority, {});
         return;
       }
@@ -156,24 +156,22 @@ export default function (server, actions, payload, task) {
       subject = mustache.render(formatterSubject, {payload: payload});
       text = mustache.render(formatterBody, {payload: payload});
       priority = action.email.priority ? action.email.priority : 'INFO';
-      server.log(['status', 'debug', 'Sentinl', 'email'], 'Subject: ' + subject + ', Body: ' + text);
+      log.debug(`subject: ${subject}, body: ${text}`);
 
       if (!email || !config.settings.email.active) {
-        server.log(['status', 'info', 'Sentinl', 'email'], 'Delivery Disabled!');
+        log.warning('email delivery disabled');
       }
       else {
-        server.log(['status', 'info', 'Sentinl', 'email'], 'Delivering to Mail Server');
+        log.debug('delivering to email server');
         email.send({
           text,
           from: action.email.from,
           to: action.email.to,
           subject
-        })
-        .then(function (message) {
-          server.log(['status', 'debug', 'Sentinl', 'email'], `Email sent. Watcher ${task._id}: ${message}`);
-        })
-        .catch(function (error) {
-          server.log(['status', 'error', 'Sentinl', 'email'], `Fail to send email. Watcher ${task._id}: ${error}`);
+        }).then(function (message) {
+          log.debug(`email sent, watcher: ${task._id}, message: ${message}`);
+        }).catch(function (error) {
+          log.error(`fail to send email, watcher: ${task._id}, ${error}`);
         });
       }
       if (!action.email.stateless) {
@@ -205,13 +203,13 @@ export default function (server, actions, payload, task) {
       text = mustache.render(formatterBody, {payload: payload});
       html = mustache.render(formatterConsole, {payload: payload});
       priority = action.email_html.priority ? action.email_html.priority : 'INFO';
-      server.log(['status', 'debug', 'Sentinl', 'email_html'], 'Subject: ' + subject + ', Body: ' + text + ', HTML:' + html);
+      log.debug(`subject: ${subject}, body: ${text}, HTML: ${html}`);
 
       if (!email || !config.settings.email.active) {
-        server.log(['status', 'info', 'Sentinl', 'email_html'], 'Delivery Disabled!');
+        log.warning('email html delivery disabled');
       }
       else {
-        server.log(['status', 'info', 'Sentinl', 'email'], 'Delivering to Mail Server');
+        log.debug('delivering to email server');
         email.send({
           text,
           from: action.email_html.from,
@@ -223,12 +221,10 @@ export default function (server, actions, payload, task) {
               alternative: true
             }
           ]
-        })
-        .then(function (message) {
-          server.log(['status', 'debug', 'Sentinl', 'email'], `Email sent. Watcher ${task._id}: ${message}`);
-        })
-        .catch(function (error) {
-          server.log(['status', 'error', 'Sentinl', 'email'], `Fail to send email. Watcher ${task._id}: ${error}`);
+        }).then(function (message) {
+          log.debug(`email sent, watcher: ${task._id}, message: ${message}`);
+        }).catch(function (error) {
+          log.error(`fail to send email, watcher: ${task._id}, ${error}`);
         });
       }
 
@@ -262,15 +258,13 @@ export default function (server, actions, payload, task) {
     */
 
     if (_.has(action, 'report')) {
-      return reportAction(server, email, task, action, actionName, payload)
-      .then(function (file) {
+      return reportAction(server, email, task, action, actionName, payload).then(function (file) {
         if (!action.report.stateless) {
           esHistory(task._source.title, actionName, text, priority, {}, true, file);
         }
         return null;
-      })
-      .catch(function (error) {
-        server.log(['status', 'error', 'Sentinl', 'report'], error);
+      }).catch(function (error) {
+        log.error(`fail to report, ${error}`);
         if (!action.report.stateless) {
           esHistory(task._source.title, actionName, error);
         }
@@ -292,10 +286,10 @@ export default function (server, actions, payload, task) {
       formatter = action.slack.message ? action.slack.message : 'Series Alarm {{ payload._id}}: {{payload.hits.total}}';
       message = mustache.render(formatter, {payload: payload});
       priority = action.slack.priority ? action.slack.priority : 'INFO';
-      server.log(['status', 'debug', 'Sentinl', 'Slack'], 'Webhook to #' + action.slack.channel + ' msg: ' + message);
+      log.debug(`webhook to #${action.slack.channel}, message: ${message}`);
 
       if (!slack || !config.settings.slack.active) {
-        server.log(['status', 'info', 'Sentinl', 'slack'], 'Delivery Disabled!');
+        log.warning('slack message delivery disabled');
       }
       else {
         try {
@@ -305,7 +299,7 @@ export default function (server, actions, payload, task) {
             username: config.settings.slack.username
           });
         } catch (err) {
-          server.log(['status', 'error', 'Sentinl', 'slack'], 'Failed sending to: ' + config.settings.slack.hook);
+          log.error(`fail sending to: ${config.settings.slack.hook}`);
         }
       }
 
@@ -360,12 +354,12 @@ export default function (server, actions, payload, task) {
       req = http.request(options, function (res) {
         res.setEncoding('utf8');
         res.on('data', function (chunk) {
-          server.log(['status', 'debug', 'Sentinl'], 'Webhook Response: ' + chunk);
+          log.debug(`webhook response: ${chunk}`);
         });
       });
 
       req.on('error', function (e) {
-        server.log(['status', 'error', 'Sentinl'], 'Error shipping Webhook: ' + e.message);
+        log.error(`fail to ship webhook: ${e.message}`);
       });
       if (dataToWrite) {
         req.write(dataToWrite);
@@ -388,7 +382,7 @@ export default function (server, actions, payload, task) {
       esFormatter = action.local.message ? action.local.message : '{{ payload }}';
       esMessage = mustache.render(esFormatter, {payload: payload});
       priority = action.local.priority ? action.local.priority : 'INFO';
-      server.log(['status', 'debug', 'Sentinl', 'local'], 'Logged Message: ' + esMessage);
+      log.debug(`logged message to elastic: ${esMessage}`);
       // Log Event
       esHistory(task._source.title, actionName, esMessage, priority, !action.local.save_payload ? {} : payload, false);
     }
@@ -436,12 +430,12 @@ export default function (server, actions, payload, task) {
       req = http.request(options, function (res) {
         res.setEncoding('utf8');
         res.on('data', function (chunk) {
-          server.log(['status', 'debug', 'Sentinl'], 'Response: ' + chunk);
+          log.debug(`pushapps response: ${chunk}`);
         });
       });
 
       req.on('error', function (e) {
-        server.log(['status', 'error', 'Sentinl'], 'Error creating a PushApps notification: ' + e);
+        log.error(`fail to create a PushApps notification: ${e}`);
       });
       req.write(postData);
       req.end();

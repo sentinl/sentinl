@@ -8,6 +8,7 @@ import es from 'elasticsearch';
 import Crypto from '../lib/classes/crypto';
 import Watcher from '../lib/classes/watcher';
 import Boom from 'boom';
+import Log from '../lib/log';
 
 const delay = function (ms) {
   return new Promise(function (resolve) {
@@ -18,6 +19,7 @@ const delay = function (ms) {
 /* ES Functions */
 var getHandler = function (type, server, req, reply) {
   const config = getConfiguration(server);
+  const log = new Log(config.app_name, server, 'routes');
 
   var timeInterval;
   // Use selected timefilter when available
@@ -41,7 +43,7 @@ var getHandler = function (type, server, req, reply) {
     sort: '@timestamp : asc',
     allowNoIndices: false,
     body: {
-      size: config.sentinl.results ? config.sentinl.results : 50,
+      size: config.es.results ? config.es.results : 50,
       query: {
         bool: {
           filter: [
@@ -56,13 +58,14 @@ var getHandler = function (type, server, req, reply) {
       }
     }
   })
-  .then((res) => reply(res))
-  .catch((err) => reply(handleESError(err)));
+    .then((res) => reply(res))
+    .catch((err) => reply(handleESError(err)));
 };
 
 export default function routes(server) {
 
   const config = getConfiguration(server);
+  const log = new Log(config.app_name, server, 'routes');
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
 
   // Current Time
@@ -111,7 +114,7 @@ export default function routes(server) {
         es: {
           index: config.es.default_index,
           type: config.es.type,
-          number_of_results: config.sentinl.results
+          number_of_results: config.es.results
         },
         authentication: {
           enabled: config.settings.authentication.enabled,
@@ -129,16 +132,13 @@ export default function routes(server) {
       const body = {
         index: config.es.default_index,
         type: config.es.type,
-        size: config.sentinl.results ? config.sentinl.results : 50,
+        size: config.es.results ? config.es.results : 50,
         allowNoIndices: false
       };
 
-      callWithRequest(req, 'search', body)
-      .then((res) => {
-        console.log(res);
+      callWithRequest(req, 'search', body).then((res) => {
         reply(res);
-      })
-      .catch((err) => reply(handleESError(err)));
+      }).catch((err) => reply(handleESError(err)));
     }
   });
 
@@ -148,7 +148,7 @@ export default function routes(server) {
     handler: function (req, reply) {
       // Check if alarm index and discard everything else
       if (!req.params.index.substr(0, config.es.alarm_index.length) === config.es.alarm_index) {
-        server.log(['status', 'err', 'Sentinl'], 'Forbidden Delete Request! ' + req.params);
+        log.error('forbidden delete request! ' + req.params);
         return;
       }
       var body = {
@@ -158,11 +158,11 @@ export default function routes(server) {
       };
 
       callWithRequest(req, 'delete', body)
-      .then(() => callWithRequest(req, 'indices.refresh', {
-        index: req.params.index
-      }))
-      .then((resp) => reply({ok: true, resp: resp}))
-      .catch((err) => reply(handleESError(err)));
+        .then(() => callWithRequest(req, 'indices.refresh', {
+          index: req.params.index
+        }))
+        .then((resp) => reply({ok: true, resp: resp}))
+        .catch((err) => reply(handleESError(err)));
     }
   });
 
@@ -189,17 +189,17 @@ export default function routes(server) {
     path: '/api/sentinl/test/{id}',
     handler: function (request, reply) {
       var client = server.plugins.elasticsearch.client;
-      server.log(['status', 'info', 'Sentinl'], 'Testing ES connection with param: ' + request.params.id);
+      log.debug('testing Elasticsearch connection with param: ' + request.params.id);
       client.ping({
         requestTimeout: 5000,
         // undocumented params are appended to the query string
         hello: 'elasticsearch'
       }, function (error) {
         if (error) {
-          server.log(['warning', 'info', 'Sentinl'], 'ES Connectivity is down! ' + request.params.id);
+          log.error('Elasticsearch connectivity is down! ' + request.params.id);
           reply({ status: 'DOWN' });
         } else {
-          server.log(['status', 'info', 'Sentinl'], 'ES Connectivity is up! ' + request.params.id);
+          log.debug('Elasticsearch connectivity is up! ' + request.params.id);
           reply({ status: 'UP' });
         }
       });
@@ -210,7 +210,7 @@ export default function routes(server) {
     method: 'GET',
     path: '/api/sentinl/get/watcher/{id}',
     handler: function (request, reply) {
-      server.log(['status', 'info', 'Sentinl'], 'Get Watcher with ID: ' + request.params.id);
+      log.debug('gettting watcher with id: ' + request.params.id);
       const body = {
         index: config.es.default_index,
         type: config.es.type,
@@ -218,11 +218,11 @@ export default function routes(server) {
       };
 
       callWithRequest(request, 'get', body)
-      .then((resp) => reply(resp))
-      .catch((err) => {
-        server.log(['debug', 'Sentinl'], err);
-        reply(err);
-      });
+        .then((resp) => reply(resp))
+        .catch((err) => {
+          log.error(err);
+          reply(err);
+        });
     }
   });
 
@@ -231,7 +231,7 @@ export default function routes(server) {
     path: '/api/sentinl/watcher/{id}',
     handler: function (request, reply) {
       var watcher = request.payload;
-      server.log(['status', 'info', 'Sentinl'], 'Saving Watcher with ID: ' + watcher._id);
+      log.debug('saving watcher with id: ' + watcher._id);
       var body = {
         index: config.es.default_index,
         type: config.es.type,
@@ -239,11 +239,11 @@ export default function routes(server) {
         body: watcher._source
       };
       callWithRequest(request, 'index', body)
-      .then(() => callWithRequest(request, 'indices.refresh', {
-        index: config.es.default_index
-      }))
-      .then((resp) => reply({ok: true, resp: resp}))
-      .catch((err) => reply(handleESError(err)));
+        .then(() => callWithRequest(request, 'indices.refresh', {
+          index: config.es.default_index
+        }))
+        .then((resp) => reply({ok: true, resp: resp}))
+        .catch((err) => reply(handleESError(err)));
     }
   });
 
@@ -275,11 +275,11 @@ export default function routes(server) {
         id: request.params.id
       };
       callWithRequest(request, 'delete', body)
-      .then(() => callWithRequest(request, 'indices.refresh', {
-        index: config.es.default_index
-      }))
-      .then((resp) => reply({ok: true, resp: resp}))
-      .catch((err) => reply(handleESError(err)));
+        .then(() => callWithRequest(request, 'indices.refresh', {
+          index: config.es.default_index
+        }))
+        .then((resp) => reply({ok: true, resp: resp}))
+        .catch((err) => reply(handleESError(err)));
     },
     config: {
       validate: {
@@ -298,15 +298,15 @@ export default function routes(server) {
         index: config.es.default_index,
       };
       callWithRequest(request, 'fieldStats', body)
-      .then(function (resp) {
-        reply({
-          ok: true,
-          field: config.es.timefield,
-          min: resp.index._all.fields[config.es.timefield].min_value,
-          max: resp.index._all.fields[config.es.timefield].max_value
-        });
-      })
-      .catch((err) => reply(handleESError(err)));
+        .then(function (resp) {
+          reply({
+            ok: true,
+            field: config.es.timefield,
+            min: resp.index._all.fields[config.es.timefield].min_value,
+            max: resp.index._all.fields[config.es.timefield].max_value
+          });
+        })
+        .catch((err) => reply(handleESError(err)));
     }
   });
 
@@ -314,8 +314,7 @@ export default function routes(server) {
     method: 'POST',
     path: '/api/sentinl/user/{watcher_id}/{username}/{password}',
     handler: function (request, reply) {
-      server.log(['status', 'info', 'Sentinl'], `Saving user ${request.params.username} for watcher ${request.params.watcher_id}`);
-
+      log.debug(`saving user ${request.params.username} for watcher ${request.params.watcher_id}`);
       const crypto = new Crypto(config.settings.authentication.encryption);
       const message = {
         index: config.settings.authentication.user_index,
@@ -328,18 +327,17 @@ export default function routes(server) {
       };
 
       callWithRequest(request, 'index', message)
-      .then(() => callWithRequest(request, 'indices.refresh', {
-        index: config.es.default_index
-      }))
-      .then((resp) => {
-        server.log(['status', 'debug', 'Sentinl', 'routes', 'AUTH'],
-          `Assign ${request.params.watcher_id} to user: ${JSON.stringify(message.body)}`);
-        reply({ok: true, resp: resp});
-      })
-      .catch((err) => {
-        server.log(['debug', 'Sentinl'], err);
-        reply(handleESError(err));
-      });
+        .then(() => callWithRequest(request, 'indices.refresh', {
+          index: config.es.default_index
+        }))
+        .then((resp) => {
+          log.debug(`assigning ${request.params.watcher_id} to user`, message.body);
+          reply({ok: true, resp: resp});
+        })
+        .catch((err) => {
+          log.error(err);
+          reply(handleESError(err));
+        });
     }
   });
 
@@ -353,7 +351,7 @@ export default function routes(server) {
     path: '/api/sentinl/save/script/{id}',
     handler: function (request, reply) {
       const script = request.payload;
-      server.log(['status', 'info', 'Sentinl'], `Saving scripts with type: ${request.params.type}`);
+      log.debug(`saving script of type: ${request.params.type}`);
       const body = {
         index: config.es.default_index,
         type: config.es.script_type,
@@ -362,14 +360,14 @@ export default function routes(server) {
       };
 
       callWithRequest(request, 'index', body)
-      .then(() => callWithRequest(request, 'indices.refresh', {
-        index: config.es.default_index
-      }))
-      .then((resp) => reply({ok: true, resp: resp}))
-      .catch((err) => {
-        server.log(['debug', 'Sentinl'], err);
-        reply(handleESError(err));
-      });
+        .then(() => callWithRequest(request, 'indices.refresh', {
+          index: config.es.default_index
+        }))
+        .then((resp) => reply({ok: true, resp: resp}))
+        .catch((err) => {
+          log.error(err);
+          reply(handleESError(err));
+        });
     }
   });
 
@@ -382,22 +380,22 @@ export default function routes(server) {
     method: 'GET',
     path: '/api/sentinl/list/scripts/{type}',
     handler: function (request, reply) {
-      server.log(['status', 'info', 'Sentinl'], `Get scripts with type: ${request.params.type}`);
+      log.debug(`get scripts of type: ${request.params.type}`);
       const body = {
         index: config.es.default_index,
         type: config.es.script_type,
-        size: config.sentinl.results ? config.sentinl.results : 50,
+        size: config.es.results ? config.es.results : 50,
         q: `description:${request.params.type}`
       };
 
       callWithRequest(request, 'search', body)
-      .then((resp) => {
-        return reply(resp);
-      })
-      .catch((err) => {
-        server.log(['debug', 'Sentinl'], err);
-        reply(err);
-      });
+        .then((resp) => {
+          return reply(resp);
+        })
+        .catch((err) => {
+          log.error(err);
+          reply(err);
+        });
     }
   });
 
@@ -415,15 +413,14 @@ export default function routes(server) {
         type: config.es.script_type,
         id: request.params.id
       };
-      server.log(['status', 'info', 'Sentinl'], `Delete script with type/id: ${request.params.type}/${request.params.id}`);
+      log.debug(`deleting script of type/id: ${request.params.type}/${request.params.id}`);
 
       callWithRequest(request, 'delete', body)
-      .then(() => callWithRequest(request, 'indices.refresh', {
-        index: config.es.default_index
-      }))
-      .then((resp) => reply({ok: true, resp: resp}))
-      .catch((err) => reply(handleESError(err)));
+        .then(() => callWithRequest(request, 'indices.refresh', {
+          index: config.es.default_index
+        }))
+        .then((resp) => reply({ok: true, resp: resp}))
+        .catch((err) => reply(handleESError(err)));
     }
   });
-
 };

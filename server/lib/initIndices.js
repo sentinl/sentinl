@@ -18,6 +18,7 @@
  */
 
 import getElasticsearchClient from './get_elasticsearch_client';
+import Log from './log';
 
 /**
 * Puts mapping for a new type in an existent index.
@@ -29,9 +30,11 @@ import getElasticsearchClient from './get_elasticsearch_client';
 * @param {object} mappings - Mapping to apply.
 */
 const putMapping = function (server, config, indexName, docType, mappings) {
-  server.log(['status', 'info', 'Sentinl'], `Checking ${indexName} index type ${docType} ...`);
+  const log = new Log(config.app_name, server, 'init_indices');
+
+  log.info(`checking ${indexName} index type ${docType}...`);
   if (!server.plugins.elasticsearch) {
-    server.log(['status', 'error', 'Sentinl'], 'Elasticsearch client not available, retrying in 5s');
+    log.error('Elasticsearch client is not available, retry in 5 sec');
     retryPutMapping(server, config, indexName, docType, mappings);
     return;
   }
@@ -42,10 +45,9 @@ const putMapping = function (server, config, indexName, docType, mappings) {
     index: indexName,
     type: docType,
     body: mappings
-  })
-  .then(function (resp) {
-    server.log(['status', 'debug', 'Sentinl'], `Index ${indexName} response`, resp);
-  }).catch((err) => server.log(['status', 'error', 'Sentinl'], err.message));
+  }).then(function (resp) {
+    log.debug(`index ${indexName} response: ${resp}`);
+  }).catch((err) => log.error(err.message));
 };
 
 /**
@@ -59,9 +61,11 @@ const putMapping = function (server, config, indexName, docType, mappings) {
 * @param {string} mode - alarm template.
 */
 const createIndex = function (server, config, indexName, docType, mappings, mode) {
-  server.log(['status', 'info', 'Sentinl'], `Checking ${indexName} index ...`);
+  const log = new Log(config.app_name, server, 'init_indices');
+
+  log.info(`checking ${indexName} index ...`);
   if (!server.plugins.elasticsearch) {
-    server.log(['status', 'error', 'Sentinl'], 'Elasticsearch client not available, retrying in 5s');
+    log.error('Elasticsearch client is not available, retry in 5 sec');
     retryCreateIndex(server, config, indexName, docType, mappings, mode);
     return;
   }
@@ -85,29 +89,28 @@ const createIndex = function (server, config, indexName, docType, mappings, mode
 
   client.indices.exists({
     index: indexName
-  })
-  .then((exists) => {
+  }).then((exists) => {
     if (exists === true) {
-      server.log(['status', 'debug', 'Sentinl'], `Index ${indexName} exists!`);
+      log.debug(`index ${indexName} exists`);
       return;
     }
-    server.log(['status', 'info', 'Sentinl'], `Creating ${indexName} index ...`);
+    log.info(`creating ${indexName} index ...`);
 
-    client.indices.create({
+    return client.indices.create({
       index: indexName,
       body: mappings
-    })
-    .then(function (resp) {
-      server.log(['status', 'debug', 'Sentinl'], `Index ${indexName} response`, resp);
-    }).catch((err) => server.log(['status', 'error', 'Sentinl'], err.message));
-  })
-  .catch((error) => server.log(['status', 'error', 'Sentinl'], `Failed to check if core index exists: ${error}`));
+    }).then(function (resp) {
+      log.debug(`index ${indexName} response: ${resp}`);
+    });
+  }).catch((error) => log.error(`fail to check if core index exists: ${error}`));
 };
 
 let retryCreateIndexCount = 0;
 function retryCreateIndex(server, config, indexName, docType, mappings, mode) {
+  const log = new Log(config.app_name, server, 'init_indices');
+
   if (retryCreateIndexCount > 5) {
-    server.log(['status', 'error', 'Sentinl'], `Failed creating index ${indexName} mapping!`);
+    log.error(`faile to create index mapping for ${indexName}`);
     return;
   }
   setTimeout(createIndex(server, config, indexName, docType, mappings, mode), 5000);
@@ -116,8 +119,10 @@ function retryCreateIndex(server, config, indexName, docType, mappings, mode) {
 
 let retryPutMappingCount = 0;
 function retryPutMapping(server, config, indexName, docType, mappings) {
+  const log = new Log(config.app_name, server, 'init_indices');
+
   if (retryPutMappingCount > 5) {
-    server.log(['status', 'error', 'Sentinl'], `Failed putting ${indexName}/${docType} mapping!`);
+    log.error(`fail to put mapping for ${indexName}/${docType}`);
     return;
   }
   setTimeout(createIndex(server, config, indexName, docType, mappings), 5000);
