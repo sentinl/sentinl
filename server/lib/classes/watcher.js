@@ -1,4 +1,4 @@
-import { get, has, forEach, difference, map, keys, isObject, isEmpty } from 'lodash';
+import { get, has, forEach, difference, keys, isObject, isEmpty } from 'lodash';
 import Promise from 'bluebird';
 import range from '../validators/range';
 import anomaly from '../validators/anomaly';
