@@ -73,7 +73,7 @@ export default function (kibana) {
     },
     config: function (Joi) {
       return Joi.object({
-        app_name: Joi.string().default('sentinl'),
+        app_name: Joi.string().default('Sentinl'),
         enabled: Joi.boolean().default(true),
         es: Joi.object({
           results: Joi.number().default(50),
