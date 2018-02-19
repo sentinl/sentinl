@@ -43,7 +43,7 @@ var options = minimist(process.argv.slice(2), knownOptions);
 var kibanaPluginDir = path.resolve(__dirname, options.kibanahomepath + '/plugins/' + packageName);
 
 const lib = {
-  gun_master: !options['lib-install'] ? null : options['lib-install'].match(/gun-master(\#([a-zA-Z\d-_.]+\b))?/gi)[0],
+  gun_master: !options['lib-install'] ? null : options['lib-install'],
 };
 
 function syncPluginTo(dest, done) {
@@ -86,7 +86,7 @@ function syncPluginTo(dest, done) {
       if (!lib.gun_master) {
         prod.on('close', done);
       } else {
-        spawn('npm', ['install', 'sirensolutions/' + lib.gun_master], {
+        spawn('npm', ['install', lib.gun_master], {
           cwd: dest,
           stdio: 'inherit'
         }).on('close', done);
