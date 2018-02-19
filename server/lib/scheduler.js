@@ -158,7 +158,7 @@ export default function Scheduler(server) {
         }
       });
     } else {
-      log.info('cluster disabled');
+      log.debug('cluster disabled');
       alert(server);
     }
   };
