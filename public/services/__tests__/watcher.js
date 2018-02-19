@@ -3,7 +3,7 @@ import sinon from 'sinon';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import uuid from 'uuid/v4';
-import { cloneDeep, keys, forEach, include, isEqual } from 'lodash';
+import { cloneDeep, keys, forEach, includes, isEqual } from 'lodash';
 import noDigestPromises from 'test_utils/no_digest_promises';
 
 import defaultEmailSource from '../../defaults/email_watcher';
@@ -51,7 +51,7 @@ describe('Watcher', function () {
     const flattedFields = keys(watcher).filter((field) => field !== 'id');
 
     forEach(flattedFields.sort(), function (field) {
-      expect(include(Watcher.fields.sort(), field)).to.be(true);
+      expect(includes(Watcher.fields.sort(), field)).to.be(true);
     });
     expect(watcher._source).to.be(undefined);
     expect(watcher._id).to.be(undefined);
@@ -66,7 +66,7 @@ describe('Watcher', function () {
     const nestedFields = keys(watcher._source);
 
     forEach(nestedFields.sort(), function (field) {
-      expect(include(Watcher.fields.sort(), field)).to.be(true);
+      expect(includes(Watcher.fields.sort(), field)).to.be(true);
     });
     expect(watcher._source).to.be.an('object');
     expect(watcher.id).to.be(undefined);

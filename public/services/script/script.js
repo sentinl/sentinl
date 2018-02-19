@@ -1,4 +1,4 @@
-import { isObject, map, forEach } from 'lodash';
+import { isObject, forEach } from 'lodash';
 import Worker from '../worker/worker';
 
 /**
