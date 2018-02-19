@@ -60,6 +60,7 @@ export default function (kibana) {
             esShardTimeout: config.get('elasticsearch.shardTimeout'),
             esApiVersion: config.get('elasticsearch.apiVersion'),
             sentinlConfig: {
+              appName: config.get('sentinl.app_name'),
               es: {
                 watcher: {
                   schedule_timezone: config.get('sentinl.es.watcher.schedule_timezone')

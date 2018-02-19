@@ -1,8 +1,9 @@
 import moment from 'moment';
 
-function AboutController($scope, $route, $interval, timefilter, createNotifier, navMenu, globalNavState, COMMON) {
+function AboutController($scope, $route, $interval, timefilter, createNotifier, navMenu, globalNavState, COMMON, sentinlConfig) {
   'ngInject';
 
+  $scope.appName = sentinlConfig.appName;
   $scope.title = COMMON.about.title;
   $scope.description = COMMON.description;
   timefilter.enabled = false;
