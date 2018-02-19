@@ -122,10 +122,6 @@ node {
 //                                               //
 ///////////////////////////////////////////////////
 task parseGunMasterUrl () {
-    if (!gun_master_url) {
-        gun_master_url = 'git+https://github.com/sirensolutions/gun-master.git'
-    }
-
     if (project.ext.properties.github_username && project.ext.properties.github_password) {
         def github_username = project.ext.properties.github_username
         def github_password = project.ext.properties.github_password
