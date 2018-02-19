@@ -75,6 +75,9 @@ export default function (kibana) {
       return Joi.object({
         app_name: Joi.string().default('Sentinl'),
         enabled: Joi.boolean().default(true),
+        sentinl: Joi.any().forbidden().error(new Error(
+          'The sentinl.sentinl.results option does not exist anymore. Use sentinl.es.results instead!'
+        )),
         es: Joi.object({
           results: Joi.number().default(50),
           host: Joi.string().default('localhost'),
