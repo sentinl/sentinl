@@ -1,4 +1,4 @@
-import { pluck, isEqual, cloneDeep } from 'lodash';
+import { map, isEqual, cloneDeep } from 'lodash';
 import Promise from 'bluebird';
 import expect from 'expect.js';
 import Watcher from '../watcher';
