@@ -10,7 +10,7 @@ class ServerConfig {
   get() {
     return this.$http.get('../api/sentinl/config').then((response) => {
       if (response.status !== 200) {
-        throw new Error('Fail to get Sentinl configuration');
+        throw new Error('fail to get app configuration');
       }
       return response;
     });

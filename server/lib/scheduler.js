@@ -21,6 +21,7 @@ import { has, forEach, difference, map, keys, isObject, isEmpty } from 'lodash';
 import later from 'later';
 import getConfiguration from './get_configuration';
 import Watcher from './classes/watcher';
+import Log from './log';
 
 /**
 * Schedules and executes watchers in background
@@ -28,6 +29,7 @@ import Watcher from './classes/watcher';
 export default function Scheduler(server) {
 
   const config = getConfiguration(server);
+  const log = new Log(config.app_name, server, 'scheduler');
 
   let watcher;
   let client;
@@ -40,7 +42,7 @@ export default function Scheduler(server) {
   function removeOrphans(resp) {
     let orphans = difference(forEach(keys(server.sentinlStore.schedule)), map(resp.hits.hits, '_id'));
     forEach(orphans, function (orphan) {
-      server.log(['status', 'info', 'Sentinl', 'scheduler'], 'Deleting orphan watcher: ' + orphan);
+      log.debug('deleting orphan watchers: ' + orphan);
       if (isObject(server.sentinlStore.schedule[orphan].later) && has(server.sentinlStore.schedule[orphan].later, 'clear')) {
         server.sentinlStore.schedule[orphan].later.clear();
       }
@@ -55,25 +57,25 @@ export default function Scheduler(server) {
   */
   function watching(task) {
     if (!task._source || task._source.disable) {
-      server.log(['status', 'debug', 'Sentinl', 'scheduler'], `Non-Executing Disabled Watch: ${task._id}`);
+      log.debug(`do not execute disabled watcher: ${task._id}`);
       return;
     }
 
-    server.log(['status', 'info', 'Sentinl', 'scheduler'], `Executing watcher: ${task._id}`);
-    server.log(['status', 'debug', 'Sentinl', 'scheduler'], JSON.stringify(task, null, 2));
+    log.info(`executing watcher: ${task._id}`);
+    log.debug('watcher', task);
 
     if (!task._source.actions || isEmpty(task._source.actions)) {
-      server.log(['status', 'debug', 'Sentinl', 'scheduler'], `Watcher ${task._source.uuid} has no actions.`);
+      log.warning(`watcher has no actions: ${task._source.uuid}`);
       return;
     }
 
-    watcher.execute(task).then(function (response) {
-      server.log(['status', 'info', 'Sentinl', 'watcher'], `SUCCESS! Watcher has been executed: ${response.task.id}.`);
-      if (response.message) {
-        server.log(['status', 'info', 'Sentinl', 'watcher'], response.message);
+    watcher.execute(task).then(function (resp) {
+      log.info(`watcher has been executed successfully: ${resp.task.id}`);
+      if (resp.message) {
+        log.info(`fail to execute watcher: ${task._id}, ${resp.message}`);
       }
     }).catch(function (error) {
-      server.log(['status', 'error', 'Sentinl', 'watcher'], `Watcher ${task._id}: ${error}`);
+      log.error(`fail to execute watcher: ${task._id}, ${error}`);
     });
   };
 
@@ -84,7 +86,7 @@ export default function Scheduler(server) {
   */
   function scheduleWatcher(task, config) {
     if (has(server.sentinlStore.schedule, `[${task._id}].later`)) {
-      server.log(['status', 'info', 'Sentinl', 'scheduler'], `Clearing watcher: ${task._id}`);
+      log.debug(`clearing watcher: ${task._id}`);
       server.sentinlStore.schedule[task._id].later.clear();
     }
     server.sentinlStore.schedule[task._id] = {task};
@@ -102,15 +104,14 @@ export default function Scheduler(server) {
       watching(task);
     }, schedule);
 
-    server.log(['status', 'info', 'Sentinl', 'scheduler'],
-      `server.sentinlStore.scheduled Watch: ${task._id} every ${server.sentinlStore.schedule[task._id].schedule}`);
+    log.info(`scheduled watcher ${task._id}, to run every ${server.sentinlStore.schedule[task._id].schedule}`);
   };
 
   function alert(server) {
-    server.log(['status', 'debug', 'Sentinl', 'scheduler'], 'Reloading Watchers...');
-    server.log(['status', 'debug', 'Sentinl', 'scheduler', 'auth'], `Enabled: ${config.settings.authentication.enabled}`);
+    log.debug('reloading watchers...');
+    log.info(`auth enabled: ${config.settings.authentication.enabled}`);
     if (config.settings.authentication.enabled) {
-      server.log(['status', 'debug', 'Sentinl', 'scheduler', 'auth'], `Mode: ${config.settings.authentication.mode}`);
+      log.info(`auth mode: ${config.settings.authentication.mode}`);
     }
 
     if (!server.sentinlStore.schedule) {
@@ -125,7 +126,7 @@ export default function Scheduler(server) {
         try {
           removeOrphans(resp);
         } catch (err) {
-          server.log(['status', 'debug', 'Sentinl', 'scheduler'], 'Failed to remove orphans');
+          log.error('failed to remove orphans');
         }
         /* Schedule watchers */
         forEach(resp.hits.hits, function (hit) {
@@ -134,9 +135,9 @@ export default function Scheduler(server) {
       });
     }).catch((error) => {
       if (error.statusCode === 404) {
-        server.log(['status', 'info', 'Sentinl', 'scheduler'], 'No indices found, initializing.');
+        log.warning('no Elasticsearch indices found, initializing...');
       } else {
-        server.log(['status', 'error', 'Sentinl', 'scheduler'], `An error occurred while looking for data in indices: ${error}`);
+        log.error(`looking for data in Elasticsearch indices: ${error}`);
       }
     });
   }
@@ -150,14 +151,14 @@ export default function Scheduler(server) {
     if (config.settings.cluster.enabled && node) {
       return node.getMaster().then((master) => {
         if (master.id === config.settings.cluster.host.id || !master.id) {
-          server.log(['status', 'info', 'Sentinl', 'scheduler', 'cluster'], 'this node is the master, executing watchers');
+          log.info('cluster master node, executing watchers');
           alert(server);
         } else {
-          server.log(['status', 'info', 'Sentinl', 'scheduler', 'cluster'], 'this node is a slave, do not execute watchers');
+          log.info('cluster slave node, do not execute watchers');
         }
       });
     } else {
-      server.log(['status', 'info', 'Sentinl', 'scheduler', 'cluster'], 'disabled');
+      log.debug('cluster disabled');
       alert(server);
     }
   };
@@ -165,5 +166,4 @@ export default function Scheduler(server) {
   return {
     doalert
   };
-
 };

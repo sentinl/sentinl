@@ -7,6 +7,7 @@ import compareArray from '../validators/compare_array';
 import getElasticsearchClient from '../get_elasticsearch_client';
 import getConfiguration from '../get_configuration';
 import actionFactory from '../actions/actions';
+import Log from '../log';
 
 /**
 * Helper class to get watchers data.
@@ -17,6 +18,7 @@ export default class Watcher {
     this.server = server;
     this.config = !config ? getConfiguration(server) : config;
     this.client = !client ? getElasticsearchClient(server, this.config) : client;
+    this.log = new Log(this.config.app_name, server, 'watcher');
   }
 
   /**
@@ -42,9 +44,9 @@ export default class Watcher {
       type: this.config.settings.authentication.user_type,
       id: watcherId
     };
-    return this.client.get(options)
-    .then((resp) => resp)
-    .catch((err) => err);
+    return this.client.get(options).catch((err) => {
+      this.log.error(`auth, fail to get user, watcher: ${watcherId}`);
+    });
   }
 
   /**
@@ -128,24 +130,24 @@ export default class Watcher {
     };
 
     if (task._source.report) { // report watcher
-      this.server.log(['status', 'info', 'Sentinl', 'watcher'], `Executing report action: ${task._id}`);
+      this.log.debug(`executing report: ${task._id}`);
 
       const actions = this.getReportActions(task._source.actions);
       const payload = { _id: task._id };
 
       if (keys(actions).length) {
         if (!isEmpty(this.getNonReportActions(task._source.actions))) {
-          Promise.resolve(this.doActions(this.server, actions, payload, task))
-          .then(() => response);
+          Promise.resolve(this.doActions(this.server, actions, payload, task)).then(() => response);
         } else {
-          return Promise.resolve(this.doActions(this.server, actions, payload, task))
-          .then(() => response);
+          return Promise.resolve(this.doActions(this.server, actions, payload, task)).then(() => response);
         }
       }
 
     }
 
     if (!(task._source.report && isEmpty(this.getNonReportActions(task._source.actions)))) { // other watcher kinds
+      this.log.debug(`executing watcher: ${task._id}`);
+
       let sirenFederateAvailable = false;
       try {
         const elasticsearchPlugins = this.server.config().get('investigate_core.clusterplugins');
@@ -156,8 +158,6 @@ export default class Watcher {
       } catch (err) {
         // 'elasticsearch.plugins' not available when running from kibana
       }
-
-      this.server.log(['status', 'info', 'Sentinl', 'watcher'], `Executing action: ${task._id}`);
 
       const actions = this.getNonReportActions(task._source.actions);
       let request = has(task._source, 'input.search.request') ? task._source.input.search.request : undefined;
@@ -175,10 +175,10 @@ export default class Watcher {
       }
 
       if (!request) {
-        throw new Error(`Watcher search request is malformed: ${task._id}`);
+        throw new Error(`watcher search request is malformed, ${task._id}`);
       }
       if (!condition) {
-        throw new Error(`Watcher condition is malformed: ${task._id}`);
+        throw new Error(`watcher condition is malformed, ${task._id}`);
       }
 
       /**
@@ -189,19 +189,18 @@ export default class Watcher {
       const self = this;
       const execute = function () {
         /* INPUT */
-        return self.search(method, request)
-        .then(function (payload) {
+        return self.search(method, request).then(function (payload) {
           if (!payload) {
-            throw new Error(`Input search query is malformed or missing key parameters: ${task._id}`);
+            throw new Error(`input search query is malformed or missing key parameters, ${task._id}`);
           }
 
-          self.server.log(['status', 'debug', 'Sentinl', 'watcher'], payload);
+          self.log.debug(`watcher payload, ${task._id}`, payload);
 
           /* CONDITION */
 
           // never execute actions
           if (condition.never) {
-            response.message = `You selected to not execute any action for ${task._id}`;
+            response.message = `action execution is disabled, ${task._id}`;
             return response;
           }
 
@@ -214,7 +213,7 @@ export default class Watcher {
                 return response;
               }
             } catch (err) {
-              throw new Error(`Condition 'script' error for ${task._id}: ${err}`);
+              throw new Error(`condition 'script' error, ${task._id}: ${err}`);
             }
           }
 
@@ -226,7 +225,7 @@ export default class Watcher {
                 return response;
               }
             } catch (err) {
-              throw new Error(`Condition 'compare' error for ${task._id}: ${err}`);
+              throw new Error(`condition 'compare' error, ${task._id}: ${err}`);
             }
           }
 
@@ -238,7 +237,7 @@ export default class Watcher {
                 return response;
               }
             } catch (err) {
-              throw new Error(`Condition 'array compare' error for ${task._id}: ${err}`);
+              throw new Error(`condition 'array compare' error, ${task._id}: ${err}`);
             }
           }
 
@@ -247,7 +246,7 @@ export default class Watcher {
             try {
               payload = anomaly.check(payload, task._source.condition);
             } catch (err) {
-              throw new Error(`Condition 'anomaly' error for ${task._id}: ${err}`);
+              throw new Error(`condition 'anomaly' error, ${task._id}: ${err}`);
             }
           }
 
@@ -256,7 +255,7 @@ export default class Watcher {
             try {
               payload = range.check(payload, task._source.condition);
             } catch (err) {
-              throw new Error(`Condition 'range' error for ${task._id}: ${err}`);
+              throw new Error(`condition 'range' error, ${task._id}: ${err}`);
             }
           }
 
@@ -271,19 +270,17 @@ export default class Watcher {
                   eval(link.script.script); // eslint-disable-line no-eval
                   resolve(null);
                 } catch (err) {
-                  reject(`Transform 'script' error for ${task._id}: ${err}`);
+                  reject(`transform 'script' error, ${task._id}: ${err}`);
                 }
               }
 
               // search in transform
               if (has(link, 'search.request')) {
-                resolve(self.search(method, link.search.request)
-                .then(function (_payload_) {
+                resolve(self.search(method, link.search.request).then(function (_payload_) {
                   payload = _payload_; // update global payload
                   return null;
-                })
-                .catch(function (err) {
-                  throw new Error(`Transform 'search' error for ${task._id}: ${err}`);
+                }).catch(function (err) {
+                  throw new Error(`transform 'search' error, ${task._id}: ${err}`);
                 }));
               }
             });
@@ -292,51 +289,38 @@ export default class Watcher {
           if (transform && transform.chain) { // transform chain
             return Promise.each(transform.chain, function (link) {
               return execTransform(link);
-            })
-            .then(function () {
+            }).then(function () {
               if (response.message && !payload) {
                 return response;
               }
 
               if (!payload) {
-                response.message = `Transform chain, no payload after execution: ${task._id}!`;
+                response.message = `transform chain, no payload after execution, ${task._id}!`;
                 response.warning = true;
                 return response;
               }
 
-              return Promise.resolve(self.doActions(self.server, actions, payload, task))
-              .then(function () {
-                return response;
-              });
-            })
-            .catch(function (err) {
-              throw new Error(`Transform 'chain': ${err}`);
+              return Promise.resolve(self.doActions(self.server, actions, payload, task)).then(() => response);
+            }).catch(function (err) {
+              throw new Error(`transform 'chain': ${err}`);
             });
           } else if (transform) { // transform
-            return execTransform(transform)
-            .then(function () {
+            return execTransform(transform).then(function () {
               if (!payload) {
                 response.message = `Transform, no payload after execution: ${task._id}!`;
                 return response;
               }
 
-              return Promise.resolve(self.doActions(self.server, actions, payload, task))
-              .then(function () {
-                return response;
-              });
+              return Promise.resolve(self.doActions(self.server, actions, payload, task)).then(() => response);
             });
           } else { // no transform
-            return Promise.resolve(self.doActions(self.server, actions, payload, task))
-            .then(function () {
-              return response;
-            });
+            return Promise.resolve(self.doActions(self.server, actions, payload, task)).then(() => response);
           }
         });
       };
 
       if (this.config.settings.authentication.enabled) { // impersonate watcher if authentication is enabled
-        return this.getImpersonatedClient(task._id)
-        .then((_client_) => {
+        return this.getImpersonatedClient(task._id).then((_client_) => {
           this.client = _client_;
           return execute();
         });
@@ -353,18 +337,15 @@ export default class Watcher {
   * @return {promise} client - impersonated client
   */
   getImpersonatedClient(id) {
-    return this.getUser(id)
-    .then((resp) => {
+    return this.getUser(id).then((resp) => {
       if (resp.found) {
         const impersonate = {
           username: resp._source.username,
           sha: resp._source.sha
         };
-        this.server.log(['status', 'debug', 'Sentinl', 'watcher', 'auth'],
-          `Impersonate watcher ${id} by ${JSON.stringify(impersonate)}`);
         return getElasticsearchClient(this.server, this.config, 'data', impersonate);
       } else {
-        throw new Error(`Fail to authenticate watcher ${id}. User not found. ${JSON.stringify(resp)}`);
+        throw new Error(`fail to authenticate watcher ${id}. User not found. ${JSON.stringify(resp)}`);
       }
     });
   }

@@ -11,15 +11,15 @@
     "report_admin": {
       "throttle_period": "15m",
       "report": {
-        "to": "report@localhost",
-        "from": "sentinl@localhost",
-        "subject": "Sentinl Report",
+        "to": "to@email.com",
+        "from": "from@email.com",
+        "subject": "My Report",
         "priority": "high",
-        "body": "Sample Sentinl Screenshot Report",
+        "body": "Sample Screenshot Report",
         "save": true,
         "snapshot": {
           "res": "1280x900",
-          "url": "http://127.0.0.1/app/kibana#/dashboard/Alerts",
+          "url": "http://localhost/app/kibana#/dashboard/Alerts",
           "path": "/tmp/",
           "params": {
             "delay": 5000,

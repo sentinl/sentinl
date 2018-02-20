@@ -6,14 +6,14 @@ import confirmMessageTemplate from '../../confirm_message/confirm_message.html';
 
 function AlarmsController($rootScope, $scope, $route, $interval,
   $timeout, $injector, timefilter, Private, createNotifier, $window, $uibModal, navMenu,
-  globalNavState, Alarm) {
+  globalNavState, Alarm, COMMON) {
   'ngInject';
 
-  $scope.title = 'Sentinl: Alarms';
-  $scope.description = 'Kibi/Kibana Report App for Elasticsearch';
+  $scope.title = COMMON.alarms.title;
+  $scope.description = COMMON.description;
 
   const notify = createNotifier({
-    location: 'Sentinl Alarms'
+    location: COMMON.alarms.title,
   });
 
   timefilter.enabled = true;

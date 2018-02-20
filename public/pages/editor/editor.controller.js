@@ -14,11 +14,11 @@ import help from '../../messages/help.json';
 // EDITOR CONTROLLER
 function EditorController(sentinlConfig, $rootScope, $scope, $route, $interval,
   $timeout, timefilter, Private, createNotifier, $window, $uibModal, Promise,
-  $log, navMenu, globalNavState, $routeParams, dataTransfer, $location, Watcher, Script, User, ServerConfig) {
+  $log, navMenu, globalNavState, $routeParams, dataTransfer, $location, Watcher, Script, User, ServerConfig, COMMON) {
   'ngInject';
 
-  $scope.title = 'Sentinl: Editor';
-  $scope.description = 'Kibi/Kibana Report App for Elasticsearch';
+  $scope.title = COMMON.editor.title;
+  $scope.description = COMMON.description;
   $scope.sentinlConfig = sentinlConfig;
 
   let editorMode = $location.$$path.slice(1); // modes: editor, wizard
@@ -31,7 +31,7 @@ function EditorController(sentinlConfig, $rootScope, $scope, $route, $interval,
   $scope.$on('globalNavState:change', () => navMenu.setKbnLogo(globalNavState.isOpen()));
 
   const notify = createNotifier({
-    location: `Sentinl Watcher ${tabName}`
+    location: COMMON.editor.title,
   });
 
   $scope.help = {
@@ -303,7 +303,7 @@ function EditorController(sentinlConfig, $rootScope, $scope, $route, $interval,
           }
         }
       }, () => {
-        $log.info('Sentinl.', `You choose not deleting the action "${actionName}"`);
+        $log.info(`you choose not deleting the action "${actionName}"`);
       });
     };
 
@@ -556,7 +556,7 @@ function EditorController(sentinlConfig, $rootScope, $scope, $route, $interval,
         saveUser($scope.watcher.$$authentication.enabled).then(function () {
           if (later.parse.text($scope.watcher._source.trigger.schedule.later).error > -1) {
             notify.error('Schedule is invalid.');
-            $log.error('Sentinl.', 'Schedule is invalid:', $scope.watcher._source.trigger.schedule.later);
+            $log.error('schedule is invalid:', $scope.watcher._source.trigger.schedule.later);
             init({
               fields: false
             });

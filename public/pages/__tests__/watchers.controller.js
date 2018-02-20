@@ -87,11 +87,6 @@ describe('watchersController', function () {
     $httpBackend.verifyNoOutstandingRequest();
   });
 
-  it('title and description', function () {
-    expect($scope.title).to.equal('Sentinl: ');
-    expect($scope.description).to.be('Kibi/Kibana Report App for Elasticsearch');
-  });
-
   it('watchers have been loaded', function (done) {
     setTimeout(function () { // catch promise response
       expect($scope.watchers.length).to.equal(2);

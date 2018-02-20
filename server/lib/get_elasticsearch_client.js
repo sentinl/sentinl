@@ -6,11 +6,13 @@
 import es from 'elasticsearch';
 import fs from 'fs';
 import Crypto from './classes/crypto';
+import Log from './log';
 
-export default function getElasticsearchClient(server, config = false, type = 'data', impersonate = null) {
+export default function getElasticsearchClient(server, config, type = 'data', impersonate = null) {
+  const log = new Log(config.app_name, server, 'get_elasticsearch_client');
 
   // Basic authentication for watchers
-  if (config && config.settings.authentication.enabled && config.settings.authentication.mode === 'basic') {
+  if (config.settings.authentication.enabled && config.settings.authentication.mode === 'basic') {
 
     /**
     * Get Elasticsearch client.
@@ -47,8 +49,7 @@ export default function getElasticsearchClient(server, config = false, type = 'd
     } else {
       authPair = `${config.settings.authentication.admin_username}:${crypto.decrypt(config.settings.authentication.admin_sha)}`;
     }
-    server.log(['status', 'debug', 'Sentinl', 'get_elasticsearch_client', 'AUTH'],
-      `Impersonate ES client by ${authPair.split(':')[0]}`);
+    log.debug(`impersonating Elasticsearch client by ${authPair.split(':')[0]}`);
 
     return getClient(authPair);
   }

@@ -13,8 +13,11 @@
  *
  * @return {String} Response.
  */
+import Log from './log';
 
 export default function logEvent(server, client, config, watcherTitle, type, message, loglevel, payload, isReport, object) {
+  const log = new Log(config.app_name, server, 'log_history');
+
   if (!loglevel) {
     loglevel = 'INFO';
   }
@@ -24,7 +27,7 @@ export default function logEvent(server, client, config, watcherTitle, type, mes
   if (!isReport) {
     isReport = false;
   }
-  server.log(['status', 'info', 'Sentinl'], `Storing Alarm to ES with type: ${type}`);
+  log.debug(`storing alarm to Elasticsearch, type: ${type}`);
   const indexDate = '-' + new Date().toISOString().substr(0, 10).replace(/-/g, '.');
   const indexName = config.es.alarm_index ? config.es.alarm_index + indexDate : `${config.es.alarm_index}${indexDate}`;
   const indexBody = {
@@ -46,9 +49,9 @@ export default function logEvent(server, client, config, watcherTitle, type, mes
     type: type,
     body: indexBody
   }).then(function (resp) {
-    server.log(['status', 'info', 'Sentinl'], `Alarm stored successfully to ES with type: [${type}]`);
+    log.debug(`alarm stored successfully to Elasticsearch, type: [${type}]`);
   }).catch(function (err) {
-    server.log(['status', 'info', 'Sentinl'], `Error storing Alarm: ${err}`);
+    log.error(`fail to store alarm: ${err}`);
   });
 
 }
