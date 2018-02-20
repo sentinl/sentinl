@@ -17,5 +17,5 @@ export default angular.module('apps/sentinl.services', [
   Watcher.name,
   NavMenu.name,
   DataTransfer.name,
-  ServerConfig.name
+  ServerConfig.name,
 ]);

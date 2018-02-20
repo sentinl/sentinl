@@ -23,17 +23,17 @@ import { forEach, difference } from 'lodash';
 export default function (kibana) {
   let requirements = ['kibana', 'elasticsearch'];
 
-  // Kibi: check if saved objects api exists.
+  // Siren: check if saved objects api exists.
   const savedObjectsAPI = `${kibana.rootDir}/src/kibi_plugins/saved_objects_api`;
   if (fs.existsSync(savedObjectsAPI)) {
     requirements.push('saved_objects_api');
 
-    // Kibi: import saved objects api related libs.
+    // Siren: import saved objects api related libs.
     const pathForLibs = `${kibana.rootDir}/plugins/sentinl/public/app.js`;
     const libsToImport = [
-      'import \'./services/saved_watchers/index\';',
-      'import \'./services/saved_users/index\';',
-      'import \'./services/saved_scripts/index\';'
+      'import \'./services/siren/saved_watchers/index\';',
+      'import \'./services/siren/saved_users/index\';',
+      'import \'./services/siren/saved_scripts/index\';'
     ];
 
     const data = fs.readFileSync(pathForLibs);
@@ -48,6 +48,7 @@ export default function (kibana) {
     require: requirements,
     uiExports: {
       spyModes: ['plugins/sentinl/dashboard_spy_button/alarm_button'],
+      mappings: require('./server/mappings/sentinl.json'),
       app: {
         icon: 'plugins/sentinl/style/sentinl.svg',
         title: 'Sentinl',
@@ -80,14 +81,18 @@ export default function (kibana) {
           'The only property still in use from that section was sentinl.sentinl.results and it was moved to sentinl.es.results'
         )),
         es: Joi.object({
+          default_index: Joi.string().default('.kibana'),
+          default_type: Joi.string().default('doc'),
           results: Joi.number().default(50),
           host: Joi.string().default('localhost'),
           port: Joi.number().default(9200),
           timefield: Joi.string().default('@timestamp'),
-          default_index: Joi.string().default('watcher'),
-          type: Joi.string().default('sentinl-watcher'),
+          type: Joi.any().forbidden().error(new Error(
+            'The sentinl.es.type option was deprecated, use sentinl.es.default_type instead!'
+          )),
           alarm_index: Joi.string().default('watcher_alarms'),
-          alarm_type: Joi.string().default('alarm'),
+          watcher_type: Joi.string().default('sentinl-watcher'),
+          alarm_type: Joi.string().default('sentinl-alarm'),
           script_type: Joi.string().default('sentinl-script'),
           watcher: Joi.object({
             schedule_timezone: Joi.string().default('utc'), // local, utc

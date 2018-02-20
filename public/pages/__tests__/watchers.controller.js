@@ -5,8 +5,6 @@ import expect from 'expect.js';
 import _ from 'lodash';
 import noDigestPromises from 'test_utils/no_digest_promises';
 
-import defaultEmailSource from '../../defaults/email_watcher';
-
 import '../watchers/watchers.controller';
 
 describe('watchersController', function () {
@@ -18,12 +16,13 @@ describe('watchersController', function () {
   let Script;
   let Promise;
   let dataTransfer;
+  let EMAILWATCHER;
 
   const init = function (done) {
     ngMock.module('kibana');
 
     ngMock.inject(function ($rootScope, $controller, _$location_, _$httpBackend_, _$route_, _Watcher_,
-      _Script_, _dataTransfer_, _Promise_) {
+      _Script_, _dataTransfer_, _Promise_, _EMAILWATCHER_) {
       $scope = $rootScope;
       $route = _$route_;
       $location = _$location_;
@@ -32,6 +31,7 @@ describe('watchersController', function () {
       Script = _Script_;
       dataTransfer = _dataTransfer_;
       Promise = _Promise_;
+      EMAILWATCHER = _EMAILWATCHER_;
 
       $httpBackend.when('GET', '../api/sentinl/config').respond(200, {
         es: {
@@ -112,7 +112,7 @@ describe('watchersController', function () {
     const watcher = {
       _id: '123',
       _type: 'sentinl-watcher',
-      _source: _.cloneDeep(defaultEmailSource)
+      _source: _.cloneDeep(EMAILWATCHER)
     };
 
     sinon.stub(Watcher, 'new', () => {

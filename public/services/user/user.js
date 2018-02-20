@@ -1,21 +1,21 @@
 /*global angular*/
 import { isObject } from 'lodash';
+import SavedObjects from '../saved_objects';
 
-class User {
+class User extends SavedObjects {
 
-  constructor($http, $injector) {
-    this.$http = $http;
+  constructor($http, $injector, Promise, ServerConfig) {
+    super($http, $injector, Promise, ServerConfig, 'user');
     this.$injector = $injector;
-    this.savedObjectsAPI = undefined;
-    this.savedUsers = undefined;
-    // Kibi: inject saved objects api related modules if they exist.
-    if (this.$injector.has('savedObjectsAPI')) {
-      this.savedObjectsAPI = this.$injector.get('savedObjectsAPI');
-      if (this.$injector.has('savedScripts')) {
-        this.savedUsers = this.$injector.get('savedUsers');
-      }
+    // Siren: inject saved objects api related modules if they exist.
+    this.savedUsersKibana = this.$injector.has('savedUsersKibana') ? this.$injector.get('savedUsersKibana') : null;
+    this.savedObjectsAPI = this.$injector.has('savedObjectsAPI') ? this.$injector.get('savedObjectsAPI') : null;
+    this.savedUsers = this.$injector.has('savedScripts') ? this.$injector.get('savedUsers') : null;
+    this.isSiren = isObject(this.savedObjectsAPI) && isObject(this.savedUsersSiren);
+    this.savedObjects = this.savedUsersKibana;
+    if (this.isSiren) {
+      this.savedObjects = this.savedUsers;
     }
-    this.savedObjectsAPIEnabled = isObject(this.savedObjectsAPI) && isObject(this.savedUsers);
   }
 
   /**
@@ -25,24 +25,16 @@ class User {
   * @param {string} username - user name.
   * @param {string} password - user password.
   */
-  new(id, username, password) {
-    if (this.savedObjectsAPIEnabled) {
-      return this.savedUsers.get()
-        .then((user) => {
-          user.id = id;
-          user.watcher_id = id;
-          user.username = username;
-          user.password = password;
-          return user.save();
-        });
-    } else {
-      return this.$http.post(`../api/sentinl/user/${id}/${username}/${password}`)
-        .then((response) => {
-          if (response.status !== 200) {
-            throw new Error(`Fail to create user ${username}/${id}`);
-          }
-          return id;
-        });
+  async new(id, username, password) {
+    try {
+      const user = await this.savedObjects.get();
+      user.id = id;
+      user.watcher_id = id;
+      user.username = username;
+      user.password = password;
+      return user.save();
+    } catch (err) {
+      throw new Error(`fail to create new user ${username} ${id}, ${err}`);
     }
   }
 }

@@ -113,7 +113,7 @@ export default function routes(server) {
       reply({
         es: {
           index: config.es.default_index,
-          type: config.es.type,
+          type: config.es.default_type,
           number_of_results: config.es.results
         },
         authentication: {
@@ -131,7 +131,7 @@ export default function routes(server) {
     handler: function (req, reply) {
       const body = {
         index: config.es.default_index,
-        type: config.es.type,
+        type: config.es.default_type,
         size: config.es.results ? config.es.results : 50,
         allowNoIndices: false
       };
@@ -213,7 +213,7 @@ export default function routes(server) {
       log.debug('gettting watcher with id: ' + request.params.id);
       const body = {
         index: config.es.default_index,
-        type: config.es.type,
+        type: config.es.default_type,
         id: request.params.id
       };
 
@@ -234,7 +234,7 @@ export default function routes(server) {
       log.debug('saving watcher with id: ' + watcher._id);
       var body = {
         index: config.es.default_index,
-        type: config.es.type,
+        type: config.es.default_type,
         id: watcher._id,
         body: watcher._source
       };
@@ -271,7 +271,7 @@ export default function routes(server) {
     handler: function (request, reply) {
       var body = {
         index: config.es.default_index,
-        type: config.es.type,
+        type: config.es.default_type,
         id: request.params.id
       };
       callWithRequest(request, 'delete', body)

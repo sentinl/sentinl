@@ -7,7 +7,7 @@ import Services from './services';
 import Directives from './directives';
 import ConfirmMessage from './confirm_message';
 
-import common from './constants/common';
+import './constants';
 
 const app = uiModules.get('apps/sentinl', [
   'ui.bootstrap',
@@ -16,7 +16,6 @@ const app = uiModules.get('apps/sentinl', [
   Services.name,
   Directives.name,
   ConfirmMessage.name
-])
-  .constant('COMMON', common);
+]);
 
 export { app };

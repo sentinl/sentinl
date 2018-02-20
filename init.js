@@ -29,15 +29,17 @@ import fs from 'fs';
 import phantom from './server/lib/phantom';
 import Log from './server/lib/log';
 
-import userIndexMappings from './server/mappings/user_index';
-import coreIndexMappings from './server/mappings/core_index';
-import alarmIndexMappings from './server/mappings/alarm_index';
-import templateMappings from './server/mappings/template';
-
-import watchConfiguration from './server/lib/saved_objects/watch';
-import scriptConfiguration from './server/lib/saved_objects/script';
-import userConfiguration from './server/lib/saved_objects/user';
-import SavedObjectsAPIMiddleware from './server/lib/saved_objects_api';
+const siren = {
+  mappings: {
+    alarm: require('./server/mappings/siren/alarm_index'),
+  },
+  schema: {
+    watch: require('./server/lib/siren/saved_objects/watch'),
+    script: require('./server/lib/siren/saved_objects/script'),
+    user: require('./server/lib/siren/saved_objects/user'),
+  },
+  SavedObjectsAPIMiddleware: require('./server/lib/siren/saved_objects_api'),
+};
 
 /**
 * Initializes Sentinl app.
@@ -83,27 +85,19 @@ const init = once(function (server) {
     config.settings.authentication.https = true;
   }
 
-  // Create indexes and doc types with mappings.
-  if (server.plugins.saved_objects_api) { // Kibi: savedObjectsAPI.
-    forEach([watchConfiguration, scriptConfiguration, userConfiguration], (schema) => {
+  config.es.default_index = server.config().get('kibana.index');
+  config.settings.authentication.user_index = server.config().get('kibana.index');
+
+  if (server.plugins.saved_objects_api) { // Siren: savedObjectsAPI.
+    forEach(siren.schema, (schema) => {
       server.plugins.saved_objects_api.registerType(schema);
     });
 
-    config.es.default_index = server.config().get('kibana.index');
-    config.settings.authentication.user_index = server.config().get('kibana.index');
-
-    const middleware = new SavedObjectsAPIMiddleware(server);
+    const middleware = new siren.SavedObjectsAPIMiddleware(server);
     server.plugins.saved_objects_api.registerMiddleware(middleware);
-  } else { // Kibana.
-    initIndices.createIndex(server, config, config.es.default_index, config.es.type, coreIndexMappings);
-    initIndices.putMapping(server, config, config.es.default_index, config.es.script_type, templateMappings);
-
-    if (config.settings.authentication.enabled) {
-      initIndices.createIndex(server, config, config.settings.authentication.user_index,
-        config.settings.authentication.user_type, userIndexMappings);
-    }
   }
-  initIndices.createIndex(server, config, config.es.alarm_index, config.es.alarm_type, alarmIndexMappings, 'alarm');
+
+  initIndices.createIndex(server, config, config.es.alarm_index, config.es.alarm_type, siren.mappings.alarm, 'alarm');
 
   // Start cluster
   let node;

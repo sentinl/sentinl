@@ -244,7 +244,7 @@ function EditorController(sentinlConfig, $rootScope, $scope, $route, $interval,
       const id = $scope.watcher['$$' + field].id;
       Script.delete(id)
         .then(function (id) {
-          notify.info(`Deleting "${$scope.form.templates[field][id]._source.title}"`);
+          notify.info(`Deleted ${id}`);
           delete $scope.form.templates[field][id];
           $scope.watcher['$$' + field].id = undefined;
           $scope.watcher['$$' + field].title = undefined;

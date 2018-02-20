@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-import { has, forEach, difference, map, keys, isObject, isEmpty } from 'lodash';
+import { has, forEach, difference, map, keys, isObject, isEmpty, assign } from 'lodash';
 import later from 'later';
 import getConfiguration from './get_configuration';
 import Watcher from './classes/watcher';
@@ -37,10 +37,10 @@ export default function Scheduler(server) {
   /**
   * Remove unused watchers watcher.
   *
-  * @param {object} resp - ES response, watchers list.
+  * @param {array} watchers
   */
-  function removeOrphans(resp) {
-    let orphans = difference(forEach(keys(server.sentinlStore.schedule)), map(resp.hits.hits, '_id'));
+  function removeOrphans(watchers) {
+    let orphans = difference(forEach(keys(server.sentinlStore.schedule)), map(watchers, '_id'));
     forEach(orphans, function (orphan) {
       log.debug('deleting orphan watchers: ' + orphan);
       if (isObject(server.sentinlStore.schedule[orphan].later) && has(server.sentinlStore.schedule[orphan].later, 'clear')) {
@@ -55,28 +55,28 @@ export default function Scheduler(server) {
   *
   * @param {object} task - watcher configuration.
   */
-  function watching(task) {
+  async function watching(task) {
     if (!task._source || task._source.disable) {
       log.debug(`do not execute disabled watcher: ${task._id}`);
       return;
     }
 
     log.info(`executing watcher: ${task._id}`);
-    log.debug('watcher', task);
 
     if (!task._source.actions || isEmpty(task._source.actions)) {
       log.warning(`watcher has no actions: ${task._source.uuid}`);
       return;
     }
 
-    watcher.execute(task).then(function (resp) {
+    try {
+      const resp = await watcher.execute(task);
       log.info(`watcher has been executed successfully: ${resp.task.id}`);
       if (resp.message) {
         log.info(`fail to execute watcher: ${task._id}, ${resp.message}`);
       }
-    }).catch(function (error) {
-      log.error(`fail to execute watcher: ${task._id}, ${error}`);
-    });
+    } catch (err) {
+      log.error(`fail to execute watcher: ${task._id}`);
+    }
   };
 
   /**
@@ -84,7 +84,7 @@ export default function Scheduler(server) {
   *
   * @param {object} task - watcher configuration.
   */
-  function scheduleWatcher(task, config) {
+  function scheduleWatcher(task) {
     if (has(server.sentinlStore.schedule, `[${task._id}].later`)) {
       log.debug(`clearing watcher: ${task._id}`);
       server.sentinlStore.schedule[task._id].later.clear();
@@ -107,9 +107,19 @@ export default function Scheduler(server) {
     log.info(`scheduled watcher ${task._id}, to run every ${server.sentinlStore.schedule[task._id].schedule}`);
   };
 
-  function alert(server) {
+  function putPropertiesUnderSource(watchers) {
+    watchers.forEach(function (w) {
+      if (w._source[config.es.watcher_type]) {
+        assign(w._source, w._source[config.es.watcher_type]);
+        delete w._source[config.es.watcher_type];
+      }
+    });
+    return watchers;
+  }
+
+  async function alert(server) {
     log.debug('reloading watchers...');
-    log.info(`auth enabled: ${config.settings.authentication.enabled}`);
+    log.debug(`auth enabled: ${config.settings.authentication.enabled}`);
     if (config.settings.authentication.enabled) {
       log.info(`auth mode: ${config.settings.authentication.mode}`);
     }
@@ -120,26 +130,35 @@ export default function Scheduler(server) {
 
     watcher = new Watcher(server);
 
-    watcher.getCount().then(function (resp) {
-      return watcher.getWatchers(resp.count).then(function (resp) {
+    try {
+      let resp = await watcher.getCount();
+      resp = await watcher.getWatchers(resp.count);
+
+      let tasks = resp.hits.hits;
+      if (tasks.length) {
+        tasks = putPropertiesUnderSource(tasks);
+
         /* Orphanize */
         try {
-          removeOrphans(resp);
+          removeOrphans(tasks);
         } catch (err) {
           log.error('failed to remove orphans');
         }
+
         /* Schedule watchers */
-        forEach(resp.hits.hits, function (hit) {
-          scheduleWatcher(hit, config);
+        tasks.forEach(function (t) {
+          scheduleWatcher(t);
         });
-      });
-    }).catch((error) => {
-      if (error.statusCode === 404) {
-        log.warning('no Elasticsearch indices found, initializing...');
       } else {
-        log.error(`looking for data in Elasticsearch indices: ${error}`);
+        log.debug('no watchers found');
       }
-    });
+    } catch (err) {
+      if (err.status === 404) {
+        log.warning(`index missing: ${config.es.default_index}`);
+      } else {
+        log.error(err);
+      }
+    }
   }
 
   /**
@@ -147,16 +166,20 @@ export default function Scheduler(server) {
   *
   * @param {object} server - Kibana server instance.
   */
-  function doalert(server, node = null) {
+  async function doalert(server, node = null) {
     if (config.settings.cluster.enabled && node) {
-      return node.getMaster().then((master) => {
+      try {
+        const master = await node.getMaster();
         if (master.id === config.settings.cluster.host.id || !master.id) {
           log.info('cluster master node, executing watchers');
           alert(server);
         } else {
           log.info('cluster slave node, do not execute watchers');
         }
-      });
+      } catch (err) {
+        log.error('fail to get cluster master node');
+        throw err;
+      }
     } else {
       log.debug('cluster disabled');
       alert(server);

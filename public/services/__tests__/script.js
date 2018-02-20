@@ -6,23 +6,23 @@ import _ from 'lodash';
 import uuid from 'uuid/v4';
 import noDigestPromises from 'test_utils/no_digest_promises';
 
-import defaultWatcherScript from '../../defaults/watcher_script';
-
 describe('Script', () => {
 
   let Script;
   let savedScripts;
   let $httpBackend;
   let Promise;
+  let WATCHERSCRIPT;
 
   const init = function () {
     ngMock.module('kibana');
 
-    ngMock.inject(($injector, _Script_, _$httpBackend_, _Promise_) => {
+    ngMock.inject(($injector, _Script_, _$httpBackend_, _Promise_, _WATCHERSCRIPT_) => {
       Promise = _Promise_;
       Script = _Script_;
       savedScripts = $injector.has('savedScripts') ? $injector.get('savedScripts') : undefined;
       $httpBackend = _$httpBackend_;
+      WATCHERSCRIPT = _WATCHERSCRIPT_;
     });
   };
 
@@ -65,9 +65,9 @@ describe('Script', () => {
       this.timeout(30000);
 
       sinon.stub(savedScripts, 'find', () => {
-        const a = _.cloneDeep(defaultWatcherScript);
+        const a = _.cloneDeep(WATCHERSCRIPT);
         a.id = '123';
-        const b = _.cloneDeep(defaultWatcherScript);
+        const b = _.cloneDeep(WATCHERSCRIPT);
         b.id = '456';
         return Promise.resolve({ hits: [ a, b ] });
       });
@@ -76,7 +76,7 @@ describe('Script', () => {
         .then((response) => {
           expect(response.length).to.eql(2);
           expect(response[0]._source).to.be.an('object');
-          expect(_.isEqual(response[0]._source, defaultWatcherScript)).to.be(true);
+          expect(_.isEqual(response[0]._source, WATCHERSCRIPT)).to.be(true);
         })
         .catch(done);
 
@@ -90,7 +90,7 @@ describe('Script', () => {
       }
 
       const id = '123';
-      const script = _.cloneDeep(defaultWatcherScript);
+      const script = _.cloneDeep(WATCHERSCRIPT);
       script.id = id;
       script.save = () => Promise.resolve(id);
 

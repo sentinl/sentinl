@@ -19,6 +19,17 @@ export default class Watcher {
     this.config = !config ? getConfiguration(server) : config;
     this.client = !client ? getElasticsearchClient(server, this.config) : client;
     this.log = new Log(this.config.app_name, server, 'watcher');
+    this.query = {
+      watcher: {
+        query: {
+          term: {
+            type: {
+              value: this.config.es.watcher_type,
+            }
+          }
+        }
+      }
+    };
   }
 
   /**
@@ -38,25 +49,32 @@ export default class Watcher {
   *
   * @param {string} watcherId - watcher _id
   */
-  getUser(watcherId) {
+  async getUser(id) {
     const options = {
-      index: this.config.settings.authentication.user_index,
-      type: this.config.settings.authentication.user_type,
-      id: watcherId
+      index: this.config.es.default_index,
+      type: this.config.es.default_type,
+      id,
     };
-    return this.client.get(options).catch((err) => {
-      this.log.error(`auth, fail to get user, watcher: ${watcherId}`);
-    });
+    try {
+      return await this.client.get(options);
+    } catch (err) {
+      throw new Error(`auth, fail to get user, watcher: ${id}`);
+    }
   }
 
   /**
   * Count watchers
   */
-  getCount() {
-    return this.client.count({
-      index: this.config.es.default_index,
-      type: this.config.es.type
-    });
+  async getCount() {
+    try {
+      return await this.client.count({
+        index: this.config.es.default_index,
+        type: this.config.es.default_type,
+        body: this.query.watcher,
+      });
+    } catch (err) {
+      throw err;
+    }
   }
 
   /**
@@ -64,19 +82,24 @@ export default class Watcher {
   *
   * @param {number} count - number of watchers to get
   */
-  getWatchers(count) {
-    return this.client.search({
-      index: this.config.es.default_index,
-      type: this.config.es.type,
-      size: count
-    });
+  async getWatchers(count) {
+    try {
+      return await this.client.search({
+        index: this.config.es.default_index,
+        type: this.config.es.default_type,
+        size: count,
+        body: this.query.watcher,
+      });
+    } catch (err) {
+      throw new Error('fail to get watchers');
+    }
   }
 
   /**
   * Search
   *
-  * @param {string} method - method name
-  * @param {object} request - search query
+  * @param {string} method name
+  * @param {object} request query
   */
   search(method, request) {
     return this.client[method](request);
