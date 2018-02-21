@@ -14,8 +14,6 @@ function AboutController($scope, $route, $interval, timefilter, createNotifier, 
 
   $scope.topNavMenu = navMenu.getTopNav('about');
   $scope.tabsMenu = navMenu.getTabs('about');
-  navMenu.setKbnLogo(globalNavState.isOpen());
-  $scope.$on('globalNavState:change', () => navMenu.setKbnLogo(globalNavState.isOpen()));
 
   if (!$scope.notified) {
     $scope.notified = true;

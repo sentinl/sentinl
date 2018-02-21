@@ -12,8 +12,6 @@ function ReportsController($rootScope, $scope, $route, $interval,
 
   $scope.topNavMenu = navMenu.getTopNav('reports');
   $scope.tabsMenu = navMenu.getTabs('reports');
-  navMenu.setKbnLogo(globalNavState.isOpen());
-  $scope.$on('globalNavState:change', () => navMenu.setKbnLogo(globalNavState.isOpen()));
 
   const notify = createNotifier({
     location: COMMON.reports.title,
