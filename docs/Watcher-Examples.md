@@ -1,4 +1,4 @@
-
+Watchers can be as simple or complex as the query and aggregations they use. Here are some examples to get started with.
 
 ### SENTINL: HIT WATCHER EXAMPLE:
 
