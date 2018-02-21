@@ -1,4 +1,4 @@
-# SENTINL Troubleshooting
+# Troubleshooting
 This page offers some common problem-solution pairs, dedicated to both new and existing users.
 
 W.I.P - Make sure you also check the [SENTINL FAQ](SENTINL-FAQ)
