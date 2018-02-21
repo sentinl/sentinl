@@ -23,34 +23,3 @@ Check out our [FAQ](SENTINL-FAQ) to see if your problem was already handled.
 ![image](https://user-images.githubusercontent.com/1423657/30432947-77a4506c-9963-11e7-93a0-6595fc353a8c.png)
 
 ![image](https://user-images.githubusercontent.com/1423657/30433048-bc560f7a-9963-11e7-93e3-d43a8eb3c1d3.png)
-
-
-[SENTINL Wiki](https://github.com/elasticfence/kaae/wiki)
----
-* [ Introduction](SENTINL-Introduction)
-     * [ Installation](SENTINL-Installation)
-     * [ Config Example](SENTINL-Config-Example)
-     * [ Authentication](Authentication)
-     * [ API](API)
-* [ Watchers](SENTINL-Watcher-Anatomy)
-     * [ Trigger Schedule ](SENTINL-Watcher-Anatomy#trigger-schedule)
-     * [ Input Query ](SENTINL-Watcher-Anatomy#input-query)
-     * [ Condition ](SENTINL-Watcher-Anatomy#condition)
-     * [ Transform ](SENTINL-Watcher-Anatomy#transform)
-     * [ Actions ](SENTINL-Watcher-Anatomy#actions)
-         * [ Controls ](SENTINL-Watcher-controls)
-* [ Watcher Examples](SENTINL-Watcher-Examples)
-* [ Report Example](SENTINL-Report-Example)
-* [ Watcher Actions](SENTINL-Watcher-Actions)
-    * [ Beginners Tutorial](SENTINL-Tutorial)
-    * [ Nagios NRDP](SENTINL-Random-Examples)
-    * [ ATLAS Tutorial](Statistical-Anomaly-Detector)
-* [ SENTINL Alerts in Kibana](SENTINL-Alerts-in-Dashboard)
-* [ SENTINL Alerts Annotations](SENTINL-Annotations)
-* [ SENTINL Kibana SPY Plugin](SENTINL-SPY-Plugin)
-* [ Troubleshooting ](Troubleshoot)
-* [F.A.Q.](SENTINL-FAQ)
-  * [+SEARCHGUARD](http://docs.search-guard.com/latest/search-guard-sentinl)
-
-
-
