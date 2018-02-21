@@ -5,7 +5,7 @@ function AboutController($scope, $route, $interval, timefilter, createNotifier, 
 
   $scope.app = {
     name: sentinlConfig.appName,
-    logo: sentinlConfig.appName === 'Sentinl' ? 'sentinl-logo-about' : 'siren-logo-about',
+    logo: sentinlConfig.appName.toLowerCase() === 'sentinl' ? 'sentinl-logo-about' : 'siren-logo-about',
   };
 
   $scope.title = COMMON.about.title;
