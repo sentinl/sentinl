@@ -58,7 +58,7 @@ sentinl:
       method: POST
       host: host
       port: 9200
-      path: ':/{{payload.watcher_id}'
+      path: ':/{{payload.watcher_id}}'
       body: '{{payload.watcher_id}}{payload.hits.total}}'
     report:
       active: false
