@@ -1,4 +1,4 @@
-### SENTINL Watcher Actions
+### Watcher Actions
 Currently supported __"actions"__ for SENTINL watchers:
 
 #### Email 
@@ -37,7 +37,7 @@ Deliver message to remote web API
 	   "method" : "POST", 
 	   "host" : "remote.server", 
 	   "port" : 9200, 
-	   "path": ":/{{payload.watcher_id}", 
+	   "path": ":/{{payload.watcher_id}}", 
 	   "body" : "{{payload.watcher_id}}:{{payload.hits.total}}",
            "create_alert" : true
 	  }
