@@ -1,6 +1,6 @@
-# SENTINL Wizard
+# Using the Wizard
 
-SENTINL provides a built-in wizard to assist forming proper watchers.
+SENTINL provides a built-in wizard to assist forming proper watchers using a _step-by-step_ sequence
 
 #### Step 1: New Watcher
 The first step is to give our Watcher a name and choose an execution frequency
