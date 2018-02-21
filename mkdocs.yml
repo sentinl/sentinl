@@ -1,3 +1,8 @@
+site_name: SENTINL Docs
+site_url: https://github.com/sirensolutions/sentinl
+repo_url: https://github.com/sirensolutions/sentinl
+site_author: Lorenzo Mangani <lorenzo.mangani@gmail.com>
+copyright: "2018 QXIP BV and Siren Solutions"
 pages:
 - Home: 
     - 'index.md'
