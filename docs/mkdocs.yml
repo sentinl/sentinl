@@ -18,7 +18,6 @@ pages:
     - 'HOWTO-Statistical-Anomaly-Detector.md'
     - 'HOWTO-Transform-Examples.md'
     - 'HOWTO Rookie Tutorial': 'Tutorial.md'
-    - ''
 - Watchers:
     - 'Anatomy': 'Watcher-Anatomy.md'
     - 'Controls': 'Watcher-Controls.md'
