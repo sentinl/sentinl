@@ -39,7 +39,7 @@ Documentation, Examples and Guides are available at [sentinl.readthedocs.io](htt
 #### **ATTENTION** Siren 10 users should use the native version bundled with their distribution!
 
 #### Snapshot Plugin Install
-Use this example and substitute 5.5.1 with your _actual_ Kibana version
+Use this example and substitute 5.5.1 with your _actual_ Kibana version or manually pick a [release](https://github.com/sirensolutions/sentinl/releases)
 <pre>
 /opt/kibana/bin/kibana-plugin install https://github.com/sirensolutions/sentinl/releases/download/tag-5.5/sentinl-v5.5.1.zip
 </pre>
