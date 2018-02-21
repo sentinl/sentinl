@@ -1,5 +1,3 @@
-# SENTINL <img src="https://camo.githubusercontent.com/15f26c4f603cac9bf415c841a8a60077f6db5102/687474703a2f2f696d6775722e636f6d2f654c446f4f4b592e706e67">
-
 ## Proof-of-Concept / Beginners Tutorial
 This tutorial will illustrate a working example of **SENTINL** for alerting 
 
@@ -7,17 +5,12 @@ _WARNING: This guide is a work-in-progress and should not be used as-is in produ
 
 ### Requirements
 
-* Elasticsearch 2.4.x
-* Kibi or Kibana 4.5+
+* Elasticsearch + Kibana 5.x
 * shell + curl to execute commands
 
 ### Setup
-Before starting, download and install the latest dev version of the plugin:
-```
-git clone https://github.com/sirensolutions/sentinl
-cd sentinl && npm install && npm run package
-/opt/kibana/bin/kibana plugin --install kaae -u file://`pwd`/sentinl-latest.tar.gz
-```
+Before starting, download and install the latest dev version of the plugin using the README instructions.
+
 
 ### Dataset
 To illustrate the logic and elements involved with *sentinl* we will generate some random data and insert it to Elasticsearch.
