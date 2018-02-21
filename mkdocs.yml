@@ -29,6 +29,5 @@ pages:
     - 'Actions': 'Watcher-Actions.md'
     - 'Wizard': 'Watcher-Wizard.md'
     - 'Examples': 'Watcher-Examples.md'
-    - 'Release Notes': 'about/release-notes.md'
 - Development:
     - 'API': 'API.md'
