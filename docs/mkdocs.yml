@@ -1,0 +1,30 @@
+pages:
+- Home: 
+    - 'index.md'
+    - 'Introduction.md'
+    - 'Installation.md'
+    - 'Config-Example.md'
+    - 'Authentication.md'
+    - 'Troubleshoot.md'
+- User Guide:
+    - 'HOWTO-Alerts-in-Dashboard.md'
+    - 'HOWTO-Alerts-in-Nagios-NRDP.md'
+    - 'HOWTO-Anomaly-Detection.md'
+    - 'HOWTO-Create-Reports.md'
+    - 'HOWTO-Form-Watchers-from-SPY-Panel.md'
+    - 'HOWTO-Kibana-Annotations.md'
+    - 'HOWTO-Outlier-Detection.md'
+    - 'HOWTO-Sentinl-and-SearchGuard.md'
+    - 'HOWTO-Statistical-Anomaly-Detector.md'
+    - 'HOWTO-Transform-Examples.md'
+    - 'HOWTO Rookie Tutorial': 'Tutorial.md'
+    - ''
+- Watchers:
+    - 'Anatomy': 'Watcher-Anatomy.md'
+    - 'Controls': 'Watcher-Controls.md'
+    - 'Actions': 'Watcher-Actions.md'
+    - 'Wizard': 'Watcher-Wizard.md'
+    - 'Examples': 'Watcher-Examples.md'
+    - 'Release Notes': 'about/release-notes.md'
+- Development:
+    - 'API': 'API.md'
