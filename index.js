@@ -49,10 +49,10 @@ export default function (kibana) {
     uiExports: {
       spyModes: ['plugins/sentinl/dashboard_spy_button/alarm_button'],
       app: {
+        icon: 'plugins/sentinl/style/sentinl.svg',
         title: 'Sentinl',
         description: 'Kibana Alert App for Elasticsearch',
         main: 'plugins/sentinl/app',
-        icon: 'plugins/sentinl/sentinl.svg',
         injectVars: function (server, options) {
           var config = server.config();
           return {

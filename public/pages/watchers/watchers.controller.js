@@ -21,8 +21,6 @@ function  WatchersController($rootScope, $scope, $route, $interval,
 
   $scope.topNavMenu = navMenu.getTopNav('watchers');
   $scope.tabsMenu = navMenu.getTabs();
-  navMenu.setKbnLogo(globalNavState.isOpen());
-  $scope.$on('globalNavState:change', () => navMenu.setKbnLogo(globalNavState.isOpen()));
 
   timefilter.enabled = false;
   $scope.watchers = [];

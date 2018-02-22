@@ -20,8 +20,6 @@ function AlarmsController($rootScope, $scope, $route, $interval,
 
   $scope.topNavMenu = navMenu.getTopNav('alarms');
   $scope.tabsMenu = navMenu.getTabs('alarms');
-  navMenu.setKbnLogo(globalNavState.isOpen());
-  $scope.$on('globalNavState:change', () => navMenu.setKbnLogo(globalNavState.isOpen()));
 
   /* First Boot */
 

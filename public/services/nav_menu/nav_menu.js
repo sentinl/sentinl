@@ -2,26 +2,12 @@ import { forEach, filter, includes } from 'lodash';
 import uiChrome from 'ui/chrome';
 
 import template from './nav_menu.html';
-const impactLogo = require('plugins/sentinl/sentinl-white-logo.svg');
-const smallLogo = require('plugins/sentinl/sentinl.svg');
 
 class NavMenu {
 
   constructor($rootScope, kbnUrl) {
     this.$rootScope = $rootScope;
     this.kbnUrl = kbnUrl;
-  }
-
-  setKbnLogo(isOpen) {
-    if (isOpen) {
-      uiChrome.setBrand({
-        logo: `url(${impactLogo}) left no-repeat`,
-      });
-    } else {
-      uiChrome.setBrand({
-        logo: `url(${smallLogo}) left no-repeat`
-      });
-    }
   }
 
   getTopNav(view) {

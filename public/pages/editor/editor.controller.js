@@ -27,8 +27,6 @@ function EditorController(sentinlConfig, $rootScope, $scope, $route, $interval,
 
   $scope.topNavMenu = navMenu.getTopNav(editorMode);
   $scope.tabsMenu = navMenu.getTabs(editorMode, [{ name: tabName, url: `#/${editorMode}` }]);
-  navMenu.setKbnLogo(globalNavState.isOpen());
-  $scope.$on('globalNavState:change', () => navMenu.setKbnLogo(globalNavState.isOpen()));
 
   const notify = createNotifier({
     location: COMMON.editor.title,
