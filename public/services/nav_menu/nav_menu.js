@@ -5,10 +5,9 @@ import template from './nav_menu.html';
 
 class NavMenu {
 
-  constructor($rootScope, kbnUrl, sentinlConfig) {
+  constructor($rootScope, kbnUrl) {
     this.$rootScope = $rootScope;
     this.kbnUrl = kbnUrl;
-    this.sentinlConfig = sentinlConfig;
   }
 
   getTopNav(view) {
