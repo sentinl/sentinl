@@ -76,7 +76,8 @@ export default function (kibana) {
         app_name: Joi.string().default('Sentinl'),
         enabled: Joi.boolean().default(true),
         sentinl: Joi.any().forbidden().error(new Error(
-          'The sentinl.sentinl.results option does not exist anymore. Use sentinl.es.results instead!'
+          'The sentinl.sentinl configuration section is obsolete please remove it. ' +
+          'The only property still in use from that section was sentinl.sentinl.results and it was moved to sentinl.es.results'
         )),
         es: Joi.object({
           results: Joi.number().default(50),
