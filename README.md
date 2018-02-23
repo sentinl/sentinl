@@ -1,6 +1,6 @@
 <img src="http://i.imgur.com/s4TKpbF.png" width="400"/>
 
-# Kibi & Kibana Alerting & Reporting App
+### Kibi & Kibana Alerting & Reporting App
 
 > Watching your data, 24/7/365. 
 
@@ -10,9 +10,9 @@
 <img src="https://img.shields.io/badge/elasticsearch-5.*-green.svg"/>
 
 
-**SENTINL 5** extends *Kibi*/*Kibana 5* with **Alerting** and **Reporting** functionality to monitor, notify and report on data series changes using standard queries, programmable validators and a variety of configurable actions - Think of it as a free an independent ["Watcher"](https://github.com/sirensolutions/sentinl/wiki/SENTINL-Introduction#what-is-a-watcher) which also has scheduled ["Reporting"](https://github.com/sirensolutions/sentinl/wiki/SENTINL-Report-Example) capabilities (PNG/PDFs snapshots).
+**SENTINL 5** extends *Kibi* and *Kibana* with **Alerting** and **Reporting** functionality to monitor, notify and report on data series changes using standard queries, programmable validators and a variety of configurable actions - Think of it as a free an independent ["Watcher"](https://github.com/sirensolutions/sentinl/wiki/SENTINL-Introduction#what-is-a-watcher) which also has scheduled ["Reporting"](https://github.com/sirensolutions/sentinl/wiki/SENTINL-Report-Example) capabilities (PNG/PDFs snapshots).
 
-**SENTINL** is also designed to simplify the process of creating and managing alerts and reports in Kibi/Kibana via its App and Spy integration, directly in the Kibi/Kibana UI.
+**SENTINL** is also designed to simplify the process of creating and managing alerts and reports in Kibi/Kibana `5.x` via its native App Interface, or by using native watcher tools in Kibana `6.x+`.
 
 <!--<img src="http://i.imgur.com/aDHvUxf.png" width="400" /> -->
 
@@ -21,22 +21,25 @@
 
 ---
 
-### Kibi/Kibana Alerts Display
-SENTINL alerts can easily be displayed back in Kibana dashboards using [saved search](https://github.com/sirensolutions/sentinl/wiki/SENTINL-Alerts-in-Dashboard) visualizations
+### Event History
+Alerts and Reports can easily be tracked and displayed in Kibana Charts, Widgets or Chart Annotations
+![sentinl_annotation](https://user-images.githubusercontent.com/1423657/36197513-3ed7dd1a-1174-11e8-92e0-65c630ae63b9.gif)
 
-### Kibi/Kibana Report Snapshots
-Boss wants to see charts and reports? SENTINL can grab timed snapshots of Kibana dashboards _(or any other website)_ and deliver them via email using the [report](https://github.com/sirensolutions/sentinl/wiki/SENTINL-Report-Example) action
+### Visual Snapshots
+Boss wants to see charts and reports? Use Reports to create timed snapshots of Kibana dashboards _(or any other website)_ at a set date or condition, and deliver them as email attachments.
 
-### Configuration & Usage
-Consult our [wiki](https://github.com/sirensolutions/sentinl/wiki) to learn how to configure and use **SENTINL** and program awesome Watchers
+### Help & Documentation
+Documentation, Examples and Guides are available at [sentinl.readthedocs.io](http://sentinl.readthedocs.io)
+
 
 --------------
 
 ## App Installation
 
-**ATTENTION** If you use it with Kibi, don't install SENTINL, always use SENTINL bundled inside the distribution.
+#### **ATTENTION** Siren 10 users should use the native version bundled with their distribution!
 
-#### Snapshot Plugin Install (substitute 5.5.1 with your Kibana version)
+#### Snapshot Plugin Install
+Use this example and substitute 5.5.1 with your _actual_ Kibana version or manually pick a [release](https://github.com/sirensolutions/sentinl/releases)
 <pre>
 /opt/kibana/bin/kibana-plugin install https://github.com/sirensolutions/sentinl/releases/download/tag-5.5/sentinl-v5.5.1.zip
 </pre>
@@ -54,13 +57,14 @@ cd sentinl && npm install && gulp package --version=5.5.1
 </pre>
 
 
+### Project Status 
 
+* Production Ready w/ thousands of deployments
+* Please help us by starring the Project
+* Contributors Needed! Please consider joining us!
 
-## Project Status 
-
-* Working Status, more testers needed!
-  * Please [report](https://github.com/sirensolutions/sentinl/issues) any ideas, bug reports and findings
-* Contributors Needed! If you know angular and elasticsearch, consider joining us!
+### Issues & Bugs
+Please [report](https://github.com/sirensolutions/sentinl/issues) any ideas, bug reports and findings on the repository.
  
 
 
@@ -69,9 +73,9 @@ cd sentinl && npm install && gulp package --version=5.5.1
 <pre>
 This software is licensed under the Apache License, version 2 ("ALv2"), quoted below.
 
-Copyright 2016, 2017 Siren Solutions
-Copyright 2016, 2017 QXIP BV, Lorenzo Mangani (lorenzo.mangani@gmail.com)
-Copyright 2015, Rao Chenlin (rao.chenlin@gmail.com)
+Copyright 2016, 2018 Siren Solutions
+Copyright 2016, 2018 QXIP BV
+Copyright 2015, Lorenzo Mangani (lorenzo.mangani@gmail.com), Rao Chenlin (rao.chenlin@gmail.com)
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not
 use this file except in compliance with the License. You may obtain a copy of
@@ -86,5 +90,4 @@ License for the specific language governing permissions and limitations under
 the License.
 </pre>
 
-<img src="https://img.shields.io/github/license/sirensolutions/sentinl.svg"/>
 <img src="https://img.shields.io/badge/made%20with-love-red.svg"/>
