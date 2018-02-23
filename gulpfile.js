@@ -82,15 +82,17 @@ function syncPluginTo(dest, done) {
         cwd: dest,
         stdio: 'inherit'
       });
-
-      if (!lib.gun_master) {
-        prod.on('close', done);
-      } else {
-        spawn('npm', ['install', lib.gun_master], {
-          cwd: dest,
-          stdio: 'inherit'
-        }).on('close', done);
-      }
+      prod.on('close', function () {
+        if (!lib.gun_master) {
+          done();
+        } else {
+          spawn('npm', ['install', lib.gun_master], {
+            cwd: dest,
+            stdio: 'inherit'
+          })
+          .on('close', done);
+        }
+      });
     }).catch(done);
   });
 }
@@ -109,6 +111,7 @@ gulp.task('lint', function (done) {
   return gulp.src([
     'index.js',
     'init.js',
+    'gulpfile.js',
     'public/**/*.js',
     'server/**/*.js',
     '!**/webpackShims/**'
