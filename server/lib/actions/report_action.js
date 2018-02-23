@@ -136,7 +136,7 @@ export default function report(server, email, task, action, actionName, payload)
           headers: {
             'Content-ID': '<my-report>',
             'Content-Type': `${type}; name="${filename}"`,
-            'content-disposition': 'attachment; filename=cid:my-report'
+            'content-disposition': 'attachment; filename="cid:my-report"'
           }
         }
       ];
