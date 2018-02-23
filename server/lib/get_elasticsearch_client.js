@@ -56,12 +56,18 @@ export default function getElasticsearchClient(server, config, type = 'data', im
 
   // Authentication via Kibi Access Control app
   if (server.plugins.kibi_access_control) {
-    return server.plugins.kibi_access_control.getSentinlClient();
+    const kibiAccessControlConfig = server.config().get('kibi_access_control');
+    if (kibiAccessControlConfig && kibiAccessControlConfig.enabled) {
+      return server.plugins.kibi_access_control.getSentinlClient();
+    }
   }
 
   // Authentication via Investigate Access Control app pre Sentinl rename
   if (server.plugins.investigate_access_control) {
-    return server.plugins.investigate_access_control.getSentinlClient();
+    const investigateAccessControlConfig = server.config().get('investigate_access_control');
+    if (investigateAccessControlConfig && investigateAccessControlConfig.enabled) {
+      return server.plugins.investigate_access_control.getSentinlClient();
+    }
   }
 
   if (type === 'data') {
