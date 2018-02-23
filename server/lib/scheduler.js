@@ -84,30 +84,28 @@ export default function Scheduler(server) {
   *
   * @param {object} task - watcher configuration.
   */
-  function scheduleWatcher(task) {
+  function scheduleWatcher(task, config) {
     if (has(server.sentinlStore.schedule, `[${task._id}].later`)) {
       server.log(['status', 'info', 'Sentinl', 'scheduler'], `Clearing watcher: ${task._id}`);
       server.sentinlStore.schedule[task._id].later.clear();
     }
+    server.sentinlStore.schedule[task._id] = {task};
 
-    server.sentinlStore.schedule[task._id] = {};
-    server.sentinlStore.schedule[task._id].task = task;
-
-    let interval;
-    if (task._source.trigger.schedule.later) {
-      // https://bunkat.github.io/later/parsers.html#text
-      interval = later.parse.text(task._source.trigger.schedule.later);
-      server.sentinlStore.schedule[task._id].interval = task._source.trigger.schedule.later;
-    } else if (task._source.trigger.schedule.interval % 1 === 0) {
-      // max 60 seconds!
-      interval = later.parse.recur().every(task._source.trigger.schedule.interval).second();
-      server.sentinlStore.schedule[task._id].interval = task._source.trigger.schedule.interval;
+    if (config.es.watcher.schedule_timezone === 'local') {
+      later.date.localTime();
     }
 
-    /* Run Watcher in interval */
-    server.sentinlStore.schedule[task._id].later = later.setInterval(() => watching(task), interval);
+    // https://bunkat.github.io/later/parsers.html#text
+    const schedule = later.parse.text(task._source.trigger.schedule.later);
+    server.sentinlStore.schedule[task._id].schedule = task._source.trigger.schedule.later;
+
+    /* Run Watcher in schedule */
+    server.sentinlStore.schedule[task._id].later = later.setInterval(function () {
+      watching(task);
+    }, schedule);
+
     server.log(['status', 'info', 'Sentinl', 'scheduler'],
-      `server.sentinlStore.scheduled Watch: ${task._id} every ${server.sentinlStore.schedule[task._id].interval}`);
+      `server.sentinlStore.scheduled Watch: ${task._id} every ${server.sentinlStore.schedule[task._id].schedule}`);
   };
 
   /**
@@ -140,7 +138,9 @@ export default function Scheduler(server) {
         }
 
         /* Schedule watchers */
-        forEach(resp.hits.hits, (hit) => scheduleWatcher(hit));
+        forEach(resp.hits.hits, function (hit) {
+          scheduleWatcher(hit, config);
+        });
       });
     })
     .catch((error) => {
@@ -157,3 +157,4 @@ export default function Scheduler(server) {
   };
 
 };
+

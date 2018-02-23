@@ -127,7 +127,9 @@ export default function (kibana) {
             body: Joi.string().default('{{payload.watcher_id}}{payload.hits.total}}')
           }).default(),
           report: Joi.object({
-            active: Joi.boolean().default(false),
+           search_guard: Joi.boolean().default(false),
+           simple_authentication: Joi.boolean().default(false),
+           active: Joi.boolean().default(false),
             phantomjs_path: Joi.string().default(undefined),
             tmp_path: Joi.string().default('/tmp/')
           }).default(),
