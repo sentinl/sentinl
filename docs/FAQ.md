@@ -104,3 +104,14 @@ SENTINL prebuilt packages include PhantomJS binaries, occupying most of the arch
 
 
 ---
+
+
+##### Q: How can I secure sensitive passwords and values in SENTINL configuration?
+When using Kibana 6.2+ the [Secure Settings](https://www.elastic.co/guide/en/kibana/current/secure-settings.html) feature can be leveraged to encrypt sensitive details. An example to protect the Email password:
+```
+bin/kibana-keystore create
+bin/kibana-keystore add sentinl.settings.email.password
+```
+
+
+---
