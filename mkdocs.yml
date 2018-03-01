@@ -14,6 +14,7 @@ pages:
     - 'Config-Example.md'
     - 'Authentication.md'
     - 'Troubleshoot.md'
+    - 'FAQ.md'
 - User Guide:
     - 'Alerts as Annotations': 'HOWTO-Kibana-Annotations.md'
     - 'Alerts in Dashboards': 'HOWTO-Alerts-in-Dashboard.md'
@@ -35,5 +36,3 @@ pages:
     - 'Reports': 'HOWTO-Create-Reports.md'
 - Development:
     - 'API': 'API.md'
-- FAQ:
-    - 'FAQ.md'
