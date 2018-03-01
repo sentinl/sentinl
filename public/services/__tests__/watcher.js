@@ -78,7 +78,7 @@ describe('Watcher', function () {
   describe('Kibi API', function () { // savedObjectsAPI
 
     const initKibiAPI = function () {
-      Watcher.savedObjectsAPIEnabled = true;
+      Watcher.isSiren = true;
     };
 
     beforeEach(function () {
@@ -202,118 +202,4 @@ describe('Watcher', function () {
     });
 
   });
-
-
-  describe('API', function () {
-
-    const initSentinlAPI = function () {
-      Watcher.savedObjectsAPIEnabled = false;
-    };
-
-    beforeEach(function () {
-      initSentinlAPI();
-    });
-
-    it('list watchers', function (done) {
-      $httpBackend.expectGET('../api/sentinl/list').respond(200, {
-        hits: {
-          hits: [
-            { _id: 1 },
-            { _id: 2 }
-          ]
-        }
-      });
-
-      Watcher.list()
-        .then((response) => {
-          expect(response.length).to.eql(2);
-        })
-        .catch(done)
-        .finally(done);
-
-      $httpBackend.flush();
-    });
-
-    it('get watcher', function (done) {
-      const id = 1;
-      $httpBackend.expectGET(`../api/sentinl/get/watcher/${id}`).respond(200, {
-        hits: {
-          hits: [
-            { _id: id }
-          ]
-        }
-      });
-
-      Watcher.get(id)
-        .then((response) => {
-          expect(response.hits.hits[0]._id).to.eql(id);
-        })
-        .catch(done)
-        .finally(done);
-
-      $httpBackend.flush();
-    });
-
-    it('create new email watcher', function (done) {
-      const type = 'email';
-      Watcher.new(type)
-        .then((watcher) => {
-          expect(watcher._id.length > 0).to.be(true);
-          expect(isEqual(watcher._source, EMAILWATCHER)).to.eql(true);
-        })
-        .catch(done)
-        .finally(done);
-    });
-
-    it('create new report watcher', function (done) {
-      const type = 'report';
-      Watcher.new(type)
-        .then((watcher) => {
-          expect(watcher._id.length > 0).to.be(true);
-          expect(isEqual(watcher._source, REPORTWATCHER)).to.eql(true);
-        })
-        .catch(done)
-        .finally(done);
-    });
-
-    it('save watcher', function (done) {
-      const watcher = {
-        _id: uuid(),
-        _source: cloneDeep(EMAILWATCHER)
-      };
-
-      $httpBackend.when('GET', '../api/sentinl/config').respond(200, {
-        es: {
-          index: 'watcher',
-          type: 'sentinl-watcher'
-        }
-      });
-      $httpBackend.expectPOST(`../api/sentinl/watcher/${watcher._id}`).respond(200, {});
-
-      Watcher.save(watcher)
-        .then((response) => {
-          expect(response).to.be.eql(watcher._id);
-        })
-        .catch(done)
-        .finally(done);
-
-      $httpBackend.flush();
-    });
-
-    it('delete watcher', function (done) {
-      const id = uuid();
-      $httpBackend.expectDELETE(`../api/sentinl/watcher/${id}`).respond(200, { ok: true });
-
-      Watcher.delete(id)
-        .then((response) => {
-          expect(response).to.be.eql(id);
-        })
-        .catch(done)
-        .finally(done);
-
-      $httpBackend.flush();
-    });
-
-  });
-
 });

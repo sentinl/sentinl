@@ -29,10 +29,11 @@ import fs from 'fs';
 import phantom from './server/lib/phantom';
 import Log from './server/lib/log';
 
+const mappings = {
+  alarm: require('./server/mappings/alarm_index'),
+};
+
 const siren = {
-  mappings: {
-    alarm: require('./server/mappings/siren/alarm_index'),
-  },
   schema: {
     watch: require('./server/lib/siren/saved_objects/watch'),
     script: require('./server/lib/siren/saved_objects/script'),
@@ -97,7 +98,7 @@ const init = once(function (server) {
     server.plugins.saved_objects_api.registerMiddleware(middleware);
   }
 
-  initIndices.createIndex(server, config, config.es.alarm_index, config.es.alarm_type, siren.mappings.alarm, 'alarm');
+  initIndices.createIndex(server, config, config.es.alarm_index, config.es.alarm_type, mappings.alarm, 'alarm');
 
   // Start cluster
   let node;

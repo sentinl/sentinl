@@ -44,7 +44,7 @@ describe('Script', () => {
   describe('Kibi API', function () {
 
     const initKibiAPI = function () {
-      Script.savedObjectsAPIEnabled = true;
+      Script.isSiren = true;
     };
 
     beforeEach(function () {
@@ -126,67 +126,4 @@ describe('Script', () => {
     });
 
   });
-
-
-  describe('API', function () {
-
-    const initSentinlAPI = function () {
-      Script.savedObjectsAPIEnabled = false;
-    };
-
-    beforeEach(() => {
-      initSentinlAPI();
-    });
-
-    it('list scripts', function (done) {
-      const type = 'transform';
-      $httpBackend.expectGET(`../api/sentinl/list/scripts/${type}`).respond(200, {
-        hits: {
-          hits: [
-            { _id: 1 },
-            { _id: 2 }
-          ]
-        }
-      });
-
-      Script.list(type)
-        .then((response) => {
-          expect(response.length).to.eql(2);
-        })
-        .catch(done)
-        .finally(done);
-
-      $httpBackend.flush();
-    });
-
-    it('create new script', function (done) {
-      const script = { _id: uuid() };
-      $httpBackend.expectPOST(`../api/sentinl/save/script/${script._id}`).respond(200, {});
-
-      Script.new(script)
-        .then((response) => {
-          expect(response).to.eql(script._id);
-        })
-        .catch(done)
-        .finally(done);
-
-      $httpBackend.flush();
-    });
-
-    it('delete script', function (done) {
-      const id = uuid();
-      $httpBackend.expectDELETE(`../api/sentinl/remove/script/${id}`).respond(200, {});
-
-      Script.delete(id)
-        .then((response) => {
-          expect(response).to.eql(id);
-        })
-        .catch(done)
-        .finally(done);
-
-      $httpBackend.flush();
-    });
-
-  });
-
 });
