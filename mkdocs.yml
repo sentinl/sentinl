@@ -35,3 +35,5 @@ pages:
     - 'Reports': 'HOWTO-Create-Reports.md'
 - Development:
     - 'API': 'API.md'
+- FAQ:
+    - 'FAQ.md'
