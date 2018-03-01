@@ -92,8 +92,8 @@ export default function (kibana) {
           )),
           alarm_index: Joi.string().default('watcher_alarms'),
           watcher_type: Joi.string().default('sentinl-watcher'),
-          alarm_type: Joi.string().default('sentinl-alarm'),
           script_type: Joi.string().default('sentinl-script'),
+          alarm_type: Joi.string().default('sentinl-alarm'),
           watcher: Joi.object({
             schedule_timezone: Joi.string().default('utc'), // local, utc
             trigger: Joi.number().default(3),

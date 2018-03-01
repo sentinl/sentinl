@@ -363,7 +363,7 @@ function EditorController(sentinlConfig, $rootScope, $scope, $route, $interval,
     * Initilizes raw property for the Raw tab.
     */
     const initRaw = function () {
-      $scope.watcher.$$raw = angular.toJson($scope.watcher, 'pretty');
+      $scope.watcher.$$raw = angular.toJson($scope.watcher._source, 'pretty');
     };
 
     /**
@@ -487,7 +487,7 @@ function EditorController(sentinlConfig, $rootScope, $scope, $route, $interval,
       if ($scope.form.rawEnabled) { // Raw
         try {
           // All settings will have been overwritten if enable is checked and the watcher is saved.
-          $scope.watcher = angular.fromJson($scope.watcher.$$raw);
+          $scope.watcher._source = angular.fromJson($scope.watcher.$$raw);
         } catch (e) {
           notify.error(`Invalid Raw configuration: ${e}`);
           init(); // init form again

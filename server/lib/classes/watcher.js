@@ -8,6 +8,7 @@ import getElasticsearchClient from '../get_elasticsearch_client';
 import getConfiguration from '../get_configuration';
 import actionFactory from '../actions/actions';
 import Log from '../log';
+import { isKibi } from '../helpers';
 
 /**
 * Helper class to get watchers data.
@@ -19,8 +20,9 @@ export default class Watcher {
     this.config = !config ? getConfiguration(server) : config;
     this.client = !client ? getElasticsearchClient(server, this.config) : client;
     this.log = new Log(this.config.app_name, server, 'watcher');
+    this.siren = isKibi(server);
     this.query = {
-      watcher: {
+      watchers: {
         query: {
           term: {
             type: {
@@ -50,13 +52,18 @@ export default class Watcher {
   * @param {string} watcherId - watcher _id
   */
   async getUser(id) {
-    const options = {
+    const request = {
       index: this.config.es.default_index,
       type: this.config.es.default_type,
       id,
     };
+
+    if (this.siren) {
+      request.type = this.config.es.watcher_type;
+    }
+
     try {
-      return await this.client.get(options);
+      return await this.client.get(request);
     } catch (err) {
       throw new Error(`auth, fail to get user, watcher: ${id}`);
     }
@@ -66,12 +73,19 @@ export default class Watcher {
   * Count watchers
   */
   async getCount() {
+    const request = {
+      index: this.config.es.default_index,
+      type: this.config.es.default_type,
+      body: this.query.watchers,
+    };
+
+    if (this.siren) {
+      request.type = this.config.es.watcher_type;
+      delete request.body;
+    }
+
     try {
-      return await this.client.count({
-        index: this.config.es.default_index,
-        type: this.config.es.default_type,
-        body: this.query.watcher,
-      });
+      return await this.client.count(request);
     } catch (err) {
       throw err;
     }
@@ -83,13 +97,20 @@ export default class Watcher {
   * @param {number} count - number of watchers to get
   */
   async getWatchers(count) {
+    const request = {
+      index: this.config.es.default_index,
+      type: this.config.es.default_type,
+      size: count,
+      body: this.query.watchers,
+    };
+
+    if (this.siren) {
+      request.type = this.config.es.watcher_type;
+      delete request.body;
+    }
+
     try {
-      return await this.client.search({
-        index: this.config.es.default_index,
-        type: this.config.es.default_type,
-        size: count,
-        body: this.query.watcher,
-      });
+      return await this.client.search(request);
     } catch (err) {
       throw new Error('fail to get watchers');
     }
@@ -216,8 +237,6 @@ export default class Watcher {
           if (!payload) {
             throw new Error(`input search query is malformed or missing key parameters, ${task._id}`);
           }
-
-          self.log.debug(`watcher payload, ${task._id}`, payload);
 
           /* CONDITION */
 
