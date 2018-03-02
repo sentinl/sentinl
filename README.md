@@ -21,22 +21,30 @@
 
 ---
 
-### Siren Investigate/Kibana Alerts Display
+### Siren Investigatea or Kibana Alerts Display
 SENTINL alerts can easily be displayed back in Kibana dashboards using [saved search](https://user-images.githubusercontent.com/5389745/36902779-f700a1d8-1e2b-11e8-8a02-be97d2e4a0d5.png) visualizations
 
 ### Siren Investigate/Kibana Report Snapshots
 Boss wants to see charts and reports? SENTINL can grab timed snapshots of Kibana dashboards _(or any other website)_ and deliver them via email using the [report](https://github.com/sirensolutions/sentinl/wiki/SENTINL-Report-Example) action
+### Event History
+Alerts and Reports can easily be tracked and displayed in Kibana Charts, Widgets or Chart Annotations
+![sentinl_annotation](https://user-images.githubusercontent.com/1423657/36197513-3ed7dd1a-1174-11e8-92e0-65c630ae63b9.gif)
 
-### Configuration & Usage
-Consult our [wiki](https://github.com/sirensolutions/sentinl/wiki) to learn how to configure and use **SENTINL** and program awesome Watchers
+### Visual Snapshots
+Boss wants to see charts and reports? Use Reports to create timed snapshots of Kibana dashboards _(or any other website)_ at a set date or condition, and deliver them as email attachments.
+
+### Help & Documentation
+Documentation, Examples and Guides are available at [sentinl.readthedocs.io](http://sentinl.readthedocs.io)
+
 
 --------------
 
 ## App Installation
 
-**ATTENTION** If you use it with Siren Investigate, don't install SENTINL, always use SENTINL bundled inside the distribution.
+#### **ATTENTION** Siren 10 users should use the native version bundled with their distribution!
 
-#### Snapshot Plugin Install (substitute 6.2.2 with your Kibana version)
+#### Snapshot Plugin Install
+Use this example and substitute 5.5.1 with your _actual_ Kibana version or manually pick a [release](https://github.com/sirensolutions/sentinl/releases)
 <pre>
 /opt/kibana/bin/kibana-plugin install https://github.com/sirensolutions/sentinl/releases/download/tag-6.2.2/sentinl-v6.2.2.zip
 </pre>
@@ -54,13 +62,14 @@ cd sentinl && npm install && gulp package --version=6.2.2
 </pre>
 
 
+### Project Status 
 
+* Production Ready w/ thousands of deployments
+* Please help us by starring the Project
+* Contributors Needed! Please consider joining us!
 
-## Project Status 
-
-* Working Status, more testers needed!
-  * Please [report](https://github.com/sirensolutions/sentinl/issues) any ideas, bug reports and findings
-* Contributors Needed! If you know angular and elasticsearch, consider joining us!
+### Issues & Bugs
+Please [report](https://github.com/sirensolutions/sentinl/issues) any ideas, bug reports and findings on the repository.
  
 
 
@@ -69,9 +78,9 @@ cd sentinl && npm install && gulp package --version=6.2.2
 <pre>
 This software is licensed under the Apache License, version 2 ("ALv2"), quoted below.
 
-Copyright 2016, 2017, 2018 Siren Solutions
-Copyright 2016, 2017, 2018 QXIP BV, Lorenzo Mangani (lorenzo.mangani@gmail.com)
-Copyright 2015, Rao Chenlin (rao.chenlin@gmail.com)
+Copyright 2016, 2018 Siren Solutions
+Copyright 2016, 2018 QXIP BV
+Copyright 2015, Lorenzo Mangani (lorenzo.mangani@gmail.com), Rao Chenlin (rao.chenlin@gmail.com)
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not
 use this file except in compliance with the License. You may obtain a copy of
@@ -86,5 +95,4 @@ License for the specific language governing permissions and limitations under
 the License.
 </pre>
 
-<img src="https://img.shields.io/github/license/sirensolutions/sentinl.svg"/>
 <img src="https://img.shields.io/badge/made%20with-love-red.svg"/>
