@@ -1,6 +1,6 @@
 <img src="http://i.imgur.com/s4TKpbF.png" width="400"/>
 
-# Siren Investigate & Kibana Alerting & Reporting App
+### Siren Investigate & Kibana Alerting & Reporting App
 
 > Watching your data, 24/7/365. 
 
@@ -10,22 +10,17 @@
 <img src="https://img.shields.io/badge/elasticsearch-5.*-green.svg"/>
 
 
-**SENTINL 6** extends *Siren Investigate* and *Kibana 4.6+* with **Alerting** and **Reporting** functionality to monitor, notify and report on data series changes using standard queries, programmable validators and a variety of configurable actions - Think of it as a free an independent ["Watcher"](https://github.com/sirensolutions/sentinl/wiki/SENTINL-Introduction#what-is-a-watcher) which also has scheduled ["Reporting"](https://github.com/sirensolutions/sentinl/wiki/SENTINL-Report-Example) capabilities (PNG/PDFs snapshots).
+**SENTINL 6** extends *Siren Investigate* and *Kibana* with **Alerting** and **Reporting** functionality to monitor, notify and report on data series changes using standard queries, programmable validators and a variety of configurable actions - Think of it as a free an independent ["Watcher"](https://github.com/sirensolutions/sentinl/wiki/SENTINL-Introduction#what-is-a-watcher) which also has scheduled ["Reporting"](https://github.com/sirensolutions/sentinl/wiki/SENTINL-Report-Example) capabilities (PNG/PDFs snapshots).
 
-**SENTINL** is also designed to simplify the process of creating and managing alerts and reports in Siren Investigate/Kibana via its App and Spy integration, directly in the Siren Investigate/Kibana UI.
+**SENTINL** is also designed to simplify the process of creating and managing alerts and reports in Siren Investigate/Kibana `6.x` via its native App Interface, or by using native watcher tools in Kibana `6.x+`.
 
 <!--<img src="http://i.imgur.com/aDHvUxf.png" width="400" /> -->
 
-<img src="http://i.imgur.com/PsNsAiy.png" />
+<img src="https://user-images.githubusercontent.com/5389745/36905512-d83083b0-1e33-11e8-9ff0-c8be94b493ef.png" />
 
 
 ---
 
-### Siren Investigatea or Kibana Alerts Display
-SENTINL alerts can easily be displayed back in Kibana dashboards using [saved search](https://user-images.githubusercontent.com/5389745/36902779-f700a1d8-1e2b-11e8-8a02-be97d2e4a0d5.png) visualizations
-
-### Siren Investigate/Kibana Report Snapshots
-Boss wants to see charts and reports? SENTINL can grab timed snapshots of Kibana dashboards _(or any other website)_ and deliver them via email using the [report](https://github.com/sirensolutions/sentinl/wiki/SENTINL-Report-Example) action
 ### Event History
 Alerts and Reports can easily be tracked and displayed in Kibana Charts, Widgets or Chart Annotations
 ![sentinl_annotation](https://user-images.githubusercontent.com/1423657/36197513-3ed7dd1a-1174-11e8-92e0-65c630ae63b9.gif)
@@ -44,7 +39,7 @@ Documentation, Examples and Guides are available at [sentinl.readthedocs.io](htt
 #### **ATTENTION** Siren 10 users should use the native version bundled with their distribution!
 
 #### Snapshot Plugin Install
-Use this example and substitute 5.5.1 with your _actual_ Kibana version or manually pick a [release](https://github.com/sirensolutions/sentinl/releases)
+Use this example and substitute 6.2.2 with your _actual_ Kibana version or manually pick a [release](https://github.com/sirensolutions/sentinl/releases)
 <pre>
 /opt/kibana/bin/kibana-plugin install https://github.com/sirensolutions/sentinl/releases/download/tag-6.2.2/sentinl-v6.2.2.zip
 </pre>
