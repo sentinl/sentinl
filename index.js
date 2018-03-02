@@ -50,10 +50,10 @@ export default function (kibana) {
       spyModes: ['plugins/sentinl/dashboard_spy_button/alarm_button'],
       mappings: require('./server/mappings/sentinl.json'),
       app: {
-        icon: 'plugins/sentinl/style/sentinl.svg',
         title: 'Sentinl',
         description: 'Kibana Alert App for Elasticsearch',
         main: 'plugins/sentinl/app',
+        icon: 'plugins/sentinl/sentinl.svg',
         injectVars: function (server, options) {
           var config = server.config();
           return {
@@ -77,20 +77,21 @@ export default function (kibana) {
         app_name: Joi.string().default('Sentinl'),
         enabled: Joi.boolean().default(true),
         sentinl: Joi.any().forbidden().error(new Error(
-          'The sentinl.sentinl configuration section is obsolete please remove it. ' +
-          'The only property still in use from that section was sentinl.sentinl.results and it was moved to sentinl.es.results'
+          'Option "sentinl.sentinl.results" was deprecated. Use "sentinl.es.results" instead!'
         )),
         es: Joi.object({
           default_index: Joi.string().default('.kibana'),
           default_type: Joi.string().default('doc'),
           results: Joi.number().default(50),
           host: Joi.string().default('localhost'),
+          protocol: Joi.string().default('http'),
           port: Joi.number().default(9200),
           timefield: Joi.string().default('@timestamp'),
           type: Joi.any().forbidden().error(new Error(
-            'The sentinl.es.type option was deprecated, use sentinl.es.default_type instead!'
+            'Option "sentinl.es.type" was deprecated. Use "sentinl.es.default_type" instead!'
           )),
           alarm_index: Joi.string().default('watcher_alarms'),
+          user_type: Joi.string().default('sentinl-user'),
           watcher_type: Joi.string().default('sentinl-watcher'),
           script_type: Joi.string().default('sentinl-script'),
           alarm_type: Joi.string().default('sentinl-alarm'),
@@ -102,6 +103,48 @@ export default function (kibana) {
           }).default(),
         }).default(),
         settings: Joi.object({
+          authentication: Joi.object({
+            https: Joi.any().forbidden().error(new Error(
+              'Option "sentinl.settings.authentication.https" was deprecated. Use "sentinl.es.protocol" instead!'
+            )),
+            verify_certificate: Joi.any().forbidden().error(new Error(
+              'Option "sentinl.settings.authentication.verify_certificate" was deprecated.' +
+              +'Use "sentinl.settings.authentication.cert.selfsigned" instead!'
+            )),
+            path_to_pem: Joi.any().forbidden().error(new Error(
+              'Option "sentinl.settings.authentication.path_to_pem" was deprecated. Use "sentinl.settings.authentication.cert.pem" instead!'
+            )),
+            admin_username: Joi.any().forbidden().error(new Error(
+              'Option "sentinl.settings.authentication.admin_username" was deprecated.' +
+              +'Use "sentinl.settings.authentication.username" instead!'
+            )),
+            admin_sha: Joi.any().forbidden().error(new Error(
+              'Option "sentinl.settings.authentication.admin_sha" was deprecated. Use "sentinl.settings.authentication.sha" instead!'
+            )),
+            mode: Joi.any().forbidden().error(new Error(
+              'Option "sentinl.settings.authentication.mode" was deprecated. Use "sentinl.settings.authentication.enabled" instead!'
+            )),
+            user_index: Joi.any().forbidden().error(new Error(
+              'Option "sentinl.settings.authentication.user_index" was deprecated. Users are saved in the default index!'
+            )),
+            user_type: Joi.any().forbidden().error(new Error(
+              'Option "sentinl.settings.authentication.user_type" was deprecated. Use "sentinl.es.user_type" instead!'
+            )),
+            enabled: Joi.boolean().default(false),
+            impersonate: Joi.boolean().default(false),
+            username: Joi.string().default('elastic'),
+            password: Joi.string().default('password'),
+            sha: Joi.string(),
+            cert: Joi.object({
+              selfsigned: Joi.boolean().default(true),
+              pem: Joi.string(),
+            }).default(),
+            encryption: Joi.object({
+              algorithm: Joi.string().default('AES-256-CBC'),
+              key: Joi.string().default('b9726b04608ac48ecb0b6918214ade54'),
+              iv_length: Joi.number().default(16)
+            }).default(),
+          }).default(),
           cluster: Joi.object({
             enabled: Joi.boolean().default(false),
             debug: Joi.boolean().default(false),
@@ -127,22 +170,6 @@ export default function (kibana) {
               name: Joi.string().default('trex'),
               node: Joi.string().default('hosts'),
               priority: Joi.number().default(0),
-            }).default(),
-          }).default(),
-          authentication: Joi.object({
-            enabled: Joi.boolean().default(false),
-            https: Joi.boolean().default(true),
-            verify_certificate: Joi.boolean().default(false),
-            path_to_pem: Joi.string(),
-            admin_username: Joi.string().default('admin'),
-            admin_sha: Joi.string().default('6859a748bc07b49ae761f5734db66848'),
-            mode: Joi.string().default('basic'),
-            user_index: Joi.string().default('sentinl_users'),
-            user_type: Joi.string().default('sentinl-user'),
-            encryption: Joi.object({
-              algorithm: Joi.string().default('AES-256-CBC'),
-              key: Joi.string().default('b9726b04608ac48ecb0b6918214ade54'),
-              iv_length: Joi.number().default(16)
             }).default(),
           }).default(),
           email: Joi.object({

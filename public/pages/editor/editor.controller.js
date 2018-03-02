@@ -551,7 +551,7 @@ function EditorController(sentinlConfig, $rootScope, $scope, $route, $interval,
       }
 
       if ($scope.watcherForm.$valid) {
-        saveUser($scope.watcher.$$authentication.enabled).then(function () {
+        saveUser($scope.watcher.$$authentication.impersonate).then(function () {
           if (later.parse.text($scope.watcher._source.trigger.schedule.later).error > -1) {
             notify.error('Schedule is invalid.');
             $log.error('schedule is invalid:', $scope.watcher._source.trigger.schedule.later);

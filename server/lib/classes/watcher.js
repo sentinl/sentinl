@@ -361,7 +361,7 @@ export default class Watcher {
         });
       };
 
-      if (this.config.settings.authentication.enabled) { // impersonate watcher if authentication is enabled
+      if (this.config.settings.authentication.impersonate) {
         return this.getImpersonatedClient(task._id).then((_client_) => {
           this.client = _client_;
           return execute();

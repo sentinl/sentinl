@@ -120,9 +120,6 @@ export default function Scheduler(server) {
   async function alert(server) {
     log.debug('reloading watchers...');
     log.debug(`auth enabled: ${config.settings.authentication.enabled}`);
-    if (config.settings.authentication.enabled) {
-      log.info(`auth mode: ${config.settings.authentication.mode}`);
-    }
 
     if (!server.sentinlStore.schedule) {
       server.sentinlStore.schedule = [];
