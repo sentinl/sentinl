@@ -1,13 +1,13 @@
-<img src="http://i.imgur.com/s4TKpbF.png" width="400"/>
+<img src="http://i.imgur.com/s4TKpbF.png" width="300"/>
 
 ### Siren Investigate & Kibana Alerting & Reporting App
 
 > Watching your data, 24/7/365. 
 
 ---
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/77b040968c354d6597ff60a615195a1a)](https://www.codacy.com/app/lorenzo-mangani/sentinl?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=sirensolutions/sentinl&amp;utm_campaign=Badge_Grade)
-<img src="https://img.shields.io/badge/kibana-5+-green.svg"/>
-<img src="https://img.shields.io/badge/elasticsearch-5.*-green.svg"/>
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/77b040968c354d6597ff60a615195a1a)](https://www.codacy.com/app/qxip/SENTINL?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=sirensolutions/sentinl&amp;utm_campaign=Badge_Grade)
+<img src="https://img.shields.io/badge/kibana-6+-green.svg"/>
+<img src="https://img.shields.io/badge/elasticsearch-6.*-green.svg"/>
 
 
 **SENTINL 6** extends *Siren Investigate* and *Kibana* with **Alerting** and **Reporting** functionality to monitor, notify and report on data series changes using standard queries, programmable validators and a variety of configurable actions - Think of it as a free an independent ["Watcher"](https://github.com/sirensolutions/sentinl/wiki/SENTINL-Introduction#what-is-a-watcher) which also has scheduled ["Reporting"](https://github.com/sirensolutions/sentinl/wiki/SENTINL-Report-Example) capabilities (PNG/PDFs snapshots).
