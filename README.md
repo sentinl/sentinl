@@ -12,7 +12,7 @@
 
 **SENTINL 6** extends *Siren Investigate* and *Kibana* with **Alerting** and **Reporting** functionality to monitor, notify and report on data series changes using standard queries, programmable validators and a variety of configurable actions - Think of it as a free an independent ["Watcher"](https://github.com/sirensolutions/sentinl/wiki/SENTINL-Introduction#what-is-a-watcher) which also has scheduled ["Reporting"](https://github.com/sirensolutions/sentinl/wiki/SENTINL-Report-Example) capabilities (PNG/PDFs snapshots).
 
-**SENTINL** is also designed to simplify the process of creating and managing alerts and reports in Siren Investigate/Kibana `5.x` via its native App Interface, or by using native watcher tools in Kibana `6.x+`.
+**SENTINL** is also designed to simplify the process of creating and managing alerts and reports in Siren Investigate/Kibana `6.x` via its native App Interface, or by using native watcher tools in Kibana `6.x+`.
 
 <!--<img src="http://i.imgur.com/aDHvUxf.png" width="400" /> -->
 
