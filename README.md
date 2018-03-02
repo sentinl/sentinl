@@ -22,7 +22,7 @@
 ---
 
 ### Siren Investigatea or Kibana Alerts Display
-SENTINL alerts can easily be displayed back in Kibana dashboards using [saved search](https://user-images.githubusercontent.com/5389745/36902779-f700a1d8-1e2b-11e8-8a02-be97d2e4a0d5.png) visualizations
+SENTINL alerts can easily be displayed back in Kibana dashboards using [saved search](https://user-images.githubusercontent.com/5389745/36905512-d83083b0-1e33-11e8-9ff0-c8be94b493ef.png) visualizations
 
 ### Siren Investigate/Kibana Report Snapshots
 Boss wants to see charts and reports? SENTINL can grab timed snapshots of Kibana dashboards _(or any other website)_ and deliver them via email using the [report](https://github.com/sirensolutions/sentinl/wiki/SENTINL-Report-Example) action
