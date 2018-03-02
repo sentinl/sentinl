@@ -4,7 +4,7 @@ import uuid from 'uuid/v4';
 /**
 * Parent class for Sentinl watcher and script docs
 */
-class Worker {
+class SavedObjects {
 
   /**
   * Constructor
@@ -18,14 +18,12 @@ class Worker {
   constructor($http, $injector, Promise, ServerConfig, type) {
     this.$http = $http;
     this.$injector = $injector;
-    this.ServerConfig = ServerConfig;
-    this.savedObjectsAPI = undefined;
-    // Kibi: inject saved objects api related modules if they exist.
-    if (this.$injector.has('savedObjectsAPI')) {
-      this.savedObjectsAPI = this.$injector.get('savedObjectsAPI');
-    }
-    this.savedObjectsAPIEnabled = isObject(this.savedObjectsAPI);
     this.type = type;
+    this.ServerConfig = ServerConfig;
+    this.savedObjectsAPI = this.$injector.has('savedObjectsAPI') ? this.$injector.get('savedObjectsAPI') : null;
+    // Kibi: inject saved objects api related modules if they exist.
+    this.savedObjects = {};
+    this.isSiren = isObject(this.savedObjectsAPI);
   }
 
   /**
@@ -62,57 +60,60 @@ class Worker {
   }
 
   /**
+  * Get object
+  *
+  * @param {string} id
+  * @return {object} doc
+  */
+  async get(id, fields) {
+    try {
+      const doc = await this.savedObjects.get(id);
+      return this.nestedSource(doc, fields);
+    } catch (err) {
+      throw new Error(`fail to get doc ${id}, ${err}`);
+    }
+  }
+
+  /**
   * List all available docs
   *
   * @param {object} savedObjects (savedScripts or savedWatchers)
-  * @param {string} uri of API
-  * @param {string} query string
   * @param {boolean} removeReservedChars from query string
   * @return {array} list of docs of this.type
   */
-  list(savedObjects, uri, query, removeReservedChars = false) {
-    // Kibi
-    if (this.savedObjectsAPIEnabled) {
-      return this.ServerConfig.get().then((config) => {
-        return savedObjects.find(query, removeReservedChars, config.data.es.number_of_results);
-      }).then((resp) => {
-        return map(resp.hits, (watcher) => this.nestedSource(watcher, this.fields));
-      }).catch(() => {
-        throw new Error(`fail to list ${this.type}s`);
-      });
-    }
-    // Kibana
-    return this.$http.get(uri + (query || '')).then((resp) => {
-      if (resp.status !== 200) {
-        throw new Error(`fail to list ${this.type}s`);
+  //async list(savedObjects, query, removeReservedChars = false) {
+  async list(query, removeReservedChars = false) {
+    try {
+      const config = await this.ServerConfig.get();
+
+      let res;
+      if (this.isSiren) {
+        res = await this.savedObjects.find(query, removeReservedChars, config.data.es.number_of_results);
+      } else {
+        res = await this.savedObjects.find(query, config.data.es.number_of_results);
       }
-      return resp.data.hits.hits;
-    });
+
+      return map(res.hits, (watcher) => this.nestedSource(watcher, this.fields));
+    } catch (err) {
+      throw new Error(`fail to list ${this.type}s, ${err}`);
+    }
   }
 
   /**
   * Delete single doc
   *
   * @param {object} savedObjects (savedScripts or savedWatchers)
-  * @param {string} uri of sentinl API
   * @param {string} id of the doc
   * @return {string} doc id
   */
-  delete(savedObjects, uri, id) {
-    // Kibi
-    if (this.savedObjectsAPIEnabled) {
-      return savedObjects.delete(id).then(() => id).catch(() => {
-        throw new Error(`fail to delete ${this.type} ` + id);
-      });
-    }
-    // Kibana
-    return this.$http.delete(uri + id).then((response) => {
-      if (response.status !== 200) {
-        throw new Error(`fail to delete ${this.type} ` + id);
-      }
+  async delete(id) {
+    try {
+      await this.savedObjects.delete(id);
       return id;
-    });
+    } catch (err) {
+      throw new Error(`fail to delete ${this.type} ${id}, ${err}`);
+    }
   }
 }
 
-export default Worker;
+export default SavedObjects;

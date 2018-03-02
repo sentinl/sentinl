@@ -82,7 +82,7 @@ const createIndex = function (server, config, indexName, docType, mappings, mode
   } else {
     mappings = {
       'mappings': {
-        [config.es.type]: mappings
+        [config.es.default_type]: mappings
       }
     };
   }

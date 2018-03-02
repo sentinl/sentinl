@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+import {assign} from 'lodash';
 import url from 'url';
 import Promise from 'bluebird';
 import moment from 'moment';
@@ -38,12 +39,11 @@ export default function (server, actions, payload, task) {
   const client = getElasticsearchClient(server, config);
 
   /* ES Indexing Functions */
-  var esHistory = function (watcherTitle, type, message, loglevel, payload, isReport, object) {
-    if (isReport) {
-      logHistory(server, client, config, watcherTitle, type, message, loglevel, payload, isReport, object);
-    } else {
-      logHistory(server, client, config, watcherTitle, type, message, loglevel, payload);
-    }
+  var esHistory = function (args) {
+    args.server = server;
+    args.client = client;
+    args.config = config;
+    return logHistory(args);
   };
 
 
@@ -115,7 +115,14 @@ export default function (server, actions, payload, task) {
       formatterConsole = action.console.message ? action.console.message : '{{ payload }}';
       message = mustache.render(formatterConsole, {payload: payload});
       log.debug('console payload', payload);
-      esHistory(task._source.title, actionName, message, priority, !action.console.save_payload ? {} : payload, false);
+      esHistory({
+        title: task._source.title,
+        actionType: actionName,
+        message,
+        level: priority,
+        payload: !action.console.save_payload ? {} : payload,
+        report: false
+      });
     }
 
     /* ***************************************************************************** */
@@ -128,7 +135,13 @@ export default function (server, actions, payload, task) {
       const id = `${task._id}_${actionName}`;
       if (debounce(id, action.throttle_period)) {
         log.info(`action throttled, watcher id: ${task._id}, action name: ${actionName}`);
-        esHistory(task._source.title, id, `Action Throttled for ${action.throttle_period}`, priority, {});
+        esHistory({
+          title: task._source.title,
+          actionType: actionName,
+          message: `Action Throttled for ${action.throttle_period}`,
+          level: priority,
+          payload: {}
+        });
         return;
       }
     }
@@ -176,7 +189,14 @@ export default function (server, actions, payload, task) {
       }
       if (!action.email.stateless) {
         // Log Event
-        esHistory(task._source.title, actionName, text, priority, !action.email.save_payload ? {} : payload, false);
+        esHistory({
+          title: task._source.title,
+          actionType: actionName,
+          message: text,
+          level: priority,
+          payload: !action.email.save_payload ? {} : payload,
+          report: false
+        });
       }
     }
 
@@ -230,7 +250,14 @@ export default function (server, actions, payload, task) {
 
       if (!action.email_html.stateless) {
         // Log Event
-        esHistory(task._source.title, actionName, text, priority, !action.email_html.save_payload ? {} : payload, false);
+        esHistory({
+          title: task._source.title,
+          actionType: actionName,
+          message: text,
+          level: priority,
+          payload: !action.email_html.save_payload ? {} : payload,
+          report: false
+        });
       }
     }
 
@@ -260,13 +287,25 @@ export default function (server, actions, payload, task) {
     if (_.has(action, 'report')) {
       return reportAction(server, email, task, action, actionName, payload).then(function (file) {
         if (!action.report.stateless) {
-          esHistory(task._source.title, actionName, text, priority, {}, true, file);
+          esHistory({
+            title: task._source.title,
+            actionType: actionName,
+            message: text,
+            level: priority,
+            payload: {},
+            report: true,
+            object: file
+          });
         }
         return null;
       }).catch(function (error) {
         log.error(`fail to report, ${error}`);
         if (!action.report.stateless) {
-          esHistory(task._source.title, actionName, error);
+          esHistory({
+            title: task._source.title,
+            actionType: actionName,
+            message: error
+          });
         }
       });
     }
@@ -305,7 +344,14 @@ export default function (server, actions, payload, task) {
 
       if (!action.slack.stateless) {
         // Log Event
-        esHistory(task._source.title, actionName, message, priority, !action.slack.save_payload ? {} : payload, false);
+        esHistory({
+          title: task._source.title,
+          actionType: actionName,
+          message,
+          level: priority,
+          payload: !action.slack.save_payload ? {} : payload,
+          report: false
+        });
       }
     }
 
@@ -346,8 +392,14 @@ export default function (server, actions, payload, task) {
       // Log Alarm Event
       if (action.webhook.create_alert && payload.constructor === Object && Object.keys(payload).length) {
         if (!action.webhook.stateless) {
-          esHistory(task._source.title, actionName, action.webhook.message, action.webhook.priority,
-            !action.webhook.save_payload ? {} : payload, false);
+          esHistory({
+            title: task._source.title,
+            actionType: actionName,
+            message: action.webhook.message,
+            level: action.webhook.priority,
+            payload: !action.webhook.save_payload ? {} : payload,
+            report: false
+          });
         }
       }
 
@@ -384,7 +436,14 @@ export default function (server, actions, payload, task) {
       priority = action.local.priority ? action.local.priority : 'INFO';
       log.debug(`logged message to elastic: ${esMessage}`);
       // Log Event
-      esHistory(task._source.title, actionName, esMessage, priority, !action.local.save_payload ? {} : payload, false);
+      esHistory({
+        title: task._source.title,
+        actionType: actionName,
+        message: esMessage,
+        level: priority,
+        payload: !action.local.save_payload ? {} : payload,
+        report: false
+      });
     }
 
 

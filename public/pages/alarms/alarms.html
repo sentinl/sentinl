@@ -80,7 +80,7 @@
             <tr ng-class-odd="'alarm-row-odd'" ng-class-even="'alarm-row'">
               <td>{{ alarm._source['@timestamp'] | dateFormat }}</td>
               <td>{{ alarm._source.level }}</td>
-              <td>{{ alarm._type }}</td>
+              <td>{{ alarm._source.action }}</td>
               <td>{{ alarm._source.message }}</td>
               <td class="text-center edit-group">
                 <span ng-click="collapse=!collapse" ng-model="collapse" class="show-rule"><i class="fa fa-ellipsis-h"></i></span>

@@ -18,6 +18,9 @@
  */
 
 import './app.module';
+import './services/kibana/saved_watchers';
+import './services/kibana/saved_scripts';
+import './services/kibana/saved_users';
 
 /* routes */
 import './app.routes';
@@ -34,4 +37,8 @@ import 'ui/timepicker';
 import 'ui/timefilter';
 import 'ui/directives/pretty_duration';
 
+import 'ui/saved_objects';
+import 'ui/courier';
+import 'ui/modals/confirm_modal';
+import 'ui/modals/confirm_modal_promise';
 /* dynamically inserted modules */

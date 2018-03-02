@@ -1,8 +1,8 @@
-import _ from 'lodash';
-import { app } from '../../app.module';
+import { uiModules } from 'ui/modules';
+const module = uiModules.get('apps/sentinl');
 
 // Used only by the savedWatchers service, usually no reason to change this
-app.factory('SavedWatcher', function (courier) {
+module.factory('SavedWatcher', function (courier) {
   // SavedWatcher constructor. Usually you'd interact with an instance of this.
   // ID is option, without it one will be generated on save.
 

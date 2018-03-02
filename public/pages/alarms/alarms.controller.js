@@ -6,7 +6,7 @@ import confirmMessageTemplate from '../../confirm_message/confirm_message.html';
 
 function AlarmsController($rootScope, $scope, $route, $interval,
   $timeout, $injector, timefilter, Private, createNotifier, $window, $uibModal, navMenu,
-  globalNavState, Alarm, COMMON) {
+  globalNavState, Alarm, COMMON, $log) {
   'ngInject';
 
   $scope.title = COMMON.alarms.title;
@@ -17,6 +17,12 @@ function AlarmsController($rootScope, $scope, $route, $interval,
   });
 
   timefilter.enabled = true;
+  try {
+    timefilter.enableAutoRefreshSelector();
+    timefilter.enableTimeRangeSelector();
+  } catch (err) {
+    $log.warn('Kibana v6.2.X feature:', err);
+  }
 
   $scope.topNavMenu = navMenu.getTopNav('alarms');
   $scope.tabsMenu = navMenu.getTabs('alarms');

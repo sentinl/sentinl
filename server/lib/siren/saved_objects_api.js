@@ -1,6 +1,6 @@
 import { cloneDeep } from 'lodash';
-import Crypto from './classes/crypto';
-import getConfiguration from './get_configuration';
+import Crypto from '../classes/crypto';
+import getConfiguration from '../get_configuration';
 
 /**
  * Middleware for the saved objects API plugin.

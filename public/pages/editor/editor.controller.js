@@ -244,7 +244,7 @@ function EditorController(sentinlConfig, $rootScope, $scope, $route, $interval,
       const id = $scope.watcher['$$' + field].id;
       Script.delete(id)
         .then(function (id) {
-          notify.info(`Deleting "${$scope.form.templates[field][id]._source.title}"`);
+          notify.info(`Deleted ${id}`);
           delete $scope.form.templates[field][id];
           $scope.watcher['$$' + field].id = undefined;
           $scope.watcher['$$' + field].title = undefined;
@@ -363,7 +363,7 @@ function EditorController(sentinlConfig, $rootScope, $scope, $route, $interval,
     * Initilizes raw property for the Raw tab.
     */
     const initRaw = function () {
-      $scope.watcher.$$raw = angular.toJson($scope.watcher, 'pretty');
+      $scope.watcher.$$raw = angular.toJson($scope.watcher._source, 'pretty');
     };
 
     /**
@@ -487,7 +487,7 @@ function EditorController(sentinlConfig, $rootScope, $scope, $route, $interval,
       if ($scope.form.rawEnabled) { // Raw
         try {
           // All settings will have been overwritten if enable is checked and the watcher is saved.
-          $scope.watcher = angular.fromJson($scope.watcher.$$raw);
+          $scope.watcher._source = angular.fromJson($scope.watcher.$$raw);
         } catch (e) {
           notify.error(`Invalid Raw configuration: ${e}`);
           init(); // init form again
@@ -551,7 +551,7 @@ function EditorController(sentinlConfig, $rootScope, $scope, $route, $interval,
       }
 
       if ($scope.watcherForm.$valid) {
-        saveUser($scope.watcher.$$authentication.enabled).then(function () {
+        saveUser($scope.watcher.$$authentication.impersonate).then(function () {
           if (later.parse.text($scope.watcher._source.trigger.schedule.later).error > -1) {
             notify.error('Schedule is invalid.');
             $log.error('schedule is invalid:', $scope.watcher._source.trigger.schedule.later);

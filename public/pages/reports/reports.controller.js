@@ -4,7 +4,7 @@ import moment from 'moment';
 import confirmMessageTemplate from '../../confirm_message/confirm_message.html';
 
 function ReportsController($rootScope, $scope, $route, $interval,
-  $timeout, timefilter, Private, createNotifier, $window, $uibModal, navMenu, globalNavState, Report, COMMON) {
+  $timeout, timefilter, Private, createNotifier, $window, $uibModal, navMenu, globalNavState, Report, COMMON, $log) {
   'ngInject';
 
   $scope.title = COMMON.reports.title;
@@ -18,6 +18,12 @@ function ReportsController($rootScope, $scope, $route, $interval,
   });
 
   timefilter.enabled = true;
+  try {
+    timefilter.enableAutoRefreshSelector();
+    timefilter.enableTimeRangeSelector();
+  } catch (err) {
+    $log.warn('Kibana v6.2.X feature:', err);
+  }
 
   /* First Boot */
 

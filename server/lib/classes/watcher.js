@@ -8,6 +8,7 @@ import getElasticsearchClient from '../get_elasticsearch_client';
 import getConfiguration from '../get_configuration';
 import actionFactory from '../actions/actions';
 import Log from '../log';
+import { isKibi } from '../helpers';
 
 /**
 * Helper class to get watchers data.
@@ -19,6 +20,18 @@ export default class Watcher {
     this.config = !config ? getConfiguration(server) : config;
     this.client = !client ? getElasticsearchClient(server, this.config) : client;
     this.log = new Log(this.config.app_name, server, 'watcher');
+    this.siren = isKibi(server);
+    this.query = {
+      watchers: {
+        query: {
+          term: {
+            type: {
+              value: this.config.es.watcher_type,
+            }
+          }
+        }
+      }
+    };
   }
 
   /**
@@ -38,25 +51,44 @@ export default class Watcher {
   *
   * @param {string} watcherId - watcher _id
   */
-  getUser(watcherId) {
-    const options = {
-      index: this.config.settings.authentication.user_index,
-      type: this.config.settings.authentication.user_type,
-      id: watcherId
+  async getUser(id) {
+    const request = {
+      index: this.config.es.default_index,
+      type: this.config.es.default_type,
+      id,
     };
-    return this.client.get(options).catch((err) => {
-      this.log.error(`auth, fail to get user, watcher: ${watcherId}`);
-    });
+
+    if (this.siren) {
+      request.type = this.config.es.watcher_type;
+    }
+
+    try {
+      return await this.client.get(request);
+    } catch (err) {
+      throw new Error(`auth, fail to get user, watcher: ${id}`);
+    }
   }
 
   /**
   * Count watchers
   */
-  getCount() {
-    return this.client.count({
+  async getCount() {
+    const request = {
       index: this.config.es.default_index,
-      type: this.config.es.type
-    });
+      type: this.config.es.default_type,
+      body: this.query.watchers,
+    };
+
+    if (this.siren) {
+      request.type = this.config.es.watcher_type;
+      delete request.body;
+    }
+
+    try {
+      return await this.client.count(request);
+    } catch (err) {
+      throw err;
+    }
   }
 
   /**
@@ -64,19 +96,31 @@ export default class Watcher {
   *
   * @param {number} count - number of watchers to get
   */
-  getWatchers(count) {
-    return this.client.search({
+  async getWatchers(count) {
+    const request = {
       index: this.config.es.default_index,
-      type: this.config.es.type,
-      size: count
-    });
+      type: this.config.es.default_type,
+      size: count,
+      body: this.query.watchers,
+    };
+
+    if (this.siren) {
+      request.type = this.config.es.watcher_type;
+      delete request.body;
+    }
+
+    try {
+      return await this.client.search(request);
+    } catch (err) {
+      throw new Error('fail to get watchers');
+    }
   }
 
   /**
   * Search
   *
-  * @param {string} method - method name
-  * @param {object} request - search query
+  * @param {string} method name
+  * @param {object} request query
   */
   search(method, request) {
     return this.client[method](request);
@@ -193,8 +237,6 @@ export default class Watcher {
           if (!payload) {
             throw new Error(`input search query is malformed or missing key parameters, ${task._id}`);
           }
-
-          self.log.debug(`watcher payload, ${task._id}`, payload);
 
           /* CONDITION */
 
@@ -319,7 +361,7 @@ export default class Watcher {
         });
       };
 
-      if (this.config.settings.authentication.enabled) { // impersonate watcher if authentication is enabled
+      if (this.config.settings.authentication.impersonate) {
         return this.getImpersonatedClient(task._id).then((_client_) => {
           this.client = _client_;
           return execute();
