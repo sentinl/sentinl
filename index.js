@@ -53,7 +53,7 @@ export default function (kibana) {
         title: 'Sentinl',
         description: 'Kibana Alert App for Elasticsearch',
         main: 'plugins/sentinl/app',
-        icon: 'plugins/sentinl/sentinl.svg',
+        icon: 'plugins/sentinl/style/sentinl.svg',
         injectVars: function (server, options) {
           var config = server.config();
           return {
