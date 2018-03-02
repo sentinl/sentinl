@@ -1,13 +1,19 @@
 #!/bin/bash
 
-# This script creates Sentinl 5 packages for the releases below.
+# This script creates Sentinl 6 packages for the releases below.
 # Example:
-#     ./createReleases.sh ~/Downloads/5-release/
+#     ./createReleases.sh ~/Downloads/6/
 
 releases=(
-"5.5.0"
-"5.5.1"
-"5.5.2"
+"6.0.0"
+"6.0.1"
+"6.1.0"
+"6.1.1"
+"6.1.2"
+"6.1.3"
+"6.2.0"
+"6.2.1"
+"6.2.2"
 )
 
 for i in "${releases[@]}"

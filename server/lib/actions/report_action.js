@@ -10,6 +10,7 @@ import getConfiguration from '../get_configuration';
 import getElasticsearchClient from '../get_elasticsearch_client';
 import { horsemanFactory, horsemanReport } from './helpers/horseman_factory';
 import uuid from 'uuid/v4';
+import Log from '../log';
 
 const readFile = promisify(fs.readFile);
 const deleteFile = promisify(fs.unlink);
@@ -25,15 +26,12 @@ const existFile = promisify(fs.access);
 */
 const getFile = function (file, save = true) {
   if (save) {
-    return readFile(file)
-    .then(function (data) {
+    return readFile(file).then(function (data) {
       return new Buffer(data).toString('base64');
     });
   }
 
-  return existFile(file, fs.constants.X_OK)
-  .then(deleteFile(file))
-  .then(null);
+  return existFile(file, fs.constants.X_OK).then(deleteFile(file)).then(null);
 };
 
 /**
@@ -49,6 +47,7 @@ const getFile = function (file, save = true) {
 export default function report(server, email, task, action, actionName, payload) {
 
   const config = getConfiguration(server);
+  const log = new Log(config.app_name, server, 'report_action');
   const client = getElasticsearchClient(server, config);
 
   if (!config.settings.report.active || (config.settings.report.active && !config.settings.email.active)) {
@@ -84,7 +83,7 @@ export default function report(server, email, task, action, actionName, payload)
 
   const subject = mustache.render(formatterSubject, { payload });
   const text = mustache.render(formatterText, { payload });
-  server.log(['status', 'debug', 'Sentinl', 'report'], `Subject: ${subject}, Body: ${text}`);
+  log.debug(`subject: ${subject}, body: ${text}`);
 
   // Set report file name
   let file = action.report.snapshot.path;
@@ -103,8 +102,7 @@ export default function report(server, email, task, action, actionName, payload)
   }
 
   // Do report
-  return horsemanFactory(server, domain)
-  .then(function (horseman) {
+  return horsemanFactory(server, domain).then(function (horseman) {
     if (config.settings.report.simple_authentication) {
       return horsemanReport(horseman, action, file, 'simple').close();
     } else if (isKibi(server) && config.settings.report.search_guard) {
@@ -113,8 +111,7 @@ export default function report(server, email, task, action, actionName, payload)
       return horsemanReport(horseman, action, file, 'search_guard_kibana').close();
     }
     return horsemanReport(horseman, action, file).close();
-  })
-  .then(function () {
+  }).then(function () {
     // Send email
     if (!action.report.stateless) {
       let type = 'image/png';
@@ -147,15 +144,13 @@ export default function report(server, email, task, action, actionName, payload)
         to: action.report.to,
         subject,
         attachment
-      })
-      .then(function (message) {
-        server.log(['status', 'debug', 'Sentinl', 'email'], `Email sent. Watcher ${task._id}: ${message}`);
+      }).then(function (message) {
+        log.debug(`email sent, watcher ${task._id}, message ${message}`);
       });
     } else {
       return null;
     }
-  })
-  .then(function () {
+  }).then(function () {
     return getFile(file, action.report.save);
   });
 }

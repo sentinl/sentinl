@@ -1,7 +1,9 @@
 import template from './slack_action.html';
 import help from '../../messages/help';
 
-const slackAction = function ($rootScope) {
+function slackAction($rootScope) {
+  'ngInject';
+
   function actionDirective(scope, element, attrs) {
     scope.help = help;
     scope.action = {
@@ -25,5 +27,4 @@ const slackAction = function ($rootScope) {
   };
 };
 
-slackAction.$inject = ['$rootScope'];
 export default slackAction;

@@ -4,22 +4,28 @@ import uiChrome from 'ui/chrome';
 
 import confirmMessageTemplate from '../../confirm_message/confirm_message.html';
 
-const AlarmsController = function ($rootScope, $scope, $route, $interval,
+function AlarmsController($rootScope, $scope, $route, $interval,
   $timeout, $injector, timefilter, Private, createNotifier, $window, $uibModal, navMenu,
-  globalNavState, Alarm) {
-  $scope.title = 'Sentinl: Alarms';
-  $scope.description = 'Kibi/Kibana Report App for Elasticsearch';
+  globalNavState, Alarm, COMMON, $log) {
+  'ngInject';
+
+  $scope.title = COMMON.alarms.title;
+  $scope.description = COMMON.description;
 
   const notify = createNotifier({
-    location: 'Sentinl Alarms'
+    location: COMMON.alarms.title,
   });
 
   timefilter.enabled = true;
+  try {
+    timefilter.enableAutoRefreshSelector();
+    timefilter.enableTimeRangeSelector();
+  } catch (err) {
+    $log.warn('Kibana v6.2.X feature:', err);
+  }
 
   $scope.topNavMenu = navMenu.getTopNav('alarms');
   $scope.tabsMenu = navMenu.getTabs('alarms');
-  navMenu.setKbnLogo(globalNavState.isOpen());
-  $scope.$on('globalNavState:change', () => navMenu.setKbnLogo(globalNavState.isOpen()));
 
   /* First Boot */
 
@@ -122,7 +128,4 @@ const AlarmsController = function ($rootScope, $scope, $route, $interval,
   $scope.$watch('$destroy', unsubscribe);
 };
 
-AlarmsController.$inject = ['$rootScope', '$scope', '$route', '$interval',
-  '$timeout', '$injector', 'timefilter', 'Private', 'createNotifier', '$window', '$uibModal', 'navMenu',
-  'globalNavState', 'Alarm'];
 export default AlarmsController;

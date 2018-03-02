@@ -28,7 +28,7 @@ describe('Report', function () {
   });
 
   it('can get an instance of the factory', function () {
-    expect(Report).to.be.a('function');
+    expect(Report).to.be.a('object');
   });
 
   describe('API', function () {

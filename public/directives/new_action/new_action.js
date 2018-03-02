@@ -1,6 +1,8 @@
 import template from './new_action.html';
 
-const newAction = function ($rootScope) {
+function newAction($rootScope) {
+  'ngInject';
+
   function actionDirective(scope, element, attrs) {
 
     scope.action = {
@@ -144,5 +146,4 @@ const newAction = function ($rootScope) {
   };
 };
 
-newAction.$inject = ['$rootScope'];
 export default newAction;

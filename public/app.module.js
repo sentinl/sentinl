@@ -7,6 +7,8 @@ import Services from './services';
 import Directives from './directives';
 import ConfirmMessage from './confirm_message';
 
+import './constants';
+
 const app = uiModules.get('apps/sentinl', [
   'ui.bootstrap',
   Filters.name,

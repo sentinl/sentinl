@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import { SpyModesRegistryProvider } from 'ui/registry/spy_modes';
-import defaultEmailWatcher from '../defaults/email_watcher';
+import EMAILWATCHER from '../constants/email_watcher';
 
 const dashboardSpyButton = function ($scope, config) {
   $scope.$bind('req', 'searchSource.history[searchSource.history.length - 1]');
@@ -56,7 +56,7 @@ const dashboardSpyButton = function ($scope, config) {
         _type: 'sentinl-watcher',
         _id: undefined,
         _new: 'true',
-        _source: _.cloneDeep(defaultEmailWatcher)
+        _source: _.cloneDeep(EMAILWATCHER)
       };
 
       // Set Index

@@ -28,7 +28,7 @@ describe('Alarm', function () {
   });
 
   it('can get an instance of the factory', function () {
-    expect(Alarm).to.be.a('function');
+    expect(Alarm).to.be.a('object');
   });
 
   describe('API', function () {

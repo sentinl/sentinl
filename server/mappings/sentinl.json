@@ -1,0 +1,62 @@
+{
+  "sentinl-watcher": {
+    "properties": {
+      "input": {
+        "type": "object",
+        "enabled": false
+      },
+      "actions": {
+        "type": "object",
+        "enabled": false
+      },
+      "transform": {
+        "type": "object",
+        "enabled": false
+      },
+      "condition": {
+        "type": "object",
+        "enabled": false
+      },
+      "trigger": {
+        "type": "object",
+        "enabled": false
+      },
+      "report": {
+        "type": "boolean"
+      },
+      "disable": {
+        "type": "boolean"
+      },
+      "title": {
+        "type": "text"
+      },
+      "sentinl": {
+        "type": "object",
+        "enabled": false
+      }
+    }
+  },
+  "sentinl-script": {
+    "properties": {
+      "title": {
+        "type": "text"
+      },
+      "description": {
+        "type": "text"
+      },
+      "body": {
+        "type": "text"
+      }
+    }
+  },
+  "sentinl-user": {
+    "properties": {
+      "username": {
+        "type":  "text"
+      },
+      "sha": {
+        "type":  "text"
+      }
+    }
+  }
+}
