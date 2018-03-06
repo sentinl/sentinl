@@ -2,7 +2,6 @@
 import { get, keys, trim, has, includes, forEach, isObject, isEmpty } from 'lodash';
 import later from 'later';
 import uuid from 'uuid/v4';
-import confirmMessageTemplate from '../../confirm_message/confirm_message.html';
 
 import WatcherHelper from './classes/WatcherHelper';
 
@@ -14,7 +13,7 @@ import help from '../../messages/help.json';
 // EDITOR CONTROLLER
 function EditorController(sentinlConfig, $rootScope, $scope, $route, $interval,
   $timeout, timefilter, Private, createNotifier, $window, $uibModal, Promise,
-  $log, navMenu, globalNavState, $routeParams, dataTransfer, $location, Watcher, Script, User, ServerConfig, COMMON) {
+  $log, navMenu, globalNavState, $routeParams, dataTransfer, $location, Watcher, Script, User, ServerConfig, COMMON, confirmModal) {
   'ngInject';
 
   $scope.title = COMMON.editor.title;
@@ -281,28 +280,24 @@ function EditorController(sentinlConfig, $rootScope, $scope, $route, $interval,
     };
 
     /**
-    * Removes action from watcher.
+    * Remove watcher action
     *
-    * @param {string} actionName - action name.
+    * @param {string} name of action
     */
-    const removeAction = function (actionName) {
-      const confirmModal = $uibModal.open({
-        template: confirmMessageTemplate,
-        controller: 'ConfirmMessageController',
-        size: 'sm'
-      });
-
-      confirmModal.result.then((response) => {
-        if (response === 'yes') {
-          delete $scope.watcher._source.actions[actionName];
-
-          if ($scope.watcher._source.report && !wHelper.numOfActionTypes($scope.watcher, 'report')) {
-            delete $scope.watcher._source.report;
-          }
+    const removeAction = function (name) {
+      function doRemoveAction() {
+        delete $scope.watcher._source.actions[name];
+        if ($scope.watcher._source.report && !wHelper.numOfActionTypes($scope.watcher, 'report')) {
+          delete $scope.watcher._source.report;
         }
-      }, () => {
-        $log.info(`you choose not deleting the action "${actionName}"`);
-      });
+      }
+
+      const confirmModalOptions = {
+        onConfirm: doRemoveAction,
+        confirmButtonText: 'Delete action',
+      };
+
+      confirmModal(`Are you sure you want to delete the action ${name}?`, confirmModalOptions);
     };
 
     /**

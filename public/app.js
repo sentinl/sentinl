@@ -39,6 +39,6 @@ import 'ui/directives/pretty_duration';
 
 import 'ui/saved_objects';
 import 'ui/courier';
-import 'ui/modals/confirm_modal';
-import 'ui/modals/confirm_modal_promise';
+import 'ui/modals';
+import 'ui/react_components';
 /* dynamically inserted modules */
