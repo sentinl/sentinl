@@ -118,3 +118,14 @@ bin/kibana-keystore add sentinl.settings.email.password
 
 
 ---
+##### Reports failing with: "HeadlessError" command failure
+When running reports using PhantomJS, the following error might be returned:
+```
+"fail to report, HeadlessError: Error executing command to extract phantom ports: Error: Command failed: ss -nlp | grep "[,=]354," || netstat -nlp | grep "[[:space:]]354/"\n/bin/sh: ss: command not found
+```
+This can be resolved by installing the missing `ss` command on your system or container, ie:
+```
+sudo yum install -y iproute
+```
+
+---
