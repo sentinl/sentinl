@@ -72,8 +72,15 @@ export default function getElasticsearchClient(server, config, type = 'data', im
 
   // Authentication via Investigate Access Control app pre Sentinl rename
   if (server.plugins.investigate_access_control && server.plugins.investigate_access_control.getSentinlClient) {
-    log.debug('auth via Investigate Access Control');
-    return server.plugins.investigate_access_control.getSentinlClient();
+    let cluster = server.config().get('elasticsearch.siren.alert.admin.cluster');
+    if (!cluster) {
+      cluster = 'data';
+    }
+    log.debug('auth via Investigate Access Control, cluster name: ' + cluster);
+    return server.plugins.elasticsearch.getCluster(cluster).createClient({
+      username: server.config().get('investigate_access_control.sirenalert.elasticsearch.username'),
+      password: server.config().get('investigate_access_control.sirenalert.elasticsearch.password'),
+    });
   }
 
   log.debug('auth via Kibana server elasticseaarch plugin');
