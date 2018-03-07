@@ -22,44 +22,12 @@
       <p style="float:left;">UTC time is {{ utcTime }}</p>
       <p style="float:right;">Local time is {{ currentTime }}</p>
       <br style="clear:both;"/>
-
-      <div class="panel panel-default" ng-show="currentReports.length">
-        <div><span class="edit-group pull-right"><a href="#"><i class="fa fa-plus"></i></a></span></div>
-        <table class="table">
-          <thead>
-            <tr>
-              <th>TIMESTAMP</th>
-              <th>ACTION</th>
-              <th>MESSAGE</th>
-              <th></th>
-            </tr>ng-hide="!report._source['attachment']"
-            <tbody ng-repeat='report in currentReports'>
-              <tr class="alarm-row">
-                <td>{{ report.id }}</td>
-                <td>{{ report.action }}</td>
-                <td>{{ report.message }}</td>
-                <td class="text-center edit-group">
-                  <span ng-click="collapse=!collapse" ng-model="collapse" class="show-rule"><i class="fa fa-ellipsis-h"></i></span>
-                  <span ng-click="deleteReportLocal($index)" class="delete-rule"><i class="fa fa-trash"></i></span>
-                </td>
-              </tr>
-              <tr ng-show=collapse>
-                <td colspan="100%">
-                  <pre><code>{{ alarm | json }}</code></pre>
-                </td>
-              </tr>
-            </tbody>
-        </table>
-      </div>
-
       <br/>
-
       <div class="panel" ng-show="!reports.length">
         <div class="well">
           No Reports found - That's great, right? <i class="fa fa-smile-o" aria-hidden="true"></i><br/>
         </div>
         <br/>
-
         <div class="panel">
           <h4>Expand time range</h4>
           <p>Reports are indexed with a date field. It is possible your query does not match anything in the current time range, or that there is no data at all in the currently selected time range.<br>
@@ -86,7 +54,7 @@
               <td class="text-center edit-group">
                 <span ng-click="collapse=!collapse" ng-model="collapse" class="show-rule"><i class="fa fa-ellipsis-h"></i></span>
                 <span ng-show="report._source.attachment" ng-click="collapseimg=!collapseimg" ng-model="collapseimg" class="show-rule"><i class="fa fa-eye"></i></span>
-                <span ng-click="deleteReport($index, report._index, report._type, report._id)" class="delete-rule"><i class="fa fa-trash"></i></span>
+                <span ng-click="deleteReport($index, report)" class="delete-rule"><i class="fa fa-trash"></i></span>
               </td>
             </tr>
             <tr ng-if=collapse>
