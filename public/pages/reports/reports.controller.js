@@ -1,10 +1,8 @@
 import { get, isNumber } from 'lodash';
 import moment from 'moment';
 
-import confirmMessageTemplate from '../../confirm_message/confirm_message.html';
-
 function ReportsController($rootScope, $scope, $route, $interval,
-  $timeout, timefilter, Private, createNotifier, $window, $uibModal, navMenu, globalNavState, Report, COMMON, $log) {
+  $timeout, timefilter, Private, createNotifier, $window, $uibModal, navMenu, globalNavState, Report, COMMON, $log, confirmModal) {
   'ngInject';
 
   $scope.title = COMMON.reports.title;
@@ -95,28 +93,30 @@ function ReportsController($rootScope, $scope, $route, $interval,
 
   });
 
-  $scope.deleteReport = function (index, rmindex, rmtype, rmid) {
-    const confirmModal = $uibModal.open({
-      template: confirmMessageTemplate,
-      controller: 'ConfirmMessageController',
-      size: 'sm'
-    });
-
-    confirmModal.result.then((response) => {
-      if (response === 'yes') {
-        Report.delete(rmindex, rmtype, rmid)
-          .then(function (response) {
-            $scope.reports.splice(index - 1, 1);
-            notify.info(`Deleted report "${response}"`);
-            getReports($scope.timeInterval);
-          })
-          .catch(notify.error);
+  /**
+  * Delete report
+  *
+  * @param {integer} index of report on Reports page
+  * @param {object} report
+  */
+  $scope.deleteReport = function (index, report) {
+    async function doDelete() {
+      try {
+        const resp = await Report.delete(report._index, report._type, report._id);
+        $scope.reports.splice(index - 1, 1);
+        notify.info(`Deleted report ${resp}`);
+        getReports($scope.timeInterval);
+      } catch (err) {
+        notify.error(`fail to delete report, ${err}`);
       }
-    });
-  };
+    }
 
-  $scope.deleteReportLocal = function (index) {
-    notify.warning('SENTINL function not yet implemented!');
+    const confirmModalOptions = {
+      onConfirm: doDelete,
+      confirmButtonText: 'Delete report',
+    };
+
+    confirmModal('Are you sure you want to delete the report?', confirmModalOptions);
   };
 
   const currentTime = moment($route.current.locals.currentTime);

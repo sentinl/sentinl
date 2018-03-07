@@ -4,12 +4,10 @@ import moment from 'moment';
 import $ from 'jquery';
 import ace from 'ace';
 
-import confirmMessageTemplate from '../../confirm_message/confirm_message.html';
-
 // WATCHERS CONTROLLER
 function  WatchersController($rootScope, $scope, $route, $interval,
   $timeout, timefilter, Private, createNotifier, $window, $http, $uibModal, $log, navMenu,
-  globalNavState, $location, dataTransfer, Watcher, Script, Promise, COMMON) {
+  globalNavState, $location, dataTransfer, Watcher, Script, Promise, COMMON, confirmModal) {
   'ngInject';
 
   $scope.title = COMMON.watchers.title;
@@ -94,35 +92,35 @@ function  WatchersController($rootScope, $scope, $route, $interval,
     listWatchers();
   });
 
-
   /**
-  * Deletes watcher.
+  * Delete watcher
   *
-  * @param {string} id - watcher id.
+  * @param {string} id of watcher
   */
   $scope.deleteWatcher = function (id) {
     const index = $scope.watchers.findIndex((watcher) => watcher._id === id);
+    const watcher = $scope.watchers[index];
 
-    const confirmModal = $uibModal.open({
-      template: confirmMessageTemplate,
-      controller: 'ConfirmMessageController',
-      size: 'sm'
-    });
-
-    confirmModal.result.then(function (response) {
-      if (response === 'yes') {
-        Watcher.delete($scope.watchers[index]._id).then(function (id) {
-          notify.info(`Deleted watcher "${$scope.watchers[index]._source.title}"`);
+    async function doDelete() {
+      try {
+        const id = await Watcher.delete(watcher._id);
+        notify.info(`Deleted watcher ${watcher._source.title}`);
+        $scope.watchers.splice(index, 1);
+      } catch (err) {
+        if (Number.isInteger(index)) {
           $scope.watchers.splice(index, 1);
-        }).catch(function (error) {
-          if (Number.isInteger(index)) {
-            $scope.watchers.splice(index, 1);
-          } else {
-            notify.error(error);
-          }
-        });
+        } else {
+          notify.error(`failto delete watcher, ${err}`);
+        }
       }
-    });
+    }
+
+    const confirmModalOptions = {
+      onConfirm: doDelete,
+      confirmButtonText: 'Delete watcher',
+    };
+
+    confirmModal(`Are you sure you want to delete the watcher ${watcher._source.title}?`, confirmModalOptions);
   };
 
   /**
