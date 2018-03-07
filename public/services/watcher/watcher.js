@@ -42,7 +42,7 @@ class Watcher extends SavedObjects {
   /**
   * Run watcher on demand
   *
-  * @param {string} id - watcher id
+  * @param {string} id of watcher
   * @return {object} ack
   */
   async play(id) {
@@ -58,7 +58,7 @@ class Watcher extends SavedObjects {
   /**
   * Get watcher
   *
-  * @param {string} id
+  * @param {string} id of watcher
   * @return {object} doc
   */
   get(id) {
@@ -75,11 +75,7 @@ class Watcher extends SavedObjects {
     try {
       this.savedObjects.Class.defaults = type === 'report' ? this.REPORTWATCHER : this.EMAILWATCHER;
       let watcher = await this.savedObjects.get();
-      watcher = this.nestedSource(watcher, this.fields);
-      const id = uuid();
-      watcher._source.title += `_${id}`;
-      watcher._id = id;
-      return watcher;
+      return this.nestedSource(watcher, this.fields);
     } catch (err) {
       throw new Error('fail to create new watcher');
     }
