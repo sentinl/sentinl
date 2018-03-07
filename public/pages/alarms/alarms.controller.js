@@ -2,11 +2,9 @@ import { get, isNumber } from 'lodash';
 import moment from 'moment';
 import uiChrome from 'ui/chrome';
 
-import confirmMessageTemplate from '../../confirm_message/confirm_message.html';
-
 function AlarmsController($rootScope, $scope, $route, $interval,
   $timeout, $injector, timefilter, Private, createNotifier, $window, $uibModal, navMenu,
-  globalNavState, Alarm, COMMON, $log) {
+  globalNavState, Alarm, COMMON, $log, confirmModal) {
   'ngInject';
 
   $scope.title = COMMON.alarms.title;
@@ -93,28 +91,30 @@ function AlarmsController($rootScope, $scope, $route, $interval,
     }
   });
 
-  $scope.deleteAlarm = function (index, rmindex, rmtype, rmid) {
-    const confirmModal = $uibModal.open({
-      template: confirmMessageTemplate,
-      controller: 'ConfirmMessageController',
-      size: 'sm'
-    });
-
-    confirmModal.result.then((response) => {
-      if (response === 'yes') {
-        Alarm.delete(rmindex, rmtype, rmid)
-          .then(function (response) {
-            $scope.alarms.splice(index - 1, 1);
-            notify.info(`Deleted alarm "${response}"`);
-            getAlarms($scope.timeInterval);
-          })
-          .catch(notify.error);
+  /**
+  * Delete alarm
+  *
+  * @param {integer} index of alarm on Alarms page
+  * @param {object} alarm
+  */
+  $scope.deleteAlarm = function (index, alarm) {
+    async function doDelete() {
+      try {
+        const resp = await Alarm.delete(alarm._index, alarm._type, alarm._id);
+        $scope.alarms.splice(index - 1, 1);
+        notify.info(`Deleted alarm ${resp}`);
+        getAlarms($scope.timeInterval);
+      } catch (err) {
+        notify.error(`fail to delete alarm, ${err}`);
       }
-    });
-  };
+    }
 
-  $scope.deleteAlarmLocal = function (index) {
-    notify.warning('SENTINL function not yet implemented!');
+    const confirmModalOptions = {
+      onConfirm: doDelete,
+      confirmButtonText: 'Delete alarm',
+    };
+
+    confirmModal(`Are you sure you want to delete the alarm ${alarm._source.watcher}?`, confirmModalOptions);
   };
 
   var currentTime = moment($route.current.locals.currentTime);
