@@ -3,12 +3,36 @@ Sentinl supports authentication via [Search Guard](https://github.com/floragunnc
 # Authenticate search request
 
 **Kibana**
+[Elasticsearch basic authentication](https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/auth-reference.html) is used for authentication. 
 
-1. Authenticate Sentinl via single user - `sg_kibana_server`. Look this [example.](Sentinl-in-Kibana-Searchguard-5.5.2-demo)
+Valid certificate
+```
+sentinl:
+  settings:
+    authentication:
+      enabled: true 
+      username: 'elastic'
+      password: 'password'
+      cert:
+        selfsigned: false
+        pem: '/path/to/pem/key'
+```
+
+Self-signed certificate
+```
+sentinl:
+  settings:
+    authentication:
+      enabled: true 
+      username: 'elastic'
+      password: 'password'
+      cert:
+        selfsigned: true
+```
 
 **Siren Platform (former Kibi)**
 
-2. Authenticate Sentinl via single user - default `sentinl` from Access Controll app. For example, default kibi.yml
+Authentication via single user - default `sentinl` from Access Controll app. For example, default kibi.yml
 ```
 # Access Control configuration
 kibi_access_control:
@@ -23,36 +47,50 @@ kibi_access_control:
 ...
 ```
 
-**Kibana or Siren Platform**
+**Impersonation**
 
-Also, there is a possibility to create multiple user credentials and assign these credentials to watchers, one credential per watcher. Thus authenticating each watcher separately. It is called impersonation. The credentials should be created in Search Guard and the required permissions should be assigned.
+There is a possibility to create multiple user credentials and assign these credentials to watchers, one credential per watcher. Thus authenticating each watcher separately. It is called impersonation. 
 
-Then, put the following configuration inside kibana.yml
+1. Create credentials in Search Guard or X-Pack and assign permissions you need.
+
+You need one user for Sentinl and one user per watcher.
+
+2. Set Sentinl authentication
 ```
 sentinl:
   settings:
     authentication:
       enabled: true 
-      mode: 'basic'
-      https: true
-      admin_username: 'sentinl'
-      admin_sha: '6859a748bc07b49ae761f5734db66848' 
-      user_index: 'sentinl_users'
-      user_type: 'user' 
-      verify_certificate: false
-      path_to_pem: '/home/kibi/.pem/sentinl.pem'
-      encryption:
-        algorithm: 'aes256'
-        key: 'b9726b04608ac48ecb0b6918214ade54'
-        iv_length: 16
+      impersonate: true
+      username: 'elastic'
+      password: 'password'
+      sha: '6859a748bc07b49ae761f5734db66848'
+      cert:
+        selfsigned: true
 ```
 
-Where `admin_username` is Sentinl system user which should be added manualy in Search Guard. Create admin password hash `admin_sha` using `sentinl/scripts/encryptPassword.js` script. For this, edit variable `plainTextPassword` value, replacing 'admin' with your password. Copy the generated hash and paste as the `admin_sha` value. 
+Set password as clear text in `password` property. The password can be put in encrypted form instead. Set password hash in `sha` property, now you can remove `password` option. 
 
-The index defined by `user_index` holds user documents, each one with username and sha hash. Set `verify_certificate` to `false` while using a self-signed certificate. Also, you can change password hashing complexity tunning options inside `encryption`. [Node.js crypto library](https://nodejs.org/api/crypto.html) is used to hash and unhash user password.
+Use `sentinl/scripts/encryptPassword.js` script to obtain the hash. Edit variable `plainTextPassword` value, replacing `admin` with your password. Copy the generated hash and paste as the `sha` value. Also, you can change password hashing complexity tunning options inside `encryption`. [Node.js crypto library](https://nodejs.org/api/crypto.html) is used to hash and unhash user password.
 
-Finally, insert the user credentials into `username` and `password` input fields in the General tab of the watcher UI editor. 
+3. Set watcher authentication 
+
+Create a sha hash of the watcher password using `encryptPassword.js`. Put it into `password` input field and username into `username` field. Note, these fields are visible only when the impersonation is enabled `impersonate: true`. The fields are one-way only, you can insert credentials but you don't see them. It is to prevent other Sentinl admins to see the credentials set by you.  
 ![screenshot from 2017-12-14 15-52-04](https://user-images.githubusercontent.com/5389745/33998197-20f662b6-e0e7-11e7-8201-d22ec9937960.png)
-Note, these fields are visible only when the impersonation authentication type is `enabled: true`. The fields are one-way only, you can insert credentials but you don't see them. This was done to prevent other Sentinl admins to see the credentials set by you.  
+
 
 # Authenticate report
+
+Both username and password should be set in the report action in UI. 
+
+Or it can be set manually.
+```
+"report" : {
+  "snapshot" : {
+    "params" : {
+      "username" : "user1",
+      "password" : "password",
+    }
+  },
+}
+```
