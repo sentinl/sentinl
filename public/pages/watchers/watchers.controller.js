@@ -75,14 +75,12 @@ function  WatchersController($rootScope, $scope, $route, $interval,
   /**
   * Lists all existing watchers.
   */
-  const listWatchers = function () {
-    Watcher.list()
-      .then((response) => {
-        $scope.watchers = response;
-        importWatcherFromLocalStorage();
-      })
-      .catch(notify.error)
-      .finally(importWatcherFromLocalStorage);
+  const listWatchers = async function () {
+    return Watcher.list().then(function (resp) {
+      $scope.watchers = resp;
+    }).catch(notify.error).then(function () {
+      importWatcherFromLocalStorage();
+    });
   };
 
   listWatchers();
