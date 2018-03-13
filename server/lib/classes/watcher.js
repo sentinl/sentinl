@@ -127,33 +127,15 @@ export default class Watcher {
   }
 
   /**
-  * Get all watcher report actions
+  * Get all watcher actions
   *
   * @param {object} actions - watcher actions
   * @return {object} actions
   */
-  getReportActions(actions) {
+  getActions(actions) {
     const filteredActions = {};
     forEach(actions, (settings, name) => {
-      if (has(settings, 'report')) {
-        filteredActions[name] = settings;
-      }
-    });
-    return filteredActions;
-  }
-
-  /**
-  * Get all watcher actions except report
-  *
-  * @param {object} actions - watcher actions
-  * @return {object} actions
-  */
-  getNonReportActions(actions) {
-    const filteredActions = {};
-    forEach(actions, (settings, name) => {
-      if (!has(settings, 'report')) {
-        filteredActions[name] = settings;
-      }
+      filteredActions[name] = settings;
     });
     return filteredActions;
   }
@@ -169,29 +151,10 @@ export default class Watcher {
     const response = {
       task: {
         id: task._id
-      },
-      error: false
+      }
     };
 
-    if (task._source.report) { // report watcher
-      this.log.debug(`executing report: ${task._id}`);
-
-      const actions = this.getReportActions(task._source.actions);
-      const payload = { _id: task._id };
-
-      if (keys(actions).length) {
-        if (!isEmpty(this.getNonReportActions(task._source.actions))) {
-          Promise.resolve(this.doActions(this.server, actions, payload, task)).then(() => response);
-        } else {
-          return Promise.resolve(this.doActions(this.server, actions, payload, task)).then(() => response);
-        }
-      }
-
-    }
-
-    if (!(task._source.report && isEmpty(this.getNonReportActions(task._source.actions)))) { // other watcher kinds
-      this.log.debug(`executing watcher: ${task._id}`);
-
+    if (!isEmpty(this.getActions(task._source.actions))) {
       let sirenFederateAvailable = false;
       try {
         const elasticsearchPlugins = this.server.config().get('investigate_core.clusterplugins');
@@ -203,10 +166,12 @@ export default class Watcher {
         // 'elasticsearch.plugins' not available when running from kibana
       }
 
-      const actions = this.getNonReportActions(task._source.actions);
+      this.server.log(['status', 'info', 'Sentinl', 'watcher'], `Executing action: ${task._id}`);
+
+      const actions = this.getActions(task._source.actions);
       let request = has(task._source, 'input.search.request') ? task._source.input.search.request : undefined;
       let condition = keys(task._source.condition).length ? task._source.condition : undefined;
-      let transform = task._source.transform && !isEmpty(task._source.transform) ? task._source.transform : undefined;
+      let transform = task._source.transform ? task._source.transform : undefined;
 
       let method = 'search';
       if (sirenFederateAvailable) {
@@ -251,7 +216,7 @@ export default class Watcher {
             try {
               // update global payload
               if (!eval(condition.script.script)) { // eslint-disable-line no-eval
-                response.message = `No results for current condition: ${task._id}`;
+                response.message = `Condition 'script' evaluated to false: ${task._id}`;
                 return response;
               }
             } catch (err) {
@@ -263,7 +228,7 @@ export default class Watcher {
           if (condition.compare) {
             try {
               if (!compare.valid(payload, condition)) {
-                response.message = `Payload data does not mutch the compare criteria: ${task._id}`;
+                response.message = `Condition 'compare' evaluated to false: ${task._id}`;
                 return response;
               }
             } catch (err) {
@@ -275,7 +240,7 @@ export default class Watcher {
           if (condition.array_compare) {
             try {
               if (!compareArray.valid(payload, condition)) {
-                response.message = `Payload data does not mutch the compare criteria: ${task._id}`;
+                response.message = `Condition 'array compare' evaluated to false: ${task._id}`;
                 return response;
               }
             } catch (err) {
@@ -284,18 +249,18 @@ export default class Watcher {
           }
 
           // find anomalies
-          if (task._source.condition.anomaly) {
+          if (has(task._source, 'sentinl.condition.anomaly')) {
             try {
-              payload = anomaly.check(payload, task._source.condition);
+              payload = anomaly.check(payload, task._source.sentinl.condition);
             } catch (err) {
               throw new Error(`condition 'anomaly' error, ${task._id}: ${err}`);
             }
           }
 
           // find hits outside range
-          if (task._source.condition.range) {
+          if (has(task._source, 'sentinl.condition.range')) {
             try {
-              payload = range.check(payload, task._source.condition);
+              payload = range.check(payload, task._source.sentinl.condition);
             } catch (err) {
               throw new Error(`condition 'range' error, ${task._id}: ${err}`);
             }
@@ -309,7 +274,9 @@ export default class Watcher {
               if (has(link, 'script.script')) {
                 try {
                   // update global payload
-                  eval(link.script.script); // eslint-disable-line no-eval
+                  if (!eval(link.script.script)) { // eslint-disable-line no-eval
+                    response.message = `Transform 'script' evaluated to false: ${task._id}`;
+                  }
                   resolve(null);
                 } catch (err) {
                   reject(`transform 'script' error, ${task._id}: ${err}`);
@@ -337,7 +304,7 @@ export default class Watcher {
               }
 
               if (!payload) {
-                response.message = `transform chain, no payload after execution, ${task._id}!`;
+                response.message = `transform chain, no payload after execution: ${task._id}!`;
                 response.warning = true;
                 return response;
               }
