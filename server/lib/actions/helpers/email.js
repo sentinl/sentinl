@@ -12,13 +12,14 @@ export default class Email {
   * @param {object} args - init server connection settings (user, password, host, ssl, timeout)
   */
   constructor(args) {
-    const { user, password, host, ssl, timeout } = args;
+    const { user, password, host, ssl, timeout, ...restOpts } = args;
     this.server = emailjs.server.connect({
       user,
       password,
       host,
       ssl,
-      timeout
+      timeout,
+      ...restOpts
     });
   }
 
