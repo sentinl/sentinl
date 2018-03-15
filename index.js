@@ -178,12 +178,19 @@ export default function (kibana) {
           email: Joi.object({
             active: Joi.boolean().default(false),
             host: Joi.string().default('localhost'),
-            timeout: Joi.number().default(5000),
             user: Joi.string(),
             password: Joi.string(),
-            host: Joi.string(),
+            port: Joi.number().default(25),
+            domain: Joi.string(),
             ssl: Joi.boolean().default(false),
-            timeout: Joi.number().default(5000)
+            tls: Joi.boolean().default(false),
+            cert: Joi.object({
+              key: Joi.string(), // full system path
+              cert: Joi.string(), // full system path
+              ca: Joi.string(), // full system path
+            }),
+            authentication: Joi.array().default(['PLAIN', 'LOGIN', 'CRAM-MD5', 'XOAUTH2']),
+            timeout: Joi.number().default(5000),
           }).default(),
           slack: Joi.object({
             active: Joi.boolean().default(false),
