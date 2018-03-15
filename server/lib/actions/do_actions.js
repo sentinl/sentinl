@@ -17,6 +17,7 @@
  * limitations under the License.
  */
 
+import fs from 'fs';
 import _ from 'lodash';
 import { assign, pick } from 'lodash';
 import url from 'url';
@@ -39,6 +40,54 @@ const toString = function (message) {
   return message;
 };
 
+/**
+* Connect email
+*
+* @param {object} log
+* @param {object} config for email connection
+*/
+const connectEmail = function (log, config) {
+  const options = pick(config, ['user', 'password', 'host', 'port', 'tls', 'timeout', 'domain', 'authentication']);
+
+  if (!config.cert) {
+    options.ssl = config.ssl;
+  } else {
+    options.ssl = {};
+
+    try {
+      options.ssl.key = fs.readFileSync(config.cert.key, 'utf8');
+    } catch (err) {
+      log.warning(`email, SSL/TLS key was not set, ${err}`);
+    }
+
+    try {
+      options.ssl.cert = fs.readFileSync(config.cert.cert, 'utf8');
+    } catch (err) {
+      log.warning(`email, SSL/TLS cert was not set, ${err}`);
+    }
+
+    try {
+      options.ssl.ca = fs.readFileSync(config.cert.ca, 'utf8');
+    } catch (err) {
+      log.warning(`email, SSL/TLS ca was not set, ${err}`);
+    }
+
+    if (!options.ssl.key && !options.ssl.cert && !options.ssl.ca) {
+      log.error('email, no SSL/TLS keys were found');
+    }
+  }
+
+  return new Email(options);
+};
+
+/**
+* Perform actions
+*
+* @param {object} server hapi of Kibana
+* @param {object} actions of watcher
+* @param {payload} payload of watcher
+* @param {task} task of watcher
+*/
 export default function (server, actions, payload, task) {
   const config = getConfiguration(server);
   const log = new Log(config.app_name, server, 'action');
@@ -51,7 +100,7 @@ export default function (server, actions, payload, task) {
   };
 
   /* Email Settings */
-  const email = new Email(pick(config.settings.email, ['user', 'password', 'host', 'ssl', 'timeout']));
+  const email = connectEmail(log, config.settings.email);
 
   /* Slack Settings */
   var slack;
@@ -316,7 +365,7 @@ export default function (server, actions, payload, task) {
             username: config.settings.slack.username
           });
         } catch (err) {
-          log.error(`fail sending to: ${config.settings.slack.hook}`);
+          log.error(`fail sending to ${config.settings.slack.hook}, ${err}`);
         }
       }
 
@@ -388,8 +437,8 @@ export default function (server, actions, payload, task) {
         });
       });
 
-      req.on('error', function (e) {
-        log.error(`fail to ship webhook: ${e.message}`);
+      req.on('error', function (err) {
+        log.error(`fail to ship webhook, ${err}`);
       });
       if (dataToWrite) {
         req.write(dataToWrite);
@@ -471,8 +520,8 @@ export default function (server, actions, payload, task) {
         });
       });
 
-      req.on('error', function (e) {
-        log.error(`fail to create a PushApps notification: ${e}`);
+      req.on('error', function (err) {
+        log.error(`fail to create a PushApps notification, ${err}`);
       });
       req.write(postData);
       req.end();
