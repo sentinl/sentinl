@@ -9,7 +9,7 @@ class Email {
   /**
   * Instantiate email server object
   *
-  * @param {object} options to init server connection settings (user, password, host, ssl, timeout)
+  * @param {object} options for server connection https://github.com/eleith/emailjs#emailserverconnectoptions
   */
   constructor(options) {
     this.server = emailjs.server.connect(options);
@@ -18,7 +18,7 @@ class Email {
   /**
   * Send email
   *
-  * @param {object} options to send email (text, from, to, subject, attachment)
+  * @param {object} options for email sending https://github.com/eleith/emailjs#emailserversendmessage-callback
   */
   send(options) {
     return new Promise((resolve, reject) => {
