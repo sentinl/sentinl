@@ -62,11 +62,6 @@ const EditorController = function (sentinlConfig, $rootScope, $scope, $route, $i
         status: {}
       },
       rawEnabled: false,
-      tabs: {
-        input: { disable: false },
-        condition: { disable: false },
-        transform: { disable: false }
-      }
     };
 
     if (!$scope.form.templates) {
@@ -350,12 +345,6 @@ const EditorController = function (sentinlConfig, $rootScope, $scope, $route, $i
           if (settings[type]) actionTypes[type] = true;
         });
       });
-
-      if (keys(actionTypes).length === 1 && keys(actionTypes)[0] === 'report') {
-        forEach($scope.form.tabs, (tab) => { tab.disable = true; });
-      } else {
-        forEach($scope.form.tabs, (tab) => { tab.disable = false; });
-      }
     };
 
     /**
