@@ -38,6 +38,7 @@ export default class Email {
         attachment
       }, function (error, message) {
         if (error) {
+          console.error(error);
           reject(error);
         }
         resolve(JSON.stringify(message));

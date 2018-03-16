@@ -1,4 +1,4 @@
-import { get, has, forEach, difference, keys, isObject, isEmpty } from 'lodash';
+import { get, has, forEach, difference, map, size, isObject, isEmpty } from 'lodash';
 import Promise from 'bluebird';
 import range from '../validators/range';
 import anomaly from '../validators/anomaly';
@@ -170,7 +170,7 @@ export default class Watcher {
 
       const actions = this.getActions(task._source.actions);
       let request = has(task._source, 'input.search.request') ? task._source.input.search.request : undefined;
-      let condition = keys(task._source.condition).length ? task._source.condition : undefined;
+      let condition = size(task._source.condition) ? task._source.condition : undefined;
       let transform = task._source.transform ? task._source.transform : undefined;
 
       let method = 'search';
@@ -216,7 +216,7 @@ export default class Watcher {
             try {
               // update global payload
               if (!eval(condition.script.script)) { // eslint-disable-line no-eval
-                response.message = `Condition 'script' evaluated to false: ${task._id}`;
+                response.message = `no data was found that meets the used 'script 'conditions, ${task._id}`;
                 return response;
               }
             } catch (err) {
@@ -228,7 +228,7 @@ export default class Watcher {
           if (condition.compare) {
             try {
               if (!compare.valid(payload, condition)) {
-                response.message = `Condition 'compare' evaluated to false: ${task._id}`;
+                response.message = `no data was found that meets the used 'compare' conditions, ${task._id}`;
                 return response;
               }
             } catch (err) {
@@ -240,7 +240,7 @@ export default class Watcher {
           if (condition.array_compare) {
             try {
               if (!compareArray.valid(payload, condition)) {
-                response.message = `Condition 'array compare' evaluated to false: ${task._id}`;
+                response.message = `no data was found that meets the used 'array compare' conditions, ${task._id}`;
                 return response;
               }
             } catch (err) {
@@ -275,7 +275,7 @@ export default class Watcher {
                 try {
                   // update global payload
                   if (!eval(link.script.script)) { // eslint-disable-line no-eval
-                    response.message = `Transform 'script' evaluated to false: ${task._id}`;
+                    response.message = `no data was found after 'script' transform was applied, ${task._id}`;
                   }
                   resolve(null);
                 } catch (err) {
@@ -295,7 +295,7 @@ export default class Watcher {
             });
           };
 
-          if (transform && transform.chain) { // transform chain
+          if (transform && transform.chain && size(transform.chain)) { // transform chain
             return Promise.each(transform.chain, function (link) {
               return execTransform(link);
             }).then(function () {
@@ -304,19 +304,21 @@ export default class Watcher {
               }
 
               if (!payload) {
-                response.message = `transform chain, no payload after execution: ${task._id}!`;
+                response.message = `no data was found after 'chain' transform was applied, ${task._id}!`;
                 response.warning = true;
                 return response;
               }
 
-              return Promise.resolve(self.doActions(self.server, actions, payload, task)).then(() => response);
+              return Promise.resolve(self.doActions(self.server, actions, payload, task)).then(function () {
+                return response;
+              });
             }).catch(function (err) {
-              throw new Error(`transform 'chain': ${err}`);
+              throw new Error(`Transform 'chain': ${err}`);
             });
-          } else if (transform) { // transform
+          } else if (transform && size(transform)) { // transform
             return execTransform(transform).then(function () {
               if (!payload) {
-                response.message = `Transform, no payload after execution: ${task._id}!`;
+                response.message = `no data was found after transform was applied, ${task._id}!`;
                 return response;
               }
 
