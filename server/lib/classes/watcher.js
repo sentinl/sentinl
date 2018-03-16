@@ -42,9 +42,7 @@ export default class Watcher {
       type: this.config.settings.authentication.user_type,
       id: watcherId
     };
-    return this.client.get(options)
-    .then((resp) => resp)
-    .catch((err) => err);
+    return this.client.get(options);
   }
 
   /**
@@ -81,33 +79,15 @@ export default class Watcher {
   }
 
   /**
-  * Get all watcher report actions
+  * Get all watcher actions
   *
   * @param {object} actions - watcher actions
   * @return {object} actions
   */
-  getReportActions(actions) {
+  getActions(actions) {
     const filteredActions = {};
     forEach(actions, (settings, name) => {
-      if (has(settings, 'report')) {
-        filteredActions[name] = settings;
-      }
-    });
-    return filteredActions;
-  }
-
-  /**
-  * Get all watcher actions except report
-  *
-  * @param {object} actions - watcher actions
-  * @return {object} actions
-  */
-  getNonReportActions(actions) {
-    const filteredActions = {};
-    forEach(actions, (settings, name) => {
-      if (!has(settings, 'report')) {
-        filteredActions[name] = settings;
-      }
+      filteredActions[name] = settings;
     });
     return filteredActions;
   }
@@ -123,29 +103,10 @@ export default class Watcher {
     const response = {
       task: {
         id: task._id
-      },
-      error: false
+      }
     };
 
-    if (task._source.report) { // report watcher
-      this.server.log(['status', 'info', 'Sentinl', 'watcher'], `Executing report action: ${task._id}`);
-
-      const actions = this.getReportActions(task._source.actions);
-      const payload = { _id: task._id };
-
-      if (keys(actions).length) {
-        if (!isEmpty(this.getNonReportActions(task._source.actions))) {
-          Promise.resolve(this.doActions(this.server, actions, payload, task))
-          .then(() => response);
-        } else {
-          return Promise.resolve(this.doActions(this.server, actions, payload, task))
-          .then(() => response);
-        }
-      }
-
-    }
-
-    if (!(task._source.report && isEmpty(this.getNonReportActions(task._source.actions)))) { // other watcher kinds
+    if (!(isEmpty(this.getActions(task._source.actions)))) {
       let sirenFederateAvailable = false;
       try {
         const elasticsearchPlugins = this.server.config().get('kibi_core.clusterplugins');
@@ -159,10 +120,10 @@ export default class Watcher {
 
       this.server.log(['status', 'info', 'Sentinl', 'watcher'], `Executing action: ${task._id}`);
 
-      const actions = this.getNonReportActions(task._source.actions);
+      const actions = this.getActions(task._source.actions);
       let request = has(task._source, 'input.search.request') ? task._source.input.search.request : undefined;
       let condition = keys(task._source.condition).length ? task._source.condition : undefined;
-      let transform = task._source.transform && !isEmpty(task._source.transform) ? task._source.transform : undefined;
+      let transform = task._source.transform ? task._source.transform : undefined;
 
       let method = 'search';
       if (sirenFederateAvailable) {
@@ -189,8 +150,7 @@ export default class Watcher {
       const self = this;
       const execute = function () {
         /* INPUT */
-        return self.search(method, request)
-        .then(function (payload) {
+        return self.search(method, request).then(function (payload) {
           if (!payload) {
             throw new Error(`Input search query is malformed or missing key parameters: ${task._id}`);
           }
@@ -210,7 +170,7 @@ export default class Watcher {
             try {
               // update global payload
               if (!eval(condition.script.script)) { // eslint-disable-line no-eval
-                response.message = `No results for current condition: ${task._id}`;
+                response.message = `No data was found that meets the used 'script 'conditions, ${task._id}`;
                 return response;
               }
             } catch (err) {
@@ -222,7 +182,7 @@ export default class Watcher {
           if (condition.compare) {
             try {
               if (!compare.valid(payload, condition)) {
-                response.message = `Payload data does not mutch the compare criteria: ${task._id}`;
+                response.message = `No data was found that meets the used 'compare' conditions, ${task._id}`;
                 return response;
               }
             } catch (err) {
@@ -234,7 +194,7 @@ export default class Watcher {
           if (condition.array_compare) {
             try {
               if (!compareArray.valid(payload, condition)) {
-                response.message = `Payload data does not mutch the compare criteria: ${task._id}`;
+                response.message = `No data was found that meets the used 'array compare' conditions, ${task._id}`;
                 return response;
               }
             } catch (err) {
@@ -243,18 +203,18 @@ export default class Watcher {
           }
 
           // find anomalies
-          if (task._source.condition.anomaly) {
+          if (has(task._source, 'sentinl.condition.anomaly')) {
             try {
-              payload = anomaly.check(payload, task._source.condition);
+              payload = anomaly.check(payload, task._source.sentinl.condition);
             } catch (err) {
               throw new Error(`Condition 'anomaly' error for ${task._id}: ${err}`);
             }
           }
 
           // find hits outside range
-          if (task._source.condition.range) {
+          if (has(task._source, 'sentinl.condition.range')) {
             try {
-              payload = range.check(payload, task._source.condition);
+              payload = range.check(payload, task._source.sentinl.condition);
             } catch (err) {
               throw new Error(`Condition 'range' error for ${task._id}: ${err}`);
             }
@@ -268,7 +228,9 @@ export default class Watcher {
               if (has(link, 'script.script')) {
                 try {
                   // update global payload
-                  eval(link.script.script); // eslint-disable-line no-eval
+                  if (!eval(link.script.script)) { // eslint-disable-line no-eval
+                    response.message = `No data was found after 'script' transform was applied, ${task._id}`;
+                  }
                   resolve(null);
                 } catch (err) {
                   reject(`Transform 'script' error for ${task._id}: ${err}`);
@@ -277,12 +239,10 @@ export default class Watcher {
 
               // search in transform
               if (has(link, 'search.request')) {
-                resolve(self.search(method, link.search.request)
-                .then(function (_payload_) {
+                resolve(self.search(method, link.search.request).then(function (_payload_) {
                   payload = _payload_; // update global payload
                   return null;
-                })
-                .catch(function (err) {
+                }).catch(function (err) {
                   throw new Error(`Transform 'search' error for ${task._id}: ${err}`);
                 }));
               }
@@ -292,42 +252,35 @@ export default class Watcher {
           if (transform && transform.chain) { // transform chain
             return Promise.each(transform.chain, function (link) {
               return execTransform(link);
-            })
-            .then(function () {
+            }).then(function () {
               if (response.message && !payload) {
                 return response;
               }
 
               if (!payload) {
-                response.message = `Transform chain, no payload after execution: ${task._id}!`;
-                response.warning = true;
+                response.message = `No data was found after 'chain' transform was applied, ${task._id}!`;
                 return response;
               }
 
-              return Promise.resolve(self.doActions(self.server, actions, payload, task))
-              .then(function () {
+              return Promise.resolve(self.doActions(self.server, actions, payload, task)).then(function () {
                 return response;
               });
-            })
-            .catch(function (err) {
+            }).catch(function (err) {
               throw new Error(`Transform 'chain': ${err}`);
             });
           } else if (transform) { // transform
-            return execTransform(transform)
-            .then(function () {
+            return execTransform(transform).then(function () {
               if (!payload) {
-                response.message = `Transform, no payload after execution: ${task._id}!`;
+                response.message = `No data was found after transform was applied, ${task._id}!`;
                 return response;
               }
 
-              return Promise.resolve(self.doActions(self.server, actions, payload, task))
-              .then(function () {
+              return Promise.resolve(self.doActions(self.server, actions, payload, task)).then(function () {
                 return response;
               });
             });
           } else { // no transform
-            return Promise.resolve(self.doActions(self.server, actions, payload, task))
-            .then(function () {
+            return Promise.resolve(self.doActions(self.server, actions, payload, task)).then(function () {
               return response;
             });
           }
@@ -335,8 +288,7 @@ export default class Watcher {
       };
 
       if (this.config.settings.authentication.enabled) { // impersonate watcher if authentication is enabled
-        return this.getImpersonatedClient(task._id)
-        .then((_client_) => {
+        return this.getImpersonatedClient(task._id).then((_client_) => {
           this.client = _client_;
           return execute();
         });
@@ -353,8 +305,7 @@ export default class Watcher {
   * @return {promise} client - impersonated client
   */
   getImpersonatedClient(id) {
-    return this.getUser(id)
-    .then((resp) => {
+    return this.getUser(id).then((resp) => {
       if (resp.found) {
         const impersonate = {
           username: resp._source.username,
