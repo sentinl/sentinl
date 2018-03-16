@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import {assign, filter} from 'lodash';
+import { assign, pick } from 'lodash';
 import url from 'url';
 import Promise from 'bluebird';
 import moment from 'moment';
@@ -43,8 +43,8 @@ export default function (server, actions, payload, task) {
     return logHistory(args);
   };
 
-  /* Email Connection */
-  const email = new Email(config.settings.email);
+  /* Email Settings */
+  const email = new Email(pick(config.settings.email, ['user', 'password', 'host', 'ssl', 'timeout']));
 
   /* Slack Settings */
   var slack;
