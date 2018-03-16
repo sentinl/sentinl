@@ -62,11 +62,6 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
         status: {}
       },
       rawEnabled: false,
-      tabs: {
-        input: { disable: false },
-        condition: { disable: false },
-        transform: { disable: false }
-      }
     };
 
     // get authentication config info
@@ -375,12 +370,6 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
           if (settings[type]) actionTypes[type] = true;
         });
       });
-
-      if (_.keys(actionTypes).length === 1 && _.keys(actionTypes)[0] === 'report') {
-        _.forEach($scope.form.tabs, (tab) => { tab.disable = true; });
-      } else {
-        _.forEach($scope.form.tabs, (tab) => { tab.disable = false; });
-      }
     };
 
     /**
@@ -623,8 +612,7 @@ app.controller('EditorController', function ($rootScope, $scope, $route, $interv
             $scope.watcher.$$authentication.password
           ).then((response) => {
             notify.info(` User ${response} saved.`);
-          })
-          .catch(notify.error);
+          }).catch(notify.error);
         }
       }
     };

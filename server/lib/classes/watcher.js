@@ -42,9 +42,7 @@ export default class Watcher {
       type: this.config.settings.authentication.user_type,
       id: watcherId
     };
-    return this.client.get(options)
-    .then((resp) => resp)
-    .catch((err) => err);
+    return this.client.get(options);
   }
 
   /**
@@ -79,8 +77,9 @@ export default class Watcher {
   search(method, request) {
     return this.client[method](request);
   }
+
   /**
-  * Get all watcher actions 
+  * Get all watcher actions
   *
   * @param {object} actions - watcher actions
   * @return {object} actions
@@ -88,8 +87,8 @@ export default class Watcher {
   getActions(actions) {
     const filteredActions = {};
     forEach(actions, (settings, name) => {
-       filteredActions[name] = settings;
-     });
+      filteredActions[name] = settings;
+    });
     return filteredActions;
   }
 
@@ -108,7 +107,7 @@ export default class Watcher {
     };
 
     if (!(isEmpty(this.getActions(task._source.actions)))) {
-      let sirenVanguardAvailable = false;
+      let sirenFederateAvailable = false;
       try {
         const elasticsearchPlugins = this.server.config().get('kibi_core.clusterplugins');
         if (elasticsearchPlugins && (elasticsearchPlugins.indexOf('siren-vanguard') > -1 ||
@@ -151,8 +150,7 @@ export default class Watcher {
       const self = this;
       const execute = function () {
         /* INPUT */
-        return self.search(method, request)
-        .then(function (payload) {
+        return self.search(method, request).then(function (payload) {
           if (!payload) {
             throw new Error(`Input search query is malformed or missing key parameters: ${task._id}`);
           }
@@ -172,7 +170,7 @@ export default class Watcher {
             try {
               // update global payload
               if (!eval(condition.script.script)) { // eslint-disable-line no-eval
-                response.message = `Condition 'script' evaluated to false: ${task._id}`;
+                response.message = `No data was found that meets the used 'script 'conditions, ${task._id}`;
                 return response;
               }
             } catch (err) {
@@ -184,7 +182,7 @@ export default class Watcher {
           if (condition.compare) {
             try {
               if (!compare.valid(payload, condition)) {
-                response.message = `Condition 'compare' evaluated to false: ${task._id}`;
+                response.message = `No data was found that meets the used 'compare' conditions, ${task._id}`;
                 return response;
               }
             } catch (err) {
@@ -196,7 +194,7 @@ export default class Watcher {
           if (condition.array_compare) {
             try {
               if (!compareArray.valid(payload, condition)) {
-                response.message = `Condition 'array compare' evaluated to false: ${task._id}`;
+                response.message = `No data was found that meets the used 'array compare' conditions, ${task._id}`;
                 return response;
               }
             } catch (err) {
@@ -231,7 +229,7 @@ export default class Watcher {
                 try {
                   // update global payload
                   if (!eval(link.script.script)) { // eslint-disable-line no-eval
-                    response.message = `Transform 'script' evaluated to false: ${task._id}`;
+                    response.message = `No data was found after 'script' transform was applied, ${task._id}`;
                   }
                   resolve(null);
                 } catch (err) {
@@ -241,12 +239,10 @@ export default class Watcher {
 
               // search in transform
               if (has(link, 'search.request')) {
-                resolve(self.search(method, link.search.request)
-                .then(function (_payload_) {
+                resolve(self.search(method, link.search.request).then(function (_payload_) {
                   payload = _payload_; // update global payload
                   return null;
-                })
-                .catch(function (err) {
+                }).catch(function (err) {
                   throw new Error(`Transform 'search' error for ${task._id}: ${err}`);
                 }));
               }
@@ -256,41 +252,35 @@ export default class Watcher {
           if (transform && transform.chain) { // transform chain
             return Promise.each(transform.chain, function (link) {
               return execTransform(link);
-            })
-            .then(function () {
+            }).then(function () {
               if (response.message && !payload) {
                 return response;
               }
 
               if (!payload) {
-                response.message = `Transform chain, no payload after execution: ${task._id}!`;
+                response.message = `No data was found after 'chain' transform was applied, ${task._id}!`;
                 return response;
               }
 
-              return Promise.resolve(self.doActions(self.server, actions, payload, task))
-              .then(function () {
+              return Promise.resolve(self.doActions(self.server, actions, payload, task)).then(function () {
                 return response;
               });
-            })
-            .catch(function (err) {
+            }).catch(function (err) {
               throw new Error(`Transform 'chain': ${err}`);
             });
           } else if (transform) { // transform
-            return execTransform(transform)
-            .then(function () {
+            return execTransform(transform).then(function () {
               if (!payload) {
-                response.message = `Transform, no payload after execution: ${task._id}!`;
+                response.message = `No data was found after transform was applied, ${task._id}!`;
                 return response;
               }
 
-              return Promise.resolve(self.doActions(self.server, actions, payload, task))
-              .then(function () {
+              return Promise.resolve(self.doActions(self.server, actions, payload, task)).then(function () {
                 return response;
               });
             });
           } else { // no transform
-            return Promise.resolve(self.doActions(self.server, actions, payload, task))
-            .then(function () {
+            return Promise.resolve(self.doActions(self.server, actions, payload, task)).then(function () {
               return response;
             });
           }
@@ -298,8 +288,7 @@ export default class Watcher {
       };
 
       if (this.config.settings.authentication.enabled) { // impersonate watcher if authentication is enabled
-        return this.getImpersonatedClient(task._id)
-        .then((_client_) => {
+        return this.getImpersonatedClient(task._id).then((_client_) => {
           this.client = _client_;
           return execute();
         });
@@ -316,8 +305,7 @@ export default class Watcher {
   * @return {promise} client - impersonated client
   */
   getImpersonatedClient(id) {
-    return this.getUser(id)
-    .then((resp) => {
+    return this.getUser(id).then((resp) => {
       if (resp.found) {
         const impersonate = {
           username: resp._source.username,
