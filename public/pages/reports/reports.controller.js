@@ -28,6 +28,14 @@ function ReportsController($rootScope, $scope, $route, $interval,
   $scope.reports = [];
   $scope.timeInterval = timefilter.time;
 
+  $scope.isData = function (report) {
+    return report._source.attachment && report._source.attachment[1].data;
+  };
+
+  $scope.isScreenshot = function (report) {
+    return report._source.attachment[1].data.charAt(0) === 'i';
+  };
+
   const getReports = function (interval) {
     Report.updateFilter(interval)
       .then((resp) => {
