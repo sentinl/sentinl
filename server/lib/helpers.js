@@ -1,3 +1,5 @@
+import Promise from 'bluebird';
+
 /**
 * Check if Kibi
 *
@@ -8,6 +10,13 @@ const isKibi = function (server) {
   return server.plugins.saved_objects_api ? true : false;
 };
 
+const delay = function (timeout) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, timeout);
+  });
+};
+
 module.exports = {
-  isKibi
+  isKibi,
+  delay,
 };

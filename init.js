@@ -26,7 +26,6 @@ import initIndices from './server/lib/initIndices';
 import getElasticsearchClient from './server/lib/get_elasticsearch_client';
 import getConfiguration from './server/lib/get_configuration';
 import fs from 'fs';
-import phantom from './server/lib/phantom';
 import Log from './server/lib/log';
 
 const mappings = {
@@ -65,13 +64,6 @@ const init = once(function (server) {
   server.sentinlStore = {
     schedule: {}
   };
-
-  // Install PhantomJS lib. The lib is needed to take screenshots by report action.
-  const phantomPath = has(config, 'settings.report.phantomjs_path') ? config.settings.report.phantomjs_path : undefined;
-  phantom.install(phantomPath).then((phantomPackage) => {
-    log.info(`phantom installed at ${phantomPackage.binary}`);
-    server.expose('phantomjs_path', phantomPackage.binary);
-  }).catch((err) => log.error(`fail to install phantomjs: ${err}`));
 
   // Load Sentinl routes.
   masterRoute(server);

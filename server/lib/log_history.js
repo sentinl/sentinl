@@ -1,4 +1,4 @@
- /**
+/**
  * Stores a Sentinl Watcher log and returns the query response.
  *
  * @param {object} server - kibana server instance
@@ -14,9 +14,13 @@
  * @return {object} elasticsearch response.
  */
 import Log from './log';
+import getConfiguration from './get_configuration';
+import getElasticsearchClient from './get_elasticsearch_client';
 
 async function logEvent(args) {
-  let {server, client, config, title, actionType, message, level, payload, report, object} = args;
+  let {server, title, actionType, message, level, payload, report, object} = args;
+  const config = getConfiguration(server);
+  const client = getElasticsearchClient(server, config);
 
   level = level || 'INFO';
   payload = payload || {};
