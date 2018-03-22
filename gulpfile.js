@@ -30,7 +30,6 @@ var include = [
   'server',
   'lib',
   'public',
-  'phantomjs'
 ];
 
 var knownOptions = {
