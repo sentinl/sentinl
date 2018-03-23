@@ -64,11 +64,11 @@
             </tr>
             <tr ng-if=collapseimg >
               <td colspan="100%">
-                <div ng-if="report._source.attachment && report._source.attachment.charAt(0) === 'i'">
-                  <object data="data:image/png;base64,{{ report._source.attachment }}"></object>
+                <div ng-if="isData(report) && isScreenshot(report)">
+                  <object data="data:image/png;base64,{{report._source.attachment[1].data}}"></object>
                 </div>
-                <div ng-if="report._source.attachment && report._source.attachment.charAt(0) !== 'i'">
-                  <object height="600" data="data:application/pdf;base64,{{ report._source.attachment }}"></object>
+                <div ng-if="isData(report) && !isScreenshot(report)">
+                  <object height="600" data="data:application/pdf;base64,{{report._source.attachment[1].data}}"></object>
                 </div>
               </td>
             </tr>

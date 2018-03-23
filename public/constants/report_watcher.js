@@ -33,7 +33,6 @@ export default {
         snapshot: {
           res: '1280x900',
           url: 'http://localhost/app/kibana#/dashboard/Alerts',
-          path: '/tmp/',
           params: {
             delay: 5000,
             crop: 'false'
