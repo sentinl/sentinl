@@ -1,54 +1,59 @@
- /**
+/**
  * Stores a Sentinl Watcher log and returns the query response.
  *
- * @param {Server} server   - A Kibana Server instance.
- * @param {Client} client   - An Elasticsearch Client instance.
- * @param {Config} config   - A Kibana config instance.
- * @param {String} type     - A SENTINL Log Type.
- * @param {String} message  - A SENTINL Log Message Body.
- * @param {String} loglevel - A SENTINL Log Level.
- * @param {String} payload  - A SENTINL Log JSON Payload.
- * @param {Bool}   isReport - An optional boolean defining reports.
- * @param {string} object   - An optional base64 attachment object.
+ * @param {object} server - kibana server instance
+ * @param {object} client - elasticsearch client instance
+ * @param {object} config of sentinl
+ * @param {string} actiontype - sentinl action type
+ * @param {string} message  - sentinl log message body
+ * @param {string} level - sentinl log level
+ * @param {object} payload - sentinl json payload
+ * @param {boolean} report - enabling reports
+ * @param {string} object - optional base64 attachment object (screenshot for report)
  *
- * @return {String} Response.
+ * @return {object} elasticsearch response.
  */
+import Log from './log';
+import getConfiguration from './get_configuration';
+import getElasticsearchClient from './get_elasticsearch_client';
 
-export default function logEvent(server, client, config, watcherTitle, type, message, loglevel, payload, isReport, object) {
-  if (!loglevel) {
-    loglevel = 'INFO';
-  }
-  if (!payload) {
-    payload = {};
-  }
-  if (!isReport) {
-    isReport = false;
-  }
-  server.log(['status', 'info', 'Sentinl'], `Storing Alarm to ES with type: ${type}`);
-  const indexDate = '-' + new Date().toISOString().substr(0, 10).replace(/-/g, '.');
-  const indexName = config.es.alarm_index ? config.es.alarm_index + indexDate : `${config.es.alarm_index}${indexDate}`;
-  const indexBody = {
-    '@timestamp': new Date().toISOString(),
-    watcher: watcherTitle,
-    level: loglevel,
-    message: message,
-    action: type,
-    payload: payload,
-    report: isReport
+async function logEvent(args) {
+  let {server, title, actionType, message, level, payload, report, object} = args;
+  const config = getConfiguration(server);
+  const client = getElasticsearchClient(server, config);
+
+  level = level || 'INFO';
+  payload = payload || {};
+  report = report || false;
+
+  const log = new Log(config.app_name, server, 'log_history');
+  log.debug(`storing alarm to Elasticsearch, action: ${actionType}`);
+
+  const doc = {
+    type: config.es.alarm_type,
+    date: '-' + new Date().toISOString().substr(0, 10).replace(/-/g, '.'),
+    body: {
+      '@timestamp': new Date().toISOString(),
+      watcher: title,
+      level,
+      message,
+      action: actionType,
+      payload,
+      report,
+    },
   };
 
+  doc.index = config.es.alarm_index + doc.date;
   if (object) {
-    indexBody.attachment = object;
+    doc.body.attachment = object;
   }
 
-  client.index({
-    index: indexName,
-    type: type,
-    body: indexBody
-  }).then(function (resp) {
-    server.log(['status', 'info', 'Sentinl'], `Alarm stored successfully to ES with type: [${type}]`);
-  }).catch(function (err) {
-    server.log(['status', 'info', 'Sentinl'], `Error storing Alarm: ${err}`);
-  });
-
+  try {
+    return await client.index({index: doc.index, type: doc.type, body: doc.body});
+  } catch (err) {
+    log.error(err);
+    throw new Error(`fail to store alarm ${title}, action ${actionType}`);
+  }
 }
+
+export default logEvent;

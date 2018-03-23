@@ -200,7 +200,7 @@
 
         <div class="form-group">
           <div class="col-md-2">
-            <label class="control-label" for="reportPath">Path</label>
+            <label class="control-label" for="reportPath">Report Name</label>
             <i class="fa fa-question-circle"
               aria-hidden="true"
               uib-popover="{{help.action.report.path}}"
@@ -211,10 +211,10 @@
               type="text"
               id="reportPath"
               name="reportPath"
-              value="{{actionSettings.report.snapshot.path}}"
+              value="{{actionSettings.report.snapshot.name}}"
               class="form-control"
-              placeholder="/tmp/"
-              ng-model="actionSettings.report.snapshot.path"
+              placeholder="my_report"
+              ng-model="actionSettings.report.snapshot.name"
             />
           </div>
           <div class="btn-group col-md-2" uib-dropdown is-open="status.isopen">

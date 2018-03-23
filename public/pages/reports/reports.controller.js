@@ -1,28 +1,40 @@
 import { get, isNumber } from 'lodash';
 import moment from 'moment';
 
-import confirmMessageTemplate from '../../confirm_message/confirm_message.html';
+function ReportsController($rootScope, $scope, $route, $interval,
+  $timeout, timefilter, Private, createNotifier, $window, $uibModal, navMenu, globalNavState, Report, COMMON, $log, confirmModal) {
+  'ngInject';
 
-const ReportsController = function ($rootScope, $scope, $route, $interval,
-  $timeout, timefilter, Private, createNotifier, $window, $uibModal, navMenu, globalNavState, Report) {
-  $scope.title = 'Sentinl: Reports';
-  $scope.description = 'Kibi/Kibana Report App for Elasticsearch';
+  $scope.title = COMMON.reports.title;
+  $scope.description = COMMON.description;
 
   $scope.topNavMenu = navMenu.getTopNav('reports');
   $scope.tabsMenu = navMenu.getTabs('reports');
-  navMenu.setKbnLogo(globalNavState.isOpen());
-  $scope.$on('globalNavState:change', () => navMenu.setKbnLogo(globalNavState.isOpen()));
 
   const notify = createNotifier({
-    location: 'Sentinl Reports'
+    location: COMMON.reports.title,
   });
 
   timefilter.enabled = true;
+  try {
+    timefilter.enableAutoRefreshSelector();
+    timefilter.enableTimeRangeSelector();
+  } catch (err) {
+    $log.warn('Kibana v6.2.X feature:', err);
+  }
 
   /* First Boot */
 
   $scope.reports = [];
   $scope.timeInterval = timefilter.time;
+
+  $scope.isData = function (report) {
+    return report._source.attachment && report._source.attachment[1].data;
+  };
+
+  $scope.isScreenshot = function (report) {
+    return report._source.attachment[1].data.charAt(0) === 'i';
+  };
 
   const getReports = function (interval) {
     Report.updateFilter(interval)
@@ -89,28 +101,30 @@ const ReportsController = function ($rootScope, $scope, $route, $interval,
 
   });
 
-  $scope.deleteReport = function (index, rmindex, rmtype, rmid) {
-    const confirmModal = $uibModal.open({
-      template: confirmMessageTemplate,
-      controller: 'ConfirmMessageController',
-      size: 'sm'
-    });
-
-    confirmModal.result.then((response) => {
-      if (response === 'yes') {
-        Report.delete(rmindex, rmtype, rmid)
-          .then(function (response) {
-            $scope.reports.splice(index - 1, 1);
-            notify.info(`Deleted report "${response}"`);
-            getReports($scope.timeInterval);
-          })
-          .catch(notify.error);
+  /**
+  * Delete report
+  *
+  * @param {integer} index of report on Reports page
+  * @param {object} report
+  */
+  $scope.deleteReport = function (index, report) {
+    async function doDelete() {
+      try {
+        const resp = await Report.delete(report._index, report._type, report._id);
+        $scope.reports.splice(index - 1, 1);
+        notify.info(`Deleted report ${resp}`);
+        getReports($scope.timeInterval);
+      } catch (err) {
+        notify.error(`fail to delete report, ${err}`);
       }
-    });
-  };
+    }
 
-  $scope.deleteReportLocal = function (index) {
-    notify.warning('SENTINL function not yet implemented!');
+    const confirmModalOptions = {
+      onConfirm: doDelete,
+      confirmButtonText: 'Delete report',
+    };
+
+    confirmModal('Are you sure you want to delete the report?', confirmModalOptions);
   };
 
   const currentTime = moment($route.current.locals.currentTime);
@@ -124,6 +138,4 @@ const ReportsController = function ($rootScope, $scope, $route, $interval,
   $scope.$watch('$destroy', unsubscribe);
 };
 
-ReportsController.$inject = ['$rootScope', '$scope', '$route', '$interval',
-'$timeout', 'timefilter', 'Private', 'createNotifier', '$window', '$uibModal', 'navMenu', 'globalNavState', 'Report'];
 export default ReportsController;

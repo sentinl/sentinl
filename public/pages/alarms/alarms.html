@@ -22,37 +22,7 @@
       <p style="float:left;">UTC time is {{ utcTime }}</p>
       <p style="float:right;">Local time is {{ currentTime }}</p>
       <br style="clear:both;">
-
-      <div class="panel panel-default" ng-show="currentAlarms.length">
-        <div><div class="edit-group pull-right"><a href="#"><i class="fa fa-plus"></i></a></div></div>
-        <table class="table">
-          <thead>
-            <tr>
-              <th>TIMESTAMP</th>
-              <th>ACTION</th>
-              <th>MESSAGE</th>
-              <th></th>
-            </tr>
-          <tbody ng-repeat='alarm in currentAlarms'>
-            <tr class="alarm-row">
-              <td>{{ alarm.id }}</td>
-              <td>{{ alarm.action }}</td>
-              <td>{{ alarm.message }}</td>
-              <td class="text-center edit-group">
-              <span ng-click="collapse=!collapse" ng-model="collapse" class="show-rule"><i class="fa fa-ellipsis-h"></i></span>
-              <span ng-click="deleteAlarmLocal($index)" class="delete-rule"><i class="fa fa-trash"></i></span></td>
-            </tr>
-            <tr ng-show=collapse>
-              <td colspan="100%">
-                <pre><code>{{ alarm | json }}</code></pre>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
       <br/>
-
       <div class="panel" ng-show="!alarms.length">
         <div class="well">
           No Alarms found - That's great, right? <i class="fa fa-smile-o" aria-hidden="true"></i><br>
@@ -80,11 +50,11 @@
             <tr ng-class-odd="'alarm-row-odd'" ng-class-even="'alarm-row'">
               <td>{{ alarm._source['@timestamp'] | dateFormat }}</td>
               <td>{{ alarm._source.level }}</td>
-              <td>{{ alarm._type }}</td>
+              <td>{{ alarm._source.action }}</td>
               <td>{{ alarm._source.message }}</td>
               <td class="text-center edit-group">
                 <span ng-click="collapse=!collapse" ng-model="collapse" class="show-rule"><i class="fa fa-ellipsis-h"></i></span>
-                <span ng-click="deleteAlarm($index,alarm._index,alarm._type,alarm._id)" class="delete-rule"><i class="fa fa-trash"></i></span>
+                <span ng-click="deleteAlarm($index, alarm)" class="delete-rule"><i class="fa fa-trash"></i></span>
               </td>
             </tr>
             <tr ng-if=collapse>

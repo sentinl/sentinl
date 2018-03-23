@@ -2,24 +2,28 @@ import { get, isNumber } from 'lodash';
 import moment from 'moment';
 import uiChrome from 'ui/chrome';
 
-import confirmMessageTemplate from '../../confirm_message/confirm_message.html';
-
-const AlarmsController = function ($rootScope, $scope, $route, $interval,
+function AlarmsController($rootScope, $scope, $route, $interval,
   $timeout, $injector, timefilter, Private, createNotifier, $window, $uibModal, navMenu,
-  globalNavState, Alarm) {
-  $scope.title = 'Sentinl: Alarms';
-  $scope.description = 'Kibi/Kibana Report App for Elasticsearch';
+  globalNavState, Alarm, COMMON, $log, confirmModal) {
+  'ngInject';
+
+  $scope.title = COMMON.alarms.title;
+  $scope.description = COMMON.description;
 
   const notify = createNotifier({
-    location: 'Sentinl Alarms'
+    location: COMMON.alarms.title,
   });
 
   timefilter.enabled = true;
+  try {
+    timefilter.enableAutoRefreshSelector();
+    timefilter.enableTimeRangeSelector();
+  } catch (err) {
+    $log.warn('Kibana v6.2.X feature:', err);
+  }
 
   $scope.topNavMenu = navMenu.getTopNav('alarms');
   $scope.tabsMenu = navMenu.getTabs('alarms');
-  navMenu.setKbnLogo(globalNavState.isOpen());
-  $scope.$on('globalNavState:change', () => navMenu.setKbnLogo(globalNavState.isOpen()));
 
   /* First Boot */
 
@@ -87,28 +91,30 @@ const AlarmsController = function ($rootScope, $scope, $route, $interval,
     }
   });
 
-  $scope.deleteAlarm = function (index, rmindex, rmtype, rmid) {
-    const confirmModal = $uibModal.open({
-      template: confirmMessageTemplate,
-      controller: 'ConfirmMessageController',
-      size: 'sm'
-    });
-
-    confirmModal.result.then((response) => {
-      if (response === 'yes') {
-        Alarm.delete(rmindex, rmtype, rmid)
-          .then(function (response) {
-            $scope.alarms.splice(index - 1, 1);
-            notify.info(`Deleted alarm "${response}"`);
-            getAlarms($scope.timeInterval);
-          })
-          .catch(notify.error);
+  /**
+  * Delete alarm
+  *
+  * @param {integer} index of alarm on Alarms page
+  * @param {object} alarm
+  */
+  $scope.deleteAlarm = function (index, alarm) {
+    async function doDelete() {
+      try {
+        const resp = await Alarm.delete(alarm._index, alarm._type, alarm._id);
+        $scope.alarms.splice(index - 1, 1);
+        notify.info(`Deleted alarm ${resp}`);
+        getAlarms($scope.timeInterval);
+      } catch (err) {
+        notify.error(`fail to delete alarm, ${err}`);
       }
-    });
-  };
+    }
 
-  $scope.deleteAlarmLocal = function (index) {
-    notify.warning('SENTINL function not yet implemented!');
+    const confirmModalOptions = {
+      onConfirm: doDelete,
+      confirmButtonText: 'Delete alarm',
+    };
+
+    confirmModal(`Are you sure you want to delete the alarm ${alarm._source.watcher}?`, confirmModalOptions);
   };
 
   var currentTime = moment($route.current.locals.currentTime);
@@ -122,7 +128,4 @@ const AlarmsController = function ($rootScope, $scope, $route, $interval,
   $scope.$watch('$destroy', unsubscribe);
 };
 
-AlarmsController.$inject = ['$rootScope', '$scope', '$route', '$interval',
-  '$timeout', '$injector', 'timefilter', 'Private', 'createNotifier', '$window', '$uibModal', 'navMenu',
-  'globalNavState', 'Alarm'];
 export default AlarmsController;

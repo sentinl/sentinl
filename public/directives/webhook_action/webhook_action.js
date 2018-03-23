@@ -3,7 +3,9 @@ import { has } from 'lodash';
 import template from './webhook_action.html';
 import help from '../../messages/help';
 
-const webhookAction = function ($rootScope) {
+function webhookAction($rootScope) {
+  'ngInject';
+
   function actionDirective(scope, element, attrs) {
     scope.help = help;
     scope.action = {
@@ -37,5 +39,4 @@ const webhookAction = function ($rootScope) {
   };
 };
 
-webhookAction.$inject = ['$rootScope'];
 export default webhookAction;

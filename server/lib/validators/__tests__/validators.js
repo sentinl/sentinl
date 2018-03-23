@@ -1,4 +1,4 @@
-import { pluck, isEqual } from 'lodash';
+import { map, isEqual } from 'lodash';
 import expect from 'expect.js';
 import anomaly from '../anomaly';
 import range from '../range';
@@ -64,7 +64,7 @@ describe('Validators', function () {
       }
     };
     const result = anomaly.check(payload, condition);
-    const values = pluck(result.anomaly, '_source.amount');
+    const values = map(result.anomaly, '_source.amount');
     expect(isEqual(values.sort(), [ -57, 55, -20, -10 ].sort())).to.be(true);
   });
 
@@ -75,7 +75,7 @@ describe('Validators', function () {
       }
     };
     const result = anomaly.check(payload, condition);
-    const values = pluck(result.anomaly, '_source.amount');
+    const values = map(result.anomaly, '_source.amount');
     expect(isEqual(values.sort(), [ -57, 55 ].sort())).to.be(true);
   });
 
@@ -89,7 +89,7 @@ describe('Validators', function () {
       }
     };
     const result = range.check(payload, condition);
-    const values = pluck(result.outside_the_range, '_source.amount');
+    const values = map(result.outside_the_range, '_source.amount');
     expect(isEqual(values.sort(), [ -57, 55, -20 ].sort())).to.be(true);
   });
 

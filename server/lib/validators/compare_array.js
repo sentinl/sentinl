@@ -1,4 +1,4 @@
-import { keys, get, forEach, cloneDeep, pluck, uniq } from 'lodash';
+import { keys, get, forEach, cloneDeep, map, uniq } from 'lodash';
 
 /**
 * Array comparison.
@@ -20,7 +20,7 @@ const valid = function (payload, condition) {
 
   const key = keys(condition.array_compare)[0].split('.').splice(1).join('.');
   const path = condition.array_compare[`payload.${key}`].path;
-  const values = uniq(pluck(get(payload, key), path));
+  const values = uniq(map(get(payload, key), path));
   const operators = cloneDeep(condition.array_compare[`payload.${key}`]);
   delete operators.path;
 

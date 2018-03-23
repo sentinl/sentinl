@@ -1,7 +1,9 @@
 import template from './console_action.html';
 import help from '../../messages/help';
 
-const consoleAction = function ($rootScope) {
+function consoleAction($rootScope) {
+  'ngInject';
+
   function actionDirective(scope, element, attrs) {
     scope.help = help;
     scope.action = {
@@ -25,5 +27,4 @@ const consoleAction = function ($rootScope) {
   };
 };
 
-consoleAction.$inject = ['$rootScope'];
 export default consoleAction;

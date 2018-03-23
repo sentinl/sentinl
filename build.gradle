@@ -121,8 +121,20 @@ node {
 //                   Package                     //
 //                                               //
 ///////////////////////////////////////////////////
+task parseGunMasterUrl () {
+    if (project.ext.properties.github_username && project.ext.properties.github_password) {
+        def github_username = project.ext.properties.github_username
+        def github_password = project.ext.properties.github_password
 
-task gulpPackage(dependsOn: ['gulp_package']) << {}
+        def urlParts = gun_master_url =~ /(git\+https:\/\/)(github\.com\/.*)/
+        gun_master_url = "${urlParts[0][1]}${github_username}:${github_password}@${urlParts[0][2]}"
+    }
+}
+
+task gulpPackage(type: GulpTask, dependsOn: [parseGunMasterUrl]) {
+    args = ["package", "--lib-install=${gun_master_url}"]
+}
+
 
 // run npm install
 gulp_package.dependsOn 'npmInstall'
@@ -146,14 +158,16 @@ task installGruntGlobally(type: NpmTask) {
 //                                               //
 ///////////////////////////////////////////////////
 
-task gulpDev(type: GulpTask) {
+task gulpDev(type: GulpTask, dependsOn: [ parseGunMasterUrl ]) {
     args = ["dev"]
     if (project.hasProperty('kibiHomePath')) {
         args << "--kibanahomepath=${kibiHomePath}"
+        args << "--lib-install=${gun_master_url}"
     }
     else {
         dependsOn installKibi
         args << "--kibanahomepath=${new File(extractKibi.destinationDir, "kibi-core-${project.version}-sources").getAbsolutePath()}"
+        args << "--lib-install=${gun_master_url}"
     }
 }
 
@@ -174,14 +188,17 @@ installGrunt.mustRunAfter 'installGruntGlobally'
 //                                               //
 ///////////////////////////////////////////////////
 
-task gulpTest(type: GulpTask) {
+task gulpTest(type: GulpTask, dependsOn: [ parseGunMasterUrl ]) {
     args = ["test"]
+
     if (project.hasProperty('kibiHomePath')) {
         args << "--kibanahomepath=${kibiHomePath}"
+        args << "--lib-install=${gun_master_url}"
     }
     else {
         dependsOn installKibi
         args << "--kibanahomepath=${new File(extractKibi.destinationDir, "kibi-core-${project.version}-sources").getAbsolutePath()}"
+        args << "--lib-install=${gun_master_url}"
     }
 }
 
@@ -202,14 +219,17 @@ installGrunt.mustRunAfter 'installGruntGlobally'
 //                                               //
 ///////////////////////////////////////////////////
 
-task gulpTestDev(type: GulpTask) {
+task gulpTestDev(type: GulpTask, dependsOn: [ parseGunMasterUrl ]) {
     args = ["testdev"]
+
     if (project.hasProperty('kibiHomePath')) {
         args << "--kibanahomepath=${kibiHomePath}"
+        args << "--lib-install=${gun_master_url}"
     }
     else {
         dependsOn installKibi
         args << "--kibanahomepath=${new File(extractKibi.destinationDir, "kibi-core-${project.version}-sources").getAbsolutePath()}"
+        args << "--lib-install=${gun_master_url}"
     }
 }
 

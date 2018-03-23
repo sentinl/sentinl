@@ -26,17 +26,20 @@ import initIndices from './server/lib/initIndices';
 import getElasticsearchClient from './server/lib/get_elasticsearch_client';
 import getConfiguration from './server/lib/get_configuration';
 import fs from 'fs';
-import phantom from './server/lib/phantom';
+import Log from './server/lib/log';
 
-import userIndexMappings from './server/mappings/user_index';
-import coreIndexMappings from './server/mappings/core_index';
-import alarmIndexMappings from './server/mappings/alarm_index';
-import templateMappings from './server/mappings/template';
+const mappings = {
+  alarm: require('./server/mappings/alarm_index'),
+};
 
-import watchConfiguration from './server/lib/saved_objects/watch';
-import scriptConfiguration from './server/lib/saved_objects/script';
-import userConfiguration from './server/lib/saved_objects/user';
-import SavedObjectsAPIMiddleware from './server/lib/saved_objects_api';
+const siren = {
+  schema: {
+    watch: require('./server/lib/siren/saved_objects/watch'),
+    script: require('./server/lib/siren/saved_objects/script'),
+    user: require('./server/lib/siren/saved_objects/user'),
+  },
+  SavedObjectsAPIMiddleware: require('./server/lib/siren/saved_objects_api'),
+};
 
 /**
 * Initializes Sentinl app.
@@ -46,6 +49,7 @@ import SavedObjectsAPIMiddleware from './server/lib/saved_objects_api';
 const init = once(function (server) {
   const config = getConfiguration(server);
   const scheduler = getScheduler(server);
+  const log = new Log(config.app_name, server, 'init');
 
   if (fs.existsSync('/etc/sentinl.json')) {
     server.plugins.sentinl.status.red('Setting configuration values in /etc/sentinl.json is not supported anymore, please copy ' +
@@ -54,21 +58,12 @@ const init = once(function (server) {
     return;
   }
 
-  server.log(['status', 'info', 'Sentinl'], 'Sentinl Initializing');
+  log.info('initializing ...');
 
   // Object to hold different runtime values.
   server.sentinlStore = {
     schedule: {}
   };
-
-  // Install PhantomJS lib. The lib is needed to take screenshots by report action.
-  const phantomPath = has(config, 'settings.report.phantomjs_path') ? config.settings.report.phantomjs_path : undefined;
-  phantom.install(phantomPath)
-  .then((phantomPackage) => {
-    server.log(['status', 'info', 'Sentinl', 'report'], `Phantom installed at ${phantomPackage.binary}`);
-    server.expose('phantomjs_path', phantomPackage.binary);
-  })
-  .catch((err) => server.log(['status', 'error', 'Sentinl', 'report'], `Failed to install phantomjs: ${err}`));
 
   // Load Sentinl routes.
   masterRoute(server);
@@ -83,31 +78,33 @@ const init = once(function (server) {
     config.settings.authentication.https = true;
   }
 
-  // Create indexes and doc types with mappings.
-  if (server.plugins.saved_objects_api) { // Kibi: savedObjectsAPI.
-    forEach([watchConfiguration, scriptConfiguration, userConfiguration], (schema) => {
+  config.es.default_index = server.config().get('kibana.index');
+  config.settings.authentication.user_index = server.config().get('kibana.index');
+
+  if (server.plugins.saved_objects_api) { // Siren: savedObjectsAPI.
+    forEach(siren.schema, (schema) => {
       server.plugins.saved_objects_api.registerType(schema);
     });
 
-    config.es.default_index = server.config().get('kibana.index');
-    config.settings.authentication.user_index = server.config().get('kibana.index');
-
-    const middleware = new SavedObjectsAPIMiddleware(server);
+    const middleware = new siren.SavedObjectsAPIMiddleware(server);
     server.plugins.saved_objects_api.registerMiddleware(middleware);
-  } else { // Kibana.
-    initIndices.createIndex(server, config, config.es.default_index, config.es.type, coreIndexMappings);
-    initIndices.putMapping(server, config, config.es.default_index, config.es.script_type, templateMappings);
-
-    if (config.settings.authentication.enabled) {
-      initIndices.createIndex(server, config, config.settings.authentication.user_index,
-        config.settings.authentication.user_type, userIndexMappings);
-    }
   }
-  initIndices.createIndex(server, config, config.es.alarm_index, config.es.alarm_type, alarmIndexMappings, 'alarm');
+
+  initIndices.createIndex(server, config, config.es.alarm_index, config.es.alarm_type, mappings.alarm, 'alarm');
+
+  // Start cluster
+  let node;
+  if (config.settings.cluster.enabled) {
+    const GunMaster = require('gun-master');
+    node = new GunMaster(config.settings.cluster);
+    node.run().catch(function (err) {
+      log.error(`fail to run cluster node, ${err}`);
+    });
+  }
 
   // Schedule watchers execution.
   const sched = later.parse.recur().on(25,55).second();
-  const handleWatchers = later.setInterval(() => scheduler.doalert(server), sched);
+  const handleWatchers = later.setInterval(() => scheduler.doalert(server, node), sched);
 });
 
 export default function (server, options) {

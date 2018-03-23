@@ -1,21 +1,25 @@
 import moment from 'moment';
 
-const AboutController = function ($scope, $route, $interval, timefilter, createNotifier, navMenu, globalNavState) {
-  $scope.title = 'Sentinl: About';
-  $scope.description = 'Kibi/Kibana Report App for Elasticsearch';
+function AboutController($scope, $route, $interval, timefilter, createNotifier, navMenu, globalNavState, COMMON, sentinlConfig) {
+  'ngInject';
+
+  $scope.app = {
+    name: sentinlConfig.appName,
+    logo: sentinlConfig.appName.toLowerCase() === 'sentinl' ? 'sentinl-logo-about' : 'siren-logo-about',
+  };
+
+  $scope.title = COMMON.about.title;
+  $scope.description = COMMON.description;
   timefilter.enabled = false;
 
   const notify = createNotifier({
-    location: 'Sentinl About'
+    location: COMMON.about.title,
   });
 
   $scope.topNavMenu = navMenu.getTopNav('about');
   $scope.tabsMenu = navMenu.getTabs('about');
-  navMenu.setKbnLogo(globalNavState.isOpen());
-  $scope.$on('globalNavState:change', () => navMenu.setKbnLogo(globalNavState.isOpen()));
 
   if (!$scope.notified) {
-    notify.warning('SENTINL is a work in progress! Use at your own risk!');
     $scope.notified = true;
   }
 
@@ -30,5 +34,4 @@ const AboutController = function ($scope, $route, $interval, timefilter, createN
   $scope.$watch('$destroy', unsubscribe);
 };
 
-AboutController.$inject = ['$scope', '$route', '$interval', 'timefilter', 'createNotifier', 'navMenu', 'globalNavState'];
 export default AboutController;

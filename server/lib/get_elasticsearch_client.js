@@ -3,61 +3,80 @@
  *
  * By default both watches and alerts history are stored in the data cluster.
  */
-import es from 'elasticsearch';
+import elasticsearch from 'elasticsearch';
 import fs from 'fs';
 import Crypto from './classes/crypto';
+import Log from './log';
 
-export default function getElasticsearchClient(server, config = false, type = 'data', impersonate = null) {
-
-  // Basic authentication for watchers
-  if (config && config.settings.authentication.enabled && config.settings.authentication.mode === 'basic') {
-
-    /**
-    * Get Elasticsearch client.
-    *
-    * @param {string} authPair - authentication pair 'username:password'
-    */
-    const getClient = function (authPair) {
-      const options = {
-        hosts: [
-          {
-            host: config.es.host,
-            auth: authPair,
-            protocol: config.settings.authentication.https ? 'https' : 'http',
-            port: config.es.port
-          }
-        ]
-      };
-
-      if (config.settings.authentication.verify_certificate) {
-        options.ssl = {
-          ca: fs.readFileSync(config.settings.authentication.path_to_pem),
-          rejectUnauthorized: true
-        };
+/**
+* Get client
+*
+*/
+function esClient(config, username, password) {
+  const options = {
+    host: [
+      {
+        host: config.es.host,
+        protocol: config.es.protocol,
+        port: config.es.port
       }
+    ]
+  };
 
-      return new es.Client(options);
+  if (username && password) {
+    options.host[0].auth = username + ':' + password;
+  }
+
+  if (!config.settings.authentication.cert.selfsigned) {
+    options.ssl = {
+      ca: fs.readFileSync(config.settings.authentication.cert.pem),
+      rejectUnauthorized: true,
     };
+  }
 
-    const crypto = new Crypto(config.settings.authentication.encryption);
+  return new elasticsearch.Client(options);
+};
 
-    let authPair;
+
+/**
+* Get Elasticsearch client
+*
+*/
+export default function getElasticsearchClient(server, config, type = 'data', impersonate = null) {
+  const log = new Log(config.app_name, server, 'get_elasticsearch_client');
+
+  const auth = config.settings.authentication;
+  // Basic authentication
+  if (auth.enabled) {
+    const crypto = new Crypto(auth.encryption);
+
     if (impersonate) {
-      authPair = `${impersonate.username}:${crypto.decrypt(impersonate.sha)}`;
-    } else {
-      authPair = `${config.settings.authentication.admin_username}:${crypto.decrypt(config.settings.authentication.admin_sha)}`;
+      log.debug(`impersonating Elasticsearch client by ${auth.username}:${auth.sha}`);
+      return esClient(config, impersonate.username, crypto.decrypt(impersonate.sha));
     }
-    server.log(['status', 'debug', 'Sentinl', 'get_elasticsearch_client', 'AUTH'],
-      `Impersonate ES client by ${authPair.split(':')[0]}`);
 
-    return getClient(authPair);
+    if (auth.sha) {
+      log.debug(`impersonating Elasticsearch client by ${auth.username}:${auth.sha}`);
+      return esClient(config, auth.username, crypto.decrypt(auth.sha));
+    }
+
+    log.debug(`impersonating Elasticsearch client by ${auth.username}:${auth.password}`);
+    return esClient(config, auth.username, auth.password);
   }
 
   // Authentication via Kibi Access Control app
   if (server.plugins.kibi_access_control) {
+    log.debug('auth via Kibi Access Control');
     return server.plugins.kibi_access_control.getSentinlClient();
   }
 
+  // Authentication via Investigate Access Control app pre Sentinl rename
+  if (server.plugins.investigate_access_control) {
+    log.debug('auth via Investigate Access Control');
+    return server.plugins.investigate_access_control.getSentinlClient();
+  }
+
+  log.debug('auth via Kibana server elasticseaarch plugin');
   if (type === 'data') {
     return server.plugins.elasticsearch.getCluster('data').getClient();
   }

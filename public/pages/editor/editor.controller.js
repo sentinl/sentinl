@@ -1,7 +1,7 @@
 /* global angular */
 import { get, keys, trim, has, includes, forEach, isObject, isEmpty } from 'lodash';
 import later from 'later';
-import confirmMessageTemplate from '../../confirm_message/confirm_message.html';
+import uuid from 'uuid/v4';
 
 import WatcherHelper from './classes/WatcherHelper';
 
@@ -11,11 +11,13 @@ import rangeTemplate from './templates/range';
 import help from '../../messages/help.json';
 
 // EDITOR CONTROLLER
-const EditorController = function (sentinlConfig, $rootScope, $scope, $route, $interval,
+function EditorController(sentinlConfig, $rootScope, $scope, $route, $interval,
   $timeout, timefilter, Private, createNotifier, $window, $uibModal, Promise,
-  $log, navMenu, globalNavState, $routeParams, dataTransfer, $location, Watcher, Script, User) {
-  $scope.title = 'Sentinl: Editor';
-  $scope.description = 'Kibi/Kibana Report App for Elasticsearch';
+  $log, navMenu, globalNavState, $routeParams, dataTransfer, $location, Watcher, Script, User, ServerConfig, COMMON, confirmModal) {
+  'ngInject';
+
+  $scope.title = COMMON.editor.title;
+  $scope.description = COMMON.description;
   $scope.sentinlConfig = sentinlConfig;
 
   let editorMode = $location.$$path.slice(1); // modes: editor, wizard
@@ -24,11 +26,9 @@ const EditorController = function (sentinlConfig, $rootScope, $scope, $route, $i
 
   $scope.topNavMenu = navMenu.getTopNav(editorMode);
   $scope.tabsMenu = navMenu.getTabs(editorMode, [{ name: tabName, url: `#/${editorMode}` }]);
-  navMenu.setKbnLogo(globalNavState.isOpen());
-  $scope.$on('globalNavState:change', () => navMenu.setKbnLogo(globalNavState.isOpen()));
 
   const notify = createNotifier({
-    location: `Sentinl Watcher ${tabName}`
+    location: COMMON.editor.title,
   });
 
   $scope.help = {
@@ -77,7 +77,7 @@ const EditorController = function (sentinlConfig, $rootScope, $scope, $route, $i
     };
 
     // get authentication config info
-    Watcher.getConfiguration()
+    ServerConfig.get()
       .then((response) => {
         $scope.watcher.$$authentication = response.data.authentication;
       })
@@ -120,9 +120,9 @@ const EditorController = function (sentinlConfig, $rootScope, $scope, $route, $i
         editorOptions: {
           autoScrollEditorIntoView: false
         },
-        onLoad: function ($$editor) {
-          $$editor.$blockScrolling = Infinity;
-        }
+        //onLoad: function ($$editor) {
+        //  $$editor.$blockScrolling = Infinity;
+        //}
       };
     };
 
@@ -196,7 +196,7 @@ const EditorController = function (sentinlConfig, $rootScope, $scope, $route, $i
 
       if ($scope.watcherForm[title].$valid) {
         const template = {
-          _id: Script.createId(),
+          _id: uuid(),
           _source: {
             description: field,
             title: $scope.watcher['$$' + field].title,
@@ -238,7 +238,7 @@ const EditorController = function (sentinlConfig, $rootScope, $scope, $route, $i
       const id = $scope.watcher['$$' + field].id;
       Script.delete(id)
         .then(function (id) {
-          notify.info(`Deleting "${$scope.form.templates[field][id]._source.title}"`);
+          notify.info(`Deleted ${id}`);
           delete $scope.form.templates[field][id];
           $scope.watcher['$$' + field].id = undefined;
           $scope.watcher['$$' + field].title = undefined;
@@ -275,28 +275,24 @@ const EditorController = function (sentinlConfig, $rootScope, $scope, $route, $i
     };
 
     /**
-    * Removes action from watcher.
+    * Remove watcher action
     *
-    * @param {string} actionName - action name.
+    * @param {string} name of action
     */
-    const removeAction = function (actionName) {
-      const confirmModal = $uibModal.open({
-        template: confirmMessageTemplate,
-        controller: 'ConfirmMessageController',
-        size: 'sm'
-      });
-
-      confirmModal.result.then((response) => {
-        if (response === 'yes') {
-          delete $scope.watcher._source.actions[actionName];
-
-          if ($scope.watcher._source.report && !wHelper.numOfActionTypes($scope.watcher, 'report')) {
-            delete $scope.watcher._source.report;
-          }
+    const removeAction = function (name) {
+      function doRemoveAction() {
+        delete $scope.watcher._source.actions[name];
+        if ($scope.watcher._source.report && !wHelper.numOfActionTypes($scope.watcher, 'report')) {
+          delete $scope.watcher._source.report;
         }
-      }, () => {
-        $log.info('Sentinl.', `You choose not deleting the action "${actionName}"`);
-      });
+      }
+
+      const confirmModalOptions = {
+        onConfirm: doRemoveAction,
+        confirmButtonText: 'Delete action',
+      };
+
+      confirmModal(`Are you sure you want to delete the action ${name}?`, confirmModalOptions);
     };
 
     /**
@@ -351,7 +347,7 @@ const EditorController = function (sentinlConfig, $rootScope, $scope, $route, $i
     * Initilizes raw property for the Raw tab.
     */
     const initRaw = function () {
-      $scope.watcher.$$raw = angular.toJson($scope.watcher, 'pretty');
+      $scope.watcher.$$raw = angular.toJson($scope.watcher._source, 'pretty');
     };
 
     /**
@@ -365,7 +361,7 @@ const EditorController = function (sentinlConfig, $rootScope, $scope, $route, $i
           $scope.form.templates[typeName] = {};
         }
         forEach(type, function (template, templateName) {
-          let id = Script.createId();
+          let id = uuid();
 
           $scope.form.templates[typeName][id] = {
             _id: id,
@@ -475,7 +471,7 @@ const EditorController = function (sentinlConfig, $rootScope, $scope, $route, $i
       if ($scope.form.rawEnabled) { // Raw
         try {
           // All settings will have been overwritten if enable is checked and the watcher is saved.
-          $scope.watcher = angular.fromJson($scope.watcher.$$raw);
+          $scope.watcher._source = angular.fromJson($scope.watcher.$$raw);
         } catch (e) {
           notify.error(`Invalid Raw configuration: ${e}`);
           init(); // init form again
@@ -499,7 +495,7 @@ const EditorController = function (sentinlConfig, $rootScope, $scope, $route, $i
         try {
           saveThrottle();
         } catch (e) {
-          notify.error(`Invalid throttle configuration.`);
+          notify.error('Invalid throttle configuration.');
           $scope.watcherForm.$valid = false;
           $scope.watcherForm.$invalid = true;
           init(); // init form again
@@ -539,28 +535,24 @@ const EditorController = function (sentinlConfig, $rootScope, $scope, $route, $i
       }
 
       if ($scope.watcherForm.$valid) {
-        saveUser($scope.watcher.$$authentication.enabled)
-        .then(function () {
+        saveUser($scope.watcher.$$authentication.impersonate).then(function () {
           if (later.parse.text($scope.watcher._source.trigger.schedule.later).error > -1) {
             notify.error('Schedule is invalid.');
-            $log.error('Sentinl.', 'Schedule is invalid:', $scope.watcher._source.trigger.schedule.later);
+            $log.error('schedule is invalid:', $scope.watcher._source.trigger.schedule.later);
             init({
               fields: false
             });
             return;
           }
 
-          return Watcher.save($scope.watcher)
-          .then(function (id) {
+          return Watcher.save($scope.watcher).then(function (id) {
             const title = $scope.watcher.title ? $scope.watcher.title : get($scope.watcher, '_source.title');
             notify.info(`Saved watcher "${title}"`);
             $scope.cancelEditor();
-          })
-          .then(function () {
+          }).then(function () {
             $rootScope.$broadcast('editorCtrl-Watcher.save');
           });
-        })
-        .catch(notify.error);
+        }).catch(notify.error);
       }
 
       if (editorMode === 'wizard') $scope.cancelEditor();
@@ -612,7 +604,4 @@ const EditorController = function (sentinlConfig, $rootScope, $scope, $route, $i
   }
 };
 
-EditorController.$inject = ['sentinlConfig', '$rootScope', '$scope', '$route', '$interval',
-'$timeout', 'timefilter', 'Private', 'createNotifier', '$window', '$uibModal', 'Promise',
-'$log', 'navMenu', 'globalNavState', '$routeParams', 'dataTransfer', '$location', 'Watcher', 'Script', 'User'];
 export default EditorController;

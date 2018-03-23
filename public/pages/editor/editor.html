@@ -44,7 +44,7 @@
                   Watcher title is required.
                 </p>
               </div> <!-- end form-group -->
-              <div class="form-group" ng-if="watcher.$$authentication.mode === 'basic' && watcher.$$authentication.enabled">
+              <div class="form-group" ng-if="watcher.$$authentication.impersonate">
                 <div class="col-md-2">
                   <label class="control-label">Username</label>
                   <i class="fa fa-question-circle"
@@ -62,7 +62,7 @@
                   />
                 </div>
               </div> <!-- end form-group -->
-              <div class="form-group" ng-if="watcher.$$authentication.mode === 'basic' && watcher.$$authentication.enabled">
+              <div class="form-group" ng-if="watcher.$$authentication.impersonate">
                 <div class="col-md-2">
                   <label class="control-label">Password</label>
                   <i class="fa fa-question-circle"

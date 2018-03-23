@@ -5,8 +5,6 @@ import expect from 'expect.js';
 import _ from 'lodash';
 import noDigestPromises from 'test_utils/no_digest_promises';
 
-import defaultEmailSource from '../../defaults/email_watcher';
-
 import '../editor/editor.controller';
 
 describe('editorController', function () {
@@ -21,6 +19,7 @@ describe('editorController', function () {
   let Notifier;
   let watcher;
   let Promise;
+  let EMAILWATCHER;
 
   let templates = {
     condition: {
@@ -51,7 +50,7 @@ describe('editorController', function () {
       ngMock.module('kibana');
 
       ngMock.inject(function ($rootScope, $controller, _$location_, _$httpBackend_, _$route_,
-        _Watcher_, _Script_, _dataTransfer_, _Notifier_, _$routeParams_, _Promise_) {
+        _Watcher_, _Script_, _dataTransfer_, _Notifier_, _$routeParams_, _Promise_, _EMAILWATCHER_) {
         $scope = $rootScope;
         $route = _$route_;
         $location = _$location_;
@@ -62,6 +61,7 @@ describe('editorController', function () {
         dataTransfer = _dataTransfer_;
         Notifier = _Notifier_;
         Promise = _Promise_;
+        EMAILWATCHER = _EMAILWATCHER_;
 
         $route.current = {
           locals: {
@@ -72,7 +72,7 @@ describe('editorController', function () {
         watcher = {
           _id: '123',
           _type: 'sentinl-watcher',
-          _source: _.cloneDeep(defaultEmailSource)
+          _source: _.cloneDeep(EMAILWATCHER)
         };
 
         dataTransfer.setWatcher(watcher);
@@ -139,8 +139,6 @@ describe('editorController', function () {
           $viewValue: 'my title'
         }
       };
-
-      sinon.stub(Script, 'createId', () => id);
 
       sinon.stub(Script, 'new', () => {
         return Promise.resolve(id);
@@ -210,7 +208,7 @@ describe('editorController', function () {
         watcher = {
           _id: '123',
           _type: 'sentinl-watcher',
-          _source: _.cloneDeep(defaultEmailSource)
+          _source: _.cloneDeep(EMAILWATCHER)
         };
 
         $routeParams.watcherId = watcher._id;

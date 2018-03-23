@@ -4,24 +4,21 @@ import moment from 'moment';
 import $ from 'jquery';
 import ace from 'ace';
 
-import confirmMessageTemplate from '../../confirm_message/confirm_message.html';
-
 // WATCHERS CONTROLLER
-const WatchersController = function ($rootScope, $scope, $route, $interval,
+function  WatchersController($rootScope, $scope, $route, $interval,
   $timeout, timefilter, Private, createNotifier, $window, $http, $uibModal, $log, navMenu,
-  globalNavState, $location, dataTransfer, Watcher, Script, Promise) {
+  globalNavState, $location, dataTransfer, Watcher, Script, Promise, COMMON, confirmModal) {
+  'ngInject';
 
-  $scope.title = 'Sentinl: ';
-  $scope.description = 'Kibi/Kibana Report App for Elasticsearch';
+  $scope.title = COMMON.watchers.title;
+  $scope.description = COMMON.description;
 
   const notify = createNotifier({
-    location: 'Sentinl Watchers'
+    location: COMMON.watchers.title,
   });
 
   $scope.topNavMenu = navMenu.getTopNav('watchers');
   $scope.tabsMenu = navMenu.getTabs();
-  navMenu.setKbnLogo(globalNavState.isOpen());
-  $scope.$on('globalNavState:change', () => navMenu.setKbnLogo(globalNavState.isOpen()));
 
   timefilter.enabled = false;
   $scope.watchers = [];
@@ -78,14 +75,12 @@ const WatchersController = function ($rootScope, $scope, $route, $interval,
   /**
   * Lists all existing watchers.
   */
-  const listWatchers = function () {
-    Watcher.list()
-      .then((response) => {
-        $scope.watchers = response;
-        importWatcherFromLocalStorage();
-      })
-      .catch(notify.error)
-      .finally(importWatcherFromLocalStorage);
+  const listWatchers = async function () {
+    return Watcher.list().then(function (resp) {
+      $scope.watchers = resp;
+    }).catch(notify.error).then(function () {
+      importWatcherFromLocalStorage();
+    });
   };
 
   listWatchers();
@@ -95,35 +90,35 @@ const WatchersController = function ($rootScope, $scope, $route, $interval,
     listWatchers();
   });
 
-
   /**
-  * Deletes watcher.
+  * Delete watcher
   *
-  * @param {string} id - watcher id.
+  * @param {string} id of watcher
   */
   $scope.deleteWatcher = function (id) {
     const index = $scope.watchers.findIndex((watcher) => watcher._id === id);
+    const watcher = $scope.watchers[index];
 
-    const confirmModal = $uibModal.open({
-      template: confirmMessageTemplate,
-      controller: 'ConfirmMessageController',
-      size: 'sm'
-    });
-
-    confirmModal.result.then(function (response) {
-      if (response === 'yes') {
-        Watcher.delete($scope.watchers[index]._id).then(function (id) {
-          notify.info(`Deleted watcher "${$scope.watchers[index]._source.title}"`);
+    async function doDelete() {
+      try {
+        const id = await Watcher.delete(watcher._id);
+        notify.info(`Deleted watcher ${watcher._source.title}`);
+        $scope.watchers.splice(index, 1);
+      } catch (err) {
+        if (Number.isInteger(index)) {
           $scope.watchers.splice(index, 1);
-        }).catch(function (error) {
-          if (Number.isInteger(index)) {
-            $scope.watchers.splice(index, 1);
-          } else {
-            notify.error(error);
-          }
-        });
+        } else {
+          notify.error(`failto delete watcher, ${err}`);
+        }
       }
-    });
+    }
+
+    const confirmModalOptions = {
+      onConfirm: doDelete,
+      confirmButtonText: 'Delete watcher',
+    };
+
+    confirmModal(`Are you sure you want to delete the watcher ${watcher._source.title}?`, confirmModalOptions);
   };
 
   /**
@@ -175,21 +170,18 @@ const WatchersController = function ($rootScope, $scope, $route, $interval,
   * @param {array} templates - list of field names for templates
   */
   Promise.map(keys(templates), function (field) {
-    return Script.list(field)
-      .then(function (_templates_) {
-        if (_templates_.length) {
-          forEach(_templates_, function (template) {
-            templates[field][template._id] = template;
-          });
-        }
-        return null;
-      });
-  })
-  .then(function () {
+    return Script.list(field).then(function (_templates_) {
+      if (_templates_.length) {
+        forEach(_templates_, function (template) {
+          templates[field][template._id] = template;
+        });
+      }
+      return null;
+    });
+  }).then(function () {
     dataTransfer.setTemplates(templates);
     return null;
-  })
-  .catch(notify.error);
+  }).catch(notify.error);
 
   const currentTime = moment($route.current.locals.currentTime);
   $scope.currentTime = currentTime.format('HH:mm:ss');
@@ -203,7 +195,4 @@ const WatchersController = function ($rootScope, $scope, $route, $interval,
 
 };
 
-WatchersController.$inject = ['$rootScope', '$scope', '$route', '$interval',
-'$timeout', 'timefilter', 'Private', 'createNotifier', '$window', '$http', '$uibModal', '$log', 'navMenu',
-'globalNavState', '$location', 'dataTransfer', 'Watcher', 'Script', 'Promise'];
 export default WatchersController;
