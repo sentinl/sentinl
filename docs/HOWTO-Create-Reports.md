@@ -27,7 +27,6 @@ So your Boss wants to see some charts each Monday? No problem!
           "snapshot": {
             "res": "1280x900",
             "url": "http://www.google.com",
-            "path": "/tmp/",
             "params": {
               "delay": 5000
             }
@@ -45,7 +44,13 @@ Report actions requires:
 
 * SENTINL 4.5+
 * PhantomJS installed on the Kibi/Kibana host, ie: ```npm install phantomjs-prebuilt -g```
-* A valid email configuration in ```kibana.yml```
+* A valid email configuration in ```kibana.yml```, for example:
+```
+sentinl:
+  settings:
+    report:
+      active: true
+```
 
 #### Report Away!
 With a pinch of luck, you will soon receive your first report with a screenshot attached.
