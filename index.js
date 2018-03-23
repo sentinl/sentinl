@@ -209,6 +209,7 @@ export default function (kibana) {
               'Option "report.tmp_path" is not needed anymore. Just delete it from config!'
             )),
             active: Joi.boolean().default(false),
+            executable_path: Joi.string().default('/usr/bin/chromium'),
             authentication: Joi.object({
               enabled: Joi.boolean().default(false),
               mode: Joi.object({
