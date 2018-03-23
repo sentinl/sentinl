@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import {assign} from 'lodash';
+import { assign, pick } from 'lodash';
 import url from 'url';
 import Promise from 'bluebird';
 import moment from 'moment';
@@ -48,14 +48,7 @@ export default function (server, actions, payload, task) {
 
 
   /* Email Settings */
-  const { user, password, host, ssl, timeout } = config.settings.email;
-  const email = new Email({
-    user,
-    password,
-    host,
-    ssl,
-    timeout
-  });
+  const email = new Email(pick(config.settings.email, ['user', 'password', 'host', 'ssl', 'timeout']));
 
   /* Slack Settings */
   var slack;

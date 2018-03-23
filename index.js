@@ -177,7 +177,7 @@ export default function (kibana) {
             user: Joi.string(),
             password: Joi.string(),
             host: Joi.string(),
-            ssl: Joi.boolean().default(true),
+            ssl: Joi.boolean().default(false),
             timeout: Joi.number().default(5000)
           }).default(),
           slack: Joi.object({
