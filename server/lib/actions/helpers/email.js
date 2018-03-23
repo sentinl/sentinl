@@ -24,7 +24,7 @@ class Email {
     return new Promise((resolve, reject) => {
       this.server.send(options, function (error, message) {
         if (error) {
-          console.error('fail to send email', error);
+          console.error(error);
           reject(error);
         }
         resolve(JSON.stringify(message));
