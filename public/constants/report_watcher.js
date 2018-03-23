@@ -7,6 +7,19 @@ export default {
       later: 'every 1 hour'
     }
   },
+  input: {
+    search: {
+      request: {
+        index: [],
+        body: {}
+      }
+    }
+  },
+  condition: {
+    script: {
+      script: 'payload.hits.total >= 0'
+    }
+  },
   actions: {
     report_admin: {
       throttle_period: '15m',
@@ -20,7 +33,6 @@ export default {
         snapshot: {
           res: '1280x900',
           url: 'http://localhost/app/kibana#/dashboard/Alerts',
-          path: '/tmp/',
           params: {
             delay: 5000,
             crop: 'false'

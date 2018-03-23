@@ -174,10 +174,12 @@ export default function (kibana) {
           }).default(),
           email: Joi.object({
             active: Joi.boolean().default(false),
+            host: Joi.string().default('localhost'),
+            timeout: Joi.number().default(5000),
             user: Joi.string(),
             password: Joi.string(),
             host: Joi.string(),
-            ssl: Joi.boolean().default(true),
+            ssl: Joi.boolean().default(false),
             timeout: Joi.number().default(5000)
           }).default(),
           slack: Joi.object({
@@ -196,11 +198,44 @@ export default function (kibana) {
             body: Joi.string().default('{{payload.watcher_id}}{payload.hits.total}}')
           }).default(),
           report: Joi.object({
-            search_guard: Joi.boolean().default(false),
-            simple_authentication: Joi.boolean().default(false),
+            search_guard: Joi.any().forbidden().error(new Error(
+              'Option "report.search_guard" was deprecated. Use "report.authentication.mode.searchguard" instead!'
+            )),
+            simple_authentication: Joi.any().forbidden().error(new Error(
+              'Option "report.simple_authentication" was deprecated. Use "report.authentication.mode.basic" instead!'
+            )),
+            phantmjs_path: Joi.any().forbidden().error(new Error(
+              'Option "report.phantomjs_path" was deprecated. Sentinl does not use PhantomJS anymore. Headless Chrome is used instead: https://developers.google.com/web/tools/puppeteer/get-started'
+            )),
+            tmp_path: Joi.any().forbidden().error(new Error (
+              'Option "report.tmp_path" is not needed anymore. Just delete it from config!'
+            )),
             active: Joi.boolean().default(false),
-            phantomjs_path: Joi.string().default(undefined),
-            tmp_path: Joi.string().default('/tmp/')
+            authentication: Joi.object({
+              enabled: Joi.boolean().default(false),
+              mode: Joi.object({
+                searchguard: Joi.boolean().default(false),
+                xpack: Joi.boolean().default(false),
+                basic: Joi.boolean().default(false),
+                custom: Joi.boolean().default(false),
+              }).default(),
+              custom: Joi.object({
+                username_input_selector: Joi.string().default('#user'),
+                password_input_selector: Joi.string().default('#pass'),
+                login_btn_selector: Joi.string().default('.btn-lg'),
+              }).default(),
+            }).default(),
+            file: Joi.object({
+              pdf: Joi.object({
+                format: Joi.string().default('A4'),
+                landscape: Joi.boolean().default(true),
+              }).default(),
+              screenshot: Joi.object({
+                width: Joi.number().default(1280),
+                height: Joi.number().default(900),
+              }).default(),
+            }).default(),
+            timeout: Joi.number().default(5000),
           }).default(),
           pushapps: Joi.object({
             active: Joi.boolean().default(false),
