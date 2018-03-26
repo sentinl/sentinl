@@ -17,6 +17,7 @@ sentinl:
       ssl: true
     report:
       active: true
+      executable_path: '/usr/bin/chromium' # path to Chrome v59+ or Chromium v59+
 ```
 
 
@@ -67,6 +68,7 @@ sentinl:
       # method: POST
     report:
       active: true
+      executable_path: '/usr/bin/chromium' # path to Chrome v59+ or Chromium v59+
       timeout: 5000
       # authentication:
       #   enabled: true

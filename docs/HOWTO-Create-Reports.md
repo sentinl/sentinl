@@ -50,6 +50,7 @@ sentinl:
   settings:
     report:
       active: true
+      executable_path: '/usr/bin/chromium' # path to Chrome v59+ or Chromium v59+
 ```
 
 #### Report Away!
