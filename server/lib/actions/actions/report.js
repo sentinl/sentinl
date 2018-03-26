@@ -5,9 +5,8 @@ import url from 'url';
 import path from 'path';
 import fs from 'fs';
 import os from 'os';
-import { resolve, promisify, reject } from 'bluebird';
+import { delay } from 'bluebird';
 import { includes, isObject } from 'lodash';
-import { delay } from '../../helpers';
 import getConfiguration from '../../get_configuration';
 import logHistory from '../../log_history';
 import uuid from 'uuid/v4';
@@ -61,11 +60,12 @@ class Reporter {
     this.config = config;
   }
 
-  async openPage(url) {
+  async openPage(url, executablePath) {
     this.url = url;
 
     try {
       this.browser = await puppeteer.launch({
+        executablePath,
         args: ['--no-sandbox', '--disable-setuid-sandbox'],
         ignoreHTTPSErrors: true,
       });
@@ -172,6 +172,7 @@ const createReportAttachment = function (filename, file, type = 'png') {
 *
 * @param {object} server - Kibana hapi server
 * @param {object} email - instance of emailjs server
+* @param {object} task - watcher
 * @param {object} action - current watcher action
 * @param {string} actionName - name of the action
 * @param {object} payload - ES response
@@ -186,7 +187,7 @@ export default async function doReport(server, email, task, action, actionName, 
   }
 
   if (!action.snapshot.url.length) {
-    reject('Report Disabled: No URL Settings!');
+    log.info('Report Disabled: No URL Settings!');
   }
 
   let formatterSubject = action.subject;
@@ -226,7 +227,7 @@ export default async function doReport(server, email, task, action, actionName, 
 
   try {
     const report = new Reporter(config);
-    await report.openPage(action.snapshot.url);
+    await report.openPage(action.snapshot.url, config.executable_path);
 
     let file;
     if (action.snapshot.type !== 'pdf') {
@@ -276,6 +277,6 @@ export default async function doReport(server, email, task, action, actionName, 
     log.debug('stateless report does not save data to Elasticsearch');
     return {message: 'stateless report does not save data to Elasticsearch'};
   } catch (err) {
-    throw err;
+    log.error(err);
   }
 }
