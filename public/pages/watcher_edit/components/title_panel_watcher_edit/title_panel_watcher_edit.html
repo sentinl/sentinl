@@ -1,0 +1,95 @@
+<section>
+  <div class="row">
+    <div class="col-sm-12">
+      <header>
+        <h3 class="form-text">
+          Watcher
+        </h3>
+        <small class="form-text text-muted">
+          Send alert via different channels when conditions are met
+        </small>
+      </header>
+    </div>
+  </div>
+  <hr/>
+  <form name="titlePanelWatcherEdit.form" ng-model-options="{ getterSetter: true }" novalidate>
+    <div class="row">
+      <div class="col-sm-4">
+        <div class="form-group">
+          <label for="watcherName">
+            Name
+          </label>
+          <input
+            class="form-control"
+            type="text"
+            name="watcherName"
+            id="watcherName"
+            input-focus
+            required
+            ng-model="titlePanelWatcherEdit.title"
+            placeholder="My Watcher"
+          >
+          <small
+            id="watcherNameValidationMessage"
+            class="form-text text-danger"
+            ng-if="titlePanelWatcherEdit.isValidationMessageVisible('watcherName', 'required')"
+          >
+            A name is required.
+          </small>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-sm-8">
+        <div class="form-group">
+          <label for="watcherIndex">
+            Select an Index
+          </label>
+          <input
+            class="form-control"
+            type="text"
+            name="watcherIndex"
+            id="watcherIndex"
+            input-focus
+            ng-model="titlePanelWatcherEdit.index"
+            placeholder="Target indices names. All indices searched if this field empty"
+          >
+          <small class="form-text text-muted">
+            Add * to index name for broad search. Use , to insert multiple indices
+          </small>
+        </div>
+      </div>
+
+      <div class="col-sm-4">
+        <div class="form-group">
+          <label for="watcherSchedule">
+            Schedule
+          </label>
+          <input
+            class="form-control"
+            type="text"
+            id="watcherSchedule"
+            name="watcherSchedule"
+            input-focus
+            required
+            placeholder="every 5 mins"
+            ng-model="titlePanelWatcherEdit.schedule"
+            ng-model-options="{ debounce: 1000 }"
+          >
+          <small
+            id="watcherScheduleValidationMessage"
+            class="form-text text-danger"
+            ng-if="titlePanelWatcherEdit.isValidationMessageVisible('watcherSchedule', 'required')"
+          >
+            A time field is required.
+          </small>
+          <small class="form-text text-muted">
+            <span>Next execution: {{titlePanelWatcherEdit.schedule | nextScheduleOccurrence: titlePanelWatcherEdit.config}}.</span>
+            <a href="https://bunkat.github.io/later/parsers.html#text" target="_blank">Format</a>
+          </small>
+        </div>
+      </div>
+    </div>
+  </form>
+</section>

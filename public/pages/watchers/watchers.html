@@ -40,35 +40,50 @@
             </tr>
           <tbody ng-repeat='watcher in watchers | filter:searchWatchers'>
             <tr>
-              <td>{{watcher._source.title}}</td>
+              <td><a ng-href="#/watcher/{{watcher._id}}/edit">{{watcher._source.title}}</a></td>
               <td ng-show="watcher._source.trigger.schedule.interval" ng-hide="watcher._source.trigger.schedule.later">{{ watcher._source.trigger.schedule.interval }}</td>
               <td ng-show="watcher._source.trigger.schedule.later">{{ watcher._source.trigger.schedule.later }}</td>
               <td>{{watcher._source.input.search.request.index.join(',')}}</td>
               <td>{{watcher._source.condition.script.script}}</td>
               <td><span ng-repeat="(key,value) in watcher._source.actions"><p>{{ key }}</p></span> </td>
               <td class="text-right edit-group">
-                <span title="Show watcher editor" class="show-rule" ng-click="editWatcher(watcher._id, 'editor')">
-                  <i class="fa fa-ellipsis-h"></i>
-                </span>
-                <span title="Execute watcher" class="show-rule" ng-click="playWatcher(watcher)">
+                <a
+                  title="Edit"
+                  class="show-rule"
+                  ng-href="#/watcher/{{watcher._id}}/edit"
+                >
+                  <i class="fa fa-pencil"></i>
+                </a>
+                <a
+                  title="Execute"
+                  class="show-rule"
+                  ng-click="playWatcher(watcher)"
+                >
                   <i class="fa fa-play-circle"></i>
-                </span>
-                <span ng-click="deleteWatcher(watcher._id)"
-                      title="Delete"
-                      class="delete-rule">
+                </a>
+                <a
+                  title="Delete"
+                  class="delete-rule"
+                  ng-click="deleteWatcher(watcher._id)"
+                >
                   <i class="fa fa-trash"></i>
-                </span>
-                <span ng-show="watcher._source.disable"
-                      ng-click="toggleWatcher(watcher._id);"
-                      title="Disabled" class="delete-rule">
+                </a>
+                <a
+                  title="Disabled"
+                  class="delete-rule"
+                  ng-click="toggleWatcher(watcher._id)"
+                  ng-show="watcher._source.disable"
+                >
                   <i class="fa fa-toggle-off"></i>
-                </span>
-                <span ng-show="!watcher._source.disable"
-                      ng-click="toggleWatcher(watcher._id);"
-                      title="Enabled" class="delete-rule">
+                </a>
+                <a
+                  title="Enabled"
+                  class="delete-rule"
+                  ng-click="toggleWatcher(watcher._id)"
+                  ng-show="!watcher._source.disable"
+                >
                   <i class="fa fa-toggle-on"></i>
-                </span>
-
+                </a>
               </td>
             </tr>
           </tbody>
