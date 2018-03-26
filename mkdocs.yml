@@ -25,7 +25,6 @@ pages:
     - 'Watcher from SPY': 'HOWTO-Form-Watchers-from-SPY-Panel.md'
     - 'SearchGuard Usage': 'HOWTO-Sentinl-and-SearchGuard.md'
     - 'Transform Examples': 'HOWTO-Transform-Examples.md'
-    - 'Rookie Tutorial': 'Tutorial.md'
 - Watchers:
     - 'Anatomy': 'Watcher-Anatomy.md'
     - 'Controls': 'Watcher-Controls.md'
