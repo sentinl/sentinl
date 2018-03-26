@@ -32,6 +32,13 @@ import Log from '../log';
 // actions
 import reportAction from './actions/report';
 
+const toString = function (message) {
+  if (typeof message !== 'string') {
+    return JSON.stringify(message);
+  }
+  return message;
+};
+
 export default function (server, actions, payload, task) {
   const config = getConfiguration(server);
   const log = new Log(config.app_name, server, 'action');
@@ -107,7 +114,7 @@ export default function (server, actions, payload, task) {
       esHistory({
         title: task._source.title,
         actionType: actionName,
-        message,
+        message: toString(message),
         level: priority,
         payload: !action.console.save_payload ? {} : payload,
         report: false
@@ -145,7 +152,7 @@ export default function (server, actions, payload, task) {
     *      "body" : "Series Alarm {{ payload._id}}: {{payload.hits.total}}",
     *      "stateless" : false,
     *      "save_payload" : false
-    *	    }
+    *     }
     */
 
     var formatterSubject;
@@ -180,7 +187,7 @@ export default function (server, actions, payload, task) {
         esHistory({
           title: task._source.title,
           actionType: actionName,
-          message: text,
+          message: toString(text),
           level: priority,
           payload: !action.email.save_payload ? {} : payload,
           report: false
@@ -200,7 +207,7 @@ export default function (server, actions, payload, task) {
     *      "html" : "<p>Series Alarm {{ payload._id}}: {{payload.hits.total}}</p>",
     *      "stateless" : false,
     *      "save_payload" : false
-    *	    }
+    *     }
     */
     var html;
     if (_.has(action, 'email_html')) {
@@ -241,7 +248,7 @@ export default function (server, actions, payload, task) {
         esHistory({
           title: task._source.title,
           actionType: actionName,
-          message: text,
+          message: toString(text),
           level: priority,
           payload: !action.email_html.save_payload ? {} : payload,
           report: false
@@ -258,13 +265,13 @@ export default function (server, actions, payload, task) {
     *      "priority" : "high",
     *      "body" : "Series Report {{ payload._id}}: {{payload.hits.total}}",
     *      "snapshot" : {
-    *      		"res" : "1280,900",
+    *         "res" : "1280,900",
     *         "url" : "http://127.0.0.1/app/kibana#/dashboard/Alerts",
     *         "path" : "/tmp/",
     *         "params" : {
-    *      				"username" : "username",
-    *      				"password" : "password",
-    *      				"delay" : 15,
+    *             "username" : "username",
+    *             "password" : "password",
+    *             "delay" : 15,
     *             "crop" : false
     *         }
     *       },
@@ -318,7 +325,7 @@ export default function (server, actions, payload, task) {
         esHistory({
           title: task._source.title,
           actionType: actionName,
-          message,
+          message: toString(message),
           level: priority,
           payload: !action.slack.save_payload ? {} : payload,
           report: false
@@ -366,7 +373,7 @@ export default function (server, actions, payload, task) {
           esHistory({
             title: task._source.title,
             actionType: actionName,
-            message: action.webhook.message,
+            message:  toString(action.webhook.message),
             level: action.webhook.priority,
             payload: !action.webhook.save_payload ? {} : payload,
             report: false
@@ -400,17 +407,17 @@ export default function (server, actions, payload, task) {
     */
 
     if (_.has(action, 'elastic')) {
-      let esMessage;
+      let message;
       let esFormatter;
       esFormatter = action.local.message ? action.local.message : '{{ payload }}';
-      esMessage = mustache.render(esFormatter, {payload: payload});
+      message = mustache.render(esFormatter, {payload: payload});
       priority = action.local.priority ? action.local.priority : 'INFO';
-      log.debug(`logged message to elastic: ${esMessage}`);
+      log.debug(`logged message to elastic: ${message}`);
       // Log Event
       esHistory({
         title: task._source.title,
         actionType: actionName,
-        message: esMessage,
+        message: toString(message),
         level: priority,
         payload: !action.local.save_payload ? {} : payload,
         report: false
@@ -472,4 +479,3 @@ export default function (server, actions, payload, task) {
     }
   });
 }
-
