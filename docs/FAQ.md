@@ -41,7 +41,15 @@ Sentinl relies on Elasticsearch search thread pool. By default, it is 1000 concu
 
 
 ##### Watchers are not running in my timezone - Why?
-SENTINL uses the UTC timezone internally to execute schedule - While rolling watchers are not effected _(every x minutes)_ UTC timezone will be used for absolute timed executions. Future versions will allow adapting to localTimezone of the server executing Kibana/Kibi.
+SENTINL uses the UTC timezone internally to execute schedule - While rolling watchers are not effected _(every x minutes)_ UTC timezone will be used for absolute timed executions. Future versions will allow adapting to localTimezone of the server executing Kibana. 
+
+To change the server or container localtime use the following example:
+```
+###Make a backup
+sudo mv /etc/localtime /etc/localtime.bak
+### set my localtime
+sudo ln -s /usr/share/zoneinfo/XXX/XXX /etc/localtime
+```
 
 ---
 
