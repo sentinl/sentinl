@@ -211,7 +211,7 @@ export default function (kibana) {
             simple_authentication: Joi.any().forbidden().error(new Error(
               'Option "report.simple_authentication" was deprecated. Use "report.authentication.mode.basic" instead!'
             )),
-            phantmjs_path: Joi.any().forbidden().error(new Error(
+            phantomjs_path: Joi.any().forbidden().error(new Error(
               'Option "report.phantomjs_path" was deprecated. Sentinl does not use PhantomJS anymore. Headless Chrome is used instead: https://developers.google.com/web/tools/puppeteer/get-started'
             )),
             tmp_path: Joi.any().forbidden().error(new Error (
