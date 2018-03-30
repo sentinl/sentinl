@@ -1,5 +1,9 @@
 /* global angular */
 import { uiModules } from 'ui/modules';
+import 'bootstrap/dist/js/bootstrap';
+import 'bootstrap/dist/css/bootstrap.css';
+import 'angular-animate';
+import 'angular-touch';
 import 'angular-ui-bootstrap';
 import Filters from './filters';
 import Pages from './pages';

@@ -1,3 +1,47 @@
 <section>
-  <p>Condition</p>
+  <div class="row">
+    <div class="col-sm-12">
+      <header>
+        <h4 class="form-text">
+          Match condition
+        </h4>
+      </header>
+    </div>
+  </div>
+  <form name="conditionPanelWatcherEdit.form" ng-model-options="{ getterSetter: true }" novalidate>
+    <div class="row">
+      <div class="col-sm-1">
+        <div class="form-group">
+          <dd-watcher-agg-type on-select="conditionPanelWatcherEdit.condition.type.handleSelect(type)"></dd-watcher-agg-type/>
+        </div>
+      </div>
+      <div class="col-sm-1">
+        <div class="form-group">
+          <dd-watcher-agg-over on-select="conditionPanelWatcherEdit.condition.over.handleSelect(over)"></dd-watcher-agg-over/>
+        </div>
+      </div>
+      <div class="col-sm-1">
+        <div class="form-group">
+          <button uib-popover-template="conditionPanelWatcherEdit.condition.over.templateUrl" popover-title="{{conditionPanelWatcherEdit.condition.over.title}}" type="button" class="btn btn-default">OVER</button>
+        </div>
+      </div>
+      <div class="col-sm-1">
+        <div class="form-group">
+          <button uib-popover-template="conditionPanelWatcherEdit.condition.direction.templateUrl" popover-title="{{conditionPanelWatcherEdit.condition.direction.title}}" type="button" class="btn btn-default">IS ABOVE</button>
+        </div>
+      </div>
+      <div class="col-sm-1">
+        <div class="form-group">
+          <button uib-popover-template="conditionPanelWatcherEdit.condition.last.templateUrl" popover-title="{{conditionPanelWatcherEdit.condition.last.title}}" type="button" class="btn btn-default">LAST</button>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-sm-8">
+<!--
+        <condition-chart></condition-chart>
+-->
+      </div>
+    </div>
+  </form>
 </section>

@@ -1,0 +1,18 @@
+<form iname="ddWatcherAggOver.form" ng-model-options="{ getterSetter: true }" novalidate>
+  <button
+    type="button"
+    class="btn btn-default pop-over-btn"
+    pop-over
+    pop-over-title="{{ddWatcherAggOver.title}}"
+  >
+    <strong class="pop-over-btn-text">{{ddWatcherAggOver.title}}</strong> {{ddWatcherAggOver.selected}}
+  </button>
+  <div ng-hide="true" class="pop-over-content">
+    <select
+      class="form-control condition-select"
+      ng-model="ddWatcherAggOver.selected"
+      ng-options="o as o for o in ddWatcherAggOver.options"
+      ng-change="ddWatcherAggOver.handleChange()"
+    ></select>
+  </div>
+</form>
