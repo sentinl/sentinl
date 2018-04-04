@@ -83,8 +83,29 @@ Create a sha hash of the watcher password using `encryptPassword.js`. Put it int
 
 Both username and password should be set in the report action in UI.
 
-## Kibana configuration
-### Searchguard
+## Kibana configuration for Sentinl v5
+
+### Search Guard
+```
+sentinl
+  settings
+    report
+      active: true
+      search_guard: true
+```
+
+### Basic
+```
+sentinl
+  settings
+    report
+      active: true
+      simple_authentication: true
+```
+
+## Kibana configuration for Sentinl v6+
+
+### Search Guard
 ```
 sentinl:
   settings:
