@@ -81,16 +81,78 @@ Create a sha hash of the watcher password using `encryptPassword.js`. Put it int
 
 # Authenticate report
 
-Both username and password should be set in the report action in UI. 
+Both username and password should be set in the report action in UI.
 
-Or it can be set manually.
+## Kibana configuration for Sentinl v5
+
+### Search Guard
 ```
-"report" : {
-  "snapshot" : {
-    "params" : {
-      "username" : "user1",
-      "password" : "password",
-    }
-  },
-}
+sentinl
+  settings
+    report
+      active: true
+      search_guard: true
+```
+
+### Basic
+```
+sentinl
+  settings
+    report
+      active: true
+      simple_authentication: true
+```
+
+## Kibana configuration for Sentinl v6+
+
+### Search Guard
+```
+sentinl:
+  settings:
+    report:
+      active: true
+      authentication:
+        enabled: true
+        mode:
+          searchguard: true
+```
+
+### X-Pack
+```
+sentinl:
+  settings:
+    report:
+      active: true
+      authentication:
+        enabled: true
+        mode:
+          xpack: true
+```
+
+### Basic
+```
+sentinl:
+  settings:
+    report:
+      active: true
+      authentication:
+        enabled: true
+        mode:
+          basic: true
+```
+
+### Custom
+```
+sentinl:
+  settings:
+    report:
+      active: true
+      authentication:
+        enabled: true
+        mode:
+          custom: true
+        custom: # you have to replace the following selectors with selectors found on your login page
+          username_input_selector: '#username'
+          password_input_selector: '#password'
+          login_btn_selector: '#login-btn'
 ```
