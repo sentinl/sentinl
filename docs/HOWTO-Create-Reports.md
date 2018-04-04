@@ -41,13 +41,29 @@ So your Boss wants to see some charts each Monday? No problem!
 ---
 #### Requirements
 Report actions requires:
+* A valid email configuration in ```kibana.yml```
 
-* SENTINL 4.5+
+##### Sentinl v5
 * PhantomJS installed on the Kibi/Kibana host, ie: ```npm install phantomjs-prebuilt -g```
-* A valid email configuration in ```kibana.yml```, for example:
+
 ```
 sentinl:
   settings:
+    email:
+      active: true
+      host: localhost
+    report:
+      active: true
+      tmp_path: /tmp
+```
+
+##### Sentinl v6
+```
+sentinl:
+  settings:
+    email:
+      active: true
+      host: localhost
     report:
       active: true
       executable_path: '/usr/bin/chromium' # path to Chrome v59+ or Chromium v59+
