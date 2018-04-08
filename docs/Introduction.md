@@ -8,7 +8,7 @@ SENTINL is an App Plugin that works with Kibana or the Siren Platform providing 
 > metrics towards any other platform, planting triggers for itself to use and so much more. “
 
 ### INTRO TO SENTINL
-**SENTINL** providesAlerting & Reporting functionality directly within the Siren Platform or Kibana in form of a powerful plugin, leveraging all available native features such as secure client for queries and extending the UI with tools for managing configuration, scheduling and handling executions of user Alerts and Reports.
+**SENTINL** provides Alerting & Reporting functionality directly within the Siren Platform or Kibana in form of a powerful plugin, leveraging all available native features such as secure client for queries and extending the UI with tools for managing configuration, scheduling and handling executions of user Alerts and Reports.
 
 **SENTINL** is also transparent to the Elasticsearch cluster(s) it monitors, appearing as a
 regular client and requiring no complex installation or restarts.
