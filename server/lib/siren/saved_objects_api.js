@@ -1,5 +1,5 @@
 import { cloneDeep } from 'lodash';
-import Crypto from '../classes/crypto';
+import Crypto from '../crypto';
 import getConfiguration from '../get_configuration';
 
 /**

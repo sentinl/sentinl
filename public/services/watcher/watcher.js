@@ -51,7 +51,7 @@ class Watcher extends SavedObjects {
       const resp = await this.$http.post('../api/sentinl/watcher/_execute', watcher);
       return resp.data;
     } catch (err) {
-      throw new Error(`fail to get watcher ${id}`);
+      throw err.data;
     }
   }
 
@@ -77,7 +77,7 @@ class Watcher extends SavedObjects {
       let watcher = await this.savedObjects.get();
       return this.nestedSource(watcher, this.fields);
     } catch (err) {
-      throw new Error('fail to create new watcher');
+      throw new Error(`fail to create new watcher, ${err}`);
     }
   }
 
@@ -92,7 +92,7 @@ class Watcher extends SavedObjects {
       try {
         return await this.flatSource(watcher).save();
       } catch (err) {
-        throw new Error(`fail to save watcher ${watcher._id}`);
+        throw new Error(`fail to save watcher, ${err}`);
       }
     }
 
@@ -103,7 +103,7 @@ class Watcher extends SavedObjects {
       });
       return savedWatcher.save();
     } catch (err) {
-      throw new Error(`fail to save watcher ${watcher._id}`);
+      throw new Error(`fail to save watcher, ${err}`);
     }
   }
 }
