@@ -1,4 +1,4 @@
 describe('Sentinl', function () {
   require('../lib/validators/__tests__/validators');
-  require('../lib/classes/__tests__/watcher');
+  require('../lib/__tests__/watcher_handler');
 });

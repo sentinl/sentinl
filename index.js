@@ -80,6 +80,8 @@ export default function (kibana) {
           'Option "sentinl.sentinl.results" was deprecated. Use "sentinl.es.results" instead!'
         )),
         es: Joi.object({
+          allow_no_indices: Joi.boolean().default(false),
+          ignore_unavailable: Joi.boolean().default(false),
           default_index: Joi.string().default('.kibana'),
           default_type: Joi.string().default('doc'),
           results: Joi.number().default(50),
