@@ -1,12 +1,12 @@
 import { isEqual, cloneDeep } from 'lodash';
 import Promise from 'bluebird';
 import expect from 'expect.js';
-import Watcher from '../watcher';
+import WatcherHandler from '../watcher_handler';
 import sinon from 'sinon';
 
-describe('Watcher', function () {
-  let task;
+describe('WatcherHandler', function () {
   let watcher;
+  let watcherHandler;
   let payload;
 
   const init = function () {
@@ -24,11 +24,9 @@ describe('Watcher', function () {
     };
     const client = {};
 
-    watcher = new Watcher(server, client, config);
+    watcherHandler = new WatcherHandler(server, client, config);
 
-    watcher.config = config;
-
-    task = {
+    watcher = {
       _index: 'watcher',
       _type: 'sentinl-watcher',
       _id: 'xqxmhjhxihq-hlqnczowo0o-rgxipimxd',
@@ -169,47 +167,62 @@ describe('Watcher', function () {
       }
     };
 
-    sinon.stub(watcher, 'search', function () {
+    sinon.stub(watcherHandler, 'search', function () {
       return Promise.resolve(payload);
     });
 
-    sinon.stub(watcher, 'doActions', function () {
-      return Promise.resolve(task._id);
+    sinon.stub(watcherHandler, 'doActions', function () {
+      return Promise.resolve(watcher._id);
     });
-
   };
 
   beforeEach(function () {
     init();
   });
 
-  it('execute with condition script evaluated to false', function (done) {
-    const localTask = cloneDeep(task);
-    localTask._source.condition.script.script = 'payload.hits.total > 999999';
-
-    watcher.execute(localTask).then(function (response) {
-      expect(response.task.id).to.eql(task._id);
-      expect(response.message).to.eql(`no data was found that meets the used 'script 'conditions, ${task._id}`);
+  it('transform chain', function (done) {
+    watcherHandler.execute(watcher).then(function (resp) {
+      expect(resp.ok).to.be(true);
+      expect(resp.success).to.be(true);
+      expect(resp.warning).to.be(undefined);
       done();
     }).catch(done);
   });
 
-  it('execute with no transform', function (done) {
-    const localTask = cloneDeep(task);
-    delete localTask._source.transform;
+  it('transform "script", JavaScript error', function (done) {
+    watcher._source.transform.chain[1].script.script = 'testerrorhere++';
+    watcherHandler.execute(watcher).catch(function (err) {
+      expect(err.message).to.eql('fail to execute watcher: fail to apply transform "chain": ' +
+        'fail to apply transform "script": testerrorhere is not defined');
+      done();
+    });
+  });
 
-    watcher.execute(localTask).then(function (response) {
-      expect(response.task.id).to.eql(task._id);
-      expect(response.message).to.be(undefined);
+  it('no transform', function (done) {
+    delete watcher._source.transform;
+    watcherHandler.execute(watcher).then(function (resp) {
+      expect(resp.ok).to.be(true);
+      expect(resp.success).to.be(true);
+      expect(resp.warning).to.be(undefined);
       done();
     }).catch(done);
   });
 
-  it('execute transform chain', function (done) {
-    watcher.execute(task).then(function (response) {
-      expect(response.task.id).to.eql(task._id);
-      expect(response.message).to.be(undefined);
+  it('condition "script", no data to match the condition', function (done) {
+    watcher._source.condition.script.script = 'payload.hits.total > 999999';
+    watcherHandler.execute(watcher).then(function (resp) {
+      expect(resp.ok).to.be(true);
+      expect(resp.warning).to.be(true);
+      expect(resp.message).to.eql('no data was found that match the used "script" conditions');
       done();
     }).catch(done);
+  });
+
+  it('condition "script", JavaScript error', function (done) {
+    watcher._source.condition.script.script = 'testerrorhere++';
+    watcherHandler.execute(watcher).catch(function (err) {
+      expect(err.message).to.eql('fail to execute watcher: fail to apply condition "script": testerrorhere is not defined');
+      done();
+    });
   });
 });
