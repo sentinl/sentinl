@@ -5,8 +5,8 @@ import Joi from 'joi';
 import dateMath from '@elastic/datemath';
 import getElasticsearchClient from '../lib/get_elasticsearch_client';
 import es from 'elasticsearch';
-import Crypto from '../lib/classes/crypto';
-import Watcher from '../lib/classes/watcher';
+import Crypto from '../lib/crypto';
+import WatcherHandler from '../lib/watcher_handler';
 import Boom from 'boom';
 import Log from '../lib/log';
 
@@ -42,7 +42,8 @@ var getAlarms = async function (type, server, req, reply) {
     const resp = await client.search({
       index: config.es.alarm_index + '*',
       sort: '@timestamp : asc',
-      allow_no_indices: false,
+      allowNoIndices: config.es.allow_no_indices,
+      ignoreUnavailable: config.es.ignore_unavailable,
       body: {
         size: config.es.results,
         query: {
@@ -198,11 +199,11 @@ export default function routes(server) {
     method: 'POST',
     path: '/api/sentinl/watcher/_execute',
     handler: async function (request, reply) {
-      const watcher = new Watcher(server);
+      const watcherHandler = new WatcherHandler(server);
 
       try {
-        const resp = await watcher.execute(request.payload);
-        return reply({ok: true, resp});
+        const resp = await watcherHandler.execute(request.payload);
+        return reply(resp);
       } catch (err) {
         return reply(Boom.notAcceptable(err.message));
       }

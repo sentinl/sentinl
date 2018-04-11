@@ -20,7 +20,7 @@
 import { has, forEach, difference, map, keys, isObject, isEmpty, assign } from 'lodash';
 import later from 'later';
 import getConfiguration from './get_configuration';
-import Watcher from './classes/watcher';
+import WatcherHandler from './watcher_handler';
 import Log from './log';
 
 /**
@@ -31,8 +31,7 @@ export default function Scheduler(server) {
   const config = getConfiguration(server);
   const log = new Log(config.app_name, server, 'scheduler');
 
-  let watcher;
-  let client;
+  let watcherHandler;
 
   /**
   * Remove unused watchers watcher.
@@ -56,26 +55,27 @@ export default function Scheduler(server) {
   * @param {object} task - watcher configuration.
   */
   async function watching(task) {
+    const prefix = `watcher ${task._id}`;
+
     if (!task._source || task._source.disable) {
-      log.debug(`do not execute disabled watcher: ${task._id}`);
+      log.debug(prefix, 'do not execute disabled watcher');
       return;
     }
 
-    log.info(`executing watcher: ${task._id}`);
+    log.info(prefix, 'executing');
 
     if (!task._source.actions || isEmpty(task._source.actions)) {
-      log.warning(`watcher has no actions: ${task._source.uuid}`);
+      log.warning(prefix, 'watcher has no actions');
       return;
     }
 
     try {
-      const resp = await watcher.execute(task);
-      log.info(`watcher has been executed successfully: ${resp.task.id}`);
-      if (resp.message) {
-        log.info(`fail to execute watcher: ${task._id}, ${resp.message}`);
+      const resp = await watcherHandler.execute(task);
+      if (!resp.ok) {
+        log.error(`${prefix}: fail to execute`, resp);
       }
     } catch (err) {
-      log.error(`fail to execute watcher: ${task._id}`);
+      log.error(`${prefix}: fail to execute`, err.message);
     }
   };
 
@@ -86,7 +86,7 @@ export default function Scheduler(server) {
   */
   function scheduleWatcher(task) {
     if (has(server.sentinlStore.schedule, `[${task._id}].later`)) {
-      log.debug(`clearing watcher: ${task._id}`);
+      log.debug(`clearing watcher ${task._id}`);
       server.sentinlStore.schedule[task._id].later.clear();
     }
     server.sentinlStore.schedule[task._id] = {task};
@@ -125,11 +125,11 @@ export default function Scheduler(server) {
       server.sentinlStore.schedule = [];
     }
 
-    watcher = new Watcher(server);
+    watcherHandler = new WatcherHandler(server);
 
     try {
-      let resp = await watcher.getCount();
-      resp = await watcher.getWatchers(resp.count);
+      let resp = await watcherHandler.getCount();
+      resp = await watcherHandler.getWatchers(resp.count);
 
       let tasks = resp.hits.hits;
       if (tasks.length) {
@@ -139,7 +139,7 @@ export default function Scheduler(server) {
         try {
           removeOrphans(tasks);
         } catch (err) {
-          log.error('failed to remove orphans');
+          log.error('fail to remove orphans', err);
         }
 
         /* Schedule watchers */
@@ -150,11 +150,7 @@ export default function Scheduler(server) {
         log.debug('no watchers found');
       }
     } catch (err) {
-      if (err.status === 404) {
-        log.warning(`index missing: ${config.es.default_index}`);
-      } else {
-        log.error(err);
-      }
+      log.error('fail to schedule watchers', err);
     }
   }
 
@@ -174,8 +170,7 @@ export default function Scheduler(server) {
           log.info('cluster slave node, do not execute watchers');
         }
       } catch (err) {
-        log.error('fail to get cluster master node');
-        throw err;
+        log.error('fail to get cluster master node', err);
       }
     } else {
       log.debug('cluster disabled');
