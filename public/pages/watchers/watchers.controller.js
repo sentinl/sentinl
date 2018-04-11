@@ -28,18 +28,17 @@ function  WatchersController($rootScope, $scope, $route, $interval,
   *
   * @param {string} id - watcher id
   */
-  $scope.playWatcher = function (task) {
-    Watcher.play(task._id)
-      .then(function (data) {
-        if (data.resp.message) {
-          notify.warning(data.resp.message);
-        } else {
-          notify.info(`Executed watcher "${task._source.title}"`);
-        }
-      })
-      .catch(function (error) {
-        notify.error(error);
-      });
+  $scope.playWatcher = async function (task) {
+    try {
+      const resp = await Watcher.play(task._id);
+      if (resp.warning) {
+        notify.warning(resp.message);
+      } else {
+        notify.info('watcher executed');
+      }
+    } catch (err) {
+      notify.error(err.message);
+    }
   };
 
   /**

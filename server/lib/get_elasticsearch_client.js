@@ -5,7 +5,7 @@
  */
 import elasticsearch from 'elasticsearch';
 import fs from 'fs';
-import Crypto from './classes/crypto';
+import Crypto from './crypto';
 import Log from './log';
 
 /**

@@ -1,3 +1,5 @@
+import {isObject, isError} from 'lodash';
+
 class Log {
   /**
   * Constructor
@@ -16,49 +18,40 @@ class Log {
   * Info message
   *
   * @param {string} message
+  * @param {object|string} err
   */
-  info(message, object = null) {
-    this._message('info', message, object);
+  info(message, err = null) {
+    this._message('info', message, err);
   }
 
   /**
   * Debug message
   *
   * @param {string} message
-  * @param {object} object to prettify
+  * @param {object|string} err
   */
-  debug(message, object = null) {
-    this._message('debug', message, object);
+  debug(message, err = null) {
+    this._message('debug', message, err);
   }
 
   /**
   * Warning message
   *
   * @param {string} message
-  * @param {object} object to prettify
+  * @param {object|string} err
   */
-  warning(message, object = null) {
-    this._message('warning', message, object);
+  warning(message, err = null) {
+    this._message('warning', message, err);
   }
 
   /**
   * Error message
   *
   * @param {string} message
-  * @param {object} object to prettify
+  * @param {object|string} err
   */
-  error(message, object = null) {
-    this._message('error', message, object);
-  }
-
-  /**
-  * Prettify object
-  *
-  * @param {object} object to prettify
-  * @return {string} stringified object
-  */
-  _pretty(object) {
-    return JSON.stringify(object, null, 2);
+  error(message, err = null) {
+    this._message('error', message, err);
   }
 
   /**
@@ -66,16 +59,23 @@ class Log {
   *
   * @param {string} type of message
   * @param {string} message
-  * @param {object} object to prettify
+  * @param {object|string} err
   */
-  _message(type, message, object) {
+  _message(type, message, err) {
     let prefix = [type, this.appName];
+
     if (this.place) {
       prefix.push(this.place);
     }
-    if (object) {
-      message += `, ${this._pretty(object)}`;
+
+    if (err && isError(err)) {
+      message += ': ' + err.message;
+    } else if (err && isObject(err)) {
+      message += ': ' + JSON.stringify(err);
+    } else if (err) {
+      message += ': ' + err;
     }
+
     this.server.log(prefix, message);
   }
 }
