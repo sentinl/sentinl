@@ -20,13 +20,17 @@
 import later from 'later';
 import { once, has, forEach } from 'lodash';
 import url from 'url';
-import masterRoute from './server/routes/routes';
 import getScheduler from './server/lib/scheduler';
 import initIndices from './server/lib/initIndices';
 import getElasticsearchClient from './server/lib/get_elasticsearch_client';
 import getConfiguration from './server/lib/get_configuration';
 import fs from 'fs';
 import Log from './server/lib/log';
+
+const routes = {
+  masterRoute: require('./server/routes/routes'),
+  watcherEdit: require('./server/routes/watcher_edit'),
+};
 
 const mappings = {
   alarm: require('./server/mappings/alarm_index'),
@@ -66,7 +70,9 @@ const init = once(function (server) {
   };
 
   // Load Sentinl routes.
-  masterRoute(server);
+  forEach(routes, function (routeSet) {
+    routeSet(server);
+  });
 
   // auto detect elasticsearch host, protocol and port
   const esUrl = url.parse(server.config().get('elasticsearch.url'));

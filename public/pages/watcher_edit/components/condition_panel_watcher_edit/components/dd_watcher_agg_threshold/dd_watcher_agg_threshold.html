@@ -1,29 +1,30 @@
 <form iname="ddWatcherAggThreshold.form" ng-model-options="{ getterSetter: true }" novalidate>
-  <button
-    type="button"
-    class="btn btn-default pop-over-btn"
-    pop-over
-    pop-over-title="{{ddWatcherAggThreshold.title}}"
-  >
-    <strong class="pop-over-btn-text">{{ddWatcherAggThreshold.title}}</strong> {{ddWatcherAggThreshold.number}}
-  </button>
+  <a pop-over pop-over-title="{{ddWatcherAggThreshold.title}}">
+    <strong class="pop-over-btn-text">IS {{ddWatcherAggThreshold.title}}</strong> {{ddWatcherAggThreshold.number}}
+  </a>
   <div ng-hide="true" class="pop-over-content">
-    <div class="input-group">
-      <div class="input-group-btn">
-        <select
-          class="form-control condition-select"
-          ng-model="ddWatcherAggThreshold.selected"
-          ng-options="o as o for o in ddWatcherAggThreshold.options"
-          ng-change="ddWatcherAggThreshold.handleChange()"
-        ></select>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="form-group">
+          <select
+            class="form-control condition-select"
+            ng-model="ddWatcherAggThreshold.selected"
+            ng-options="o as o for o in ddWatcherAggThreshold.options"
+            ng-change="ddWatcherAggThreshold.handleChange()"
+          ></select>
+        </div>
       </div>
-      <input
-        class="form-control"
-        id="number"
-        type="number"
-        ng-model="ddWatcherAggThreshold.number"
-        ng-change="ddWatcherAggThreshold.handleChange()"
-      >
+      <div class="col-md-6">
+        <div class="form-group">
+          <input
+            class="form-control"
+            id="number"
+            type="number"
+            ng-model="ddWatcherAggThreshold.number"
+            ng-change="ddWatcherAggThreshold.handleChange()"
+          >
+        </div>
+      </div>
     </div>
   </div>
 </form>

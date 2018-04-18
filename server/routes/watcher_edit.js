@@ -1,64 +1,62 @@
 import Joi from 'joi';
 import Boom from 'boom';
+import {pick} from 'lodash';
 import getConfiguration from  '../lib/get_configuration';
 import getElasticsearchClient from '../lib/get_elasticsearch_client';
 import Log from '../lib/log';
-
-
-class Query {
-  static range(gte = 'now-1m', lt = 'now', timeField = '@timestamp', format = 'strict_date_optional_time||epoch_millis') {
-    return {
-      query: {
-        bool: {
-          filter: {
-            range: {
-              [timeField]: { gte, lt, format }
-            }
-          }
-        }
-      }
-    };
-  }
-}
+import WatcherChartQueryBuilder from './watcher_edit_lib/watcher_chart_query_builder';
 
 export default function watcherEdit(server) {
   const config = getConfiguration(server);
   const client = getElasticsearchClient(server, config);
   const log = new Log(config.app_name, server, 'routes');
 
+  const chartQuery = new WatcherChartQueryBuilder({
+    timeFieldName: config.es.timefield,
+    timezoneName: config.es.timezone,
+  });
+
   server.route({
-    path: '/api/sentinl/watcher_edit/count/all/last',
+    path: '/api/sentinl/watcher/editor/count/all',
     method: 'POST',
     config: {
       validate: {
         payload: {
-          index: Joi.array().items(Joi.string().default('mos-*')).default(),
-          number: Joi.number().default(60),
-          units: Joi.string().default('m'),
-          format: Joi.string().default('strict_date_optional_time||epoch_millis'),
-          threshold: Joi.object({
-            number: Joi.number().default(1),
-            direction: Joi.string().default('>'),
+          es_params: Joi.object({
+            index: Joi.array().items(Joi.string().default('*')).default(),
+            number: Joi.number().default(config.es.results),
+            allowNoIndices: Joi.boolean().default(config.es.allow_no_indices),
+            ignoreUnavailable: Joi.boolean().default(config.es.ignore_unavailable),
           }).default(),
-          page: Joi.object({
-            from: Joi.number().default(0),
-            size: Joi.number().default(config.es.results),
+          query_params: Joi.object({
+            field: Joi.string(),
+            over: Joi.string().default('_all'),
+            last: Joi.object({
+              n: Joi.number().default(15),
+              unit: Joi.string().default('minutes'),
+            }).default(),
+            interval: Joi.object({
+              n: Joi.number().default(1),
+              unit: Joi.string().default('minutes'),
+            }).default(),
           }).default(),
-          sort: Joi.string().default('@timestamp: asc'),
-          allowNoIndices: Joi.boolean().default(false),
         },
       },
     },
     handler: async function (req, reply) {
-      const {number, units, format, index, threshold, sort, allowNoIndices, page} = req.payload;
+      const esParams = req.payload.es_params;
+      const queryParams = req.payload.query_params;
 
       try {
-        const gte = 'now-' + number + units;
-        const body = Query.range(gte);
-        body.from = page.from;
-        body.size = page.size;
+        const body = chartQuery.count(queryParams);
 
-        const resp = await client.search({ index, sort, body, allow_no_indices: allowNoIndices });
+        const resp = await client.search({
+          index: esParams.index,
+          ignoreUnavailable: esParams.ignoreUnavailable,
+          allowNoIndices: esParams.allowNoIndices,
+          body,
+        });
+
         return reply(resp);
       } catch (err) {
         return reply(Boom.serverUnavailable(err));

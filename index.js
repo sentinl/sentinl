@@ -80,6 +80,8 @@ export default function (kibana) {
           'Option "sentinl.sentinl.results" was deprecated. Use "sentinl.es.results" instead!'
         )),
         es: Joi.object({
+          ignore_unavailable: Joi.boolean().default(false),
+          allow_no_indices: Joi.boolean().default(false),
           default_index: Joi.string().default('.kibana'),
           default_type: Joi.string().default('doc'),
           results: Joi.number().default(50),
@@ -87,6 +89,7 @@ export default function (kibana) {
           protocol: Joi.string().default('http'),
           port: Joi.number().default(9200),
           timefield: Joi.string().default('@timestamp'),
+          timezone: Joi.string().default('Europe/Amsterdam'),
           type: Joi.any().forbidden().error(new Error(
             'Option "sentinl.es.type" was deprecated. Use "sentinl.es.default_type" instead!'
           )),

@@ -4,9 +4,12 @@ import routes from 'ui/routes';
 
 import './components/threshold_watcher_edit';
 import './components/title_panel_watcher_edit';
+import './components/condition_panel_watcher_edit/services/watcher_editor_chart_service';
 import './components/condition_panel_watcher_edit';
 import './components/condition_panel_watcher_edit/components/dd_watcher_agg_type';
-import './components/condition_panel_watcher_edit/components/dd_watcher_agg_over';
+import './components/condition_panel_watcher_edit/components/dd_watcher_agg_field';
+import './components/condition_panel_watcher_edit/components/dd_watcher_agg_time';
+import './components/condition_panel_watcher_edit/components/dd_watcher_agg_threshold';
 import './components/action_panel_watcher_edit';
 
 import template from './watcher_edit.html';

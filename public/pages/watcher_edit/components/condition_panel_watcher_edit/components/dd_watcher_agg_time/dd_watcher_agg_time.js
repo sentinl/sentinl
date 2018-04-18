@@ -4,12 +4,12 @@ class DdWatcherAggTime {
   constructor() {
     this.title = 'LAST';
     this.selected = 'minutes';
-    this.options = ['seconds', 'minutes', 'hours', 'months', 'years'];
+    this.options = ['seconds', 'minutes', 'hours', 'days', 'months', 'years'];
     this.number = 5;
   }
 
   handleChange() {
-    this.onSelect({units: this.selected, number: this.number});
+    this.onSelect({unit: this.selected, n: this.number});
   }
 }
 

@@ -1,0 +1,42 @@
+<form iname="ddWatcherAggField.form" ng-model-options="{ getterSetter: true }" novalidate>
+  <a pop-over pop-over-title="{{ddWatcherAggField.title}}">
+    <strong class="pop-over-btn-text">{{ddWatcherAggField.top.enabled ? 'GROUPED ' : ''}}{{ddWatcherAggField.title}}</strong> {{ddWatcherAggField.selected}} {{ddWatcherAggField.top.enabled ? ddWatcherAggField.top.num_of_values : ''}}
+  </a>
+  <div ng-hide="true" class="pop-over-content">
+    <div class="row">
+      <div class="col-sm-4">
+        <div class="form-group">
+          <select
+            class="form-control condition-select"
+            ng-model="ddWatcherAggField.selected"
+            ng-options="o as o for o in ddWatcherAggField.options"
+            ng-change="ddWatcherAggField.handleChange()"
+          ></select>
+        </div>
+      </div>
+      <div class="col-sm-4" ng-show="ddWatcherAggField.top.enabled">
+        <div class="form-group">
+          <input
+            class="form-control"
+            id="number"
+            type="number"
+            ng-model="ddWatcherAggField.top.num_of_values"
+            ng-change="ddWatcherAggField.handleChange()"
+          >
+        </div>
+      </div>
+      <div class="col-sm-4" ng-show="ddWatcherAggField.top.enabled">
+        <div class="form-group">
+          <input
+            class="form-control"
+            id="field"
+            type="text"
+            ng-show="ddWatcherAggField.top.enabled"
+            ng-model="ddWatcherAggField.top.field_name"
+            ng-change="ddWatcherAggField.handleChange()"
+          >
+        </div>
+      </div>
+    </div>
+  </div>
+</form>

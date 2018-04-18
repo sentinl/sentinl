@@ -116,7 +116,8 @@ export default function routes(server) {
         es: {
           index: config.es.default_index,
           type: config.es.default_type,
-          number_of_results: config.es.results
+          number_of_results: config.es.results,
+          timefield: config.es.timefield,
         },
         authentication: {
           impersonate: config.settings.authentication.impersonate,

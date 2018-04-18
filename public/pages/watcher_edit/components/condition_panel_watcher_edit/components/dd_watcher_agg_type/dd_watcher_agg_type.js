@@ -2,7 +2,7 @@ import template from './dd_watcher_agg_type.html';
 
 class DdWatcherAggType {
   constructor() {
-    this.title = 'When';
+    this.title = 'WHEN';
     this.selected = 'count';
     this.options = ['count', 'average', 'min', 'max'];
   }

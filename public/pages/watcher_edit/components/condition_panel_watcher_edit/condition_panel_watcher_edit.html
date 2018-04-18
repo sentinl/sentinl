@@ -1,46 +1,56 @@
 <section>
-  <div class="row">
-    <div class="col-sm-12">
-      <header>
-        <h4 class="form-text">
-          Match condition
-        </h4>
-      </header>
-    </div>
-  </div>
   <form name="conditionPanelWatcherEdit.form" ng-model-options="{ getterSetter: true }" novalidate>
     <div class="row">
-      <div class="col-sm-1">
-        <div class="form-group">
-          <dd-watcher-agg-type on-select="conditionPanelWatcherEdit.condition.type.handleSelect(type)"></dd-watcher-agg-type/>
-        </div>
-      </div>
-      <div class="col-sm-1">
-        <div class="form-group">
-          <dd-watcher-agg-over on-select="conditionPanelWatcherEdit.condition.over.handleSelect(over)"></dd-watcher-agg-over/>
-        </div>
-      </div>
-      <div class="col-sm-1">
-        <div class="form-group">
-          <button uib-popover-template="conditionPanelWatcherEdit.condition.over.templateUrl" popover-title="{{conditionPanelWatcherEdit.condition.over.title}}" type="button" class="btn btn-default">OVER</button>
-        </div>
-      </div>
-      <div class="col-sm-1">
-        <div class="form-group">
-          <button uib-popover-template="conditionPanelWatcherEdit.condition.direction.templateUrl" popover-title="{{conditionPanelWatcherEdit.condition.direction.title}}" type="button" class="btn btn-default">IS ABOVE</button>
-        </div>
-      </div>
-      <div class="col-sm-1">
-        <div class="form-group">
-          <button uib-popover-template="conditionPanelWatcherEdit.condition.last.templateUrl" popover-title="{{conditionPanelWatcherEdit.condition.last.title}}" type="button" class="btn btn-default">LAST</button>
-        </div>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-sm-8">
+      <div class="col-md-12">
+        <div class="panel-body">
+          <div class="row">
+            <div class="col-md-6">
+              <header>
+                <h4 class="form-text">
+                  Match condition
+                </h4>
+              </header>
+            </div>
+          </div> <!-- END header -->
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <ul>
+                  <li><dd-watcher-agg-type on-select="conditionPanelWatcherEdit.condition.type.handleSelect(type)"></dd-watcher-agg-type/></li>
+                  <li><dd-watcher-agg-field on-select="conditionPanelWatcherEdit.condition.over.handleSelect(field)"></dd-watcher-agg-field/></li>
+                  <li><dd-watcher-agg-threshold on-select="conditionPanelWatcherEdit.condition.threshold.handleSelect(direction, number)"></dd-watcher-agg-threshold/></li>
+                  <li><dd-watcher-agg-time on-select="conditionPanelWatcherEdit.condition.last.handleSelect(unit, n)"></dd-watcher-agg-time/></li>
+                </ul>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+              </div>
+            </div>
+          </div> <!-- END condition based query builder -->
+          <div class="row">
+            <div class="col-md-6">
+              <canvas
+                class="chart chart-line"
+                chart-data="conditionPanelWatcherEdit.chart.yAxis"
+                chart-labels="conditionPanelWatcherEdit.chart.xAxis"
+                chart-options="conditionPanelWatcherEdit.chart.options"
+                chart-click="conditionPanelWatcherEdit.onChartClick"
+              ></canvas> 
 <!--
-        <condition-chart></condition-chart>
+              <canvas
+                class="chart chart-line"
+                chart-data="conditionPanelWatcherEdit.demo.data"
+                chart-labels="conditionPanelWatcherEdit.demo.labels"
+                chart-series="conditionPanelWatcherEdit.demo.series"
+                chart-click="conditionPanelWatcherEdit.onChartClick"
+              ></canvas> 
 -->
+            </div>
+            <div class="col-md-6">
+            </div>
+          </div> <!-- END chart, data hostory -->
+        </div>
       </div>
     </div>
   </form>

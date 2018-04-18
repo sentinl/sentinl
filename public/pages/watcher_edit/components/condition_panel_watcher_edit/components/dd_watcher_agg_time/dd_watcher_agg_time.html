@@ -1,28 +1,29 @@
 <form iname="ddWatcherAggTime.form" ng-model-options="{ getterSetter: true }" novalidate>
-  <button
-    type="button"
-    class="btn btn-default pop-over-btn"
-    pop-over
-    pop-over-title="{{ddWatcherAggTime.title}}"
-  >
-    <strong class="pop-over-btn-text">{{ddWatcherAggTime.title}}</strong> {{ddWatcherAggTime.number}} {{ddWatcherAggTime.selected}}
-  </button>
+  <a pop-over pop-over-title="{{ddWatcherAggTime.title}}">
+    <strong class="pop-over-btn-text">FOR {{ddWatcherAggTime.title}}</strong> {{ddWatcherAggTime.number}} {{ddWatcherAggTime.selected}}
+  </a>
   <div ng-hide="true" class="pop-over-content">
-    <div class="input-group">
-      <input
-        class="form-control"
-        id="number"
-        type="number"
-        ng-model="ddWatcherAggTime.number"
-        ng-change="ddWatcherAggTime.handleChange()"
-      >
-      <div class="input-group-btn">
-        <select
-          class="form-control condition-select"
-          ng-model="ddWatcherAggTime.selected"
-          ng-options="o as o for o in ddWatcherAggTime.options"
-          ng-change="ddWatcherAggTime.handleChange()"
-        ></select>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="form-group">
+          <input
+            class="form-control"
+            id="number"
+            type="number"
+            ng-model="ddWatcherAggTime.number"
+            ng-change="ddWatcherAggTime.handleChange()"
+          >
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <select
+            class="form-control condition-select"
+            ng-model="ddWatcherAggTime.selected"
+            ng-options="o as o for o in ddWatcherAggTime.options"
+            ng-change="ddWatcherAggTime.handleChange()"
+          ></select>
+        </div>
       </div>
     </div>
   </div>

@@ -5,6 +5,8 @@ import 'bootstrap/dist/css/bootstrap.css';
 import 'angular-animate';
 import 'angular-touch';
 import 'angular-ui-bootstrap';
+import 'chart.js';
+import 'angular-chart.js';
 import Filters from './filters';
 import Pages from './pages';
 import Services from './services';
@@ -15,11 +17,26 @@ import './constants';
 
 const app = uiModules.get('apps/sentinl', [
   'ui.bootstrap',
+  'chart.js',
   Filters.name,
   Pages.name,
   Services.name,
   Directives.name,
   Components.name,
 ]);
+
+app.config(function (ChartJsProvider) {
+  'ngInject';
+  // Configure all charts
+  ChartJsProvider.setOptions({
+    chartColors: ['#FF5252', '#FF8A80'],
+    responsive: true,
+  });
+
+  // // Configure all line charts
+  // ChartJsProvider.setOptions('line', {
+  //   showLines: false
+  // });
+});
 
 export { app };
