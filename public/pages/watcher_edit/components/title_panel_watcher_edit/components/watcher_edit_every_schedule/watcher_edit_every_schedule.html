@@ -1,0 +1,31 @@
+<form iname="watcherEditEverySchedule.form" ng-model-options="{ getterSetter: true }" novalidate>
+  <div class="row">
+    <div class="col-md-6">
+      <div class="form-group" ng-show="watcherEditEverySchedule.enabled">
+        <label for="watcherEditEverySchedule">
+          Every
+        </label>
+        <input
+          class="form-control"
+          id="number"
+          type="number"
+          ng-model="watcherEditEverySchedule.number"
+          ng-change="watcherEditEverySchedule.handleChange()"
+        >
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="form-group" ng-show="watcherEditEverySchedule.enabled">
+        <label for="watcherEditEverySchedule">
+          Unit
+        </label>
+        <select
+          class="form-control condition-select"
+          ng-model="watcherEditEverySchedule.selected"
+          ng-options="o as o for o in watcherEditEverySchedule.options"
+          ng-change="watcherEditEverySchedule.handleChange()"
+        ></select>
+      </div>
+    </div>
+  </div>
+</form>

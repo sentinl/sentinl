@@ -2,8 +2,29 @@ import {has, size} from 'lodash';
 import template from './title_panel_watcher_edit.html';
 
 class TitlePanelWatcherEdit {
-  constructor(sentinlConfig) {
-    this.config = sentinlConfig;
+  constructor($log) {
+    this.$log = $log;
+
+    this.schedule = {
+      every: {
+        enabled: true,
+      },
+      human: {
+        enabled: false,
+      },
+      selected: 'every',
+      options: ['every', 'human'],
+      handleChange: () => {
+        this.$log.debug('schedule type changed:', this.schedule.selected);
+        if (this.schedule.selected === 'every') {
+          this.schedule.every.enabled = true;
+          this.schedule.human.enabled = false;
+        } else {
+          this.schedule.every.enabled = false;
+          this.schedule.human.enabled = true;
+        }
+      },
+    };
   }
 
   get title() {
@@ -31,13 +52,13 @@ class TitlePanelWatcherEdit {
     }
   }
 
-  get schedule() {
-    return this.watcher._source.trigger.schedule.later;
-  }
+  // get scheduleHuman() {
+  //   return this.watcher._source.trigger.schedule.later;
+  // }
 
-  set schedule(interval) {
-    this.watcher._source.trigger.schedule.later = interval;
-  }
+  // set scheduleHuman(interval) {
+  //   this.watcher._source.trigger.schedule.later = interval;
+  // }
 
   isValidationMessageVisible(fieldName, errorType, showIfOtherErrors = true) {
     if (!this.form[fieldName]) {

@@ -43,13 +43,42 @@ class ConditionPanelWatcherEdit {
       last: {
         handleSelect: (unit, n) => {
           this.$log.debug('select last:', unit, n);
-          this.chartQueryParams.last = { unit, n };
+          this.updateChartQueryParamsLast(n, unit);
           this.countAll(pick(this.chartQueryParams, ['index', 'over', 'last', 'interval']));
         },
       },
     };
 
+    this.$scope.$watch('conditionPanelWatcherEdit.watcher._source.trigger.schedule.later', () => {
+      this.updateChartQueryParamsInterval(this.watcher._source.trigger.schedule.later);
+      this.countAll(pick(this.chartQueryParams, ['index', 'over', 'last', 'interval']));
+    });
+
     this.countAll(pick(this.chartQueryParams, ['index', 'over', 'last', 'interval']));
+  }
+
+  scheduleModeEveryIsUsed(interval) {
+    if (interval.match(/every \d+ (seconds|minutes|hours|days|months|years)/g)) {
+      return true;
+    }
+    return false;
+  }
+
+  /*
+  * @param {string} interval of time: every 1 minutes
+  */
+  updateChartQueryParamsInterval(interval) {
+    if (this.scheduleModeEveryIsUsed(interval)) {
+      interval = interval.split(' ');
+      this.chartQueryParams.interval = {
+        n: +interval[1],
+        unit: interval[2],
+      };
+    }
+  }
+
+  updateChartQueryParamsLast(n, unit) {
+    this.chartQueryParams.last = { unit, n };
   }
 
   async countAll({index, over, last, interval}) {

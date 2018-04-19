@@ -1,0 +1,33 @@
+<form iname="watcherEditHumanSchedule.form" ng-model-options="{ getterSetter: true }" novalidate>
+  <div class="row">
+    <div class="col-md-12">
+      <div class="form-group" ng-show="watcherEditHumanSchedule.enabled">
+        <label for="watcherEditHumanSchedule">
+          Human
+        </label>
+        <input
+          class="form-control"
+          type="text"
+          id="watcherEditHumanSchedule"
+          name="watcherEditHumanSchedule"
+          input-focus
+          required
+          placeholder="every 5 mins"
+          ng-model="watcherEditHumanSchedule.schedule"
+          ng-model-options="{ debounce: 1000 }"
+        >
+        <small
+          id="watcherEditHumanScheduleValidationMessage"
+          class="form-text text-danger"
+          ng-if="watcherEditHumanSchedule.isValidationMessageVisible('watcherEditHumanSchedule', 'required')"
+        >
+          A time field is required.
+        </small>
+        <small class="form-text text-muted">
+          <span>Next execution: {{watcherEditHumanSchedule.schedule | nextScheduleOccurrence: watcherEditHumanSchedule.config}}.</span>
+          <a href="https://bunkat.github.io/later/parsers.html#text" target="_blank">Format</a>
+        </small>
+      </div>
+    </div>
+  </div>
+</form>

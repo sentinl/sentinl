@@ -42,7 +42,7 @@
             </div>
           </div> <!-- END title -->
           <div class="row">
-            <div class="col-sm-8">
+            <div class="col-sm-6">
               <div class="form-group">
                 <label for="watcherIndex">
                   Select an Index
@@ -61,33 +61,27 @@
                 </small>
               </div>
             </div> <!-- END select indices -->
-            <div class="col-sm-4">
+            <div class="col-sm-2">
               <div class="form-group">
-                <label for="watcherSchedule">
-                  Schedule
+                <label for="watcherScheduleMode">
+                  Schedule mode
                 </label>
-                <input
-                  class="form-control"
-                  type="text"
-                  id="watcherSchedule"
-                  name="watcherSchedule"
-                  input-focus
-                  required
-                  placeholder="every 5 mins"
-                  ng-model="titlePanelWatcherEdit.schedule"
-                  ng-model-options="{ debounce: 1000 }"
-                >
-                <small
-                  id="watcherScheduleValidationMessage"
-                  class="form-text text-danger"
-                  ng-if="titlePanelWatcherEdit.isValidationMessageVisible('watcherSchedule', 'required')"
-                >
-                  A time field is required.
-                </small>
-                <small class="form-text text-muted">
-                  <span>Next execution: {{titlePanelWatcherEdit.schedule | nextScheduleOccurrence: titlePanelWatcherEdit.config}}.</span>
-                  <a href="https://bunkat.github.io/later/parsers.html#text" target="_blank">Format</a>
-                </small>
+                <select
+                  name="watcherScheduleMode"
+                  id="watcherScheduleMode"
+                  class="form-control condition-select"
+                  ng-model="titlePanelWatcherEdit.schedule.selected"
+                  ng-options="o as o for o in titlePanelWatcherEdit.schedule.options"
+                  ng-change="titlePanelWatcherEdit.schedule.handleChange()"
+                ></select>
+              </div>
+            </div>
+            <div class="col-sm-4">
+              <div class="form-group" ng-show="titlePanelWatcherEdit.schedule.human.enabled">
+                <watcher-edit-human-schedule watcher="titlePanelWatcherEdit.watcher"></watcher-edit-human-schedule>
+              </div>
+              <div class="form-group" ng-show="titlePanelWatcherEdit.schedule.every.enabled">
+                <watcher-edit-every-schedule watcher="titlePanelWatcherEdit.watcher"></watcher-edit-every-schedule>
               </div>
             </div> <!-- END schedule -->
           </div> <!-- END index and schedule -->
