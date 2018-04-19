@@ -9,6 +9,7 @@
           <select
             class="form-control condition-select"
             ng-model="ddWatcherAggThreshold.selected"
+            ng-model-options="{ debounce: 500 }"
             ng-options="o as o for o in ddWatcherAggThreshold.options"
             ng-change="ddWatcherAggThreshold.handleChange()"
           ></select>
@@ -21,6 +22,7 @@
             id="number"
             type="number"
             ng-model="ddWatcherAggThreshold.number"
+            ng-model-options="{ debounce: 500 }"
             ng-change="ddWatcherAggThreshold.handleChange()"
           >
         </div>

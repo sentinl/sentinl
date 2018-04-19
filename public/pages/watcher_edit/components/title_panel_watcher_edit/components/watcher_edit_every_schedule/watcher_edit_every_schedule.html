@@ -10,6 +10,7 @@
           id="number"
           type="number"
           ng-model="watcherEditEverySchedule.number"
+          ng-model-options="{ debounce: 500 }"
           ng-change="watcherEditEverySchedule.handleChange()"
         >
       </div>
@@ -22,6 +23,7 @@
         <select
           class="form-control condition-select"
           ng-model="watcherEditEverySchedule.selected"
+          ng-model-options="{ debounce: 500 }"
           ng-options="o as o for o in watcherEditEverySchedule.options"
           ng-change="watcherEditEverySchedule.handleChange()"
         ></select>

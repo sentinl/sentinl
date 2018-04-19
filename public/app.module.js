@@ -29,7 +29,7 @@ app.config(function (ChartJsProvider) {
   'ngInject';
   // Configure all charts
   ChartJsProvider.setOptions({
-    chartColors: ['#FF5252', '#FF8A80'],
+    chartColors: ['#0074D9', '#FF4136'],
     responsive: true,
   });
 

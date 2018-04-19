@@ -12,7 +12,7 @@ class DdWatcherAggThreshold {
   }
 
   handleChange() {
-    this.onSelect({direction: this.selected, number: this.number});
+    this.onSelect({direction: this.selected, n: this.number});
   }
 }
 

@@ -12,6 +12,7 @@
             type="number"
             ng-model="ddWatcherAggTime.number"
             ng-change="ddWatcherAggTime.handleChange()"
+            ng-model-options="{ debounce: 500 }"
           >
         </div>
       </div>
@@ -20,6 +21,7 @@
           <select
             class="form-control condition-select"
             ng-model="ddWatcherAggTime.selected"
+            ng-model-options="{ debounce: 500 }"
             ng-options="o as o for o in ddWatcherAggTime.options"
             ng-change="ddWatcherAggTime.handleChange()"
           ></select>

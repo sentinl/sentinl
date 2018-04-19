@@ -13,15 +13,22 @@ class ConditionPanelWatcherEdit {
 
     this.chart = {
       xAxis: [],
-      yAxis: [],
-      options: {},
+      yAxis: [[], []],
+      options: {
+        title: {
+          display: false,
+          text: 'Historical results chart'
+        },
+      },
     };
 
     this.chartQueryParams = {
       index: ['watcher_aggs_test'],
+      // index: watcher._source.search.request.index,
       over: '_all',
       last: { n: 15, unit: 'minutes' },
       interval: { n: 1, unit: 'minutes' },
+      threshold: { n: 10, directon: 'above' },
     };
 
     this.condition = {
@@ -36,8 +43,10 @@ class ConditionPanelWatcherEdit {
         },
       },
       threshold: {
-        handleSelect: (direction, number) => {
-          this.$log.debug('select threshold:', direction, number);
+        handleSelect: (direction, n) => {
+          this.$log.debug('select threshold:', direction, n);
+          this.updateChartQueryParamsThreshold(n, direction);
+          this.drawThreshold(this.chartQueryParams.threshold.n);
         },
       },
       last: {
@@ -54,9 +63,24 @@ class ConditionPanelWatcherEdit {
       this.countAll(pick(this.chartQueryParams, ['index', 'over', 'last', 'interval']));
     });
 
+    this.$scope.$watch('conditionPanelWatcherEdit.watcher._source.input.search.request.index', () => {
+      // this.chartQueryParams.index = this.watcher._source.input.search.request.index;
+    });
+
     this.countAll(pick(this.chartQueryParams, ['index', 'over', 'last', 'interval']));
   }
 
+  /*
+  * @param {integer} n on y axis
+  */
+  drawThreshold(n) {
+    const len = this.chart.yAxis[0].length;
+    this.chart.yAxis[1] = Array.apply(null, Array(len)).map(Number.prototype.valueOf, n);
+  }
+
+  /*
+  * @param {string} interval of time: every 1 minutes
+  */
   scheduleModeEveryIsUsed(interval) {
     if (interval.match(/every \d+ (seconds|minutes|hours|days|months|years)/g)) {
       return true;
@@ -78,7 +102,11 @@ class ConditionPanelWatcherEdit {
   }
 
   updateChartQueryParamsLast(n, unit) {
-    this.chartQueryParams.last = { unit, n };
+    this.chartQueryParams.last = { unit, n: +n };
+  }
+
+  updateChartQueryParamsThreshold(n, direction) {
+    this.chartQueryParams.threshold = { direction, n: +n };
   }
 
   async countAll({index, over, last, interval}) {
@@ -92,8 +120,9 @@ class ConditionPanelWatcherEdit {
         } else {
           resp.data.aggregations.dateAgg.buckets.forEach((bucket) => {
             this.chart.xAxis.push(this.formatTimeForXAxis(bucket.key, last.unit));
-            this.chart.yAxis.push(bucket.doc_count);
+            this.chart.yAxis[0].push(bucket.doc_count);
           });
+          this.drawThreshold(this.chartQueryParams.threshold.n);
         }
       } else {
         this.$log.warn('count all, no aggregation results found', resp);
@@ -106,7 +135,7 @@ class ConditionPanelWatcherEdit {
 
   purgeChartData() {
     this.chart.xAxis = [];
-    this.chart.yAxis = [];
+    this.chart.yAxis[0] = [];
   }
 
   /*

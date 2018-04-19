@@ -18,7 +18,7 @@
                 <ul>
                   <li><dd-watcher-agg-type on-select="conditionPanelWatcherEdit.condition.type.handleSelect(type)"></dd-watcher-agg-type/></li>
                   <li><dd-watcher-agg-field on-select="conditionPanelWatcherEdit.condition.over.handleSelect(field)"></dd-watcher-agg-field/></li>
-                  <li><dd-watcher-agg-threshold on-select="conditionPanelWatcherEdit.condition.threshold.handleSelect(direction, number)"></dd-watcher-agg-threshold/></li>
+                  <li><dd-watcher-agg-threshold on-select="conditionPanelWatcherEdit.condition.threshold.handleSelect(direction, n)"></dd-watcher-agg-threshold/></li>
                   <li><dd-watcher-agg-time on-select="conditionPanelWatcherEdit.condition.last.handleSelect(unit, n)"></dd-watcher-agg-time/></li>
                 </ul>
               </div>
@@ -30,22 +30,15 @@
           </div> <!-- END condition based query builder -->
           <div class="row">
             <div class="col-md-6">
-              <canvas
-                class="chart chart-line"
-                chart-data="conditionPanelWatcherEdit.chart.yAxis"
-                chart-labels="conditionPanelWatcherEdit.chart.xAxis"
-                chart-options="conditionPanelWatcherEdit.chart.options"
-                chart-click="conditionPanelWatcherEdit.onChartClick"
-              ></canvas> 
-<!--
-              <canvas
-                class="chart chart-line"
-                chart-data="conditionPanelWatcherEdit.demo.data"
-                chart-labels="conditionPanelWatcherEdit.demo.labels"
-                chart-series="conditionPanelWatcherEdit.demo.series"
-                chart-click="conditionPanelWatcherEdit.onChartClick"
-              ></canvas> 
--->
+              <div class="chart-container">
+                <canvas
+                  class="chart chart-line"
+                  chart-data="conditionPanelWatcherEdit.chart.yAxis"
+                  chart-labels="conditionPanelWatcherEdit.chart.xAxis"
+                  chart-options="conditionPanelWatcherEdit.chart.options"
+                  chart-click="conditionPanelWatcherEdit.onChartClick"
+                ></canvas> 
+              </div>
             </div>
             <div class="col-md-6">
             </div>
