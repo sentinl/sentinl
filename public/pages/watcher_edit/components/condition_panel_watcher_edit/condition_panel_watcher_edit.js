@@ -20,6 +20,10 @@ class ConditionPanelWatcherEdit {
           text: 'Historical results chart'
         },
       },
+      progress: {
+        running: false,
+        message: 'LOADING DATA ...',
+      },
     };
 
     this.chartQueryParams = {
@@ -67,7 +71,7 @@ class ConditionPanelWatcherEdit {
       // this.chartQueryParams.index = this.watcher._source.input.search.request.index;
     });
 
-    this.countAll(pick(this.chartQueryParams, ['index', 'over', 'last', 'interval']));
+    // this.countAll(pick(this.chartQueryParams, ['index', 'over', 'last', 'interval']));
   }
 
   /*
@@ -110,27 +114,51 @@ class ConditionPanelWatcherEdit {
   }
 
   async countAll({index, over, last, interval}) {
+    this.onProgress();
     try {
       const resp = await this.watcherEditorChartService.countAll({ index, over, last, interval });
       this.purgeChartData();
 
       if (has(resp, 'data.aggregations.dateAgg.buckets')) {
         if (!resp.data.aggregations.dateAgg.buckets.length) {
-          this.$log.warn('count all, no aggregation results found', resp);
+          const msg = 'no aggregation results found';
+          this.offProgress(msg);
+          this.$log.warn(msg, resp);
         } else {
-          resp.data.aggregations.dateAgg.buckets.forEach((bucket) => {
-            this.chart.xAxis.push(this.formatTimeForXAxis(bucket.key, last.unit));
-            this.chart.yAxis[0].push(bucket.doc_count);
-          });
+          this.offProgress();
+          this.updateChartAxisesForCount(resp.data.aggregations, last);
           this.drawThreshold(this.chartQueryParams.threshold.n);
         }
       } else {
-        this.$log.warn('count all, no aggregation results found', resp);
+        const msg = 'no aggregation results found';
+        this.offProgress(msg);
+        this.$log.warn(msg, resp);
       }
       this.$log.debug('count all resp:', resp);
     } catch (err) {
       this.$log.error(`fail to count all: ${err.message}`);
     }
+    this.offProgress();
+  }
+
+  onProgress(msg) {
+    this.chart.progress.message = msg || 'LOADING DATA ...';
+    this.chart.progress.running = true;
+  }
+
+  offProgress(msg) {
+    this.$scope.$apply(() => {
+      this.chart.progress.message = msg || 'LOADING DATA ...';
+      this.chart.progress.running = false;
+    });
+    // window.dispatchEvent(new Event('click'));
+  }
+
+  updateChartAxisesForCount(aggregations, last) {
+    aggregations.dateAgg.buckets.forEach((bucket) => {
+      this.chart.xAxis.push(this.formatTimeForXAxis(bucket.key, last.unit));
+      this.chart.yAxis[0].push(bucket.doc_count);
+    });
   }
 
   purgeChartData() {

@@ -13,7 +13,7 @@
             </div>
           </div> <!-- END header -->
           <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-8">
               <div class="form-group">
                 <ul>
                   <li><dd-watcher-agg-type on-select="conditionPanelWatcherEdit.condition.type.handleSelect(type)"></dd-watcher-agg-type/></li>
@@ -23,14 +23,14 @@
                 </ul>
               </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
               <div class="form-group">
               </div>
             </div>
           </div> <!-- END condition based query builder -->
           <div class="row">
             <div class="col-md-6">
-              <div class="chart-container">
+              <div class="form-group chart-container">
                 <canvas
                   class="chart chart-line"
                   chart-data="conditionPanelWatcherEdit.chart.yAxis"
@@ -41,6 +41,9 @@
               </div>
             </div>
             <div class="col-md-6">
+              <div class="form-group">
+                <p ng-show="conditionPanelWatcherEdit.chart.progress.running">{{conditionPanelWatcherEdit.chart.progress.message}}</p>
+              </div>
             </div>
           </div> <!-- END chart, data hostory -->
         </div>

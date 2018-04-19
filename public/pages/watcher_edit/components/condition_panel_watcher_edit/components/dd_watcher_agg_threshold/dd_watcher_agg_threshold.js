@@ -4,7 +4,7 @@ class DdWatcherAggThreshold {
   constructor() {
     this.selected = 'above';
     this.options = ['above', 'below'];
-    this.number = 5;
+    this.number = 10;
   }
 
   get title() {
