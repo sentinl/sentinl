@@ -252,7 +252,7 @@ class ConditionPanelWatcherEdit {
   }
 
   _offProgress(msg) {
-    this.chart.progress.message = msg || 'LOADING DATA ...';
+    this.chart.progress.message = msg || '';
     this.chart.progress.running = false;
   }
 
