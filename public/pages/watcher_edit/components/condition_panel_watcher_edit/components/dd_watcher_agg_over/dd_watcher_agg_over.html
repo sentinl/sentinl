@@ -1,18 +1,42 @@
-<form iname="ddWatcherAggOver.form" ng-model-options="{ getterSetter: true }" novalidate>
-  <button
-    type="button"
-    class="btn btn-default pop-over-btn"
-    pop-over
-    pop-over-title="{{ddWatcherAggOver.title}}"
-  >
-    <strong class="pop-over-btn-text">{{ddWatcherAggOver.title}}</strong> {{ddWatcherAggOver.selected}}
-  </button>
+<form name="ddWatcherAggOver.form" ng-model-options="{ getterSetter: true }" novalidate>
+  <a pop-over pop-over-title="{{ddWatcherAggOver.title}}">
+    <strong class="pop-over-btn-text">{{ddWatcherAggOver.top.enabled ? 'GROUPED ' : ''}}{{ddWatcherAggOver.title}}</strong> {{ddWatcherAggOver.selected}} {{ddWatcherAggOver.top.enabled ? ddWatcherAggOver.top.num_of_values : ''}}
+  </a>
   <div ng-hide="true" class="pop-over-content">
-    <select
-      class="form-control condition-select"
-      ng-model="ddWatcherAggOver.selected"
-      ng-options="o as o for o in ddWatcherAggOver.options"
-      ng-change="ddWatcherAggOver.handleChange()"
-    ></select>
+    <div class="row">
+      <div class="col-sm-4">
+        <div class="form-group">
+          <select
+            class="form-control condition-select"
+            ng-model="ddWatcherAggOver.selected"
+            ng-options="o as o for o in ddWatcherAggOver.options"
+            ng-change="ddWatcherAggOver.handleChange()"
+          ></select>
+        </div>
+      </div>
+      <div class="col-sm-4" ng-show="ddWatcherAggOver.top.enabled">
+        <div class="form-group">
+          <input
+            class="form-control"
+            id="number"
+            type="number"
+            ng-model="ddWatcherAggOver.top.num_of_values"
+            ng-change="ddWatcherAggOver.handleChange()"
+          >
+        </div>
+      </div>
+      <div class="col-sm-4" ng-show="ddWatcherAggOver.top.enabled">
+        <div class="form-group">
+          <input
+            class="form-control"
+            id="field"
+            type="text"
+            ng-show="ddWatcherAggOver.top.enabled"
+            ng-model="ddWatcherAggOver.top.field_name"
+            ng-change="ddWatcherAggOver.handleChange()"
+          >
+        </div>
+      </div>
+    </div>
   </div>
 </form>

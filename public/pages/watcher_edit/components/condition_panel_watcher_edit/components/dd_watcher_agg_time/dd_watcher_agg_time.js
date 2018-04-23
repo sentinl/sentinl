@@ -5,7 +5,7 @@ class DdWatcherAggTime {
     this.title = 'LAST';
     this.selected = 'minutes';
     this.options = ['seconds', 'minutes', 'hours', 'days', 'months', 'years'];
-    this.number = 5;
+    this.number = 15;
   }
 
   handleChange() {

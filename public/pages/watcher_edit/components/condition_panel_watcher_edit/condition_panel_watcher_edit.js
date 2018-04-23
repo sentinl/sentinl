@@ -2,7 +2,7 @@ import './condition_panel_watcher_edit.less';
 import template from './condition_panel_watcher_edit.html';
 
 import moment from 'moment';
-import {has, pick} from 'lodash';
+import {has, pick, includes} from 'lodash';
 
 class ConditionPanelWatcherEdit {
   constructor($http, $log, $scope, watcherEditorChartService) {
@@ -11,7 +11,13 @@ class ConditionPanelWatcherEdit {
     this.$scope = $scope;
     this.watcherEditorChartService = watcherEditorChartService;
 
+    this.messages = {
+      nodata: 'the selected condition does not return any data',
+    };
+
     this.chart = {
+      enabled: true,
+      message: '',
       xAxis: [],
       yAxis: [[], []],
       options: {
@@ -29,6 +35,7 @@ class ConditionPanelWatcherEdit {
     this.chartQueryParams = {
       index: ['watcher_aggs_test'],
       // index: watcher._source.search.request.index,
+      queryType: 'count',
       over: '_all',
       last: { n: 15, unit: 'minutes' },
       interval: { n: 1, unit: 'minutes' },
@@ -39,45 +46,95 @@ class ConditionPanelWatcherEdit {
       type: {
         handleSelect: (type) => {
           this.$log.debug('select type:', type);
+          this._updateChartQueryParamsQueryType(type);
+        },
+      },
+      field: {
+        enabled: false,
+        handleSelect: (field) => {
+          this.$log.debug('select field:', field);
+          this._updateChartQueryParamsField(field);
         },
       },
       over: {
-        handleSelect: (field) => {
-          this.$log.debug('select over:', field);
+        handleSelect: (over) => {
+          this.$log.debug('select over:', over);
         },
       },
       threshold: {
         handleSelect: (direction, n) => {
           this.$log.debug('select threshold:', direction, n);
-          this.updateChartQueryParamsThreshold(n, direction);
-          this.drawThreshold(this.chartQueryParams.threshold.n);
+          this._updateChartQueryParamsThreshold(n, direction);
+          this._drawChartThreshold(this.chartQueryParams.threshold.n);
         },
       },
       last: {
         handleSelect: (unit, n) => {
           this.$log.debug('select last:', unit, n);
-          this.updateChartQueryParamsLast(n, unit);
-          this.countAll(pick(this.chartQueryParams, ['index', 'over', 'last', 'interval']));
+          this._updateChartQueryParamsLast(n, unit);
         },
       },
     };
 
     this.$scope.$watch('conditionPanelWatcherEdit.watcher._source.trigger.schedule.later', () => {
-      this.updateChartQueryParamsInterval(this.watcher._source.trigger.schedule.later);
-      this.countAll(pick(this.chartQueryParams, ['index', 'over', 'last', 'interval']));
+      this._updateChartQueryParamsInterval(this.watcher._source.trigger.schedule.later);
     });
 
     this.$scope.$watch('conditionPanelWatcherEdit.watcher._source.input.search.request.index', () => {
       // this.chartQueryParams.index = this.watcher._source.input.search.request.index;
     });
 
-    // this.countAll(pick(this.chartQueryParams, ['index', 'over', 'last', 'interval']));
+    this.$scope.$watch('conditionPanelWatcherEdit.chartQueryParams', () => {
+      this._fetchChartData();
+    }, true);
+  }
+
+  /*
+  * Fetch chart data and fill its X and Y axises
+  */
+  _fetchChartData() {
+    this._toggleConditionBuilderMetricAggOverField();
+    const params = pick(this.chartQueryParams, ['index', 'over', 'last', 'interval', 'field']);
+
+    if (this.chartQueryParams.queryType === 'average') {
+      params.metricAggType = 'average';
+      this._queryMetricAgg(params);
+      return;
+    }
+
+    if (this.chartQueryParams.queryType === 'sum') {
+      params.metricAggType = 'sum';
+      this._queryMetricAgg(params);
+      return;
+    }
+
+    if (this.chartQueryParams.queryType === 'min') {
+      params.metricAggType = 'min';
+      this._queryMetricAgg(params);
+      return;
+    }
+
+    if (this.chartQueryParams.queryType === 'max') {
+      params.metricAggType = 'max';
+      this._queryMetricAgg(params);
+      return;
+    }
+
+    this._queryCount(params);
+  }
+
+  _toggleConditionBuilderMetricAggOverField() {
+    if (this.chartQueryParams.queryType === 'count') {
+      this.condition.field.enabled = false;
+    } else {
+      this.condition.field.enabled = true;
+    }
   }
 
   /*
   * @param {integer} n on y axis
   */
-  drawThreshold(n) {
+  _drawChartThreshold(n) {
     const len = this.chart.yAxis[0].length;
     this.chart.yAxis[1] = Array.apply(null, Array(len)).map(Number.prototype.valueOf, n);
   }
@@ -85,7 +142,7 @@ class ConditionPanelWatcherEdit {
   /*
   * @param {string} interval of time: every 1 minutes
   */
-  scheduleModeEveryIsUsed(interval) {
+  _scheduleModeEveryIsUsed(interval) {
     if (interval.match(/every \d+ (seconds|minutes|hours|days|months|years)/g)) {
       return true;
     }
@@ -95,8 +152,8 @@ class ConditionPanelWatcherEdit {
   /*
   * @param {string} interval of time: every 1 minutes
   */
-  updateChartQueryParamsInterval(interval) {
-    if (this.scheduleModeEveryIsUsed(interval)) {
+  _updateChartQueryParamsInterval(interval) {
+    if (this._scheduleModeEveryIsUsed(interval)) {
       interval = interval.split(' ');
       this.chartQueryParams.interval = {
         n: +interval[1],
@@ -105,63 +162,129 @@ class ConditionPanelWatcherEdit {
     }
   }
 
-  updateChartQueryParamsLast(n, unit) {
+  _updateChartQueryParamsField(field) {
+    this.chartQueryParams.field = field;
+  }
+
+  _updateChartQueryParamsQueryType(type) {
+    this.chartQueryParams.queryType = type;
+  }
+
+  _updateChartQueryParamsLast(n, unit) {
     this.chartQueryParams.last = { unit, n: +n };
   }
 
-  updateChartQueryParamsThreshold(n, direction) {
+  _updateChartQueryParamsThreshold(n, direction) {
     this.chartQueryParams.threshold = { direction, n: +n };
   }
 
-  async countAll({index, over, last, interval}) {
-    this.onProgress();
+  /**
+  * Get matric aggregation (sum, min, max, average) of field
+  */
+  async _queryMetricAgg({ index, over, last, interval, field, metricAggType }) {
+    this._onProgress();
     try {
-      const resp = await this.watcherEditorChartService.countAll({ index, over, last, interval });
-      this.purgeChartData();
+      let resp;
+      if (metricAggType === 'average') {
+        resp = await this.watcherEditorChartService.metricAggAverage({ index, over, last, interval, field });
+      } else if (metricAggType === 'sum') {
+        resp = await this.watcherEditorChartService.metricAggSum({ index, over, last, interval, field });
+      } else if (metricAggType === 'min') {
+        resp = await this.watcherEditorChartService.metricAggMin({ index, over, last, interval, field });
+      } else if (metricAggType === 'max') {
+        resp = await this.watcherEditorChartService.metricAggMax({ index, over, last, interval, field });
+      }
+
+      this._purgeChartData();
 
       if (has(resp, 'data.aggregations.dateAgg.buckets')) {
         if (!resp.data.aggregations.dateAgg.buckets.length) {
-          const msg = 'no aggregation results found';
-          this.offProgress(msg);
-          this.$log.warn(msg, resp);
+          this._offChart(this.messages.nodata);
         } else {
-          this.offProgress();
-          this.updateChartAxisesForCount(resp.data.aggregations, last);
-          this.drawThreshold(this.chartQueryParams.threshold.n);
+          this._updateChartAxisesForMetricAgg(resp.data.aggregations, last);
+          this._drawChartThreshold(this.chartQueryParams.threshold.n);
+          this._onChart();
         }
       } else {
-        const msg = 'no aggregation results found';
-        this.offProgress(msg);
-        this.$log.warn(msg, resp);
+        this._offChart(this.messages.nodata);
       }
-      this.$log.debug('count all resp:', resp);
+      this._offProgress();
+      this.$log.debug(`${metricAggType} all resp:`, resp);
     } catch (err) {
       this.$log.error(`fail to count all: ${err.message}`);
+      this._offChart(this.messages.nodata);
+      this._offProgress();
     }
-    this.offProgress();
   }
 
-  onProgress(msg) {
+  /**
+  * Count documents
+  */
+  async _queryCount({ index, over, last, interval, field }) {
+    this._onProgress();
+    try {
+      const resp = await this.watcherEditorChartService.count({ index, over, last, interval, field });
+      this._purgeChartData();
+
+      if (has(resp, 'data.aggregations.dateAgg.buckets')) {
+        if (!resp.data.aggregations.dateAgg.buckets.length) {
+          this._offChart(this.messages.nodata);
+        } else {
+          this._updateChartAxisesForCount(resp.data.aggregations, last);
+          this._drawChartThreshold(this.chartQueryParams.threshold.n);
+          this._onChart();
+        }
+      } else {
+        this._offChart(this.messages.nodata);
+      }
+      this._offProgress();
+      this.$log.debug('COUNT all resp:', resp);
+    } catch (err) {
+      this.$log.error(`fail to count all: ${err.message}`);
+      this._offChart(this.messages.nodata);
+      this._offProgress();
+    }
+  }
+
+  _onProgress(msg) {
     this.chart.progress.message = msg || 'LOADING DATA ...';
     this.chart.progress.running = true;
   }
 
-  offProgress(msg) {
-    this.$scope.$apply(() => {
-      this.chart.progress.message = msg || 'LOADING DATA ...';
-      this.chart.progress.running = false;
-    });
-    // window.dispatchEvent(new Event('click'));
+  _offProgress(msg) {
+    this.chart.progress.message = msg || 'LOADING DATA ...';
+    this.chart.progress.running = false;
   }
 
-  updateChartAxisesForCount(aggregations, last) {
+  _onChart(msg) {
+    this.$scope.$apply(() => {
+      this.chart.message = msg || '';
+      this.chart.enabled = true;
+    });
+  }
+
+  _offChart(msg) {
+    this.$scope.$apply(() => {
+      this.chart.message = msg || '';
+      this.chart.enabled = false;
+    });
+  }
+
+  _updateChartAxisesForCount(aggregations, last) {
     aggregations.dateAgg.buckets.forEach((bucket) => {
-      this.chart.xAxis.push(this.formatTimeForXAxis(bucket.key, last.unit));
+      this.chart.xAxis.push(this._formatTimeForXAxis(bucket.key, last.unit));
       this.chart.yAxis[0].push(bucket.doc_count);
     });
   }
 
-  purgeChartData() {
+  _updateChartAxisesForMetricAgg(aggregations, last) {
+    aggregations.dateAgg.buckets.forEach((bucket) => {
+      this.chart.xAxis.push(this._formatTimeForXAxis(bucket.key, last.unit));
+      this.chart.yAxis[0].push(bucket.metricAgg.value);
+    });
+  }
+
+  _purgeChartData() {
     this.chart.xAxis = [];
     this.chart.yAxis[0] = [];
   }
@@ -169,7 +292,7 @@ class ConditionPanelWatcherEdit {
   /*
   * @return {string} formatted time - April 18, 2018 4:58 PM
   */
-  formatTimeForXAxis(epochTime, unit) {
+  _formatTimeForXAxis(epochTime, unit) {
     let locale = 'LLL';
     if (unit === 'seconds') {
       locale = 'LTS';
@@ -180,11 +303,10 @@ class ConditionPanelWatcherEdit {
     if (unit === 'days' || unit === 'months' || unit === 'years') {
       locale = 'L';
     }
-    this.$log.debug('formatTimeForX:', unit, locale);
     return moment(epochTime).format(locale);
   }
 
-  onChartClick() {
+  _onChartClick() {
     console.log('chart clicked');
   }
 }

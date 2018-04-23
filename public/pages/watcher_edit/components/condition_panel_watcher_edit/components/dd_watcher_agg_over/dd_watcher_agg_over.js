@@ -2,9 +2,9 @@ import template from './dd_watcher_agg_over.html';
 
 class DdWatcherAggOver {
   constructor() {
-    this.title = 'Over';
+    this.title = 'OVER';
     this.selected = 'all docs';
-    this.options = ['all docs'];
+    this.options = ['all docs', 'top'];
     this.top = {
       enabled: false,
       num_of_values: 5,

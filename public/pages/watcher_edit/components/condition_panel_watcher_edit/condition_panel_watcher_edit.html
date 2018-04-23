@@ -17,7 +17,13 @@
               <div class="form-group">
                 <ul>
                   <li><dd-watcher-agg-type on-select="conditionPanelWatcherEdit.condition.type.handleSelect(type)"></dd-watcher-agg-type/></li>
-                  <li><dd-watcher-agg-field on-select="conditionPanelWatcherEdit.condition.over.handleSelect(field)"></dd-watcher-agg-field/></li>
+                  <li>
+                    <dd-watcher-agg-field
+                      ng-show="conditionPanelWatcherEdit.condition.field.enabled"
+                      on-select="conditionPanelWatcherEdit.condition.field.handleSelect(field)"
+                    ></dd-watcher-agg-field/>
+                  </li>
+                  <li><dd-watcher-agg-over on-select="conditionPanelWatcherEdit.condition.over.handleSelect(over)"></dd-watcher-agg-over/></li>
                   <li><dd-watcher-agg-threshold on-select="conditionPanelWatcherEdit.condition.threshold.handleSelect(direction, n)"></dd-watcher-agg-threshold/></li>
                   <li><dd-watcher-agg-time on-select="conditionPanelWatcherEdit.condition.last.handleSelect(unit, n)"></dd-watcher-agg-time/></li>
                 </ul>
@@ -30,7 +36,7 @@
           </div> <!-- END condition based query builder -->
           <div class="row">
             <div class="col-md-6">
-              <div class="form-group chart-container">
+              <div class="form-group chart-container" ng-show="conditionPanelWatcherEdit.chart.enabled">
                 <canvas
                   class="chart chart-line"
                   chart-data="conditionPanelWatcherEdit.chart.yAxis"
@@ -38,6 +44,9 @@
                   chart-options="conditionPanelWatcherEdit.chart.options"
                   chart-click="conditionPanelWatcherEdit.onChartClick"
                 ></canvas> 
+              </div>
+              <div class="form-group" ng-show="!conditionPanelWatcherEdit.chart.enabled">
+                <p>{{conditionPanelWatcherEdit.chart.message}}</p>
               </div>
             </div>
             <div class="col-md-6">

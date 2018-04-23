@@ -4,7 +4,7 @@ class DdWatcherAggType {
   constructor() {
     this.title = 'WHEN';
     this.selected = 'count';
-    this.options = ['count', 'average', 'min', 'max'];
+    this.options = ['count', 'average', 'sum', 'min', 'max'];
   }
 
   handleChange() {

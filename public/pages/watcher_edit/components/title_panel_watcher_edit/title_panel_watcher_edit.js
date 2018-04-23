@@ -52,14 +52,6 @@ class TitlePanelWatcherEdit {
     }
   }
 
-  // get scheduleHuman() {
-  //   return this.watcher._source.trigger.schedule.later;
-  // }
-
-  // set scheduleHuman(interval) {
-  //   this.watcher._source.trigger.schedule.later = interval;
-  // }
-
   isValidationMessageVisible(fieldName, errorType, showIfOtherErrors = true) {
     if (!this.form[fieldName]) {
       return false;
