@@ -30,7 +30,11 @@ export default function watcherEdit(server) {
           }).default(),
           query_params: Joi.object({
             field: Joi.string(),
-            over: Joi.string().default('_all'),
+            over: Joi.object({
+              type: Joi.string().default('all docs'),
+              field: Joi.string(),
+              n: Joi.number(),
+            }).default(),
             last: Joi.object({
               n: Joi.number().default(15),
               unit: Joi.string().default('minutes'),
@@ -79,7 +83,11 @@ export default function watcherEdit(server) {
           }).default(),
           query_params: Joi.object({
             field: Joi.string(),
-            over: Joi.string().default('_all'),
+            over: Joi.object({
+              type: Joi.string().default('all docs'),
+              field: Joi.string(),
+              n: Joi.number(),
+            }).default(),
             last: Joi.object({
               n: Joi.number().default(15),
               unit: Joi.string().default('minutes'),
@@ -128,7 +136,11 @@ export default function watcherEdit(server) {
           }).default(),
           query_params: Joi.object({
             field: Joi.string(),
-            over: Joi.string().default('_all'),
+            over: Joi.object({
+              type: Joi.string().default('all docs'),
+              field: Joi.string(),
+              n: Joi.number(),
+            }).default(),
             last: Joi.object({
               n: Joi.number().default(15),
               unit: Joi.string().default('minutes'),
@@ -177,7 +189,11 @@ export default function watcherEdit(server) {
           }).default(),
           query_params: Joi.object({
             field: Joi.string(),
-            over: Joi.string().default('_all'),
+            over: Joi.object({
+              type: Joi.string().default('all docs'),
+              field: Joi.string(),
+              n: Joi.number(),
+            }).default(),
             last: Joi.object({
               n: Joi.number().default(15),
               unit: Joi.string().default('minutes'),
@@ -226,7 +242,11 @@ export default function watcherEdit(server) {
           }).default(),
           query_params: Joi.object({
             field: Joi.string(),
-            over: Joi.string().default('_all'),
+            over: Joi.object({
+              type: Joi.string().default('all docs'),
+              field: Joi.string(),
+              n: Joi.number(),
+            }).default(),
             last: Joi.object({
               n: Joi.number().default(15),
               unit: Joi.string().default('minutes'),

@@ -15,17 +15,39 @@
           <div class="row">
             <div class="col-md-8">
               <div class="form-group">
-                <ul>
-                  <li><dd-watcher-agg-type on-select="conditionPanelWatcherEdit.condition.type.handleSelect(type)"></dd-watcher-agg-type/></li>
+                <ul>a
+                  <li>
+                    <dd-watcher-agg-type
+                      agg-type-selected="conditionPanelWatcherEdit.chartQueryParams.queryType"
+                      agg-type-on-select="conditionPanelWatcherEdit.condition.type.handleSelect(type)"
+                    ></dd-watcher-agg-type/>
+                  </li>
                   <li>
                     <dd-watcher-agg-field
                       ng-show="conditionPanelWatcherEdit.condition.field.enabled"
-                      on-select="conditionPanelWatcherEdit.condition.field.handleSelect(field)"
+                      agg-field-fields="conditionPanelWatcherEdit.allDocFields"
+                      agg-field-on-select="conditionPanelWatcherEdit.condition.field.handleSelect(field)"
                     ></dd-watcher-agg-field/>
                   </li>
-                  <li><dd-watcher-agg-over on-select="conditionPanelWatcherEdit.condition.over.handleSelect(over)"></dd-watcher-agg-over/></li>
-                  <li><dd-watcher-agg-threshold on-select="conditionPanelWatcherEdit.condition.threshold.handleSelect(direction, n)"></dd-watcher-agg-threshold/></li>
-                  <li><dd-watcher-agg-time on-select="conditionPanelWatcherEdit.condition.last.handleSelect(unit, n)"></dd-watcher-agg-time/></li>
+                  <li>
+                    <dd-watcher-agg-over
+                      agg-over-options="conditionPanelWatcherEdit.chartQueryParams.over"
+                      agg-over-fields="conditionPanelWatcherEdit.allDocFields"
+                      agg-over-on-select="conditionPanelWatcherEdit.condition.over.handleSelect(over)"
+                    ></dd-watcher-agg-over/>
+                  </li>
+                  <li>
+                    <dd-watcher-agg-threshold
+                      agg-threshold-options="conditionPanelWatcherEdit.chartQueryParams.threshold"
+                      agg-threshold-on-select="conditionPanelWatcherEdit.condition.threshold.handleSelect(direction, n)"
+                    ></dd-watcher-agg-threshold/>
+                  </li>
+                  <li>
+                    <dd-watcher-agg-time
+                      agg-time-options="conditionPanelWatcherEdit.chartQueryParams.last"
+                      agg-time-on-select="conditionPanelWatcherEdit.condition.last.handleSelect(unit, n)"
+                    ></dd-watcher-agg-time/>
+                  </li>
                 </ul>
               </div>
             </div>

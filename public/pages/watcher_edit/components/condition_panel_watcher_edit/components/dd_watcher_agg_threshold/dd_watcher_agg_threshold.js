@@ -2,9 +2,12 @@ import template from './dd_watcher_agg_threshold.html';
 
 class DdWatcherAggThreshold {
   constructor() {
-    this.selected = 'above';
     this.options = ['above', 'below'];
-    this.number = 10;
+  }
+
+  $onInit() {
+    this.number = this.aggThresholdOptions.n || 5;
+    this.selected = this.aggThresholdOptions.direction || 'above';
   }
 
   get title() {
@@ -12,7 +15,7 @@ class DdWatcherAggThreshold {
   }
 
   handleChange() {
-    this.onSelect({direction: this.selected, n: this.number});
+    this.aggThresholdOnSelect({direction: this.selected, n: this.number});
   }
 }
 
@@ -21,8 +24,8 @@ function ddWatcherAggThreshold() {
     template,
     restrict: 'E',
     scope: {
-      watcher: '=watcher',
-      onSelect: '&',
+      aggThresholdOptions: '<',
+      aggThresholdOnSelect: '&',
     },
     controller:  DdWatcherAggThreshold,
     controllerAs: 'ddWatcherAggThreshold',

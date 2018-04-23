@@ -3,25 +3,39 @@ import template from './dd_watcher_agg_over.html';
 class DdWatcherAggOver {
   constructor() {
     this.title = 'OVER';
-    this.selected = 'all docs';
     this.options = ['all docs', 'top'];
     this.top = {
       enabled: false,
-      num_of_values: 5,
-      field_name: '@timestamp',
+      num_of_values: 3,
+      selected: '',
+      options: [],
     };
+  }
+
+  $onInit() {
+    this.selected = this.aggOverOptions.type || 'all docs';
+    if (this.aggOverOptions === 'top') {
+      this.top.enabled = true;
+      this.top.num_of_values = this.aggOverOptions.n;
+      this.top.selected = this.aggOverOptions.field;
+    }
+    this.top.options = this.aggOverFields;
   }
 
   handleChange() {
     if (this.selected !== 'top') {
       this.top.enabled = false;
-      this.onSelect({over: this.selected});
+      this.aggOverOnSelect({
+        over: {
+          field: this.selected,
+        }
+      });
     } else {
       this.top.enabled = true;
-      this.onSelect({
+      this.aggOverOnSelect({
         over: {
-          num_of_values: this.top.num_of_values,
-          field_name: this.top.field_name,
+          n: this.top.num_of_values,
+          field: this.top.selected,
         }
       });
     }
@@ -33,8 +47,9 @@ function ddWatcherAggOver() {
     template,
     restrict: 'E',
     scope: {
-      watcher: '=watcher',
-      onSelect: '&',
+      aggOverOptions: '<',
+      aggOverFields: '<',
+      aggOverOnSelect: '&',
     },
     controller:  DdWatcherAggOver,
     controllerAs: 'ddWatcherAggOver',

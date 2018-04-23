@@ -27,14 +27,12 @@
       </div>
       <div class="col-sm-4" ng-show="ddWatcherAggOver.top.enabled">
         <div class="form-group">
-          <input
-            class="form-control"
-            id="field"
-            type="text"
-            ng-show="ddWatcherAggOver.top.enabled"
-            ng-model="ddWatcherAggOver.top.field_name"
+          <select
+            class="form-control condition-select"
+            ng-model="ddWatcherAggOver.top.selected"
+            ng-options="o as o for o in ddWatcherAggOver.top.options"
             ng-change="ddWatcherAggOver.handleChange()"
-          >
+          ></select>
         </div>
       </div>
     </div>

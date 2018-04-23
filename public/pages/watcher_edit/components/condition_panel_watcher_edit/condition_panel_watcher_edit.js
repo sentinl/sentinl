@@ -36,11 +36,13 @@ class ConditionPanelWatcherEdit {
       index: ['watcher_aggs_test'],
       // index: watcher._source.search.request.index,
       queryType: 'count',
-      over: '_all',
+      over: { type: 'all docs' },
       last: { n: 15, unit: 'minutes' },
       interval: { n: 1, unit: 'minutes' },
-      threshold: { n: 10, directon: 'above' },
+      threshold: { n: 10, direction: 'above' },
     };
+
+    this.allDocFields = ['random'];
 
     this.condition = {
       type: {
@@ -208,13 +210,12 @@ class ConditionPanelWatcherEdit {
       } else {
         this._offChart(this.messages.nodata);
       }
-      this._offProgress();
       this.$log.debug(`${metricAggType} all resp:`, resp);
     } catch (err) {
       this.$log.error(`fail to count all: ${err.message}`);
       this._offChart(this.messages.nodata);
-      this._offProgress();
     }
+    this._offProgress();
   }
 
   /**
@@ -237,13 +238,12 @@ class ConditionPanelWatcherEdit {
       } else {
         this._offChart(this.messages.nodata);
       }
-      this._offProgress();
       this.$log.debug('COUNT all resp:', resp);
     } catch (err) {
       this.$log.error(`fail to count all: ${err.message}`);
       this._offChart(this.messages.nodata);
-      this._offProgress();
     }
+    this._offProgress();
   }
 
   _onProgress(msg) {

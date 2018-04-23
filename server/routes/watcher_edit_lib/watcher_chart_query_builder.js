@@ -13,7 +13,7 @@ class WatcherChartQueryBuilder {
 
   /*
   * @return {object} Elasticsearch query to count documents 'over' a field for 'last' time and in 'interval'
-  * if (over === '_all')
+  * if (over.type === 'all docs')
   *   {
   *     "size": 0,
   *     "query": {
@@ -41,10 +41,10 @@ class WatcherChartQueryBuilder {
   *     }
   *   }
   */
-  count({field = null, over = '_all', last = {n: 15, unit: 'minutes'}, interval = {n: 1, unit: 'minutes'}}) {
+  count({field = null, over = {type: 'all docs'}, last = {n: 15, unit: 'minutes'}, interval = {n: 1, unit: 'minutes'}}) {
     const body = this._epochRange(last.n, last.unit);
 
-    if (over === '_all') {
+    if (over.type === 'all docs') {
       body.aggs = this._dateAgg({
         field: this.timeFieldName,
         interval,
@@ -56,7 +56,7 @@ class WatcherChartQueryBuilder {
 
   /*
   * @return {object} Elasticsearch query to get average of 'field' values 'over' a field for 'last' time and in 'interval'
-  * if (over === '_all')
+  * if (over.type === 'all docs')
   *   {
   *     "size": 0,
   *     "query": {
@@ -91,10 +91,10 @@ class WatcherChartQueryBuilder {
   *     }
   *   }
   */
-  average({field = null, over = '_all', last = {n: 15, unit: 'minutes'}, interval = {n: 1, unit: 'minutes'}}) {
+  average({field = null, over = {type: 'all docs'}, last = {n: 15, unit: 'minutes'}, interval = {n: 1, unit: 'minutes'}}) {
     const body = this._epochRange(last.n, last.unit);
 
-    if (over === '_all') {
+    if (over.type === 'all docs') {
       body.aggs = this._dateAgg({
         field: this.timeFieldName,
         interval,
@@ -107,7 +107,7 @@ class WatcherChartQueryBuilder {
 
   /*
   * @return {object} Elasticsearch query to get sum of 'field' values 'over' a field for 'last' time and in 'interval'
-  * if (over === '_all')
+  * if (over.type === 'all docs')
   *  {
   *    "size": 0,
   *    "query": {
@@ -142,10 +142,10 @@ class WatcherChartQueryBuilder {
   *    }
   *  }
   */
-  sum({field = null, over = '_all', last = {n: 15, unit: 'minutes'}, interval = {n: 1, unit: 'minutes'}}) {
+  sum({field = null, over = {type: 'all docs'}, last = {n: 15, unit: 'minutes'}, interval = {n: 1, unit: 'minutes'}}) {
     const body = this._epochRange(last.n, last.unit);
 
-    if (over === '_all') {
+    if (over.type === 'all docs') {
       body.aggs = this._dateAgg({
         field: this.timeFieldName,
         interval,
@@ -158,7 +158,7 @@ class WatcherChartQueryBuilder {
 
   /*
   * @return {object} Elasticsearch query to get min of 'field' values 'over' a field for 'last' time and in 'interval'
-  * if (over === '_all')
+  * if (over.type === 'all docs')
   *   {
   *     "size": 0,
   *     "query": {
@@ -193,10 +193,10 @@ class WatcherChartQueryBuilder {
   *     }
   *   }
   */
-  min({field = null, over = '_all', last = {n: 15, unit: 'minutes'}, interval = {n: 1, unit: 'minutes'}}) {
+  min({field = null, over = {type: 'all docs'}, last = {n: 15, unit: 'minutes'}, interval = {n: 1, unit: 'minutes'}}) {
     const body = this._epochRange(last.n, last.unit);
 
-    if (over === '_all') {
+    if (over.type === 'all docs') {
       body.aggs = this._dateAgg({
         field: this.timeFieldName,
         interval,
@@ -209,7 +209,7 @@ class WatcherChartQueryBuilder {
 
   /*
   * @return {object} Elasticsearch query to get max of 'field' values 'over' a field for 'last' time and in 'interval'
-  * if (over === '_all')
+  * if (over.type === 'all docs')
   *   {
   *     "size": 0,
   *     "query": {
@@ -244,10 +244,10 @@ class WatcherChartQueryBuilder {
   *     }
   *   }
   */
-  max({field = null, over = '_all', last = {n: 15, unit: 'minutes'}, interval = {n: 1, unit: 'minutes'}}) {
+  max({field = null, over = {type: 'all docs'}, last = {n: 15, unit: 'minutes'}, interval = {n: 1, unit: 'minutes'}}) {
     const body = this._epochRange(last.n, last.unit);
 
-    if (over === '_all') {
+    if (over.type === 'all docs') {
       body.aggs = this._dateAgg({
         field: this.timeFieldName,
         interval,

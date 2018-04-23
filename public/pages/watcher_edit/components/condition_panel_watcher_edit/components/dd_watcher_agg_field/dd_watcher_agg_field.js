@@ -4,11 +4,14 @@ class DdWatcherAggField {
   constructor() {
     this.title = 'FIELD';
     this.selected = 'select a field';
-    this.options = ['random'];
   }
 
   handleChange() {
-    this.onSelect({field: this.selected});
+    this.aggFieldOnSelect({field: this.selected});
+  }
+
+  $onInit() {
+    this.options = this.aggFieldFields;
   }
 }
 
@@ -17,8 +20,8 @@ function ddWatcherAggField() {
     template,
     restrict: 'E',
     scope: {
-      watcher: '=watcher',
-      onSelect: '&',
+      aggFieldFields: '<',
+      aggFieldOnSelect: '&',
     },
     controller:  DdWatcherAggField,
     controllerAs: 'ddWatcherAggField',
