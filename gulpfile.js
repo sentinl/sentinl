@@ -39,7 +39,7 @@ var knownOptions = {
   default: { kibanahomepath: '../kibi-internal' }
 };
 var options = minimist(process.argv.slice(2), knownOptions);
-var kibanaPluginDir = path.resolve(__dirname, options.kibanahomepath + '/plugins/' + packageName);
+var kibanaPluginDir = path.resolve(__dirname, options.kibanahomepath + '/siren_plugins/' + packageName);
 
 const lib = {
   gun_master: !options['lib-install'] ? null : options['lib-install'],
