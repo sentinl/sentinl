@@ -27,13 +27,14 @@ class DdWatcherAggOver {
       this.top.enabled = false;
       this.aggOverOnSelect({
         over: {
-          field: this.selected,
+          type: this.selected,
         }
       });
     } else {
       this.top.enabled = true;
       this.aggOverOnSelect({
         over: {
+          type: 'top',
           n: this.top.num_of_values,
           field: this.top.selected,
         }

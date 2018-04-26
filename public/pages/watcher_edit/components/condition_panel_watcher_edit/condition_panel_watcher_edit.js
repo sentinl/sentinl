@@ -42,7 +42,7 @@ class ConditionPanelWatcherEdit {
       threshold: { n: 10, direction: 'above' },
     };
 
-    this.allDocFields = ['random'];
+    this.allDocFields = ['animal', 'random'];
 
     this.condition = {
       type: {
@@ -61,6 +61,7 @@ class ConditionPanelWatcherEdit {
       over: {
         handleSelect: (over) => {
           this.$log.debug('select over:', over);
+          this._updateChartQueryParamsOver(over);
         },
       },
       threshold: {
@@ -162,6 +163,10 @@ class ConditionPanelWatcherEdit {
         unit: interval[2],
       };
     }
+  }
+
+  _updateChartQueryParamsOver(over) {
+    this.chartQueryParams.over = pick(over, ['type', 'n', 'field']);
   }
 
   _updateChartQueryParamsField(field) {

@@ -49,6 +49,15 @@ class WatcherChartQueryBuilder {
         field: this.timeFieldName,
         interval,
       });
+    } else {
+      body.aggs = this._termsAgg({
+        field: over.field,
+        size: over.n,
+      });
+      body.aggs.bucketAgg.aggs = this._dateAgg({
+        field: this.timeFieldName,
+        interval,
+      });
     }
 
     return body;
@@ -100,6 +109,17 @@ class WatcherChartQueryBuilder {
         interval,
       });
       body.aggs.dateAgg.aggs = this._metricAggAvg(field);
+    } else {
+      body.aggs = this._termsAgg({
+        field: over.field,
+        size: over.n,
+      });
+      body.aggs.bucketAgg.aggs = this._metricAggAvg(field);
+      body.aggs.bucketAgg.aggs.dateAgg = this._dateAgg({
+        field: this.timeFieldName,
+        interval,
+      }).dateAgg;
+      body.aggs.bucketAgg.aggs.dateAgg.aggs = this._metricAggAvg(field);
     }
 
     return body;
@@ -151,6 +171,17 @@ class WatcherChartQueryBuilder {
         interval,
       });
       body.aggs.dateAgg.aggs = this._metricAggSum(field);
+    } else {
+      body.aggs = this._termsAgg({
+        field: over.field,
+        size: over.n,
+      });
+      body.aggs.bucketAgg.aggs = this._metricAggSum(field);
+      body.aggs.bucketAgg.aggs.dateAgg = this._dateAgg({
+        field: this.timeFieldName,
+        interval,
+      }).dateAgg;
+      body.aggs.bucketAgg.aggs.dateAgg.aggs = this._metricAggSum(field);
     }
 
     return body;
@@ -202,6 +233,17 @@ class WatcherChartQueryBuilder {
         interval,
       });
       body.aggs.dateAgg.aggs = this._metricAggMin(field);
+    } else {
+      body.aggs = this._termsAgg({
+        field: over.field,
+        size: over.n,
+      });
+      body.aggs.bucketAgg.aggs = this._metricAggMin(field);
+      body.aggs.bucketAgg.aggs.dateAgg = this._dateAgg({
+        field: this.timeFieldName,
+        interval,
+      }).dateAgg;
+      body.aggs.bucketAgg.aggs.dateAgg.aggs = this._metricAggMin(field);
     }
 
     return body;
@@ -253,6 +295,17 @@ class WatcherChartQueryBuilder {
         interval,
       });
       body.aggs.dateAgg.aggs = this._metricAggMax(field);
+    } else {
+      body.aggs = this._termsAgg({
+        field: over.field,
+        size: over.n,
+      });
+      body.aggs.bucketAgg.aggs = this._metricAggMax(field);
+      body.aggs.bucketAgg.aggs.dateAgg = this._dateAgg({
+        field: this.timeFieldName,
+        interval,
+      }).dateAgg;
+      body.aggs.bucketAgg.aggs.dateAgg.aggs = this._metricAggMax(field);
     }
 
     return body;
@@ -272,7 +325,7 @@ class WatcherChartQueryBuilder {
     return moment.tz(moment().format(), this.timezoneName).valueOf();
   }
 
-  _epochTimeNUnitsAgo(n = 5, unit = 'minutes') {
+  _epochTimeNUnitsAgo(n = 1, unit = 'minutes') {
     return moment.tz(moment().subtract(n, unit).format(), this.timezoneName).valueOf();
   }
 
@@ -325,6 +378,24 @@ class WatcherChartQueryBuilder {
           time_zone: this.timezoneName,
           interval,
           min_doc_count: 1,
+        },
+      },
+    };
+  }
+
+  _termsAgg({field, size, order = 'desc'}) {
+    if (!Number.isInteger(+field)) {
+      field += '.keyword';
+    }
+
+    return {
+      bucketAgg: {
+        terms: {
+          field,
+          size,
+          order: {
+            '_count': order,
+          },
         },
       },
     };
