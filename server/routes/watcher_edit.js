@@ -17,7 +17,7 @@ export default function watcherEdit(server) {
   });
 
   server.route({
-    path: '/api/sentinl/watcher/editor/count/all',
+    path: '/api/sentinl/watcher/editor/count',
     method: 'POST',
     config: {
       validate: {
@@ -70,7 +70,7 @@ export default function watcherEdit(server) {
   });
 
   server.route({
-    path: '/api/sentinl/watcher/editor/average/all',
+    path: '/api/sentinl/watcher/editor/average',
     method: 'POST',
     config: {
       validate: {
@@ -123,7 +123,7 @@ export default function watcherEdit(server) {
   });
 
   server.route({
-    path: '/api/sentinl/watcher/editor/min/all',
+    path: '/api/sentinl/watcher/editor/min',
     method: 'POST',
     config: {
       validate: {
@@ -176,7 +176,7 @@ export default function watcherEdit(server) {
   });
 
   server.route({
-    path: '/api/sentinl/watcher/editor/max/all',
+    path: '/api/sentinl/watcher/editor/max',
     method: 'POST',
     config: {
       validate: {
@@ -229,7 +229,7 @@ export default function watcherEdit(server) {
   });
 
   server.route({
-    path: '/api/sentinl/watcher/editor/sum/all',
+    path: '/api/sentinl/watcher/editor/sum',
     method: 'POST',
     config: {
       validate: {

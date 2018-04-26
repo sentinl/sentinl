@@ -57,23 +57,60 @@
             </div>
           </div> <!-- END condition based query builder -->
           <div class="row">
+            <div class="col-md-2">
+              <div class="form-group">
+                <p ng-show="conditionPanelWatcherEdit.activeChart.enabled">
+                  <strong>{{conditionPanelWatcherEdit.activeChart.name}}</strong>
+                </p>
+              </div>
+            </div>
+            <div class="col-md-1">
+              <div class="form-group">
+                <button 
+                  type="button"
+                  class="btn btn-default"
+                  aria-label="Left Align"
+                  ng-click="conditionPanelWatcherEdit.switchToLeftChart()"
+                  ng-show="conditionPanelWatcherEdit.areMultipleCharts()"
+                >
+                  <span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
+                </button>
+              </div>
+            </div>
+            <div class="col-md-1">
+              <div class="form-group">
+                <button
+                  type="button"
+                  class="btn btn-default"
+                  aria-label="Left Align"
+                  ng-click="conditionPanelWatcherEdit.switchToRightChart()"
+                  ng-show="conditionPanelWatcherEdit.areMultipleCharts()"
+                >
+                  <span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>
+                </button>
+              </div>
+            </div>
+            <div class="col-md-8">
+            </div>
+          </div>
+          <div class="row">
             <div class="col-md-6">
-              <div class="form-group chart-container" ng-show="conditionPanelWatcherEdit.chart.enabled">
+              <div class="form-group chart-container" ng-show="conditionPanelWatcherEdit.activeChart.enabled">
                 <canvas
                   class="chart chart-line"
-                  chart-data="conditionPanelWatcherEdit.chart.yAxis"
-                  chart-labels="conditionPanelWatcherEdit.chart.xAxis"
-                  chart-options="conditionPanelWatcherEdit.chart.options"
+                  chart-data="conditionPanelWatcherEdit.activeChart.yAxis"
+                  chart-labels="conditionPanelWatcherEdit.activeChart.xAxis"
+                  chart-options="conditionPanelWatcherEdit.activeChart.options"
                   chart-click="conditionPanelWatcherEdit.onChartClick"
                 ></canvas> 
               </div>
-              <div class="form-group" ng-show="!conditionPanelWatcherEdit.chart.enabled">
-                <p>{{conditionPanelWatcherEdit.chart.message}}</p>
+              <div class="form-group" ng-show="!conditionPanelWatcherEdit.activeChart.enabled">
+                <p>{{conditionPanelWatcherEdit.activeChart.message}}</p>
               </div>
             </div>
             <div class="col-md-6">
               <div class="form-group">
-                <p ng-show="conditionPanelWatcherEdit.chart.progress.running">{{conditionPanelWatcherEdit.chart.progress.message}}</p>
+                <p ng-show="conditionPanelWatcherEdit.progress.running">{{conditionPanelWatcherEdit.progress.message}}</p>
               </div>
             </div>
           </div> <!-- END chart, data hostory -->

@@ -6,7 +6,7 @@ class WatcherEditorChartService {
 
   async _query({ queryType = 'count', index = [], over, last, interval, field }) {
     try {
-      const uri = this.API.ALL[queryType.toUpperCase()];
+      const uri = this.API[queryType.toUpperCase()];
 
       return await this.$http.post(uri, {
         es_params: {

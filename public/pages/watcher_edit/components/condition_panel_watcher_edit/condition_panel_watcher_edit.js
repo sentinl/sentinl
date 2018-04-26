@@ -2,7 +2,23 @@ import './condition_panel_watcher_edit.less';
 import template from './condition_panel_watcher_edit.html';
 
 import moment from 'moment';
-import {has, pick, includes} from 'lodash';
+import {size, has, pick, includes} from 'lodash';
+
+class Chart {
+  constructor({name = 'all docs', enabled = true, message = '', xAxis = [], yAxis = [[], []], options} = {}) {
+    this.name = name;
+    this.enabled = enabled;
+    this.message = message;
+    this.xAxis = xAxis;
+    this.yAxis = yAxis;
+    this.options = options || {
+      title: {
+        display: false,
+        text: 'Historical results chart',
+      },
+    };
+  }
+}
 
 class ConditionPanelWatcherEdit {
   constructor($http, $log, $scope, watcherEditorChartService) {
@@ -15,22 +31,12 @@ class ConditionPanelWatcherEdit {
       nodata: 'the selected condition does not return any data',
     };
 
-    this.chart = {
-      enabled: true,
-      message: '',
-      xAxis: [],
-      yAxis: [[], []],
-      options: {
-        title: {
-          display: false,
-          text: 'Historical results chart'
-        },
-      },
-      progress: {
-        running: false,
-        message: 'LOADING DATA ...',
-      },
+    this.progress = {
+      running: false,
+      message: 'LOADING DATA ...',
     };
+
+    this.charts = [];
 
     this.chartQueryParams = {
       index: ['watcher_aggs_test'],
@@ -61,14 +67,16 @@ class ConditionPanelWatcherEdit {
       over: {
         handleSelect: (over) => {
           this.$log.debug('select over:', over);
-          this._updateChartQueryParamsOver(over);
+          if (over.type !== 'top' || !!over.n && !!over.field.length) {
+            this._updateChartQueryParamsOver(over);
+          }
         },
       },
       threshold: {
         handleSelect: (direction, n) => {
           this.$log.debug('select threshold:', direction, n);
           this._updateChartQueryParamsThreshold(n, direction);
-          this._drawChartThreshold(this.chartQueryParams.threshold.n);
+          this._drawChartThreshold(this.activeChart, this.chartQueryParams.threshold.n);
         },
       },
       last: {
@@ -92,12 +100,50 @@ class ConditionPanelWatcherEdit {
     }, true);
   }
 
+  get activeChart() {
+    return this.charts.find((chart) => chart.enabled === true);
+  }
+
+  areMultipleCharts() {
+    return this.charts.length > 1;
+  }
+
+  _activeChartIndex() {
+    return this.charts.findIndex((e) => e.enabled === true);
+  }
+
+  _offChartBatch(indicesToExclude = []) {
+    this.charts.forEach((chart, i) => {
+      if (!indicesToExclude.includes(i)) {
+        this._offChart(chart);
+      }
+    });
+  }
+
+  switchToLeftChart() {
+    let index = this._activeChartIndex();
+    if (index > 0) {
+      index -= 1;
+      this._offChartBatch([index]);
+      this._onChart(this.charts[index]);
+    }
+  }
+
+  switchToRightChart() {
+    let index = this._activeChartIndex();
+    if (index < size(this.charts) - 1) {
+      index += 1;
+      this._offChartBatch([index]);
+      this._onChart(this.charts[index]);
+    }
+  }
+
   /*
   * Fetch chart data and fill its X and Y axises
   */
   _fetchChartData() {
     this._toggleConditionBuilderMetricAggOverField();
-    const params = pick(this.chartQueryParams, ['index', 'over', 'last', 'interval', 'field']);
+    const params = pick(this.chartQueryParams, ['index', 'over', 'last', 'interval', 'field', 'threshold']);
 
     if (this.chartQueryParams.queryType === 'average') {
       params.metricAggType = 'average';
@@ -137,9 +183,9 @@ class ConditionPanelWatcherEdit {
   /*
   * @param {integer} n on y axis
   */
-  _drawChartThreshold(n) {
-    const len = this.chart.yAxis[0].length;
-    this.chart.yAxis[1] = Array.apply(null, Array(len)).map(Number.prototype.valueOf, n);
+  _drawChartThreshold(chart, n) {
+    const len = chart.yAxis[0].length;
+    chart.yAxis[1] = Array.apply(null, Array(len)).map(Number.prototype.valueOf, n);
   }
 
   /*
@@ -223,75 +269,99 @@ class ConditionPanelWatcherEdit {
     this._offProgress();
   }
 
+  _isDateAgg(esResp) {
+    return has(esResp, 'data.aggregations.dateAgg.buckets') && !!esResp.data.aggregations.dateAgg.buckets.length;
+  }
+
+  _isBucketAgg(esResp) {
+    return has(esResp, 'data.aggregations.bucketAgg.buckets') && !!esResp.data.aggregations.bucketAgg.buckets.length;
+  }
+
   /**
   * Count documents
   */
-  async _queryCount({ index, over, last, interval, field }) {
+  async _queryCount({ index, over, last, interval, field, threshold }) {
     this._onProgress();
     try {
       const resp = await this.watcherEditorChartService.count({ index, over, last, interval, field });
-      this._purgeChartData();
+      this.charts = [];
 
-      if (has(resp, 'data.aggregations.dateAgg.buckets')) {
-        if (!resp.data.aggregations.dateAgg.buckets.length) {
-          this._offChart(this.messages.nodata);
+      try {
+        if (this._isDateAgg(resp)) {
+          this.charts.push(new Chart());
+          this._updateCountChartWithNewData(this.activeChart, resp.data.aggregations, last, threshold);
+          this._onChart(this.activeChart);
+        } else if (this._isBucketAgg(resp)) {
+          resp.data.aggregations.bucketAgg.buckets.forEach((bucket, i) => {
+            this.charts.push(new Chart({enabled: false, name: bucket.key}));
+            this._updateCountChartWithNewData(this.charts[i], bucket, last, threshold);
+          });
+          this._onChart(this.charts[0]);
         } else {
-          this._updateChartAxisesForCount(resp.data.aggregations, last);
-          this._drawChartThreshold(this.chartQueryParams.threshold.n);
-          this._onChart();
+          this._offChart(this.activeChart, this.messages.nodata);
         }
-      } else {
-        this._offChart(this.messages.nodata);
+      } catch (err) {
+        this.$log.error(`fail to update chart data: ${err}`);
       }
       this.$log.debug('COUNT all resp:', resp);
     } catch (err) {
       this.$log.error(`fail to count all: ${err.message}`);
-      this._offChart(this.messages.nodata);
+      this._offChart(this.activeChart, this.messages.nodata);
     }
     this._offProgress();
   }
 
-  _onProgress(msg) {
-    this.chart.progress.message = msg || 'LOADING DATA ...';
-    this.chart.progress.running = true;
+  _updateCountChartWithNewData(chart, aggs, last, threshold) {
+    this._purgeChartData(chart);
+    this._updateChartAxisesForCount(chart, aggs, last.unit);
+    this._drawChartThreshold(chart, threshold.n);
   }
 
-  _offProgress(msg) {
-    this.chart.progress.message = msg || '';
-    this.chart.progress.running = false;
+  _onProgress(chart, msg) {
+    this.progress.message = msg || 'LOADING DATA ...';
+    this.progress.running = true;
   }
 
-  _onChart(msg) {
-    this.$scope.$apply(() => {
-      this.chart.message = msg || '';
-      this.chart.enabled = true;
+  _offProgress(chart, msg) {
+    this.progress.message = msg || '';
+    this.progress.running = false;
+  }
+
+  _onChart(chart, msg) {
+    setTimeout(() => {
+      this.$scope.$apply(() => {
+        chart.message = msg || '';
+        chart.enabled = true;
+      });
     });
   }
 
-  _offChart(msg) {
-    this.$scope.$apply(() => {
-      this.chart.message = msg || '';
-      this.chart.enabled = false;
+  _offChart(chart, msg) {
+    setTimeout(() => {
+      this.$scope.$apply(() => {
+        chart.message = msg || '';
+        chart.enabled = false;
+      });
     });
   }
 
-  _updateChartAxisesForCount(aggregations, last) {
+  _updateChartAxisesForCount(chart, aggregations, unit) {
     aggregations.dateAgg.buckets.forEach((bucket) => {
-      this.chart.xAxis.push(this._formatTimeForXAxis(bucket.key, last.unit));
-      this.chart.yAxis[0].push(bucket.doc_count);
+      chart.xAxis.push(this._formatTimeForXAxis(bucket.key, unit));
+      chart.yAxis[0].push(bucket.doc_count);
     });
   }
 
-  _updateChartAxisesForMetricAgg(aggregations, last) {
+  _updateChartAxisesForMetricAgg(chart, aggregations, last) {
     aggregations.dateAgg.buckets.forEach((bucket) => {
-      this.chart.xAxis.push(this._formatTimeForXAxis(bucket.key, last.unit));
-      this.chart.yAxis[0].push(bucket.metricAgg.value);
+      chart.xAxis.push(this._formatTimeForXAxis(bucket.key, last.unit));
+      chart.yAxis[0].push(bucket.metricAgg.value);
     });
   }
 
-  _purgeChartData() {
-    this.chart.xAxis = [];
-    this.chart.yAxis[0] = [];
+  _purgeChartData(chart) {
+    chart.xAxis = [];
+    chart.yAxis[0] = [];
   }
 
   /*
