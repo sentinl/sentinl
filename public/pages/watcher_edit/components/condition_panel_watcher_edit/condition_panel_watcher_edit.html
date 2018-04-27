@@ -71,7 +71,7 @@
                   class="btn btn-default"
                   aria-label="Left Align"
                   ng-click="conditionPanelWatcherEdit.switchToLeftChart()"
-                  ng-show="conditionPanelWatcherEdit.areMultipleCharts()"
+                  ng-show="conditionPanelWatcherEdit.areMultipleCharts && conditionPanelWatcherEdit.isAnyActiveChart"
                 >
                   <span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
                 </button>
@@ -84,7 +84,7 @@
                   class="btn btn-default"
                   aria-label="Left Align"
                   ng-click="conditionPanelWatcherEdit.switchToRightChart()"
-                  ng-show="conditionPanelWatcherEdit.areMultipleCharts()"
+                  ng-show="conditionPanelWatcherEdit.areMultipleCharts && conditionPanelWatcherEdit.isAnyActiveChart"
                 >
                   <span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>
                 </button>
@@ -104,8 +104,8 @@
                   chart-click="conditionPanelWatcherEdit.onChartClick"
                 ></canvas> 
               </div>
-              <div class="form-group" ng-show="!conditionPanelWatcherEdit.activeChart.enabled">
-                <p>{{conditionPanelWatcherEdit.activeChart.message}}</p>
+              <div class="form-group" ng-show="!conditionPanelWatcherEdit.isAnyActiveChart">
+                <p>{{conditionPanelWatcherEdit.messages.nodata}}</p>
               </div>
             </div>
             <div class="col-md-6">
