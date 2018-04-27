@@ -385,21 +385,25 @@ class ConditionPanelWatcherEdit {
   }
 
   _onChart(chart, msg) {
-    setTimeout(() => {
-      this.$scope.$apply(() => {
-        chart.message = msg || '';
-        chart.enabled = true;
+    if (chart) {
+      setTimeout(() => {
+        this.$scope.$apply(() => {
+          chart.message = msg || '';
+          chart.enabled = true;
+        });
       });
-    });
+    }
   }
 
   _offChart(chart, msg) {
-    setTimeout(() => {
-      this.$scope.$apply(() => {
-        chart.message = msg || '';
-        chart.enabled = false;
+    if (chart) {
+      setTimeout(() => {
+        this.$scope.$apply(() => {
+          chart.message = msg || '';
+          chart.enabled = false;
+        });
       });
-    });
+    }
   }
 
   _updateChartAxisesForCount(chart, aggregations, unit) {
