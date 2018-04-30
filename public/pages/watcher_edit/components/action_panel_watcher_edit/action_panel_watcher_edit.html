@@ -1,3 +1,48 @@
 <section>
-  <p>Actions</p>
+  <form name="actionPanelWatcherEdit.form" ng-model-options="{ getterSetter: true }" novalidate>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="panel-body">
+          <div class="row">
+            <div class="col-md-6">
+              <header>
+                <h4 class="form-text">
+                  Actions
+                </h4>
+              </header>
+            </div>
+          </div> <!-- END header -->
+          <div class="row">
+            <div class="col-md-2">
+              <div class="form-group">
+                <watcher-edit-add-action
+                  add-action-list="actionPanelWatcherEdit.actionsList"
+                  add-action-persist="actionPanelWatcherEdit.actionPersistSameName({origActionName, actionSettings})"
+                ></watcher-edit-add-action>
+              </div>
+            </div>
+            <div class="col-md-10">
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12">
+              <div class="form-group">
+                <uib-accordion
+                  close-others="actionPanelWatcherEdit.status.closeOthers"
+                  ng-repeat="(actionName, actionSettings) in actionPanelWatcherEdit.watcher._source.actions track by $index">
+                  <watcher-edit-email-action
+                    ng-if="actionPanelWatcherEdit.isAction(actionSettings, 'email')"
+                    email-action-name="{{actionName}}"
+                    email-action-settings="actionSettings"
+                    email-action-delete="actionPanelWatcherEdit.actionDelete({origActionName})"
+                    email-action-persist="actionPanelWatcherEdit.actionPersist({origActionName, newActionName, actionSettings});"
+                  ></watcher-edit-email-action>
+                </uib-accordion>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
 </section>

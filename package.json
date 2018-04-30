@@ -37,6 +37,7 @@
     "decompress": "4.2.0",
     "elasticsearch": "13.2.0",
     "emailjs": "1.0.8",
+    "font-awesome": "4.7.0",
     "later": "1.2.0",
     "moment": "^2.22.1",
     "moment-timezone": "^0.5.16",

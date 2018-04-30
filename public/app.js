@@ -28,9 +28,9 @@ import './pages/watcher_edit';
 import './app.routes';
 
 /* styles */
-import 'bootstrap/dist/css/bootstrap.min.css';
 import './style/main.less';
 import 'ui/autoload/styles';
+import 'font-awesome/css/font-awesome.css';
 
 /* libs */
 import 'ui/kbn_top_nav';
