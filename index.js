@@ -24,12 +24,15 @@ export default function (kibana) {
   let requirements = ['kibana', 'elasticsearch'];
 
   // Siren: check if saved objects api exists.
-  const savedObjectsAPI = `${kibana.rootDir}/src/kibi_plugins/saved_objects_api`;
-  if (fs.existsSync(savedObjectsAPI)) {
+  const savedObjectsAPI1 = `${kibana.rootDir}/src/siren_core_plugins/saved_objects_api`;
+  const savedObjectsAPI2 = `${kibana.rootDir}/src/plugins/saved_objects_api`;
+  if (fs.existsSync(savedObjectsAPI1) || fs.existsSync(savedObjectsAPI2)) {
     requirements.push('saved_objects_api');
 
     // Siren: import saved objects api related libs.
-    const pathForLibs = `${kibana.rootDir}/plugins/sentinl/public/app.js`;
+    let pathForLibs = `${kibana.rootDir}/siren_plugins/sentinl/public/app.js`;
+    pathForLibs = fs.existsSync(pathForLibs) ? pathForLibs : `${kibana.rootDir}/plugins/sentinl/public/app.js`;
+
     const libsToImport = [
       'import \'./services/siren/saved_watchers/index\';',
       'import \'./services/siren/saved_users/index\';',
