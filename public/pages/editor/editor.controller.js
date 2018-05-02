@@ -554,8 +554,6 @@ function EditorController(sentinlConfig, $rootScope, $scope, $route, $interval,
           });
         }).catch(notify.error);
       }
-
-      if (editorMode === 'wizard') $scope.cancelEditor();
     };
 
     /**
