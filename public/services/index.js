@@ -9,6 +9,7 @@ import DataTransfer from './data_transfer/index';
 import NavMenu from './nav_menu/index';
 import ServerConfig from './server_config/index';
 import SentinlLog from './sentinl_log/index';
+import SentinlHelper from './sentinl_helper/index';
 
 export default angular.module('apps/sentinl.services', [
   Alarm.name,
@@ -20,4 +21,5 @@ export default angular.module('apps/sentinl.services', [
   DataTransfer.name,
   ServerConfig.name,
   SentinlLog.name,
+  SentinlHelper.name,
 ]);
