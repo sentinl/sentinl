@@ -24,9 +24,8 @@ export default function (kibana) {
   let requirements = ['kibana', 'elasticsearch'];
 
   // Siren: check if saved objects api exists.
-  const savedObjectsAPI1 = `${kibana.rootDir}/src/siren_core_plugins/saved_objects_api`;
-  const savedObjectsAPI2 = `${kibana.rootDir}/src/plugins/saved_objects_api`;
-  if (fs.existsSync(savedObjectsAPI1) || fs.existsSync(savedObjectsAPI2)) {
+  const savedObjectsAPI = `${kibana.rootDir}/src/siren_core_plugins/saved_objects_api`;
+  if (fs.existsSync(savedObjectsAPI)) {
     requirements.push('saved_objects_api');
 
     // Siren: import saved objects api related libs.
