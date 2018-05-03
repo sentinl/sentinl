@@ -17,6 +17,8 @@
  * limitations under the License.
  */
 
+import { stripObjectPropertiesByNameRegex } from '../lib/sentinl_helper';
+
 import _ from 'lodash';
 import { SpyModesRegistryProvider } from 'ui/registry/spy_modes';
 import EMAILWATCHER from '../constants/email_watcher';
@@ -37,15 +39,8 @@ const dashboardSpyButton = function ($scope, config) {
     $scope.indices = [];
 
     if (req.fetchParams && req.fetchParams.index) {
-      const idx = req.fetchParams.index.toString();
-      indexPattern = $scope.searchSource.get('index');
-      if (indexPattern.getTimeField()) {
-        const tmp = idx.replace(/\*/g, '');
-        $scope.indices.push(`<${tmp}{now/d}>`);
-        $scope.indices.push(`<${tmp}{now/d-1d}>`);
-      } else {
-        $scope.indices.push(idx);
-      }
+      const index = req.fetchParams.index.toString();
+      $scope.indices.push(index);
     }
 
     $scope.createWatcher = function () {
@@ -79,6 +74,8 @@ const dashboardSpyButton = function ($scope, config) {
           }
         });
       }
+
+      stripObjectPropertiesByNameRegex(alarm._source.input.search, /\$.*/);
       window.localStorage.setItem('sentinl_saved_query', JSON.stringify(alarm));
     };
 
