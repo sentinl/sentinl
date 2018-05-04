@@ -56,8 +56,19 @@ class Authenticator {
 }
 
 class Reporter {
-  constructor(config) {
-    this.config = config;
+  constructor(config, action) {
+    this.config = this.initConfig(config, action);
+  }
+
+  initConfig(config, action) {
+    config.authentication = action.snapshot.params.authentication || config.authentication;
+    config.authentication.username = action.snapshot.params.username;
+    config.authentication.password = action.snapshot.params.password;
+    config.file.screenshot.width = action.snapshot.res.split('x')[0] || config.file.screenshot.width;
+    config.file.screenshot.height = action.snapshot.res.split('x')[1] || config.file.screenshot.height;
+    config.file.pdf = action.snapshot.params.pdf || config.file.pdf;
+    config.timeout = action.snapshot.params.delay || config.timeout;
+    return config;
   }
 
   async openPage(url, executablePath) {
@@ -220,22 +231,8 @@ export default async function doReport(server, email, task, action, actionName, 
 
   const filename = createReportFileName(action.snapshot.name, action.snapshot.type);
 
-  config.authentication.username = action.snapshot.params.username;
-  config.authentication.password = action.snapshot.params.password;
-  config.file.screenshot.width = action.snapshot.res.split('x')[0] || config.file.screenshot.width;
-  config.file.screenshot.height = action.snapshot.res.split('x')[1] || config.file.screenshot.height;
-  config.timeout = action.snapshot.params.delay || config.timeout;
-
-  if (config.authentication.mode.custom) {
-    config.authentication.custom = {
-      username_input_selector: action.snapshot.params.username_input_selector || config.authentication.custom.username_input_selector,
-      password_input_selector: action.snapshot.params.password_input_selector || config.authentication.custom.password_input_selector,
-      login_btn_selector: action.snapshot.params.login_btn_selector || config.authentication.custom.login_btn_selector,
-    };
-  }
-
   try {
-    const report = new Reporter(config);
+    const report = new Reporter(config, action);
     await report.openPage(action.snapshot.url, config.executable_path);
 
     let file;
