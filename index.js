@@ -209,6 +209,10 @@ export default function (kibana) {
             body: Joi.string().default('{{payload.watcher_id}}{payload.hits.total}}')
           }).default(),
           report: Joi.object({
+            debug: Joi.object({
+              headless: Joi.boolean().default(true),
+              devtools: Joi.boolean().default(false),
+            }).default(),
             search_guard: Joi.any().forbidden().error(new Error(
               'Option "report.search_guard" was deprecated. Use "report.authentication.mode.searchguard" instead!'
             )),
@@ -243,8 +247,8 @@ export default function (kibana) {
                 landscape: Joi.boolean().default(true),
               }).default(),
               screenshot: Joi.object({
-                width: Joi.number().default(1280),
-                height: Joi.number().default(900),
+                width: Joi.number().default(1920),
+                height: Joi.number().default(1080),
               }).default(),
             }).default(),
             timeout: Joi.number().default(5000),
