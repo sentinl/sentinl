@@ -126,7 +126,10 @@ class Reporter {
     }
 
     if (mode.custom) {
-      await Authenticator.custom(this.page, this.browser, user, pass, '#user', '#pass', '.btn-lg', timeout);
+      const userSelector = this.config.authentication.custom.username_input_selector;
+      const passSelector = this.config.authentication.custom.password_input_selector;
+      const loginBtnSelector = this.config.authentication.custom.login_btn_selector;
+      await Authenticator.custom(this.page, user, pass, userSelector, passSelector, loginBtnSelector, timeout);
     }
   }
 
