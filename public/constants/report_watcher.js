@@ -31,7 +31,7 @@ export default {
         body: 'Sample Screenshot Report',
         save: true,
         snapshot: {
-          res: '1280x900',
+          res: '1920x1080',
           url: 'http://localhost/app/kibana#/dashboard/Alerts',
           params: {
             delay: 5000,
