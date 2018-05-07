@@ -19,6 +19,7 @@
 
 import fs from 'fs';
 import { forEach, difference } from 'lodash';
+import { getFullPathByFileName } from './server/lib/helpers';
 
 export default function (kibana) {
   let requirements = ['kibana', 'elasticsearch'];
@@ -226,7 +227,7 @@ export default function (kibana) {
               'Option "report.tmp_path" is not needed anymore. Just delete it from config!'
             )),
             active: Joi.boolean().default(false),
-            executable_path: Joi.string().default('/usr/bin/chromium'),
+            executable_path: Joi.string().default(getFullPathByFileName('chrome', __dirname + '/node_modules/puppeteer/.local-chromium')),
             authentication: Joi.object({
               enabled: Joi.boolean().default(false),
               mode: Joi.object({
