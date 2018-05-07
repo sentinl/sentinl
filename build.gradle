@@ -56,7 +56,7 @@ configurations {
 }
 
 dependencies {
-    kibi "solutions.siren:kibi-core:${project.version}:sources@zip"
+    kibi "solutions.siren:investigate-core:${project.version}:sources@zip"
 }
 
 /**
@@ -75,15 +75,15 @@ task downloadKibi(type: Copy) {
  * Task to unzip kibi
  */
 task extractKibi(type: Copy, dependsOn: [downloadKibi]) {
-    from { zipTree(new File(downloadKibi.destinationDir, "kibi-core.zip")) }
-    into new File(buildDir, 'kibi-core')
+    from { zipTree(new File(downloadKibi.destinationDir, "investigate-core.zip")) }
+    into new File(buildDir, 'investigate-core')
 }
 
 /**
  * Task to execute the `npmInstall` gradle's task from the kibi distribution
  */
 task npmInstallKibi(type: GradleBuild, dependsOn: [extractKibi]) {
-    dir new File(extractKibi.destinationDir, "kibi-core-${project.version}-sources")
+    dir new File(extractKibi.destinationDir, "investigate-core-${project.version}-sources")
     tasks = ['npmInstall']
 }
 
@@ -166,7 +166,7 @@ task gulpDev(type: GulpTask, dependsOn: [ parseGunMasterUrl ]) {
     }
     else {
         dependsOn installKibi
-        args << "--kibanahomepath=${new File(extractKibi.destinationDir, "kibi-core-${project.version}-sources").getAbsolutePath()}"
+        args << "--kibanahomepath=${new File(extractKibi.destinationDir, "investigate-core-${project.version}-sources").getAbsolutePath()}"
         args << "--lib-install=${gun_master_url}"
     }
 }
@@ -197,7 +197,7 @@ task gulpTest(type: GulpTask, dependsOn: [ parseGunMasterUrl ]) {
     }
     else {
         dependsOn installKibi
-        args << "--kibanahomepath=${new File(extractKibi.destinationDir, "kibi-core-${project.version}-sources").getAbsolutePath()}"
+        args << "--kibanahomepath=${new File(extractKibi.destinationDir, "investigate-core-${project.version}-sources").getAbsolutePath()}"
         args << "--lib-install=${gun_master_url}"
     }
 }
@@ -228,7 +228,7 @@ task gulpTestDev(type: GulpTask, dependsOn: [ parseGunMasterUrl ]) {
     }
     else {
         dependsOn installKibi
-        args << "--kibanahomepath=${new File(extractKibi.destinationDir, "kibi-core-${project.version}-sources").getAbsolutePath()}"
+        args << "--kibanahomepath=${new File(extractKibi.destinationDir, "investigate-core-${project.version}-sources").getAbsolutePath()}"
         args << "--lib-install=${gun_master_url}"
     }
 }
