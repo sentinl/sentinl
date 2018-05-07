@@ -41,7 +41,7 @@ class Authenticator {
       await delay(timeout);
     } catch (err) {
       await browser.close();
-      throw new Error(`fail to authenticate via custom auth, user: ${user}, ${err.message}`);
+      throw new Error(`fail to authenticate via custom auth, user: ${user}: ${err.message}`);
     }
   }
 
