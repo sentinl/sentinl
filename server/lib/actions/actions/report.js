@@ -13,7 +13,7 @@ import uuid from 'uuid/v4';
 import Log from '../../log';
 
 class Authenticator {
-  static async kibana(page, user, pass, appName = 'xpack', timeout = 5000) {
+  static async kibana(page, browser, user, pass, appName = 'xpack', timeout = 5000) {
     try {
       await page.type('#username', user, {delay: timeout / 50});
       await page.type('#password', pass, {delay: timeout / 50});
@@ -28,28 +28,31 @@ class Authenticator {
       await page.click('.global-nav-link--close');
       await delay(timeout);
     } catch (err) {
-      throw new Error(`fail to authenticate via Search Guard, user: ${user}: ${err.message}`);
+      await browser.close();
+      throw new Error(`fail to authenticate via Search Guard, user: ${user}, ${err.message}`);
     }
   }
 
-  static async custom(page, user, pass, userSelector, passSelector, loginBtnSelector, timeout = 5000) {
+  static async custom(page, browser, user, pass, userSelector, passSelector, loginBtnSelector, timeout = 5000) {
     try {
       await page.type(userSelector, user, {delay: timeout / 50});
       await page.type(passSelector, pass, {delay: timeout / 50});
       await page.click(loginBtnSelector);
       await delay(timeout);
     } catch (err) {
-      throw new Error(`fail to authenticate via custom auth, user: ${user}: ${err.message}`);
+      await browser.close();
+      throw new Error(`fail to authenticate via custom auth, user: ${user}, ${err.message}`);
     }
   }
 
-  static async basic(page, user, pass, encoding = 'base64') {
+  static async basic(page, browser, user, pass, encoding = 'base64') {
     try {
       const headers = new Map();
       headers.set('Authorization', `Basic ${new Buffer(`${user}:${pass}`).toString(encoding)}`);
       await page.setExtraHTTPHeaders(headers);
       return page;
     } catch (err) {
+      await browser.close();
       throw new Error(`fail to set basic auth headers, user: ${user}, ${err.message}`);
     }
   }
@@ -116,18 +119,15 @@ class Reporter {
 
   async authenticate(mode, user, pass, timeout) {
     if (mode.searchguard) {
-      await Authenticator.kibana(this.page, user, pass, 'searchguard', timeout);
+      await Authenticator.kibana(this.page, this.browser, user, pass, 'searchguard', timeout);
     }
 
     if (mode.xpack) {
-      await Authenticator.kibana(this.page, user, pass, 'xpack', timeout);
+      await Authenticator.kibana(this.page, this.browser, user, pass, 'xpack', timeout);
     }
 
     if (mode.custom) {
-      const userSelector = this.config.authentication.custom.username_input_selector;
-      const passSelector = this.config.authentication.custom.password_input_selector;
-      const loginBtnSelector = this.config.authentication.custom.login_btn_selector;
-      await Authenticator.custom(this.page, user, pass, userSelector, passSelector, loginBtnSelector, timeout);
+      await Authenticator.custom(this.page, this.browser, user, pass, '#user', '#pass', '.btn-lg', timeout);
     }
   }
 
