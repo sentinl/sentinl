@@ -75,14 +75,18 @@ class Reporter {
     this.url = url;
 
     try {
-      this.browser = await puppeteer.launch({
+      const options = {
         headless: this.config.debug.headless,
         devtools: this.config.debug.devtools,
-        executablePath,
         args: ['--no-sandbox', '--disable-setuid-sandbox'],
         ignoreHTTPSErrors: true,
-      });
+      };
 
+      if (executablePath) {
+        options.executablePath = executablePath;
+      }
+
+      this.browser = await puppeteer.launch(options);
       this.page = await this.browser.newPage();
       this.page.setViewport({
         width: +this.config.file.screenshot.width,
