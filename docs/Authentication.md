@@ -156,3 +156,32 @@ sentinl:
           password_input_selector: '#password'
           login_btn_selector: '#login-btn'
 ```
+
+### Authentication per report
+You can set different authentication modes per different reports. This can be added only in the Raw tab of watcher editor. 
+```
+...
+  "actions": {
+    "report_screenshot": {
+      "throttle_period": "0h0m1s",
+      "report": {
+        ...
+        "snapshot": {
+          "res": "1920x1080",
+          "url": "https://auth-demo.aerobaticapp.com/protected-standard/",
+          "params": {
+            "username": "aerobatic",
+            "password": "aerobatic"
+            "authentication": {
+              "enabled": true,
+              "mode": {
+                "searchguard": true
+              }
+            }
+          },
+        }
+      }
+    }
+...
+""
+```
