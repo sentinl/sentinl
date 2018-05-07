@@ -164,7 +164,7 @@ describe('Watcher', function () {
 
     it('save watcher', function (done) {
       if (!savedWatchers) {
-        done();
+        return done();
       }
 
       const id = '123';

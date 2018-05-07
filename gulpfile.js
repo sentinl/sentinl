@@ -36,10 +36,14 @@ var knownOptions = {
   string: 'kibanahomepath',
   string: 'lib-install',
   string: 'version',
-  default: { kibanahomepath: '../kibi-internal' }
+  string: 'plugindir',
+  default: {
+    kibanahomepath: '../kibi-internal',
+    plugindir: 'plugins',
+  }
 };
 var options = minimist(process.argv.slice(2), knownOptions);
-var kibanaPluginDir = path.resolve(__dirname, options.kibanahomepath + '/plugins/' + packageName);
+var kibanaPluginDir = path.resolve(__dirname, `${options.kibanahomepath}/${options.plugindir}/${packageName}`);
 
 const lib = {
   gun_master: !options['lib-install'] ? null : options['lib-install'],

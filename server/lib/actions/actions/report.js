@@ -26,10 +26,10 @@ class Authenticator {
 
       await delay(timeout);
       await page.click('.global-nav-link--close');
-      await delay(timeout / 5);
+      await delay(timeout);
     } catch (err) {
       await browser.close();
-      throw new Error(`fail to authenticate via Search Guard, user: ${user}, ${err}`);
+      throw new Error(`fail to authenticate via Search Guard, user: ${user}, ${err.message}`);
     }
   }
 
@@ -41,7 +41,7 @@ class Authenticator {
       await delay(timeout);
     } catch (err) {
       await browser.close();
-      throw new Error(`fail to authenticate via custom auth, user: ${user}, ${err}`);
+      throw new Error(`fail to authenticate via custom auth, user: ${user}, ${err.message}`);
     }
   }
 
@@ -53,29 +53,50 @@ class Authenticator {
       return page;
     } catch (err) {
       await browser.close();
-      throw new Error(`fail to set basic auth headers, user: ${user}, ${err}`);
+      throw new Error(`fail to set basic auth headers, user: ${user}, ${err.message}`);
     }
   }
 }
 
 class Reporter {
-  constructor(config) {
-    this.config = config;
+  constructor(config, action) {
+    this.config = this.initConfig(config, action);
+  }
+
+  initConfig(config, action) {
+    config.authentication = action.snapshot.params.authentication || config.authentication;
+    config.authentication.username = action.snapshot.params.username;
+    config.authentication.password = action.snapshot.params.password;
+    config.file.screenshot.width = action.snapshot.res.split('x')[0] || config.file.screenshot.width;
+    config.file.screenshot.height = action.snapshot.res.split('x')[1] || config.file.screenshot.height;
+    config.file.pdf = action.snapshot.params.pdf || config.file.pdf;
+    config.timeout = action.snapshot.params.delay || config.timeout;
+    return config;
   }
 
   async openPage(url, executablePath) {
     this.url = url;
 
     try {
-      this.browser = await puppeteer.launch({
-        executablePath,
+      const options = {
+        headless: this.config.debug.headless,
+        devtools: this.config.debug.devtools,
         args: ['--no-sandbox', '--disable-setuid-sandbox'],
         ignoreHTTPSErrors: true,
-      });
+      };
 
+      if (executablePath) {
+        options.executablePath = executablePath;
+      }
+
+      this.browser = await puppeteer.launch(options);
       this.page = await this.browser.newPage();
+      this.page.setViewport({
+        width: +this.config.file.screenshot.width,
+        height: +this.config.file.screenshot.height,
+      });
     } catch (err) {
-      throw new Error(`fail to open headless chrome, ${err}`);
+      throw new Error(`fail to open headless chrome, ${err.message}`);
     }
 
     if (this.config.authentication.enabled && this.config.authentication.mode.basic) {
@@ -106,7 +127,10 @@ class Reporter {
     }
 
     if (mode.custom) {
-      await Authenticator.custom(this.page, this.browser, user, pass, '#user', '#pass', '.btn-lg', timeout);
+      const userSelector = this.config.authentication.custom.username_input_selector;
+      const passSelector = this.config.authentication.custom.password_input_selector;
+      const loginBtnSelector = this.config.authentication.custom.login_btn_selector;
+      await Authenticator.custom(this.page, this.browser, user, pass, userSelector, passSelector, loginBtnSelector, timeout);
     }
   }
 
@@ -116,7 +140,7 @@ class Reporter {
       await this.page.setViewport({width: +width, height: +height});
       return await this.page.screenshot({type});
     } catch (err) {
-      throw new Error(`fail to do a screenshot, url: ${this.url}, ${err}`);
+      throw new Error(`fail to do a screenshot, url: ${this.url}, ${err.message}`);
     }
   }
 
@@ -125,7 +149,7 @@ class Reporter {
     try {
       return await this.page.pdf({format, landscape});
     } catch (err) {
-      throw new Error(`fail to do a PDF doc, url: ${this.url}, ${err}`);
+      throw new Error(`fail to do a PDF doc, url: ${this.url}, ${err.message}`);
     }
   }
 
@@ -133,7 +157,7 @@ class Reporter {
     try {
       await this.browser.close();
     } catch (err) {
-      throw new Error(`fail to close headless chrome, ${err}`);
+      throw new Error(`fail to close headless chrome, ${err.message}`);
     }
   }
 }
@@ -210,26 +234,12 @@ export default async function doReport(server, email, task, action, actionName, 
 
   const subject = mustache.render(formatterSubject, { payload });
   const text = mustache.render(formatterText, { payload });
-  log.debug(`subject: ${subject}, body: ${text}`);
+  log.debug(`report email subject: ${subject}, body: ${text}`);
 
   const filename = createReportFileName(action.snapshot.name, action.snapshot.type);
 
-  config.authentication.username = action.snapshot.params.username;
-  config.authentication.password = action.snapshot.params.password;
-  config.file.screenshot.width = action.snapshot.res.split('x')[0];
-  config.file.screenshot.height = action.snapshot.res.split('x')[1];
-  config.timeout = action.snapshot.params.delay || config.timeout;
-
-  if (config.authentication.mode.custom) {
-    config.authentication.custom = {
-      username_input_selector: action.snapshot.params.username_input_selector || config.authentication.custom.username_input_selector,
-      password_input_selector: action.snapshot.params.password_input_selector || config.authentication.custom.password_input_selector,
-      login_btn_selector: action.snapshot.params.login_btn_selector || config.authentication.custom.login_btn_selector,
-    };
-  }
-
   try {
-    const report = new Reporter(config);
+    const report = new Reporter(config, action);
     await report.openPage(action.snapshot.url, config.executable_path);
 
     let file;
@@ -241,15 +251,20 @@ export default async function doReport(server, email, task, action, actionName, 
 
     await report.end();
 
-    log.debug(`sending email, watcher ${task._id}, text ${text}`);
+    log.debug(`report action is sending email, watcher ${task._id}, text ${text}`);
     const attachment = createReportAttachment(filename, file, action.snapshot.type);
-    await email.send({
-      text,
-      from: action.from,
-      to: action.to,
-      subject,
-      attachment,
-    });
+
+    try {
+      await email.send({
+        text,
+        from: action.from,
+        to: action.to,
+        subject,
+        attachment,
+      });
+    } catch (err) {
+      log.error(`fail to send report email: ${err.message}`);
+    }
 
     if (!action.stateless) {
       try {
@@ -273,13 +288,13 @@ export default async function doReport(server, email, task, action, actionName, 
           });
         }
 
-        throw new Error(`fail to save report in Elasticsearch, ${err}`);
+        throw new Error(`fail to save report in Elasticsearch: ${err.message}`);
       }
     }
 
     log.debug('stateless report does not save data to Elasticsearch');
     return {message: 'stateless report does not save data to Elasticsearch'};
   } catch (err) {
-    log.error(err);
+    throw new Error(`fail to execute report: ${err.message}`);
   }
 }
