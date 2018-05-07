@@ -75,14 +75,18 @@ class Reporter {
     this.url = url;
 
     try {
-      this.browser = await puppeteer.launch({
+      const options = {
         headless: this.config.debug.headless,
         devtools: this.config.debug.devtools,
-        executablePath,
         args: ['--no-sandbox', '--disable-setuid-sandbox'],
         ignoreHTTPSErrors: true,
-      });
+      };
 
+      if (executablePath) {
+        options.executablePath = executablePath;
+      }
+
+      this.browser = await puppeteer.launch(options);
       this.page = await this.browser.newPage();
       this.page.setViewport({
         width: +this.config.file.screenshot.width,
@@ -246,13 +250,18 @@ export default async function doReport(server, email, task, action, actionName, 
 
     log.debug(`report action is sending email, watcher ${task._id}, text ${text}`);
     const attachment = createReportAttachment(filename, file, action.snapshot.type);
-    await email.send({
-      text,
-      from: action.from,
-      to: action.to,
-      subject,
-      attachment,
-    });
+
+    try {
+      await email.send({
+        text,
+        from: action.from,
+        to: action.to,
+        subject,
+        attachment,
+      });
+    } catch (err) {
+      log.error(`fail to send report email: ${err.message}`);
+    }
 
     if (!action.stateless) {
       try {
@@ -276,13 +285,13 @@ export default async function doReport(server, email, task, action, actionName, 
           });
         }
 
-        throw new Error(`fail to save report in Elasticsearch, ${err.message}`);
+        throw new Error(`fail to save report in Elasticsearch: ${err.message}`);
       }
     }
 
     log.debug('stateless report does not save data to Elasticsearch');
     return {message: 'stateless report does not save data to Elasticsearch'};
   } catch (err) {
-    log.error(err);
+    throw new Error(`fail to execute report: ${err.message}`);
   }
 }
