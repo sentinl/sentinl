@@ -332,7 +332,7 @@ export default function (server, actions, payload, task) {
         try {
           await reportAction(server, email, task, action.report, actionName, payload);
         } catch (err) {
-          log.error(`report, ${err}`);
+          log.error(`report action: ${err.message}`);
         }
       })();
     }
