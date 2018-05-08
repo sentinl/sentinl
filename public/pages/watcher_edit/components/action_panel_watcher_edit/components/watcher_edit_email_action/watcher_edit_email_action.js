@@ -7,7 +7,7 @@ class WatcherEditEmailAction {
     this.$scope = $scope;
     this.type = 'email';
     this.status = {
-      isOpen: true,
+      isOpen: false,
     };
     this.priority = {
       selected: 'low',

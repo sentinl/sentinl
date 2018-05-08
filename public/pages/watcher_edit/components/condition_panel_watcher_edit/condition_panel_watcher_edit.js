@@ -98,7 +98,9 @@ class ConditionPanelWatcherEdit {
     this.$scope.$watch('conditionPanelWatcherEdit.chartQueryParams', async () => {
       try {
         await this._fetchChartData();
+        this._reportStatusToThresholdWatcherEdit();
       } catch (err) {
+        this._reportStatusToThresholdWatcherEdit({success: false});
         this.$log.error(['ConditionPanelWatcherEdit'], `fail: ${err.message}`);
       }
     }, true);
@@ -362,6 +364,11 @@ class ConditionPanelWatcherEdit {
     return null;
   }
 
+  _reportStatusToThresholdWatcherEdit({success = true} = {}) {
+    const isSuccess = !!this.charts.length && success || false;
+    this.conditionPanelUpdateStatus({ isSuccess });
+  }
+
   _updateCountChartWithNewData(chart, aggs, last, threshold) {
     this._purgeChartData(chart);
     this._updateChartAxisesForCount(chart, aggs, last.unit);
@@ -457,6 +464,7 @@ function conditionPanelWatcherEdit() {
     restrict: 'E',
     scope: {
       watcher: '=watcher',
+      conditionPanelUpdateStatus: '&',
     },
     controller:  ConditionPanelWatcherEdit,
     controllerAs: 'conditionPanelWatcherEdit',

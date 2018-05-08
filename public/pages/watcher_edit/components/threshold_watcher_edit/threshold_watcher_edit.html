@@ -1,17 +1,24 @@
 <div class="panel-group">
   <div class="panel panel-default">
     <div class="panel-body">
-      <title-panel-watcher-edit watcher="thresholdWatcherEdit.watcher"></title-panel-watcher-edit>
+      <title-panel-watcher-edit
+        watcher="thresholdWatcherEdit.watcher"
+      ></title-panel-watcher-edit>
     </div>
   </div>
-  <div class="panel panel-default">
+  <div class="panel panel-default" ng-show="thresholdWatcherEdit.condition.show">
     <div class="panel-body">
-      <condition-panel-watcher-edit watcher="thresholdWatcherEdit.watcher"></condition-panel-watcher-edit>
+      <condition-panel-watcher-edit
+        watcher="thresholdWatcherEdit.watcher"
+        condition-panel-update-status="thresholdWatcherEdit.condition.updateStatus(isSuccess)"
+      ></condition-panel-watcher-edit>
     </div>
   </div>
-  <div class="panel panel-default">
+  <div class="panel panel-default" ng-show="thresholdWatcherEdit.action.show">
     <div class="panel-body">
-      <action-panel-watcher-edit watcher="thresholdWatcherEdit.watcher"></action-panel-watcher-edit>
+      <action-panel-watcher-edit
+        watcher="thresholdWatcherEdit.watcher"
+      ></action-panel-watcher-edit>
     </div>
   </div>
 </div>
