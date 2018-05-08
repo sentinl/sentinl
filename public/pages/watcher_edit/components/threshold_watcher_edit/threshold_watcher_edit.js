@@ -2,29 +2,46 @@ import template from './threshold_watcher_edit.html';
 import { has } from 'lodash';
 
 class ThresholdWatcherEdit {
-  constructor($scope, $log, sentinlLog) {
+  constructor($scope, $log, kbnUrl, sentinlLog) {
     this.$scope = $scope;
+    this.kbnUrl = kbnUrl;
     this.sentinlLog = sentinlLog;
     this.sentinlLog.initLocation('ThresholdWatcherEdit');
 
     this.condition = {
       show: false,
       updateStatus: (isSuccess) => {
-        this.action.show = isSuccess;
+        this.action.show = isSuccess && this.condition.show ? true : false;
       },
     };
     this.action = {
-      show: false,
+      show: this.condition.show,
     };
   }
 
   $onInit() {
     this.$scope.$watch('thresholdWatcherEdit.watcher._source', () => {
-      this.condition.show = this._showTitlePanel(this.watcher);
+      this.condition.show = this._showCondition(this.watcher);
+      this.action.show = this.condition.show;
     }, true);
+
+    this.$scope.$on('navMenu:cancelEditor', () => {
+      this._cancelWatcherEditor();
+    });
+    this.$scope.$on('navMenu:saveEditor', () => {
+      this._saveWatcherEditor();
+    });
   }
 
-  _showTitlePanel(watcher) {
+  _cancelWatcherEditor() {
+    this.kbnUrl.redirect('/');
+  };
+
+  _saveWatcherEditor() {
+    this.kbnUrl.redirect('/');
+  };
+
+  _showCondition(watcher) {
     try {
       if (watcher._source.title && !!watcher._source.title.length) {
         if (has(watcher._source, 'trigger.schedule.later') && !!watcher._source.trigger.schedule.later.length) {
