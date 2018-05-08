@@ -2,11 +2,12 @@ import template from './threshold_watcher_edit.html';
 import { has } from 'lodash';
 
 class ThresholdWatcherEdit {
-  constructor($scope, $log, kbnUrl, sentinlLog) {
+  constructor($scope, $log, kbnUrl, sentinlLog, confirmModal) {
     this.$scope = $scope;
     this.kbnUrl = kbnUrl;
     this.sentinlLog = sentinlLog;
     this.sentinlLog.initLocation('ThresholdWatcherEdit');
+    this.confirmModal = confirmModal;
 
     this.condition = {
       show: false,
@@ -28,9 +29,23 @@ class ThresholdWatcherEdit {
     this.$scope.$on('navMenu:cancelEditor', () => {
       this._cancelWatcherEditor();
     });
+
     this.$scope.$on('navMenu:saveEditor', () => {
-      this._saveWatcherEditor();
+      if (this._isWatcherValid()) {
+        this._saveWatcherEditor();
+      } else {
+        const confirmModalOptions = {
+          onConfirm: () => true,
+          onCancel: () => this._cancelWatcherEditor(),
+          confirmButtonText: 'Continue',
+        };
+        this.confirmModal('Watcher is not valid', confirmModalOptions);
+      }
     });
+  }
+
+  _isWatcherValid() {
+    return this.condition.show && this.action.show;
   }
 
   _cancelWatcherEditor() {
