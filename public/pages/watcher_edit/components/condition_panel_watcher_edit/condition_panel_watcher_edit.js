@@ -21,11 +21,12 @@ class Chart {
 }
 
 class ConditionPanelWatcherEdit {
-  constructor($http, $log, $scope, watcherEditorChartService) {
+  constructor($http, $log, $scope, watcherEditorChartService, watcherHelper) {
     this.$http = $http;
     this.$log = $log;
     this.$scope = $scope;
     this.watcherEditorChartService = watcherEditorChartService;
+    this.helper = watcherHelper;
 
     this.messages = {
       nodata: 'the selected condition does not return any data',
@@ -222,18 +223,8 @@ class ConditionPanelWatcherEdit {
   /*
   * @param {string} interval of time: every 1 minutes
   */
-  _scheduleModeEveryIsUsed(interval) {
-    if (interval.match(/every \d+ (seconds|minutes|hours|days|months|years)/g)) {
-      return true;
-    }
-    return false;
-  }
-
-  /*
-  * @param {string} interval of time: every 1 minutes
-  */
   _updateChartQueryParamsInterval(interval) {
-    if (this._scheduleModeEveryIsUsed(interval)) {
+    if (this.helper.isScheduleModeEvery(interval)) {
       interval = interval.split(' ');
       this.chartQueryParams.interval = {
         n: +interval[1],
