@@ -27,16 +27,16 @@
           <div class="row">
             <div class="col-md-12">
               <div class="form-group">
-                <uib-accordion
-                  close-others="actionPanelWatcherEdit.status.closeOthers"
-                  ng-repeat="(actionName, actionSettings) in actionPanelWatcherEdit.watcher._source.actions track by $index">
-                  <watcher-edit-email-action
-                    ng-if="actionPanelWatcherEdit.isAction(actionSettings, 'email')"
-                    email-action-name="{{actionName}}"
-                    email-action-settings="actionSettings"
-                    email-action-delete="actionPanelWatcherEdit.actionDelete({origActionName})"
-                    email-action-persist="actionPanelWatcherEdit.actionPersist({origActionName, newActionName, actionSettings});"
-                  ></watcher-edit-email-action>
+                <uib-accordion close-others="actionPanelWatcherEdit.status.closeOthers">
+                  <div ng-repeat="(actionName, actionSettings) in actionPanelWatcherEdit.watcher._source.actions track by $index">
+                    <watcher-edit-email-action
+                      ng-if="actionPanelWatcherEdit.isAction(actionSettings, 'email')"
+                      email-action-name="{{actionName}}"
+                      email-action-settings="actionSettings"
+                      email-action-delete="actionPanelWatcherEdit.actionDelete({origActionName})"
+                      email-action-persist="actionPanelWatcherEdit.actionPersist({origActionName, newActionName, actionSettings});"
+                    ></watcher-edit-email-action>
+                  </div>
                 </uib-accordion>
               </div>
             </div>
