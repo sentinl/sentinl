@@ -41,6 +41,9 @@ class WatcherEditEmailAction {
   $onInit() {
     this.name = this.emailActionName;
     this.settings = cloneDeep(this.emailActionSettings);
+    this.onTrigger.save = () => {
+      this.emailActionPersist({origActionName: this.emailActionName, newActionName: this.name, actionSettings: this.settings});
+    };
   }
 
   deleteAction() {
@@ -57,6 +60,7 @@ function watcherEditEmailAction() {
       emailActionSettings: '<',
       emailActionPersist: '&',
       emailActionDelete: '&',
+      onTrigger: '=',
     },
     controller:  WatcherEditEmailAction,
     controllerAs: 'watcherEditEmailAction',
