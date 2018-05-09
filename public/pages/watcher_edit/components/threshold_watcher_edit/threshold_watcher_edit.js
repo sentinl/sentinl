@@ -37,7 +37,7 @@ class ThresholdWatcherEdit {
 
   $onInit() {
     this.$scope.$watch('thresholdWatcherEdit.watcher._source', () => {
-      this.condition.show = this._showCondition(this.watcher);
+      this.condition.show = this._isTitlePanelValid(this.watcher);
       this.actions.show = this.condition.show;
     }, true);
 
@@ -70,7 +70,6 @@ class ThresholdWatcherEdit {
   }
 
   indexChange(index) {
-    // debugger;
     this.watcher._source.input.search.request.index = index;
     this.condition.trigger.indexChange(index);
   }
@@ -110,21 +109,25 @@ class ThresholdWatcherEdit {
     }
   };
 
-  _showCondition(watcher) {
+  _isSchedule(watcher) {
+    return watcher._source && !!watcher._source.trigger.schedule.later.length;
+  }
+
+  _isIndex(watcher) {
+    return watcher._source && Array.isArray(watcher._source.input.search.request.index) &&
+    !!watcher._source.input.search.request.index.length;
+  }
+
+  _isTitle(watcher) {
+    return watcher._source && !!watcher._source.title.length;
+  }
+
+  _isTitlePanelValid(watcher) {
     try {
-      if (watcher._source.title && !!watcher._source.title.length) {
-        if (has(watcher._source, 'trigger.schedule.later') && !!watcher._source.trigger.schedule.later.length) {
-          if (has(watcher._source, 'input.search.request.index') && Array.isArray(watcher._source.input.search.request.index) &&
-            !!watcher._source.input.search.request.index.length) {
-            return true;
-          }
-        }
-      }
+      return this._isSchedule(watcher) && this._isIndex(watcher) && this._isTitle(watcher);
     } catch (err) {
-      this.notify.error(`fail to check if threshold watcher title panel is valid: ${err.message}`);
-      return false;
+      this.notify.error(`fail to check if title panel is valid: ${err.message}`);
     }
-    return false;
   }
 }
 
@@ -133,7 +136,7 @@ function thresholdWatcherEdit() {
     template,
     restrict: 'E',
     scope: {
-      watcher: '=watcher',
+      watcher: '=',
     },
     controller: ThresholdWatcherEdit,
     controllerAs: 'thresholdWatcherEdit',
