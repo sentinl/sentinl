@@ -15,6 +15,7 @@
           placeholder="every 5 mins"
           ng-model="watcherEditHumanSchedule.schedule"
           ng-model-options="{ debounce: 1000 }"
+          ng-change="watcherEditHumanSchedule.handleChange()"
         >
         <small
           id="watcherEditHumanScheduleValidationMessage"

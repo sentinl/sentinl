@@ -29,6 +29,7 @@
                   input-focus
                   required
                   ng-model="titlePanelWatcherEdit.title"
+                  ng-model-options="{ debounce: 500 }"
                   placeholder="My Watcher"
                 >
                 <small
@@ -54,6 +55,7 @@
                   id="watcherIndex"
                   input-focus
                   ng-model="titlePanelWatcherEdit.index"
+                  ng-model-options="{ debounce: 500 }"
                   placeholder="Target indices names. All indices searched if this field empty"
                 >
                 <small class="form-text text-muted">
@@ -72,16 +74,23 @@
                   class="form-control condition-select"
                   ng-model="titlePanelWatcherEdit.schedule.selected"
                   ng-options="o as o for o in titlePanelWatcherEdit.schedule.options"
-                  ng-change="titlePanelWatcherEdit.schedule.handleChange()"
+                  ng-model-options="{ debounce: 500 }"
+                  ng-change="titlePanelWatcherEdit.schedule.switchMode()"
                 ></select>
               </div>
             </div>
             <div class="col-sm-4">
               <div class="form-group" ng-show="titlePanelWatcherEdit.schedule.human.enabled">
-                <watcher-edit-human-schedule watcher="titlePanelWatcherEdit.watcher"></watcher-edit-human-schedule>
+                <watcher-edit-human-schedule
+                  watcher="titlePanelWatcherEdit.watcher"
+                  on-change="titlePanelWatcherEdit.schedule.human.handleChange(schedule)"
+                ></watcher-edit-human-schedule>
               </div>
               <div class="form-group" ng-show="titlePanelWatcherEdit.schedule.every.enabled">
-                <watcher-edit-every-schedule watcher="titlePanelWatcherEdit.watcher"></watcher-edit-every-schedule>
+                <watcher-edit-every-schedule
+                  watcher="titlePanelWatcherEdit.watcher"
+                  on-change="titlePanelWatcherEdit.schedule.every.handleChange(schedule)"
+                ></watcher-edit-every-schedule>
               </div>
             </div> <!-- END schedule -->
           </div> <!-- END index and schedule -->

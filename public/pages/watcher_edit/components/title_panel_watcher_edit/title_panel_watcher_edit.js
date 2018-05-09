@@ -1,21 +1,19 @@
-import {has, size} from 'lodash';
+import { has, size, cloneDeep } from 'lodash';
 import template from './title_panel_watcher_edit.html';
 
 class TitlePanelWatcherEdit {
-  constructor($log) {
-    this.$log = $log;
+  constructor($scope, sentinlLog) {
+    const locationName = 'TitlePanelWatcheredit';
+
+    this.$scope = $scope;
+    this.log = sentinlLog;
+    this.log.initLocation(locationName);
 
     this.schedule = {
-      every: {
-        enabled: true,
-      },
-      human: {
-        enabled: false,
-      },
       selected: 'every',
       options: ['every', 'human'],
-      handleChange: () => {
-        this.$log.debug('schedule type changed:', this.schedule.selected);
+      swithchMode: () => {
+        this.log.debug('schedule mode changed:', this.schedule.selected);
         if (this.schedule.selected === 'every') {
           this.schedule.every.enabled = true;
           this.schedule.human.enabled = false;
@@ -24,32 +22,45 @@ class TitlePanelWatcherEdit {
           this.schedule.human.enabled = true;
         }
       },
+      every: {
+        enabled: true,
+        handleChange: (schedule) => {
+          this.onScheduleChange({schedule});
+        },
+      },
+      human: {
+        enabled: false,
+        handleChange: (schedule) => {
+          this.onScheduleChange({schedule});
+        },
+      },
     };
   }
 
+  $onInit() {
+    this._watcher = cloneDeep(this.watcher);
+  }
+
   get title() {
-    return this.watcher._source.title;
+    return this._watcher._source.title;
   }
 
   set title(title) {
-    this.watcher._source.title = title;
+    this._watcher._source.title = title;
+    this.onTitleChange({ title });
   }
 
   get index() {
-    if (has(this.watcher._source, 'input.search.request.index')) {
-      if (Array.isArray(this.watcher._source.input.search.request.index)) {
-        return this.watcher._source.input.search.request.index.join(',');
-      }
-      return this.watcher._source.input.search.request.index;
+    if (Array.isArray(this._watcher._source.input.search.request.index)) {
+      return this._watcher._source.input.search.request.index.join(',');
     }
+    return this._watcher._source.input.search.request.index;
   }
 
-  set index(indices) {
-    if (!indices) {
-      this.watcher._source.input.search.request.index = [];
-    } else {
-      this.watcher._source.input.search.request.index = indices.split(',');
-    }
+  set index(index) {
+    index = !index ? [] : index.split(',');
+    this._watcher._source.input.search.request.index = index;
+    this.onIndexChange({ index });
   }
 
   isValidationMessageVisible(fieldName, errorType, showIfOtherErrors = true) {
@@ -70,7 +81,10 @@ function titlePanelWatcherEdit() {
     template,
     restrict: 'E',
     scope: {
-      watcher: '=watcher',
+      watcher: '=',
+      onScheduleChange: '&',
+      onIndexChange: '&',
+      onTitleChange: '&',
     },
     controller:  TitlePanelWatcherEdit,
     controllerAs: 'titlePanelWatcherEdit',

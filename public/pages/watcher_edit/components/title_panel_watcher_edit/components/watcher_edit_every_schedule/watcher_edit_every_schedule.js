@@ -17,8 +17,8 @@ class WatcherEditEverySchedule {
     return +number[1];
   }
 
-  handleSelected() {
-    this.watcher._source.trigger.schedule.later = `every ${this.number} ${this.selected}`;
+  handleChange() {
+    this.onChange({ schedule: `every ${this.number} ${this.selected}` });
   }
 }
 
@@ -27,7 +27,8 @@ function watcherEditEverySchedule() {
     template,
     restrict: 'E',
     scope: {
-      watcher: '=',
+      watcher: '<',
+      onChange: '&',
     },
     controller:  WatcherEditEverySchedule,
     controllerAs: 'watcherEditEverySchedule',

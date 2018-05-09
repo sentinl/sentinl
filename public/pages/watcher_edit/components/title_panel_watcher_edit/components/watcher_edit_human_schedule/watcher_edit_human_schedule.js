@@ -6,15 +6,12 @@ class WatcherEditHumanSchedule {
     this.enabled = true;
   }
 
-  get schedule() {
-    return this.watcher._source.trigger.schedule.later;
+  $onInit() {
+    this.schedule = this.watcher._source.trigger.schedule.later;
   }
 
-  /*
-  * @param {string} interval of time in human language
-  */
-  set schedule(interval) {
-    this.watcher._source.trigger.schedule.later = interval;
+  handleChange() {
+    this.onChange({ schedule: this.schedule });
   }
 }
 
@@ -24,6 +21,7 @@ function watcherEditHumanSchedule() {
     restrict: 'E',
     scope: {
       watcher: '=',
+      onChange: '&',
       // isValidationMessageVisible: '&',
     },
     controller:  WatcherEditHumanSchedule,
