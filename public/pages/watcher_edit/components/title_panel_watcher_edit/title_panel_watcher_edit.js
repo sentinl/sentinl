@@ -81,7 +81,7 @@ function titlePanelWatcherEdit() {
     template,
     restrict: 'E',
     scope: {
-      watcher: '=',
+      watcher: '<',
       onScheduleChange: '&',
       onIndexChange: '&',
       onTitleChange: '&',
