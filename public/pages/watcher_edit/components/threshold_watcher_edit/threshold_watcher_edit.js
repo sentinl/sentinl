@@ -21,6 +21,10 @@ class ThresholdWatcherEdit {
       updateStatus: (isSuccess) => {
         this.actions.show = isSuccess && this.condition.show ? true : false;
       },
+      trigger: {
+        scheduleChange: () => {},
+        indexChange: () => {},
+      },
     };
 
     this.actions = {
@@ -68,6 +72,7 @@ class ThresholdWatcherEdit {
   indexChange(index) {
     // debugger;
     this.watcher._source.input.search.request.index = index;
+    this.condition.trigger.indexChange(index);
   }
 
   titleChange(title) {
@@ -76,6 +81,7 @@ class ThresholdWatcherEdit {
 
   scheduleChange(schedule) {
     this.watcher._source.trigger.schedule.later = schedule;
+    this.condition.trigger.scheduleChange(schedule);
   }
 
   conditionChange(inputQuery, condition) {

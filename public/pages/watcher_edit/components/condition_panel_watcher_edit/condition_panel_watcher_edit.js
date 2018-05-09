@@ -21,12 +21,18 @@ class Chart {
 }
 
 class ConditionPanelWatcherEdit {
-  constructor($http, $log, $scope, watcherEditorChartService, watcherHelper) {
+  constructor($http, $scope, watcherEditorChartService, watcherHelper, createNotifier, sentinlLog) {
     this.$http = $http;
-    this.$log = $log;
     this.$scope = $scope;
     this.watcherEditorChartService = watcherEditorChartService;
     this.helper = watcherHelper;
+    this.log = sentinlLog;
+
+    this.locationName = 'ConditionPanelWatcherEdit';
+    this.log.initLocation(this.locationName);
+    this.notify = createNotifier({
+      location: this.locationName,
+    });
 
     this.messages = {
       nodata: 'the selected condition does not return any data',
@@ -40,8 +46,6 @@ class ConditionPanelWatcherEdit {
     this.charts = [];
 
     this.chartQueryParams = {
-      index: ['watcher_aggs_test'],
-      // index: watcher._source.search.request.index,
       queryType: 'count',
       over: { type: 'all docs' },
       last: { n: 15, unit: 'minutes' },
@@ -54,20 +58,20 @@ class ConditionPanelWatcherEdit {
     this.condition = {
       type: {
         handleSelect: (type) => {
-          this.$log.debug('select type:', type);
+          this.log.debug('select type:', type);
           this._updateChartQueryParamsQueryType(type);
         },
       },
       field: {
         enabled: false,
         handleSelect: (field) => {
-          this.$log.debug('select field:', field);
+          this.log.debug('select field:', field);
           this._updateChartQueryParamsField(field);
         },
       },
       over: {
         handleSelect: (over) => {
-          this.$log.debug('select over:', over);
+          this.log.debug('select over:', over);
           if (over.type !== 'top' || !!over.n && !!over.field.length) {
             this._updateChartQueryParamsOver(over);
           }
@@ -75,26 +79,18 @@ class ConditionPanelWatcherEdit {
       },
       threshold: {
         handleSelect: (direction, n) => {
-          this.$log.debug('select threshold:', direction, n);
+          this.log.debug('select threshold:', direction, n);
           this._updateChartQueryParamsThreshold(n, direction);
           this._drawChartThreshold(this.activeChart, this.chartQueryParams.threshold.n);
         },
       },
       last: {
         handleSelect: (unit, n) => {
-          this.$log.debug('select last:', unit, n);
+          this.log.debug('select last:', unit, n);
           this._updateChartQueryParamsLast(n, unit);
         },
       },
     };
-
-    this.$scope.$watch('conditionPanelWatcherEdit.watcher._source.trigger.schedule.later', () => {
-      this._updateChartQueryParamsInterval(this.watcher._source.trigger.schedule.later);
-    });
-
-    this.$scope.$watch('conditionPanelWatcherEdit.watcher._source.input.search.request.index', () => {
-      // this.chartQueryParams.index = this.watcher._source.input.search.request.index;
-    });
 
     this.$scope.$watch('conditionPanelWatcherEdit.chartQueryParams', async () => {
       try {
@@ -102,10 +98,19 @@ class ConditionPanelWatcherEdit {
         this._reportStatusToThresholdWatcherEdit();
       } catch (err) {
         this._reportStatusToThresholdWatcherEdit({success: false});
-        this.$log.error(['ConditionPanelWatcherEdit'], `fail: ${err.message}`);
+        this.log.debug(`fail: ${err.message}`);
       }
     }, true);
   }
+
+  $onInit() {
+    this.onTrigger.scheduleChange = (schedule) => {
+      this._updateChartQueryParamsInterval(schedule);
+    };
+    this.onTrigger.indexChange = (index) => {
+      this.chartQueryParams.index = index;
+    };
+  };
 
   get activeChart() {
     return this.charts.find((chart) => chart.enabled === true);
@@ -284,7 +289,7 @@ class ConditionPanelWatcherEdit {
       }
 
       this.charts = [];
-      this.$log.debug(`${metricAggType} es resp:`, resp);
+      this.log.debug(`${metricAggType} es resp:`, resp);
 
       try {
         if (this._isDateAggData(resp)) {
@@ -327,7 +332,7 @@ class ConditionPanelWatcherEdit {
       }
 
       this.charts = [];
-      this.$log.debug('count es resp:', resp);
+      this.log.debug('count es resp:', resp);
 
       try {
         if (this._isDateAggData(resp)) {
@@ -357,7 +362,7 @@ class ConditionPanelWatcherEdit {
 
   _reportStatusToThresholdWatcherEdit({success = true} = {}) {
     const isSuccess = !!this.charts.length && success || false;
-    this.conditionPanelUpdateStatus({ isSuccess });
+    this.updateStatus({ isSuccess });
   }
 
   _updateCountChartWithNewData(chart, aggs, last, threshold) {
@@ -443,10 +448,6 @@ class ConditionPanelWatcherEdit {
     }
     return moment(epochTime).format(locale);
   }
-
-  _onChartClick() {
-    console.log('chart clicked');
-  }
 }
 
 function conditionPanelWatcherEdit() {
@@ -454,8 +455,9 @@ function conditionPanelWatcherEdit() {
     template,
     restrict: 'E',
     scope: {
-      watcher: '=watcher',
-      conditionPanelUpdateStatus: '&',
+      watcher: '=',
+      updateStatus: '&',
+      onTrigger: '=',
     },
     controller:  ConditionPanelWatcherEdit,
     controllerAs: 'conditionPanelWatcherEdit',
