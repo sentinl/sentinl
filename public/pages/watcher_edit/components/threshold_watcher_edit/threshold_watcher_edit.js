@@ -2,58 +2,106 @@ import template from './threshold_watcher_edit.html';
 import { has } from 'lodash';
 
 class ThresholdWatcherEdit {
-  constructor($scope, $log, kbnUrl, sentinlLog, confirmModal) {
+  constructor($scope, $log, kbnUrl, sentinlLog, confirmModal, createNotifier, Watcher) {
     this.$scope = $scope;
     this.kbnUrl = kbnUrl;
     this.sentinlLog = sentinlLog;
-    this.sentinlLog.initLocation('ThresholdWatcherEdit');
     this.confirmModal = confirmModal;
+    this.watcherService = Watcher;
+
+    this.locationName = 'ThresholdWatcherEdit';
+
+    this.sentinlLog.initLocation(this.locationName);
+    this.notify = createNotifier({
+      location: this.locationName,
+    });
 
     this.condition = {
       show: false,
       updateStatus: (isSuccess) => {
-        this.action.show = isSuccess && this.condition.show ? true : false;
+        this.actions.show = isSuccess && this.condition.show ? true : false;
       },
     };
-    this.action = {
+
+    this.actions = {
       show: this.condition.show,
+      trigger: {
+        save: () => {},
+      },
     };
   }
 
   $onInit() {
     this.$scope.$watch('thresholdWatcherEdit.watcher._source', () => {
       this.condition.show = this._showCondition(this.watcher);
-      this.action.show = this.condition.show;
+      this.actions.show = this.condition.show;
     }, true);
 
     this.$scope.$on('navMenu:cancelEditor', () => {
-      this._cancelWatcherEditor();
+      const confirmModalOptions = {
+        onCancel: () => true,
+        onConfirm: () => this._cancelWatcherEditor(),
+        confirmButtonText: 'Yes',
+      };
+      this.confirmModal('Stop configuring this watcher?', confirmModalOptions);
     });
 
     this.$scope.$on('navMenu:saveEditor', () => {
       if (this._isWatcherValid()) {
-        this._saveWatcherEditor();
+        const confirmModalOptions = {
+          onCancel: () => true,
+          onConfirm: () => this._saveWatcherEditor(),
+          confirmButtonText: 'Yes',
+        };
+        this.confirmModal('Save this watcher?', confirmModalOptions);
       } else {
         const confirmModalOptions = {
           onConfirm: () => true,
           onCancel: () => this._cancelWatcherEditor(),
-          confirmButtonText: 'Continue',
+          confirmButtonText: 'Continue configuring',
         };
         this.confirmModal('Watcher is not valid', confirmModalOptions);
       }
     });
   }
 
+  indexChange(index) {
+    // debugger;
+    this.watcher._source.input.search.request.index = index;
+  }
+
+  titleChange(title) {
+    this.watcher._source.title = title;
+  }
+
+  scheduleChange(schedule) {
+    this.watcher._source.trigger.schedule.later = schedule;
+  }
+
+  conditionChange(inputQuery, condition) {
+    // debugger;
+  }
+
+  actionChange(actions) {
+    this.watcher._source.actions = actions;
+  }
+
   _isWatcherValid() {
-    return this.condition.show && this.action.show;
+    return this.condition.show && this.actions.show;
   }
 
   _cancelWatcherEditor() {
     this.kbnUrl.redirect('/');
   };
 
-  _saveWatcherEditor() {
-    this.kbnUrl.redirect('/');
+  async _saveWatcherEditor() {
+    try {
+      this.actions.trigger.save();
+      await this.watcherService.save(this.watcher);
+      this._cancelWatcherEditor();
+    } catch (err) {
+      this.notify.error(`fail to save watcher: ${err.message}`);
+    }
   };
 
   _showCondition(watcher) {
@@ -67,7 +115,7 @@ class ThresholdWatcherEdit {
         }
       }
     } catch (err) {
-      this.sentinlLog.error(['ThresholdWatcherEdit'], `fail to check if title panel valid: ${err.message}`);
+      this.notify.error(`fail to check if threshold watcher title panel is valid: ${err.message}`);
       return false;
     }
     return false;
