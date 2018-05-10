@@ -51,8 +51,40 @@
                 </ul>
               </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-2">
               <div class="form-group">
+              </div>
+            </div>
+            <div class="col-md-1">
+              <div class="form-group">
+                <a href="javascript:void(0)"
+                  ng-show="!conditionPanelWatcherEdit.rawDoc.chart.show"
+                  ng-click="conditionPanelWatcherEdit.rawDoc.chart.toggle()"
+                >
+                  <i class="fa fa-eye-slash"></i> chart query
+                </a>
+                <a href="javascript:void(0)"
+                  ng-show="conditionPanelWatcherEdit.rawDoc.chart.show"
+                  ng-click="conditionPanelWatcherEdit.rawDoc.chart.toggle()"
+                >
+                  <i class="fa fa-eye"></i> chart query
+                </a>
+              </div>
+            </div>
+            <div class="col-md-1">
+              <div class="form-group">
+                <a href="javascript:void(0)"
+                  ng-show="!conditionPanelWatcherEdit.rawDoc.watcher.show"
+                  ng-click="conditionPanelWatcherEdit.rawDoc.watcher.toggle()"
+                >
+                  <i class="fa fa-eye-slash"></i> watcher raw
+                </a>
+                <a href="javascript:void(0)"
+                  ng-show="conditionPanelWatcherEdit.rawDoc.watcher.show"
+                  ng-click="conditionPanelWatcherEdit.rawDoc.watcher.toggle()"
+                >
+                  <i class="fa fa-eye"></i> watcher raw
+                </a>
               </div>
             </div>
           </div> <!-- END condition based query builder -->
@@ -108,9 +140,28 @@
                 <p>{{conditionPanelWatcherEdit.messages.nodata}}</p>
               </div>
             </div>
-            <div class="col-md-6">
-              <div class="form-group">
-                <p ng-show="conditionPanelWatcherEdit.progress.running">{{conditionPanelWatcherEdit.progress.message}}</p>
+            <div class="col-md-3">
+              <div class="form-group" ng-show="conditionPanelWatcherEdit.rawDoc.chart.show">
+                <small class="form-text text-muted">Chart query (read only)</small>
+                <div
+                  readonly
+                  ui-ace="conditionPanelWatcherEdit.rawDoc.config()"
+                  ng-model="conditionPanelWatcherEdit.rawDoc.chart.text"
+                >
+                  {{conditionPanelWatcherEdit.rawDoc.chart.text}}
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="form-group" ng-show="conditionPanelWatcherEdit.rawDoc.watcher.show">
+                <small class="form-text text-muted">Watcher raw (read only)</small>
+                <div
+                  readonly
+                  ui-ace="conditionPanelWatcherEdit.rawDoc.config()"
+                  ng-model="conditionPanelWatcherEdit.rawDoc.watcher.text"
+                >
+                  {{conditionPanelWatcherEdit.rawDoc.watcher.text}}
+                </div>
               </div>
             </div>
           </div> <!-- END chart, data hostory -->

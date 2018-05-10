@@ -36,7 +36,7 @@ class ConditionPanelWatcherEdit {
       location: this.locationName,
     });
 
-    this.queryBuilder = new WatcherEditorQueryBuilder({timeFieldName: '@timestamp', timezoneName: 'Europe/Amsterdam'});
+    this.queryBuilder = new WatcherEditorQueryBuilder({timeFieldName: '@timestamp', timezoneName: 'Europe/Amsterdam'}); // to-do: get timestamp and timezone from config
     this.conditionBuilder = new WatcherEditorConditionBuilder();
 
     this.messages = {
@@ -63,7 +63,40 @@ class ConditionPanelWatcherEdit {
       metric: ['average', 'min', 'max', 'sum'],
     };
 
-    this.allDocFields = ['animal', 'random'];
+    this.allDocFields = ['animal', 'random']; // to-do: get fields from index docs
+
+    this.rawDoc = {
+      config: (mode = 'json', maxLines = 29, minLines = 29) => {
+        return {
+          mode,
+          useWrapMode : true,
+          showGutter: true,
+          rendererOptions: {
+            maxLines,
+            minLines,
+          },
+          editorOptions: {
+            autoScrollEditorIntoView: false
+          },
+          // onLoad : () => {}, // to-do: consider persisting changes
+          // onChange: () => {},
+        };
+      },
+      watcher: {
+        show: false,
+        text: '',
+        toggle: () => {
+          this.rawDoc.watcher.show = !this.rawDoc.watcher.show;
+        },
+      },
+      chart: {
+        show: false,
+        text: '',
+        toggle: () => {
+          this.rawDoc.chart.show = !this.rawDoc.chart.show;
+        },
+      },
+    };
 
     this.condition = {
       type: {
@@ -122,6 +155,10 @@ class ConditionPanelWatcherEdit {
       this.chartQueryParams.index = index;
     };
   };
+
+  _updateWatcherRawDoc(watcher) {
+    this.rawDoc.watcher.text = JSON.stringify(watcher._source, null, 2);
+  }
 
   get activeChart() {
     return this.charts.find((chart) => chart.enabled === true);
@@ -264,6 +301,12 @@ class ConditionPanelWatcherEdit {
       } catch (err) {
         throw new Error(`build Elasticsearch query: ${err.message}`);
       }
+    }
+
+    try {
+      this._updateWatcherRawDoc(this.watcher);
+    } catch (err) {
+      throw new Error(`update watcher raw doc: ${err.message}`);
     }
 
     return null;
