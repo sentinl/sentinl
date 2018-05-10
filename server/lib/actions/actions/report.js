@@ -100,7 +100,7 @@ class Reporter {
     }
 
     if (this.config.authentication.enabled && this.config.authentication.mode.basic) {
-      this.page = await Authenticator.basic(this.page, this.authentication.username, this.authentication.password);
+      this.page = await Authenticator.basic(this.page, this.config.authentication.username, this.config.authentication.password);
     }
 
     try {
