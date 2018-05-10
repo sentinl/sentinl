@@ -1,6 +1,6 @@
 <div uib-accordion-group class="panel-default" is-open="watcherEditEmailAction.status.isOpen">
   <uib-accordion-heading>
-    {{watcherEditEmailAction.type}} action: {{watcherEditEmailAction.name}} <i class="pull-right glyphicon"
+    <i class="fa fa-envelope"></i> {{watcherEditEmailAction.type}} action: {{watcherEditEmailAction.name}} <i class="pull-right glyphicon"
     ng-class="{'glyphicon-chevron-down': watcherEditEmailAction.status.isOpen, 'glyphicon-chevron-right': !watcherEditEmailAction.status.isOpen}"></i>
   </uib-accordion-heading>
   <form name="watcherEditEmailAction.form" ng-model-options="{ getterSetter: true }" novalidate>

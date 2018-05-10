@@ -66,7 +66,7 @@ class ConditionPanelWatcherEdit {
     this.allDocFields = ['animal', 'random']; // to-do: get fields from index docs
 
     this.rawDoc = {
-      config: (mode = 'json', maxLines = 29, minLines = 29) => {
+      config: (mode = 'json', maxLines = 30, minLines = 30) => {
         return {
           mode,
           useWrapMode : true,
