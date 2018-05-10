@@ -83,8 +83,12 @@ class ThresholdWatcherEdit {
     this.condition.trigger.scheduleChange(schedule);
   }
 
-  conditionChange(inputQuery, condition) {
-    // debugger;
+  conditionChange(condition) {
+    //debugger;
+  }
+
+  queryChange(body) {
+    this.watcher._source.input.search.request.body = body;
   }
 
   actionChange(actions) {

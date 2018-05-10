@@ -2,7 +2,8 @@ import './condition_panel_watcher_edit.less';
 import template from './condition_panel_watcher_edit.html';
 
 import moment from 'moment';
-import {size, has, pick, includes} from 'lodash';
+import {size, has, pick, includes, cloneDeep} from 'lodash';
+import WatcherEditorQueryBuilder from './classes/watcher_editor_query_builder';
 
 class Chart {
   constructor({name = 'all docs', enabled = true, message = '', xAxis = [], yAxis = [[], []], options} = {}) {
@@ -34,6 +35,8 @@ class ConditionPanelWatcherEdit {
       location: this.locationName,
     });
 
+    this.queryBuilder = new WatcherEditorQueryBuilder({timeFieldName: '@timestamp', timezoneName: 'Europe/Amsterdam'});
+
     this.messages = {
       nodata: 'the selected condition does not return any data',
     };
@@ -51,6 +54,11 @@ class ConditionPanelWatcherEdit {
       last: { n: 15, unit: 'minutes' },
       interval: { n: 1, unit: 'minutes' },
       threshold: { n: 10, direction: 'above' },
+    };
+
+    this.queryTypes = {
+      count: {},
+      metric: ['average', 'min', 'max', 'sum'],
     };
 
     this.allDocFields = ['animal', 'random'];
@@ -98,7 +106,8 @@ class ConditionPanelWatcherEdit {
         this._reportStatusToThresholdWatcherEdit();
       } catch (err) {
         this._reportStatusToThresholdWatcherEdit({success: false});
-        this.log.debug(`fail: ${err.message}`);
+        this.notify.error(`fail: ${err.message}`);
+        this.log.error(`fail: ${err.message}`);
       }
     }, true);
   }
@@ -154,59 +163,75 @@ class ConditionPanelWatcherEdit {
     }
   }
 
+  _buildInputQuery({ over, last, interval, field, threshold, queryType }) {
+    let body;
+
+    switch (queryType) {
+      case 'average':
+        body = this.queryBuilder.average({ over, last, interval, field, threshold });
+        this.onQueryChange({ body });
+        break;
+      case 'sum':
+        body = this.queryBuilder.sum({ over, last, interval, field, threshold });
+        this.onQueryChange({ body });
+        break;
+      case 'min':
+        body = this.queryBuilder.min({ over, last, interval, field, threshold });
+        this.onQueryChange({ body });
+        break;
+      case 'max':
+        body = this.queryBuilder.max({ over, last, interval, field, threshold });
+        this.onQueryChange({ body });
+        break;
+      case 'count':
+        body = this.queryBuilder.count({ over, last, interval, field, threshold });
+        this.onQueryChange({ body });
+        break;
+      default:
+        throw new Error('unknown query type');
+    }
+  }
+
   /*
   * Fetch chart data and fill its X and Y axises
   */
   async _fetchChartData() {
     this._toggleConditionBuilderMetricAggOverField();
-    const params = pick(this.chartQueryParams, ['index', 'over', 'last', 'interval', 'field', 'threshold']);
+    const params = pick(this.chartQueryParams, ['index', 'over', 'last', 'interval', 'field', 'threshold', 'queryType']);
 
-    if (this.chartQueryParams.queryType === 'average') {
-      params.metricAggType = 'average';
+    if (this._isMetricAgg(params.queryType)) {
+      params.metricAggType = params.queryType;
+    }
+
+    if (params.metricAggType) {
       try {
         await this._queryMetricAgg(params);
-        return;
       } catch (err) {
-        throw new Error(`average: ${err.message}`);
+        throw new Error(`${params.metricAggType}: ${err.message}`);
+      }
+    } else {
+      if (this.chartQueryParams.queryType === 'count') {
+        try {
+          await this._queryCount(params);
+        } catch (err) {
+          throw new Error(`count: ${err.message}`);
+        }
       }
     }
 
-    if (this.chartQueryParams.queryType === 'sum') {
-      params.metricAggType = 'sum';
+    if (this.isAnyActiveChart) {
       try {
-        await this._queryMetricAgg(params);
-        return;
+        this._buildInputQuery(params);
       } catch (err) {
-        throw new Error(`sum: ${err.message}`);
+        throw new Error(`build Elasticsearch query: ${err.message}`);
       }
     }
 
-    if (this.chartQueryParams.queryType === 'min') {
-      params.metricAggType = 'min';
-      try {
-        await this._queryMetricAgg(params);
-        return;
-      } catch (err) {
-        throw new Error(`min: ${err.message}`);
-      }
-    }
-
-    if (this.chartQueryParams.queryType === 'max') {
-      params.metricAggType = 'max';
-      try {
-        await this._queryMetricAgg(params);
-        return;
-      } catch (err) {
-        throw new Error(`max: ${err.message}`);
-      }
-    }
-
-    try {
-      await this._queryCount(params);
-    } catch (err) {
-      throw new Error(`count: ${err.message}`);
-    }
     return null;
+  }
+
+  _isMetricAgg(type) {
+    return this.queryTypes.metric.includes(type);
   }
 
   _toggleConditionBuilderMetricAggOverField() {
@@ -455,9 +480,11 @@ function conditionPanelWatcherEdit() {
     template,
     restrict: 'E',
     scope: {
-      watcher: '=',
+      watcher: '<',
       updateStatus: '&',
       onTrigger: '=',
+      onQueryChange: '&',
+      onConditionChange: '&',
     },
     controller:  ConditionPanelWatcherEdit,
     controllerAs: 'conditionPanelWatcherEdit',

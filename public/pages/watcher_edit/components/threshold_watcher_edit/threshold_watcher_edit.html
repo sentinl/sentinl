@@ -14,7 +14,8 @@
       <condition-panel-watcher-edit
         watcher="thresholdWatcherEdit.watcher"
         update-status="thresholdWatcherEdit.condition.updateStatus(isSuccess)"
-        on-change="thresholdWatcherEdit.conditionChange(inputQuery, condition)"
+        on-query-change="thresholdWatcherEdit.queryChange(body)"
+        on-condition-change="thresholdWatcherEdit.conditionChange(condition)"
         on-trigger="thresholdWatcherEdit.condition.trigger"
       ></condition-panel-watcher-edit>
     </div>
