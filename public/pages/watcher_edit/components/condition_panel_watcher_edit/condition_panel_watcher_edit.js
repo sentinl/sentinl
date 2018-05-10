@@ -65,6 +65,7 @@ class ConditionPanelWatcherEdit {
 
     this.allDocFields = ['animal', 'random']; // to-do: get fields from index docs
 
+    // to-do: update editor when action and title updated
     this.rawDoc = {
       config: (mode = 'json', maxLines = 30, minLines = 30) => {
         return {

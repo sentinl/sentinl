@@ -1,3 +1,4 @@
+import './threshold_watcher_edit.less';
 import template from './threshold_watcher_edit.html';
 import { has } from 'lodash';
 
