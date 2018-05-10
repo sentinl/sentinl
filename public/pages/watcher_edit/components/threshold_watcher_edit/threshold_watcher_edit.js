@@ -84,7 +84,7 @@ class ThresholdWatcherEdit {
   }
 
   conditionChange(condition) {
-    //debugger;
+    this.watcher._source.condition.script.script = condition;
   }
 
   queryChange(body) {

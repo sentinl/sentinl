@@ -4,6 +4,7 @@ import template from './condition_panel_watcher_edit.html';
 import moment from 'moment';
 import {size, has, pick, includes, cloneDeep} from 'lodash';
 import WatcherEditorQueryBuilder from './classes/watcher_editor_query_builder';
+import WatcherEditorConditionBuilder from './classes/watcher_editor_condition_builder';
 
 class Chart {
   constructor({name = 'all docs', enabled = true, message = '', xAxis = [], yAxis = [[], []], options} = {}) {
@@ -36,6 +37,7 @@ class ConditionPanelWatcherEdit {
     });
 
     this.queryBuilder = new WatcherEditorQueryBuilder({timeFieldName: '@timestamp', timezoneName: 'Europe/Amsterdam'});
+    this.conditionBuilder = new WatcherEditorConditionBuilder();
 
     this.messages = {
       nodata: 'the selected condition does not return any data',
@@ -129,6 +131,10 @@ class ConditionPanelWatcherEdit {
     return !!this.charts.find((chart) => chart.enabled === true);
   }
 
+  get isAnyChart() {
+    return !!this.charts.length;
+  }
+
   get areMultipleCharts() {
     return this.charts.length > 1;
   }
@@ -163,32 +169,59 @@ class ConditionPanelWatcherEdit {
     }
   }
 
-  _buildInputQuery({ over, last, interval, field, threshold, queryType }) {
+  _buildInputQuery({ over, last, interval, field, queryType }) {
     let body;
-
     switch (queryType) {
       case 'average':
-        body = this.queryBuilder.average({ over, last, interval, field, threshold });
+        body = this.queryBuilder.average({ over, last, interval, field });
         this.onQueryChange({ body });
         break;
       case 'sum':
-        body = this.queryBuilder.sum({ over, last, interval, field, threshold });
+        body = this.queryBuilder.sum({ over, last, interval, field });
         this.onQueryChange({ body });
         break;
       case 'min':
-        body = this.queryBuilder.min({ over, last, interval, field, threshold });
+        body = this.queryBuilder.min({ over, last, interval, field });
         this.onQueryChange({ body });
         break;
       case 'max':
-        body = this.queryBuilder.max({ over, last, interval, field, threshold });
+        body = this.queryBuilder.max({ over, last, interval, field });
         this.onQueryChange({ body });
         break;
       case 'count':
-        body = this.queryBuilder.count({ over, last, interval, field, threshold });
+        body = this.queryBuilder.count({ over, last, interval, field });
         this.onQueryChange({ body });
         break;
       default:
-        throw new Error('unknown query type');
+        throw new Error('build query: unknown query type');
+    }
+  }
+
+  _buildCondition({ over, threshold, queryType }) {
+    let condition;
+    switch (queryType) {
+      case 'average':
+        condition = this.conditionBuilder.average({ over, threshold });
+        this.onConditionChange({ condition });
+        break;
+      case 'sum':
+        condition = this.conditionBuilder.sum({ over, threshold });
+        this.onConditionChange({ condition });
+        break;
+      case 'min':
+        condition = this.conditionBuilder.min({ over, threshold });
+        this.onConditionChange({ condition });
+        break;
+      case 'max':
+        condition = this.conditionBuilder.max({ over, threshold });
+        this.onConditionChange({ condition });
+        break;
+      case 'count':
+        condition = this.conditionBuilder.count({ over, threshold });
+        this.onConditionChange({ condition });
+        break;
+      default:
+        throw new Error('build condition: unknown query type');
     }
   }
 
@@ -219,9 +252,15 @@ class ConditionPanelWatcherEdit {
       }
     }
 
-    if (this.isAnyActiveChart) {
+    if (this.isAnyChart) {
       try {
         this._buildInputQuery(params);
+      } catch (err) {
+        throw new Error(`build Elasticsearch query: ${err.message}`);
+      }
+
+      try {
+        this._buildCondition(params);
       } catch (err) {
         throw new Error(`build Elasticsearch query: ${err.message}`);
       }
