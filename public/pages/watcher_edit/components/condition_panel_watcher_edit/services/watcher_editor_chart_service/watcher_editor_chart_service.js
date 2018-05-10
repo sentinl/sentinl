@@ -1,7 +1,9 @@
 class WatcherEditorChartService {
-  constructor($http, API) {
+  constructor($http, API, sentinlLog) {
     this.$http = $http;
     this.API = API.WATCHER_EDIT;
+    this.log = sentinlLog;
+    this.log.initLocation('WatcherEditorChartService');
   }
 
   async _query({ queryType = 'count', index = [], over, last, interval, field }) {
@@ -20,7 +22,11 @@ class WatcherEditorChartService {
         }
       });
     } catch (err) {
-      throw new Error(`fail to fetch chart data for ${queryType}: ` + err.data.message || err.data.error);
+      if (err.status === 503 && err.data.message.includes('index_not_found_exception')) {
+        this.log.warn(err.data.message);
+      } else {
+        throw new Error(`fail to fetch chart data for ${queryType}: ` + err.data.message || err.data.error);
+      }
     }
   }
 
