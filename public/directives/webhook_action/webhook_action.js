@@ -10,31 +10,42 @@ function webhookAction($rootScope) {
     scope.help = help;
     scope.action = {
       type: 'webhook',
-      title: attrs.name,
+      title: scope.actionName,
       status: {
-        isHeaderOpen: false
-      }
+        isHeaderOpen: false,
+      },
+      priority: {
+        selected: scope.actionSettings.webhook.priority || 'low',
+        options: ['low', 'medium', 'high'],
+        handleChange: () => {
+          scope.actionSettings.webhook.priority = scope.action.priority.selected;
+        },
+      },
     };
 
-    if (has(scope.watcher._source.actions[attrs.name].webhook, 'headers')) {
-      let headers = scope.watcher._source.actions[attrs.name].webhook.headers;
-      scope.watcher._source.actions[attrs.name].webhook._headers = angular.toJson(headers, 'pretty');
+    scope.actionSettings.webhook.priority = scope.actionSettings.webhook.priority || scope.action.priority.selected;
+
+    if (has(scope.watcher._source.actions[scope.actionName].webhook, 'headers')) {
+      let headers = scope.watcher._source.actions[scope.actionName].webhook.headers;
+      scope.watcher._source.actions[scope.actionName].webhook._headers = angular.toJson(headers, 'pretty');
     }
 
     scope.changeMethod = function (method) {
-      scope.watcher._source.actions[attrs.name].webhook.method = method;
+      scope.watcher._source.actions[scope.actionName].webhook.method = method;
     };
 
     scope.removeAction = function () {
-      $rootScope.$broadcast('action:removeAction', { name: attrs.name });
+      $rootScope.$broadcast('action:removeAction', { name: scope.actionName });
     };
-
   };
 
   return {
     restrict: 'E',
     template,
-    scope: true,
+    scope: {
+      actionName: '@',
+      actionSettings: '=',
+    },
     link: actionDirective
   };
 };
