@@ -9,20 +9,31 @@ function consoleAction($rootScope) {
     scope.action = {
       type: 'console',
       status: {
-        isHeaderOpen: false
-      }
+        isHeaderOpen: false,
+      },
+      priority: {
+        selected: scope.actionSettings.console.priority || 'low',
+        options: ['low', 'medium', 'high'],
+        handleChange: () => {
+          scope.actionSettings.console.priority = scope.action.priority.selected;
+        },
+      },
     };
+
+    scope.actionSettings.console.priority = scope.actionSettings.console.priority || scope.action.priority.selected;
 
     scope.removeAction = function () {
-      $rootScope.$broadcast('action:removeAction', { name: attrs.name });
+      $rootScope.$broadcast('action:removeAction', { name: scope.actionName });
     };
-
   }
 
   return {
     restrict: 'E',
     template,
-    scope: true,
+    scope: {
+      actionName: '@',
+      actionSettings: '=',
+    },
     link: actionDirective
   };
 };
