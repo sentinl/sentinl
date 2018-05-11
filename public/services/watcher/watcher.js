@@ -101,7 +101,7 @@ class Watcher extends SavedObjects {
       forEach(watcher._source, (val, key) => {
         savedWatcher[key] = val;
       });
-      return savedWatcher.save();
+      return await savedWatcher.save();
     } catch (err) {
       throw new Error(`fail to save watcher, ${err}`);
     }
