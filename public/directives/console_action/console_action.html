@@ -25,9 +25,13 @@
         <div class="form-group">
           <label class="col-md-2 control-label">Priority</label>
           <div class="btn-group col-md-4">
-            <label class="btn btn-danger" ng-model="actionSettings.console.priority" btn-radio="'high'">High</label>
-            <label class="btn btn-warning" ng-model="actionSettings.console.priority" btn-radio="'medium'">Medium</label>
-            <label class="btn btn-info" ng-model="actionSettings.console.priority" btn-radio="'low'">Low</label>
+            <select
+              class="form-control condition-select"
+              ng-model="action.priority.selected"
+              ng-model-options="{ debounce: 500 }"
+              ng-options="o as o for o in action.priority.options"
+              ng-change="action.priority.handleChange()"
+            ></select>
           </div>
           <div class="col-md-3">
             <input type="checkbox"
