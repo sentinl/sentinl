@@ -92,7 +92,7 @@ class ConditionPanelWatcherEdit {
       },
       chart: {
         show: false,
-        text: '',
+        text: '{\n"message": "This feaature is under construction. Comming soon ..."\n}',
         toggle: () => {
           this.rawDoc.chart.show = !this.rawDoc.chart.show;
         },
