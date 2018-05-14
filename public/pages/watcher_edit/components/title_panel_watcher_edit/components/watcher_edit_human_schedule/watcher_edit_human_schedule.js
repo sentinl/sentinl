@@ -7,11 +7,12 @@ class WatcherEditHumanSchedule {
   }
 
   $onInit() {
-    this.schedule = this.watcher._source.trigger.schedule.later;
+    // this.schedule = this.watcher._source.trigger.schedule.later;
+    this.schedule = 'This feature is under construction. Comming soon ...';
   }
 
   handleChange() {
-    this.onChange({ schedule: this.schedule });
+    // this.onChange({ schedule: this.schedule });
   }
 }
 
