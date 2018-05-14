@@ -12,7 +12,7 @@ class TitlePanelWatcherEdit {
     this.schedule = {
       selected: 'every',
       options: ['every', 'human'],
-      swithchMode: () => {
+      switchMode: () => {
         this.log.debug('schedule mode changed:', this.schedule.selected);
         if (this.schedule.selected === 'every') {
           this.schedule.every.enabled = true;
@@ -50,17 +50,17 @@ class TitlePanelWatcherEdit {
     this.onTitleChange({ title });
   }
 
+  setIndex(index) {
+    index = !index ? [] : index.split(',');
+    this._watcher._source.input.search.request.index = index;
+    this.onIndexChange({ index });
+  }
+
   get index() {
     if (Array.isArray(this._watcher._source.input.search.request.index)) {
       return this._watcher._source.input.search.request.index.join(',');
     }
     return this._watcher._source.input.search.request.index;
-  }
-
-  set index(index) {
-    index = !index ? [] : index.split(',');
-    this._watcher._source.input.search.request.index = index;
-    this.onIndexChange({ index });
   }
 
   isValidationMessageVisible(fieldName, errorType, showIfOtherErrors = true) {

@@ -28,8 +28,9 @@ import fs from 'fs';
 import Log from './server/lib/log';
 
 const routes = {
-  masterRoute: require('./server/routes/routes'),
-  watcherEdit: require('./server/routes/watcher_edit'),
+  watcherRoutes: require('./server/routes/routes'),
+  watcherEditRoutes: require('./server/routes/watcher_edit'),
+  esRoutes: require('./server/routes/es'),
 };
 
 const mappings = {

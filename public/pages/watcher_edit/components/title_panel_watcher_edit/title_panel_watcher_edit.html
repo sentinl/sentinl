@@ -49,19 +49,10 @@
                 <label for="watcherIndex">
                   Select an Index
                 </label>
-                <input
-                  class="form-control"
-                  type="text"
-                  name="watcherIndex"
-                  id="watcherIndex"
-                  input-focus
-                  ng-model="titlePanelWatcherEdit.index"
-                  ng-model-options="{ debounce: 500 }"
-                  placeholder="Target indices names. All indices searched if this field empty"
-                >
-                <small class="form-text text-muted">
-                  Add * to index name for broad search. Use , to insert multiple indices
-                </small>
+                <watcher-edit-add-index
+                  index-name="titlePanelWatcherEdit.index"
+                  on-change="titlePanelWatcherEdit.setIndex(index)"
+                ></watcher-edit-add-index>
               </div>
             </div> <!-- END select indices -->
             <div class="col-sm-2">

@@ -8,4 +8,7 @@ export default {
     MIN: `${base}/watcher/editor/min`,
     MAX: `${base}/watcher/editor/max`,
   },
+  ES: {
+    ALL_INDEXES: `${base}/es/indexes`,
+  },
 };
