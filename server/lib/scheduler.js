@@ -130,17 +130,16 @@ export default function Scheduler(server) {
     try {
       let resp = await watcherHandler.getCount();
       resp = await watcherHandler.getWatchers(resp.count);
-
       let tasks = resp.hits.hits;
+
+      try {
+        removeOrphans(tasks);
+      } catch (err) {
+        log.error('fail to remove orphans', err);
+      }
+
       if (tasks.length) {
         tasks = putPropertiesUnderSource(tasks);
-
-        /* Orphanize */
-        try {
-          removeOrphans(tasks);
-        } catch (err) {
-          log.error('fail to remove orphans', err);
-        }
 
         /* Schedule watchers */
         tasks.forEach(function (t) {
