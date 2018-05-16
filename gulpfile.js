@@ -141,7 +141,8 @@ gulp.task('build', ['clean'], function (done) {
 
 gulp.task('package', ['build'], function (done) {
   return gulp.src([
-    path.join(buildDir, '**', '*')
+    path.join(buildDir, '**', '*'),
+    path.join(buildDir, '**/.local-chromium/**/*')
   ])
     .pipe(zip(options.version ? packageName + '-v' + options.version  + '.zip' : packageName + '.zip'))
     .pipe(gulp.dest(targetDir));
