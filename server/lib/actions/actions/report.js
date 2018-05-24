@@ -109,7 +109,7 @@ class Reporter {
       throw new Error(`fail to go to url: ${url}`);
     }
 
-    if (this.config.authentication.enabled) {
+    if (this.config.authentication.enabled && !this.config.authentication.mode.basic) {
       const {mode, username, password} = this.config.authentication;
       await this.authenticate(mode, username, password, this.config.timeout);
     } else {
