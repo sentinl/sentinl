@@ -1,5 +1,6 @@
 ### Watcher Actions
 __"Actions"__ are executed when a Watcher returns data past its `condition`. 
+
 The following supported __"actions"__ types are available:
 
 #### Email 
