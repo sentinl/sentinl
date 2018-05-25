@@ -118,8 +118,23 @@ Output Query results and message to Console
 
 --------------
 
+##### Storing Payload
+
 By defaults, the original `payload` will not be stored back in Elasticsearch to avoid duplication.
-To save the original and modified payload, please add the following option to your action:
+To save the original and modified payload, please add the following option to your action settings:
 ```
 "save_payload" : true
+```
+
+Example:
+```
+   "email" : {
+          "to" : "root@localhost",
+          "from" : "sentinl@localhost",
+          "subject" : "Alarm Title",
+          "priority" : "high",
+          "body" : "Series Alarm {{ payload._id}}: {{payload.hits.total}}",
+          "stateless" : false,
+          "save_payload" : true
+    }
 ```
