@@ -45,9 +45,9 @@ class Authenticator {
 
   static async basic(page, browser, user, pass, encoding = 'base64') {
     try {
-      const headers = new Map();
-      headers.set('Authorization', `Basic ${new Buffer(`${user}:${pass}`).toString(encoding)}`);
-      await page.setExtraHTTPHeaders(headers);
+      await page.setExtraHTTPHeaders({
+        Authorization: `Basic ${new Buffer(`${user}:${pass}`).toString(encoding)}`
+      })
       return page;
     } catch (err) {
       await browser.close();
