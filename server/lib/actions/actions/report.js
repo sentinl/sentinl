@@ -47,7 +47,7 @@ class Authenticator {
     try {
       await page.setExtraHTTPHeaders({
         Authorization: `Basic ${new Buffer(`${user}:${pass}`).toString(encoding)}`
-      })
+      });
       return page;
     } catch (err) {
       await browser.close();
