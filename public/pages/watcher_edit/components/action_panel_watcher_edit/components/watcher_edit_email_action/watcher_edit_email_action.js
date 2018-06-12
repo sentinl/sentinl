@@ -9,18 +9,6 @@ class WatcherEditEmailAction {
     this.status = {
       isOpen: false,
     };
-    this.priority = {
-      selected: 'low',
-      options: ['low', 'medium', 'high'],
-      handleChange: () => {
-        this.settings.email.priority = this.priority.selected;
-      },
-    };
-    this.$scope.$watch('watcherEditEmailAction.status.isOpen', () => {
-      if (!this.status.isOpen) {
-        this.emailActionPersist({origActionName: this.emailActionName, newActionName: this.name, actionSettings: this.settings});
-      }
-    });
   }
 
   aceOptions(mode, lines = 10) {
@@ -39,15 +27,18 @@ class WatcherEditEmailAction {
   };
 
   $onInit() {
-    this.name = this.emailActionName;
-    this.settings = cloneDeep(this.emailActionSettings);
-    this.onTrigger.save = () => {
-      this.emailActionPersist({origActionName: this.emailActionName, newActionName: this.name, actionSettings: this.settings});
+    this.name = this.actionName;
+    this.priority = {
+      selected: 'low',
+      options: ['low', 'medium', 'high'],
+      handleChange: () => {
+        this.actionSettings.email.priority = this.priority.selected;
+      },
     };
   }
 
   deleteAction() {
-    this.emailActionDelete({origActionName: this.emailActionName});
+    this.actionDelete({origActionName: this.actionName});
   }
 }
 
@@ -56,10 +47,9 @@ function watcherEditEmailAction() {
     template,
     restrict: 'E',
     scope: {
-      emailActionName: '@',
-      emailActionSettings: '<',
-      emailActionPersist: '&',
-      emailActionDelete: '&',
+      actionName: '@',
+      actionSettings: '<',
+      actionDelete: '&',
       onTrigger: '=',
     },
     controller:  WatcherEditEmailAction,

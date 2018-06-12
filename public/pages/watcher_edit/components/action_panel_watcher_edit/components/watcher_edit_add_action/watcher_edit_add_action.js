@@ -1,6 +1,7 @@
 import template from './watcher_edit_add_action.html';
 
 class Actions {
+  static types = ['email'];
   static email() {
     const name = 'An action';
     const settings = {
@@ -21,18 +22,12 @@ class WatcherEditAddAction {
   }
 
   $onInit() {
-    this.actions = this.addActionList;
+    this.actions = Actions.types;
   }
 
   addAction(actionType) {
-    if (actionType === 'email') {
-      const {name, settings} = Actions.email();
-      this.persistAction(name, settings);
-    }
-  }
-
-  persistAction(origActionName, actionSettings) {
-    this.addActionPersist({origActionName, actionSettings});
+    const {name, settings} = Actions.email();
+    this.onAdd({actionName: name, actionSettings: settings});
   }
 }
 
@@ -41,8 +36,7 @@ function watcherEditAddAction() {
     template,
     restrict: 'E',
     scope: {
-      addActionList: '<',
-      addActionPersist: '&',
+      onAdd: '&',
     },
     controller:  WatcherEditAddAction,
     controllerAs: 'watcherEditAddAction',

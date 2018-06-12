@@ -17,8 +17,7 @@
             <div class="col-md-2">
               <div class="form-group">
                 <watcher-edit-add-action
-                  add-action-list="actionPanelWatcherEdit.actionsList"
-                  add-action-persist="actionPanelWatcherEdit.actionPersistSameName({origActionName, actionSettings})"
+                  on-add="actionPanelWatcherEdit.onAdd({actionName, actionSettings})"
                 ></watcher-edit-add-action>
               </div>
             </div>
@@ -32,11 +31,9 @@
                   <div ng-repeat="(actionName, actionSettings) in actionPanelWatcherEdit.watcher._source.actions track by $index">
                     <watcher-edit-email-action
                       ng-if="actionPanelWatcherEdit.isAction(actionSettings, 'email')"
-                      email-action-name="{{actionName}}"
-                      email-action-settings="actionSettings"
-                      email-action-delete="actionPanelWatcherEdit.actionDelete({origActionName})"
-                      email-action-persist="actionPanelWatcherEdit.actionPersist({origActionName, newActionName, actionSettings});"
-                      on-trigger="actionPanelWatcherEdit.action.trigger"
+                      action-name="{{actionName}}"
+                      action-settings="actionSettings"
+                      action-delete="actionPanelWatcherEdit.onDelete({actionName})"
                     ></watcher-edit-email-action>
                   </div>
                 </uib-accordion>

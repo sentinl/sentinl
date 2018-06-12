@@ -30,9 +30,6 @@ class ThresholdWatcherEdit {
 
     this.actions = {
       show: this.condition.show,
-      trigger: {
-        save: () => {},
-      },
     };
   }
 
@@ -92,8 +89,12 @@ class ThresholdWatcherEdit {
     this.watcher._source.input.search.request.body = body;
   }
 
-  actionChange(actions) {
-    this.watcher._source.actions = actions;
+  actionAdd(actionName, actionSettings) {
+    this.watcher._source.actions[actionName] = actionSettings;
+  }
+
+  actionDelete(actionName) {
+    delete this.watcher._source.actions[actionName];
   }
 
   _isWatcherValid() {
@@ -106,7 +107,6 @@ class ThresholdWatcherEdit {
 
   async _saveWatcherEditor() {
     try {
-      this.actions.trigger.save();
       await this.watcherService.save(this.watcher);
       this._cancelWatcherEditor();
     } catch (err) {
