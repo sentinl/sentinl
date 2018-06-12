@@ -27,7 +27,7 @@ class WatcherEditEmailAction {
   };
 
   $onInit() {
-    this.name = this.actionName;
+    this.actionSettings.name = this.actionName;
     this.priority = {
       selected: 'low',
       options: ['low', 'medium', 'high'],

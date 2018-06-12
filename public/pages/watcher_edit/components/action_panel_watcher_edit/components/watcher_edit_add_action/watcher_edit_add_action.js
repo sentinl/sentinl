@@ -3,14 +3,14 @@ import template from './watcher_edit_add_action.html';
 class Actions {
   static types = ['email'];
   static email() {
-    const name = 'An action';
     const settings = {
+      name: 'An action',
       throttle_period: '1s',
       email: {
         priority: 'low',
       },
     };
-    return {name, settings};
+    return {name: settings.name, settings};
   }
 }
 
