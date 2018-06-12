@@ -26,7 +26,6 @@ class Authenticator {
 
       await delay(timeout);
       await page.click('.global-nav-link--close');
-      await delay(timeout);
     } catch (err) {
       await browser.close();
       throw new Error(`fail to authenticate via Search Guard, user: ${user}: ${err.message}`);
@@ -38,7 +37,6 @@ class Authenticator {
       await page.type(userSelector, user, {delay: timeout / 50});
       await page.type(passSelector, pass, {delay: timeout / 50});
       await page.click(loginBtnSelector);
-      await delay(timeout);
     } catch (err) {
       await browser.close();
       throw new Error(`fail to authenticate via custom auth, user: ${user}: ${err.message}`);
@@ -47,9 +45,9 @@ class Authenticator {
 
   static async basic(page, browser, user, pass, encoding = 'base64') {
     try {
-      const headers = new Map();
-      headers.set('Authorization', `Basic ${new Buffer(`${user}:${pass}`).toString(encoding)}`);
-      await page.setExtraHTTPHeaders(headers);
+      await page.setExtraHTTPHeaders({
+        Authorization: `Basic ${new Buffer(`${user}:${pass}`).toString(encoding)}`
+      });
       return page;
     } catch (err) {
       await browser.close();
@@ -100,7 +98,8 @@ class Reporter {
     }
 
     if (this.config.authentication.enabled && this.config.authentication.mode.basic) {
-      this.page = await Authenticator.basic(this.page, this.config.authentication.username, this.config.authentication.password);
+      this.page = await Authenticator.basic(this.page, this.browser,
+        this.config.authentication.username, this.config.authentication.password);
     }
 
     try {
@@ -112,9 +111,9 @@ class Reporter {
     if (this.config.authentication.enabled) {
       const {mode, username, password} = this.config.authentication;
       await this.authenticate(mode, username, password, this.config.timeout);
-    } else {
-      await delay(this.config.timeout);
     }
+
+    await delay(this.config.timeout);
   }
 
   async authenticate(mode, user, pass, timeout) {
