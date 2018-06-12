@@ -47,7 +47,7 @@ class Authenticator {
     try {
       await page.setExtraHTTPHeaders({
         Authorization: `Basic ${new Buffer(`${user}:${pass}`).toString(encoding)}`
-      })
+      });
       return page;
     } catch (err) {
       await browser.close();
@@ -98,7 +98,8 @@ class Reporter {
     }
 
     if (this.config.authentication.enabled && this.config.authentication.mode.basic) {
-      this.page = await Authenticator.basic(this.page, this.config.authentication.username, this.config.authentication.password);
+      this.page = await Authenticator.basic(this.page, this.browser,
+        this.config.authentication.username, this.config.authentication.password);
     }
 
     try {
