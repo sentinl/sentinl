@@ -1,5 +1,7 @@
 ### Watcher Actions
-Currently supported __"actions"__ for SENTINL watchers:
+__"Actions"__ are executed when a Watcher returns data past its `condition`. 
+
+The following supported __"actions"__ types are available:
 
 #### Email 
 Send Query results and message via Email/SMTP
@@ -112,4 +114,27 @@ Output Query results and message to Console
 	  "priority" : "DEBUG",
 	  "message" : "Average {{payload.aggregations.avg.value}}"
 	  }
+```
+
+--------------
+
+##### Storing Payload
+
+By defaults, the original `payload` will not be stored back in Elasticsearch to avoid duplication.
+To save the original and modified payload, please add the following option to your action settings:
+```
+"save_payload" : true
+```
+
+Example:
+```
+   "email" : {
+          "to" : "root@localhost",
+          "from" : "sentinl@localhost",
+          "subject" : "Alarm Title",
+          "priority" : "high",
+          "body" : "Series Alarm {{ payload._id}}: {{payload.hits.total}}",
+          "stateless" : false,
+          "save_payload" : true
+    }
 ```

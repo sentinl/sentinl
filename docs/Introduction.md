@@ -1,5 +1,5 @@
 ### What is SENTINL?
-SENTINL is an App Plugin extending Kibana or KiBi with dynamic Alerting and Reporting functionality
+SENTINL is an App Plugin that works with Kibana or the Siren Platform providing dynamic Alerting and Reporting functionality
 
 > “Designed to monitor, validate and inform users and systems on data series changes using
 > standard or join queries, programmable result validators, transformers and templates to
@@ -7,15 +7,18 @@ SENTINL is an App Plugin extending Kibana or KiBi with dynamic Alerting and Repo
 > remote APIs for data and commands, generating new Elasticsearch documents, arbitrary
 > metrics towards any other platform, planting triggers for itself to use and so much more. “
 
-### SENTINEL vs. X-PACK
-**SENTINL** provides X-Pack-like Alerting & Reporting functionality directly within Kibi & Kibana in form of a powerful plugin, leveraging all available native features such as secure client for queries and extending the UI with tools for managing configuration, scheduling and handling executions of user Alerts and Reports.
+### INTRO TO SENTINL
+**SENTINL** provides Alerting & Reporting functionality directly within the Siren Platform or Kibana in form of a powerful plugin, leveraging all available native features such as secure client for queries and extending the UI with tools for managing configuration, scheduling and handling executions of user Alerts and Reports.
 
 **SENTINL** is also transparent to the Elasticsearch cluster(s) it monitors, appearing as a
-regular client and requiring no complex installation, restarts and no licensing fees.
+regular client and requiring no complex installation or restarts.
 
 Powered by the many I/O modules the Node.JS community offers, SENTINL usage is not
 limited to Elasticsearch and its capabilities can easily be extended to fully interface with
 third party data sources and platforms for ingress and egress data.
+
+This is particularly true when used together with the Siren Platform as it will be able
+to use the JDBC virtualizations capabilities and the join capabilities across indexes (Elasticsearch or Virtualized)
 
 ### WHAT IS A WATCHER?
 
