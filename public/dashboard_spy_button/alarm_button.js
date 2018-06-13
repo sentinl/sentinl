@@ -39,7 +39,7 @@ const dashboardSpyButton = function ($scope, config) {
     $scope.indices = [];
 
     if (req.fetchParams && req.fetchParams.index) {
-      const index = req.fetchParams.index.toString();
+      const index = req.fetchParams.index.title || req.fetchParams.index.toString();
       $scope.indices.push(index);
     }
 
