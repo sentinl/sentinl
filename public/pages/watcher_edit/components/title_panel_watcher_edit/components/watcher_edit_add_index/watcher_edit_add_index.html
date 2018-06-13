@@ -12,14 +12,13 @@
           typeahead-loading="watcherEditAddIndex.loadingLocations"
           typeahead-no-results="watcherEditAddIndex.noResults"
           typeahead-on-select="watcherEditAddIndex.handleChange($item, $model, $label, $event)" 
+          ng-change="watcherEditAddIndex.handleChange()"
+          ng-model-options="{ debounce: 500 }"
         >
         <i ng-show="watcherEditAddIndex.loadingLocations" class="glyphicon glyphicon-refresh"></i>
         <div ng-show="watcherEditAddIndex.noResults">
           <i class="glyphicon glyphicon-remove"></i> No Results Found
         </div>
-<!--
-          ng-change="watcherEditAddIndex.handleChange()"
--->
       </div>
     </div>
   </div>

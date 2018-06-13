@@ -39,12 +39,11 @@ class WatcherEditAddIndex {
 
   _filterIndexesByNamePrefix(indexes, namePrefix) {
     const re = new RegExp(namePrefix + '.*', 'gi');
-    return indexes.filter((i) => re.exec(i.index));
+    return indexes.filter((i) => i.index.match(re));
   }
 
   handleChange() {
     this._setIndex(this.selected);
-    // this.onChange({ index: this.selected });
   }
 }
 
