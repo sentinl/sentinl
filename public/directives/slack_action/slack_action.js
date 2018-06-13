@@ -9,20 +9,31 @@ function slackAction($rootScope) {
     scope.action = {
       type: 'slack',
       status: {
-        isHeaderOpen: false
-      }
+        isHeaderOpen: false,
+      },
+      priority: {
+        selected: scope.actionSettings.slack.priority || 'low',
+        options: ['low', 'medium', 'high'],
+        handleChange: () => {
+          scope.actionSettings.slack.priority = scope.action.priority.selected;
+        },
+      },
     };
+
+    scope.actionSettings.slack.priority = scope.actionSettings.slack.priority || scope.action.priority.selected;
 
     scope.removeAction = function () {
-      $rootScope.$broadcast('action:removeAction', { name: attrs.name });
+      $rootScope.$broadcast('action:removeAction', { name: scope.actionName });
     };
-
   }
 
   return {
     restrict: 'E',
     template,
-    scope: true,
+    scope: {
+      actionName: '@',
+      actionSettings: '=',
+    },
     link: actionDirective
   };
 };

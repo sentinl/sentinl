@@ -9,20 +9,31 @@ function emailHtmlAction($rootScope) {
     scope.action = {
       type: 'email HTML',
       status: {
-        isHeaderOpen: false
-      }
+        isHeaderOpen: false,
+      },
+      priority: {
+        selected: scope.actionSettings.email_html.priority || 'low',
+        options: ['low', 'medium', 'high'],
+        handleChange: () => {
+          scope.actionSettings.email_html.priority = scope.action.priority.selected;
+        },
+      },
     };
+
+    scope.actionSettings.email_html.priority = scope.actionSettings.email_html.priority || scope.action.priority.selected;
 
     scope.removeAction = function () {
-      $rootScope.$broadcast('action:removeAction', { name: attrs.name });
+      $rootScope.$broadcast('action:removeAction', { name: scope.actionName });
     };
-
   }
 
   return {
     restrict: 'E',
     template,
-    scope: true,
+    scope: {
+      actionName: '@',
+      actionSettings: '=',
+    },
     link: actionDirective
   };
 };
