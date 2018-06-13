@@ -72,10 +72,6 @@ class ThresholdWatcherEdit {
     this.condition.trigger.indexChange(index);
   }
 
-  titleChange(title) {
-    this.watcher._source.title = title;
-  }
-
   scheduleChange(schedule) {
     this.watcher._source.trigger.schedule.later = schedule;
     this.condition.trigger.scheduleChange(schedule);

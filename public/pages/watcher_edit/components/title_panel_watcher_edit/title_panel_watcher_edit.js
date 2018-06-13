@@ -41,15 +41,6 @@ class TitlePanelWatcherEdit {
     this._watcher = cloneDeep(this.watcher);
   }
 
-  get title() {
-    return this._watcher._source.title;
-  }
-
-  set title(title) {
-    this._watcher._source.title = title;
-    this.onTitleChange({ title });
-  }
-
   setIndex(index) {
     index = !index ? [] : index.split(',');
     this._watcher._source.input.search.request.index = index;
@@ -84,7 +75,6 @@ function titlePanelWatcherEdit() {
       watcher: '<',
       onScheduleChange: '&',
       onIndexChange: '&',
-      onTitleChange: '&',
     },
     controller:  TitlePanelWatcherEdit,
     controllerAs: 'titlePanelWatcherEdit',
