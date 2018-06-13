@@ -149,10 +149,12 @@ class ConditionPanelWatcherEdit {
   }
 
   $onInit() {
-    this.$scope.$watch('conditionPanelWatcherEdit.watcher._source.source.trigger.schedule.later', () => {
+    this.$scope.$watch('conditionPanelWatcherEdit.watcher._source.trigger.schedule.later', () => {
+      this.log.debug('onInit schedule: ' + this.watcher._source.trigger.schedule.later);
       this._updateChartQueryParamsInterval(this.watcher._source.trigger.schedule.later);
     });
-    this.$scope.$watch('conditionPanelWatcherEdit.watcher._source.source.trigger.schedule.later', () => {
+    this.$scope.$watch('conditionPanelWatcherEdit.watcher._source.input.search.request.index', () => {
+      this.log.debug('onInit index: ' + this.watcher._source.input.search.request.index);
       this.chartQueryParams.index = this.watcher._source.input.search.request.index;
     });
   };
