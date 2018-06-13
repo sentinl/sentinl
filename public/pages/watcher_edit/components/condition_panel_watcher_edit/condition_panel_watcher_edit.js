@@ -66,39 +66,6 @@ class ConditionPanelWatcherEdit {
     this.allDocFields = ['animal', 'random']; // to-do: get fields from index docs
 
     // to-do: update editor when action and title updated
-    this.rawDoc = {
-      config: (mode = 'json', maxLines = 30, minLines = 30) => {
-        return {
-          mode,
-          useWrapMode : true,
-          showGutter: true,
-          rendererOptions: {
-            maxLines,
-            minLines,
-          },
-          editorOptions: {
-            autoScrollEditorIntoView: false
-          },
-          // onLoad : () => {}, // to-do: consider persisting changes
-          // onChange: () => {},
-        };
-      },
-      watcher: {
-        show: false,
-        text: '',
-        toggle: () => {
-          this.rawDoc.watcher.show = !this.rawDoc.watcher.show;
-        },
-      },
-      chart: {
-        show: false,
-        text: '{\n"message": "This feaature is under construction. Comming soon ..."\n}',
-        toggle: () => {
-          this.rawDoc.chart.show = !this.rawDoc.chart.show;
-        },
-      },
-    };
-
     this.condition = {
       type: {
         handleSelect: (type) => {
@@ -149,14 +116,49 @@ class ConditionPanelWatcherEdit {
   }
 
   $onInit() {
-    this.$scope.$watch('conditionPanelWatcherEdit.watcher._source.trigger.schedule.later', () => {
-      this.log.debug('onInit schedule: ' + this.watcher._source.trigger.schedule.later);
+    this.$scope.$watch('conditionPanelWatcherEdit.watcher._source', () => {
       this._updateChartQueryParamsInterval(this.watcher._source.trigger.schedule.later);
-    });
-    this.$scope.$watch('conditionPanelWatcherEdit.watcher._source.input.search.request.index', () => {
-      this.log.debug('onInit index: ' + this.watcher._source.input.search.request.index);
       this.chartQueryParams.index = this.watcher._source.input.search.request.index;
-    });
+
+      try {
+        this._updateWatcherRawDoc(this.watcher);
+      } catch (err) {
+        throw new Error(`update watcher raw doc: ${err.message}`);
+      }
+    }, true);
+
+    this.rawDoc = {
+      config: (mode = 'json', maxLines = 30, minLines = 30) => {
+        return {
+          mode,
+          useWrapMode : true,
+          showGutter: true,
+          rendererOptions: {
+            maxLines,
+            minLines,
+          },
+          editorOptions: {
+            autoScrollEditorIntoView: false
+          },
+          // onLoad : () => {}, // to-do: consider persisting changes
+          // onChange: () => {},
+        };
+      },
+      watcher: {
+        show: false,
+        text: JSON.stringify(this.watcher._source, null, 2),
+        toggle: () => {
+          this.rawDoc.watcher.show = !this.rawDoc.watcher.show;
+        },
+      },
+      chart: {
+        show: false,
+        text: '{\n"message": "This feaature is under construction. Comming soon ..."\n}',
+        toggle: () => {
+          this.rawDoc.chart.show = !this.rawDoc.chart.show;
+        },
+      },
+    };
   };
 
   _updateWatcherRawDoc(watcher) {
@@ -304,12 +306,6 @@ class ConditionPanelWatcherEdit {
       } catch (err) {
         throw new Error(`build Elasticsearch query: ${err.message}`);
       }
-    }
-
-    try {
-      this._updateWatcherRawDoc(this.watcher);
-    } catch (err) {
-      throw new Error(`update watcher raw doc: ${err.message}`);
     }
 
     return null;
