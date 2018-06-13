@@ -149,12 +149,12 @@ class ConditionPanelWatcherEdit {
   }
 
   $onInit() {
-    this.onTrigger.scheduleChange = (schedule) => {
-      this._updateChartQueryParamsInterval(schedule);
-    };
-    this.onTrigger.indexChange = (index) => {
-      this.chartQueryParams.index = index;
-    };
+    this.$scope.$watch('conditionPanelWatcherEdit.watcher._source.source.trigger.schedule.later', () => {
+      this._updateChartQueryParamsInterval(this.watcher._source.trigger.schedule.later);
+    });
+    this.$scope.$watch('conditionPanelWatcherEdit.watcher._source.source.trigger.schedule.later', () => {
+      this.chartQueryParams.index = this.watcher._source.input.search.request.index;
+    });
   };
 
   _updateWatcherRawDoc(watcher) {

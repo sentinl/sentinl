@@ -50,8 +50,7 @@
                   Select an Index
                 </label>
                 <watcher-edit-add-index
-                  index-name="titlePanelWatcherEdit.index"
-                  on-change="titlePanelWatcherEdit.setIndex(index)"
+                  watcher="titlePanelWatcherEdit.watcher"
                 ></watcher-edit-add-index>
               </div>
             </div> <!-- END select indices -->
@@ -75,13 +74,11 @@
               <div class="form-group" ng-show="titlePanelWatcherEdit.schedule.human.enabled">
                 <watcher-edit-human-schedule
                   watcher="titlePanelWatcherEdit.watcher"
-                  on-change="titlePanelWatcherEdit.schedule.human.handleChange(schedule)"
                 ></watcher-edit-human-schedule>
               </div>
               <div class="form-group" ng-show="titlePanelWatcherEdit.schedule.every.enabled">
                 <watcher-edit-every-schedule
                   watcher="titlePanelWatcherEdit.watcher"
-                  on-change="titlePanelWatcherEdit.schedule.every.handleChange(schedule)"
                 ></watcher-edit-every-schedule>
               </div>
             </div> <!-- END schedule -->

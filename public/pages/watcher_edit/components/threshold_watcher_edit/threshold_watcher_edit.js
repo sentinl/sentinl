@@ -22,10 +22,6 @@ class ThresholdWatcherEdit {
       updateStatus: (isSuccess) => {
         this.actions.show = isSuccess && this.condition.show ? true : false;
       },
-      trigger: {
-        scheduleChange: () => {},
-        indexChange: () => {},
-      },
     };
 
     this.actions = {
@@ -65,16 +61,6 @@ class ThresholdWatcherEdit {
         this.confirmModal('Watcher is not valid', confirmModalOptions);
       }
     });
-  }
-
-  indexChange(index) {
-    this.watcher._source.input.search.request.index = index;
-    this.condition.trigger.indexChange(index);
-  }
-
-  scheduleChange(schedule) {
-    this.watcher._source.trigger.schedule.later = schedule;
-    this.condition.trigger.scheduleChange(schedule);
   }
 
   conditionChange(condition) {

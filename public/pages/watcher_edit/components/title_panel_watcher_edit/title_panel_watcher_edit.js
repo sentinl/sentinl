@@ -24,35 +24,14 @@ class TitlePanelWatcherEdit {
       },
       every: {
         enabled: true,
-        handleChange: (schedule) => {
-          this.onScheduleChange({schedule});
-        },
       },
       human: {
         enabled: false,
-        handleChange: (schedule) => {
-          this.onScheduleChange({schedule});
-        },
       },
     };
   }
 
-  $onInit() {
-    this._watcher = cloneDeep(this.watcher);
-  }
-
-  setIndex(index) {
-    index = !index ? [] : index.split(',');
-    this._watcher._source.input.search.request.index = index;
-    this.onIndexChange({ index });
-  }
-
-  get index() {
-    if (Array.isArray(this._watcher._source.input.search.request.index)) {
-      return this._watcher._source.input.search.request.index.join(',');
-    }
-    return this._watcher._source.input.search.request.index;
-  }
+  $onInit() {}
 
   isValidationMessageVisible(fieldName, errorType, showIfOtherErrors = true) {
     if (!this.form[fieldName]) {
@@ -73,8 +52,6 @@ function titlePanelWatcherEdit() {
     restrict: 'E',
     scope: {
       watcher: '<',
-      onScheduleChange: '&',
-      onIndexChange: '&',
     },
     controller:  TitlePanelWatcherEdit,
     controllerAs: 'titlePanelWatcherEdit',

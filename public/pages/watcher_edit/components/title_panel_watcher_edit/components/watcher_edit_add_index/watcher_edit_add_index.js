@@ -11,6 +11,22 @@ class WatcherEditAddIndex {
     this.esService = esService;
   }
 
+  $onInit() {
+    this.selected = this._getIndex();
+  }
+
+  _getIndex() {
+    if (Array.isArray(this.watcher._source.input.search.request.index)) {
+      return this.watcher._source.input.search.request.index.join(',');
+    }
+    return this.watcher._source.input.search.request.index;
+  }
+
+  _setIndex(index) {
+    index = !index ? [] : index.split(',');
+    this.watcher._source.input.search.request.index = index;
+  }
+
   async getIndexNames(name) {
     try {
       let indexes = await this.esService.getAllIndexes();
@@ -26,8 +42,9 @@ class WatcherEditAddIndex {
     return indexes.filter((i) => re.exec(i.index));
   }
 
-  handleChange($item, $model, $label, $event) {
-    this.onChange({ index: this.selected });
+  handleChange() {
+    this._setIndex(this.selected);
+    // this.onChange({ index: this.selected });
   }
 }
 
@@ -36,7 +53,7 @@ function watcherEditAddIndex() {
     template,
     restrict: 'E',
     scope: {
-      onChange: '&',
+      watcher: '<',
     },
     controller:  WatcherEditAddIndex,
     controllerAs: 'watcherEditAddIndex',
