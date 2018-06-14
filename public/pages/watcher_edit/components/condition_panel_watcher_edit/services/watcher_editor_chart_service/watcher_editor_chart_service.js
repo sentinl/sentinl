@@ -6,7 +6,7 @@ class WatcherEditorChartService {
     this.log.initLocation('WatcherEditorChartService');
   }
 
-  async _query({ queryType = 'count', index = [], over, last, interval, field }) {
+  async _query({ queryType = 'count', index = [], query }) {
     try {
       const uri = this.API[queryType.toUpperCase()];
 
@@ -14,12 +14,7 @@ class WatcherEditorChartService {
         es_params: {
           index,
         },
-        query_params: {
-          over,
-          last,
-          interval,
-          field,
-        }
+        query,
       });
     } catch (err) {
       if (err.status === 503 && err.data.message.includes('index_not_found_exception')) {
@@ -30,58 +25,43 @@ class WatcherEditorChartService {
     }
   }
 
-  async count({ index = [], over, last, interval, field }) {
+  count({ index = [], query }) {
     return this._query({
       queryType: 'count',
       index,
-      over,
-      last,
-      interval,
-      field
+      query,
     });
   }
 
-  async metricAggAverage({ index = [], over, last, interval, field }) {
+  metricAggAverage({ index = [], query }) {
     return this._query({
       queryType: 'average',
       index,
-      over,
-      last,
-      interval,
-      field
+      query,
     });
   }
 
-  async metricAggSum({ index = [], over, last, interval, field }) {
+  metricAggSum({ index = [], query }) {
     return this._query({
       queryType: 'sum',
       index,
-      over,
-      last,
-      interval,
-      field
+      query,
     });
   }
 
-  async metricAggMax({ index = [], over, last, interval, field }) {
+  metricAggMax({ index = [], query }) {
     return this._query({
       queryType: 'max',
       index,
-      over,
-      last,
-      interval,
-      field
+      query,
     });
   }
 
-  async metricAggMin({ index = [], over, last, interval, field }) {
+  metricAggMin({ index = [], query }) {
     return this._query({
       queryType: 'min',
       index,
-      over,
-      last,
-      interval,
-      field
+      query,
     });
   }
 }

@@ -1,12 +1,15 @@
 import moment from 'moment';
 import 'moment-timezone';
 
+import WatcherEditorQueryBuilder from './watcher_editor_query_builder';
+
 /*
 * Build Elasticsearch query for watcherEdit chart
 */
 
-class WatcherChartQueryBuilder {
-  constructor({timeFieldName = '@timestamp', timezoneName = 'Europe/Amsterdam'}) {
+class WatcherEditorChartQueryBuilder extends WatcherEditorQueryBuilder {
+  constructor({timeFieldName = '@timestamp', timezoneName = 'Europe/Amsterdam'} = {}) {
+    super({timeFieldName, timezoneName});
     this.timeFieldName = timeFieldName;
     this.timezoneName = timezoneName;
   }
@@ -310,114 +313,6 @@ class WatcherChartQueryBuilder {
 
     return body;
   }
-
-  _epochRange(n, unit) {
-    const body = this._range({
-      gte: this._epochTimeNUnitsAgo(n, unit),
-      lte: this._epochTimeNow(),
-    });
-
-    body.size = 0;
-    return body;
-  }
-
-  _epochTimeNow() {
-    return moment.tz(moment().format(), this.timezoneName).valueOf();
-  }
-
-  _epochTimeNUnitsAgo(n = 1, unit = 'minutes') {
-    return moment.tz(moment().subtract(n, unit).format(), this.timezoneName).valueOf();
-  }
-
-  _metricAggSum(field) {
-    return {
-      metricAgg: {
-        sum: {
-          field,
-        },
-      },
-    };
-  }
-
-  _metricAggAvg(field) {
-    return {
-      metricAgg: {
-        avg: {
-          field,
-        },
-      },
-    };
-  }
-
-  _metricAggMin(field) {
-    return {
-      metricAgg: {
-        min: {
-          field,
-        },
-      },
-    };
-  }
-
-  _metricAggMax(field) {
-    return {
-      metricAgg: {
-        max: {
-          field,
-        },
-      },
-    };
-  }
-
-  _dateAgg({field, interval}) {
-    interval = interval.n + interval.unit.substring(0, 1);
-    return {
-      dateAgg: {
-        date_histogram: {
-          field: this.timeFieldName,
-          time_zone: this.timezoneName,
-          interval,
-          min_doc_count: 1,
-        },
-      },
-    };
-  }
-
-  _termsAgg({field, size, order = 'desc'}) {
-    if (!Number.isInteger(+field)) {
-      field += '.keyword';
-    }
-
-    return {
-      bucketAgg: {
-        terms: {
-          field,
-          size,
-          order: {
-            '_count': order,
-          },
-        },
-      },
-    };
-  }
-
-  _range({gte, lte, format = 'epoch_millis'}) {
-    return {
-      query: {
-        bool: {
-          filter: {
-            range: {
-              [this.timeFieldName]: {
-                gte,
-                lte,
-                format,
-              }
-            }
-          }
-        }
-      }
-    };
-  }
 }
 
-export default WatcherChartQueryBuilder;
+export default WatcherEditorChartQueryBuilder;
