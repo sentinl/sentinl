@@ -61,8 +61,6 @@ export default function Scheduler(server) {
       return;
     }
 
-    log.info(`executing watcher: ${task._id}`);
-
     if (!task._source.actions || isEmpty(task._source.actions)) {
       log.warning(`watcher has no actions: ${task._source.uuid}`);
       return;
@@ -75,7 +73,7 @@ export default function Scheduler(server) {
         log.info(`fail to execute watcher: ${task._id}, ${resp.message}`);
       }
     } catch (err) {
-      log.error(`fail to execute watcher: ${task._id}`);
+      log.error(`execute watcher: ${err.message}`);
     }
   };
 

@@ -166,7 +166,7 @@ export default class Watcher {
         // 'elasticsearch.plugins' not available when running from kibana
       }
 
-      this.server.log(['status', 'info', 'Sentinl', 'watcher'], `Executing action: ${task._id}`);
+      this.log.info(['status', 'info', 'Sentinl', 'watcher'], `executing watcher: ${task._id}`);
 
       const actions = this.getActions(task._source.actions);
       let request = has(task._source, 'input.search.request') ? task._source.input.search.request : undefined;
@@ -201,6 +201,10 @@ export default class Watcher {
         return self.search(method, request).then(function (payload) {
           if (!payload) {
             throw new Error(`input search query is malformed or missing key parameters, ${task._id}`);
+          }
+
+          if (!payload.hits.hits.length) {
+            this.log.info(`no search results, ${task._id}`);
           }
 
           /* CONDITION */
