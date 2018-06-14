@@ -45,7 +45,7 @@ class WatcherEditorChartQueryBuilder extends WatcherEditorQueryBuilder {
   *   }
   */
   count({field = null, over = {type: 'all docs'}, last = {n: 15, unit: 'minutes'}, interval = {n: 1, unit: 'minutes'}}) {
-    const body = this._epochRange(last.n, last.unit);
+    const body = this._epochRange(last.n, last.unit, 0);
 
     if (over.type === 'all docs') {
       body.aggs = this._dateAgg({
@@ -104,7 +104,7 @@ class WatcherEditorChartQueryBuilder extends WatcherEditorQueryBuilder {
   *   }
   */
   average({field = null, over = {type: 'all docs'}, last = {n: 15, unit: 'minutes'}, interval = {n: 1, unit: 'minutes'}}) {
-    const body = this._epochRange(last.n, last.unit);
+    const body = this._epochRange(last.n, last.unit, 0);
 
     if (over.type === 'all docs') {
       body.aggs = this._dateAgg({
@@ -166,7 +166,7 @@ class WatcherEditorChartQueryBuilder extends WatcherEditorQueryBuilder {
   *  }
   */
   sum({field = null, over = {type: 'all docs'}, last = {n: 15, unit: 'minutes'}, interval = {n: 1, unit: 'minutes'}}) {
-    const body = this._epochRange(last.n, last.unit);
+    const body = this._epochRange(last.n, last.unit, 0);
 
     if (over.type === 'all docs') {
       body.aggs = this._dateAgg({
@@ -228,7 +228,7 @@ class WatcherEditorChartQueryBuilder extends WatcherEditorQueryBuilder {
   *   }
   */
   min({field = null, over = {type: 'all docs'}, last = {n: 15, unit: 'minutes'}, interval = {n: 1, unit: 'minutes'}}) {
-    const body = this._epochRange(last.n, last.unit);
+    const body = this._epochRange(last.n, last.unit, 0);
 
     if (over.type === 'all docs') {
       body.aggs = this._dateAgg({
@@ -290,7 +290,7 @@ class WatcherEditorChartQueryBuilder extends WatcherEditorQueryBuilder {
   *   }
   */
   max({field = null, over = {type: 'all docs'}, last = {n: 15, unit: 'minutes'}, interval = {n: 1, unit: 'minutes'}}) {
-    const body = this._epochRange(last.n, last.unit);
+    const body = this._epochRange(last.n, last.unit, 0);
 
     if (over.type === 'all docs') {
       body.aggs = this._dateAgg({

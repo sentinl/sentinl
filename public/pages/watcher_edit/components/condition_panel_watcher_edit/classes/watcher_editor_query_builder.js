@@ -355,13 +355,15 @@ class WatcherEditorQueryBuilder {
     return body;
   }
 
-  _epochRange(n, unit) {
+  _epochRange(n, unit, bodySize) {
     const body = this._range({
       gte: this._epochTimeNUnitsAgo(n, unit),
       lte: this._epochTimeNow(),
     });
 
-    body.size = 0;
+    if (bodySize) {
+      body.size = bodySize;
+    }
     return body;
   }
 
