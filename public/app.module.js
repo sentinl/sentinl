@@ -32,11 +32,6 @@ app.config(function (ChartJsProvider) {
     chartColors: ['#0074D9', '#FF4136'],
     responsive: true,
   });
-
-  // // Configure all line charts
-  // ChartJsProvider.setOptions('line', {
-  //   showLines: false
-  // });
 });
 
 export { app };

@@ -18,7 +18,7 @@
   </kbn-top-nav>
 
   <div class="row container">
-    <div class="col-12-sm">
+    <div class="col-md-12">
       <p style="float:left;">UTC time is {{ utcTime }}</p>
       <p style="float:right;">Local time is {{ currentTime }}</p>
       <br style="clear:both;">
@@ -28,31 +28,44 @@
       </div>
 
       <div class="panel panel-default">
-        <table class="table">
+        <table class="table" id="watchersList">
           <thead>
             <tr>
               <th>TITLE</th>
               <th>INTERVAL</th>
               <th>INPUT</th>
-              <th>SCRIPT</th>
               <th>ACTIONS</th>
               <th></th>
             </tr>
           <tbody ng-repeat='watcher in watchers | filter:searchWatchers'>
             <tr>
-              <td><a ng-href="#/watcher/{{watcher._id}}/edit">{{watcher._source.title}}</a></td>
-              <td ng-show="watcher._source.trigger.schedule.interval" ng-hide="watcher._source.trigger.schedule.later">{{ watcher._source.trigger.schedule.interval }}</td>
-              <td ng-show="watcher._source.trigger.schedule.later">{{ watcher._source.trigger.schedule.later }}</td>
-              <td>{{watcher._source.input.search.request.index.join(',')}}</td>
-              <td>{{watcher._source.condition.script.script}}</td>
-              <td><span ng-repeat="(key,value) in watcher._source.actions"><p>{{ key }}</p></span> </td>
-              <td class="text-right edit-group">
+              <td class="col-md-2">
+                <a ng-href="#/watcher/{{watcher._id}}/edit">{{watcher._source.title}}</a>
+              </td>
+              <td class="col-md-2"
+                ng-show="watcher._source.trigger.schedule.later">
+                {{ watcher._source.trigger.schedule.later }}
+              </td>
+              <td class="col-md-2">{{watcher._source.input.search.request.index.join(',')}}</td>
+              <td class="col-md-3">
+                <span ng-repeat="(key,value) in watcher._source.actions">
+                  <p>{{ key }}</p>
+                </span>
+              </td>
+              <td class="col-md-3 text-right edit-group">
                 <a
-                  title="Edit"
+                  title="Raw Edit"
+                  class="show-rule"
+                  ng-href="#/watcher/raw/{{watcher._id}}/edit"
+                >
+                  <i class="fa fa-pencil"></i>
+                </a>
+                <a
+                  title="Wizard"
                   class="show-rule"
                   ng-href="#/watcher/{{watcher._id}}/edit"
                 >
-                  <i class="fa fa-pencil"></i>
+                  <i class="fa fa-magic"></i>
                 </a>
                 <a
                   title="Execute"
