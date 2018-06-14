@@ -74,6 +74,27 @@ const dashboardSpyButton = function ($scope, config) {
           }
         });
       }
+      if (alarm._source.input.search.request.body.query.bool.must) {
+        let must = alarm._source.input.search.request.body.query.bool.must;
+        var newTimestamp = {};
+        for (var key in must) {
+          if (must.hasOwnProperty(key) && must[key].range) {
+            if (must[key].range['@timestamp']) {
+              if (must[key].range['@timestamp'].format) {
+                if (_.includes(must[key].range['@timestamp'].format,'epoch_millis')) {
+                  let start = new Date(must[key].range['@timestamp'].gte);
+                  let end = new Date(must[key].range['@timestamp'].lte);
+                  let diff = new Date(end - start).getTime() / 1000; // UTC timestamp in seconds
+                  newTimestamp.gte = 'now-' + diff + 's/s';
+                  newTimestamp.lte = 'now/s';
+                  newTimestamp.format = must[key].range['@timestamp'].format.replace('millis','second');
+                  alarm._source.input.search.request.body.query.bool.must[key].range['@timestamp'] = newTimestamp;
+                }
+              }
+            }
+          }
+        }
+      }
 
       stripObjectPropertiesByNameRegex(alarm._source.input.search, /\$.*/);
       window.localStorage.setItem('sentinl_saved_query', JSON.stringify(alarm));
