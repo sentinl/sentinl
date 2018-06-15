@@ -24,7 +24,7 @@ class WatcherEditorConditionBuilder {
   /*
   * @return {string}
     // if (over.type === 'all docs')
-    "return payload.hits.total > 0"
+    "payload.hits.total > 0"
     // else
     "for(var r=payload.aggregations.bucketAgg.buckets,t=0;t<r.length;t++)if(r[t].doc_count>0)return!0;return!1"
   */
@@ -32,9 +32,9 @@ class WatcherEditorConditionBuilder {
     const compToThis = this._mathSmbl(threshold.direction) + threshold.n;
 
     if (over.type === 'all docs') {
-      return `return payload.hits.total ${compToThis}`;
+      return `payload.hits.total ${compToThis}`;
     }
-    return `for(var r=payload.aggregations.bucketAgg.buckets,t=0;t<r.length;t++)if(r[t].doc_count${compToThis})return!0;return!1`;
+    return `payload.aggregations.bucketAgg.buckets.some(e => e.doc_count${compToThis})`;
   }
 
   /*
@@ -68,7 +68,7 @@ class WatcherEditorConditionBuilder {
   /*
   * @return {string}
     // if (over.type === 'all docs')
-    "return payload.aggregations.metricAgg.value >0"
+    "payload.aggregations.metricAgg.value >0"
     // else
     for(var r=payload.aggregations.bucketAgg.buckets,a=0;a<r.length;a++)if(r[a].metricAgg.value>0)return!0;return!1
   */
@@ -76,9 +76,9 @@ class WatcherEditorConditionBuilder {
     const compToThis = this._mathSmbl(threshold.direction) + threshold.n;
 
     if (over.type === 'all docs') {
-      return `return payload.aggregations.metricAgg.value ${compToThis}`;
+      return `payload.aggregations.metricAgg.value ${compToThis}`;
     }
-    return `for(var r=payload.aggregations.bucketAgg.buckets,a=0;a<r.length;a++)if(r[a].metricAgg.value${compToThis})return!0;return!1`;
+    return `payload.aggregations.bucketAgg.buckets.some(e => e.metricAgg.value${compToThis})`;
   }
 }
 
