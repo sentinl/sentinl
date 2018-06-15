@@ -53,14 +53,6 @@ class ConditionPanelWatcherEdit {
     this.charts = [];
     this.chartQuery;
 
-    this.chartQueryParams = {
-      queryType: 'count',
-      over: { type: 'all docs' },
-      last: { n: 15, unit: 'minutes' },
-      interval: { n: 1, unit: 'minutes' },
-      threshold: { n: 10, direction: 'above' },
-    };
-
     this.queryTypes = {
       count: {},
       metric: ['average', 'min', 'max', 'sum'],
@@ -125,6 +117,14 @@ class ConditionPanelWatcherEdit {
   }
 
   $onInit() {
+    this.chartQueryParams = {
+      queryType: 'count',
+      over: { type: 'all docs' },
+      last: { n: 15, unit: 'minutes' },
+      interval: { n: 1, unit: 'minutes' },
+      threshold: this._getThreshold(this.watcher),
+    };
+
     this.$scope.$watch('conditionPanelWatcherEdit.watcher._source', () => {
       this._updateChartQueryParamsInterval(this.watcher._source.trigger.schedule.later);
       this.chartQueryParams.index = this.watcher._source.input.search.request.index;
@@ -169,6 +169,22 @@ class ConditionPanelWatcherEdit {
       },
     };
   };
+
+  _getThreshold(watcher) {
+    const condition = /(>=|<=|<|>)(\d+)/.exec(watcher._source.condition.script.script);
+    if (condition[1] === '<') {
+      return {n: +condition[2], direction: 'below'};
+    }
+    if (condition[1] === '>') {
+      return {n: +condition[2], direction: 'above'};
+    }
+    if (condition[1] === '<=') {
+      return {n: +condition[2], direction: 'below eq'};
+    }
+    if (condition[1] === '>=') {
+      return {n: +condition[2], direction: 'above eq'};
+    }
+  }
 
   _updateWatcherRawDoc(watcher) {
     this.rawDoc.watcher.text = JSON.stringify(watcher._source, null, 2);
