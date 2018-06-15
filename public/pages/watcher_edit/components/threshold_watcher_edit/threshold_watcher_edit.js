@@ -1,6 +1,6 @@
 import './threshold_watcher_edit.less';
 import template from './threshold_watcher_edit.html';
-import { has } from 'lodash';
+import { has, forEach } from 'lodash';
 
 class ThresholdWatcherEdit {
   constructor($scope, $log, kbnUrl, sentinlLog, confirmModal, createNotifier, Watcher) {
@@ -89,12 +89,23 @@ class ThresholdWatcherEdit {
 
   async _saveWatcherEditor() {
     try {
+      this.watcher._source.actions = this._renameActionsIfNeeded(this.watcher._source.actions);
       await this.watcherService.save(this.watcher);
       this._cancelWatcherEditor();
     } catch (err) {
       this.notify.error(`fail to save watcher: ${err.message}`);
     }
   };
+
+  _renameActionsIfNeeded(actions) {
+    const result = {};
+    forEach(actions, function (action) {
+      action.name = action.name.replace(/ /g, '_');
+      result[action.name] = action;
+      delete result[action.name].name;
+    });
+    return result;
+  }
 
   _isSchedule(watcher) {
     return watcher._source && !!watcher._source.trigger.schedule.later.length;

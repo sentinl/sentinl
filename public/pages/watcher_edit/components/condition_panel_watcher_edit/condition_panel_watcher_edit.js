@@ -126,13 +126,15 @@ class ConditionPanelWatcherEdit {
     };
 
     this.$scope.$watch('conditionPanelWatcherEdit.watcher._source', () => {
-      this._updateChartQueryParamsInterval(this.watcher._source.trigger.schedule.later);
-      this.chartQueryParams.index = this.watcher._source.input.search.request.index;
+      if (has(this.watcher, '_source.trigger.schedule.later')) {
+        this._updateChartQueryParamsInterval(this.watcher._source.trigger.schedule.later);
+        this.chartQueryParams.index = this.watcher._source.input.search.request.index;
 
-      try {
-        this._updateWatcherRawDoc(this.watcher);
-      } catch (err) {
-        throw new Error(`update watcher raw doc: ${err.message}`);
+        try {
+          this._updateWatcherRawDoc(this.watcher);
+        } catch (err) {
+          throw new Error(`update watcher raw doc: ${err.message}`);
+        }
       }
     }, true);
 
