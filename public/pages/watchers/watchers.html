@@ -40,7 +40,7 @@
           <tbody ng-repeat='watcher in watchers | filter:searchWatchers'>
             <tr>
               <td class="col-md-2">
-                <a ng-href="#/watcher/raw/{{watcher._id}}/edit">{{watcher._source.title}}</a>
+                <a ng-href="#/watcher/{{watcher._id}}/edit">{{watcher._source.title}}</a>
               </td>
               <td class="col-md-2"
                 ng-show="watcher._source.trigger.schedule.later">
