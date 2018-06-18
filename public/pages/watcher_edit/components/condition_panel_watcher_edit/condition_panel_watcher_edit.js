@@ -173,7 +173,7 @@ class ConditionPanelWatcherEdit {
   };
 
   _getThreshold(watcher) {
-    const condition = /(>=|<=|<|>)(\d+)/.exec(watcher._source.condition.script.script);
+    const condition = /(>=|<=|<|>)\s?(\d+)/.exec(watcher._source.condition.script.script);
     if (condition[1] === '<') {
       return {n: +condition[2], direction: 'below'};
     }
