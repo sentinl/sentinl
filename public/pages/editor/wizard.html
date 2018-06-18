@@ -69,12 +69,12 @@
           <div class="col-md-8">
             <label>Actions:</label>
             <uib-accordion close-others="true" ng-repeat="(actionName, actionSettings) in watcher._source.actions track by $index">
-              <webhook-action ng-if="actionOfType(actionSettings, 'webhook')" name="{{actionName}}"></webhook-action>
-              <email-action ng-if="actionOfType(actionSettings, 'email')" name="{{actionName}}"></email-action>
-              <report-action ng-if="actionOfType(actionSettings, 'report')" name="{{actionName}}"></report-action>
-              <email-html-action ng-if="actionOfType(actionSettings, 'email_html')" name="{{actionName}}"></email-html-action>
-              <slack-action ng-if="actionOfType(actionSettings, 'slack')" name="{{actionName}}"></slack-action>
-              <console-action ng-if="actionOfType(actionSettings, 'console')" name="{{actionName}}"></console-action>
+              <webhook-action ng-if="actionOfType(actionSettings, 'webhook')" action-name="actionName" action-settings="actionSettings"></webhook-action>
+              <email-action ng-if="actionOfType(actionSettings, 'email')" action-name="actionName" action-settings="actionSettings"></email-action>
+              <report-action ng-if="actionOfType(actionSettings, 'report')" action-name="actionName" action-settings="actionSettings"></report-action>
+              <email-html-action ng-if="actionOfType(actionSettings, 'email_html')" action-name="actionName" action-settings="actionSettings"></email-html-action>
+              <slack-action ng-if="actionOfType(actionSettings, 'slack')" action-name="actionName" action-settings="actionSettings"></slack-action>
+              <console-action ng-if="actionOfType(actionSettings, 'console')" action-name="actionName" action-settings="actionSettings"></console-action>
             </uib-accordion>
           </div>
         </div> <!-- end form-group -->
