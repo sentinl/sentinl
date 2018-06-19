@@ -473,7 +473,6 @@ function EditorController(sentinlConfig, $rootScope, $scope, $route, $interval,
         const condition = $scope.watcher._source.condition.script.script.split(' ');
         condition[1] = $scope.watcher.$$condition_operator;
         condition[2] = $scope.watcher.$$condition_value;
-        console.log(JSON.stringify(condition));
         $scope.watcher._source.condition.script.script = condition.join(' ');
         delete $scope.watcher.$$condition_value;
       }
