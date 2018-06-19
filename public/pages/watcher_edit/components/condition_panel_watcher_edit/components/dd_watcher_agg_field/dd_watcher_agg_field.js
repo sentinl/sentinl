@@ -10,7 +10,7 @@ class DdWatcherAggField {
   }
 
   $onInit() {
-    this.options = this.aggFieldNames;
+    // this.options = this.aggFieldNames;
     this.selected = this.aggActiveFieldName;
   }
 }

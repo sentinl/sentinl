@@ -13,7 +13,6 @@ class DdWatcherAggOver {
       enabled: type === 'top',
       n,
       selected: field,
-      options: this.aggOverFields,
     };
   }
 
@@ -44,7 +43,7 @@ function ddWatcherAggOver() {
     restrict: 'E',
     scope: {
       aggOverOptions: '<',
-      aggOverFields: '<',
+      aggFieldNames: '<',
       aggOverOnSelect: '&',
     },
     controller:  DdWatcherAggOver,

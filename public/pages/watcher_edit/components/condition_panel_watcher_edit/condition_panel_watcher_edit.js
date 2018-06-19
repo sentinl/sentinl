@@ -122,7 +122,6 @@ class ConditionPanelWatcherEdit {
         try {
           this._updateWatcherRawDoc(this.watcher);
           this._updateChartRawDoc(this.chartQuery);
-          await this._getIndexFieldNames(this.watcher._source.input.search.request.index, this.indexesData);
           await this._fetchChartData();
           this._reportStatusToThresholdWatcherEdit();
         } catch (err) {
@@ -135,6 +134,14 @@ class ConditionPanelWatcherEdit {
         }
       }
     }, true);
+
+    this.$scope.$watch('conditionPanelWatcherEdit.watcher._source.wizard.chart_query_params.field', async () => {
+      try {
+        await this._getIndexFieldNames(this.watcher._source.input.search.request.index, this.indexesData);
+      } catch (err) {
+        this._error(`init watcher agg field: ${err.message}`);
+      }
+    });
 
     this.rawDoc = {
       config: (mode = 'json', maxLines = 30, minLines = 30) => {
@@ -201,9 +208,10 @@ class ConditionPanelWatcherEdit {
 
     try {
       const mapping = await this.watcherEditorEsService.getMapping(index);
-      indexesData.fieldName = [];
+      indexesData.fieldNames = [];
       getFields(mapping);
     } catch (err) {
+      indexesData.fieldNames = [];
       throw new Error(err.message);
     }
   };

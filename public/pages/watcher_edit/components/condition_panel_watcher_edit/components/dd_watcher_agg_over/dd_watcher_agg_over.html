@@ -28,7 +28,7 @@
             class="form-control condition-select"
             ng-show="ddWatcherAggOver.top.enabled"
             ng-model="ddWatcherAggOver.top.selected"
-            ng-options="o as o for o in ddWatcherAggOver.top.options"
+            ng-options="o as o for o in ddWatcherAggOver.aggFieldNames"
             ng-change="ddWatcherAggOver.handleChange()"
           ></select>
         </div>

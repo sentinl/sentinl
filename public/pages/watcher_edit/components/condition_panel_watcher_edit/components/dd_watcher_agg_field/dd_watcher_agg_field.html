@@ -9,7 +9,7 @@
           <select
             class="form-control condition-select"
             ng-model="ddWatcherAggField.selected"
-            ng-options="o as o for o in ddWatcherAggField.options"
+            ng-options="o as o for o in ddWatcherAggField.aggFieldNames"
             ng-change="ddWatcherAggField.handleChange()"
           ></select>
         </div>
