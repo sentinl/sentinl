@@ -10,13 +10,13 @@ class WatcherEditorConditionBuilder {
     if (word === 'above') {
       return '>';
     }
-    if (word === 'above equal') {
+    if (word === 'above eq') {
       return '>=';
     }
     if (word === 'below') {
       return '<';
     }
-    if (word === 'below equal') {
+    if (word === 'below eq') {
       return '<=';
     }
   }

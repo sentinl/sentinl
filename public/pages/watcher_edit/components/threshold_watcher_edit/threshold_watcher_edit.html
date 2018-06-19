@@ -13,7 +13,6 @@
         update-status="thresholdWatcherEdit.condition.updateStatus(isSuccess)"
         on-query-change="thresholdWatcherEdit.queryChange(body)"
         on-condition-change="thresholdWatcherEdit.conditionChange(condition)"
-        on-trigger="thresholdWatcherEdit.condition.trigger"
       ></condition-panel-watcher-edit>
     </div>
   </div>
@@ -24,13 +23,6 @@
         on-add="thresholdWatcherEdit.actionAdd(actionName, actionSettings)"
         on-delete="thresholdWatcherEdit.actionDelete(actionName)"
       ></action-panel-watcher-edit>
-        <!--
-      <action-panel-watcher-edit
-        watcher="thresholdWatcherEdit.watcher"
-        on-change="thresholdWatcherEdit.actionChange(actions)"
-        on-trigger="thresholdWatcherEdit.actions.trigger"
-      ></action-panel-watcher-edit>
-        -->
     </div>
   </div>
 </div>

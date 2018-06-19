@@ -2,7 +2,7 @@ import template from './dd_watcher_agg_threshold.html';
 
 class DdWatcherAggThreshold {
   constructor() {
-    this.options = ['above', 'below'];
+    this.options = ['above', 'below', 'above eq', 'below eq'];
   }
 
   $onInit() {
