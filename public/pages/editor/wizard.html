@@ -57,6 +57,8 @@
             <label>Number of results</label>
           </div>
           <div class="col-md-6">
+            <select name="operator" ng-model="watcher.$$condition_operator" ng-options="operator.operator as operator.name for operator in watcher.$$condition_operators">
+            </select>
             <input type="number" min="0" class="form-control" id="watcherTitle" ng-model="watcher.$$condition_value">
           </div>
         </div> <!-- end form-group -->

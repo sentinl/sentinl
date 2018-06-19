@@ -63,6 +63,14 @@ function EditorController(sentinlConfig, $rootScope, $scope, $route, $interval,
       },
       rawEnabled: false,
     };
+    if (editorMode === 'wizard') {
+      $scope.watcher.$$condition_operators = [
+        {operator: '>=', name: 'Is above'},
+        {operator: '<=', name: 'Is under'},
+        {operator: '==', name: 'Equals'}
+      ];
+      $scope.watcher.$$condition_operator = $scope.watcher.$$condition_operators[0].operator; // setting the default operator (gte)
+    }
 
     if (!$scope.form.templates) {
       $scope.form.templates = {};
@@ -463,7 +471,9 @@ function EditorController(sentinlConfig, $rootScope, $scope, $route, $interval,
 
       if (editorMode === 'wizard' && $scope.watcher._source.condition.script.script.length) {
         const condition = $scope.watcher._source.condition.script.script.split(' ');
+        condition[1] = $scope.watcher.$$condition_operator;
         condition[2] = $scope.watcher.$$condition_value;
+        console.log(JSON.stringify(condition));
         $scope.watcher._source.condition.script.script = condition.join(' ');
         delete $scope.watcher.$$condition_value;
       }
