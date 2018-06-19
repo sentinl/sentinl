@@ -21,7 +21,7 @@ class WatcherRawEdit {
     }
 
     this.topNavMenu = navMenu.getTopNav('editor');
-    this.tabsMenu = navMenu.getTabs('editor', [{ name: `Raw Edit: ${this.watcher._id}`, url: '#/editor' }]);
+    this.tabsMenu = navMenu.getTabs('editor', [{ name: `Advanced: ${this.watcher._id}`, url: '#/editor' }]);
 
     this.$scope.$on('navMenu:cancelEditor', () => {
       const confirmModalOptions = {

@@ -22,7 +22,8 @@ module.factory('SavedWatcher', function (courier) {
           condition: 'object',
           report: 'boolean',
           disable: 'boolean',
-          trigger: 'object'
+          trigger: 'object',
+          wizard: 'object',
         },
         // if this is null/undefined then the SavedObject will be assigned the defaults
         id: id,

@@ -90,10 +90,10 @@ class ThresholdWatcherEdit {
   async _saveWatcherEditor() {
     try {
       this.watcher._source.actions = this._renameActionsIfNeeded(this.watcher._source.actions);
-      await this.watcherService.save(this.watcher);
+      const resp = await this.watcherService.save(this.watcher);
       this._cancelWatcherEditor();
     } catch (err) {
-      this.notify.error(`fail to save watcher: ${err.message}`);
+      this.notify.error(err.message);
     }
   };
 

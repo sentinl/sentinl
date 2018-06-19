@@ -40,7 +40,14 @@
           <tbody ng-repeat='watcher in watchers | filter:searchWatchers'>
             <tr>
               <td class="col-md-2">
-                <a ng-href="#/watcher/{{watcher._id}}/edit">{{watcher._source.title}}</a>
+                <a
+                  ng-if="!watcher._source.wizard"
+                  ng-href="#/watcher/raw/{{watcher._id}}/edit"
+                >{{watcher._source.title}}</a>
+                <a
+                  ng-if="watcher._source.wizard"
+                  ng-href="#/watcher/{{watcher._id}}/edit"
+                >{{watcher._source.title}}</a>
               </td>
               <td class="col-md-2"
                 ng-show="watcher._source.trigger.schedule.later">
@@ -56,15 +63,17 @@
                 <a
                   title="Raw Edit"
                   class="show-rule"
+                  ng-if="!watcher._source.wizard"
                   ng-href="#/watcher/raw/{{watcher._id}}/edit"
-                >
+                > advanced
                   <i class="fa fa-pencil"></i>
                 </a>
                 <a
                   title="Wizard"
                   class="show-rule"
+                  ng-if="watcher._source.wizard"
                   ng-href="#/watcher/{{watcher._id}}/edit"
-                >
+                > wizard
                   <i class="fa fa-magic"></i>
                 </a>
                 <a

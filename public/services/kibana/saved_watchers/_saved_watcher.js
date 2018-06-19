@@ -27,6 +27,7 @@ module.factory('SavedWatcherKibana', function (courier, EMAILWATCHER) {
       report: 'boolean',
       disable: 'boolean',
       trigger: 'object',
+      wizard: 'object',
     };
 
     static defaults = EMAILWATCHER;

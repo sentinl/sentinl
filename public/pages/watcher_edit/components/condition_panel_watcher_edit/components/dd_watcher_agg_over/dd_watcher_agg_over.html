@@ -1,6 +1,6 @@
 <form name="ddWatcherAggOver.form" ng-model-options="{ getterSetter: true }" novalidate>
   <a pop-over pop-over-title="{{ddWatcherAggOver.title}}">
-    <strong class="pop-over-btn-text">{{ddWatcherAggOver.top.enabled ? 'GROUPED ' : ''}}{{ddWatcherAggOver.title}}</strong> {{ddWatcherAggOver.selected}} {{ddWatcherAggOver.top.enabled ? ddWatcherAggOver.top.num_of_values : ''}}
+    <strong class="pop-over-btn-text">{{ddWatcherAggOver.top.enabled ? 'GROUPED ' : ''}}{{ddWatcherAggOver.title}}</strong> {{ddWatcherAggOver.selected}} {{ddWatcherAggOver.top.enabled ? ddWatcherAggOver.top.n : ''}}
   </a>
   <div ng-hide="true" class="pop-over-content">
     <div class="row">
@@ -13,22 +13,20 @@
             ng-change="ddWatcherAggOver.handleChange()"
           ></select>
         </div>
-      </div>
-      <div class="col-sm-4" ng-show="ddWatcherAggOver.top.enabled">
         <div class="form-group">
           <input
-            class="form-control"
+            class="form-control condition-select"
             id="number"
             type="number"
-            ng-model="ddWatcherAggOver.top.num_of_values"
+            ng-show="ddWatcherAggOver.top.enabled"
+            ng-model="ddWatcherAggOver.top.n"
             ng-change="ddWatcherAggOver.handleChange()"
           >
         </div>
-      </div>
-      <div class="col-sm-4" ng-show="ddWatcherAggOver.top.enabled">
         <div class="form-group">
           <select
             class="form-control condition-select"
+            ng-show="ddWatcherAggOver.top.enabled"
             ng-model="ddWatcherAggOver.top.selected"
             ng-options="o as o for o in ddWatcherAggOver.top.options"
             ng-change="ddWatcherAggOver.handleChange()"

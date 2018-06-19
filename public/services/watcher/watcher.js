@@ -35,7 +35,7 @@ class Watcher extends SavedObjects {
       'actions', 'input',
       'condition', 'transform',
       'trigger', 'disable',
-      'report', 'title'
+      'report', 'title', 'wizard'
     ];
   }
 

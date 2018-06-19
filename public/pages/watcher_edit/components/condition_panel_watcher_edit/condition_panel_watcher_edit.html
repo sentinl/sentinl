@@ -19,33 +19,34 @@
                 <ul>
                   <li>
                     <dd-watcher-agg-type
-                      agg-type-selected="conditionPanelWatcherEdit.chartQueryParams.queryType"
+                      agg-type-selected="conditionPanelWatcherEdit.watcher._source.wizard.chart_query_params.queryType"
                       agg-type-on-select="conditionPanelWatcherEdit.condition.type.handleSelect(type)"
                     ></dd-watcher-agg-type/>
                   </li>
                   <li>
                     <dd-watcher-agg-field
                       ng-show="conditionPanelWatcherEdit.condition.field.enabled"
-                      agg-field-fields="conditionPanelWatcherEdit.indexesData.fieldNames"
+                      agg-field-names="conditionPanelWatcherEdit.indexesData.fieldNames"
+                      agg-active-field-name="{{conditionPanelWatcherEdit.watcher._source.wizard.chart_query_params.field}}"
                       agg-field-on-select="conditionPanelWatcherEdit.condition.field.handleSelect(field)"
                     ></dd-watcher-agg-field/>
                   </li>
                   <li>
                     <dd-watcher-agg-over
-                      agg-over-options="conditionPanelWatcherEdit.chartQueryParams.over"
+                      agg-over-options="conditionPanelWatcherEdit.watcher._source.wizard.chart_query_params.over"
                       agg-over-fields="conditionPanelWatcherEdit.indexesData.fieldNames"
                       agg-over-on-select="conditionPanelWatcherEdit.condition.over.handleSelect(over)"
                     ></dd-watcher-agg-over/>
                   </li>
                   <li>
                     <dd-watcher-agg-threshold
-                      agg-threshold-options="conditionPanelWatcherEdit.chartQueryParams.threshold"
+                      agg-threshold-options="conditionPanelWatcherEdit.watcher._source.wizard.chart_query_params.threshold"
                       agg-threshold-on-select="conditionPanelWatcherEdit.condition.threshold.handleSelect(direction, n)"
                     ></dd-watcher-agg-threshold/>
                   </li>
                   <li>
                     <dd-watcher-agg-time
-                      agg-time-options="conditionPanelWatcherEdit.chartQueryParams.last"
+                      agg-time-options="conditionPanelWatcherEdit.watcher._source.wizard.chart_query_params.last"
                       agg-time-on-select="conditionPanelWatcherEdit.condition.last.handleSelect(unit, n)"
                     ></dd-watcher-agg-time/>
                   </li>

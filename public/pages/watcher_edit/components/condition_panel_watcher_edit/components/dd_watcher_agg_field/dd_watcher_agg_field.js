@@ -3,7 +3,6 @@ import template from './dd_watcher_agg_field.html';
 class DdWatcherAggField {
   constructor() {
     this.title = 'FIELD';
-    this.selected = 'select a field';
   }
 
   handleChange() {
@@ -11,7 +10,8 @@ class DdWatcherAggField {
   }
 
   $onInit() {
-    this.options = this.aggFieldFields;
+    this.options = this.aggFieldNames;
+    this.selected = this.aggActiveFieldName;
   }
 }
 
@@ -20,7 +20,8 @@ function ddWatcherAggField() {
     template,
     restrict: 'E',
     scope: {
-      aggFieldFields: '<',
+      aggActiveFieldName: '@',
+      aggFieldNames: '<',
       aggFieldOnSelect: '&',
     },
     controller:  DdWatcherAggField,

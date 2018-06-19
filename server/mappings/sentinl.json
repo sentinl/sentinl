@@ -1,6 +1,10 @@
 {
   "sentinl-watcher": {
     "properties": {
+      "wizard": {
+        "type": "object",
+        "enabled": false
+      },
       "input": {
         "type": "object",
         "enabled": false

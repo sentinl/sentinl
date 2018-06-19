@@ -4,22 +4,17 @@ class DdWatcherAggOver {
   constructor() {
     this.title = 'OVER';
     this.options = ['all docs', 'top'];
-    this.top = {
-      enabled: false,
-      num_of_values: 3,
-      selected: '',
-      options: [],
-    };
   }
 
   $onInit() {
-    this.selected = this.aggOverOptions.type || 'all docs';
-    if (this.aggOverOptions === 'top') {
-      this.top.enabled = true;
-      this.top.num_of_values = this.aggOverOptions.n;
-      this.top.selected = this.aggOverOptions.field;
-    }
-    this.top.options = this.aggOverFields;
+    const {type, n, field} = this.aggOverOptions;
+    this.selected = type;
+    this.top = {
+      enabled: type === 'top',
+      n,
+      selected: field,
+      options: this.aggOverFields,
+    };
   }
 
   handleChange() {
@@ -35,7 +30,7 @@ class DdWatcherAggOver {
       this.aggOverOnSelect({
         over: {
           type: 'top',
-          n: this.top.num_of_values,
+          n: this.top.n,
           field: this.top.selected,
         }
       });

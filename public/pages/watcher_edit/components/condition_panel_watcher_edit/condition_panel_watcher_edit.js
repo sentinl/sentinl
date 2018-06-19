@@ -60,6 +60,42 @@ class ConditionPanelWatcherEdit {
     };
 
     // to-do: update editor when action and title updated
+
+    // this.$scope.$watch('conditionPanelWatcherEdit.watcher._source.wizard.chart_query_params', async () => {
+    //   try {
+    //     await this._fetchChartData();
+    //     this._reportStatusToThresholdWatcherEdit();
+    //   } catch (err) {
+    //     this._reportStatusToThresholdWatcherEdit({success: false});
+    //     this.notify.error(`fail: ${err.message}`);
+    //     this.log.error(`fail: ${err.message}`);
+    //   }
+
+    //   try {
+    //     this._updateChartRawDoc(this.chartQuery);
+    //   } catch (err) {
+    //     throw new Error(`update chart raw doc: ${err.message}`);
+    //   }
+    // }, true);
+  }
+
+  $onInit() {
+    if (!has(this.watcher._source, 'wizard.chart_query_params')) {
+      this.watcher._source.wizard = {
+        chart_query_params: {
+          queryType: 'count',
+          over: { type: 'all docs' },
+          last: { n: 15, unit: 'minutes' },
+          interval: { n: 1, unit: 'minutes' },
+          threshold: this._getThreshold(this.watcher),
+        }
+      };
+    }
+
+    this.indexesData = {
+      fieldNames: [],
+    };
+
     this.condition = {
       type: {
         handleSelect: (type) => {
@@ -86,7 +122,7 @@ class ConditionPanelWatcherEdit {
         handleSelect: (direction, n) => {
           this.log.debug('select threshold:', direction, n);
           this._updateChartQueryParamsThreshold(n, direction);
-          this._drawChartThreshold(this.activeChart, this.chartQueryParams.threshold.n);
+          this._drawChartThreshold(this.activeChart, this.watcher._source.wizard.chart_query_params.threshold.n);
         },
       },
       last: {
@@ -97,53 +133,31 @@ class ConditionPanelWatcherEdit {
       },
     };
 
-    this.$scope.$watch('conditionPanelWatcherEdit.chartQueryParams', async () => {
-      try {
-        await this._fetchChartData();
-        this._reportStatusToThresholdWatcherEdit();
-      } catch (err) {
-        this._reportStatusToThresholdWatcherEdit({success: false});
-        this.notify.error(`fail: ${err.message}`);
-        this.log.error(`fail: ${err.message}`);
-      }
-
-      try {
-        this._updateChartRawDoc(this.chartQuery);
-      } catch (err) {
-        throw new Error(`update chart raw doc: ${err.message}`);
-      }
-    }, true);
-  }
-
-  $onInit() {
-    this.chartQueryParams = {
-      queryType: 'count',
-      over: { type: 'all docs' },
-      last: { n: 15, unit: 'minutes' },
-      interval: { n: 1, unit: 'minutes' },
-      threshold: this._getThreshold(this.watcher),
-    };
-
-    this.$scope.$watch('conditionPanelWatcherEdit.watcher._source', () => {
+    this.$scope.$watch('conditionPanelWatcherEdit.watcher._source', async () => {
       if (has(this.watcher, '_source.trigger.schedule.later')) {
         this._updateChartQueryParamsInterval(this.watcher._source.trigger.schedule.later);
-        this.chartQueryParams.index = this.watcher._source.input.search.request.index;
+        this.watcher._source.wizard.chart_query_params.index = this.watcher._source.input.search.request.index;
 
         try {
           this._updateWatcherRawDoc(this.watcher);
+          this._updateChartRawDoc(this.chartQuery);
+          await this._getIndexFieldNames(this.watcher._source.input.search.request.index, this.indexesData);
+          await this._fetchChartData();
+          this._reportStatusToThresholdWatcherEdit();
         } catch (err) {
-          throw new Error(`update watcher raw doc: ${err.message}`);
+          if (err.message.match(/field doesn't support values of type: VALUE_NULL/)) {
+            this._warning(err.message);
+          } else {
+            this._error(`init watcher and wizard: ${err.message}`);
+          }
+          this._reportStatusToThresholdWatcherEdit({success: false});
         }
       }
     }, true);
 
-    this.indexesData = {
-      fieldNames: [],
-    };
-
-    this.$scope.$watch('conditionPanelWatcherEdit.watcher._source.input.search.request.index', () => {
-      this._getIndexFieldNames(this.watcher._source.input.search.request.index, this.indexesData);
-    }, true);
+    // this.$scope.$watch('conditionPanelWatcherEdit.watcher._source.input.search.request.index', () => {
+    //   this._getIndexFieldNames(this.watcher._source.input.search.request.index, this.indexesData);
+    // }, true);
 
     this.rawDoc = {
       config: (mode = 'json', maxLines = 30, minLines = 30) => {
@@ -179,6 +193,17 @@ class ConditionPanelWatcherEdit {
     };
   };
 
+  _warning(msg) {
+    msg = msg.replace(/fail/ig, '[warning]');
+    this.log.warn(msg);
+    this.notify.warning(msg);
+  }
+
+  _error(msg) {
+    this.log.error(msg);
+    this.notify.error(msg);
+  }
+
   async _getIndexFieldNames(index, indexesData) {
     function pushFieldIfNotExist(properties) {
       properties.forEach((field) => {
@@ -191,11 +216,6 @@ class ConditionPanelWatcherEdit {
         if (typeof mapping[i] === 'object' && mapping[i] !== null) {
           if (mapping[i].properties) {
             pushFieldIfNotExist(Object.keys(mapping[i].properties));
-            // properties.forEach((field) => {
-            //   if (indexesData.fieldNames.indexOf(field) === -1) {
-            //     indexesData.fieldNames.push(field);
-            //   }
-            // });
           }
           getFields(mapping[i]);
         }
@@ -204,10 +224,10 @@ class ConditionPanelWatcherEdit {
 
     try {
       const mapping = await this.watcherEditorEsService.getMapping(index);
+      indexesData.fieldName = [];
       getFields(mapping);
     } catch (err) {
-      this.log.error(`fail: ${err.message}`);
-      this.notify.error(`fail: ${err.message}`);
+      throw new Error(err.message);
     }
   };
 
@@ -342,7 +362,8 @@ class ConditionPanelWatcherEdit {
   */
   async _fetchChartData() {
     this._toggleConditionBuilderMetricAggOverField();
-    const params = pick(this.chartQueryParams, ['index', 'over', 'last', 'interval', 'field', 'threshold', 'queryType']);
+    const params = pick(this.watcher._source.wizard.chart_query_params,
+      ['index', 'over', 'last', 'interval', 'field', 'threshold', 'queryType']);
 
     if (this._isMetricAgg(params.queryType)) {
       params.metricAggType = params.queryType;
@@ -355,7 +376,7 @@ class ConditionPanelWatcherEdit {
         throw new Error(`${params.metricAggType}: ${err.message}`);
       }
     } else {
-      if (this.chartQueryParams.queryType === 'count') {
+      if (this.watcher._source.wizard.chart_query_params.queryType === 'count') {
         try {
           await this._queryCount(params);
         } catch (err) {
@@ -386,7 +407,7 @@ class ConditionPanelWatcherEdit {
   }
 
   _toggleConditionBuilderMetricAggOverField() {
-    if (this.chartQueryParams.queryType === 'count') {
+    if (this.watcher._source.wizard.chart_query_params.queryType === 'count') {
       this.condition.field.enabled = false;
     } else {
       this.condition.field.enabled = true;
@@ -407,7 +428,7 @@ class ConditionPanelWatcherEdit {
   _updateChartQueryParamsInterval(interval) {
     if (this.helper.isScheduleModeEvery(interval)) {
       interval = interval.split(' ');
-      this.chartQueryParams.interval = {
+      this.watcher._source.wizard.chart_query_params.interval = {
         n: +interval[1],
         unit: interval[2],
       };
@@ -415,23 +436,23 @@ class ConditionPanelWatcherEdit {
   }
 
   _updateChartQueryParamsOver(over) {
-    this.chartQueryParams.over = pick(over, ['type', 'n', 'field']);
+    this.watcher._source.wizard.chart_query_params.over = pick(over, ['type', 'n', 'field']);
   }
 
   _updateChartQueryParamsField(field) {
-    this.chartQueryParams.field = field;
+    this.watcher._source.wizard.chart_query_params.field = field;
   }
 
   _updateChartQueryParamsQueryType(type) {
-    this.chartQueryParams.queryType = type;
+    this.watcher._source.wizard.chart_query_params.queryType = type;
   }
 
   _updateChartQueryParamsLast(n, unit) {
-    this.chartQueryParams.last = { unit, n: +n };
+    this.watcher._source.wizard.chart_query_params.last = { unit, n: +n };
   }
 
   _updateChartQueryParamsThreshold(n, direction) {
-    this.chartQueryParams.threshold = { direction, n: +n };
+    this.watcher._source.wizard.chart_query_params.threshold = { direction, n: +n };
   }
 
   _isDateAggData(esResp) {
