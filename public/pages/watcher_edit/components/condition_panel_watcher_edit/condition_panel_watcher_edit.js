@@ -58,25 +58,6 @@ class ConditionPanelWatcherEdit {
       count: {},
       metric: ['average', 'min', 'max', 'sum'],
     };
-
-    // to-do: update editor when action and title updated
-
-    // this.$scope.$watch('conditionPanelWatcherEdit.watcher._source.wizard.chart_query_params', async () => {
-    //   try {
-    //     await this._fetchChartData();
-    //     this._reportStatusToThresholdWatcherEdit();
-    //   } catch (err) {
-    //     this._reportStatusToThresholdWatcherEdit({success: false});
-    //     this.notify.error(`fail: ${err.message}`);
-    //     this.log.error(`fail: ${err.message}`);
-    //   }
-
-    //   try {
-    //     this._updateChartRawDoc(this.chartQuery);
-    //   } catch (err) {
-    //     throw new Error(`update chart raw doc: ${err.message}`);
-    //   }
-    // }, true);
   }
 
   $onInit() {
@@ -154,10 +135,6 @@ class ConditionPanelWatcherEdit {
         }
       }
     }, true);
-
-    // this.$scope.$watch('conditionPanelWatcherEdit.watcher._source.input.search.request.index', () => {
-    //   this._getIndexFieldNames(this.watcher._source.input.search.request.index, this.indexesData);
-    // }, true);
 
     this.rawDoc = {
       config: (mode = 'json', maxLines = 30, minLines = 30) => {
