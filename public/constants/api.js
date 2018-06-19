@@ -10,5 +10,6 @@ export default {
   },
   ES: {
     ALL_INDEXES: `${base}/es/indexes`,
+    GET_MAPPING: `${base}/es/getmapping`,
   },
 };

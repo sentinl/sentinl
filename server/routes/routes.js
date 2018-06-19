@@ -209,4 +209,25 @@ export default function routes(server) {
       }
     }
   });
+
+  server.route({
+    method: 'POST',
+    path: '/api/sentinl/es/getmapping',
+    config: {
+      validate: {
+        payload: {
+          index: Joi.array().required(),
+        },
+      },
+    },
+    handler: async function (request, reply) {
+      const {index} = request.payload;
+      try {
+        const resp = await client.indices.getMapping({index});
+        return reply(resp).code(201);
+      } catch (err) {
+        return reply(Boom.serverUnavailable(err));
+      }
+    }
+  });
 };

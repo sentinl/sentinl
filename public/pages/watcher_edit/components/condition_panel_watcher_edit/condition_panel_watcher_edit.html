@@ -26,14 +26,14 @@
                   <li>
                     <dd-watcher-agg-field
                       ng-show="conditionPanelWatcherEdit.condition.field.enabled"
-                      agg-field-fields="conditionPanelWatcherEdit.allDocFields"
+                      agg-field-fields="conditionPanelWatcherEdit.indexesData.fieldNames"
                       agg-field-on-select="conditionPanelWatcherEdit.condition.field.handleSelect(field)"
                     ></dd-watcher-agg-field/>
                   </li>
                   <li>
                     <dd-watcher-agg-over
                       agg-over-options="conditionPanelWatcherEdit.chartQueryParams.over"
-                      agg-over-fields="conditionPanelWatcherEdit.allDocFields"
+                      agg-over-fields="conditionPanelWatcherEdit.indexesData.fieldNames"
                       agg-over-on-select="conditionPanelWatcherEdit.condition.over.handleSelect(over)"
                     ></dd-watcher-agg-over/>
                   </li>

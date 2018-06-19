@@ -24,10 +24,11 @@ class Chart {
 }
 
 class ConditionPanelWatcherEdit {
-  constructor($http, $scope, watcherEditorChartService, watcherHelper, createNotifier, sentinlLog) {
+  constructor($http, $scope, watcherEditorChartService, watcherEditorEsService, watcherHelper, createNotifier, sentinlLog) {
     this.$http = $http;
     this.$scope = $scope;
     this.watcherEditorChartService = watcherEditorChartService;
+    this.watcherEditorEsService = watcherEditorEsService;
     this.helper = watcherHelper;
     this.log = sentinlLog;
 
@@ -57,8 +58,6 @@ class ConditionPanelWatcherEdit {
       count: {},
       metric: ['average', 'min', 'max', 'sum'],
     };
-
-    this.allDocFields = ['animal', 'random']; // to-do: get fields from index docs
 
     // to-do: update editor when action and title updated
     this.condition = {
@@ -138,6 +137,14 @@ class ConditionPanelWatcherEdit {
       }
     }, true);
 
+    this.indexesData = {
+      fieldNames: [],
+    };
+
+    this.$scope.$watch('conditionPanelWatcherEdit.watcher._source.input.search.request.index', () => {
+      this._getIndexFieldNames(this.watcher._source.input.search.request.index, this.indexesData);
+    }, true);
+
     this.rawDoc = {
       config: (mode = 'json', maxLines = 30, minLines = 30) => {
         return {
@@ -170,6 +177,38 @@ class ConditionPanelWatcherEdit {
         },
       },
     };
+  };
+
+  async _getIndexFieldNames(index, indexesData) {
+    function pushFieldIfNotExist(properties) {
+      properties.forEach((field) => {
+        if (indexesData.fieldNames.indexOf(field) === -1) indexesData.fieldNames.push(field);
+      });
+    }
+
+    function getFields(mapping) {
+      for (let i in mapping) {
+        if (typeof mapping[i] === 'object' && mapping[i] !== null) {
+          if (mapping[i].properties) {
+            pushFieldIfNotExist(Object.keys(mapping[i].properties));
+            // properties.forEach((field) => {
+            //   if (indexesData.fieldNames.indexOf(field) === -1) {
+            //     indexesData.fieldNames.push(field);
+            //   }
+            // });
+          }
+          getFields(mapping[i]);
+        }
+      }
+    }
+
+    try {
+      const mapping = await this.watcherEditorEsService.getMapping(index);
+      getFields(mapping);
+    } catch (err) {
+      this.log.error(`fail: ${err.message}`);
+      this.notify.error(`fail: ${err.message}`);
+    }
   };
 
   _getThreshold(watcher) {
