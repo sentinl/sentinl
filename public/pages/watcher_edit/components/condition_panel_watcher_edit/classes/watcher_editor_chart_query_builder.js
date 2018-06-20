@@ -8,9 +8,8 @@ import WatcherEditorQueryBuilder from './watcher_editor_query_builder';
 */
 
 class WatcherEditorChartQueryBuilder extends WatcherEditorQueryBuilder {
-  constructor({timeFieldName = '@timestamp', timezoneName = 'Europe/Amsterdam'} = {}) {
-    super({timeFieldName, timezoneName});
-    this.timeFieldName = timeFieldName;
+  constructor({timezoneName = 'Europe/Amsterdam'} = {}) {
+    super({timezoneName});
     this.timezoneName = timezoneName;
   }
 
@@ -44,13 +43,25 @@ class WatcherEditorChartQueryBuilder extends WatcherEditorQueryBuilder {
   *     }
   *   }
   */
-  count({field = null, over = {type: 'all docs'}, last = {n: 15, unit: 'minutes'}, interval = {n: 1, unit: 'minutes'}}) {
-    const body = this._epochRange(last.n, last.unit, 0);
+  count({
+    field = null,
+    over = {type: 'all docs'},
+    last = {n: 15, unit: 'minutes'},
+    interval = {n: 1, unit: 'minutes'},
+    timeField = '@timestamp'} = {}
+  ) {
+    const body = this._epochRange({
+      n: last.n,
+      unit: last.unit,
+      bodySize: 0,
+      timeField,
+    });
 
     if (over.type === 'all docs') {
       body.aggs = this._dateAgg({
-        field: this.timeFieldName,
+        field: timeField,
         interval,
+        timeField,
       });
     } else {
       body.aggs = this._termsAgg({
@@ -58,8 +69,9 @@ class WatcherEditorChartQueryBuilder extends WatcherEditorQueryBuilder {
         size: over.n,
       });
       body.aggs.bucketAgg.aggs = this._dateAgg({
-        field: this.timeFieldName,
+        field: timeField,
         interval,
+        timeField,
       });
     }
 
@@ -103,13 +115,25 @@ class WatcherEditorChartQueryBuilder extends WatcherEditorQueryBuilder {
   *     }
   *   }
   */
-  average({field = null, over = {type: 'all docs'}, last = {n: 15, unit: 'minutes'}, interval = {n: 1, unit: 'minutes'}}) {
-    const body = this._epochRange(last.n, last.unit, 0);
+  average({
+    field = null,
+    over = {type: 'all docs'},
+    last = {n: 15, unit: 'minutes'},
+    interval = {n: 1, unit: 'minutes'},
+    timeField = '@timestamp'} = {}
+  ) {
+    const body = this._epochRange({
+      n: last.n,
+      unit: last.unit,
+      bodySize: 0,
+      timeField,
+    });
 
     if (over.type === 'all docs') {
       body.aggs = this._dateAgg({
-        field: this.timeFieldName,
+        field: timeField,
         interval,
+        timeField,
       });
       body.aggs.dateAgg.aggs = this._metricAggAvg(field);
     } else {
@@ -119,8 +143,9 @@ class WatcherEditorChartQueryBuilder extends WatcherEditorQueryBuilder {
       });
       body.aggs.bucketAgg.aggs = this._metricAggAvg(field);
       body.aggs.bucketAgg.aggs.dateAgg = this._dateAgg({
-        field: this.timeFieldName,
+        field: timeField,
         interval,
+        timeField,
       }).dateAgg;
       body.aggs.bucketAgg.aggs.dateAgg.aggs = this._metricAggAvg(field);
     }
@@ -165,13 +190,25 @@ class WatcherEditorChartQueryBuilder extends WatcherEditorQueryBuilder {
   *    }
   *  }
   */
-  sum({field = null, over = {type: 'all docs'}, last = {n: 15, unit: 'minutes'}, interval = {n: 1, unit: 'minutes'}}) {
-    const body = this._epochRange(last.n, last.unit, 0);
+  sum({
+    field = null,
+    over = {type: 'all docs'},
+    last = {n: 15, unit: 'minutes'},
+    interval = {n: 1, unit: 'minutes'},
+    timeField = '@timestamp'
+  } = {}) {
+    const body = this._epochRange({
+      n: last.n,
+      unit: last.unit,
+      bodySize: 0,
+      timeField,
+    });
 
     if (over.type === 'all docs') {
       body.aggs = this._dateAgg({
-        field: this.timeFieldName,
+        field: timeField,
         interval,
+        timeField,
       });
       body.aggs.dateAgg.aggs = this._metricAggSum(field);
     } else {
@@ -181,8 +218,9 @@ class WatcherEditorChartQueryBuilder extends WatcherEditorQueryBuilder {
       });
       body.aggs.bucketAgg.aggs = this._metricAggSum(field);
       body.aggs.bucketAgg.aggs.dateAgg = this._dateAgg({
-        field: this.timeFieldName,
+        field: timeField,
         interval,
+        timeField,
       }).dateAgg;
       body.aggs.bucketAgg.aggs.dateAgg.aggs = this._metricAggSum(field);
     }
@@ -227,13 +265,25 @@ class WatcherEditorChartQueryBuilder extends WatcherEditorQueryBuilder {
   *     }
   *   }
   */
-  min({field = null, over = {type: 'all docs'}, last = {n: 15, unit: 'minutes'}, interval = {n: 1, unit: 'minutes'}}) {
-    const body = this._epochRange(last.n, last.unit, 0);
+  min({
+    field = null,
+    over = {type: 'all docs'},
+    last = {n: 15, unit: 'minutes'},
+    interval = {n: 1, unit: 'minutes'},
+    timeField = '@timestamp'
+  } = {}) {
+    const body = this._epochRange({
+      n: last.n,
+      unit: last.unit,
+      bodySize: 0,
+      timeField,
+    });
 
     if (over.type === 'all docs') {
       body.aggs = this._dateAgg({
-        field: this.timeFieldName,
+        field: timeField,
         interval,
+        timeField,
       });
       body.aggs.dateAgg.aggs = this._metricAggMin(field);
     } else {
@@ -243,8 +293,9 @@ class WatcherEditorChartQueryBuilder extends WatcherEditorQueryBuilder {
       });
       body.aggs.bucketAgg.aggs = this._metricAggMin(field);
       body.aggs.bucketAgg.aggs.dateAgg = this._dateAgg({
-        field: this.timeFieldName,
+        field: timeField,
         interval,
+        timeField,
       }).dateAgg;
       body.aggs.bucketAgg.aggs.dateAgg.aggs = this._metricAggMin(field);
     }
@@ -289,13 +340,25 @@ class WatcherEditorChartQueryBuilder extends WatcherEditorQueryBuilder {
   *     }
   *   }
   */
-  max({field = null, over = {type: 'all docs'}, last = {n: 15, unit: 'minutes'}, interval = {n: 1, unit: 'minutes'}}) {
-    const body = this._epochRange(last.n, last.unit, 0);
+  max({
+    field = null,
+    over = {type: 'all docs'},
+    last = {n: 15, unit: 'minutes'},
+    interval = {n: 1, unit: 'minutes'},
+    timeField = '@timestamp'} = {}
+  ) {
+    const body = this._epochRange({
+      n: last.n,
+      unit: last.unit,
+      bodySize: 0,
+      timeField,
+    });
 
     if (over.type === 'all docs') {
       body.aggs = this._dateAgg({
-        field: this.timeFieldName,
+        field: timeField,
         interval,
+        timeField,
       });
       body.aggs.dateAgg.aggs = this._metricAggMax(field);
     } else {
@@ -305,8 +368,9 @@ class WatcherEditorChartQueryBuilder extends WatcherEditorQueryBuilder {
       });
       body.aggs.bucketAgg.aggs = this._metricAggMax(field);
       body.aggs.bucketAgg.aggs.dateAgg = this._dateAgg({
-        field: this.timeFieldName,
+        field: timeField,
         interval,
+        timeField,
       }).dateAgg;
       body.aggs.bucketAgg.aggs.dateAgg.aggs = this._metricAggMax(field);
     }

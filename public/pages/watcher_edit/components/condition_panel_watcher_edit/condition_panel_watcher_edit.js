@@ -2,7 +2,7 @@ import './condition_panel_watcher_edit.less';
 import template from './condition_panel_watcher_edit.html';
 
 import moment from 'moment';
-import {size, has, pick, includes, cloneDeep} from 'lodash';
+import {size, has, pick, includes, union} from 'lodash';
 import WatcherEditorQueryBuilder from './classes/watcher_editor_query_builder';
 import WatcherEditorChartQueryBuilder from './classes/watcher_editor_chart_query_builder';
 import WatcherEditorConditionBuilder from './classes/watcher_editor_condition_builder';
@@ -38,8 +38,8 @@ class ConditionPanelWatcherEdit {
       location: this.locationName,
     });
 
-    this.queryBuilder = new WatcherEditorQueryBuilder({timeFieldName: '@timestamp', timezoneName: 'Europe/Amsterdam'}); // to-do: get timestamp and timezone from config
-    this.chartQueryBuilder = new WatcherEditorChartQueryBuilder({timeFieldName: '@timestamp', timezoneName: 'Europe/Amsterdam'}); // to-do: get timestamp and timezone from config
+    this.queryBuilder = new WatcherEditorQueryBuilder({timezoneName: 'Europe/Amsterdam'}); // to-do: get timestamp and timezone from config
+    this.chartQueryBuilder = new WatcherEditorChartQueryBuilder({timezoneName: 'Europe/Amsterdam'}); // to-do: get timestamp and timezone from config
     this.conditionBuilder = new WatcherEditorConditionBuilder();
 
     this.messages = {
@@ -64,6 +64,7 @@ class ConditionPanelWatcherEdit {
     if (!has(this.watcher._source, 'wizard.chart_query_params')) {
       this.watcher._source.wizard = {
         chart_query_params: {
+          timeField: '@timestamp',
           queryType: 'count',
           over: { type: 'all docs' },
           last: { n: 15, unit: 'minutes' },
@@ -85,16 +86,16 @@ class ConditionPanelWatcherEdit {
         },
       },
       field: {
-        enabled: false,
-        handleSelect: (field) => {
+        aggEnabled: false,
+        handleSelect: (field, timeField) => {
           this.log.debug('select field:', field);
-          this._updateChartQueryParamsField(field);
+          this._updateChartQueryParamsField(field, timeField);
         },
       },
       over: {
         handleSelect: (over) => {
           this.log.debug('select over:', over);
-          if (over.type !== 'top' || !!over.n && !!over.field.length) {
+          if (over.type !== 'top' || !!over.n && (over.field && !!over.field.length)) {
             this._updateChartQueryParamsOver(over);
           }
         },
@@ -136,10 +137,12 @@ class ConditionPanelWatcherEdit {
     }, true);
 
     this.$scope.$watch('conditionPanelWatcherEdit.watcher._source.wizard.chart_query_params.field', async () => {
-      try {
-        await this._getIndexFieldNames(this.watcher._source.input.search.request.index, this.indexesData);
-      } catch (err) {
-        this._error(`init watcher agg field: ${err.message}`);
+      if (has(this.watcher, '_source.input.search.request.index')) {
+        try {
+          this.indexesData.fieldNames = await this._getIndexFieldNames(this.watcher._source.input.search.request.index);
+        } catch (err) {
+          this._error(`init watcher agg field: ${err.message}`);
+        }
       }
     });
 
@@ -188,30 +191,24 @@ class ConditionPanelWatcherEdit {
     this.notify.error(msg);
   }
 
-  async _getIndexFieldNames(index, indexesData) {
-    function pushFieldIfNotExist(properties) {
-      properties.forEach((field) => {
-        if (indexesData.fieldNames.indexOf(field) === -1) indexesData.fieldNames.push(field);
-      });
-    }
-
-    function getFields(mapping) {
+  async _getIndexFieldNames(index) {
+    let fieldNames = [];
+    function getFieldNames(mapping) {
       for (let i in mapping) {
         if (typeof mapping[i] === 'object' && mapping[i] !== null) {
           if (mapping[i].properties) {
-            pushFieldIfNotExist(Object.keys(mapping[i].properties));
+            fieldNames = union(fieldNames, Object.keys(mapping[i].properties));
           }
-          getFields(mapping[i]);
+          getFieldNames(mapping[i]);
         }
       }
     }
 
     try {
       const mapping = await this.watcherEditorEsService.getMapping(index);
-      indexesData.fieldNames = [];
-      getFields(mapping);
+      getFieldNames(mapping);
+      return fieldNames;
     } catch (err) {
-      indexesData.fieldNames = [];
       throw new Error(err.message);
     }
   };
@@ -286,27 +283,27 @@ class ConditionPanelWatcherEdit {
     }
   }
 
-  _buildInputQuery({ over, last, interval, field, queryType }) {
+  _buildInputQuery({ over, last, interval, field, queryType, timeField }) {
     let body;
     switch (queryType) {
       case 'average':
-        body = this.queryBuilder.average({ over, last, interval, field });
+        body = this.queryBuilder.average({ over, last, interval, field, timeField });
         this.onQueryChange({ body });
         break;
       case 'sum':
-        body = this.queryBuilder.sum({ over, last, interval, field });
+        body = this.queryBuilder.sum({ over, last, interval, field, timeField });
         this.onQueryChange({ body });
         break;
       case 'min':
-        body = this.queryBuilder.min({ over, last, interval, field });
+        body = this.queryBuilder.min({ over, last, interval, field, timeField });
         this.onQueryChange({ body });
         break;
       case 'max':
-        body = this.queryBuilder.max({ over, last, interval, field });
+        body = this.queryBuilder.max({ over, last, interval, field, timeField });
         this.onQueryChange({ body });
         break;
       case 'count':
-        body = this.queryBuilder.count({ over, last, interval, field });
+        body = this.queryBuilder.count({ over, last, interval, field, timeField });
         this.onQueryChange({ body });
         break;
       default:
@@ -348,7 +345,7 @@ class ConditionPanelWatcherEdit {
   async _fetchChartData() {
     this._toggleConditionBuilderMetricAggOverField();
     const params = pick(this.watcher._source.wizard.chart_query_params,
-      ['index', 'over', 'last', 'interval', 'field', 'threshold', 'queryType']);
+      ['index', 'over', 'last', 'interval', 'field', 'threshold', 'queryType', 'timeField']);
 
     if (this._isMetricAgg(params.queryType)) {
       params.metricAggType = params.queryType;
@@ -393,9 +390,9 @@ class ConditionPanelWatcherEdit {
 
   _toggleConditionBuilderMetricAggOverField() {
     if (this.watcher._source.wizard.chart_query_params.queryType === 'count') {
-      this.condition.field.enabled = false;
+      this.condition.field.aggEnabled = false;
     } else {
-      this.condition.field.enabled = true;
+      this.condition.field.aggEnabled = true;
     }
   }
 
@@ -424,12 +421,16 @@ class ConditionPanelWatcherEdit {
     this.watcher._source.wizard.chart_query_params.over = pick(over, ['type', 'n', 'field']);
   }
 
-  _updateChartQueryParamsField(field) {
+  _updateChartQueryParamsField(field, timeField) {
     this.watcher._source.wizard.chart_query_params.field = field;
+    this.watcher._source.wizard.chart_query_params.timeField = timeField;
   }
 
   _updateChartQueryParamsQueryType(type) {
     this.watcher._source.wizard.chart_query_params.queryType = type;
+    if (type === 'count') {
+      delete this.watcher._source.wizard.chart_query_params.field;
+    }
   }
 
   _updateChartQueryParamsLast(n, unit) {
@@ -451,23 +452,23 @@ class ConditionPanelWatcherEdit {
   /**
   * Get matric aggregation (sum, min, max, average) of field
   */
-  async _queryMetricAgg({ index, over, last, interval, field, threshold, metricAggType }) {
+  async _queryMetricAgg({index, over, last, interval, field, threshold, metricAggType, timeField}) {
     this._onProgress();
 
     try {
       let resp;
       try {
         if (metricAggType === 'average') {
-          this.chartQuery = this.chartQueryBuilder.average({over, last, interval, field});
+          this.chartQuery = this.chartQueryBuilder.average({over, last, interval, field, timeField});
           resp = await this.watcherEditorChartService.metricAggAverage({index, query: JSON.stringify(this.chartQuery)});
         } else if (metricAggType === 'sum') {
-          this.chartQuery = this.chartQueryBuilder.sum({over, last, interval, field});
+          this.chartQuery = this.chartQueryBuilder.sum({over, last, interval, field, timeField});
           resp = await this.watcherEditorChartService.metricAggSum({index, query: JSON.stringify(this.chartQuery)});
         } else if (metricAggType === 'min') {
-          this.chartQuery = this.chartQueryBuilder.min({over, last, interval, field});
+          this.chartQuery = this.chartQueryBuilder.min({over, last, interval, field, timeField});
           resp = await this.watcherEditorChartService.metricAggMin({index, query: JSON.stringify(this.chartQuery)});
         } else if (metricAggType === 'max') {
-          this.chartQuery = this.chartQueryBuilder.max({over, last, interval, field});
+          this.chartQuery = this.chartQueryBuilder.max({over, last, interval, field, timeField});
           resp = await this.watcherEditorChartService.metricAggMax({index, query: JSON.stringify(this.chartQuery)});
         }
       } catch (err) {
@@ -506,13 +507,13 @@ class ConditionPanelWatcherEdit {
   /**
   * Count documents
   */
-  async _queryCount({ index, over, last, interval, field, threshold }) {
+  async _queryCount({ index, over, last, interval, field, threshold, timeField }) {
     this._onProgress();
 
     try {
       let resp;
       try {
-        this.chartQuery = this.chartQueryBuilder.count({over, last, interval, field});
+        this.chartQuery = this.chartQueryBuilder.count({over, last, interval, field, timeField});
         resp = await this.watcherEditorChartService.count({index, query: JSON.stringify(this.chartQuery)});
       } catch (err) {
         throw new Error(`query ES: ${err.message}`);

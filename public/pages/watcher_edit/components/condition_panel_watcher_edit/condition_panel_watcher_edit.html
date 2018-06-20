@@ -25,10 +25,11 @@
                   </li>
                   <li>
                     <dd-watcher-agg-field
-                      ng-show="conditionPanelWatcherEdit.condition.field.enabled"
-                      agg-field-names="conditionPanelWatcherEdit.indexesData.fieldNames"
-                      agg-active-field-name="{{conditionPanelWatcherEdit.watcher._source.wizard.chart_query_params.field}}"
-                      agg-field-on-select="conditionPanelWatcherEdit.condition.field.handleSelect(field)"
+                      agg-enabled="conditionPanelWatcherEdit.condition.field.aggEnabled"
+                      active-field="{{conditionPanelWatcherEdit.watcher._source.wizard.chart_query_params.field}}"
+                      field-names="conditionPanelWatcherEdit.indexesData.fieldNames"
+                      time-field="{{conditionPanelWatcherEdit.watcher._source.wizard.chart_query_params.timeField}}"
+                      on-select-field="conditionPanelWatcherEdit.condition.field.handleSelect(field, timeField)"
                     ></dd-watcher-agg-field/>
                   </li>
                   <li>

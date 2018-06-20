@@ -1,4 +1,5 @@
 import template from './dd_watcher_agg_field.html';
+// import {uniq} from 'lodash';
 
 class DdWatcherAggField {
   constructor() {
@@ -6,13 +7,35 @@ class DdWatcherAggField {
   }
 
   handleChange() {
-    this.aggFieldOnSelect({field: this.selected});
+    this.onSelectField({
+      field: this.activeField,
+      timeField: this.timeField,
+    });
   }
 
-  $onInit() {
-    // this.options = this.aggFieldNames;
-    this.selected = this.aggActiveFieldName;
+  $onInit() {}
+
+  _shortTitle(fieldName) {
+    if (fieldName && fieldName.length > 7) {
+      return fieldName.substring(0, 6) + '...';
+    }
+    return fieldName || '';
   }
+
+  get activeFieldTitle() {
+    return this._shortTitle(this.activeField);
+  }
+
+  get timeFieldTitle() {
+    return this._shortTitle(this.timeField);
+  }
+
+  // get deduplicatedFieldNames() {
+  //   if (this.fieldNames) {
+  //     return uniq(this.fieldNames);
+  //   }
+  //   return [];
+  // }
 }
 
 function ddWatcherAggField() {
@@ -20,9 +43,11 @@ function ddWatcherAggField() {
     template,
     restrict: 'E',
     scope: {
-      aggActiveFieldName: '@',
-      aggFieldNames: '<',
-      aggFieldOnSelect: '&',
+      aggEnabled: '=',
+      activeField: '@',
+      timeField: '@',
+      fieldNames: '<',
+      onSelectField: '&',
     },
     controller:  DdWatcherAggField,
     controllerAs: 'ddWatcherAggField',

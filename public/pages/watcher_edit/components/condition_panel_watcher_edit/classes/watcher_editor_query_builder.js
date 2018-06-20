@@ -6,8 +6,7 @@ import 'moment-timezone';
 */
 
 class WatcherEditorQueryBuilder {
-  constructor({timeFieldName = '@timestamp', timezoneName = 'Europe/Amsterdam'} = {}) {
-    this.timeFieldName = timeFieldName;
+  constructor({timezoneName = 'Europe/Amsterdam'} = {}) {
     this.timezoneName = timezoneName;
   }
 
@@ -53,8 +52,18 @@ class WatcherEditorQueryBuilder {
        }
      }
   */
-  count({field = null, over = {type: 'all docs'}, last = {n: 15, unit: 'minutes'}, interval = {n: 1, unit: 'minutes'}} = {}) {
-    const body = this._epochRange(last.n, last.unit);
+  count({
+    field = null,
+    over = {type: 'all docs'},
+    last = {n: 15, unit: 'minutes'},
+    interval = {n: 1, unit: 'minutes'},
+    timeField = '@timestamp'} = {}
+  ) {
+    const body = this._epochRange({
+      n: last.n,
+      unit: last.unit,
+      timeField,
+    });
 
     if (over.type === 'all docs') {
       return body;
@@ -123,8 +132,18 @@ class WatcherEditorQueryBuilder {
       }
     }
   */
-  average({field = null, over = {type: 'all docs'}, last = {n: 15, unit: 'minutes'}, interval = {n: 1, unit: 'minutes'}} = {}) {
-    const body = this._epochRange(last.n, last.unit);
+  average({
+    field = null,
+    over = {type: 'all docs'},
+    last = {n: 15, unit: 'minutes'},
+    interval = {n: 1, unit: 'minutes'},
+    timeField = '@timestamp'} = {}
+  ) {
+    const body = this._epochRange({
+      n: last.n,
+      unit: last.unit,
+      timeField,
+    });
 
     if (over.type === 'all docs') {
       body.aggs = this._metricAggAvg(field);
@@ -195,8 +214,18 @@ class WatcherEditorQueryBuilder {
     }
   }
   */
-  sum({field = null, over = {type: 'all docs'}, last = {n: 15, unit: 'minutes'}, interval = {n: 1, unit: 'minutes'}} = {}) {
-    const body = this._epochRange(last.n, last.unit);
+  sum({
+    field = null,
+    over = {type: 'all docs'},
+    last = {n: 15, unit: 'minutes'},
+    interval = {n: 1, unit: 'minutes'},
+    timeField = '@timestamp'} = {}
+  ) {
+    const body = this._epochRange({
+      n: last.n,
+      unit: last.unit,
+      timeField,
+    });
 
     if (over.type === 'all docs') {
       body.aggs = this._metricAggSum(field);
@@ -267,8 +296,18 @@ class WatcherEditorQueryBuilder {
     }
   }
   */
-  min({field = null, over = {type: 'all docs'}, last = {n: 15, unit: 'minutes'}, interval = {n: 1, unit: 'minutes'}} = {}) {
-    const body = this._epochRange(last.n, last.unit);
+  min({
+    field = null,
+    over = {type: 'all docs'},
+    last = {n: 15, unit: 'minutes'},
+    interval = {n: 1, unit: 'minutes'},
+    timeField = '@timestamp'} = {}
+  ) {
+    const body = this._epochRange({
+      n: last.n,
+      unit: last.unit,
+      timeField,
+    });
 
     if (over.type === 'all docs') {
       body.aggs = this._metricAggMin(field);
@@ -339,8 +378,18 @@ class WatcherEditorQueryBuilder {
     }
   }
   */
-  max({field = null, over = {type: 'all docs'}, last = {n: 15, unit: 'minutes'}, interval = {n: 1, unit: 'minutes'}} = {}) {
-    const body = this._epochRange(last.n, last.unit);
+  max({
+    field = null,
+    over = {type: 'all docs'},
+    last = {n: 15, unit: 'minutes'},
+    interval = {n: 1, unit: 'minutes'},
+    timeField = '@timestamp'} = {}
+  ) {
+    const body = this._epochRange({
+      n: last.n,
+      unit: last.unit,
+      timeField,
+    });
 
     if (over.type === 'all docs') {
       body.aggs = this._metricAggMax(field);
@@ -355,10 +404,11 @@ class WatcherEditorQueryBuilder {
     return body;
   }
 
-  _epochRange(n, unit, bodySize) {
+  _epochRange({n, unit, bodySize, timeField}) {
     const body = this._range({
       gte: this._epochTimeNUnitsAgo(n, unit),
       lte: this._epochTimeNow(),
+      timeField,
     });
 
     if (bodySize) {
@@ -415,12 +465,12 @@ class WatcherEditorQueryBuilder {
     };
   }
 
-  _dateAgg({field, interval}) {
+  _dateAgg({field, interval, timeField}) {
     interval = interval.n + interval.unit.substring(0, 1);
     return {
       dateAgg: {
         date_histogram: {
-          field: this.timeFieldName,
+          field: timeField,
           time_zone: this.timezoneName,
           interval,
           min_doc_count: 1,
@@ -447,13 +497,13 @@ class WatcherEditorQueryBuilder {
     };
   }
 
-  _range({gte, lte, format = 'epoch_millis'}) {
+  _range({gte, lte, format = 'epoch_millis', timeField}) {
     return {
       query: {
         bool: {
           filter: {
             range: {
-              [this.timeFieldName]: {
+              [timeField]: {
                 gte,
                 lte,
                 format,

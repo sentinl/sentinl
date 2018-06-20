@@ -1,6 +1,6 @@
 <form name="ddWatcherAggField.form" ng-model-options="{ getterSetter: true }" novalidate>
   <a pop-over pop-over-title="{{ddWatcherAggField.title}}">
-    <strong class="pop-over-btn-text">{{ddWatcherAggField.title}}</strong> {{ddWatcherAggField.selected}}
+    <strong class="pop-over-btn-text">{{ddWatcherAggField.title}}</strong> {{ddWatcherAggField.activeFieldTitle}} {{ddWatcherAggField.timeFieldTitle}}
   </a>
   <div ng-hide="true" class="pop-over-content">
     <div class="row">
@@ -8,8 +8,18 @@
         <div class="form-group">
           <select
             class="form-control condition-select"
-            ng-model="ddWatcherAggField.selected"
-            ng-options="o as o for o in ddWatcherAggField.aggFieldNames"
+            ng-show="ddWatcherAggField.aggEnabled"
+            ng-model="ddWatcherAggField.activeField"
+            ng-options="o as o for o in ddWatcherAggField.fieldNames"
+            ng-change="ddWatcherAggField.handleChange()"
+          ></select>
+        </div>
+        <div class="form-group">
+          <p>Time</p>
+          <select
+            class="form-control condition-select"
+            ng-model="ddWatcherAggField.timeField"
+            ng-options="o as o for o in ddWatcherAggField.fieldNames"
             ng-change="ddWatcherAggField.handleChange()"
           ></select>
         </div>
