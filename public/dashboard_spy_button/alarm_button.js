@@ -105,19 +105,19 @@ const dashboardSpyButton = function ($scope, config) {
                   let diff = new Date(end - start).getTime() / 1000; // UTC timestamp in seconds
                   let timeArray = getUTCArray(diff,timeFractions);
                   let largestUnit = 0;
-                  for(let i = 0; i < timeArray.length; ++i) {
+                  for (let i = 0; i < timeArray.length; ++i) {
                     //[s,min,hour,day,week] == input array [60,60,24,7]
                     largestUnit = i;
-                    if(timeArray[i] !== 0) {
+                    if (timeArray[i] !== 0) {
                       break;
                     }
                   }
                   let relativeTime = timeArray[largestUnit];// works as start time in the right unit
                   if (largestUnit <= timeArray.length) {
-                    for(let k = largestUnit + 1; k < timeArray.length; ++k) {
+                    for (let k = largestUnit + 1; k < timeArray.length; ++k) {
                       let timeSize = 1;
-                      if(timeArray[k] !== 0) {
-                        for(let g = k; g > largestUnit; --g) {
+                      if (timeArray[k] !== 0) {
+                        for (let g = k; g > largestUnit; --g) {
                           timeSize *= timeFractions[g - 1];
                         }
                       }
