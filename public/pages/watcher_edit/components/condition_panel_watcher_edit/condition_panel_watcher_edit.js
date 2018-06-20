@@ -24,12 +24,13 @@ class Chart {
 }
 
 class ConditionPanelWatcherEdit {
-  constructor($http, $scope, watcherEditorChartService, watcherEditorEsService, watcherHelper, createNotifier, sentinlLog) {
+  constructor($http, $scope, watcherEditorChartService, watcherEditorEsService, watcherHelper, createNotifier, sentinlLog, ServerConfig) {
     this.$http = $http;
     this.$scope = $scope;
     this.watcherEditorChartService = watcherEditorChartService;
     this.watcherEditorEsService = watcherEditorEsService;
     this.helper = watcherHelper;
+    this.serverConfig = ServerConfig;
     this.log = sentinlLog;
 
     this.locationName = 'ConditionPanelWatcherEdit';
@@ -37,10 +38,6 @@ class ConditionPanelWatcherEdit {
     this.notify = createNotifier({
       location: this.locationName,
     });
-
-    this.queryBuilder = new WatcherEditorQueryBuilder({timezoneName: 'Europe/Amsterdam'}); // to-do: get timestamp and timezone from config
-    this.chartQueryBuilder = new WatcherEditorChartQueryBuilder({timezoneName: 'Europe/Amsterdam'}); // to-do: get timestamp and timezone from config
-    this.conditionBuilder = new WatcherEditorConditionBuilder();
 
     this.messages = {
       nodata: 'the selected condition does not return any data',
@@ -60,7 +57,7 @@ class ConditionPanelWatcherEdit {
     };
   }
 
-  $onInit() {
+  async $onInit() {
     if (!has(this.watcher._source, 'wizard.chart_query_params')) {
       this.watcher._source.wizard = {
         chart_query_params: {
@@ -115,37 +112,6 @@ class ConditionPanelWatcherEdit {
       },
     };
 
-    this.$scope.$watch('conditionPanelWatcherEdit.watcher._source', async () => {
-      if (has(this.watcher, '_source.trigger.schedule.later')) {
-        this._updateChartQueryParamsInterval(this.watcher._source.trigger.schedule.later);
-        this.watcher._source.wizard.chart_query_params.index = this.watcher._source.input.search.request.index;
-
-        try {
-          this._updateWatcherRawDoc(this.watcher);
-          this._updateChartRawDoc(this.chartQuery);
-          await this._fetchChartData();
-          this._reportStatusToThresholdWatcherEdit();
-        } catch (err) {
-          if (err.message.match(/field doesn't support values of type: VALUE_NULL/)) {
-            this._warning(err.message);
-          } else {
-            this._error(`init watcher and wizard: ${err.message}`);
-          }
-          this._reportStatusToThresholdWatcherEdit({success: false});
-        }
-      }
-    }, true);
-
-    this.$scope.$watch('conditionPanelWatcherEdit.watcher._source.wizard.chart_query_params.field', async () => {
-      if (has(this.watcher, '_source.input.search.request.index')) {
-        try {
-          this.indexesData.fieldNames = await this._getIndexFieldNames(this.watcher._source.input.search.request.index);
-        } catch (err) {
-          this._error(`init watcher agg field: ${err.message}`);
-        }
-      }
-    });
-
     this.rawDoc = {
       config: (mode = 'json', maxLines = 30, minLines = 30) => {
         return {
@@ -178,6 +144,42 @@ class ConditionPanelWatcherEdit {
         },
       },
     };
+
+    const config = await this.serverConfig.get();
+    this.queryBuilder = new WatcherEditorQueryBuilder({timezoneName: config.data.es.timezone});
+    this.chartQueryBuilder = new WatcherEditorChartQueryBuilder({timezoneName: config.data.es.timezone});
+    this.conditionBuilder = new WatcherEditorConditionBuilder();
+
+    this.$scope.$watch('conditionPanelWatcherEdit.watcher._source', async () => {
+      if (has(this.watcher, '_source.trigger.schedule.later')) {
+        this._updateChartQueryParamsInterval(this.watcher._source.trigger.schedule.later);
+        this.watcher._source.wizard.chart_query_params.index = this.watcher._source.input.search.request.index;
+
+        try {
+          this._updateWatcherRawDoc(this.watcher);
+          this._updateChartRawDoc(this.chartQuery);
+          await this._fetchChartData();
+          this._reportStatusToThresholdWatcherEdit();
+        } catch (err) {
+          if (err.message.match(/field doesn't support values of type: VALUE_NULL/)) {
+            this._warning(err.message);
+          } else {
+            this._error(`init watcher and wizard: ${err.message}`);
+          }
+          this._reportStatusToThresholdWatcherEdit({success: false});
+        }
+      }
+    }, true);
+
+    this.$scope.$watch('conditionPanelWatcherEdit.watcher._source.wizard.chart_query_params.field', async () => {
+      if (has(this.watcher, '_source.input.search.request.index')) {
+        try {
+          this.indexesData.fieldNames = await this._getIndexFieldNames(this.watcher._source.input.search.request.index);
+        } catch (err) {
+          this._error(`init watcher agg field: ${err.message}`);
+        }
+      }
+    });
   };
 
   _warning(msg) {
