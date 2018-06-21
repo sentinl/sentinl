@@ -160,6 +160,7 @@ export default class WatcherHandler {
   * @return {object} null or warning message
   */
   _executeCondition(payload, condition, isAnomaly = false, isRange = false) {
+    this.log.debug(`condition: ${JSON.stringify(condition, null, 2)}`);
     if (condition.never) {
       throw new Error('warning, action execution is disabled');
     }
@@ -168,7 +169,7 @@ export default class WatcherHandler {
     if (has(condition, 'script.script')) {
       try {
         if (!eval(condition.script.script)) { // eslint-disable-line no-eval
-          return new WarningAndLog(this.log, 'no data was found that match the used "script" conditions');
+          return new WarningAndLog(this.log, 'no data satisfy "script" condition');
         }
       } catch (err) {
         throw new ErrorAndLog(this.log, err, `fail to apply condition "script": ${err.message}`);
@@ -179,7 +180,7 @@ export default class WatcherHandler {
     if (condition.compare) {
       try {
         if (!compare.valid(payload, condition)) {
-          return new WarningAndLog(this.log, 'no data was found that match the used "compare" conditions');
+          return new WarningAndLog(this.log, 'no data satisfy "compare" condition');
         }
       } catch (err) {
         throw new ErrorAndLog(this.log, err, 'fail to apply condition "compare"');
@@ -190,7 +191,7 @@ export default class WatcherHandler {
     if (condition.array_compare) {
       try {
         if (!compareArray.valid(payload, condition)) {
-          return new WarningAndLog(this.log, 'no data was found that match the used "array compare" condition');
+          return new WarningAndLog(this.log, 'no data satisfy "array compare" condition');
         }
       } catch (err) {
         throw new ErrorAndLog(this.log, err, `fail to apply condition "array compare": ${err.message}`);
@@ -226,6 +227,7 @@ export default class WatcherHandler {
   * @return {object} null or warning message
   */
   async _executeTransform(payload, transform, method) {
+    this.log.debug(`transform: ${JSON.stringify(transform, null, 2)}`);
     const bulkTransform = async (link) => {
       // validate JS script in transform
       if (has(link, 'script.script')) {
@@ -297,6 +299,7 @@ export default class WatcherHandler {
 
     try {
       payload = await this.search(request, method); // data from Elasticsearch
+      this.log.debug(`payload: ${JSON.stringify(payload, null, 2)}`);
     } catch (err) {
       throw err;
     }
@@ -336,6 +339,45 @@ export default class WatcherHandler {
     return new SuccessAndLog(this.log, 'successfuly executed');
   }
 
+  _checkWatcher(task) {
+    this.log.info('executing');
+
+    let sirenFederateAvailable = false;
+    try {
+      const elasticsearchPlugins = this.server.config().get('investigate_core.clusterplugins');
+      if (elasticsearchPlugins && (elasticsearchPlugins.indexOf('siren-vanguard') > -1 ||
+          elasticsearchPlugins.indexOf('siren-federate') > -1)) {
+        sirenFederateAvailable = true;
+      }
+    } catch (err) {
+      this.log.warning('"elasticsearch.plugins" not available when running from kibana');
+    }
+
+    let method = 'search';
+    if (sirenFederateAvailable) {
+      for (let candidate of ['investigate_search', 'kibi_search', 'vanguard_search', 'search']) {
+        if (this.client[candidate]) {
+          method = candidate;
+          break;
+        }
+      }
+    }
+
+    const actions = this.getActions(task._source.actions);
+    let request = has(task._source, 'input.search.request') ? task._source.input.search.request : undefined;
+    let condition = size(task._source.condition) ? task._source.condition : undefined;
+    let transform = task._source.transform ? task._source.transform : undefined;
+
+    if (!request) {
+      throw new Error('search request is malformed');
+    }
+    if (!condition) {
+      throw new Error('condition is malformed');
+    }
+
+    return {method, request, condition, transform, actions};
+  }
+
   /**
   * Execute watcher.
   *
@@ -343,44 +385,9 @@ export default class WatcherHandler {
   */
   async execute(task) {
     this.log = new Log(this.config.app_name, this.server, `watcher ${task._id}`);
-
     if (!isEmpty(this.getActions(task._source.actions))) {
-      this.log.info('executing');
-
-      let sirenFederateAvailable = false;
       try {
-        const elasticsearchPlugins = this.server.config().get('investigate_core.clusterplugins');
-        if (elasticsearchPlugins && (elasticsearchPlugins.indexOf('siren-vanguard') > -1 ||
-            elasticsearchPlugins.indexOf('siren-federate') > -1)) {
-          sirenFederateAvailable = true;
-        }
-      } catch (err) {
-        this.log.warning('"elasticsearch.plugins" not available when running from kibana');
-      }
-
-      const actions = this.getActions(task._source.actions);
-      let request = has(task._source, 'input.search.request') ? task._source.input.search.request : undefined;
-      let condition = size(task._source.condition) ? task._source.condition : undefined;
-      let transform = task._source.transform ? task._source.transform : undefined;
-
-      if (!request) {
-        throw new Error('search request is malformed');
-      }
-      if (!condition) {
-        throw new Error('condition is malformed');
-      }
-
-      let method = 'search';
-      if (sirenFederateAvailable) {
-        for (let candidate of ['investigate_search', 'kibi_search', 'vanguard_search', 'search']) {
-          if (this.client[candidate]) {
-            method = candidate;
-            break;
-          }
-        }
-      }
-
-      try {
+        const {method, request, condition, transform, actions} = this._checkWatcher(task);
         if (this.config.settings.authentication.impersonate) {
           this.client = await this.getImpersonatedClient(task._id);
         }
@@ -389,6 +396,7 @@ export default class WatcherHandler {
         throw new ErrorAndLog(this.log, err, `fail to execute watcher: ${err.message}`);
       }
     }
+    return new WarningAndLog(this.log, 'no actions found');
   }
 
   /**

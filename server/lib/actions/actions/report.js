@@ -28,7 +28,7 @@ class Authenticator {
       await page.click('.global-nav-link--close');
     } catch (err) {
       await browser.close();
-      throw new Error(`fail to authenticate via Search Guard, user: ${user}, ${err.message}`);
+      throw new Error(`fail to authenticate via Search Guard, user: ${user}: ${err.message}`);
     }
   }
 

@@ -21,6 +21,7 @@ import { has, forEach, difference, map, keys, isObject, isEmpty, assign } from '
 import later from 'later';
 import getConfiguration from './get_configuration';
 import WatcherHandler from './watcher_handler';
+import WatcherWizardHandler from './watcher_wizard_handler';
 import Log from './log';
 
 /**
@@ -32,6 +33,7 @@ export default function Scheduler(server) {
   const log = new Log(config.app_name, server, 'scheduler');
 
   let watcherHandler;
+  let watcherWizardHandler;
 
   /**
   * Remove unused watchers watcher.
@@ -70,7 +72,12 @@ export default function Scheduler(server) {
     }
 
     try {
-      const resp = await watcherHandler.execute(task);
+      let resp;
+      if (task._source.wizard) {
+        resp = await watcherWizardHandler.execute(task);
+      } else {
+        resp = await watcherHandler.execute(task);
+      }
       if (!resp.ok) {
         log.error(`${prefix}: fail to execute`, resp);
       }
@@ -126,6 +133,7 @@ export default function Scheduler(server) {
     }
 
     watcherHandler = new WatcherHandler(server);
+    watcherWizardHandler = new WatcherWizardHandler(server);
 
     try {
       let resp = await watcherHandler.getCount();
