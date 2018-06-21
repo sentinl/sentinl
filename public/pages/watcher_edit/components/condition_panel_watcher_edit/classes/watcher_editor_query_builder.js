@@ -63,6 +63,7 @@ class WatcherEditorQueryBuilder {
       n: last.n,
       unit: last.unit,
       timeField,
+      bodySize: 0,
     });
 
     if (over.type === 'all docs') {
@@ -143,6 +144,7 @@ class WatcherEditorQueryBuilder {
       n: last.n,
       unit: last.unit,
       timeField,
+      bodySize: 0,
     });
 
     if (over.type === 'all docs') {
@@ -225,6 +227,7 @@ class WatcherEditorQueryBuilder {
       n: last.n,
       unit: last.unit,
       timeField,
+      bodySize: 0,
     });
 
     if (over.type === 'all docs') {
@@ -307,6 +310,7 @@ class WatcherEditorQueryBuilder {
       n: last.n,
       unit: last.unit,
       timeField,
+      bodySize: 0,
     });
 
     if (over.type === 'all docs') {
@@ -389,6 +393,7 @@ class WatcherEditorQueryBuilder {
       n: last.n,
       unit: last.unit,
       timeField,
+      bodySize: 0,
     });
 
     if (over.type === 'all docs') {
@@ -411,7 +416,7 @@ class WatcherEditorQueryBuilder {
       timeField,
     });
 
-    if (bodySize) {
+    if (typeof bodySize === 'number') {
       body.size = bodySize;
     }
     return body;
