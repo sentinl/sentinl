@@ -63,6 +63,16 @@ function EditorController(sentinlConfig, $rootScope, $scope, $route, $interval,
       },
       rawEnabled: false,
     };
+    if (editorMode === 'wizard') {
+      $scope.watcher.$$condition_operators = [
+        {operator:  '>', name: 'Greater than'},
+        {operator:  '<', name: 'Less than'},
+        {operator: '>=', name: 'Greater than or equal'},
+        {operator: '<=', name: 'Less than or equal'},
+        {operator: '==', name: 'Equal'}
+      ];
+      $scope.watcher.$$condition_operator = $scope.watcher.$$condition_operators[0].operator; // setting the default operator (gte)
+    }
 
     if (!$scope.form.templates) {
       $scope.form.templates = {};
@@ -463,6 +473,7 @@ function EditorController(sentinlConfig, $rootScope, $scope, $route, $interval,
 
       if (editorMode === 'wizard' && $scope.watcher._source.condition.script.script.length) {
         const condition = $scope.watcher._source.condition.script.script.split(' ');
+        condition[1] = $scope.watcher.$$condition_operator;
         condition[2] = $scope.watcher.$$condition_value;
         $scope.watcher._source.condition.script.script = condition.join(' ');
         delete $scope.watcher.$$condition_value;
