@@ -126,7 +126,6 @@ const dashboardSpyButton = function ($scope, config) {
                   }
                   newTimestamp.gte = 'now-' + relativeTime + timeUnits[largestUnit] + '/' + timeUnits[largestUnit];
                   newTimestamp.lte = 'now/' + timeUnits[largestUnit];
-                  //newTimestamp.format = must[key].range['@timestamp'].format.replace('millis','second');
                   alarm._source.input.search.request.body.query.bool.must[key].range['@timestamp'] = newTimestamp;
                 }
               }
