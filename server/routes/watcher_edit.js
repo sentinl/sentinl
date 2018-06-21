@@ -31,7 +31,7 @@ export default function watcherEdit(server) {
 
       try {
         const body = JSON.parse(req.payload.query);
-        log.debug('COUNT QUERY BODY:', body);
+        log.debug('COUNT QUERY BODY:', JSON.stringify(body, null, 2));
         log.debug('INDEX:', esParams.index);
 
         const resp = await client.search({
@@ -69,7 +69,7 @@ export default function watcherEdit(server) {
 
       try {
         const body = JSON.parse(req.payload.query);
-        log.debug('AVERAGE QUERY BODY:', body);
+        log.debug('AVERAGE QUERY BODY:', JSON.stringify(body, null, 2));
         log.debug('INDEX:', esParams.index);
 
         const resp = await client.search({
@@ -107,7 +107,7 @@ export default function watcherEdit(server) {
 
       try {
         const body = JSON.parse(req.payload.query);
-        log.debug('MIN QUERY BODY:', body);
+        log.debug('MIN QUERY BODY:', JSON.stringify(body, null, 2));
         log.debug('INDEX:', esParams.index);
 
         const resp = await client.search({
@@ -145,7 +145,7 @@ export default function watcherEdit(server) {
 
       try {
         const body = JSON.parse(req.payload.query);
-        log.debug('MAX QUERY BODY:', body);
+        log.debug('MAX QUERY BODY:', JSON.stringify(body, null, 2));
         log.debug('INDEX:', esParams.index);
 
         const resp = await client.search({
@@ -183,7 +183,7 @@ export default function watcherEdit(server) {
 
       try {
         const body = JSON.parse(req.payload.query);
-        log.debug('SUM QUERY BODY:', body);
+        log.debug('SUM QUERY BODY:', JSON.stringify(body, null, 2));
         log.debug('INDEX:', esParams.index);
 
         const resp = await client.search({

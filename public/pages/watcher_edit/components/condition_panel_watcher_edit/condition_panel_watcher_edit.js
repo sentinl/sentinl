@@ -4,7 +4,6 @@ import template from './condition_panel_watcher_edit.html';
 import moment from 'moment';
 import {size, has, pick, includes, union} from 'lodash';
 import WatcherEditorQueryBuilder from './classes/watcher_editor_query_builder';
-import WatcherEditorChartQueryBuilder from './classes/watcher_editor_chart_query_builder';
 import WatcherEditorConditionBuilder from './classes/watcher_editor_condition_builder';
 
 class Chart {
@@ -147,7 +146,6 @@ class ConditionPanelWatcherEdit {
 
     const config = await this.serverConfig.get();
     this.queryBuilder = new WatcherEditorQueryBuilder({timezoneName: config.data.es.timezone});
-    this.chartQueryBuilder = new WatcherEditorChartQueryBuilder({timezoneName: config.data.es.timezone});
     this.conditionBuilder = new WatcherEditorConditionBuilder();
 
     this.$scope.$watch('conditionPanelWatcherEdit.watcher._source', async () => {
@@ -461,16 +459,16 @@ class ConditionPanelWatcherEdit {
       let resp;
       try {
         if (metricAggType === 'average') {
-          this.chartQuery = this.chartQueryBuilder.average({over, last, interval, field, timeField});
+          this.chartQuery = this.queryBuilder.average({over, last, interval, field, timeField});
           resp = await this.watcherEditorChartService.metricAggAverage({index, query: JSON.stringify(this.chartQuery)});
         } else if (metricAggType === 'sum') {
-          this.chartQuery = this.chartQueryBuilder.sum({over, last, interval, field, timeField});
+          this.chartQuery = this.queryBuilder.sum({over, last, interval, field, timeField});
           resp = await this.watcherEditorChartService.metricAggSum({index, query: JSON.stringify(this.chartQuery)});
         } else if (metricAggType === 'min') {
-          this.chartQuery = this.chartQueryBuilder.min({over, last, interval, field, timeField});
+          this.chartQuery = this.queryBuilder.min({over, last, interval, field, timeField});
           resp = await this.watcherEditorChartService.metricAggMin({index, query: JSON.stringify(this.chartQuery)});
         } else if (metricAggType === 'max') {
-          this.chartQuery = this.chartQueryBuilder.max({over, last, interval, field, timeField});
+          this.chartQuery = this.queryBuilder.max({over, last, interval, field, timeField});
           resp = await this.watcherEditorChartService.metricAggMax({index, query: JSON.stringify(this.chartQuery)});
         }
       } catch (err) {
@@ -515,7 +513,7 @@ class ConditionPanelWatcherEdit {
     try {
       let resp;
       try {
-        this.chartQuery = this.chartQueryBuilder.count({over, last, interval, field, timeField});
+        this.chartQuery = this.queryBuilder.count({over, last, interval, field, timeField});
         resp = await this.watcherEditorChartService.count({index, query: JSON.stringify(this.chartQuery)});
       } catch (err) {
         throw new Error(`query ES: ${err.message}`);

@@ -55,7 +55,7 @@ export default class WatcherWizardHandler extends WatcherHandler {
 
     try {
       payload = await this.search(request, method); // data from Elasticsearch
-      this.log.debug(`payload: ${JSON.stringify(payload, null, 2)}`);
+      // this.log.debug(`payload: ${JSON.stringify(payload)}`);
     } catch (err) {
       throw err;
     }
