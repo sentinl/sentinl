@@ -23,6 +23,24 @@ import _ from 'lodash';
 import { SpyModesRegistryProvider } from 'ui/registry/spy_modes';
 import EMAILWATCHER from '../constants/email_watcher';
 
+const timeFractions = [60,60,24,7]; // 60s/min, 60m/hr, 24hr/day, 7day/week
+const timeUnits = ['s','m','h','d','w']; // second, minute, hour, day, week
+/**
+  * Get UTC array
+  * Returns an array with values in each dedicated time unit
+  *
+  * @param {integer} baseValue
+  * @param {array} timeFractions relation between time types e.g. timeFractions = [60,60,24,7]; // 60s/min, 60m/hr, 24hr/day, 7day/week
+  */
+let getUTCArray = (baseValue, timeFractions) =>  {
+  let timeData = [baseValue];
+  for (let i = 0; i < timeFractions.length; i++) {
+    timeData.push(parseInt(timeData[i] / timeFractions[i]));
+    timeData[i] = timeData[i] % timeFractions[i];
+  };
+  return timeData;
+};
+
 const dashboardSpyButton = function ($scope, config) {
   $scope.$bind('req', 'searchSource.history[searchSource.history.length - 1]');
   $scope.$watchMulti([
@@ -73,6 +91,47 @@ const dashboardSpyButton = function ($scope, config) {
             }
           }
         });
+      }
+      if (alarm._source.input.search.request.body.query.bool.must) {
+        let must = alarm._source.input.search.request.body.query.bool.must;
+        var newTimestamp = {};
+        for (var key in must) {
+          if (must.hasOwnProperty(key) && must[key].range) {
+            if (must[key].range['@timestamp']) {
+              if (must[key].range['@timestamp'].format) {
+                if (_.includes(must[key].range['@timestamp'].format,'epoch_millis')) {
+                  let start = new Date(must[key].range['@timestamp'].gte);
+                  let end = new Date(must[key].range['@timestamp'].lte);
+                  let diff = new Date(end - start).getTime() / 1000; // UTC timestamp in seconds
+                  let timeArray = getUTCArray(diff,timeFractions);
+                  let largestUnit = 0;
+                  for (let i = 0; i < timeArray.length; ++i) {
+                    //[s,min,hour,day,week] == input array [60,60,24,7]
+                    largestUnit = i;
+                    if (timeArray[i] !== 0) {
+                      break;
+                    }
+                  }
+                  let relativeTime = timeArray[largestUnit];// works as start time in the right unit
+                  if (largestUnit <= timeArray.length) {
+                    for (let k = largestUnit + 1; k < timeArray.length; ++k) {
+                      let timeSize = 1;
+                      if (timeArray[k] !== 0) {
+                        for (let g = k; g > largestUnit; --g) {
+                          timeSize *= timeFractions[g - 1];
+                        }
+                      }
+                      relativeTime += timeArray[k] * timeSize;
+                    }
+                  }
+                  newTimestamp.gte = 'now-' + relativeTime + timeUnits[largestUnit] + '/' + timeUnits[largestUnit];
+                  newTimestamp.lte = 'now/' + timeUnits[largestUnit];
+                  alarm._source.input.search.request.body.query.bool.must[key].range['@timestamp'] = newTimestamp;
+                }
+              }
+            }
+          }
+        }
       }
 
       stripObjectPropertiesByNameRegex(alarm._source.input.search, /\$.*/);
