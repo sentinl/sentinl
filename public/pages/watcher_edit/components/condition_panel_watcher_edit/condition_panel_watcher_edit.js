@@ -154,9 +154,9 @@ class ConditionPanelWatcherEdit {
         this.watcher._source.wizard.chart_query_params.index = this.watcher._source.input.search.request.index;
 
         try {
+          await this._fetchChartData();
           this._updateWatcherRawDoc(this.watcher);
           this._updateChartRawDoc(this.chartQuery);
-          await this._fetchChartData();
           this._reportStatusToThresholdWatcherEdit();
         } catch (err) {
           if (err.message.match(/field doesn't support values of type: VALUE_NULL/)) {

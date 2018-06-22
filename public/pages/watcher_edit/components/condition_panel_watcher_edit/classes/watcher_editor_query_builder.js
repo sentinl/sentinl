@@ -630,8 +630,8 @@ class WatcherEditorQueryBuilder {
 
   _epochRange({n, unit, bodySize, timeField}) {
     const body = this._range({
-      gte: this._epochTimeNUnitsAgo(n, unit),
-      lte: this._epochTimeNow(),
+      gte: this._dateMathNUnitsAgo(n, unit),
+      lte: this._dateMathNow(unit),
       timeField,
     });
 
@@ -639,6 +639,14 @@ class WatcherEditorQueryBuilder {
       body.size = bodySize;
     }
     return body;
+  }
+
+  _dateMathNow(unit) {
+    return `now/${unit[0]}`;
+  }
+
+  _dateMathNUnitsAgo(n, unit) {
+    return `now-${n}${unit[0]}/${unit[0]}`;
   }
 
   _epochTimeNow() {
