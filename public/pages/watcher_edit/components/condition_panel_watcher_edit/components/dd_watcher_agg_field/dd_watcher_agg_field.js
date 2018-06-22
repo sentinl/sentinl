@@ -1,8 +1,14 @@
 import template from './dd_watcher_agg_field.html';
-// import {uniq} from 'lodash';
 
 class DdWatcherAggField {
-  constructor() {
+  constructor($scope) {
+    this.$scope = $scope;
+    this.aggEnabled = this.aggEnabled || this.$scope.aggEnabled;
+    this.activeField = this.activeField || this.$scope.activeField;
+    this.timeField = this.timeField || this.$scope.timeField;
+    this.fieldNames = this.fieldNames || this.$scope.fieldNames;
+    this.onSelectField = this.onSelectField || this.$scope.onSelectField;
+
     this.title = 'FIELD';
   }
 
@@ -12,8 +18,6 @@ class DdWatcherAggField {
       timeField: this.timeField,
     });
   }
-
-  $onInit() {}
 
   _shortTitle(fieldName) {
     if (fieldName && fieldName.length > 7) {
@@ -29,13 +33,6 @@ class DdWatcherAggField {
   get timeFieldTitle() {
     return this._shortTitle(this.timeField);
   }
-
-  // get deduplicatedFieldNames() {
-  //   if (this.fieldNames) {
-  //     return uniq(this.fieldNames);
-  //   }
-  //   return [];
-  // }
 }
 
 function ddWatcherAggField() {
@@ -46,12 +43,18 @@ function ddWatcherAggField() {
       aggEnabled: '=',
       activeField: '@',
       timeField: '@',
-      fieldNames: '<',
+      fieldNames: '=',
       onSelectField: '&',
     },
     controller:  DdWatcherAggField,
     controllerAs: 'ddWatcherAggField',
-    bindToController: true,
+    bindToController: {
+      aggEnabled: '=',
+      activeField: '@',
+      timeField: '@',
+      fieldNames: '=',
+      onSelectField: '&',
+    },
   };
 }
 

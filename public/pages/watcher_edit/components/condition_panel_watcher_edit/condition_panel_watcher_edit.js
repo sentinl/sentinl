@@ -24,8 +24,13 @@ class Chart {
 
 class ConditionPanelWatcherEdit {
   constructor($http, $scope, watcherEditorChartService, watcherEditorEsService, watcherHelper, createNotifier, sentinlLog, ServerConfig) {
-    this.$http = $http;
     this.$scope = $scope;
+    this.watcher = this.watcher || this.$scope.watcher;
+    this.updateStatus = this.updateStatus || this.$scope.updateStatus;
+    this.onQueryChange = this.onQueryChange || this.$scope.onQueryChange;
+    this.onConditionChange = this.onConditionChange || this.$scope.onConditionChange;
+
+    this.$http = $http;
     this.watcherEditorChartService = watcherEditorChartService;
     this.watcherEditorEsService = watcherEditorEsService;
     this.helper = watcherHelper;
@@ -54,9 +59,7 @@ class ConditionPanelWatcherEdit {
       count: {},
       metric: ['average', 'min', 'max', 'sum'],
     };
-  }
 
-  async $onInit() {
     if (!has(this.watcher._source, 'wizard.chart_query_params')) {
       this.watcher._source.wizard = {
         chart_query_params: {
@@ -144,41 +147,43 @@ class ConditionPanelWatcherEdit {
       },
     };
 
-    const config = await this.serverConfig.get();
-    this.queryBuilder = new WatcherEditorQueryBuilder({timezoneName: config.data.es.timezone});
-    this.conditionBuilder = new WatcherEditorConditionBuilder();
+    (async () => {
+      const config = await this.serverConfig.get();
+      this.queryBuilder = new WatcherEditorQueryBuilder({timezoneName: config.data.es.timezone});
+      this.conditionBuilder = new WatcherEditorConditionBuilder();
 
-    this.$scope.$watch('conditionPanelWatcherEdit.watcher._source', async () => {
-      if (has(this.watcher, '_source.trigger.schedule.later')) {
-        this._updateChartQueryParamsInterval(this.watcher._source.trigger.schedule.later);
-        this.watcher._source.wizard.chart_query_params.index = this.watcher._source.input.search.request.index;
+      this.$scope.$watch('conditionPanelWatcherEdit.watcher._source', async () => {
+        if (has(this.watcher, '_source.trigger.schedule.later')) {
+          this._updateChartQueryParamsInterval(this.watcher._source.trigger.schedule.later);
+          this.watcher._source.wizard.chart_query_params.index = this.watcher._source.input.search.request.index;
 
-        try {
-          await this._fetchChartData();
-          this._updateWatcherRawDoc(this.watcher);
-          this._updateChartRawDoc(this.chartQuery);
-          this._reportStatusToThresholdWatcherEdit();
-        } catch (err) {
-          if (err.message.match(/field doesn't support values of type: VALUE_NULL/)) {
-            this._warning(err.message);
-          } else {
-            this._error(`init watcher and wizard: ${err.message}`);
+          try {
+            await this._fetchChartData();
+            this._updateWatcherRawDoc(this.watcher);
+            this._updateChartRawDoc(this.chartQuery);
+            this._reportStatusToThresholdWatcherEdit();
+          } catch (err) {
+            if (err.message.match(/field doesn't support values of type: VALUE_NULL/)) {
+              this._warning(err.message);
+            } else {
+              this._error(`init watcher and wizard: ${err.message}`);
+            }
+            this._reportStatusToThresholdWatcherEdit({success: false});
           }
-          this._reportStatusToThresholdWatcherEdit({success: false});
         }
-      }
-    }, true);
+      }, true);
 
-    this.$scope.$watch('conditionPanelWatcherEdit.watcher._source.wizard.chart_query_params.field', async () => {
-      if (has(this.watcher, '_source.input.search.request.index')) {
-        try {
-          this.indexesData.fieldNames = await this._getIndexFieldNames(this.watcher._source.input.search.request.index);
-        } catch (err) {
-          this._error(`init watcher agg field: ${err.message}`);
+      this.$scope.$watch('conditionPanelWatcherEdit.watcher._source.wizard.chart_query_params.field', async () => {
+        if (has(this.watcher, '_source.input.search.request.index')) {
+          try {
+            this.indexesData.fieldNames = await this._getIndexFieldNames(this.watcher._source.input.search.request.index);
+          } catch (err) {
+            this._error(`init watcher agg field: ${err.message}`);
+          }
         }
-      }
-    });
-  };
+      });
+    })();
+  }
 
   _warning(msg) {
     msg = msg.replace(/fail/ig, '[warning]');
@@ -643,15 +648,19 @@ function conditionPanelWatcherEdit() {
     template,
     restrict: 'E',
     scope: {
-      watcher: '<',
+      watcher: '=',
       updateStatus: '&',
-      onTrigger: '=',
       onQueryChange: '&',
       onConditionChange: '&',
     },
     controller:  ConditionPanelWatcherEdit,
     controllerAs: 'conditionPanelWatcherEdit',
-    bindToController: true,
+    bindToController: {
+      watcher: '=',
+      updateStatus: '&',
+      onQueryChange: '&',
+      onConditionChange: '&',
+    },
   };
 }
 

@@ -1,12 +1,14 @@
 import template from './dd_watcher_agg_over.html';
 
 class DdWatcherAggOver {
-  constructor() {
+  constructor($scope) {
+    this.$scope = $scope;
+    this.aggOverOptions = this.aggOverOptions || this.$scope.aggOverOptions;
+    this.aggFieldNames = this.aggFieldNames || this.$scope.aggFieldNames;
+    this.aggOverOnSelect = this.aggOverOnSelect || this.$scope.aggOverOnSelect;
+
     this.title = 'OVER';
     this.options = ['all docs', 'top'];
-  }
-
-  $onInit() {
     const {type, n, field} = this.aggOverOptions;
     this.selected = type;
     this.top = {
@@ -42,13 +44,17 @@ function ddWatcherAggOver() {
     template,
     restrict: 'E',
     scope: {
-      aggOverOptions: '<',
-      aggFieldNames: '<',
+      aggOverOptions: '=',
+      aggFieldNames: '=',
       aggOverOnSelect: '&',
     },
     controller:  DdWatcherAggOver,
     controllerAs: 'ddWatcherAggOver',
-    bindToController: true,
+    bindToController: {
+      aggOverOptions: '=',
+      aggFieldNames: '=',
+      aggOverOnSelect: '&',
+    },
   };
 }
 

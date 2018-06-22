@@ -1,12 +1,13 @@
 import template from './dd_watcher_agg_time.html';
 
 class DdWatcherAggTime {
-  constructor() {
+  constructor($scope) {
+    this.$scope = $scope;
+    this.aggTimeOptions = this.aggTimeOptions || this.$scope.aggTimeOptions;
+    this.aggTimeOnSelect = this.aggTimeOnSelect || this.$scope.aggTimeOnSelect;
+
     this.title = 'LAST';
     this.options = ['seconds', 'minutes', 'hours', 'days', 'months', 'years'];
-  }
-
-  $onInit() {
     this.selected = this.aggTimeOptions.unit || 'minutes';
     this.number = this.aggTimeOptions.n || 15;
   }
@@ -21,12 +22,15 @@ function ddWatcherAggTime() {
     template,
     restrict: 'E',
     scope: {
-      aggTimeOptions: '<',
+      aggTimeOptions: '=',
       aggTimeOnSelect: '&',
     },
     controller:  DdWatcherAggTime,
     controllerAs: 'ddWatcherAggTime',
-    bindToController: true,
+    bindToController: {
+      aggTimeOptions: '=',
+      aggTimeOnSelect: '&',
+    },
   };
 }
 

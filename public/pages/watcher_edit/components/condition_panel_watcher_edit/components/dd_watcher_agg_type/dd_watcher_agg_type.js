@@ -1,12 +1,13 @@
 import template from './dd_watcher_agg_type.html';
 
 class DdWatcherAggType {
-  constructor() {
+  constructor($scope) {
+    this.$scope = $scope;
+    this.aggTypeSelected = this.aggTypeSelected || this.$scope.aggTypeSelected;
+    this.aggTypeOnSelect = this.aggTypeOnSelect || this.$scope.aggTypeOnSelect;
+
     this.title = 'WHEN';
     this.options = ['count', 'average', 'sum', 'min', 'max'];
-  }
-
-  $onInit() {
     this.selected = this.aggTypeSelected || 'count';
   }
 
@@ -25,7 +26,10 @@ function ddWatcherAggType() {
     },
     controller:  DdWatcherAggType,
     controllerAs: 'ddWatcherAggType',
-    bindToController: true,
+    bindToController: {
+      aggTypeSelected: '=',
+      aggTypeOnSelect: '&',
+    },
   };
 }
 

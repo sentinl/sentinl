@@ -1,7 +1,10 @@
 import template from './watcher_edit_add_index.html';
 
 class WatcherEditAddIndex {
-  constructor(esService, createNotifier, sentinlLog) {
+  constructor($scope, esService, createNotifier, sentinlLog) {
+    this.$scope = $scope;
+    this.watcher = this.watcher || this.$scope.watcher;
+
     this.locationName = 'WatcherEditAddIndex';
     this.notify = createNotifier({
       location: this.locationName,
@@ -9,9 +12,6 @@ class WatcherEditAddIndex {
     this.log = sentinlLog;
     this.log.initLocation(this.locationName);
     this.esService = esService;
-  }
-
-  $onInit() {
     this.selected = this._getIndex();
   }
 
@@ -52,11 +52,13 @@ function watcherEditAddIndex() {
     template,
     restrict: 'E',
     scope: {
-      watcher: '<',
+      watcher: '=',
     },
     controller:  WatcherEditAddIndex,
     controllerAs: 'watcherEditAddIndex',
-    bindToController: true,
+    bindToController: {
+      watcher: '=',
+    },
   };
 }
 

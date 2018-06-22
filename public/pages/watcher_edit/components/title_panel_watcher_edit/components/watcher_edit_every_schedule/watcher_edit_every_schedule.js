@@ -1,13 +1,13 @@
 import template from './watcher_edit_every_schedule.html';
 
 class WatcherEditEverySchedule {
-  constructor() {
+  constructor($scope) {
+    this.$scope = $scope;
+    this.watcher = this.watcher || this.$scope.watcher;
+
     this.enabled = true;
     this.selected = 'minutes';
     this.options = ['seconds', 'minutes', 'hours', 'days', 'months', 'years'];
-  }
-
-  $onInit() {
     this.number = this._getNumber();
   }
 
@@ -27,11 +27,13 @@ function watcherEditEverySchedule() {
     template,
     restrict: 'E',
     scope: {
-      watcher: '<',
+      watcher: '=',
     },
     controller:  WatcherEditEverySchedule,
     controllerAs: 'watcherEditEverySchedule',
-    bindToController: true,
+    bindToController: {
+      watcher: '=',
+    },
   };
 }
 

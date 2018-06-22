@@ -3,11 +3,11 @@ import template from './title_panel_watcher_edit.html';
 
 class TitlePanelWatcherEdit {
   constructor($scope, sentinlLog) {
-    const locationName = 'TitlePanelWatcheredit';
-
     this.$scope = $scope;
+    this.watcher = this.watcher || this.$scope.watcher;
+
     this.log = sentinlLog;
-    this.log.initLocation(locationName);
+    this.log.initLocation('TitlePanelWatcheredit');
 
     this.schedule = {
       selected: 'every',
@@ -31,8 +31,6 @@ class TitlePanelWatcherEdit {
     };
   }
 
-  $onInit() {}
-
   isValidationMessageVisible(fieldName, errorType, showIfOtherErrors = true) {
     if (!this.form[fieldName]) {
       return false;
@@ -51,11 +49,13 @@ function titlePanelWatcherEdit() {
     template,
     restrict: 'E',
     scope: {
-      watcher: '<',
+      watcher: '=',
     },
     controller:  TitlePanelWatcherEdit,
     controllerAs: 'titlePanelWatcherEdit',
-    bindToController: true,
+    bindToController: {
+      watcher: '=',
+    },
   };
 }
 

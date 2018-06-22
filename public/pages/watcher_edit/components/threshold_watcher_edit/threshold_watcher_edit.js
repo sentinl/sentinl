@@ -5,6 +5,8 @@ import { has, forEach } from 'lodash';
 class ThresholdWatcherEdit {
   constructor($scope, $log, kbnUrl, sentinlLog, confirmModal, createNotifier, Watcher) {
     this.$scope = $scope;
+    this.watcher = this.watcher || this.$scope.watcher;
+
     this.kbnUrl = kbnUrl;
     this.sentinlLog = sentinlLog;
     this.confirmModal = confirmModal;
@@ -27,9 +29,7 @@ class ThresholdWatcherEdit {
     this.actions = {
       show: this.condition.show,
     };
-  }
 
-  $onInit() {
     this.$scope.$watch('thresholdWatcherEdit.watcher._source', () => {
       this.condition.show = this._isTitlePanelValid(this.watcher);
       this.actions.show = this.condition.show;
@@ -138,7 +138,9 @@ function thresholdWatcherEdit() {
     },
     controller: ThresholdWatcherEdit,
     controllerAs: 'thresholdWatcherEdit',
-    bindToController: true,
+    bindToController: {
+      watcher: '=',
+    },
   };
 }
 

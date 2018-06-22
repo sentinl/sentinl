@@ -5,9 +5,21 @@ import {cloneDeep} from 'lodash';
 class WatcherEditEmailAction {
   constructor($scope) {
     this.$scope = $scope;
+    this.actionName = this.actionName || this.$scope.actionName;
+    this.actionSettings = this.actionSettings || this.$scope.actionSettings;
+    this.actionDelete = this.actionDelete || this.$scope.actionDelete;
+
     this.type = 'email';
     this.status = {
       isOpen: false,
+    };
+    this.actionSettings.name = this.actionName;
+    this.priority = {
+      selected: this.actionSettings.email.priority,
+      options: ['low', 'medium', 'high'],
+      handleChange: () => {
+        this.actionSettings.email.priority = this.priority.selected;
+      },
     };
   }
 
@@ -26,17 +38,6 @@ class WatcherEditEmailAction {
     };
   };
 
-  $onInit() {
-    this.actionSettings.name = this.actionName;
-    this.priority = {
-      selected: this.actionSettings.email.priority,
-      options: ['low', 'medium', 'high'],
-      handleChange: () => {
-        this.actionSettings.email.priority = this.priority.selected;
-      },
-    };
-  }
-
   deleteAction() {
     this.actionDelete({origActionName: this.actionName});
   }
@@ -48,13 +49,16 @@ function watcherEditEmailAction() {
     restrict: 'E',
     scope: {
       actionName: '@',
-      actionSettings: '<',
+      actionSettings: '=',
       actionDelete: '&',
-      onTrigger: '=',
     },
     controller:  WatcherEditEmailAction,
     controllerAs: 'watcherEditEmailAction',
-    bindToController: true,
+    bindToController: {
+      actionName: '@',
+      actionSettings: '=',
+      actionDelete: '&',
+    },
   };
 }
 

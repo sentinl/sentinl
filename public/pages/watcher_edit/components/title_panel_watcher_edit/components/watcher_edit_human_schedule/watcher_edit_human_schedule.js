@@ -1,18 +1,17 @@
 import template from './watcher_edit_human_schedule.html';
 
 class WatcherEditHumanSchedule {
-  constructor(sentinlConfig) {
+  constructor($scope, sentinlConfig) {
+    this.$scope = $scope;
+    this.watcher = this.watcher || this.$scope.watcher;
+    this.onChange = this.onChange || this.$scope.onChange;
+
     this.config = sentinlConfig;
     this.enabled = true;
-  }
-
-  $onInit() {
-    // this.schedule = this.watcher._source.trigger.schedule.later;
     this.schedule = 'This feature is under construction. Comming soon ...';
   }
 
   handleChange() {
-    // this.onChange({ schedule: this.schedule });
   }
 }
 
@@ -23,11 +22,13 @@ function watcherEditHumanSchedule() {
     scope: {
       watcher: '=',
       onChange: '&',
-      // isValidationMessageVisible: '&',
     },
     controller:  WatcherEditHumanSchedule,
     controllerAs: 'watcherEditHumanSchedule',
-    bindToController: true,
+    bindToController: {
+      watcher: '=',
+      onChange: '&',
+    },
   };
 }
 

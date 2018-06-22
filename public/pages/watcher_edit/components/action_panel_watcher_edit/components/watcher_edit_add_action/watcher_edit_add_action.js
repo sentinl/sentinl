@@ -15,13 +15,13 @@ class Actions {
 }
 
 class WatcherEditAddAction {
-  constructor() {
+  constructor($scope) {
+    this.$scope = $scope;
+    this.onAdd = this.onAdd || this.$scope.onAdd;
+
     this.status = {
       isOpen: false,
     };
-  }
-
-  $onInit() {
     this.actions = Actions.types;
   }
 
@@ -40,7 +40,9 @@ function watcherEditAddAction() {
     },
     controller:  WatcherEditAddAction,
     controllerAs: 'watcherEditAddAction',
-    bindToController: true,
+    bindToController: {
+      onAdd: '&',
+    },
   };
 }
 
