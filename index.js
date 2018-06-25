@@ -209,6 +209,7 @@ export default function (kibana) {
             body: Joi.string().default('{{payload.watcher_id}}{payload.hits.total}}')
           }).default(),
           report: Joi.object({
+            active: Joi.boolean().default(true),
             debug: Joi.object({
               headless: Joi.boolean().default(true),
               devtools: Joi.boolean().default(false),
@@ -225,7 +226,6 @@ export default function (kibana) {
             tmp_path: Joi.any().forbidden().error(new Error (
               'Option "report.tmp_path" is not needed anymore. Just delete it from config!'
             )),
-            active: Joi.boolean().default(false),
             executable_path: Joi.string(),
             authentication: Joi.object({
               enabled: Joi.boolean().default(false),
