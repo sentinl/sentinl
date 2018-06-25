@@ -230,15 +230,12 @@ export default class WatcherHandler {
       // validate JS script in transform
       if (has(link, 'script.script')) {
         try {
-          // update global payload
-          if (!eval(link.script.script)) { // eslint-disable-line no-eval
-            return new WarningAndLog(this.log, 'no data was found after "script" transform was applied');
-          }
+          // transform global payload
+          eval(link.script.script); // eslint-disable-line no-eval
         } catch (err) {
           throw new ErrorAndLog(this.log, err, `fail to apply transform "script": ${err.message}`);
         }
       }
-
       // search in transform
       if (has(link, 'search.request')) {
         try {
@@ -252,26 +249,19 @@ export default class WatcherHandler {
 
     if (transform && transform.chain && size(transform.chain)) { // transform chain
       return Promise.each(transform.chain, (link) => bulkTransform(link)).then(() => {
-        if (!payload) {
+        if (!payload || !size(payload)) {
           return new WarningAndLog(this.log, 'no data was found after "chain" transform was applied');
         }
-
         return new SuccessAndLog(this.log, 'successfully applied "chain" transform', { payload });
       }).catch((err) => {
         throw new ErrorAndLog(this.log, err, `fail to apply transform "chain": ${err.message}`);
       });
-
     } else if (transform && size(transform)) { // transform
       try {
-        const resp = await bulkTransform(transform);
-        if (resp && resp.warning) {
-          return resp;
-        }
-
-        if (!payload) {
+        await bulkTransform(transform);
+        if (!payload || !size(payload)) {
           return new WarningAndLog(this.log, 'no data was found after transform was applied');
         }
-
         return new SuccessAndLog(this.log, 'successfully applied transform', { payload });
       } catch (err) {
         throw new ErrorAndLog(this.log, err, `fail to apply transform: ${err.message}`);
