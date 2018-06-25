@@ -200,9 +200,14 @@ export default function routes(server) {
     path: '/api/sentinl/watcher/_execute',
     handler: async function (request, reply) {
       const watcherHandler = new WatcherHandler(server);
+      const watcher = request.payload;
 
       try {
-        const resp = await watcherHandler.execute(request.payload);
+        if (watcher._source.report && !config.settings.report.active) {
+          return reply(Boom.forbidden('report is disabled in config'));
+        }
+
+        const resp = await watcherHandler.execute(watcher);
         return reply(resp);
       } catch (err) {
         return reply(Boom.notAcceptable(err.message));
