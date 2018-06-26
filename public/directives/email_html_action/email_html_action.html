@@ -1,8 +1,7 @@
-<div uib-accordion-group class="panel-default" is-open="action.status.isHeaderOpen">
-
+<div uib-accordion-group class="panel-default" is-open="emailHtmlAction.isOpen">
   <uib-accordion-heading>
-    {{actionSettings.$$title}} <i class="pull-right glyphicon"
-    ng-class="{'glyphicon-chevron-down': action.status.isHeaderOpen, 'glyphicon-chevron-right': !action.status.isHeaderOpen}"></i>
+    {{emailHtmlAction.actionSettings.$$title}} <i class="pull-right glyphicon"
+    ng-class="{'glyphicon-chevron-down': emailHtmlAction.isOpen, 'glyphicon-chevron-right': !emailHtmlAction.isOpen}"></i>
   </uib-accordion-heading>
 
   <div class="row" id="email-html-action" class="action-panel">
@@ -10,7 +9,7 @@
       <div class="well" ng-form="emailHtmlForm">
 
         <div class="page-header">
-          <h4><small>{{action.type}} action</small></h4>
+          <h4><small>{{emailHtmlAction.type}} action</small></h4>
         </div> <!-- end page-header -->
 
         <div class="form-group">
@@ -18,7 +17,7 @@
             <label>Throttle</label>
           </div>
           <div class="col-md-10">
-            <period-tag timesrc="actionSettings.$$throttle"></period-tag>
+            <period-tag timesrc="emailHtmlAction.actionSettings.$$throttle"></period-tag>
           </div>
         </div>
 
@@ -27,28 +26,26 @@
           <div class="btn-group col-md-2">
             <select
               class="form-control condition-select"
-              ng-model="action.priority.selected"
-              ng-model-options="{ debounce: 500 }"
-              ng-options="o as o for o in action.priority.options"
-              ng-change="action.priority.handleChange()"
+              ng-model="emailHtmlAction.actionSettings.email_html.priority"
+              ng-options="o as o for o in emailHtmlAction.actionPriorities"
             ></select>
           </div>
           <div class="col-md-2">
             <label class="checkbox">
               <input type="checkbox"
-                ng-model="actionSettings.email_html.stateless"
-                ng-checked="actionSettings.email_html.stateless"
+                ng-model="emailHtmlAction.actionSettings.email_html.stateless"
+                ng-checked="emailHtmlAction.actionSettings.email_html.stateless"
               /> stateless
             </label>
           </div>
           <div class="col-md-3">
             <input type="checkbox"
-              ng-model="actionSettings.email_html.save_payload"
-              ng-checked="actionSettings.email_html.save_payload"
+              ng-model="emailHtmlAction.actionSettings.email_html.save_payload"
+              ng-checked="emailHtmlAction.actionSettings.email_html.save_payload"
             /> save payload
             <i class="fa fa-question-circle"
               aria-hidden="true"
-              uib-popover="{{help.action.save_payload}}"
+              uib-popover="{{emailHtmlAction.help.action.save_payload}}"
               popover-trigger="'outsideClick'"></i>
           </div>
         </div> <!-- end form-group -->
@@ -60,11 +57,11 @@
               type="text"
               id="emailHtmlTitle"
               name="emailHtmlTitle"
-              value="{{actionName}}"
+              value="{{emailHtmlAction.actionName}}"
               class="form-control"
               placeholder="{{watcher._id}}"
-              ng-model="actionSettings.$$title"
-              ng-required="actionSettings.email_html.$$edit"
+              ng-model="emailHtmlAction.actionSettings.$$title"
+              ng-required="emailHtmlAction.actionSettings.email_html.$$edit"
             />
           </div>
           <p ng-show="emailHtmlForm.emailHtmlTitle.$invalid && !emailHtmlForm.emailHtmlTitle.$pristine" class="help-block">
@@ -79,11 +76,11 @@
               type="text"
               id="emailHtmlTo"
               name="emailHtmlTo"
-              value="{{actionSettings.email_html.to}}"
+              value="{{emailHtmlAction.actionSettings.email_html.to}}"
               class="form-control"
               placeholder="root@localhost"
-              ng-model="actionSettings.email_html.to"
-              ng-required="actionSettings.email_html.$$edit"
+              ng-model="emailHtmlAction.actionSettings.email_html.to"
+              ng-required="emailHtmlAction.actionSettings.email_html.$$edit"
             />
           </div>
           <p ng-show="emailHtmlForm.emailHtmlTo.$invalid && !emailHtmlForm.emailHtmlTo.$pristine" class="help-block">
@@ -98,11 +95,11 @@
               type="text"
               id="emailHtmlFrom"
               name="emailHtmlFrom"
-              value="{{actionSettings.email_html.from}}"
+              value="{{emailHtmlAction.actionSettings.email_html.from}}"
               class="form-control"
               placeholder="sentinl@localhost"
-              ng-model="actionSettings.email_html.from"
-              ng-required="actionSettings.email_html.$$edit"
+              ng-model="emailHtmlAction.actionSettings.email_html.from"
+              ng-required="emailHtmlAction.actionSettings.email_html.$$edit"
             />
           </div>
           <p ng-show="emailHtmlForm.emailHtmlFrom.$invalid && !emailHtmlForm.emailHtmlFrom.$pristine" class="help-block">
@@ -117,11 +114,11 @@
               type="text"
               id="emailHtmlSubject"
               name="emailHtmlSubject"
-              value="{{actionSettings.email_html.subject}}"
+              value="{{emailHtmlAction.actionSettings.email_html.subject}}"
               class="form-control"
               placeholder="Alarm Title"
-              ng-model="actionSettings.email_html.subject"
-              ng-required="actionSettings.email_html.$$edit"
+              ng-model="emailHtmlAction.actionSettings.email_html.subject"
+              ng-required="emailHtmlAction.actionSettings.email_html.$$edit"
             />
           </div>
           <p ng-show="emailHtmlForm.emailHtmlSubject.$invalid && !emailHtmlForm.emailHtmlSubject.$pristine" class="help-block">
@@ -129,34 +126,36 @@
           </p>
         </div> <!-- end form-group -->
 
-        <div class="form-group" ng-class="{'has-error': !actionSettings.email_html.body.length}">
+        <div class="form-group" ng-class="{'has-error': !emailHtmlAction.actionSettings.email_html.body.length}">
           <label class="col-md-2 control-label" for="emailHtmlBody">Body</label>
           <div class="col-md-10">
             <div id="emailHtmlBody"
-              ng-model="actionSettings.email_html.body"
-              ui-ace="aceOptions('behaviour')">
+              ng-model="emailHtmlAction.actionSettings.email_html.body"
+              ui-ace="emailHtmlAction.aceOptions({mode: 'behaviour'})"
+            >{{emailHtmlAction.actionSettings.email_html.body}}
             </div>
           </div>
-          <p ng-show="!actionSettings.email_html.body.length" class="text-warning">
+          <p ng-show="!emailHtmlAction.actionSettings.email_html.body.length" class="text-warning">
             Describe the alert in the email body.
           </p>
         </div> <!-- end form-group -->
 
-        <div class="form-group" ng-class="{'has-error': !actionSettings.email_html.html.length}">
+        <div class="form-group" ng-class="{'has-error': !emailHtmlAction.actionSettings.email_html.html.length}">
           <label class="col-md-2 control-label" for="emailHtmlBody">Body HTML</label>
           <div class="col-md-10">
             <div id="emailHtmlBody"
-              ng-model="actionSettings.email_html.html"
-              ui-ace="aceOptions('html')">
+              ng-model="emailHtmlAction.actionSettings.email_html.html"
+              ui-ace="emailHtmlAction.aceOptions({mode: 'html'})"
+            >{{emailHtmlAction.actionSettings.email_html.html}}
             </div>
           </div>
-          <p ng-show="!actionSettings.email_html.html.length" class="text-warning">
+          <p ng-show="!emailHtmlAction.actionSettings.email_html.html.length" class="text-warning">
             Describe the alert in the email body HTML.
           </p>
         </div> <!-- end form-group -->
 
         <div class="form-group control-actions">
-          <button type="button" class="btn btn-danger pull-right" ng-click="removeAction()">Delete</button>
+          <button type="button" class="btn btn-danger pull-right" ng-click="emailHtmlAction.remove()">Delete</button>
         </div> <!-- end form-group -->
 
       </div> <!-- end well -->

@@ -1,40 +1,48 @@
 import template from './slack_action.html';
 import help from '../../messages/help';
 
-function slackAction($rootScope) {
-  'ngInject';
+class SlackAction {
+  constructor($scope, $rootScope) {
+    'ngInject';
+    this.$scope = $scope;
+    this.actionName = this.actionName || this.$scope.actionName;
+    this.actionSettings = this.actionSettings || this.$scope.actionSettings;
+    this.actionPriorities = this.actionPriorities || this.$scope.actionPriorities;
+    this.aceOptions = this.aceOptions || this.$scope.aceOptions;
 
-  function actionDirective(scope, element, attrs) {
-    scope.help = help;
-    scope.action = {
-      type: 'slack',
-      status: {
-        isHeaderOpen: false,
-      },
-      priority: {
-        selected: scope.actionSettings.slack.priority || 'low',
-        options: ['low', 'medium', 'high'],
-        handleChange: () => {
-          scope.actionSettings.slack.priority = scope.action.priority.selected;
-        },
-      },
-    };
-
-    scope.actionSettings.slack.priority = scope.actionSettings.slack.priority || scope.action.priority.selected;
-
-    scope.removeAction = function () {
-      $rootScope.$broadcast('action:removeAction', { name: scope.actionName });
-    };
+    this.$rootScope = $rootScope;
+    this.help = help;
+    this.type = 'slack';
+    this.isOpen = true;
+    this.actionSettings.slack.priority = this.actionSettings.slack.priority || 'low';
   }
+
+  remove() {
+    this.$rootScope.$broadcast('action:removeAction', { name: this.actionName });
+  }
+}
+
+function slackAction() {
+  function link() {}
 
   return {
     restrict: 'E',
     template,
+    link,
+    controller: SlackAction,
+    controllerAs: 'slackAction',
+    bindToController: {
+      actionName: '@',
+      actionSettings: '=',
+      actionPriorities: '=',
+      aceOptions: '&',
+    },
     scope: {
       actionName: '@',
       actionSettings: '=',
+      actionPriorities: '=',
+      aceOptions: '&',
     },
-    link: actionDirective
   };
 };
 

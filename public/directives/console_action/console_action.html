@@ -1,8 +1,7 @@
-<div uib-accordion-group class="panel-default" is-open="action.status.isHeaderOpen">
-
+<div uib-accordion-group class="panel-default" is-open="consoleAction.isOpen">
   <uib-accordion-heading>
-    {{actionSettings.$$title}} <i class="pull-right glyphicon"
-    ng-class="{'glyphicon-chevron-down': action.status.isHeaderOpen, 'glyphicon-chevron-right': !action.status.isHeaderOpen}"></i>
+    {{consoleAction.actionSettings.$$title}} <i class="pull-right glyphicon"
+    ng-class="{'glyphicon-chevron-down': consoleAction.isOpen, 'glyphicon-chevron-right': !consoleAction.isOpen}"></i>
   </uib-accordion-heading>
 
   <div class="row" id="console-action" class="action-panel">
@@ -10,7 +9,7 @@
       <div class="well" ng-form="consoleForm">
 
         <div class="page-header">
-          <h4><small>{{action.type}} action</small></h4>
+          <h4><small>{{consoleAction.type}} action</small></h4>
         </div> <!-- end page-header -->
 
         <div class="form-group">
@@ -18,7 +17,7 @@
             <label>Throttle</label>
           </div>
           <div class="col-md-10">
-            <period-tag timesrc="actionSettings.$$throttle"></period-tag>
+            <period-tag timesrc="consoleAction.actionSettings.$$throttle"></period-tag>
           </div>
         </div>
 
@@ -27,20 +26,18 @@
           <div class="btn-group col-md-4">
             <select
               class="form-control condition-select"
-              ng-model="action.priority.selected"
-              ng-model-options="{ debounce: 500 }"
-              ng-options="o as o for o in action.priority.options"
-              ng-change="action.priority.handleChange()"
+              ng-model="consoleAction.actionSettings.console.priority"
+              ng-options="o as o for o in consoleAction.actionPriorities"
             ></select>
           </div>
           <div class="col-md-3">
             <input type="checkbox"
-              ng-model="actionSettings.console.save_payload"
-              ng-checked="actionSettings.console.save_payload"
+              ng-model="consoleAction.actionSettings.console.save_payload"
+              ng-checked="consoleAction.actionSettings.console.save_payload"
             /> save payload
             <i class="fa fa-question-circle"
               aria-hidden="true"
-              uib-popover="{{help.action.save_payload}}"
+              uib-popover="{{consoleAction.help.action.save_payload}}"
               popover-trigger="'outsideClick'"></i>
           </div>
         </div> <!-- end form-group -->
@@ -52,11 +49,11 @@
               type="text"
               id="consoleTitle"
               name="consoleTitle"
-              value="{{actionName}}"
+              value="{{consoleAction.actionName}}"
               class="form-control"
               placeholder="{{watcher._id}}"
-              ng-model="actionSettings.$$title"
-              ng-required="actionSettings.console.$$edit"
+              ng-model="consoleAction.actionSettings.$$title"
+              ng-required="consoleAction.actionSettings.console.$$edit"
             />
           </div>
           <p ng-show="consoleForm.consoleTitle.$invalid && !consoleForm.consoleTitle.$pristine" class="help-block">
@@ -64,21 +61,22 @@
           </p>
         </div> <!-- end form-group -->
 
-        <div class="form-group" ng-class="{'has-error': !actionSettings.console.message.length}">
+        <div class="form-group" ng-class="{'has-error': !consoleAction.actionSettings.console.message.length}">
           <label class="col-md-2 control-label" for="consoleMessage">Message</label>
           <div class="col-md-10">
             <div id="consoleMessage"
-              ng-model="actionSettings.console.message"
-              ui-ace="aceOptions('behaviour')">
+              ng-model="consoleAction.actionSettings.console.message"
+              ui-ace="consoleAction.aceOptions({mode: 'behaviour'})"
+            >{{consoleAction.actionSettings.console.message}}
             </div>
           </div>
-          <p ng-show="!actionSettings.console.message.length" class="text-warning">
+          <p ng-show="!consoleAction.actionSettings.console.message.length" class="text-warning">
             Write a message.
           </p>
         </div>
 
         <div class="form-group control-actions">
-          <button type="button" class="btn btn-danger pull-right" ng-click="removeAction()">Delete</button>
+          <button type="button" class="btn btn-danger pull-right" ng-click="consoleAction.remove()">Delete</button>
         </div> <!-- end form-group -->
 
       </div> <!-- end well -->

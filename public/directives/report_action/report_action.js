@@ -1,45 +1,54 @@
 import template from './report_action.html';
 import help from '../../messages/help';
 
-function reportAction($rootScope) {
-  'ngInject';
+class ReportAction {
+  constructor($scope, $rootScope) {
+    'ngInject';
+    this.$scope = $scope;
+    this.actionName = this.actionName || this.$scope.actionName;
+    this.actionSettings = this.actionSettings || this.$scope.actionSettings;
+    this.actionPriorities = this.actionPriorities || this.$scope.actionPriorities;
+    this.aceOptions = this.aceOptions || this.$scope.aceOptions;
 
-  function actionDirective(scope, element, attrs) {
-    scope.help = help;
-    scope.action = {
-      type: 'report',
-      resolutionPattern: '^\\d{1,4}x\\d{1,4}$',
-      status: {
-        isHeaderOpen: false,
-      },
-      priority: {
-        selected: scope.actionSettings.report.priority || 'low',
-        options: ['low', 'medium', 'high'],
-        handleChange: () => {
-          scope.actionSettings.report.priority = scope.action.priority.selected;
-        },
-      },
-    };
-
-    scope.actionSettings.report.priority = scope.actionSettings.report.priority || scope.action.priority.selected;
-
-    scope.removeAction = function () {
-      $rootScope.$broadcast('action:removeAction', { name: scope.actionName });
-    };
-
-    scope.applyReportType = function (name) {
-      scope.watcher._source.actions[scope.actionName].report.snapshot.type = name;
-    };
+    this.$rootScope = $rootScope;
+    this.help = help;
+    this.type = 'report';
+    this.isOpen = true;
+    this.isTypeOpen = false;
+    this.resolutionPattern = '^\\d{1,4}x\\d{1,4}$';
+    this.actionSettings.report.priority = this.actionSettings.report.priority || 'low';
   }
+
+  remove() {
+    this.$rootScope.$broadcast('action:removeAction', { name: this.actionName });
+  }
+
+  applyReportType(name) {
+    this.actionSettings.report.snapshot.type = name;
+  }
+}
+
+function reportAction() {
+  function link() {}
 
   return {
     restrict: 'E',
     template,
+    link,
+    controller: ReportAction,
+    controllerAs: 'reportAction',
+    bindToController: {
+      actionName: '@',
+      actionSettings: '=',
+      actionPriorities: '=',
+      aceOptions: '&',
+    },
     scope: {
       actionName: '@',
       actionSettings: '=',
+      actionPriorities: '=',
+      aceOptions: '&',
     },
-    link: actionDirective
   };
 };
 

@@ -1,52 +1,57 @@
 /*global angular*/
-import { has } from 'lodash';
 import template from './webhook_action.html';
 import help from '../../messages/help';
 
-function webhookAction($rootScope) {
-  'ngInject';
+class WebhookAction {
+  constructor($scope, $rootScope) {
+    'ngInject';
+    this.$scope = $scope;
+    this.actionName = this.actionName || this.$scope.actionName;
+    this.actionSettings = this.actionSettings || this.$scope.actionSettings;
+    this.actionPriorities = this.actionPriorities || this.$scope.actionPriorities;
+    this.aceOptions = this.aceOptions || this.$scope.aceOptions;
 
-  function actionDirective(scope, element, attrs) {
-    scope.help = help;
-    scope.action = {
-      type: 'webhook',
-      title: scope.actionName,
-      status: {
-        isHeaderOpen: false,
-      },
-      priority: {
-        selected: scope.actionSettings.webhook.priority || 'low',
-        options: ['low', 'medium', 'high'],
-        handleChange: () => {
-          scope.actionSettings.webhook.priority = scope.action.priority.selected;
-        },
-      },
-    };
-
-    scope.actionSettings.webhook.priority = scope.actionSettings.webhook.priority || scope.action.priority.selected;
-
-    if (has(scope.watcher._source.actions[scope.actionName].webhook, 'headers')) {
-      let headers = scope.watcher._source.actions[scope.actionName].webhook.headers;
-      scope.watcher._source.actions[scope.actionName].webhook._headers = angular.toJson(headers, 'pretty');
+    this.$rootScope = $rootScope;
+    this.help = help;
+    this.type = 'webhook';
+    this.isOpen = true;
+    this.actionSettings.webhook.priority = this.actionSettings.webhook.priority || 'low';
+    if (this.actionSettings.webhook.headers) {
+      this.actionSettings.webhook._headers = angular.toJson(this.actionSettings.webhook.headers, 'pretty');
     }
+  }
 
-    scope.changeMethod = function (method) {
-      scope.watcher._source.actions[scope.actionName].webhook.method = method;
-    };
+  remove() {
+    this.$rootScope.$broadcast('action:removeAction', { name: this.actionName });
+  }
 
-    scope.removeAction = function () {
-      $rootScope.$broadcast('action:removeAction', { name: scope.actionName });
-    };
-  };
+  changeMethod(method) {
+    this.actionSettings.webhook.method = method;
+  }
+}
+
+function webhookAction() {
+  function link() {}
 
   return {
     restrict: 'E',
     template,
+    link,
+    controller: WebhookAction,
+    controllerAs: 'webhookAction',
+    bindToController: true,
+    bindToController: {
+      actionName: '@',
+      actionSettings: '=',
+      actionPriorities: '=',
+      aceOptions: '&',
+    },
     scope: {
       actionName: '@',
       actionSettings: '=',
+      actionPriorities: '=',
+      aceOptions: '&',
     },
-    link: actionDirective
   };
 };
 
