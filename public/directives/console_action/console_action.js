@@ -1,40 +1,48 @@
 import template from './console_action.html';
 import help from '../../messages/help';
 
-function consoleAction($rootScope) {
-  'ngInject';
+class ConsoleAction {
+  constructor($scope, $rootScope) {
+    'ngInject';
+    this.$scope = $scope;
+    this.actionName = this.actionName || this.$scope.actionName;
+    this.actionSettings = this.actionSettings || this.$scope.actionSettings;
+    this.actionPriorities = this.actionPriorities || this.$scope.actionPriorities;
+    this.aceOptions = this.aceOptions || this.$scope.aceOptions;
 
-  function actionDirective(scope, element, attrs) {
-    scope.help = help;
-    scope.action = {
-      type: 'console',
-      status: {
-        isHeaderOpen: false,
-      },
-      priority: {
-        selected: scope.actionSettings.console.priority || 'low',
-        options: ['low', 'medium', 'high'],
-        handleChange: () => {
-          scope.actionSettings.console.priority = scope.action.priority.selected;
-        },
-      },
-    };
-
-    scope.actionSettings.console.priority = scope.actionSettings.console.priority || scope.action.priority.selected;
-
-    scope.removeAction = function () {
-      $rootScope.$broadcast('action:removeAction', { name: scope.actionName });
-    };
+    this.$rootScope = $rootScope;
+    this.help = help;
+    this.type = 'console';
+    this.isOpen = true;
+    this.actionSettings.console.priority = this.actionSettings.console.priority || 'low';
   }
+
+  remove() {
+    this.$rootScope.$broadcast('action:removeAction', { name: this.actionName });
+  }
+}
+
+function consoleAction() {
+  function link() {}
 
   return {
     restrict: 'E',
     template,
+    link,
+    controller: ConsoleAction,
+    controllerAs: 'consoleAction',
+    bindToController: {
+      actionName: '@',
+      actionSettings: '=',
+      actionPriorities: '=',
+      aceOptions: '&',
+    },
     scope: {
       actionName: '@',
       actionSettings: '=',
+      actionPriorities: '=',
+      aceOptions: '&',
     },
-    link: actionDirective
   };
 };
 

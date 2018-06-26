@@ -59,7 +59,8 @@ function EditorController(sentinlConfig, $rootScope, $scope, $route, $interval,
           edit: false
         },
         types: [ 'webhook', 'email', 'email_html', 'report', 'slack', 'console' ],
-        status: {}
+        status: {},
+        priorities: ['low', 'medium', 'high'],
       },
       rawEnabled: false,
     };
