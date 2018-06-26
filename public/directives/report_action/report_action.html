@@ -1,8 +1,7 @@
-<div uib-accordion-group class="panel-default" is-open="action.status.isHeaderOpen">
-
+<div uib-accordion-group class="panel-default" is-open="reportAction.isOpen">
   <uib-accordion-heading>
-    {{actionSettings.$$title}} <i class="pull-right glyphicon"
-    ng-class="{'glyphicon-chevron-down': action.status.isHeaderOpen, 'glyphicon-chevron-right': !action.status.isHeaderOpen}"></i>
+    {{reportAction.actionSettings.$$title}} <i class="pull-right glyphicon"
+    ng-class="{'glyphicon-chevron-down': reportAction.isOpen, 'glyphicon-chevron-right': !reportAction.isOpen}"></i>
   </uib-accordion-heading>
 
   <div class="row" id="report-action" class="action-panel">
@@ -10,7 +9,7 @@
       <div class="well" ng-form="reportForm">
 
         <div class="page-header">
-          <h4><small>{{action.type}} action</small></h4>
+          <h4><small>{{reportAction.type}} action</small></h4>
         </div> <!-- end page-header -->
 
         <div class="form-group">
@@ -18,7 +17,7 @@
             <label>Throttle</label>
           </div>
           <div class="col-md-10">
-            <period-tag timesrc="actionSettings.$$throttle"></period-tag>
+            <period-tag timesrc="reportAction.actionSettings.$$throttle"></period-tag>
           </div>
         </div>
 
@@ -27,33 +26,31 @@
           <div class="btn-group col-md-2">
             <select
               class="form-control condition-select"
-              ng-model="action.priority.selected"
-              ng-model-options="{ debounce: 500 }"
-              ng-options="o as o for o in action.priority.options"
-              ng-change="action.priority.handleChange()"
+              ng-model="reportAction.actionSettings.report.priority"
+              ng-options="o as o for o in reportAction.actionPriorities"
             ></select>
           </div>
           <div class="col-md-1">
             <label class="checkbox">
               <input type="checkbox"
-                ng-model="actionSettings.report.save"
-                ng-checked="actionSettings.report.save"
+                ng-model="reportAction.actionSettings.report.save"
+                ng-checked="reportAction.actionSettings.report.save"
               /> save
             </label>
           </div>
           <div class="col-md-1">
             <label class="checkbox">
               <input type="checkbox"
-                ng-model="actionSettings.report.snapshot.params.crop"
-                ng-checked="actionSettings.report.snapshot.params.crop"
+                ng-model="reportAction.actionSettings.report.snapshot.params.crop"
+                ng-checked="reportAction.actionSettings.report.snapshot.params.crop"
               /> crop
             </label>
           </div>
           <div class="col-md-1">
             <label class="checkbox">
               <input type="checkbox"
-                ng-model="actionSettings.report.stateless"
-                ng-checked="actionSettings.report.stateless"
+                ng-model="reportAction.actionSettings.report.stateless"
+                ng-checked="reportAction.actionSettings.report.stateless"
               /> stateless
             </label>
           </div>
@@ -66,11 +63,11 @@
               type="text"
               id="reportTitle"
               name="reportTitle"
-              value="{{actionName}}"
+              value="{{reportAction.actionName}}"
               class="form-control"
               placeholder="{{watcher._id}}"
-              ng-model="actionSettings.$$title"
-              ng-required="actionSettings.report.$$edit"
+              ng-model="reportAction.actionSettings.$$title"
+              ng-required="reportAction.actionSettings.report.$$edit"
             />
           </div>
           <p ng-show=" reportForm.reportTitle.$invalid && !reportForm.reportTitle.$pristine" class="help-block">
@@ -85,11 +82,11 @@
               type="text"
               id="reportTo"
               name="reportTo"
-              value="{{actionSettings.report.to}}"
+              value="{{reportAction.actionSettings.report.to}}"
               class="form-control"
               placeholder="reports@localhost"
-              ng-model="actionSettings.report.to"
-              ng-required="actionSettings.report.$$edit"
+              ng-model="reportAction.actionSettings.report.to"
+              ng-required="reportAction.actionSettings.report.$$edit"
             />
           </div>
           <p ng-show="reportForm.reportTo.$invalid && !reportForm.reportTo.$pristine" class="help-block">
@@ -104,11 +101,11 @@
               type="text"
               id="reportFrom"
               name="reportFrom"
-              value="{{actionSettings.report.from}}"
+              value="{{reportAction.actionSettings.report.from}}"
               class="form-control"
               placeholder="sentinl@localhost"
-              ng-model="actionSettings.report.from"
-              ng-required="actionSettings.report.$$edit"
+              ng-model="reportAction.actionSettings.report.from"
+              ng-required="reportAction.actionSettings.report.$$edit"
             />
           </div>
           <p ng-show="reportForm.reportFrom.$invalid && !reportForm.reportFrom.$pristine" class="help-block">
@@ -123,24 +120,25 @@
               type="text"
               id="reportSubject"
               name="reportSubject"
-              value="{{actionSettings.report.subject}}"
+              value="{{reportAction.actionSettings.report.subject}}"
               class="form-control"
               placeholder="SENTINL Report"
-              ng-model="actionSettings.report.subject"
-              ng-required="actionSettings.report.$$edit"
+              ng-model="reportAction.actionSettings.report.subject"
+              ng-required="reportAction.actionSettings.report.$$edit"
             />
           </div>
         </div> <!-- end form-group -->
 
-        <div class="form-group" ng-class="{'has-error': !actionSettings.report.body.length}">
+        <div class="form-group" ng-class="{'has-error': !reportAction.actionSettings.report.body.length}">
           <label class="col-md-2 control-label" for="reportBody">Body</label>
           <div class="col-md-10">
             <div id="reportBody"
-              ng-model="actionSettings.report.body"
-              ui-ace="aceOptions('behaviour')">
+              ng-model="reportAction.actionSettings.report.body"
+              ui-ace="reportAction.aceOptions({mode: 'behaviour'})"
+            >{{reportAction.actionSettings.report.body}}
             </div>
           </div>
-          <p ng-show="!actionSettings.report.body.length" class="text-warning">
+          <p ng-show="!reportAction.actionSettings.report.body.length" class="text-warning">
             Describe the report in the body.
           </p>
         </div> <!-- end form-group -->
@@ -154,12 +152,12 @@
               type="text"
               id="reportResolution"
               name="reportResolution"
-              value="{{actionSettings.report.snapshot.res}}"
+              value="{{reportAction.actionSettings.report.snapshot.res}}"
               class="form-control"
               placeholder="1280x900"
-              ng-model="actionSettings.report.snapshot.res"
-              ng-pattern="action.resolutionPattern"
-              ng-required="actionSettings.report.$$edit"
+              ng-model="reportAction.actionSettings.report.snapshot.res"
+              ng-pattern="reportAction.actionSettings.resolutionPattern"
+              ng-required="reportAction.actionSettings.report.$$edit"
             />
           </div>
           <label class="col-md-2 control-label" for="reportDelay">Delay</label>
@@ -169,10 +167,10 @@
               min="0"
               id="reportDelay"
               name="reportDelay"
-              ng-value="actionSettings.report.snapshot.params.delay"
+              ng-value="reportAction.actionSettings.report.snapshot.params.delay"
               class="form-control"
               placeholder="5000"
-              ng-model="actionSettings.report.snapshot.params.delay"
+              ng-model="reportAction.actionSettings.report.snapshot.params.delay"
             />
           </div>
           <p ng-show="reportForm.reportResolution.$invalid && !reportForm.reportResolution.$pristine" class="help-block">
@@ -190,11 +188,11 @@
               type="text"
               id="reportUrl"
               name="reportUrl"
-              value="{{actionSettings.report.snapshot.url}}"
+              value="{{reportAction.actionSettings.report.snapshot.url}}"
               class="form-control"
               placeholder="http://www.google.com"
-              ng-model="actionSettings.report.snapshot.url"
-              ng-required="actionSettings.report.$$edit"
+              ng-model="reportAction.actionSettings.report.snapshot.url"
+              ng-required="reportAction.actionSettings.report.$$edit"
             />
           </div>
           <p ng-show="reportForm.reportUrl.$invalid && !reportForm.reportUrl.$pristine" class="help-block">
@@ -207,7 +205,7 @@
             <label class="control-label" for="reportPath">Report Name</label>
             <i class="fa fa-question-circle"
               aria-hidden="true"
-              uib-popover="{{help.action.report.path}}"
+              uib-popover="{{reportAction.help.action.report.path}}"
               popover-trigger="'outsideClick'"></i>
           </div>
           <div class="col-md-7">
@@ -215,19 +213,19 @@
               type="text"
               id="reportPath"
               name="reportPath"
-              value="{{actionSettings.report.snapshot.name}}"
+              value="{{reportAction.actionSettings.report.snapshot.name}}"
               class="form-control"
               placeholder="my_report"
-              ng-model="actionSettings.report.snapshot.name"
+              ng-model="reportAction.actionSettings.report.snapshot.name"
             />
           </div>
-          <div class="btn-group col-md-2" uib-dropdown is-open="status.isopen">
+          <div class="btn-group col-md-2" uib-dropdown is-open="reportAction.isTypeOpen">
             <button type="button" class="btn btn-primary dropdown-toggle" uib-dropdown-toggle>
-              {{actionSettings.report.snapshot.type || 'report type'}} <span class="caret"></span>
+              {{reportAction.actionSettings.report.snapshot.type || 'report type'}} <span class="caret"></span>
             </button>
             <ul class="dropdown-menu" uib-dropdown-menu role="menu">
-              <li><a href="javascript:void(0)" ng-click="applyReportType('png')">PNG</a></li>
-              <li><a href="javascript:void(0)" ng-click="applyReportType('pdf')">PDF</a></li>
+              <li><a href="javascript:void(0)" ng-click="reportAction.applyReportType('png')">PNG</a></li>
+              <li><a href="javascript:void(0)" ng-click="reportAction.applyReportType('pdf')">PDF</a></li>
             </ul>
           </div>
         </div> <!-- end form-group -->
@@ -239,9 +237,9 @@
               type="text"
               id="reportUsername"
               name="reportUsername"
-              value="{{actionSettings.report.snapshot.params.username}}"
+              value="{{reportAction.actionSettings.report.snapshot.params.username}}"
               class="form-control"
-              ng-model="actionSettings.report.snapshot.params.username"
+              ng-model="reportAction.actionSettings.report.snapshot.params.username"
             />
           </div>
         </div> <!-- end form-group -->
@@ -253,15 +251,15 @@
               type="password"
               id="reportPassword"
               name="reportPassword"
-              value="{{actionSettings.report.snapshot.params.password}}"
+              value="{{reportAction.actionSettings.report.snapshot.params.password}}"
               class="form-control"
-              ng-model="actionSettings.report.snapshot.params.password"
+              ng-model="reportAction.actionSettings.report.snapshot.params.password"
             />
           </div>
         </div> <!-- end form-group -->
 
         <div class="form-group control-actions">
-          <button type="button" class="btn btn-danger pull-right" ng-click="removeAction()">Delete</button>
+          <button type="button" class="btn btn-danger pull-right" ng-click="reportAction.remove()">Delete</button>
         </div> <!-- end form-group -->
 
       </div> <!-- end well -->

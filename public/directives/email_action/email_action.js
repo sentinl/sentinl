@@ -1,40 +1,48 @@
 import template from './email_action.html';
 import help from '../../messages/help';
 
-function emailAction($rootScope) {
-  'ngInject';
+class EmailAction {
+  constructor($scope, $rootScope) {
+    'ngInject';
+    this.$scope = $scope;
+    this.actionName = this.actionName || this.$scope.actionName;
+    this.actionSettings = this.actionSettings || this.$scope.actionSettings;
+    this.actionPriorities = this.actionPriorities || this.$scope.actionPriorities;
+    this.aceOptions = this.aceOptions || this.$scope.aceOptions;
 
-  function actionDirective(scope, element, attrs) {
-    scope.help = help;
-    scope.action = {
-      type: 'email',
-      status: {
-        isHeaderOpen: false,
-      },
-      priority: {
-        selected: scope.actionSettings.email.priority || 'low',
-        options: ['low', 'medium', 'high'],
-        handleChange: () => {
-          scope.actionSettings.email.priority = scope.action.priority.selected;
-        },
-      },
-    };
-
-    scope.actionSettings.email.priority = scope.actionSettings.email.priority || scope.action.priority.selected;
-
-    scope.removeAction = function () {
-      $rootScope.$broadcast('action:removeAction', { name: scope.actionName });
-    };
+    this.$rootScope = $rootScope;
+    this.help = help;
+    this.type = 'email';
+    this.isOpen = true;
+    this.actionSettings.email.priority = this.actionSettings.email.priority || 'low';
   }
+
+  remove() {
+    this.$rootScope.$broadcast('action:removeAction', { name: this.actionName });
+  }
+}
+
+function emailAction() {
+  function link() {}
 
   return {
     restrict: 'E',
     template,
+    link,
+    controller: EmailAction,
+    controllerAs: 'emailAction',
+    bindToController: {
+      actionName: '@',
+      actionSettings: '=',
+      actionPriorities: '=',
+      aceOptions: '&',
+    },
     scope: {
       actionName: '@',
       actionSettings: '=',
+      actionPriorities: '=',
+      aceOptions: '&',
     },
-    link: actionDirective
   };
 };
 
