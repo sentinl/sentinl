@@ -87,7 +87,7 @@ sentinl:
 ```
 
 ##### Example (extended)
-The commented ('#') configuration is optional and are applied by default if not specified otherwise.
+The commented ('#') configuration is optional and is applied by default if not specified otherwise.
 
 ```yaml
 sentinl:
