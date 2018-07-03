@@ -17,7 +17,7 @@
             <div class="col-md-2">
               <div class="form-group">
                 <watcher-edit-add-action
-                  on-add="actionPanelWatcherEdit.onAdd({actionName, actionSettings})"
+                  on-add="actionPanelWatcherEdit.onAdd({actionName: actionName, actionSettings: actionSettings})"
                 ></watcher-edit-add-action>
               </div>
             </div>
@@ -33,7 +33,7 @@
                       ng-if="actionPanelWatcherEdit.isAction(actionSettings, 'email')"
                       action-name="{{actionName}}"
                       action-settings="actionSettings"
-                      action-delete="actionPanelWatcherEdit.onDelete({actionName})"
+                      action-delete="actionPanelWatcherEdit.onDelete({actionName: actionName})"
                     ></watcher-edit-email-action>
                   </div>
                 </uib-accordion>

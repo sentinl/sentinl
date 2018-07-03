@@ -71,12 +71,12 @@ class ThresholdWatcherEdit {
     this.watcher._source.input.search.request.body = body;
   }
 
-  actionAdd(actionName, actionSettings) {
-    this.watcher._source.actions[actionName] = actionSettings;
+  actionAdd(params) {
+    this.watcher._source.actions[params.actionName] = params.actionSettings;
   }
 
-  actionDelete(actionName) {
-    delete this.watcher._source.actions[actionName];
+  actionDelete(params) {
+    delete this.watcher._source.actions[params.actionName];
   }
 
   _isWatcherValid() {

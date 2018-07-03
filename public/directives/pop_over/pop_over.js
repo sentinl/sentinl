@@ -1,11 +1,14 @@
 /* global $ */
 
+let self; // global var because 'link' method creates its own scope (this)
+
 class PopOver {
   constructor($compile) {
-    this.restrict = 'A';
-    this.transclude = true;
-    this.template = '<span ng-transclude class="pop-over-container"></span>';
-    this.$compile = $compile;
+    self = this;
+    self.restrict = 'A';
+    self.transclude = true;
+    self.template = '<span ng-transclude class="pop-over-container"></span>';
+    self.$compile = $compile;
   }
 
   link(scope, element, attrs) {
@@ -19,7 +22,7 @@ class PopOver {
       }
 
       $(element).popover({
-        content: this.$compile(html)(scope),
+        content: self.$compile(html)(scope),
         title: popOverTitle || '',
         placement: popOverPlacement || 'bottom',
         trigger: popOverTrigger || 'click',
