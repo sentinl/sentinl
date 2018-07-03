@@ -84,6 +84,7 @@ Create a sha hash of the watcher password using `encryptPassword.js`. Put it int
 Both username and password should be set in the report action in UI.
 
 ## Kibana configuration for Sentinl v5
+In the Sentinl v5 report authentication is set systemwide and applied for all watchers. It is not possible to set unique authentication per watcher.
 
 ### Search Guard
 ```
@@ -104,84 +105,242 @@ sentinl
 ```
 
 ## Kibana configuration for Sentinl v6+
+In the Sentinl v6 report unique authentication is set per watcher.
 
-### Search Guard
+### Basic authentication
 ```
-sentinl:
-  settings:
-    report:
-      active: true
-      authentication:
-        enabled: true
-        mode:
-          searchguard: true
-```
-
-### X-Pack
-```
-sentinl:
-  settings:
-    report:
-      active: true
-      authentication:
-        enabled: true
-        mode:
-          xpack: true
-```
-
-### Basic
-```
-sentinl:
-  settings:
-    report:
-      active: true
-      authentication:
-        enabled: true
-        mode:
-          basic: true
-```
-
-### Custom
-```
-sentinl:
-  settings:
-    report:
-      active: true
-      authentication:
-        enabled: true
-        mode:
-          custom: true
-        custom: # you have to replace the following selectors with selectors found on your login page
-          username_input_selector: '#username'
-          password_input_selector: '#password'
-          login_btn_selector: '#login-btn'
-```
-
-### Authentication per report
-You can set different authentication modes per different reports. This can be added only in the Raw tab of watcher editor. 
-```
-...
+{
   "actions": {
-    "report_screenshot": {
+    "report_admin": {
       "throttle_period": "0h0m1s",
       "report": {
-        ...
+        "to": "sergibondarenko@gmail.com",
+        "from": "trex@beast",
+        "subject": "My Report",
+        "priority": "high",
+        "body": "Sample Screenshot Report",
+        "save": true,
+        "auth": {
+          "active": true,
+          "mode": "basic",
+          "username": "user",
+          "password": "passwd"
+        },
         "snapshot": {
           "res": "1920x1080",
-          "url": "https://auth-demo.aerobaticapp.com/protected-standard/",
+          "url": "http://httpbin.org/basic-auth/user/passwd",
           "params": {
-            "username": "aerobatic",
-            "password": "aerobatic"
-            "authentication": {
-              "enabled": true,
-              "mode": {
-                "searchguard": true
-              }
-            }
+            "delay": 5000,
+            "crop": "false"
           },
+          "type": "png"
         }
       }
     }
-...
-""
+  },
+  "input": {
+    "search": {
+      "request": {
+        "index": [],
+        "body": {}
+      }
+    }
+  },
+  "condition": {
+    "script": {
+      "script": "payload.hits.total >= 0"
+    }
+  },
+  "transform": {},
+  "trigger": {
+    "schedule": {
+      "later": "every 1 hour"
+    }
+  },
+  "disable": true,
+  "report": true,
+  "title": "reporter_title"
+}
+```
+
+### Custom login page authentication
+Sentinl uses CSS selectors to find page login form controls: username, password and login button.
+```
+{
+  "actions": {
+    "report_admin": {
+      "throttle_period": "0h0m1s",
+      "report": {
+        "to": "sergibondarenko@gmail.com",
+        "from": "trex@beast",
+        "subject": "My Report",
+        "priority": "high",
+        "body": "Sample Screenshot Report",
+        "save": true,
+        "auth": {
+          "active": true,
+          "mode": "customselector",
+          "username": "admin",
+          "password": "12345",
+          "selector_username": "form input[id='usr']",
+          "selector_password": "form input[id='pwd']",
+          "selector_login_btn": "form input[type='submit']"
+        },
+        "snapshot": {
+          "res": "1920x1080",
+          "url": "http://testing-ground.scraping.pro/login",
+          "params": {
+            "delay": 5000,
+            "crop": "false",
+            "username": "elastic",
+            "password": "password"
+          },
+          "type": "png"
+        }
+      }
+    }
+  },
+  "input": {
+    "search": {
+      "request": {
+        "index": [],
+        "body": {}
+      }
+    }
+  },
+  "condition": {
+    "script": {
+      "script": "payload.hits.total >= 0"
+    }
+  },
+  "transform": {},
+  "trigger": {
+    "schedule": {
+      "later": "every 1 hour"
+    }
+  },
+  "disable": true,
+  "report": true,
+  "title": "reporter_title"
+}
+```
+
+### SearchGuard authentication
+It is essentially same as the authentication above except CSS selectors here are hardcoded in the Sentinl part of Kibana configuration.
+You can change the selectors if they don't work for you. For details look the [advanced configuration report part](Config-Example.md). 
+```
+{
+  "actions": {
+    "report_admin": {
+      "throttle_period": "0h0m1s",
+      "report": {
+        "to": "sergibondarenko@gmail.com",
+        "from": "trex@beast",
+        "subject": "My Report",
+        "priority": "high",
+        "body": "Sample Screenshot Report",
+        "save": true,
+        "auth": {
+          "active": true,
+          "mode": "searchguard",
+          "username": "admin",
+          "password": "12345"
+        },
+        "snapshot": {
+          "res": "1920x1080",
+          "url": "http://testing-ground.scraping.pro/login",
+          "params": {
+            "delay": 5000,
+            "crop": "false",
+            "username": "elastic",
+            "password": "password"
+          },
+          "type": "png"
+        }
+      }
+    }
+  },
+  "input": {
+    "search": {
+      "request": {
+        "index": [],
+        "body": {}
+      }
+    }
+  },
+  "condition": {
+    "script": {
+      "script": "payload.hits.total >= 0"
+    }
+  },
+  "transform": {},
+  "trigger": {
+    "schedule": {
+      "later": "every 1 hour"
+    }
+  },
+  "disable": true,
+  "report": true,
+  "title": "reporter_title"
+}
+```
+
+### Kibana X-Pack authentication
+It is essentially same as the authentication above except CSS selectors here are hardcoded in the Sentinl part of Kibana configuration.
+You can change the selectors if they don't work for you. For details look the [advanced configuration report part](Config-Example.md). 
+```
+{
+  "actions": {
+    "report_admin": {
+      "throttle_period": "0h0m1s",
+      "report": {
+        "to": "sergibondarenko@gmail.com",
+        "from": "trex@beast",
+        "subject": "My Report",
+        "priority": "high",
+        "body": "Sample Screenshot Report",
+        "save": true,
+        "auth": {
+          "active": true,
+          "mode": "xpack",
+          "username": "admin",
+          "password": "12345"
+        },
+        "snapshot": {
+          "res": "1920x1080",
+          "url": "http://testing-ground.scraping.pro/login",
+          "params": {
+            "delay": 5000,
+            "crop": "false",
+            "username": "elastic",
+            "password": "password"
+          },
+          "type": "png"
+        }
+      }
+    }
+  },
+  "input": {
+    "search": {
+      "request": {
+        "index": [],
+        "body": {}
+      }
+    }
+  },
+  "condition": {
+    "script": {
+      "script": "payload.hits.total >= 0"
+    }
+  },
+  "transform": {},
+  "trigger": {
+    "schedule": {
+      "later": "every 1 hour"
+    }
+  },
+  "disable": true,
+  "report": true,
+  "title": "reporter_title"
+}
 ```
