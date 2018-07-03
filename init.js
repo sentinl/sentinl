@@ -16,15 +16,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import later from 'later';
-import { once, has, forEach } from 'lodash';
+import { once, has, forEach, includes } from 'lodash';
 import url from 'url';
 import getScheduler from './server/lib/scheduler';
 import initIndices from './server/lib/initIndices';
 import getElasticsearchClient from './server/lib/get_elasticsearch_client';
 import getConfiguration from './server/lib/get_configuration';
-import fs from 'fs';
+import {existsSync} from 'fs';
 import Log from './server/lib/log';
 
 const routes = {
@@ -56,7 +55,7 @@ const init = once(function (server) {
   const scheduler = getScheduler(server);
   const log = new Log(config.app_name, server, 'init');
 
-  if (fs.existsSync('/etc/sentinl.json')) {
+  if (existsSync('/etc/sentinl.json')) {
     server.plugins.sentinl.status.red('Setting configuration values in /etc/sentinl.json is not supported anymore, please copy ' +
                                       'your Sentinl configuration values to config/kibi.yml or config/kibana.yml, ' +
                                       'remove /etc/sentinl.json and restart.');
@@ -64,6 +63,11 @@ const init = once(function (server) {
   }
 
   log.info('initializing ...');
+
+  if (!includes(['horseman', 'puppeteer'], config.settings.report.engine)) {
+    log.error(`unsupported authentication engine: ${config.settings.report.engine}` +
+      'Supported engines: horseman, puppeteer');
+  }
 
   // Object to hold different runtime values.
   server.sentinlStore = {

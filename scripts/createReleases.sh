@@ -15,9 +15,11 @@ releases=(
 "6.2.1"
 "6.2.2"
 "6.2.3"
+"6.2.4"
 )
 
 for i in "${releases[@]}"
 do
 	gulp package --version=$i && mv ../target/gulp/sentinl* $1
+	# gulp package_nochrome --version=$i && mv ../target/gulp/sentinl* $1
 done

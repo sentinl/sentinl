@@ -148,6 +148,14 @@ gulp.task('package', ['build'], function (done) {
     .pipe(gulp.dest(targetDir));
 });
 
+gulp.task('package_nochrome', ['build'], function (done) {
+  return gulp.src([
+    path.join(buildDir, '**', '*'),
+  ])
+    .pipe(zip(options.version ? packageName + '-v' + options.version  + '.zip' : packageName + '.zip'))
+    .pipe(gulp.dest(targetDir));
+});
+
 gulp.task('dev', ['sync'], function (done) {
   gulp.watch([
     'index.js',

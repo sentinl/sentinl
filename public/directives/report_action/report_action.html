@@ -233,15 +233,39 @@
         </div> <!-- end form-group -->
 
         <div class="form-group">
+          <hr>
+          <label class="col-md-2 control-label">Authentication:</label>
+        </div>
+
+        <div class="form-group">
+          <label class="col-md-2 control-label" for="reportMode">Mode</label>
+          <div class="btn-group col-md-2">
+            <select
+              class="form-control condition-select"
+              ng-model="reportAction.actionSettings.report.auth.mode"
+              ng-options="o as o for o in reportAction.authModes"
+            ></select>
+          </div>
+          <div class="col-md-1">
+            <label class="checkbox">
+              <input type="checkbox"
+                ng-model="reportAction.actionSettings.report.auth.active"
+                ng-checked="reportAction.actionSettings.report.auth.active"
+              /> active
+            </label>
+          </div>
+        </div> <!-- end form-group -->
+
+        <div class="form-group">
           <label class="col-md-2 control-label" for="reportUsername">Username</label>
           <div class="col-md-10">
             <input
               type="text"
               id="reportUsername"
               name="reportUsername"
-              value="{{actionSettings.report.snapshot.params.username}}"
+              value="{{reportAction.actionSettings.report.auth.username}}"
               class="form-control"
-              ng-model="actionSettings.report.snapshot.params.username"
+              ng-model="reportAction.actionSettings.report.auth.username"
             />
           </div>
         </div> <!-- end form-group -->
@@ -253,9 +277,51 @@
               type="password"
               id="reportPassword"
               name="reportPassword"
-              value="{{actionSettings.report.snapshot.params.password}}"
+              value="{{reportAction.actionSettings.report.auth.password}}"
               class="form-control"
-              ng-model="actionSettings.report.snapshot.params.password"
+              ng-model="reportAction.actionSettings.report.auth.password"
+            />
+          </div>
+        </div> <!-- end form-group -->
+
+        <div class="form-group" ng-show="reportAction.actionSettings.report.auth.mode === 'customselector'">
+          <label class="col-md-2 control-label" for="reportSelectorUsername">CSS Selector for username</label>
+          <div class="col-md-10">
+            <input
+              type="text"
+              id="reportSelectorUsername"
+              name="reportSelectorUsername"
+              value="{{reportAction.actionSettings.report.auth.selector_username}}"
+              class="form-control"
+              ng-model="reportAction.actionSettings.report.auth.selector_username"
+            />
+          </div>
+        </div> <!-- end form-group -->
+
+        <div class="form-group" ng-show="reportAction.actionSettings.report.auth.mode === 'customselector'">
+          <label class="col-md-2 control-label" for="reportSelectorPassword">CSS Selector for password</label>
+          <div class="col-md-10">
+            <input
+              type="text"
+              id="reportSelectorPassword"
+              name="reportSelectorPassword"
+              value="{{reportAction.actionSettings.report.auth.selector_password}}"
+              class="form-control"
+              ng-model="reportAction.actionSettings.report.auth.selector_password"
+            />
+          </div>
+        </div> <!-- end form-group -->
+
+        <div class="form-group" ng-show="reportAction.actionSettings.report.auth.mode === 'customselector'">
+          <label class="col-md-2 control-label" for="reportSelectorLognBtn">CSS Selector for login btn</label>
+          <div class="col-md-10">
+            <input
+              type="text"
+              id="reportSelectorLognBtn"
+              name="reportSelectorLognBtn"
+              value="{{reportAction.actionSettings.report.auth.selector_login_btn}}"
+              class="form-control"
+              ng-model="reportAction.actionSettings.report.auth.selector_login_btn"
             />
           </div>
         </div> <!-- end form-group -->

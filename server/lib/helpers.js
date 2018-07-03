@@ -1,6 +1,7 @@
 import Promise from 'bluebird';
 import path from 'path';
-import klawSync from 'klaw-sync';
+const {readdirSync, chmodSync, lstatSync} = require('fs');
+const {join} = require('path');
 
 /**
 * Check if Kibi
@@ -12,22 +13,19 @@ const isKibi = function (server) {
   return server.plugins.saved_objects_api ? true : false;
 };
 
-/**
-* Get full sys path by file name
-*
-* @param {string} fileName
-* @param {string} rootPath where to look for the fileName
-* @return {string} full sys path to fileName
-*/
-const getFullPathByFileName = function (fileName, rootPath) {
-  const paths = klawSync(rootPath);
-  let found = paths.filter((e) => path.basename(e.path) === fileName);
-  if (Array.isArray(found) && !!found.length) {
-    return found[0].path;
-  }
+const listAllFilesSync = function (dir, filesArr) {
+  filesArr = filesArr || [];
+  readdirSync(dir).map(name => join(dir, name)).forEach(function (file) {
+    if (lstatSync(file).isDirectory()) {
+      filesArr = listAllFilesSync(file, filesArr);
+    } else {
+      filesArr.push(file);
+    }
+  });
+  return filesArr;
 };
 
 module.exports = {
   isKibi,
-  getFullPathByFileName,
+  listAllFilesSync,
 };
