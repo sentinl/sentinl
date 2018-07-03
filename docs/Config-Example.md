@@ -22,6 +22,7 @@ sentinl:
 ```
 
 ##### Example (extended)
+
 ```
 sentinl:
   es:
@@ -86,7 +87,7 @@ sentinl:
 ```
 
 ##### Example (extended)
-The commented configuration is optional and are applied by default if not specified otherwise.
+The commented ('#') configuration is optional and are applied by default if not specified otherwise.
 
 ```yaml
 sentinl:
@@ -128,29 +129,25 @@ sentinl:
       # path: ':/{{payload.watcher_id}}'
       # body: '{{payload.watcher_id}}{payload.hits.total}}'
       # method: POST
-    report:
-      active: true
-      executable_path: '/usr/bin/chromium' # path to Chrome v59+ or Chromium v59+
-      timeout: 5000
-      # authentication:
-      #   enabled: true
-      #   mode:
-      #     searchguard: false
-      #     xpack: false
-      #     basic: false
-      #     custom: true
-      #   custom:
-      #     username_input_selector: '#username'
-      #     password_input_selector: '#password'
-      #     login_btn_selector: '#login-btn'
-      # file:
-      #   pdf:
-      #     format: 'A4'
-      #     landscape: true
-      #   screenshot:
-      #     width: 1280
-      #     height: 900
     pushapps:
       active: false
       api_key: '<pushapps API Key>'  
+      # report:
+      #   engine: horseman # options: horseman, puppeteer
+      #   chrome_path: '/usr/bin/chromium' # path to Chrome v59+ or Chromium v59+
+      #   phantomjs_path: '/opt/kibana/plugins/sentinl/node_modules/phantomjs-prebuilt/bin/phantomjs' # path to PhantomJS
+      #   active: true
+      #   debug:
+      #     headless: true
+      #     devtools: false
+      #   auth:
+      #     css_selectors: # howto find selectors: https://developers.google.com/web/updates/2015/05/search-dom-tree-by-css-selector
+      #       searchguard:
+      #         username: 'form input[name="username"]' 
+      #         password: 'form input[name="password"]' 
+      #         login_btn: 'form button.btn.btn-login' 
+      #       xpack:
+      #         username: 'form input[data-test-subj="loginUsername"]' 
+      #         password: 'form input[data-test-subj="loginPassword"]' 
+      #         login_btn: 'form button[data-test-subj="loginSubmit"]' 
 ```
