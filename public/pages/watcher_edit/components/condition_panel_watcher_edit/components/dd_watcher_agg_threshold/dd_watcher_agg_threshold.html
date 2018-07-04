@@ -1,6 +1,6 @@
 <form iname="ddWatcherAggThreshold.form" ng-model-options="{ getterSetter: true }" novalidate>
   <a pop-over pop-over-title="{{ddWatcherAggThreshold.selected | uppercase}}">
-    <strong class="pop-over-btn-text">IS {{ddWatcherAggThreshold.selected | uppercase}}</strong> {{ddWatcherAggThreshold.number}}
+    <strong class="pop-over-btn-text">IS {{ddWatcherAggThreshold.selected | uppercase}}</strong> {{ddWatcherAggThreshold.number | limitText: WatcherAggThreshold.textLimit}}
   </a>
   <div ng-hide="true" class="pop-over-content">
     <div class="row">

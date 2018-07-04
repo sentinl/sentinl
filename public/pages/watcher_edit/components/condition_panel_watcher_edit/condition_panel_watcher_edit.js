@@ -23,7 +23,7 @@ class Chart {
 }
 
 class ConditionPanelWatcherEdit {
-  constructor($http, $scope, watcherEditorChartService, watcherEditorEsService, watcherHelper, createNotifier, sentinlLog, ServerConfig) {
+  constructor($http, $scope, watcherEditorChartService, watcherEditorEsService, createNotifier, sentinlLog, ServerConfig) {
     this.$scope = $scope;
     this.watcher = this.watcher || this.$scope.watcher;
     this.updateStatus = this.updateStatus || this.$scope.updateStatus;
@@ -33,7 +33,6 @@ class ConditionPanelWatcherEdit {
     this.$http = $http;
     this.watcherEditorChartService = watcherEditorChartService;
     this.watcherEditorEsService = watcherEditorEsService;
-    this.helper = watcherHelper;
     this.serverConfig = ServerConfig;
     this.log = sentinlLog;
 
@@ -78,6 +77,7 @@ class ConditionPanelWatcherEdit {
     };
 
     this.condition = {
+      textLimit: 7,
       type: {
         handleSelect: (type) => {
           this.log.debug('select type:', type);
@@ -110,6 +110,12 @@ class ConditionPanelWatcherEdit {
         handleSelect: (unit, n) => {
           this.log.debug('select last:', unit, n);
           this._updateChartQueryParamsLast(n, unit);
+        },
+      },
+      interval: {
+        handleSelect: (unit, n) => {
+          this.log.debug('select interval:', unit, n);
+          this._updateChartQueryParamsInterval(n, unit);
         },
       },
     };
@@ -154,7 +160,6 @@ class ConditionPanelWatcherEdit {
 
       this.$scope.$watch('conditionPanelWatcherEdit.watcher._source', async () => {
         if (has(this.watcher, '_source.trigger.schedule.later')) {
-          this._updateChartQueryParamsInterval(this.watcher._source.trigger.schedule.later);
           this.watcher._source.wizard.chart_query_params.index = this.watcher._source.input.search.request.index;
 
           try {
@@ -409,19 +414,6 @@ class ConditionPanelWatcherEdit {
     chart.yAxis[1] = Array.apply(null, Array(len)).map(Number.prototype.valueOf, n);
   }
 
-  /*
-  * @param {string} interval of time: every 1 minutes
-  */
-  _updateChartQueryParamsInterval(interval) {
-    if (this.helper.isScheduleModeEvery(interval)) {
-      interval = interval.split(' ');
-      this.watcher._source.wizard.chart_query_params.interval = {
-        n: +interval[1],
-        unit: interval[2],
-      };
-    }
-  }
-
   _updateChartQueryParamsOver(over) {
     this.watcher._source.wizard.chart_query_params.over = pick(over, ['type', 'n', 'field']);
   }
@@ -440,6 +432,10 @@ class ConditionPanelWatcherEdit {
 
   _updateChartQueryParamsLast(n, unit) {
     this.watcher._source.wizard.chart_query_params.last = { unit, n: +n };
+  }
+
+  _updateChartQueryParamsInterval(n, unit) {
+    this.watcher._source.wizard.chart_query_params.interval = { unit, n: +n };
   }
 
   _updateChartQueryParamsThreshold(n, direction) {

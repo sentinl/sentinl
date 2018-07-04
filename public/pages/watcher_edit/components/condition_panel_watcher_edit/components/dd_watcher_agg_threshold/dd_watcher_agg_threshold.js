@@ -5,6 +5,7 @@ class DdWatcherAggThreshold {
     this.$scope = $scope;
     this.aggThresholdOptions = this.aggThresholdOptions || this.$scope.aggThresholdOptions;
     this.aggThresholdOnSelect = this.aggThresholdOnSelect || this.$scope.aggThresholdOnSelect;
+    this.textLimit = this.textLimit || this.$scope.textLimit;
 
     this.options = ['above', 'below', 'above eq', 'below eq'];
     this.number = this.aggThresholdOptions.n || 5;
@@ -23,12 +24,14 @@ function ddWatcherAggThreshold() {
     scope: {
       aggThresholdOptions: '=',
       aggThresholdOnSelect: '&',
+      textLimit: '=',
     },
     controller:  DdWatcherAggThreshold,
     controllerAs: 'ddWatcherAggThreshold',
     bindToController: {
       aggThresholdOptions: '=',
       aggThresholdOnSelect: '&',
+      textLimit: '=',
     },
   };
 }

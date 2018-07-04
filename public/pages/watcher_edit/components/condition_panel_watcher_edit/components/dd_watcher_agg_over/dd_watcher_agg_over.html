@@ -1,6 +1,6 @@
 <form name="ddWatcherAggOver.form" ng-model-options="{ getterSetter: true }" novalidate>
-  <a pop-over pop-over-title="{{ddWatcherAggOver.title}}">
-    <strong class="pop-over-btn-text">{{ddWatcherAggOver.top.enabled ? 'GROUPED ' : ''}}{{ddWatcherAggOver.title}}</strong> {{ddWatcherAggOver.selected}} {{ddWatcherAggOver.top.enabled ? ddWatcherAggOver.top.n : ''}}
+  <a pop-over pop-over-title="{{ddWatcherAggOver.title | uppercase}}">
+    <strong class="pop-over-btn-text">{{ddWatcherAggOver.topEnabled | uppercase}}</strong> {{ddWatcherAggOver.selected}} {{ddWatcherAggOver.topN | limitText: ddWatcherAggOver.textLimit}}
   </a>
   <div ng-hide="true" class="pop-over-content">
     <div class="row">

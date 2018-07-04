@@ -5,6 +5,7 @@ class DdWatcherAggType {
     this.$scope = $scope;
     this.aggTypeSelected = this.aggTypeSelected || this.$scope.aggTypeSelected;
     this.aggTypeOnSelect = this.aggTypeOnSelect || this.$scope.aggTypeOnSelect;
+    this.textLimit = this.textLimit || this.$scope.textLimit;
 
     this.title = 'WHEN';
     this.options = ['count', 'average', 'sum', 'min', 'max'];
@@ -23,12 +24,14 @@ function ddWatcherAggType() {
     scope: {
       aggTypeSelected: '=',
       aggTypeOnSelect: '&',
+      textLimit: '=',
     },
     controller:  DdWatcherAggType,
     controllerAs: 'ddWatcherAggType',
     bindToController: {
       aggTypeSelected: '=',
       aggTypeOnSelect: '&',
+      textLimit: '=',
     },
   };
 }

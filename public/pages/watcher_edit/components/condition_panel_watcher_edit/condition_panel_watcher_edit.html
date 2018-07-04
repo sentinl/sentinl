@@ -14,45 +14,55 @@
           </div> <!-- END header -->
           <hr>
           <div class="row watcher-editor-panel-paragraph">
-            <div class="col-md-8">
-              <div class="form-group">
-                <ul>
-                  <li>
-                    <dd-watcher-agg-type
-                      agg-type-selected="conditionPanelWatcherEdit.watcher._source.wizard.chart_query_params.queryType"
-                      agg-type-on-select="conditionPanelWatcherEdit.condition.type.handleSelect(type)"
-                    ></dd-watcher-agg-type/>
-                  </li>
-                  <li>
-                    <dd-watcher-agg-field
-                      agg-enabled="conditionPanelWatcherEdit.condition.field.aggEnabled"
-                      active-field="{{conditionPanelWatcherEdit.watcher._source.wizard.chart_query_params.field}}"
-                      field-names="conditionPanelWatcherEdit.indexesData.fieldNames"
-                      time-field="{{conditionPanelWatcherEdit.watcher._source.wizard.chart_query_params.timeField}}"
-                      on-select-field="conditionPanelWatcherEdit.condition.field.handleSelect(field, timeField)"
-                    ></dd-watcher-agg-field/>
-                  </li>
-                  <li>
-                    <dd-watcher-agg-over
-                      agg-over-options="conditionPanelWatcherEdit.watcher._source.wizard.chart_query_params.over"
-                      agg-field-names="conditionPanelWatcherEdit.indexesData.fieldNames"
-                      agg-over-on-select="conditionPanelWatcherEdit.condition.over.handleSelect(over)"
-                    ></dd-watcher-agg-over/>
-                  </li>
-                  <li>
-                    <dd-watcher-agg-threshold
-                      agg-threshold-options="conditionPanelWatcherEdit.watcher._source.wizard.chart_query_params.threshold"
-                      agg-threshold-on-select="conditionPanelWatcherEdit.condition.threshold.handleSelect(direction, n)"
-                    ></dd-watcher-agg-threshold/>
-                  </li>
-                  <li>
-                    <dd-watcher-agg-time
-                      agg-time-options="conditionPanelWatcherEdit.watcher._source.wizard.chart_query_params.last"
-                      agg-time-on-select="conditionPanelWatcherEdit.condition.last.handleSelect(unit, n)"
-                    ></dd-watcher-agg-time/>
-                  </li>
-                </ul>
-              </div>
+            <div id="watcher-editor-condition-dd-menu" class="col-md-8">
+              <ul>
+                <li class="watcher-editor-condition-dd">
+                  <dd-watcher-agg-type
+                    agg-type-selected="conditionPanelWatcherEdit.watcher._source.wizard.chart_query_params.queryType"
+                    agg-type-on-select="conditionPanelWatcherEdit.condition.type.handleSelect(type)"
+                    text-limit="conditionPanelWatcherEdit.condition.textLimit"
+                  ></dd-watcher-agg-type/>
+                </li>
+                <li class="watcher-editor-condition-dd">
+                  <dd-watcher-agg-field
+                    agg-enabled="conditionPanelWatcherEdit.condition.field.aggEnabled"
+                    active-field="{{conditionPanelWatcherEdit.watcher._source.wizard.chart_query_params.field}}"
+                    field-names="conditionPanelWatcherEdit.indexesData.fieldNames"
+                    time-field="{{conditionPanelWatcherEdit.watcher._source.wizard.chart_query_params.timeField}}"
+                    on-select-field="conditionPanelWatcherEdit.condition.field.handleSelect(field, timeField)"
+                    text-limit="conditionPanelWatcherEdit.condition.textLimit"
+                  ></dd-watcher-agg-field/>
+                </li>
+                <li class="watcher-editor-condition-dd">
+                  <dd-watcher-agg-over
+                    agg-over-options="conditionPanelWatcherEdit.watcher._source.wizard.chart_query_params.over"
+                    agg-field-names="conditionPanelWatcherEdit.indexesData.fieldNames"
+                    agg-over-on-select="conditionPanelWatcherEdit.condition.over.handleSelect(over)"
+                    text-limit="conditionPanelWatcherEdit.condition.textLimit"
+                  ></dd-watcher-agg-over/>
+                </li>
+                <li class="watcher-editor-condition-dd">
+                  <dd-watcher-agg-threshold
+                    agg-threshold-options="conditionPanelWatcherEdit.watcher._source.wizard.chart_query_params.threshold"
+                    agg-threshold-on-select="conditionPanelWatcherEdit.condition.threshold.handleSelect(direction, n)"
+                    text-limit="conditionPanelWatcherEdit.condition.textLimit"
+                  ></dd-watcher-agg-threshold/>
+                </li>
+                <li class="watcher-editor-condition-dd">
+                  <dd-watcher-agg-time
+                    agg-time-options="conditionPanelWatcherEdit.watcher._source.wizard.chart_query_params.last"
+                    agg-time-on-select="conditionPanelWatcherEdit.condition.last.handleSelect(unit, n)"
+                    text-limit="conditionPanelWatcherEdit.condition.textLimit"
+                  ></dd-watcher-agg-time/>
+                </li>
+                <li class="watcher-editor-condition-dd">
+                  <dd-watcher-agg-interval
+                    agg-interval-options="conditionPanelWatcherEdit.watcher._source.wizard.chart_query_params.interval"
+                    agg-interval-on-select="conditionPanelWatcherEdit.condition.interval.handleSelect(unit, n)"
+                    text-limit="conditionPanelWatcherEdit.condition.textLimit"
+                  ></dd-watcher-agg-interval/>
+                </li>
+              </ul>
             </div>
             <div class="col-md-2">
               <div class="form-group">

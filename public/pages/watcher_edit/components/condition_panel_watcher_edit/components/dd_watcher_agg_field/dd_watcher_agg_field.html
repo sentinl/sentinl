@@ -1,6 +1,6 @@
 <form name="ddWatcherAggField.form" ng-model-options="{ getterSetter: true }" novalidate>
   <a pop-over pop-over-title="{{ddWatcherAggField.title}}">
-    <strong class="pop-over-btn-text">{{ddWatcherAggField.title}}</strong> {{ddWatcherAggField.activeFieldTitle}} {{ddWatcherAggField.timeFieldTitle}}
+    <strong class="pop-over-btn-text">FIELD</strong> {{ddWatcherAggField.activeField | limitText: ddWatcherAggField.textLimit}} <strong>TIME</strong> {{ddWatcherAggField.timeField | limitText: ddWatcherAggField.textLimit}}
   </a>
   <div ng-hide="true" class="pop-over-content">
     <div class="row">

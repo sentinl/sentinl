@@ -5,8 +5,9 @@ class DdWatcherAggTime {
     this.$scope = $scope;
     this.aggTimeOptions = this.aggTimeOptions || this.$scope.aggTimeOptions;
     this.aggTimeOnSelect = this.aggTimeOnSelect || this.$scope.aggTimeOnSelect;
+    this.textLimit = this.textLimit || this.$scope.textLimit;
 
-    this.title = 'LAST';
+    this.title = 'last';
     this.options = ['seconds', 'minutes', 'hours', 'days', 'months', 'years'];
     this.selected = this.aggTimeOptions.unit || 'minutes';
     this.number = this.aggTimeOptions.n || 15;
@@ -24,12 +25,14 @@ function ddWatcherAggTime() {
     scope: {
       aggTimeOptions: '=',
       aggTimeOnSelect: '&',
+      textLimit: '=',
     },
     controller:  DdWatcherAggTime,
     controllerAs: 'ddWatcherAggTime',
     bindToController: {
       aggTimeOptions: '=',
       aggTimeOnSelect: '&',
+      textLimit: '=',
     },
   };
 }

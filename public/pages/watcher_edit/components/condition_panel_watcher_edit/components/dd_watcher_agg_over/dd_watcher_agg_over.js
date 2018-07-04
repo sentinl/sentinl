@@ -6,8 +6,9 @@ class DdWatcherAggOver {
     this.aggOverOptions = this.aggOverOptions || this.$scope.aggOverOptions;
     this.aggFieldNames = this.aggFieldNames || this.$scope.aggFieldNames;
     this.aggOverOnSelect = this.aggOverOnSelect || this.$scope.aggOverOnSelect;
+    this.textLimit = this.textLimit || this.$scope.textLimit;
 
-    this.title = 'OVER';
+    this.title = 'over';
     this.options = ['all docs', 'top'];
     const {type, n, field} = this.aggOverOptions;
     this.selected = type;
@@ -16,6 +17,14 @@ class DdWatcherAggOver {
       n,
       selected: field,
     };
+  }
+
+  get topN() {
+    return this.top.enabled ? this.top.n : '';
+  }
+
+  get topEnabled() {
+    return this.top.enabled ? 'grouped over' : 'over';
   }
 
   handleChange() {
@@ -44,6 +53,7 @@ function ddWatcherAggOver() {
     template,
     restrict: 'E',
     scope: {
+      textLimit: '=',
       aggOverOptions: '=',
       aggFieldNames: '=',
       aggOverOnSelect: '&',
@@ -51,6 +61,7 @@ function ddWatcherAggOver() {
     controller:  DdWatcherAggOver,
     controllerAs: 'ddWatcherAggOver',
     bindToController: {
+      textLimit: '=',
       aggOverOptions: '=',
       aggFieldNames: '=',
       aggOverOnSelect: '&',
