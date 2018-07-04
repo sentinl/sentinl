@@ -21,6 +21,14 @@ routes
         const notifier = new Notifier({ location: 'Watcher' });
 
         const watcherId = $route.current.params.id;
+
+        if (!watcherId) {
+          return watcherService.new('watcher').catch(function (err) {
+            notifier.error(err);
+            kbnUrl.redirect('/');
+          });
+        }
+
         return watcherService.get(watcherId).catch(function (err) {
           notifier.error(err);
           kbnUrl.redirect('/');
