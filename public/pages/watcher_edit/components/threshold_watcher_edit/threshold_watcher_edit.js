@@ -63,6 +63,11 @@ class ThresholdWatcherEdit {
     });
   }
 
+  scheduleChange(mode, text) {
+    this.watcher._source.wizard.chart_query_params.scheduleType = mode;
+    this.watcher._source.trigger.schedule.later = text;
+  }
+
   conditionChange(condition) {
     this.watcher._source.condition.script.script = condition;
   }

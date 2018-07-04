@@ -4,8 +4,8 @@ class WatcherEditEverySchedule {
   constructor($scope) {
     this.$scope = $scope;
     this.watcher = this.watcher || this.$scope.watcher;
+    this.onSelect = this.onSelect || this.$scope.onSelect;
 
-    this.enabled = true;
     this.selected = 'minutes';
     this.options = ['seconds', 'minutes', 'hours', 'days', 'months', 'years'];
     this.number = this._getNumber();
@@ -18,7 +18,7 @@ class WatcherEditEverySchedule {
   }
 
   handleChange() {
-    this.watcher._source.trigger.schedule.later = `every ${this.number} ${this.selected}`;
+    this.onSelect({mode: 'every', text: `every ${this.number} ${this.selected}`});
   }
 }
 
@@ -28,11 +28,13 @@ function watcherEditEverySchedule() {
     restrict: 'E',
     scope: {
       watcher: '=',
+      onSelect: '&',
     },
     controller:  WatcherEditEverySchedule,
     controllerAs: 'watcherEditEverySchedule',
     bindToController: {
       watcher: '=',
+      onSelect: '&',
     },
   };
 }

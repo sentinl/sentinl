@@ -1,34 +1,36 @@
-import { has, size, cloneDeep } from 'lodash';
+import { has, size, cloneDeep, get } from 'lodash';
 import template from './title_panel_watcher_edit.html';
 
 class TitlePanelWatcherEdit {
   constructor($scope, sentinlLog) {
     this.$scope = $scope;
     this.watcher = this.watcher || this.$scope.watcher;
+    this.onScheduleChange = this.onScheduleChange || this.$scope.onScheduleChange;
 
     this.log = sentinlLog;
     this.log.initLocation('TitlePanelWatcheredit');
 
     this.schedule = {
-      selected: 'every',
+      selected: get(this.watcher, '_source.wizard.chart_query_params.scheduleType') || 'every',
       options: ['every', 'human'],
-      switchMode: () => {
-        this.log.debug('schedule mode changed:', this.schedule.selected);
-        if (this.schedule.selected === 'every') {
-          this.schedule.every.enabled = true;
-          this.schedule.human.enabled = false;
-        } else {
-          this.schedule.every.enabled = false;
-          this.schedule.human.enabled = true;
-        }
-      },
-      every: {
-        enabled: true,
-      },
-      human: {
-        enabled: false,
+      handleChange: (mode, text) => {
+        // this.watcher._source.wizard.chart_query_params.scheduleType = this.schedule.selected;
+        // this.watcher._source.trigger.schedule.later = text;
+        this.onScheduleChange({mode, text});
       },
     };
+  }
+
+  handleModeChange() {
+    if (this.schedule.selected === 'every') {
+      this.schedule.handleChange('every', 'every 1 minutes');
+    } else {
+      this.schedule.handleChange('human', 'at 15:35');
+    }
+  }
+
+  showScheduleMode(mode) {
+    return this.schedule.selected === mode;
   }
 
   isValidationMessageVisible(fieldName, errorType, showIfOtherErrors = true) {
@@ -50,11 +52,13 @@ function titlePanelWatcherEdit() {
     restrict: 'E',
     scope: {
       watcher: '=',
+      onScheduleChange: '&',
     },
     controller:  TitlePanelWatcherEdit,
     controllerAs: 'titlePanelWatcherEdit',
     bindToController: {
       watcher: '=',
+      onScheduleChange: '&',
     },
   };
 }

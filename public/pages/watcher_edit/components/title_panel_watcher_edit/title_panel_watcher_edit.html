@@ -66,19 +66,21 @@
                   ng-model="titlePanelWatcherEdit.schedule.selected"
                   ng-options="o as o for o in titlePanelWatcherEdit.schedule.options"
                   ng-model-options="{ debounce: 500 }"
-                  ng-change="titlePanelWatcherEdit.schedule.switchMode()"
+                  ng-change="titlePanelWatcherEdit.handleModeChange()"
                 ></select>
               </div>
             </div>
             <div class="col-sm-4">
-              <div class="form-group" ng-show="titlePanelWatcherEdit.schedule.human.enabled">
+              <div class="form-group" ng-show="titlePanelWatcherEdit.showScheduleMode('human')">
                 <watcher-edit-human-schedule
                   watcher="titlePanelWatcherEdit.watcher"
+                  on-select="titlePanelWatcherEdit.schedule.handleChange(mode, text)"
                 ></watcher-edit-human-schedule>
               </div>
-              <div class="form-group" ng-show="titlePanelWatcherEdit.schedule.every.enabled">
+              <div class="form-group" ng-show="titlePanelWatcherEdit.showScheduleMode('every')">
                 <watcher-edit-every-schedule
                   watcher="titlePanelWatcherEdit.watcher"
+                  on-select="titlePanelWatcherEdit.schedule.handleChange(mode, text)"
                 ></watcher-edit-every-schedule>
               </div>
             </div> <!-- END schedule -->

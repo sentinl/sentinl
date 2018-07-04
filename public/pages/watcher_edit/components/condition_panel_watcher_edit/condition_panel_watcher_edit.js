@@ -64,6 +64,7 @@ class ConditionPanelWatcherEdit {
         chart_query_params: {
           timeField: '@timestamp',
           queryType: 'count',
+          scheduleType: 'every', // options: every, human
           over: { type: 'all docs' },
           last: { n: 15, unit: 'minutes' },
           interval: { n: 1, unit: 'minutes' },

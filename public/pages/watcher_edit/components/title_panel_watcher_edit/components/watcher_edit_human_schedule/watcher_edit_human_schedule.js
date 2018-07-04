@@ -1,17 +1,18 @@
 import template from './watcher_edit_human_schedule.html';
+import { get } from 'lodash';
 
 class WatcherEditHumanSchedule {
   constructor($scope, sentinlConfig) {
     this.$scope = $scope;
-    this.watcher = this.watcher || this.$scope.watcher;
-    this.onChange = this.onChange || this.$scope.onChange;
-
     this.config = sentinlConfig;
-    this.enabled = true;
-    this.schedule = 'This feature is under construction. Comming soon ...';
+    this.watcher = this.watcher || this.$scope.watcher;
+    this.onSelect = this.onSelect || this.$scope.onSelect;
+
+    this.schedule = get(this.watcher, '_source.trigger.schedule.later') || '';
   }
 
   handleChange() {
+    this.onSelect({mode: 'human', text: this.schedule});
   }
 }
 
@@ -21,13 +22,13 @@ function watcherEditHumanSchedule() {
     restrict: 'E',
     scope: {
       watcher: '=',
-      onChange: '&',
+      onSelect: '&',
     },
     controller:  WatcherEditHumanSchedule,
     controllerAs: 'watcherEditHumanSchedule',
     bindToController: {
       watcher: '=',
-      onChange: '&',
+      onSelect: '&',
     },
   };
 }

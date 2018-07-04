@@ -1,7 +1,7 @@
 <form iname="watcherEditHumanSchedule.form" ng-model-options="{ getterSetter: true }" novalidate>
   <div class="row">
     <div class="col-md-12">
-      <div class="form-group" ng-show="watcherEditHumanSchedule.enabled">
+      <div class="form-group">
         <label for="watcherEditHumanSchedule">
           Human
         </label>
@@ -14,8 +14,8 @@
           required
           placeholder="every 5 mins"
           ng-model="watcherEditHumanSchedule.schedule"
-          ng-model-options="{ debounce: 1000 }"
           ng-change="watcherEditHumanSchedule.handleChange()"
+          ng-model-options="{ debounce: 1000 }"
         >
         <small
           id="watcherEditHumanScheduleValidationMessage"
