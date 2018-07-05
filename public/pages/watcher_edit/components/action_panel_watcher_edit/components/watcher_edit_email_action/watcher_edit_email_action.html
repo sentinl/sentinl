@@ -53,23 +53,19 @@
       </div>
       <div class="col-md-6">
         <div class="form-group">
-          <label for="watcherEditEmailActionPreferences" class="control-label">Preferences</label> 
+          <label for="watcherEditEmailActionPreferences" class="control-label">
+            <i class="fa fa-cog"></i> Preferences
+          </label> 
           <div>
             <label class="checkbox-inline">
               <input
                 type="checkbox"
                 name="watcherEditEmailActionPreferences"
                 ng-model="watcherEditEmailAction.actionSettings.email.stateless"
-                ng-checked="watcherEditEmailAction.actionSettings.email.stateless"
-              >stateless
-            </label>
-            <label class="checkbox-inline">
-              <input
-                type="checkbox"
-                name="watcherEditEmailActionPreferences"
-                ng-model="watcherEditEmailAction.actionSettings.email.save_payload"
-                ng-checked="watcherEditEmailAction.actionSettings.email.save_payload"
-              >save payload
+                ng-checked="!watcherEditEmailAction.actionSettings.email.stateless"
+                ng-true-value="false"
+                ng-false-value="true"
+              >record action log
             </label>
           </div>
         </div>

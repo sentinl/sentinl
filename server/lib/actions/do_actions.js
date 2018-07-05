@@ -148,7 +148,6 @@ export default function (server, actions, payload, task) {
     *   "console" : {
     *      "priority" : "DEBUG",
     *      "message" : "Average {{payload.aggregations.avg.value}}",
-    *      "save_payload" : false
     *    }
     */
 
@@ -165,7 +164,7 @@ export default function (server, actions, payload, task) {
         actionType: actionName,
         message: toString(message),
         level: priority,
-        payload: !action.console.save_payload ? {} : payload,
+        payload: !task._source.save_payload ? {} : payload,
         report: false
       });
     }
@@ -200,7 +199,6 @@ export default function (server, actions, payload, task) {
     *      "priority" : "high",
     *      "body" : "Series Alarm {{ payload._id}}: {{payload.hits.total}}",
     *      "stateless" : false,
-    *      "save_payload" : false
     *     }
     */
 
@@ -232,13 +230,17 @@ export default function (server, actions, payload, task) {
         });
       }
       if (!action.email.stateless) {
+        console.log('-----------------------------------------------------');
+        console.log('-----------------------------------------------------');
+        console.log('save_payload? ', task._source.save_payload);
+
         // Log Event
         esHistory({
           title: task._source.title,
           actionType: actionName,
           message: toString(text),
           level: priority,
-          payload: !action.email.save_payload ? {} : payload,
+          payload: !task._source.save_payload ? {} : payload,
           report: false
         });
       }
@@ -255,7 +257,6 @@ export default function (server, actions, payload, task) {
     *      "body" : "Series Alarm {{ payload._id}}: {{payload.hits.total}}",
     *      "html" : "<p>Series Alarm {{ payload._id}}: {{payload.hits.total}}</p>",
     *      "stateless" : false,
-    *      "save_payload" : false
     *     }
     */
     var html;
@@ -299,7 +300,7 @@ export default function (server, actions, payload, task) {
           actionType: actionName,
           message: toString(text),
           level: priority,
-          payload: !action.email_html.save_payload ? {} : payload,
+          payload: !task._source.save_payload ? {} : payload,
           report: false
         });
       }
@@ -343,7 +344,6 @@ export default function (server, actions, payload, task) {
     *      "channel": '#<channel>',
     *      "message" : "Series Alarm {{ payload._id}}: {{payload.hits.total}}",
     *      "stateless" : false,
-    *      "save_payload" : false
     *    }
     */
 
@@ -376,7 +376,7 @@ export default function (server, actions, payload, task) {
           actionType: actionName,
           message: toString(message),
           level: priority,
-          payload: !action.slack.save_payload ? {} : payload,
+          payload: !task._source.save_payload ? {} : payload,
           report: false
         });
       }
@@ -392,7 +392,6 @@ export default function (server, actions, payload, task) {
     *      "body" : "{{payload.watcher_id}}:{{payload.hits.total}}",
     *      "use_https" : false,
     *      "stateless" : false,
-    *      "save_payload" : false,
     *      "headers": {'Content-Type': 'text/plain'},
     *    }
     */
@@ -424,7 +423,7 @@ export default function (server, actions, payload, task) {
             actionType: actionName,
             message:  toString(action.webhook.message),
             level: action.webhook.priority,
-            payload: !action.webhook.save_payload ? {} : payload,
+            payload: !task._source.save_payload ? {} : payload,
             report: false
           });
         }
@@ -451,7 +450,6 @@ export default function (server, actions, payload, task) {
     *   "elastic" : {
     *      "priority" : "DEBUG",
     *      "message" : "Avg {{payload.aggregations.avg.value}} measurements in 5 minutes"
-    *      "save_payload" : false,
     *    }
     */
 
@@ -468,7 +466,7 @@ export default function (server, actions, payload, task) {
         actionType: actionName,
         message: toString(message),
         level: priority,
-        payload: !action.local.save_payload ? {} : payload,
+        payload: !task._source.save_payload ? {} : payload,
         report: false
       });
     }

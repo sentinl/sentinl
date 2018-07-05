@@ -2,6 +2,7 @@ export default {
   title: 'watcher_title',
   disable: false,
   report: false,
+  save_payload: false,
   trigger: {
     schedule: {
       later: 'every 5 minutes'
@@ -24,6 +25,7 @@ export default {
     email_admin: {
       throttle_period: '15m',
       email: {
+        stateless: false,
         to: 'alarm@localhost',
         from: 'sentinl@localhost',
         subject: 'Alarm',

@@ -31,6 +31,9 @@
       "disable": {
         "type": "boolean"
       },
+      "save_payload": {
+        "type": "boolean"
+      },
       "title": {
         "type": "text"
       },

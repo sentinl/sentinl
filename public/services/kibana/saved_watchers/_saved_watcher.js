@@ -26,6 +26,7 @@ module.factory('SavedWatcherKibana', function (courier, EMAILWATCHER) {
       condition: 'object',
       report: 'boolean',
       disable: 'boolean',
+      save_payload: 'boolean',
       trigger: 'object',
       wizard: 'object',
     };

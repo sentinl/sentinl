@@ -2,6 +2,7 @@ export default {
   title: 'reporter_title',
   disable: false,
   report: true,
+  save_payload: false,
   trigger: {
     schedule: {
       later: 'every 1 hour'
@@ -24,6 +25,7 @@ export default {
     report_admin: {
       throttle_period: '15m',
       report: {
+        stateless: false,
         to: 'to@email.com',
         from: 'from@email.com',
         subject: 'My Report',

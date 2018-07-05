@@ -53,15 +53,19 @@
       </div>
       <div class="col-md-6">
         <div class="form-group">
-          <label for="watcherEditReportActionPreferences" class="control-label">Preferences</label> 
+          <label for="watcherEditReportActionPreferences" class="control-label">
+            <i class="fa fa-cog"></i> Preferences
+          </label> 
           <div>
             <label class="checkbox-inline">
               <input
                 type="checkbox"
                 name="watcherEditReportActionPreferences"
                 ng-model="watcherEditReportAction.actionSettings.report.stateless"
-                ng-checked="watcherEditReportAction.actionSettings.report.stateless"
-              >stateless
+                ng-checked="!watcherEditReportAction.actionSettings.report.stateless"
+                ng-true-value="false"
+                ng-false-value="true"
+              >record action log
             </label>
             <label class="checkbox-inline">
               <input
@@ -151,33 +155,29 @@
       <div class="col-md-2">
         <div class="form-group">
           <label class="control-label" for="watcherEditReportResolution">Resolution</label>
-          <div class="input-group">
-            <input
-              type="text"
-              id="watcherEditReportResolution"
-              name="watcherEditReportResolution"
-              value="{{watcherEditReportAction.actionSettings.report.snapshot.res}}"
-              class="form-control"
-              placeholder="1280x900"
-              ng-model="watcherEditReportAction.actionSettings.report.snapshot.res"
-            />
-          </div>
+          <input
+            type="text"
+            id="watcherEditReportResolution"
+            name="watcherEditReportResolution"
+            value="{{watcherEditReportAction.actionSettings.report.snapshot.res}}"
+            class="form-control"
+            placeholder="1280x900"
+            ng-model="watcherEditReportAction.actionSettings.report.snapshot.res"
+          />
         </div>
       </div> 
       <div class="col-md-2">
         <div class="form-group">
           <label class="control-label" for="watcherEditReportDelay">Delay</label>
-          <div class="input-group">
-            <input
-              type="number"
-              min="0"
-              id="watcherEditReportDelay"
-              name="watcherEditReportDelay"
-              class="form-control"
-              placeholder="5000"
-              ng-model="watcherEditReportAction.actionSettings.report.snapshot.params.delay"
-            />
-          </div>
+          <input
+            type="number"
+            min="0"
+            id="watcherEditReportDelay"
+            name="watcherEditReportDelay"
+            class="form-control"
+            placeholder="5000"
+            ng-model="watcherEditReportAction.actionSettings.report.snapshot.params.delay"
+          />
         </div>
       </div> 
     </div> 
@@ -227,16 +227,6 @@
     <div class="row">
       <div class="col-md-2">
         <div class="form-group">
-          <label class="checkbox-inline">
-            <input type="checkbox"
-              ng-model="watcherEditReportAction.actionSettings.report.auth.active"
-              ng-checked="watcherEditReportAction.actionSettings.report.auth.active"
-            /> active
-          </label>
-        </div>
-      </div> 
-      <div class="col-md-2">
-        <div class="form-group">
           <label class="control-label" for="watcherEditReportMode">Mode</label>
           <select
             name="watcherEditReportMode"
@@ -246,6 +236,22 @@
           ></select>
         </div>
       </div>
+      <div class="col-md-2">
+        <div class="form-group">
+          <label for="watcherEditReportActionPreferences" class="control-label">
+            <i class="fa fa-cog"></i> Preferences
+          </label> 
+          <div>
+            <label class="checkbox-inline">
+              <input
+                type="checkbox"
+                ng-model="watcherEditReportAction.actionSettings.report.auth.active"
+                ng-checked="watcherEditReportAction.actionSettings.report.auth.active"
+              /> active
+            </label>
+          </div>
+        </div>
+      </div> 
     </div> 
     <div class="row">
       <div class="col-md-12">

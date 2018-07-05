@@ -42,6 +42,23 @@
                 </small>
               </div>
             </div>
+            <div class="col-sm-2">
+              <div class="form-group">
+                <label for="watcherPreferences">
+                  <i class="fa fa-cog"></i> Preferences
+                </label>
+                <div>
+                  <label class="checkbox-inline">
+                    <input
+                      type="checkbox"
+                      name="watcherPreferences"
+                      ng-model="titlePanelWatcherEdit.watcher._source.save_payload"
+                      ng-checked="titlePanelWatcherEdit.watcher._source.save_payload"
+                    >save payload
+                  </label>
+                </div>
+              </div>
+            </div>
           </div> <!-- END title -->
           <div class="row">
             <div class="col-sm-6">

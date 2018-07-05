@@ -8,6 +8,7 @@ class Actions {
       throttle_period: '15m',
       email: {
         priority: 'low',
+        stateless: false,
       },
     };
   }
@@ -17,6 +18,7 @@ class Actions {
       throttle_period: '15m',
       report: {
         priority: 'low',
+        stateless: false,
         body: 'You can find the screenshot in the attachment.',
         save: true,
         snapshot: {
