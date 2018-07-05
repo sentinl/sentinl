@@ -21,6 +21,7 @@ import './components/condition_panel_watcher_edit/components/dd_watcher_agg_thre
 import './components/action_panel_watcher_edit';
 import './components/action_panel_watcher_edit/components/watcher_edit_add_action';
 import './components/action_panel_watcher_edit/components/watcher_edit_email_action';
+import './components/action_panel_watcher_edit/components/watcher_edit_report_action';
 
 import template from './watcher_edit.html';
 import controller from './watcher_edit';

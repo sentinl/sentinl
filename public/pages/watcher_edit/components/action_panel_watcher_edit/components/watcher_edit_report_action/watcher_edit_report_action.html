@@ -1,0 +1,320 @@
+<div uib-accordion-group class="panel-default" is-open="watcherEditReportAction.status.isOpen">
+  <uib-accordion-heading>
+    <i class="fa fa-envelope"></i> {{watcherEditReportAction.type}} action: {{watcherEditReportAction.actionSettings.name}} <i class="pull-right glyphicon"
+    ng-class="{'glyphicon-chevron-down': watcherEditReportAction.status.isOpen, 'glyphicon-chevron-right': !watcherEditReportAction.status.isOpen}"></i>
+  </uib-accordion-heading>
+  <form name="watcherEditReportAction.form" ng-model-options="{ getterSetter: true }" novalidate>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="form-group">
+          <label class="control-label" for="watcherEditReportActionTitle">Title</label> 
+          <input
+            id="watcherEditReportActionTitle"
+            name="watcherEditReportActionTitle"
+            placeholder="title"
+            type="text"
+            class="form-control"
+            ng-model="watcherEditReportAction.actionSettings.name"
+          >
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-2">
+        <div class="form-group">
+          <label for="watcherEditReportActionThrottle" class="control-label">Throttle</label> 
+          <div class="input-group">
+            <div class="input-group-addon">
+              <i class="fa fa-snowflake-o" aria-hidden="true"></i>
+            </div> 
+            <input
+              id="watcherEditReportThrottle"
+              name="watcherEditReportThrottle"
+              placeholder="0h15m0s"
+              type="text"
+              class="form-control"
+              ng-model="watcherEditReportAction.actionSettings.throttle_period"
+            >
+          </div> 
+        </div>
+      </div>
+      <div class="col-md-2">
+        <div class="form-group">
+          <label for="watcherEditReportActionPriority" class="control-label">Priority</label> 
+          <select
+            id="watcherEditReportActionPriority"
+            name="watcherEditReportActionPriority"
+            class="select form-control"
+            ng-model="watcherEditReportAction.priority.selected"
+            ng-options="o as o for o in watcherEditReportAction.priority.options"
+            ng-change="watcherEditReportAction.priority.handleChange()"
+          ></select>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label for="watcherEditReportActionPreferences" class="control-label">Preferences</label> 
+          <div>
+            <label class="checkbox-inline">
+              <input
+                type="checkbox"
+                name="watcherEditReportActionPreferences"
+                ng-model="watcherEditReportAction.actionSettings.report.stateless"
+                ng-checked="watcherEditReportAction.actionSettings.report.stateless"
+              >stateless
+            </label>
+            <label class="checkbox-inline">
+              <input
+                type="checkbox"
+                name="watcherEditReportActionPreferences"
+                ng-model="watcherEditReportAction.actionSettings.report.save"
+                ng-checked="watcherEditReportAction.actionSettings.report.save"
+              >save
+            </label>
+            <label class="checkbox-inline">
+              <input
+                type="checkbox"
+                name="watcherEditReportActionPreferences"
+                ng-model="watcherEditReportAction.actionSettings.report.snapshot.params.crop"
+                ng-checked="watcherEditReportAction.actionSettings.report.snapshot.params.crop"
+              >crop
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="form-group">
+          <label for="watcherEditReportActionTo" class="control-label">To</label> 
+          <div class="input-group">
+            <div class="input-group-addon">
+              <i class="fa fa-address-card" aria-hidden="true"></i>
+            </div> 
+            <input
+              id="watcherEditReportActionTo"
+              name="watcherEditReportActionTo"
+              placeholder="Report destination address"
+              type="text"
+              class="form-control"
+              aria-describedby="watcherEditReportActionToHelpBlock"
+              ng-model="watcherEditReportAction.actionSettings.report.to"
+            >
+          </div> 
+          <span id="watcherEditReportActionToHelpBlock" class="help-block">Put multiple addresses separating them by ','</span>
+        </div>
+        <div class="form-group">
+          <label for="watcherEditReportActionFrom" class="control-label">From</label> 
+          <div class="input-group">
+            <div class="input-group-addon">
+              <i class="fa fa-address-card"></i>
+            </div> 
+            <input
+              id="watcherEditReportActionFrom"
+              name="watcherEditReportActionFrom"
+              placeholder="Report source address"
+              type="text"
+              aria-describedby="watcherEditReportActionFromHelpBlock"
+              class="form-control"
+              ng-model="watcherEditReportAction.actionSettings.report.from"
+            >
+          </div> 
+          <span id="watcherEditReportActionFromHelpBlock" class="help-block">Put multiple addresses separating them by ','</span>
+        </div>
+        <div class="form-group">
+          <label for="watcherEditReportActionSubject" class="control-label">Subject</label> 
+          <input
+            id="watcherEditReportActionSubject"
+            name="watcherEditReportActionSubject"
+            placeholder="Subject"
+            type="text"
+            class="form-control"
+            ng-model="watcherEditReportAction.actionSettings.report.subject"
+          >
+        </div>
+        <div class="form-group">
+          <label class="control-label" for="watcherEditReportActionContent">Content</label> 
+          <div id="watcherEditReportActionContent"
+            ng-model="watcherEditReportAction.actionSettings.report.body"
+            ui-ace="watcherEditReportAction.aceOptions({maxLines: 30})">
+          </div>
+        </div> 
+      </div> 
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <hr>
+        <h4>Screenshot preferences</h4>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-2">
+        <div class="form-group">
+          <label class="control-label" for="watcherEditReportResolution">Resolution</label>
+          <div class="input-group">
+            <input
+              type="text"
+              id="watcherEditReportResolution"
+              name="watcherEditReportResolution"
+              value="{{watcherEditReportAction.actionSettings.report.snapshot.res}}"
+              class="form-control"
+              placeholder="1280x900"
+              ng-model="watcherEditReportAction.actionSettings.report.snapshot.res"
+            />
+          </div>
+        </div>
+      </div> 
+      <div class="col-md-2">
+        <div class="form-group">
+          <label class="control-label" for="watcherEditReportDelay">Delay</label>
+          <div class="input-group">
+            <input
+              type="number"
+              min="0"
+              id="watcherEditReportDelay"
+              name="watcherEditReportDelay"
+              class="form-control"
+              placeholder="5000"
+              ng-model="watcherEditReportAction.actionSettings.report.snapshot.params.delay"
+            />
+          </div>
+        </div>
+      </div> 
+    </div> 
+    <div class="row">
+      <div class="col-md-12">
+        <div class="form-group">
+          <label class="control-label" for="watcherEditReportUrl">URL</label>
+          <input
+            type="text"
+            id="watcherEditReportUrl"
+            name="watcherEditReportUrl"
+            class="form-control"
+            placeholder="http://www.google.com"
+            ng-model="watcherEditReportAction.actionSettings.report.snapshot.url"
+          />
+        </div> <!-- end form-group -->
+        <div class="form-group">
+          <label class="control-label" for="watcherEditReportPath">Report Name</label>
+          <input
+            type="text"
+            id="watcherEditReportPath"
+            name="watcherEditReportPath"
+            class="form-control"
+            placeholder="my_report"
+            ng-model="watcherEditReportAction.actionSettings.report.snapshot.name"
+          />
+        </div>
+        <div class="form-group">
+          <div class="btn-group" uib-dropdown is-open="watcherEditReportAction.isTypeOpen">
+            <button type="button" class="btn btn-primary dropdown-toggle" uib-dropdown-toggle>
+              {{watcherEditReportAction.actionSettings.report.snapshot.type || 'report type'}} <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" uib-dropdown-menu role="menu">
+              <li><a href="javascript:void(0)" ng-click="watcherEditReportAction.applyReportType('png')">PNG</a></li>
+              <li><a href="javascript:void(0)" ng-click="watcherEditReportAction.applyReportType('pdf')">PDF</a></li>
+            </ul>
+          </div>
+        </div>
+      <div>
+    </div> 
+    <div class="row">
+      <div class="col-md-12">
+        <hr>
+        <h4>Authentication preferences</h4>
+      </div> 
+    </div> 
+    <div class="row">
+      <div class="col-md-2">
+        <div class="form-group">
+          <label class="checkbox-inline">
+            <input type="checkbox"
+              ng-model="watcherEditReportAction.actionSettings.report.auth.active"
+              ng-checked="watcherEditReportAction.actionSettings.report.auth.active"
+            /> active
+          </label>
+        </div>
+      </div> 
+      <div class="col-md-2">
+        <div class="form-group">
+          <label class="control-label" for="watcherEditReportMode">Mode</label>
+          <select
+            name="watcherEditReportMode"
+            class="form-control condition-select"
+            ng-model="watcherEditReportAction.actionSettings.report.auth.mode"
+            ng-options="o as o for o in watcherEditReportAction.authModes"
+          ></select>
+        </div>
+      </div>
+    </div> 
+    <div class="row">
+      <div class="col-md-12">
+        <div class="form-group">
+          <label class="control-label" for="watcherEditReportUsername">Username</label>
+          <input
+            type="text"
+            id="watcherEditReportUsername"
+            name="watcherEditReportUsername"
+            value="{{watcherEditReportAction.actionSettings.report.auth.username}}"
+            class="form-control"
+            ng-model="watcherEditReportAction.actionSettings.report.auth.username"
+          />
+        </div> <!-- end form-group -->
+        <div class="form-group">
+          <label class="control-label" for="watcherEditReportPassword">Password</label>
+          <input
+            type="password"
+            id="watcherEditReportPassword"
+            name="watcherEditReportPassword"
+            value="{{watcherEditReportAction.actionSettings.report.auth.password}}"
+            class="form-control"
+            ng-model="watcherEditReportAction.actionSettings.report.auth.password"
+          />
+        </div> <!-- end form-group -->
+        <div class="form-group" ng-show="watcherEditReportAction.actionSettings.report.auth.mode === 'customselector'">
+          <label class="control-label" for="watcherEditReportSelectorUsername">CSS Selector for username</label>
+          <input
+            type="text"
+            id="watcherEditReportSelectorUsername"
+            name="watcherEditReportSelectorUsername"
+            value="{{watcherEditReportAction.actionSettings.report.auth.selector_username}}"
+            class="form-control"
+            placeholder="form input[name='username']"
+            ng-model="watcherEditReportAction.actionSettings.report.auth.selector_username"
+          />
+        </div> <!-- end form-group -->
+        <div class="form-group" ng-show="watcherEditReportAction.actionSettings.report.auth.mode === 'customselector'">
+          <label class="control-label" for="watcherEditReportSelectorPassword">CSS Selector for password</label>
+          <input
+            type="text"
+            id="watcherEditReportSelectorPassword"
+            name="watcherEditReportSelectorPassword"
+            value="{{watcherEditReportAction.actionSettings.report.auth.selector_password}}"
+            class="form-control"
+            placeholder="form input[name='password']"
+            ng-model="watcherEditReportAction.actionSettings.report.auth.selector_password"
+          />
+        </div> <!-- end form-group -->
+        <div class="form-group" ng-show="watcherEditReportAction.actionSettings.report.auth.mode === 'customselector'">
+          <label class="control-label" for="watcherEditReportSelectorLoginBtn">CSS Selector for login btn</label>
+          <input
+            type="text"
+            id="watcherEditReportSelectorLoginBtn"
+            name="watcherEditReportSelectorLoginBtn"
+            value="{{watcherEditReportAction.actionSettings.report.auth.selector_login_btn}}"
+            class="form-control"
+            placeholder="form button.btn.btn-login"
+            ng-model="watcherEditReportAction.actionSettings.report.auth.selector_login_btn"
+          />
+        </div> <!-- end form-group -->
+      </div>
+    </div> 
+    <div class="row">
+      <div class="col-md-12">
+        <div class="form-group">
+          <button name="submit" type="submit" class="btn btn-danger" ng-click="watcherEditReportAction.deleteAction()">Delete</button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>

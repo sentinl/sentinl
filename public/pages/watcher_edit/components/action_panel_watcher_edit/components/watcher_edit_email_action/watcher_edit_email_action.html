@@ -128,9 +128,13 @@
           <label class="control-label" for="watcherEditEmailActionContent">Content</label> 
             <div id="watcherEditEmailActionContent"
               ng-model="watcherEditEmailAction.actionSettings.email.body"
-              ui-ace="watcherEditEmailAction.aceOptions('behaviour', 30)">
+              ui-ace="watcherEditEmailAction.aceOptions({maxLines: 30})">
             </div>
         </div> 
+      </div> 
+    </div> 
+    <div class="row">
+      <div class="col-md-12">
         <div class="form-group">
           <button name="submit" type="submit" class="btn btn-danger" ng-click="watcherEditEmailAction.deleteAction()">Delete</button>
         </div>

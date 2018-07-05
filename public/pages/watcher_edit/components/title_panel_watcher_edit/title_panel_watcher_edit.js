@@ -14,8 +14,6 @@ class TitlePanelWatcherEdit {
       selected: get(this.watcher, '_source.wizard.chart_query_params.scheduleType') || 'every',
       options: ['every', 'human'],
       handleChange: (mode, text) => {
-        // this.watcher._source.wizard.chart_query_params.scheduleType = this.schedule.selected;
-        // this.watcher._source.trigger.schedule.later = text;
         this.onScheduleChange({mode, text});
       },
     };

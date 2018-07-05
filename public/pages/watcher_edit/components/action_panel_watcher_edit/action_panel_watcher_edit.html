@@ -34,7 +34,15 @@
                       action-name="{{actionName}}"
                       action-settings="actionSettings"
                       action-delete="actionPanelWatcherEdit.onDelete({actionName: actionName})"
+                      ace-options="actionPanelWatcherEdit.aceOptions({mode: mode, maxLines: maxLines, minLines: minLines})"
                     ></watcher-edit-email-action>
+                    <watcher-edit-report-action
+                      ng-if="actionPanelWatcherEdit.isAction(actionSettings, 'report')"
+                      action-name="{{actionName}}"
+                      action-settings="actionSettings"
+                      action-delete="actionPanelWatcherEdit.onDelete({actionName: actionName})"
+                      ace-options="actionPanelWatcherEdit.aceOptions({mode: mode, maxLines: maxLines, minLines: minLines})"
+                    ></watcher-edit-report-action>
                   </div>
                 </uib-accordion>
               </div>

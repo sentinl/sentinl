@@ -14,6 +14,7 @@
         update-status="thresholdWatcherEdit.condition.updateStatus(isSuccess)"
         on-query-change="thresholdWatcherEdit.queryChange(body)"
         on-condition-change="thresholdWatcherEdit.conditionChange(condition)"
+        ace-options="thresholdWatcherEdit.aceOptions({mode: mode, maxLines: maxLines, minLines: minLines})"
       ></condition-panel-watcher-edit>
     </div>
   </div>
@@ -23,6 +24,7 @@
         watcher="thresholdWatcherEdit.watcher"
         on-add="thresholdWatcherEdit.actionAdd({actionName: actionName, actionSettings: actionSettings})"
         on-delete="thresholdWatcherEdit.actionDelete({actionName: actionName})"
+        ace-options="thresholdWatcherEdit.aceOptions({mode: mode, maxLines: maxLines, minLines: minLines})"
       ></action-panel-watcher-edit>
     </div>
   </div>

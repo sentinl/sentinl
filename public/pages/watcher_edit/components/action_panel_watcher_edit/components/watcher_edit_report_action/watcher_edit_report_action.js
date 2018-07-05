@@ -1,8 +1,8 @@
-import template from './watcher_edit_email_action.html';
+import template from './watcher_edit_report_action.html';
 
 import {cloneDeep} from 'lodash';
 
-class WatcherEditEmailAction {
+class WatcherEditReportAction {
   constructor($scope) {
     this.$scope = $scope;
     this.actionName = this.actionName || this.$scope.actionName;
@@ -10,18 +10,20 @@ class WatcherEditEmailAction {
     this.actionDelete = this.actionDelete || this.$scope.actionDelete;
     this.aceOptions = this.aceOptions || this.$scope.aceOptions;
 
-    this.type = 'email';
+    this.type = 'report';
     this.status = {
       isOpen: false,
     };
     this.actionSettings.name = this.actionName;
     this.priority = {
-      selected: this.actionSettings.email.priority,
+      selected: this.actionSettings.report.priority || 'low',
       options: ['low', 'medium', 'high'],
       handleChange: () => {
-        this.actionSettings.email.priority = this.priority.selected;
+        this.actionSettings.report.priority = this.priority.selected;
       },
     };
+    this.resolutionPattern = '^\\d{1,4}x\\d{1,4}$';
+    this.authModes = ['basic', 'customselector', 'xpack', 'searchguard'];
   }
 
   deleteAction() {
@@ -29,7 +31,7 @@ class WatcherEditEmailAction {
   }
 }
 
-function watcherEditEmailAction() {
+function watcherEditReportAction() {
   return {
     template,
     restrict: 'E',
@@ -39,8 +41,8 @@ function watcherEditEmailAction() {
       actionDelete: '&',
       aceOptions: '&',
     },
-    controller:  WatcherEditEmailAction,
-    controllerAs: 'watcherEditEmailAction',
+    controller:  WatcherEditReportAction,
+    controllerAs: 'watcherEditReportAction',
     bindToController: {
       actionName: '@',
       actionSettings: '=',
@@ -50,4 +52,4 @@ function watcherEditEmailAction() {
   };
 }
 
-export default watcherEditEmailAction;
+export default watcherEditReportAction;

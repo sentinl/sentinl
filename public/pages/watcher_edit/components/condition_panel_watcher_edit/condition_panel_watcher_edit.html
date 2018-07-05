@@ -159,7 +159,7 @@
                 <small class="form-text text-muted">Chart query (read only)</small>
                 <div
                   readonly
-                  ui-ace="conditionPanelWatcherEdit.rawDoc.config()"
+                  ui-ace="conditionPanelWatcherEdit.aceOptions({mode: 'json', maxLines: 30, minLines: 30})"
                   ng-model="conditionPanelWatcherEdit.rawDoc.chart.text"
                 >
                   {{conditionPanelWatcherEdit.rawDoc.chart.text}}
@@ -171,7 +171,7 @@
                 <small class="form-text text-muted">Watcher raw (read only)</small>
                 <div
                   readonly
-                  ui-ace="conditionPanelWatcherEdit.rawDoc.config()"
+                  ui-ace="conditionPanelWatcherEdit.aceOptions({mode: 'json', maxLines: 30, minLines: 30})"
                   ng-model="conditionPanelWatcherEdit.rawDoc.watcher.text"
                 >
                   {{conditionPanelWatcherEdit.rawDoc.watcher.text}}

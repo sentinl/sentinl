@@ -29,6 +29,7 @@ class ConditionPanelWatcherEdit {
     this.updateStatus = this.updateStatus || this.$scope.updateStatus;
     this.onQueryChange = this.onQueryChange || this.$scope.onQueryChange;
     this.onConditionChange = this.onConditionChange || this.$scope.onConditionChange;
+    this.aceOptions = this.aceOptions || this.$scope.aceOptions;
 
     this.$http = $http;
     this.watcherEditorChartService = watcherEditorChartService;
@@ -122,22 +123,6 @@ class ConditionPanelWatcherEdit {
     };
 
     this.rawDoc = {
-      config: (mode = 'json', maxLines = 30, minLines = 30) => {
-        return {
-          mode,
-          useWrapMode : true,
-          showGutter: true,
-          rendererOptions: {
-            maxLines,
-            minLines,
-          },
-          editorOptions: {
-            autoScrollEditorIntoView: false
-          },
-          // onLoad : () => {}, // to-do: consider persisting changes
-          // onChange: () => {},
-        };
-      },
       watcher: {
         show: false,
         text: JSON.stringify(this.watcher._source, null, 2),
@@ -649,6 +634,7 @@ function conditionPanelWatcherEdit() {
       updateStatus: '&',
       onQueryChange: '&',
       onConditionChange: '&',
+      aceOptions: '&',
     },
     controller:  ConditionPanelWatcherEdit,
     controllerAs: 'conditionPanelWatcherEdit',
@@ -657,6 +643,7 @@ function conditionPanelWatcherEdit() {
       updateStatus: '&',
       onQueryChange: '&',
       onConditionChange: '&',
+      aceOptions: '&',
     },
   };
 }

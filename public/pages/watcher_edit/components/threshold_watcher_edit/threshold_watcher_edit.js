@@ -63,6 +63,21 @@ class ThresholdWatcherEdit {
     });
   }
 
+  aceOptions({mode = 'behaviour', maxLines = 10, minLines = 5} = {}) {
+    return {
+      mode: mode,
+      useWrapMode : true,
+      showGutter: true,
+      rendererOptions: {
+        maxLines: maxLines,
+        minLines: minLines,
+      },
+      editorOptions: {
+        autoScrollEditorIntoView: false
+      },
+    };
+  }
+
   scheduleChange(mode, text) {
     this.watcher._source.wizard.chart_query_params.scheduleType = mode;
     this.watcher._source.trigger.schedule.later = text;

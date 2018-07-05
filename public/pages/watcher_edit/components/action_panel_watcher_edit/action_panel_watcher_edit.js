@@ -7,6 +7,7 @@ class ActionPanelWatcherEdit {
     this.watcher = this.watcher || this.$scope.watcher;
     this.onAdd = this.onAdd || this.$scope.onAdd;
     this.onDelete = this.onDelete || this.$scope.onDelete;
+    this.aceOptions = this.aceOptions || this.$scope.aceOptions;
 
     this.status = {
       closeOthers: true,
@@ -26,6 +27,7 @@ function actionPanelWatcherEdit() {
       watcher: '=',
       onAdd: '&',
       onDelete: '&',
+      aceOptions: '&',
     },
     controller:  ActionPanelWatcherEdit,
     controllerAs: 'actionPanelWatcherEdit',
@@ -33,6 +35,7 @@ function actionPanelWatcherEdit() {
       watcher: '=',
       onAdd: '&',
       onDelete: '&',
+      aceOptions: '&',
     },
   };
 }
