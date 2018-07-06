@@ -14,7 +14,7 @@
           </div> <!-- END header -->
           <hr>
           <div class="row watcher-editor-panel-paragraph">
-            <div id="watcher-editor-condition-dd-menu" class="col-md-8">
+            <div id="watcher-editor-condition-dd-menu" class="col-md-9">
               <ul>
                 <li class="watcher-editor-condition-dd">
                   <dd-watcher-agg-type
@@ -64,45 +64,55 @@
                 </li>
               </ul>
             </div>
-            <div class="col-md-2">
-              <div class="form-group">
-              </div>
-            </div>
-            <div class="col-md-1">
-              <div class="form-group">
-                <a href="javascript:void(0)"
-                  ng-show="!conditionPanelWatcherEdit.rawDoc.chart.show"
-                  ng-click="conditionPanelWatcherEdit.rawDoc.chart.toggle()"
-                >
-                  <i class="fa fa-eye-slash"></i> chart query
-                </a>
-                <a href="javascript:void(0)"
-                  ng-show="conditionPanelWatcherEdit.rawDoc.chart.show"
-                  ng-click="conditionPanelWatcherEdit.rawDoc.chart.toggle()"
-                >
-                  <i class="fa fa-eye"></i> chart query
-                </a>
-              </div>
-            </div>
-            <div class="col-md-1">
-              <div class="form-group">
-                <a href="javascript:void(0)"
-                  ng-show="!conditionPanelWatcherEdit.rawDoc.watcher.show"
-                  ng-click="conditionPanelWatcherEdit.rawDoc.watcher.toggle()"
-                >
-                  <i class="fa fa-eye-slash"></i> watcher raw
-                </a>
-                <a href="javascript:void(0)"
-                  ng-show="conditionPanelWatcherEdit.rawDoc.watcher.show"
-                  ng-click="conditionPanelWatcherEdit.rawDoc.watcher.toggle()"
-                >
-                  <i class="fa fa-eye"></i> watcher raw
-                </a>
+            <div class="col-md-3" id="watcher-editor-condition-views">
+              <div class="form-inline">
+                <div class="form-group">
+                  <a href="javascript:void(0)"
+                    ng-show="!conditionPanelWatcherEdit.content.views.chart.show"
+                    ng-click="conditionPanelWatcherEdit.content.toggle('chart')"
+                  >
+                    <i class="fa fa-eye-slash"></i> chart
+                  </a>
+                  <a href="javascript:void(0)"
+                    ng-show="conditionPanelWatcherEdit.content.views.chart.show"
+                    ng-click="conditionPanelWatcherEdit.content.toggle('chart')"
+                  >
+                    <i class="fa fa-eye"></i> chart
+                  </a>
+                </div>
+                <div class="form-group">
+                  <a href="javascript:void(0)"
+                    ng-show="!conditionPanelWatcherEdit.content.views.chartquery.show"
+                    ng-click="conditionPanelWatcherEdit.content.toggle('chartquery')"
+                  >
+                    <i class="fa fa-eye-slash"></i> chart query
+                  </a>
+                  <a href="javascript:void(0)"
+                    ng-show="conditionPanelWatcherEdit.content.views.chartquery.show"
+                    ng-click="conditionPanelWatcherEdit.content.toggle('chartquery')"
+                  >
+                    <i class="fa fa-eye"></i> chart query
+                  </a>
+                </div>
+                <div class="form-group">
+                  <a href="javascript:void(0)"
+                    ng-show="!conditionPanelWatcherEdit.content.views.watcherquery.show"
+                    ng-click="conditionPanelWatcherEdit.content.toggle('watcherquery')"
+                  >
+                    <i class="fa fa-eye-slash"></i> watcher query
+                  </a>
+                  <a href="javascript:void(0)"
+                    ng-show="conditionPanelWatcherEdit.content.views.watcherquery.show"
+                    ng-click="conditionPanelWatcherEdit.content.toggle('watcherquery')"
+                  >
+                    <i class="fa fa-eye"></i> watcher raw
+                  </a>
+                </div>
               </div>
             </div>
           </div> <!-- END condition based query builder -->
-          <div class="row">
-            <div class="col-md-2">
+          <div class="row" ng-show="conditionPanelWatcherEdit.content.views.chart.show">
+            <div class="col-md-1">
               <div class="form-group">
                 <p ng-show="conditionPanelWatcherEdit.activeChart.enabled">
                   <i class="fa fa-area-chart"></i> {{conditionPanelWatcherEdit.activeChart.name}}
@@ -138,9 +148,11 @@
             <div class="col-md-8">
             </div>
           </div>
-          <div class="row">
-            <div class="col-md-6">
-              <div class="form-group chart-container" ng-show="conditionPanelWatcherEdit.activeChart.enabled">
+          <div class="row" id="watcher-editor-condition-content" >
+            <div class="col-md-12">
+              <div
+                class="form-group chart-container"
+                ng-show="conditionPanelWatcherEdit.activeChart.enabled && conditionPanelWatcherEdit.content.views.chart.show">
                 <small class="form-text text-muted">Historical data:</small>
                 <canvas
                   class="chart chart-line"
@@ -153,9 +165,7 @@
               <div class="form-group" ng-show="!conditionPanelWatcherEdit.isAnyActiveChart">
                 <p>{{conditionPanelWatcherEdit.messages.nodata}}</p>
               </div>
-            </div>
-            <div class="col-md-3">
-              <div class="form-group" ng-show="conditionPanelWatcherEdit.rawDoc.chart.show">
+              <div class="form-group" ng-show="conditionPanelWatcherEdit.content.views.chartquery.show">
                 <small class="form-text text-muted">Chart query (read only)</small>
                 <div
                   readonly
@@ -165,9 +175,7 @@
                   {{conditionPanelWatcherEdit.rawDoc.chart.text}}
                 </div>
               </div>
-            </div>
-            <div class="col-md-3">
-              <div class="form-group" ng-show="conditionPanelWatcherEdit.rawDoc.watcher.show">
+              <div class="form-group" ng-show="conditionPanelWatcherEdit.content.views.watcherquery.show">
                 <small class="form-text text-muted">Watcher raw (read only)</small>
                 <div
                   readonly

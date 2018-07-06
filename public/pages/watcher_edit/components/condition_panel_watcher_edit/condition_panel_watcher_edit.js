@@ -2,7 +2,7 @@ import './condition_panel_watcher_edit.less';
 import template from './condition_panel_watcher_edit.html';
 
 import moment from 'moment';
-import {size, has, pick, includes, union} from 'lodash';
+import {forEach, size, has, pick, includes, union} from 'lodash';
 import WatcherEditorQueryBuilder from './classes/watcher_editor_query_builder';
 import WatcherEditorConditionBuilder from './classes/watcher_editor_condition_builder';
 
@@ -119,6 +119,32 @@ class ConditionPanelWatcherEdit {
           this.log.debug('select interval:', unit, n);
           this._updateChartQueryParamsInterval(n, unit);
         },
+      },
+    };
+
+    this.content = {
+      views: {
+        chart: {
+          show: true,
+        },
+        chartquery: {
+          show: false,
+        },
+        watcherquery: {
+          show: false,
+        },
+      },
+      toggle: (view) => {
+        this.content.views[view].show = !this.content.views[view].show;
+        if (!this.content.views[view].show) {
+          this.content.views.chart.show = true;
+        } else {
+          forEach(this.content.views, function (settings, viewName) {
+            if (view !== viewName) {
+              settings.show = false;
+            }
+          });
+        }
       },
     };
 
