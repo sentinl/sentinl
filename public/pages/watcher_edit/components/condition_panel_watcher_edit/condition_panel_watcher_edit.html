@@ -67,46 +67,34 @@
             <div class="col-md-3" id="watcher-editor-condition-views">
               <div class="form-inline">
                 <div class="form-group">
-                  <a href="javascript:void(0)"
-                    ng-show="!conditionPanelWatcherEdit.content.views.chart.show"
+                  <button
+                    type="button"
+                    class="btn btn-sm"
+                    ng-class="conditionPanelWatcherEdit.content.views.chart.show ? 'btn-primary' : 'btn-default'"
                     ng-click="conditionPanelWatcherEdit.content.toggle('chart')"
                   >
-                    <i class="fa fa-eye-slash"></i> chart
-                  </a>
-                  <a href="javascript:void(0)"
-                    ng-show="conditionPanelWatcherEdit.content.views.chart.show"
-                    ng-click="conditionPanelWatcherEdit.content.toggle('chart')"
-                  >
-                    <i class="fa fa-eye"></i> chart
-                  </a>
+                    chart
+                  </button>
                 </div>
                 <div class="form-group">
-                  <a href="javascript:void(0)"
-                    ng-show="!conditionPanelWatcherEdit.content.views.chartquery.show"
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-default"
+                    ng-class="conditionPanelWatcherEdit.content.views.chartquery.show ? 'btn-primary' : 'btn-default'"
                     ng-click="conditionPanelWatcherEdit.content.toggle('chartquery')"
                   >
-                    <i class="fa fa-eye-slash"></i> chart query
-                  </a>
-                  <a href="javascript:void(0)"
-                    ng-show="conditionPanelWatcherEdit.content.views.chartquery.show"
-                    ng-click="conditionPanelWatcherEdit.content.toggle('chartquery')"
-                  >
-                    <i class="fa fa-eye"></i> chart query
-                  </a>
+                    chart query
+                  </button>
                 </div>
                 <div class="form-group">
-                  <a href="javascript:void(0)"
-                    ng-show="!conditionPanelWatcherEdit.content.views.watcherquery.show"
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-default"
+                    ng-class="conditionPanelWatcherEdit.content.views.watcherquery.show ? 'btn-primary' : 'btn-default'"
                     ng-click="conditionPanelWatcherEdit.content.toggle('watcherquery')"
                   >
-                    <i class="fa fa-eye-slash"></i> watcher query
-                  </a>
-                  <a href="javascript:void(0)"
-                    ng-show="conditionPanelWatcherEdit.content.views.watcherquery.show"
-                    ng-click="conditionPanelWatcherEdit.content.toggle('watcherquery')"
-                  >
-                    <i class="fa fa-eye"></i> watcher raw
-                  </a>
+                    watcher query
+                  </button>
                 </div>
               </div>
             </div>
