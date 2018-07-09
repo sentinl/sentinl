@@ -3,6 +3,7 @@ export default {
   disable: false,
   report: true,
   save_payload: false,
+  spy: false,
   trigger: {
     schedule: {
       later: 'every 1 hour'

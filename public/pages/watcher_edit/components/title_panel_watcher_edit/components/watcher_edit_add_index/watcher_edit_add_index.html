@@ -6,14 +6,13 @@
           class="form-control"
           type="text"
           ng-model="watcherEditAddIndex.selected"
-          ng-model-options="{ debounce: 500 }"
+          ng-model-options="{ debounce: 1000 }"
           placeholder="Type index names here"
           uib-typeahead="element.index for element in watcherEditAddIndex.getIndexNames($viewValue)"
           typeahead-loading="watcherEditAddIndex.loadingLocations"
           typeahead-no-results="watcherEditAddIndex.noResults"
           typeahead-on-select="watcherEditAddIndex.handleChange($item, $model, $label, $event)" 
           ng-change="watcherEditAddIndex.handleChange()"
-          ng-model-options="{ debounce: 500 }"
         >
         <i ng-show="watcherEditAddIndex.loadingLocations" class="glyphicon glyphicon-refresh"></i>
         <div ng-show="watcherEditAddIndex.noResults">

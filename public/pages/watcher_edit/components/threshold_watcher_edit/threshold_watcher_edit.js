@@ -3,14 +3,16 @@ import template from './threshold_watcher_edit.html';
 import { has, forEach } from 'lodash';
 
 class ThresholdWatcherEdit {
-  constructor($scope, $log, kbnUrl, sentinlLog, confirmModal, createNotifier, Watcher) {
+  constructor($scope, $log, $window, kbnUrl, sentinlLog, confirmModal, createNotifier, Watcher, wizardHelper) {
     this.$scope = $scope;
     this.watcher = this.watcher || this.$scope.watcher;
 
+    this.$window = $window;
     this.kbnUrl = kbnUrl;
     this.sentinlLog = sentinlLog;
     this.confirmModal = confirmModal;
     this.watcherService = Watcher;
+    this.wizardHelper = wizardHelper;
 
     this.locationName = 'ThresholdWatcherEdit';
 
@@ -22,17 +24,21 @@ class ThresholdWatcherEdit {
     this.condition = {
       show: false,
       updateStatus: (isSuccess) => {
-        this.actions.show = isSuccess && this.condition.show ? true : false;
+        this.actions.show = isSuccess && this.condition.show;
       },
     };
 
     this.actions = {
-      show: this.condition.show,
+      show: this.wizardHelper.isSpyWatcher(this.watcher) || this.condition.show,
     };
 
     this.$scope.$watch('thresholdWatcherEdit.watcher._source', () => {
-      this.condition.show = this._isTitlePanelValid(this.watcher);
-      this.actions.show = this.condition.show;
+      if (this.wizardHelper.isSpyWatcher(this.watcher)) {
+        this.actions.show = this._isTitlePanelValid(this.watcher);
+      } else {
+        this.condition.show = this._isTitlePanelValid(this.watcher);
+        this.actions.show = this.condition.show;
+      }
     }, true);
 
     this.$scope.$on('navMenu:cancelEditor', () => {
@@ -100,12 +106,16 @@ class ThresholdWatcherEdit {
   }
 
   _isWatcherValid() {
-    return this.condition.show && this.actions.show;
+    return this.wizardHelper.isSpyWatcher(this.watcher) ? this.actions.show : this.condition.show && this.actions.show;
   }
 
   _cancelWatcherEditor() {
-    this.kbnUrl.redirect('/');
-  };
+    if (this.wizardHelper.isSpyWatcher(this.watcher)) {
+      this.$window.location.href = this.$window.location.href.split('#')[0];
+    } else {
+      this.kbnUrl.redirect('/');
+    }
+  }
 
   async _saveWatcherEditor() {
     try {
@@ -115,7 +125,7 @@ class ThresholdWatcherEdit {
     } catch (err) {
       this.notify.error(err.message);
     }
-  };
+  }
 
   _renameActionsIfNeeded(actions) {
     const result = {};
@@ -144,7 +154,7 @@ class ThresholdWatcherEdit {
     try {
       return this._isSchedule(watcher) && this._isIndex(watcher) && this._isTitle(watcher);
     } catch (err) {
-      this.notify.error(`fail to check if title panel is valid: ${err.message}`);
+      this.notify.error(`check title panel: ${err.message}`);
     }
   }
 }

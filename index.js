@@ -62,7 +62,7 @@ export default function (kibana) {
     chmodSync(chromeDefaultPath, '755');
   } catch (err) {
     chromeDefaultPath = null;
-    console.log(`[sentinl] fail to make report engine executable: ${err.message}!`);
+    console.log(`[sentinl] [warning] make report engine executable: ${err.message}!`);
   }
 
   return new kibana.Plugin({
@@ -230,9 +230,9 @@ export default function (kibana) {
           }).default(),
           report: Joi.object({
             active: Joi.boolean().default(true),
-            engine: Joi.string().default('puppeteer'), // options: puppeteer, horseman
-            phantomjs_path: Joi.string().default(phantomjsDefaultPath || ''),
-            chrome_path: Joi.string().default(chromeDefaultPath || ''),
+            engine: Joi.string().default('horseman'), // options: puppeteer, horseman
+            phantomjs_path: Joi.string().allow('').default(phantomjsDefaultPath || ''),
+            chrome_path: Joi.string().allow('').default(chromeDefaultPath || ''),
             executable_path: Joi.any().forbidden().error(new Error(
               'Option "report.executable_path" was deprecated. Use "report.chrome_path" instead!'
             )),

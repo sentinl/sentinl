@@ -71,6 +71,7 @@ const dashboardSpyButton = function ($scope, config) {
         _new: 'true',
         _source: _.cloneDeep(EMAILWATCHER)
       };
+      alarm._source.spy = true;
 
       // Set Index
       alarm._source.input.search.request.index = $scope.indices;
@@ -137,7 +138,6 @@ const dashboardSpyButton = function ($scope, config) {
       stripObjectPropertiesByNameRegex(alarm._source.input.search, /\$.*/);
       window.localStorage.setItem('sentinl_saved_query', JSON.stringify(alarm));
     };
-
   });
 };
 

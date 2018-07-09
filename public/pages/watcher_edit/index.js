@@ -40,18 +40,33 @@ routes
         const kbnUrl = $injector.get('kbnUrl');
         const watcherService = $injector.get('Watcher');
         const notifier = new Notifier({ location: 'Watcher' });
-
         const watcherId = $route.current.params.id;
 
+        let spyBtnWatcher;
+        try {
+          if (window.localStorage.sentinl_saved_query && !!window.localStorage.sentinl_saved_query.length) {
+            spyBtnWatcher = JSON.parse(window.localStorage.sentinl_saved_query);
+            delete window.localStorage.sentinl_saved_query;
+          }
+        } catch (err) {
+          notifier.error(`parse spy button watcher: ${err.message}`);
+          kbnUrl.redirect('/');
+        }
+
         if (!watcherId) {
-          return watcherService.new('watcher').catch(function (err) {
-            notifier.error(err);
+          return watcherService.new('watcher').then(function (watcher) {
+            if (spyBtnWatcher) {
+              watcher._source = spyBtnWatcher._source;
+            }
+            return watcher;
+          }).catch(function (err) {
+            notifier.error(`create new watcher: ${err.message}`);
             kbnUrl.redirect('/');
           });
         }
 
         return watcherService.get(watcherId).catch(function (err) {
-          notifier.error(err);
+          notifier.error(`get watcher: ${err.message}`);
           kbnUrl.redirect('/');
         });
       },

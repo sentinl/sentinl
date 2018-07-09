@@ -13,8 +13,9 @@ const WatchConfiguration = {
     report: Joi.boolean(),
     disable: Joi.boolean(),
     save_payload: Joi.boolean(),
+    spy: Joi.boolean(),
     trigger: Joi.any(),
-    wizard: Joi.object(),
+    wizard: Joi.any(),
   })
 };
 

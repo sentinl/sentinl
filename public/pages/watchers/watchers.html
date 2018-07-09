@@ -63,7 +63,7 @@
                 <a
                   title="Raw Edit"
                   class="show-rule"
-                  ng-if="!watcher._source.wizard"
+                  ng-if="!wizardHelper.isWizardWatcher(watcher)"
                   ng-href="#/watcher/raw/{{watcher._id}}/edit"
                 > advanced
                   <i class="fa fa-file-code-o"></i>
@@ -71,7 +71,7 @@
                 <a
                   title="Wizard"
                   class="show-rule"
-                  ng-if="watcher._source.wizard"
+                  ng-if="wizardHelper.isWizardWatcher(watcher)"
                   ng-href="#/watcher/{{watcher._id}}/edit"
                 > wizard
                   <i class="fa fa-magic"></i>

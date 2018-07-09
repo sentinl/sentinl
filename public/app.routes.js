@@ -21,28 +21,6 @@ uiRoutes
 });
 
 uiRoutes
-.when('/editor/:watcherId?', {
-  template: editor,
-  controller: 'EditorController',
-  resolve: {
-    currentTime: function ($http) {
-      return $http.get('../api/sentinl/time').then((resp) => resp.data.time);
-    }
-  }
-});
-
-uiRoutes
-.when('/wizard/:watcherId?', {
-  template: wizard,
-  controller: 'EditorController',
-  resolve: {
-    currentTime: function ($http) {
-      return $http.get('../api/sentinl/time').then((resp) => resp.data.time);
-    }
-  }
-});
-
-uiRoutes
 .when('/alarms', {
   template: alarms,
   controller: 'AlarmsController',

@@ -230,10 +230,6 @@ export default function (server, actions, payload, task) {
         });
       }
       if (!action.email.stateless) {
-        console.log('-----------------------------------------------------');
-        console.log('-----------------------------------------------------');
-        console.log('save_payload? ', task._source.save_payload);
-
         // Log Event
         esHistory({
           title: task._source.title,

@@ -7,7 +7,9 @@
       ></title-panel-watcher-edit>
     </div>
   </div>
-  <div class="panel panel-default" ng-show="thresholdWatcherEdit.condition.show">
+  <div class="panel panel-default"
+    ng-if="!thresholdWatcherEdit.wizardHelper.isSpyWatcher(thresholdWatcherEdit.watcher) && thresholdWatcherEdit.condition.show"
+  >
     <div class="panel-body">
       <condition-panel-watcher-edit
         watcher="thresholdWatcherEdit.watcher"
@@ -18,7 +20,9 @@
       ></condition-panel-watcher-edit>
     </div>
   </div>
-  <div class="panel panel-default" ng-show="thresholdWatcherEdit.actions.show">
+  <div class="panel panel-default"
+    ng-if="thresholdWatcherEdit.actions.show"
+  >
     <div class="panel-body">
       <action-panel-watcher-edit
         watcher="thresholdWatcherEdit.watcher"

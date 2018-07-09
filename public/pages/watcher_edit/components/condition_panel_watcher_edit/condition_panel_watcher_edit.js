@@ -23,7 +23,7 @@ class Chart {
 }
 
 class ConditionPanelWatcherEdit {
-  constructor($http, $scope, watcherEditorChartService, watcherEditorEsService, createNotifier, sentinlLog, ServerConfig) {
+  constructor($http, $scope, watcherEditorChartService, watcherEditorEsService, createNotifier, sentinlLog, ServerConfig, wizardHelper) {
     this.$scope = $scope;
     this.watcher = this.watcher || this.$scope.watcher;
     this.updateStatus = this.updateStatus || this.$scope.updateStatus;
@@ -35,6 +35,7 @@ class ConditionPanelWatcherEdit {
     this.watcherEditorChartService = watcherEditorChartService;
     this.watcherEditorEsService = watcherEditorEsService;
     this.serverConfig = ServerConfig;
+    this.wizardHelper = wizardHelper;
     this.log = sentinlLog;
 
     this.locationName = 'ConditionPanelWatcherEdit';
@@ -60,7 +61,7 @@ class ConditionPanelWatcherEdit {
       metric: ['average', 'min', 'max', 'sum'],
     };
 
-    if (!has(this.watcher._source, 'wizard.chart_query_params')) {
+    if (!this.wizardHelper.isWizardWatcher(this.watcher)) {
       this.watcher._source.wizard = {
         chart_query_params: {
           timeField: '@timestamp',

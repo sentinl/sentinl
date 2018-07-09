@@ -23,6 +23,7 @@ module.factory('SavedWatcher', function (courier) {
           report: 'boolean',
           disable: 'boolean',
           save_payload: 'boolean',
+          spy: 'boolean',
           trigger: 'object',
           wizard: 'object',
         },
