@@ -41,6 +41,7 @@
     "moment": "2.22.1",
     "moment-timezone": "0.5.16",
     "mustache": "2.3.0",
+    "node-horseman": "3.3.0",
     "node-slack": "0.0.7",
     "phantom": "6.0.3",
     "puppeteer": "1.5.0",
