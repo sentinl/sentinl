@@ -1,9 +1,10 @@
 import template from './watcher_edit_add_index.html';
 
 class WatcherEditAddIndex {
-  constructor($scope, esService, createNotifier, sentinlLog) {
+  constructor($scope, watcherEditorEsService, createNotifier, sentinlLog) {
     this.$scope = $scope;
     this.watcher = this.watcher || this.$scope.watcher;
+    this.onIndexChange = this.onIndexChange || this.$scope.onIndexChange;
 
     this.locationName = 'WatcherEditAddIndex';
     this.notify = createNotifier({
@@ -11,7 +12,7 @@ class WatcherEditAddIndex {
     });
     this.log = sentinlLog;
     this.log.initLocation(this.locationName);
-    this.esService = esService;
+    this.watcherEditorEsService = watcherEditorEsService;
     this.selected = this._getIndex();
   }
 
@@ -22,14 +23,9 @@ class WatcherEditAddIndex {
     return this.watcher._source.input.search.request.index;
   }
 
-  _setIndex(index) {
-    index = !index ? [] : index.split(',');
-    this.watcher._source.input.search.request.index = index;
-  }
-
   async getIndexNames(name) {
     try {
-      let indexes = await this.esService.getAllIndexes();
+      let indexes = await this.watcherEditorEsService.getAllIndexes();
       return this._filterIndexesByNamePrefix(indexes, this.selected);
     } catch (err) {
       this.notify(err.message);
@@ -43,7 +39,8 @@ class WatcherEditAddIndex {
   }
 
   handleChange() {
-    this._setIndex(this.selected);
+    const index = !this.selected ? [] : this.selected.split(',');
+    this.onIndexChange({index});
   }
 }
 
@@ -53,11 +50,13 @@ function watcherEditAddIndex() {
     restrict: 'E',
     scope: {
       watcher: '=',
+      onIndexChange: '&',
     },
     controller:  WatcherEditAddIndex,
     controllerAs: 'watcherEditAddIndex',
     bindToController: {
       watcher: '=',
+      onIndexChange: '&',
     },
   };
 }

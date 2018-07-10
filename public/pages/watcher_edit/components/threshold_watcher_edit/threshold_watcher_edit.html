@@ -3,6 +3,7 @@
     <div class="panel-body">
       <title-panel-watcher-edit
         watcher="thresholdWatcherEdit.watcher"
+        on-index-change="thresholdWatcherEdit.indexChange({index: index})"
         on-schedule-change="thresholdWatcherEdit.scheduleChange(mode, text)"
       ></title-panel-watcher-edit>
     </div>
@@ -18,6 +19,8 @@
         on-condition-change="thresholdWatcherEdit.conditionChange(condition)"
         ace-options="thresholdWatcherEdit.aceOptions({mode: mode, maxLines: maxLines, minLines: minLines})"
         turn-into-advanced="thresholdWatcherEdit.turnIntoAdvanced()"
+        indexes-data="thresholdWatcherEdit.indexesData"
+        error-message="thresholdWatcherEdit.errorMessage(err)"
       ></condition-panel-watcher-edit>
     </div>
   </div>

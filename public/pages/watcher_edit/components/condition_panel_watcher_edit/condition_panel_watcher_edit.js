@@ -2,7 +2,7 @@ import './condition_panel_watcher_edit.less';
 import template from './condition_panel_watcher_edit.html';
 
 import moment from 'moment';
-import {forEach, size, has, pick, includes, union} from 'lodash';
+import {forEach, size, has, pick, includes} from 'lodash';
 import WatcherEditorQueryBuilder from './classes/watcher_editor_query_builder';
 import WatcherEditorConditionBuilder from './classes/watcher_editor_condition_builder';
 
@@ -23,17 +23,19 @@ class Chart {
 }
 
 class ConditionPanelWatcherEdit {
-  constructor($http, $scope, watcherEditorChartService, watcherEditorEsService, createNotifier, sentinlLog, ServerConfig, wizardHelper) {
+  constructor($http, $scope, watcherEditorChartService, createNotifier, sentinlLog, ServerConfig, wizardHelper) {
     this.$scope = $scope;
     this.watcher = this.watcher || this.$scope.watcher;
     this.updateStatus = this.updateStatus || this.$scope.updateStatus;
     this.onQueryChange = this.onQueryChange || this.$scope.onQueryChange;
     this.onConditionChange = this.onConditionChange || this.$scope.onConditionChange;
     this.aceOptions = this.aceOptions || this.$scope.aceOptions;
+    this.indexesData = this.indexesData || this.$scope.indexesData;
+    this.turnIntoAdvanced = this.turnIntoAdvanced || this.$scope.turnIntoAdvanced;
+    this.errorMessage = this.errorMessage || this.$scope.errorMessage;
 
     this.$http = $http;
     this.watcherEditorChartService = watcherEditorChartService;
-    this.watcherEditorEsService = watcherEditorEsService;
     this.serverConfig = ServerConfig;
     this.wizardHelper = wizardHelper;
     this.log = sentinlLog;
@@ -75,10 +77,6 @@ class ConditionPanelWatcherEdit {
       };
     }
 
-    this.indexesData = {
-      fieldNames: [],
-    };
-
     this.condition = {
       textLimit: 7,
       type: {
@@ -89,9 +87,13 @@ class ConditionPanelWatcherEdit {
       },
       field: {
         aggEnabled: false,
-        handleSelect: (field, timeField) => {
+        handleFieldSelect: (field) => {
           this.log.debug('select field:', field);
-          this._updateChartQueryParamsField(field, timeField);
+          this.watcher._source.wizard.chart_query_params.field = field;
+        },
+        handleTimeFieldSelect: (timeField) => {
+          this.log.debug('select time field:', timeField);
+          this.watcher._source.wizard.chart_query_params.timeField = timeField;
         },
       },
       over: {
@@ -166,41 +168,29 @@ class ConditionPanelWatcherEdit {
       },
     };
 
-    (async () => {
-      const config = await this.serverConfig.get();
-      this.queryBuilder = new WatcherEditorQueryBuilder({timezoneName: config.data.es.timezone});
-      this.conditionBuilder = new WatcherEditorConditionBuilder();
+    this._init();
+  }
 
-      this.$scope.$watch('conditionPanelWatcherEdit.watcher._source', async () => {
-        if (has(this.watcher, '_source.trigger.schedule.later')) {
-          this.watcher._source.wizard.chart_query_params.index = this.watcher._source.input.search.request.index;
+  async _init() {
+    const config = await this.serverConfig.get();
+    this.queryBuilder = new WatcherEditorQueryBuilder({timezoneName: config.data.es.timezone});
+    this.conditionBuilder = new WatcherEditorConditionBuilder();
 
-          try {
-            await this._fetchChartData();
-            this._updateWatcherRawDoc(this.watcher);
-            this._updateChartRawDoc(this.chartQuery);
-            this._reportStatusToThresholdWatcherEdit();
-          } catch (err) {
-            if (err.message.match(/field doesn't support values of type: VALUE_NULL/)) {
-              this._warning(err.message);
-            } else {
-              this._error(`init watcher and wizard: ${err.message}`);
-            }
-            this._reportStatusToThresholdWatcherEdit({success: false});
-          }
+    this.$scope.$watch('conditionPanelWatcherEdit.watcher._source', async () => {
+      if (has(this.watcher, '_source.trigger.schedule.later')) {
+        this.watcher._source.wizard.chart_query_params.index = this.watcher._source.input.search.request.index;
+
+        try {
+          await this._fetchChartData();
+          this._updateWatcherRawDoc(this.watcher);
+          this._updateChartRawDoc(this.chartQuery);
+          this._reportStatusToThresholdWatcherEdit();
+        } catch (err) {
+          this.errorMessage({err});
+          this._reportStatusToThresholdWatcherEdit({success: false});
         }
-      }, true);
-
-      this.$scope.$watch('conditionPanelWatcherEdit.watcher._source.wizard.chart_query_params.field', async () => {
-        if (has(this.watcher, '_source.input.search.request.index')) {
-          try {
-            this.indexesData.fieldNames = await this._getIndexFieldNames(this.watcher._source.input.search.request.index);
-          } catch (err) {
-            this._error(`init watcher agg field: ${err.message}`);
-          }
-        }
-      });
-    })();
+      }
+    }, true);
   }
 
   _warning(msg) {
@@ -213,28 +203,6 @@ class ConditionPanelWatcherEdit {
     this.log.error(msg);
     this.notify.error(msg);
   }
-
-  async _getIndexFieldNames(index) {
-    let fieldNames = [];
-    function getFieldNames(mapping) {
-      for (let i in mapping) {
-        if (typeof mapping[i] === 'object' && mapping[i] !== null) {
-          if (mapping[i].properties) {
-            fieldNames = union(fieldNames, Object.keys(mapping[i].properties));
-          }
-          getFieldNames(mapping[i]);
-        }
-      }
-    }
-
-    try {
-      const mapping = await this.watcherEditorEsService.getMapping(index);
-      getFieldNames(mapping);
-      return fieldNames;
-    } catch (err) {
-      throw new Error(err.message);
-    }
-  };
 
   _getThreshold(watcher) {
     const condition = /(>=|<=|<|>)\s?(\d+)/.exec(watcher._source.condition.script.script);
@@ -429,11 +397,6 @@ class ConditionPanelWatcherEdit {
 
   _updateChartQueryParamsOver(over) {
     this.watcher._source.wizard.chart_query_params.over = pick(over, ['type', 'n', 'field']);
-  }
-
-  _updateChartQueryParamsField(field, timeField) {
-    this.watcher._source.wizard.chart_query_params.field = field;
-    this.watcher._source.wizard.chart_query_params.timeField = timeField;
   }
 
   _updateChartQueryParamsQueryType(type) {
@@ -663,6 +626,8 @@ function conditionPanelWatcherEdit() {
       onConditionChange: '&',
       aceOptions: '&',
       turnIntoAdvanced: '&',
+      indexesData: '=',
+      errorMessage: '&',
     },
     controller:  ConditionPanelWatcherEdit,
     controllerAs: 'conditionPanelWatcherEdit',
@@ -673,6 +638,8 @@ function conditionPanelWatcherEdit() {
       onConditionChange: '&',
       aceOptions: '&',
       turnIntoAdvanced: '&',
+      indexesData: '=',
+      errorMessage: '&',
     },
   };
 }

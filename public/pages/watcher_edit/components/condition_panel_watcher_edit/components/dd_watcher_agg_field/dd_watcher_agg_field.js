@@ -8,21 +8,20 @@ class DdWatcherAggField {
     this.timeField = this.timeField || this.$scope.timeField;
     this.fieldNames = this.fieldNames || this.$scope.fieldNames;
     this.onSelectField = this.onSelectField || this.$scope.onSelectField;
+    this.onSelectTimeField = this.onSelectTimeField || this.$scope.onSelectTimeField;
     this.textLimit = this.textLimit || this.$scope.textLimit;
 
-    this.title = 'FIELD';
+    this.title = 'field';
   }
 
-  shortText(text, limit) {
-    if (text && text.length > limit) {
-      return text.substring(0, limit - 1) + '...';
-    }
-    return text || '';
-  }
-
-  handleChange() {
+  handleFieldChange() {
     this.onSelectField({
       field: this.activeField,
+    });
+  }
+
+  handleTimeFieldChange() {
+    this.onSelectTimeField({
       timeField: this.timeField,
     });
   }
@@ -38,6 +37,7 @@ function ddWatcherAggField() {
       timeField: '@',
       fieldNames: '=',
       onSelectField: '&',
+      onSelectTimeField: '&',
       textLimit: '=',
     },
     controller:  DdWatcherAggField,
@@ -48,6 +48,7 @@ function ddWatcherAggField() {
       timeField: '@',
       fieldNames: '=',
       onSelectField: '&',
+      onSelectTimeField: '&',
       textLimit: '=',
     },
   };

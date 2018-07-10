@@ -14,7 +14,7 @@ class DdWatcherAggOver {
     this.selected = type;
     this.top = {
       enabled: type === 'top',
-      n,
+      n: n || 3,
       selected: field,
     };
   }

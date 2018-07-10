@@ -6,6 +6,7 @@ class TitlePanelWatcherEdit {
     this.$scope = $scope;
     this.watcher = this.watcher || this.$scope.watcher;
     this.onScheduleChange = this.onScheduleChange || this.$scope.onScheduleChange;
+    this.onIndexChange = this.onIndexChange || this.$scope.onIndexChange;
 
     this.log = sentinlLog;
     this.log.initLocation('TitlePanelWatcheredit');
@@ -51,12 +52,14 @@ function titlePanelWatcherEdit() {
     scope: {
       watcher: '=',
       onScheduleChange: '&',
+      onIndexChange: '&',
     },
     controller:  TitlePanelWatcherEdit,
     controllerAs: 'titlePanelWatcherEdit',
     bindToController: {
       watcher: '=',
       onScheduleChange: '&',
+      onIndexChange: '&',
     },
   };
 }

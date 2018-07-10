@@ -1,22 +1,23 @@
 import './threshold_watcher_edit.less';
 import template from './threshold_watcher_edit.html';
-import { has, forEach } from 'lodash';
+import { has, forEach, union, isObject } from 'lodash';
 
 class ThresholdWatcherEdit {
-  constructor($scope, $log, $window, kbnUrl, sentinlLog, confirmModal, createNotifier, Watcher, wizardHelper) {
+  constructor($scope, $log, $window, kbnUrl, sentinlLog, confirmModal, createNotifier, Watcher, wizardHelper, watcherEditorEsService) {
     this.$scope = $scope;
     this.watcher = this.watcher || this.$scope.watcher;
 
     this.$window = $window;
     this.kbnUrl = kbnUrl;
-    this.sentinlLog = sentinlLog;
     this.confirmModal = confirmModal;
     this.watcherService = Watcher;
     this.wizardHelper = wizardHelper;
+    this.watcherEditorEsService = watcherEditorEsService;
 
     this.locationName = 'ThresholdWatcherEdit';
 
-    this.sentinlLog.initLocation(this.locationName);
+    this.log = sentinlLog;
+    this.log.initLocation(this.locationName);
     this.notify = createNotifier({
       location: this.locationName,
     });
@@ -67,6 +68,20 @@ class ThresholdWatcherEdit {
         this.confirmModal('Watcher is not valid', confirmModalOptions);
       }
     });
+
+    this._init();
+  }
+
+  async _init() {
+    this.indexesData = {
+      fieldNames: [],
+    };
+
+    try {
+      this.indexesData.fieldNames = await this.getIndexFieldNames(this.watcher._source.input.search.request.index);
+    } catch (err) {
+      this.errorMessage(`get index "${this.watcher._source.input.search.request.index}" field names: ${err.message}`);
+    }
   }
 
   turnIntoAdvanced() {
@@ -93,6 +108,15 @@ class ThresholdWatcherEdit {
         autoScrollEditorIntoView: false
       },
     };
+  }
+
+  async indexChange(params) {
+    this.watcher._source.input.search.request.index = params.index;
+    try {
+      this.indexesData.fieldNames = await this.getIndexFieldNames(params.index);
+    } catch (err) {
+      this.errorMessage(`get index "${params.index}" field names: ${err.message}`);
+    }
   }
 
   scheduleChange(mode, text) {
@@ -168,6 +192,49 @@ class ThresholdWatcherEdit {
       this.notify.error(`check title panel: ${err.message}`);
     }
   }
+
+  async getIndexFieldNames(index) {
+    let fieldNames = [];
+    function getFieldNames(mapping) {
+      for (let i in mapping) {
+        if (typeof mapping[i] === 'object' && mapping[i] !== null) {
+          if (mapping[i].properties) {
+            fieldNames = union(fieldNames, Object.keys(mapping[i].properties));
+          }
+          getFieldNames(mapping[i]);
+        }
+      }
+    }
+
+    try {
+      const mapping = await this.watcherEditorEsService.getMapping(index);
+      getFieldNames(mapping);
+      return fieldNames;
+    } catch (err) {
+      throw new Error(err.message);
+    }
+  }
+
+  _warning(msg) {
+    this.log.warn(msg);
+    this.notify.warning(msg);
+  }
+
+  _error(err) {
+    this.log.error(err);
+    this.notify.error(err);
+  }
+
+  errorMessage(err) {
+    err = err || 'unknown error, bad implementation';
+    err = err.message || (isObject(err) ? JSON.stringify(err) : err);
+    if (err.match(/(illegal_argument_exception)|(index_not_found_exception)/)) {
+      this._warning(err);
+    } else {
+      this._error(err);
+    }
+  }
+
 }
 
 function thresholdWatcherEdit() {

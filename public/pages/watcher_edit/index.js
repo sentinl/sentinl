@@ -3,14 +3,13 @@ import { Notifier } from 'ui/notify/notifier';
 import routes from 'ui/routes';
 
 import './services/wizard_helper';
-import './services/es_service';
+import './services/watcher_editor_es_service';
 import './components/threshold_watcher_edit';
 import './components/title_panel_watcher_edit';
 import './components/title_panel_watcher_edit/components/watcher_edit_human_schedule';
 import './components/title_panel_watcher_edit/components/watcher_edit_every_schedule';
 import './components/title_panel_watcher_edit/components/watcher_edit_add_index';
 import './components/condition_panel_watcher_edit';
-import './components/condition_panel_watcher_edit/services/watcher_editor_es_service';
 import './components/condition_panel_watcher_edit/services/watcher_editor_chart_service';
 import './components/condition_panel_watcher_edit/components/dd_watcher_agg_type';
 import './components/condition_panel_watcher_edit/components/dd_watcher_agg_field';
