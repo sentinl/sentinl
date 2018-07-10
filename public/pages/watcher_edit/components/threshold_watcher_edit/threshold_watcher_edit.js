@@ -112,10 +112,14 @@ class ThresholdWatcherEdit {
 
   async indexChange(params) {
     this.watcher._source.input.search.request.index = params.index;
-    try {
-      this.indexesData.fieldNames = await this.getIndexFieldNames(params.index);
-    } catch (err) {
-      this.errorMessage(`get index "${params.index}" field names: ${err.message}`);
+    this.actions.show = this._isTitlePanelValid(this.watcher);
+    if (!this.wizardHelper.isSpyWatcher(this.watcher)) {
+      this.watcher._source.wizard.chart_query_params.index = params.index;
+      try {
+        this.indexesData.fieldNames = await this.getIndexFieldNames(params.index);
+      } catch (err) {
+        this.errorMessage(`get index "${params.index}" field names: ${err.message}`);
+      }
     }
   }
 

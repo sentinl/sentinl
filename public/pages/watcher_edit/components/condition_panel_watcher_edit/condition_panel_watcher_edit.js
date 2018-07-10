@@ -176,19 +176,24 @@ class ConditionPanelWatcherEdit {
     this.queryBuilder = new WatcherEditorQueryBuilder({timezoneName: config.data.es.timezone});
     this.conditionBuilder = new WatcherEditorConditionBuilder();
 
-    this.$scope.$watch('conditionPanelWatcherEdit.watcher._source', async () => {
-      if (has(this.watcher, '_source.trigger.schedule.later')) {
-        this.watcher._source.wizard.chart_query_params.index = this.watcher._source.input.search.request.index;
+    this.$scope.$watch('conditionPanelWatcherEdit.watcher._source.wizard.chart_query_params', async () => {
+      try {
+        await this._fetchChartData();
+        this._reportStatusToThresholdWatcherEdit();
+      } catch (err) {
+        this.errorMessage({err});
+        this._reportStatusToThresholdWatcherEdit({success: false});
+      }
+    }, true);
 
-        try {
-          await this._fetchChartData();
-          this._updateWatcherRawDoc(this.watcher);
-          this._updateChartRawDoc(this.chartQuery);
-          this._reportStatusToThresholdWatcherEdit();
-        } catch (err) {
-          this.errorMessage({err});
-          this._reportStatusToThresholdWatcherEdit({success: false});
-        }
+    this.$scope.$watch('conditionPanelWatcherEdit.watcher._source', () => {
+      try {
+        this._updateWatcherRawDoc(this.watcher);
+        this._updateChartRawDoc(this.chartQuery);
+        this._reportStatusToThresholdWatcherEdit();
+      } catch (err) {
+        this.errorMessage({err});
+        this._reportStatusToThresholdWatcherEdit({success: false});
       }
     }, true);
   }
@@ -336,7 +341,8 @@ class ConditionPanelWatcherEdit {
   async _fetchChartData() {
     this._toggleConditionBuilderMetricAggOverField();
     const params = pick(this.watcher._source.wizard.chart_query_params,
-      ['index', 'over', 'last', 'interval', 'field', 'threshold', 'queryType', 'timeField']);
+      ['over', 'last', 'interval', 'field', 'threshold', 'queryType', 'timeField']);
+    params.index = this.watcher._source.input.search.request.index;
 
     if (this._isMetricAgg(params.queryType)) {
       params.metricAggType = params.queryType;
