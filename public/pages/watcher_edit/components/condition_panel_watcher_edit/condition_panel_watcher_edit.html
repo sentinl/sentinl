@@ -149,7 +149,7 @@
                   chart-click="conditionPanelWatcherEdit.onChartClick"
                 ></canvas> 
               </div>
-              <div class="form-group" ng-show="!conditionPanelWatcherEdit.isAnyActiveChart">
+              <div class="alert alert-warning" role="alert" ng-show="!conditionPanelWatcherEdit.isAnyActiveChart">
                 <p>{{conditionPanelWatcherEdit.messages.nodata}}</p>
               </div>
               <div class="form-group" ng-show="conditionPanelWatcherEdit.content.views.chartquery.show">

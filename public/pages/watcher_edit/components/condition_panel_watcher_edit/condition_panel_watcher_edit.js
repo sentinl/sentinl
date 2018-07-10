@@ -47,7 +47,7 @@ class ConditionPanelWatcherEdit {
     });
 
     this.messages = {
-      nodata: 'the selected condition does not return any data',
+      nodata: 'The selected index or condition do not return any data!',
     };
 
     this.progress = {
