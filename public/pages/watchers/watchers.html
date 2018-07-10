@@ -41,11 +41,11 @@
             <tr>
               <td class="col-md-2">
                 <a
-                  ng-if="!watcher._source.wizard"
+                  ng-if="!wizardHelper.isWizardWatcher(watcher)"
                   ng-href="#/watcher/raw/{{watcher._id}}/edit"
                 >{{watcher._source.title}}</a>
                 <a
-                  ng-if="watcher._source.wizard"
+                  ng-if="wizardHelper.isWizardWatcher(watcher)"
                   ng-href="#/watcher/{{watcher._id}}/edit"
                 >{{watcher._source.title}}</a>
               </td>

@@ -662,6 +662,7 @@ function conditionPanelWatcherEdit() {
       onQueryChange: '&',
       onConditionChange: '&',
       aceOptions: '&',
+      turnIntoAdvanced: '&',
     },
     controller:  ConditionPanelWatcherEdit,
     controllerAs: 'conditionPanelWatcherEdit',
@@ -671,6 +672,7 @@ function conditionPanelWatcherEdit() {
       onQueryChange: '&',
       onConditionChange: '&',
       aceOptions: '&',
+      turnIntoAdvanced: '&',
     },
   };
 }

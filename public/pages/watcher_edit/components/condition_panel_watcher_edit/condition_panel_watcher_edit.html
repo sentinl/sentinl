@@ -152,7 +152,8 @@
                 <p>{{conditionPanelWatcherEdit.messages.nodata}}</p>
               </div>
               <div class="form-group" ng-show="conditionPanelWatcherEdit.content.views.chartquery.show">
-                <small class="form-text text-muted">Chart query (read only)</small>
+                <small class="form-text text-muted">Chart query (read only). <a ng-click="conditionPanelWatcherEdit.turnIntoAdvanced()">Turn into advanced</a></small>
+                
                 <div
                   readonly
                   ui-ace="conditionPanelWatcherEdit.aceOptions({mode: 'json', maxLines: 30, minLines: 30})"
@@ -162,7 +163,7 @@
                 </div>
               </div>
               <div class="form-group" ng-show="conditionPanelWatcherEdit.content.views.watcherquery.show">
-                <small class="form-text text-muted">Watcher raw (read only)</small>
+                <small class="form-text text-muted">Watcher raw (read only). <a ng-click="conditionPanelWatcherEdit.turnIntoAdvanced()">Turn into advanced</a></small>
                 <div
                   readonly
                   ui-ace="conditionPanelWatcherEdit.aceOptions({mode: 'json', maxLines: 30, minLines: 30})"

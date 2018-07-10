@@ -69,6 +69,17 @@ class ThresholdWatcherEdit {
     });
   }
 
+  turnIntoAdvanced() {
+    delete this.watcher._source.wizard.chart_query_params;
+    const confirmModalOptions = {
+      onCancel: () => true,
+      onConfirm: () => this._saveWatcherEditor(),
+      confirmButtonText: 'Yes',
+    };
+    this.confirmModal('Are you sure you want to turn this watcher into advanced watcher?' +
+      ' Attention! It is one-way operation, you can\'t revert it.', confirmModalOptions);
+  }
+
   aceOptions({mode = 'behaviour', maxLines = 10, minLines = 5} = {}) {
     return {
       mode: mode,
