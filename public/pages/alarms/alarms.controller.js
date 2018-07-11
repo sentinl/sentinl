@@ -10,6 +10,35 @@ function AlarmsController($rootScope, $scope, $route, $interval,
   $scope.title = COMMON.alarms.title;
   $scope.description = COMMON.description;
 
+  //columns for dynamic view
+  $scope.alarm_columns = [
+    {
+      name:'level',
+      label:'Level',
+      visible: true
+    },
+    {
+      name: 'action',
+      label:'Action',
+      visible: true
+    },
+    {
+      name: 'report',
+      label: 'Report',
+      visible: false
+    },
+    {
+      name: 'watcher',
+      label: 'Watcher',
+      visible: true
+    },
+    {
+      name: 'message',
+      label: 'Message',
+      visible: true
+    }
+  ];
+
   const notify = createNotifier({
     location: COMMON.alarms.title,
   });

@@ -21,6 +21,7 @@
     <div class="col-12-sm">
       <p style="float:left;">UTC time is {{ utcTime }}</p>
       <p style="float:right;">Local time is {{ currentTime }}</p>
+      <p> HELLO</p>
       <br style="clear:both;">
       <br/>
       <div class="panel" ng-show="!alarms.length">
@@ -35,23 +36,29 @@
           Click the button below to open the time picker. For future reference you can open the time picker by clicking on the <a class="btn btn-xs navbtn" ng-click="kbnTopNav.toggle('filter')" aria-expanded="kbnTopNav.is('filter')" aria-label="time picker" data-test-subj="discoverNoResultsTimefilter"><i aria-hidden="true" class="fa fa-clock-o"></i> time picker</a> button in the top right corner of your screen.</p>
         </div>
       </div>
-
+      <h4>Dynamic field selector</h4>
+      <label ng-repeat="col in alarm_columns">
+        {{col.label}}
+        <input type="checkbox" ng-model="col.visible">
+      </label><br/>
       <div class="panel panel-default" ng-show="alarms.length">
         <table class="table">
           <thead>
             <tr>
               <th>TIMESTAMP</th>
-              <th>LEVEL</th>
+              <th ng-repeat="col in alarm_columns" ng-if="col.visible">{{col.label}}</th>
+              <!--- <th>LEVEL</th>
               <th>ACTION</th>
-              <th>MESSAGE</th>
+              <th>MESSAGE</th> -->
               <th></th>
             </tr>
           <tbody ng-repeat="alarm in alarms | orderBy:'_source[\'@timestamp\']':true">
             <tr ng-class-odd="'alarm-row-odd'" ng-class-even="'alarm-row'">
               <td>{{ alarm._source['@timestamp'] | dateFormat }}</td>
-              <td>{{ alarm._source.level }}</td>
+              <td ng-repeat="col in alarm_columns" ng-if="col.visible">{{alarm._source[col.name] || alarm[col.name]}}</td>
+              <!--- <td>{{ alarm._source.level }}</td>
               <td>{{ alarm._source.action }}</td>
-              <td>{{ alarm._source.message }}</td>
+              <td>{{ alarm._source.message }}</td> -->
               <td class="text-center edit-group">
                 <span ng-click="collapse=!collapse" ng-model="collapse" class="show-rule"><i class="fa fa-ellipsis-h"></i></span>
                 <span ng-click="deleteAlarm($index, alarm)" class="delete-rule"><i class="fa fa-trash"></i></span>
