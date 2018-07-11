@@ -23,11 +23,6 @@ function AlarmsController($rootScope, $scope, $route, $interval,
       visible: true
     },
     {
-      name: 'report',
-      label: 'Report',
-      visible: false
-    },
-    {
       name: 'watcher',
       label: 'Watcher',
       visible: true

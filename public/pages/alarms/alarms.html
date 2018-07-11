@@ -46,18 +46,12 @@
             <tr>
               <th>TIMESTAMP</th>
               <th ng-repeat="col in alarm_columns" ng-if="col.visible">{{col.label}}</th>
-              <!--- <th>LEVEL</th>
-              <th>ACTION</th>
-              <th>MESSAGE</th> -->
               <th></th>
             </tr>
           <tbody ng-repeat="alarm in alarms | orderBy:'_source[\'@timestamp\']':true">
             <tr ng-class-odd="'alarm-row-odd'" ng-class-even="'alarm-row'">
               <td>{{ alarm._source['@timestamp'] | dateFormat }}</td>
               <td ng-repeat="col in alarm_columns" ng-if="col.visible">{{alarm._source[col.name] || alarm[col.name]}}</td>
-              <!--- <td>{{ alarm._source.level }}</td>
-              <td>{{ alarm._source.action }}</td>
-              <td>{{ alarm._source.message }}</td> -->
               <td class="text-center edit-group">
                 <span ng-click="collapse=!collapse" ng-model="collapse" class="show-rule"><i class="fa fa-ellipsis-h"></i></span>
                 <span ng-click="deleteAlarm($index, alarm)" class="delete-rule"><i class="fa fa-trash"></i></span>
