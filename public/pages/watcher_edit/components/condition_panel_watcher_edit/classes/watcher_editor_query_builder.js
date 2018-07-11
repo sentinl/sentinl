@@ -61,7 +61,7 @@ class WatcherEditorQueryBuilder {
         "aggs": {
           "bucketAgg": {
             "terms": {
-              "field": "animal.keyword",
+              "field": "animal",
               "size": 2,
               "order": {
                 "_count": "desc"
@@ -174,7 +174,7 @@ class WatcherEditorQueryBuilder {
         "aggs": {
           "bucketAgg": {
             "terms": {
-              "field": "animal.keyword",
+              "field": "animal",
               "size": 2,
               "order": {
                 "_count": "desc"
@@ -302,7 +302,7 @@ class WatcherEditorQueryBuilder {
         "aggs": {
           "bucketAgg": {
             "terms": {
-              "field": "animal.keyword",
+              "field": "animal",
               "size": 2,
               "order": {
                 "_count": "desc"
@@ -430,7 +430,7 @@ class WatcherEditorQueryBuilder {
         "aggs": {
           "bucketAgg": {
             "terms": {
-              "field": "animal.keyword",
+              "field": "animal",
               "size": 2,
               "order": {
                 "_count": "desc"
@@ -558,7 +558,7 @@ class WatcherEditorQueryBuilder {
         "aggs": {
           "bucketAgg": {
             "terms": {
-              "field": "animal.keyword",
+              "field": "animal",
               "size": 2,
               "order": {
                 "_count": "desc"
@@ -712,10 +712,6 @@ class WatcherEditorQueryBuilder {
   }
 
   _termsAgg({field, size, order = 'desc'}) {
-    if (!Number.isInteger(+field)) {
-      field += '.keyword';
-    }
-
     return {
       bucketAgg: {
         terms: {
