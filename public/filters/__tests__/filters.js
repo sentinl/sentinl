@@ -16,25 +16,13 @@ describe('Filters', function () {
     });
 
     it('should calculate the next schedule occurrence in UTC', function (done) {
-      const sentinlConfig = {
-        es: {
-          watcher: {}
-        }
-      };
-      const result = $filter('nextScheduleOccurrence')(schedule, sentinlConfig);
+      const result = $filter('nextScheduleOccurrence')(schedule, 'utc');
       expect(result).to.eql(moment(later.schedule(later.parse.text(schedule)).next()).format('D/M/YYYY HH:mm:ss'));
       done();
     });
 
     it('should calculate the next schedule occurrence in a local timezone', function (done) {
-      const sentinlConfig = {
-        es: {
-          watcher: {
-            schedule_timezone: 'local'
-          }
-        }
-      };
-      const result = $filter('nextScheduleOccurrence')(schedule, sentinlConfig);
+      const result = $filter('nextScheduleOccurrence')(schedule, 'local');
       later.date.localTime();
       expect(result).to.eql(moment(later.schedule(later.parse.text(schedule)).next()).format('D/M/YYYY HH:mm:ss'));
       done();

@@ -1,9 +1,10 @@
 import './threshold_watcher_edit.less';
 import template from './threshold_watcher_edit.html';
-import { has, forEach, union, isObject } from 'lodash';
+import { get, has, forEach, union, isObject } from 'lodash';
 
 class ThresholdWatcherEdit {
-  constructor($scope, $log, $window, kbnUrl, sentinlLog, confirmModal, createNotifier, Watcher, wizardHelper, watcherEditorEsService) {
+  constructor($scope, $log, $window, kbnUrl, sentinlLog, confirmModal, createNotifier,
+    Watcher, wizardHelper, watcherEditorEsService, sentinlConfig) {
     this.$scope = $scope;
     this.watcher = this.watcher || this.$scope.watcher;
 
@@ -13,6 +14,7 @@ class ThresholdWatcherEdit {
     this.watcherService = Watcher;
     this.wizardHelper = wizardHelper;
     this.watcherEditorEsService = watcherEditorEsService;
+    this.sentinlConfig = sentinlConfig;
 
     this.locationName = 'ThresholdWatcherEdit';
 
@@ -69,6 +71,21 @@ class ThresholdWatcherEdit {
       }
     });
 
+    if (!get(this.watcher, '_source.wizard.chart_query_params') && !this.wizardHelper.isSpyWatcher(this.watcher)) {
+      this.watcher._source.wizard = {
+        chart_query_params: {
+          timezoneName: get(this.sentinlConfig, 'es.timezone'), // Europe/Amsterdam
+          timeField: get(this.sentinlConfig, 'es.timefield'),
+          queryType: get(this.sentinlConfig, 'wizard.condition.query_type'),
+          scheduleType: get(this.sentinlConfig, 'wizard.condition.schedule_type'),
+          over: get(this.sentinlConfig, 'wizard.condition.over'),
+          last: get(this.sentinlConfig, 'wizard.condition.last'),
+          interval: get(this.sentinlConfig, 'wizard.condition.interval'),
+          threshold: this._getThreshold(this.watcher._source.condition.script.script),
+        }
+      };
+    }
+
     this._init();
   }
 
@@ -81,6 +98,22 @@ class ThresholdWatcherEdit {
       this.indexesData.fieldNames = await this.getIndexFieldNames(this.watcher._source.input.search.request.index);
     } catch (err) {
       this.errorMessage(`get index "${this.watcher._source.input.search.request.index}" field names: ${err.message}`);
+    }
+  }
+
+  _getThreshold(conditionScript) {
+    const condition = /(>=|<=|<|>)\s?(\d+)/.exec(conditionScript);
+    if (condition[1] === '<') {
+      return {n: +condition[2], direction: 'below'};
+    }
+    if (condition[1] === '>') {
+      return {n: +condition[2], direction: 'above'};
+    }
+    if (condition[1] === '<=') {
+      return {n: +condition[2], direction: 'below eq'};
+    }
+    if (condition[1] === '>=') {
+      return {n: +condition[2], direction: 'above eq'};
     }
   }
 
@@ -177,23 +210,25 @@ class ThresholdWatcherEdit {
   }
 
   _isSchedule(watcher) {
-    return watcher._source && !!watcher._source.trigger.schedule.later.length;
+    const sched = get(watcher, '_source.trigger.schedule.later');
+    return sched && !!sched.length;
   }
 
   _isIndex(watcher) {
-    return watcher._source && Array.isArray(watcher._source.input.search.request.index) &&
-    !!watcher._source.input.search.request.index.length;
+    const index = get(watcher, '_source.input.search.request.index');
+    return index && Array.isArray(index) && !!index.length;
   }
 
   _isTitle(watcher) {
-    return watcher._source && !!watcher._source.title.length;
+    const title = get(watcher, '_source.title');
+    return title && !!title.length;
   }
 
   _isTitlePanelValid(watcher) {
     try {
       return this._isSchedule(watcher) && this._isIndex(watcher) && this._isTitle(watcher);
     } catch (err) {
-      this.notify.error(`check title panel: ${err.message}`);
+      this.notify.error(`check title panel ${err}`);
     }
   }
 

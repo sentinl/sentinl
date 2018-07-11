@@ -2,7 +2,7 @@ import './condition_panel_watcher_edit.less';
 import template from './condition_panel_watcher_edit.html';
 
 import moment from 'moment';
-import {forEach, size, has, pick, includes} from 'lodash';
+import {get, forEach, size, has, pick, includes} from 'lodash';
 import WatcherEditorQueryBuilder from './classes/watcher_editor_query_builder';
 import WatcherEditorConditionBuilder from './classes/watcher_editor_condition_builder';
 
@@ -36,7 +36,6 @@ class ConditionPanelWatcherEdit {
 
     this.$http = $http;
     this.watcherEditorChartService = watcherEditorChartService;
-    this.serverConfig = ServerConfig;
     this.wizardHelper = wizardHelper;
     this.log = sentinlLog;
 
@@ -62,20 +61,6 @@ class ConditionPanelWatcherEdit {
       count: {},
       metric: ['average', 'min', 'max', 'sum'],
     };
-
-    if (!this.wizardHelper.isWizardWatcher(this.watcher)) {
-      this.watcher._source.wizard = {
-        chart_query_params: {
-          timeField: '@timestamp',
-          queryType: 'count',
-          scheduleType: 'every', // options: every, human
-          over: { type: 'all docs' },
-          last: { n: 15, unit: 'minutes' },
-          interval: { n: 1, unit: 'minutes' },
-          threshold: this._getThreshold(this.watcher),
-        }
-      };
-    }
 
     this.condition = {
       textLimit: 7,
@@ -172,8 +157,7 @@ class ConditionPanelWatcherEdit {
   }
 
   async _init() {
-    const config = await this.serverConfig.get();
-    this.queryBuilder = new WatcherEditorQueryBuilder({timezoneName: config.data.es.timezone});
+    this.queryBuilder = new WatcherEditorQueryBuilder({timezoneName: this.watcher._source.wizard.chart_query_params.timezoneName});
     this.conditionBuilder = new WatcherEditorConditionBuilder();
 
     this.$scope.$watch('conditionPanelWatcherEdit.watcher._source.wizard.chart_query_params', async () => {
@@ -207,22 +191,6 @@ class ConditionPanelWatcherEdit {
   _error(msg) {
     this.log.error(msg);
     this.notify.error(msg);
-  }
-
-  _getThreshold(watcher) {
-    const condition = /(>=|<=|<|>)\s?(\d+)/.exec(watcher._source.condition.script.script);
-    if (condition[1] === '<') {
-      return {n: +condition[2], direction: 'below'};
-    }
-    if (condition[1] === '>') {
-      return {n: +condition[2], direction: 'above'};
-    }
-    if (condition[1] === '<=') {
-      return {n: +condition[2], direction: 'below eq'};
-    }
-    if (condition[1] === '>=') {
-      return {n: +condition[2], direction: 'above eq'};
-    }
   }
 
   _updateWatcherRawDoc(watcher) {

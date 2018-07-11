@@ -1,11 +1,13 @@
 import template from './watcher_edit_every_schedule.html';
+import { get } from 'lodash';
 
 class WatcherEditEverySchedule {
-  constructor($scope) {
+  constructor($scope, sentinlConfig) {
     this.$scope = $scope;
     this.watcher = this.watcher || this.$scope.watcher;
     this.onSelect = this.onSelect || this.$scope.onSelect;
 
+    this.schedule_timezone = get(sentinlConfig, 'es.watcher.schedule_timezone'); // local, utc
     this.selected = 'minutes';
     this.options = ['seconds', 'minutes', 'hours', 'days', 'months', 'years'];
     this.number = this._getNumber();
@@ -18,7 +20,11 @@ class WatcherEditEverySchedule {
   }
 
   handleChange() {
-    this.onSelect({mode: 'every', text: `every ${this.number} ${this.selected}`});
+    this.onSelect({mode: 'every', text: this.schedule});
+  }
+
+  get schedule() {
+    return `every ${this.number} ${this.selected}`;
   }
 }
 

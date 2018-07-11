@@ -89,13 +89,13 @@
               </div>
             </div>
             <div class="col-sm-4">
-              <div class="form-group" ng-show="titlePanelWatcherEdit.showScheduleMode('human')">
+              <div class="form-group" ng-if="titlePanelWatcherEdit.showScheduleMode('text')">
                 <watcher-edit-human-schedule
                   watcher="titlePanelWatcherEdit.watcher"
                   on-select="titlePanelWatcherEdit.schedule.handleChange(mode, text)"
                 ></watcher-edit-human-schedule>
               </div>
-              <div class="form-group" ng-show="titlePanelWatcherEdit.showScheduleMode('every')">
+              <div class="form-group" ng-if="titlePanelWatcherEdit.showScheduleMode('every')">
                 <watcher-edit-every-schedule
                   watcher="titlePanelWatcherEdit.watcher"
                   on-select="titlePanelWatcherEdit.schedule.handleChange(mode, text)"

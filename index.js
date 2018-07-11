@@ -85,9 +85,20 @@ export default function (kibana) {
               appName: config.get('sentinl.app_name'),
               es: {
                 watcher: {
-                  schedule_timezone: config.get('sentinl.es.watcher.schedule_timezone')
-                }
-              }
+                  schedule_timezone: config.get('sentinl.es.watcher.schedule_timezone'),
+                },
+                timezone: config.get('sentinl.es.timezone'),
+                timefield: config.get('sentinl.es.timefield'),
+              },
+              wizard: {
+                condition: {
+                  query_type: config.get('sentinl.settings.wizard.condition.query_type'),
+                  schedule_type: config.get('sentinl.settings.wizard.condition.schedule_type'),
+                  over: config.get('sentinl.settings.wizard.condition.over'),
+                  last: config.get('sentinl.settings.wizard.condition.last'),
+                  interval: config.get('sentinl.settings.wizard.condition.interval'),
+                },
+              },
             }
           };
         }
@@ -127,6 +138,23 @@ export default function (kibana) {
           }).default(),
         }).default(),
         settings: Joi.object({
+          wizard: Joi.object({
+            condition: Joi.object({
+              query_type: Joi.string().default('count'),
+              schedule_type: Joi.string().default('every'), // options: every, text
+              over: Joi.object({
+                type: Joi.string().default('all docs'),
+              }).default(),
+              last: Joi.object({
+                n: Joi.number().default(15),
+                unit: Joi.string().default('minutes'),
+              }).default(),
+              interval: Joi.object({
+                n: Joi.number().default(1),
+                unit: Joi.string().default('minutes'),
+              }).default(),
+            }).default(),
+          }).default(),
           authentication: Joi.object({
             https: Joi.any().forbidden().error(new Error(
               'Option "sentinl.settings.authentication.https" was deprecated. Use "sentinl.es.protocol" instead!'

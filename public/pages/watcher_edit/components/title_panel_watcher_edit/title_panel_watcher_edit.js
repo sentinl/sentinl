@@ -13,7 +13,7 @@ class TitlePanelWatcherEdit {
 
     this.schedule = {
       selected: get(this.watcher, '_source.wizard.chart_query_params.scheduleType') || 'every',
-      options: ['every', 'human'],
+      options: ['every', 'text'],
       handleChange: (mode, text) => {
         this.onScheduleChange({mode, text});
       },
@@ -24,7 +24,7 @@ class TitlePanelWatcherEdit {
     if (this.schedule.selected === 'every') {
       this.schedule.handleChange('every', 'every 1 minutes');
     } else {
-      this.schedule.handleChange('human', 'at 15:35');
+      this.schedule.handleChange('text', 'at 15:35');
     }
   }
 

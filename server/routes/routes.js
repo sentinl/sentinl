@@ -118,7 +118,7 @@ export default function routes(server) {
           index: config.es.default_index,
           type: config.es.default_type,
           number_of_results: config.es.results,
-          timezone: config.es.timezone,
+          timezone: config.es.watcher.schedule_timezone,
           timefield: config.es.timefield,
         },
         authentication: {

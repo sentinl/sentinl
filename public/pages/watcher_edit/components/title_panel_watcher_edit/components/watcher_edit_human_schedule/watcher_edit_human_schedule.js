@@ -4,10 +4,10 @@ import { get } from 'lodash';
 class WatcherEditHumanSchedule {
   constructor($scope, sentinlConfig) {
     this.$scope = $scope;
-    this.config = sentinlConfig;
     this.watcher = this.watcher || this.$scope.watcher;
     this.onSelect = this.onSelect || this.$scope.onSelect;
 
+    this.schedule_timezone = get(sentinlConfig, 'es.watcher.schedule_timezone'); // local, utc
     this.schedule = get(this.watcher, '_source.trigger.schedule.later') || '';
   }
 

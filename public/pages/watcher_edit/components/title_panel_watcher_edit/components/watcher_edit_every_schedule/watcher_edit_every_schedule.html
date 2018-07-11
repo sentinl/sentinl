@@ -13,6 +13,9 @@
           ng-model-options="{ debounce: 500 }"
           ng-change="watcherEditEverySchedule.handleChange()"
         >
+        <small class="form-text text-muted">
+          <span>Timezone: {{watcherEditEverySchedule.schedule_timezone}}</span>
+        </small>
       </div>
     </div>
     <div class="col-md-6">
