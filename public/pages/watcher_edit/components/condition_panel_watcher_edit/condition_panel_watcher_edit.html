@@ -12,9 +12,8 @@
               </header>
             </div>
           </div> <!-- END header -->
-          <hr>
           <div class="row watcher-editor-panel-paragraph">
-            <div id="watcher-editor-condition-dd-menu" class="col-md-9">
+            <div class="watcher-editor-condition-dd-menu col-md-12">
               <ul>
                 <li class="watcher-editor-condition-dd">
                   <dd-watcher-agg-type
@@ -65,116 +64,100 @@
                 </li>
               </ul>
             </div>
-            <div class="col-md-3" id="watcher-editor-condition-views">
-              <div class="form-inline">
-                <div class="form-group">
-                  <button
-                    type="button"
-                    class="btn btn-sm"
-                    ng-class="conditionPanelWatcherEdit.content.views.chart.show ? 'btn-primary' : 'btn-default'"
-                    ng-click="conditionPanelWatcherEdit.content.toggle('chart')"
-                  >
-                    chart
-                  </button>
-                </div>
-                <div class="form-group">
-                  <button
-                    type="button"
-                    class="btn btn-sm btn-default"
-                    ng-class="conditionPanelWatcherEdit.content.views.chartquery.show ? 'btn-primary' : 'btn-default'"
-                    ng-click="conditionPanelWatcherEdit.content.toggle('chartquery')"
-                  >
-                    chart query
-                  </button>
-                </div>
-                <div class="form-group">
-                  <button
-                    type="button"
-                    class="btn btn-sm btn-default"
-                    ng-class="conditionPanelWatcherEdit.content.views.watcherquery.show ? 'btn-primary' : 'btn-default'"
-                    ng-click="conditionPanelWatcherEdit.content.toggle('watcherquery')"
-                  >
-                    watcher query
-                  </button>
-                </div>
-              </div>
+            <div id="watcher-editor-condition-tabset">
+              <uib-tabset active="active">
+                <uib-tab index="0" heading="Chart">
+                  <div class="row">
+                    <div class="col-md-1">
+                      <div class="form-inline">
+                        <div class="form-group">
+                          <button 
+                            type="button"
+                            class="btn btn-sm btn-default"
+                            aria-label="Left Align"
+                            ng-click="conditionPanelWatcherEdit.switchToLeftChart()"
+                            ng-show="conditionPanelWatcherEdit.areMultipleCharts && conditionPanelWatcherEdit.isAnyActiveChart"
+                          >
+                            <span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
+                          </button>
+                        </div>
+                        <div class="form-group">
+                          <button
+                            type="button"
+                            class="btn btn-sm btn-default"
+                            aria-label="Left Align"
+                            ng-click="conditionPanelWatcherEdit.switchToRightChart()"
+                            ng-show="conditionPanelWatcherEdit.areMultipleCharts && conditionPanelWatcherEdit.isAnyActiveChart"
+                          >
+                            <span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-11">
+                      <div class="form-group">
+                        <p ng-show="conditionPanelWatcherEdit.activeChart.enabled">
+                          <i class="fa fa-area-chart"></i> {{conditionPanelWatcherEdit.activeChart.name}}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row" id="watcher-editor-condition-chart" >
+                    <div class="col-md-12">
+                      <div
+                        class="form-group chart-container"
+                        ng-show="conditionPanelWatcherEdit.activeChart.enabled">
+                        <small class="form-text text-muted">Historical data:</small>
+                        <canvas
+                          class="chart chart-line"
+                          chart-data="conditionPanelWatcherEdit.activeChart.yAxis"
+                          chart-labels="conditionPanelWatcherEdit.activeChart.xAxis"
+                          chart-options="conditionPanelWatcherEdit.activeChart.options"
+                          chart-click="conditionPanelWatcherEdit.onChartClick"
+                        ></canvas> 
+                      </div>
+                      <div class="alert alert-warning" role="alert" ng-show="!conditionPanelWatcherEdit.isAnyActiveChart">
+                        <p>{{conditionPanelWatcherEdit.messages.nodata}}</p>
+                      </div>
+                    </div>
+                  </div>
+                </uib-tab>
+                <uib-tab index="1" heading="Chart query">
+                  <div class="row" id="watcher-editor-condition-chart-query" >
+                    <div class="col-md-12">
+                      <div class="form-group">
+                        <small class="form-text text-muted">Chart query (read only). <a ng-click="conditionPanelWatcherEdit.turnIntoAdvanced()">Turn into advanced</a></small>
+                        
+                        <div
+                          readonly
+                          ui-ace="conditionPanelWatcherEdit.aceOptions({mode: 'json', maxLines: 50, minLines: 50})"
+                          ng-model="conditionPanelWatcherEdit.rawDoc.chart.text"
+                        >
+                          {{conditionPanelWatcherEdit.rawDoc.chart.text}}
+                        </div>
+                      </div>
+                    </div>
+                  </div> <!-- END -->
+                </uib-tab>
+                <uib-tab index="2" heading="Watcher query">
+                  <div class="row" id="watcher-editor-condition-whatcher-query" >
+                    <div class="col-md-12">
+                      <div class="form-group">
+                        <small class="form-text text-muted">Watcher raw (read only). <a ng-click="conditionPanelWatcherEdit.turnIntoAdvanced()">Turn into advanced</a></small>
+                        <div
+                          readonly
+                          ui-ace="conditionPanelWatcherEdit.aceOptions({mode: 'json', maxLines: 50, minLines: 50})"
+                          ng-model="conditionPanelWatcherEdit.rawDoc.watcher.text"
+                        >
+                          {{conditionPanelWatcherEdit.rawDoc.watcher.text}}
+                        </div>
+                      </div>
+                    </div>
+                  </div> <!-- END -->
+                </uib-tab>
+              </uib-tabset>
             </div>
           </div> <!-- END condition based query builder -->
-          <div class="row" ng-show="conditionPanelWatcherEdit.content.views.chart.show">
-            <div class="col-md-1">
-              <div class="form-group">
-                <p ng-show="conditionPanelWatcherEdit.activeChart.enabled">
-                  <i class="fa fa-area-chart"></i> {{conditionPanelWatcherEdit.activeChart.name}}
-                </p>
-              </div>
-            </div>
-            <div class="col-md-1">
-              <div class="form-inline">
-                <div class="form-group">
-                  <button 
-                    type="button"
-                    class="btn btn-sm btn-default"
-                    aria-label="Left Align"
-                    ng-click="conditionPanelWatcherEdit.switchToLeftChart()"
-                    ng-show="conditionPanelWatcherEdit.areMultipleCharts && conditionPanelWatcherEdit.isAnyActiveChart"
-                  >
-                    <span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
-                  </button>
-                </div>
-                <div class="form-group">
-                  <button
-                    type="button"
-                    class="btn btn-sm btn-default"
-                    aria-label="Left Align"
-                    ng-click="conditionPanelWatcherEdit.switchToRightChart()"
-                    ng-show="conditionPanelWatcherEdit.areMultipleCharts && conditionPanelWatcherEdit.isAnyActiveChart"
-                  >
-                    <span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="row" id="watcher-editor-condition-content" >
-            <div class="col-md-12">
-              <div
-                class="form-group chart-container"
-                ng-show="conditionPanelWatcherEdit.activeChart.enabled && conditionPanelWatcherEdit.content.views.chart.show">
-                <small class="form-text text-muted">Historical data:</small>
-                <canvas
-                  class="chart chart-line"
-                  chart-data="conditionPanelWatcherEdit.activeChart.yAxis"
-                  chart-labels="conditionPanelWatcherEdit.activeChart.xAxis"
-                  chart-options="conditionPanelWatcherEdit.activeChart.options"
-                  chart-click="conditionPanelWatcherEdit.onChartClick"
-                ></canvas> 
-              </div>
-              <div class="alert alert-warning" role="alert" ng-show="!conditionPanelWatcherEdit.isAnyActiveChart">
-                <p>{{conditionPanelWatcherEdit.messages.nodata}}</p>
-              </div>
-              <div class="form-group" ng-show="conditionPanelWatcherEdit.content.views.chartquery.show">
-                <small class="form-text text-muted">Chart query (read only). <a ng-click="conditionPanelWatcherEdit.turnIntoAdvanced()">Turn into advanced</a></small>
-                
-                <div
-                  readonly
-                  ui-ace="conditionPanelWatcherEdit.aceOptions({mode: 'json', maxLines: 30, minLines: 30})"
-                  ng-model="conditionPanelWatcherEdit.rawDoc.chart.text"
-                >
-                  {{conditionPanelWatcherEdit.rawDoc.chart.text}}
-                </div>
-              </div>
-              <div class="form-group" ng-show="conditionPanelWatcherEdit.content.views.watcherquery.show">
-                <small class="form-text text-muted">Watcher raw (read only). <a ng-click="conditionPanelWatcherEdit.turnIntoAdvanced()">Turn into advanced</a></small>
-                <div
-                  readonly
-                  ui-ace="conditionPanelWatcherEdit.aceOptions({mode: 'json', maxLines: 30, minLines: 30})"
-                  ng-model="conditionPanelWatcherEdit.rawDoc.watcher.text"
-                >
-                  {{conditionPanelWatcherEdit.rawDoc.watcher.text}}
-                </div>
-              </div>
-            </div>
-          </div> <!-- END chart, data hostory -->
         </div>
       </div>
     </div>

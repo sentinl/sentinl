@@ -110,32 +110,6 @@ class ConditionPanelWatcherEdit {
       },
     };
 
-    this.content = {
-      views: {
-        chart: {
-          show: true,
-        },
-        chartquery: {
-          show: false,
-        },
-        watcherquery: {
-          show: false,
-        },
-      },
-      toggle: (view) => {
-        this.content.views[view].show = !this.content.views[view].show;
-        if (!this.content.views[view].show) {
-          this.content.views.chart.show = true;
-        } else {
-          forEach(this.content.views, function (settings, viewName) {
-            if (view !== viewName) {
-              settings.show = false;
-            }
-          });
-        }
-      },
-    };
-
     this.rawDoc = {
       watcher: {
         show: false,
