@@ -68,7 +68,10 @@
               <uib-tabset active="active">
                 <uib-tab index="0" heading="Chart">
                   <div class="row">
-                    <div class="col-md-1">
+                    <div
+                      class="col-md-1"
+                      ng-if="conditionPanelWatcherEdit.areMultipleCharts && conditionPanelWatcherEdit.isAnyActiveChart"
+                    >
                       <div class="form-inline">
                         <div class="form-group">
                           <button 
@@ -76,7 +79,6 @@
                             class="btn btn-sm btn-default"
                             aria-label="Left Align"
                             ng-click="conditionPanelWatcherEdit.switchToLeftChart()"
-                            ng-show="conditionPanelWatcherEdit.areMultipleCharts && conditionPanelWatcherEdit.isAnyActiveChart"
                           >
                             <span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
                           </button>
@@ -87,7 +89,6 @@
                             class="btn btn-sm btn-default"
                             aria-label="Left Align"
                             ng-click="conditionPanelWatcherEdit.switchToRightChart()"
-                            ng-show="conditionPanelWatcherEdit.areMultipleCharts && conditionPanelWatcherEdit.isAnyActiveChart"
                           >
                             <span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>
                           </button>

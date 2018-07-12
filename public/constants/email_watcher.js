@@ -6,7 +6,7 @@ export default {
   spy: false,
   trigger: {
     schedule: {
-      later: 'every 5 minutes'
+      later: 'every 2 minutes'
     }
   },
   input: {
@@ -19,16 +19,14 @@ export default {
   },
   condition: {
     script: {
-      script: 'payload.hits.total > 100'
+      script: 'payload.hits.total >= 0'
     }
   },
   actions: {
-    email_admin: {
-      throttle_period: '15m',
+    email_alarm: {
+      throttle_period: '1m',
       email: {
         stateless: false,
-        to: 'alarm@localhost',
-        from: 'sentinl@localhost',
         subject: 'Alarm',
         priority: 'high',
         body: 'Found {{payload.hits.total}} Events'
