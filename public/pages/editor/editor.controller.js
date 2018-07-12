@@ -69,7 +69,8 @@ function EditorController(sentinlConfig, $rootScope, $scope, $route, $interval,
         {operator:  '>', name: 'Greater than'},
         {operator:  '<', name: 'Less than'},
         {operator: '>=', name: 'Greater than or equal'},
-        {operator: '<=', name: 'Less than or equal'}
+        {operator: '<=', name: 'Less than or equal'},
+        {operator: '==', name: 'Equal'}
       ];
       $scope.watcher.$$condition_operator = $scope.watcher.$$condition_operators[0].operator; // setting the default operator (gte)
     }
