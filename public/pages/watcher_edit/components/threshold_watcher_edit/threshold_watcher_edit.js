@@ -1,6 +1,6 @@
 import './threshold_watcher_edit.less';
 import template from './threshold_watcher_edit.html';
-import { get, has, forEach, union, isObject } from 'lodash';
+import { get, has, forEach, keys, isObject, isEmpty, includes, union } from 'lodash';
 
 class ThresholdWatcherEdit {
   constructor($scope, $log, $window, kbnUrl, sentinlLog, confirmModal, createNotifier,
@@ -95,10 +95,34 @@ class ThresholdWatcherEdit {
     };
 
     try {
-      this.indexesData.fieldNames = await this.getIndexFieldNames(this.watcher._source.input.search.request.index);
+      const mappings = await this.watcherEditorEsService.getMapping(this.watcher._source.input.search.request.index);
+      this.indexesData.fieldNames = this._getIndexFieldNames(mappings).sort();
     } catch (err) {
       this.errorMessage(`get index "${this.watcher._source.input.search.request.index}" field names: ${err.message}`);
     }
+  }
+
+  _getIndexFieldNames(mappings, result = []) {
+    if (!isObject(mappings) || isEmpty(mappings)) {
+      return result;
+    }
+
+    forEach(mappings, (mapping, key) => {
+      if (mapping.properties) {
+        result = union(result, keys(mapping.properties));
+      }
+      if (mapping.fields) {
+        forEach(mapping.fields, (mFieldMapping, mFieldName) => {
+          if (!includes(result, key + '.' + mFieldName)) {
+            result.push(key + '.' + mFieldName);
+          }
+        });
+      }
+      if (isObject(mapping)) {
+        result = this._getIndexFieldNames(mapping, result);
+      }
+    });
+    return result;
   }
 
   _getThreshold(conditionScript) {
@@ -143,15 +167,16 @@ class ThresholdWatcherEdit {
     };
   }
 
-  async indexChange(params) {
-    this.watcher._source.input.search.request.index = params.index;
+  async indexChange({index}) {
+    this.watcher._source.input.search.request.index = index;
     this.actions.show = this._isTitlePanelValid(this.watcher);
     if (!this.wizardHelper.isSpyWatcher(this.watcher)) {
-      this.watcher._source.wizard.chart_query_params.index = params.index;
+      this.watcher._source.wizard.chart_query_params.index = index;
       try {
-        this.indexesData.fieldNames = await this.getIndexFieldNames(params.index);
+        const mappings = await this.watcherEditorEsService.getMapping(index);
+        this.indexesData.fieldNames = this._getIndexFieldNames(mappings).sort();
       } catch (err) {
-        this.errorMessage(`get index "${params.index}" field names: ${err.message}`);
+        this.errorMessage(`get index "${index}" field names: ${err.message}`);
       }
     }
   }
@@ -169,12 +194,12 @@ class ThresholdWatcherEdit {
     this.watcher._source.input.search.request.body = body;
   }
 
-  actionAdd(params) {
-    this.watcher._source.actions[params.actionName] = params.actionSettings;
+  actionAdd({actionName, actionSettings}) {
+    this.watcher._source.actions[actionName] = actionSettings;
   }
 
-  actionDelete(params) {
-    delete this.watcher._source.actions[params.actionName];
+  actionDelete({actionName}) {
+    delete this.watcher._source.actions[actionName];
   }
 
   _isWatcherValid() {
@@ -229,28 +254,6 @@ class ThresholdWatcherEdit {
       return this._isSchedule(watcher) && this._isIndex(watcher) && this._isTitle(watcher);
     } catch (err) {
       this.notify.error(`check title panel ${err}`);
-    }
-  }
-
-  async getIndexFieldNames(index) {
-    let fieldNames = [];
-    function getFieldNames(mapping) {
-      for (let i in mapping) {
-        if (typeof mapping[i] === 'object' && mapping[i] !== null) {
-          if (mapping[i].properties) {
-            fieldNames = union(fieldNames, Object.keys(mapping[i].properties));
-          }
-          getFieldNames(mapping[i]);
-        }
-      }
-    }
-
-    try {
-      const mapping = await this.watcherEditorEsService.getMapping(index);
-      getFieldNames(mapping);
-      return fieldNames;
-    } catch (err) {
-      throw new Error(err.message);
     }
   }
 
