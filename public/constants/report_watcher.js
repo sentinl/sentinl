@@ -24,8 +24,6 @@ export default {
     report_admin: {
       throttle_period: '15m',
       report: {
-        to: 'to@email.com',
-        from: 'from@email.com',
         subject: 'My Report',
         priority: 'high',
         body: 'Sample Screenshot Report',
