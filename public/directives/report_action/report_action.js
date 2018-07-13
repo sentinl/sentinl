@@ -17,6 +17,7 @@ class ReportAction {
     this.isTypeOpen = false;
     this.resolutionPattern = '^\\d{1,4}x\\d{1,4}$';
     this.actionSettings.report.priority = this.actionSettings.report.priority || 'low';
+    this.authModes = ['basic', 'customselector', 'xpack', 'searchguard'];
   }
 
   remove() {
