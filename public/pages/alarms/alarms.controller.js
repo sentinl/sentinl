@@ -11,7 +11,7 @@ function AlarmsController($rootScope, $scope, $route, $interval,
   $scope.description = COMMON.description;
 
   //columns for dynamic view
-  $scope.alarm_columns = [
+  $scope.alarmColumns = [
     {
       name:'level',
       label:'Level',

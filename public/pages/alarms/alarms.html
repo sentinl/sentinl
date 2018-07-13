@@ -36,7 +36,7 @@
         </div>
       </div>
       <form class="form-inline" novalidate>
-        <div class="checkbox" ng-repeat="col in alarm_columns">
+        <div class="checkbox" ng-repeat="col in alarmColumns">
           <label>
             <input type="checkbox" ng-model="col.visible">{{col.label}}
           </label>
@@ -47,13 +47,13 @@
           <thead>
             <tr>
               <th>TIMESTAMP</th>
-              <th ng-repeat="col in alarm_columns" ng-if="col.visible">{{col.label}}</th>
+              <th ng-repeat="col in alarmColumns" ng-if="col.visible">{{col.label}}</th>
               <th></th>
             </tr>
           <tbody ng-repeat="alarm in alarms | orderBy:'_source[\'@timestamp\']':true">
             <tr ng-class-odd="'alarm-row-odd'" ng-class-even="'alarm-row'">
               <td>{{ alarm._source['@timestamp'] | dateFormat }}</td>
-              <td ng-repeat="col in alarm_columns" ng-if="col.visible">{{alarm._source[col.name] || alarm[col.name]}}</td>
+              <td ng-repeat="col in alarmColumns" ng-if="col.visible">{{alarm._source[col.name] || alarm[col.name]}}</td>
               <td class="text-center edit-group">
                 <span ng-click="collapse=!collapse" ng-model="collapse" class="show-rule"><i class="fa fa-ellipsis-h"></i></span>
                 <span ng-click="deleteAlarm($index, alarm)" class="delete-rule"><i class="fa fa-trash"></i></span>
