@@ -10,8 +10,8 @@ class User extends SavedObjects {
     // Siren: inject saved objects api related modules if they exist.
     this.savedUsersKibana = this.$injector.has('savedUsersKibana') ? this.$injector.get('savedUsersKibana') : null;
     this.savedObjectsAPI = this.$injector.has('savedObjectsAPI') ? this.$injector.get('savedObjectsAPI') : null;
-    this.savedUsers = this.$injector.has('savedScripts') ? this.$injector.get('savedUsers') : null;
-    this.isSiren = isObject(this.savedObjectsAPI) && isObject(this.savedUsersSiren);
+    this.savedUsers = this.$injector.has('savedUsers') ? this.$injector.get('savedUsers') : null;
+    this.isSiren = isObject(this.savedObjectsAPI) && isObject(this.savedUsers);
     this.savedObjects = this.savedUsersKibana;
     if (this.isSiren) {
       this.savedObjects = this.savedUsers;
@@ -21,18 +21,21 @@ class User extends SavedObjects {
   /**
   * Creates new user.
   *
-  * @param {string} id - watcher id.
-  * @param {string} username - user name.
-  * @param {string} password - user password.
+  * @param {string} id of watcher.
+  * @param {string} username
+  * @param {string} password
   */
   async new(id, username, password) {
     try {
       const user = await this.savedObjects.get();
-      user.id = id;
-      user.watcher_id = id;
+      user.id = id; // sentinl-user:id, where id is id of watcher
       user.username = username;
-      user.password = password;
-      return user.save();
+      if (this.isSiren) {
+        user.password = password; // password hashed by the Siren saved_objects_api middleware
+      } else {
+        user.sha = await this.hash(password);
+      }
+      return await user.save();
     } catch (err) {
       throw new Error(`fail to create new user ${username} ${id}, ${err}`);
     }

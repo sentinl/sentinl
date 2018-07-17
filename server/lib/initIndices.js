@@ -39,7 +39,7 @@ const putMapping = function (server, config, indexName, docType, mappings) {
     return;
   }
 
-  const client = getElasticsearchClient(server, config);
+  const client = getElasticsearchClient({server, config});
 
   client.indices.putMapping({
     index: indexName,
@@ -70,7 +70,7 @@ const createIndex = function (server, config, indexName, docType, mappings, mode
     return;
   }
 
-  const client = getElasticsearchClient(server, config);
+  const client = getElasticsearchClient({server, config});
 
   if (mode === 'alarm') {
     mappings = {

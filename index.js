@@ -23,30 +23,39 @@ import {join} from 'path';
 import { forEach, difference } from 'lodash';
 import {listAllFilesSync} from './server/lib/helpers';
 
+function loadLibs(kibana, requirements) {
+  const sirenSavedObjectsAPI = __dirname.split('/').slice(0, -2).join('/') + '/src/siren_core_plugins/saved_objects_api';
+  const appFile = __dirname + '/public/app.js';
+
+  let customer = 'kibana';
+  if (existsSync(sirenSavedObjectsAPI)) {
+    requirements.push('saved_objects_api');
+    customer = 'siren';
+  }
+
+  const libsToImport = [
+    `import './services/${customer}/saved_watchers/index';`,
+    `import './services/${customer}/saved_users/index';`,
+    `import './services/${customer}/saved_scripts/index';`,
+  ];
+
+  const data = readFileSync(appFile);
+  const libs = data.toString().trim().split('\n');
+
+  forEach(difference(libsToImport, libs), (lib) => {
+    appendFileSync(appFile, `${lib}\n`);
+  });
+
+  return requirements;
+}
+
 export default function (kibana) {
   let requirements = ['kibana', 'elasticsearch'];
 
-  // Siren: check if saved objects api exists.
-  const savedObjectsAPI = `${kibana.rootDir}/src/siren_core_plugins/saved_objects_api`;
-  if (existsSync(savedObjectsAPI)) {
-    requirements.push('saved_objects_api');
-
-    // Siren: import saved objects api related libs.
-    let pathForLibs = `${kibana.rootDir}/siren_plugins/sentinl/public/app.js`;
-    pathForLibs = existsSync(pathForLibs) ? pathForLibs : `${kibana.rootDir}/plugins/sentinl/public/app.js`;
-
-    const libsToImport = [
-      'import \'./services/siren/saved_watchers/index\';',
-      'import \'./services/siren/saved_users/index\';',
-      'import \'./services/siren/saved_scripts/index\';'
-    ];
-
-    const data = readFileSync(pathForLibs);
-    const libs = data.toString().trim().split('\n');
-
-    forEach(difference(libsToImport, libs), (lib) => {
-      appendFileSync(pathForLibs, `${lib}\n`);
-    });
+  try {
+    requirements = loadLibs(kibana, requirements);
+  } catch (err) {
+    throw new Error('put libs into app.js: ' + err.message);
   }
 
   const phantomjsDefaultPath = urljoin(__dirname, 'node_modules/phantomjs-prebuilt/bin/phantomjs');
@@ -155,7 +164,7 @@ export default function (kibana) {
             )),
             enabled: Joi.boolean().default(false),
             impersonate: Joi.boolean().default(false),
-            username: Joi.string().default('elastic'),
+            username: Joi.string().default('sentinl'),
             password: Joi.string().default('password'),
             sha: Joi.string(),
             cert: Joi.object({
