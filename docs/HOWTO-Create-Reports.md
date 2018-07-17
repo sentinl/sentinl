@@ -58,6 +58,8 @@ sentinl:
 ```
 
 ##### Sentinl v6
+Two report engines are supported: horseman (default) and puppeteer.
+
 ```
 sentinl:
   settings:
@@ -65,8 +67,7 @@ sentinl:
       active: true
       host: localhost
     report:
-      active: true
-      executable_path: '/usr/bin/chromium' # path to Chrome v59+ or Chromium v59+
+      engine: horseman # options: horseman, puppeteer
 ```
 
 #### Report Away!
