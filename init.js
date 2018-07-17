@@ -22,7 +22,6 @@ import url from 'url';
 import masterRoute from './server/routes/routes';
 import getScheduler from './server/lib/scheduler';
 import initIndices from './server/lib/initIndices';
-import getElasticsearchClient from './server/lib/get_elasticsearch_client';
 import getConfiguration from './server/lib/get_configuration';
 import {existsSync} from 'fs';
 import Log from './server/lib/log';
@@ -60,7 +59,7 @@ const init = once(function (server) {
   log.info('initializing ...');
 
   if (!includes(['horseman', 'puppeteer'], config.settings.report.engine)) {
-    log.error(`unsupported authentication engine: ${config.settings.report.engine}` +
+    log.error(`unsupported authentication engine: ${config.settings.report.engine}. ` +
       'Supported engines: horseman, puppeteer');
   }
 

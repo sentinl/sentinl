@@ -19,7 +19,7 @@ const delay = function (ms) {
 /* ES Functions */
 var getAlarms = async function (type, server, req, reply) {
   const config = getConfiguration(server);
-  const client = getElasticsearchClient(server, config);
+  const client = getElasticsearchClient({server, config});
   const log = new Log(config.app_name, server, 'routes');
 
   var timeInterval;
@@ -68,7 +68,7 @@ var getAlarms = async function (type, server, req, reply) {
 
 export default function routes(server) {
   const config = getConfiguration(server);
-  const client = getElasticsearchClient(server, config);
+  const client = getElasticsearchClient({server, config});
   const log = new Log(config.app_name, server, 'routes');
 
   // Current Time
@@ -209,6 +209,35 @@ export default function routes(server) {
 
         const resp = await watcherHandler.execute(watcher);
         return reply(resp);
+      } catch (err) {
+        return reply(Boom.notAcceptable(err.message));
+      }
+    }
+  });
+
+  /**
+  * Hash clear text
+  *
+  * @param {object} SHA hash
+  */
+  server.route({
+    method: 'POST',
+    path: '/api/sentinl/hash',
+    config: {
+      validate: {
+        payload: {
+          text: Joi.string().required(),
+        },
+      },
+    },
+    handler: async function (request, reply) {
+      const text = request.payload.text;
+      const crypto = new Crypto(config.settings.authentication.encryption);
+
+      try {
+        return reply({
+          sha: crypto.encrypt(text),
+        });
       } catch (err) {
         return reply(Boom.notAcceptable(err.message));
       }
