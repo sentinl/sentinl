@@ -229,7 +229,7 @@ export default function (kibana) {
           }).default(),
           report: Joi.object({
             active: Joi.boolean().default(true),
-            engine: Joi.string().default('puppeter'), // options: puppeteer, horseman
+            engine: Joi.string().default('puppeteer'), // options: puppeteer, horseman
             phantomjs_path: Joi.string().default(phantomjsDefaultPath),
             chrome_path: Joi.string().default(chromeDefaultPath),
             executable_path: Joi.any().forbidden().error(new Error(
