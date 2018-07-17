@@ -19,15 +19,15 @@ module.factory('SavedUserKibana', function (courier) {
 
     // if type:sentinl-user has no mapping, we push this mapping into ES
     static mapping = {
-      title: 'string',
-      description: 'string',
-      body: 'string',
+      username: 'string',
+      password: 'string',
+      sha: 'string',
     };
 
     static defaults = {};
 
     // Order these fields to the top, the rest are alphabetical
-    static fieldOrder = ['title'];
+    static fieldOrder = ['username'];
   }
 
   return SavedUserKibana;

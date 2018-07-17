@@ -91,7 +91,7 @@ const connectEmail = function (log, config) {
 export default function (server, actions, payload, task) {
   const config = getConfiguration(server);
   const log = new Log(config.app_name, server, 'do_action');
-  const client = getElasticsearchClient(server, config);
+  const client = getElasticsearchClient({server, config});
 
   /* ES Indexing Functions */
   var esHistory = function (args) {
