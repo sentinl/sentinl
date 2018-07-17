@@ -20,7 +20,7 @@ import getElasticsearchClient from './get_elasticsearch_client';
 async function logEvent(args) {
   let {server, title, actionType, message, level, payload, report, object} = args;
   const config = getConfiguration(server);
-  const client = getElasticsearchClient(server, config);
+  const client = getElasticsearchClient({server, config});
 
   level = level || 'INFO';
   payload = payload || {};

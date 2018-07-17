@@ -4,7 +4,6 @@ import Joi from 'joi';
 const UserConfiguration = {
   type: 'sentinl-user',
   schema: Joi.object().keys({
-    watcher_id: Joi.string(),
     username: Joi.string(),
     password: Joi.string()
   })
