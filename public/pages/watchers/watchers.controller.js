@@ -7,7 +7,7 @@ import ace from 'ace';
 // WATCHERS CONTROLLER
 function  WatchersController($rootScope, $scope, $route, $interval,
   $timeout, timefilter, Private, createNotifier, $window, $http, $uibModal, $log, navMenu,
-  globalNavState, $location, dataTransfer, Watcher, Script, Promise, COMMON, confirmModal) {
+  globalNavState, $location, dataTransfer, Watcher, User, Script, Promise, COMMON, confirmModal) {
   'ngInject';
 
   $scope.title = COMMON.watchers.title;
@@ -101,13 +101,21 @@ function  WatchersController($rootScope, $scope, $route, $interval,
     async function doDelete() {
       try {
         const id = await Watcher.delete(watcher._id);
-        notify.info(`Deleted watcher ${watcher._source.title}`);
+        notify.info(`deleted watcher ${watcher._source.title}`);
         $scope.watchers.splice(index, 1);
+
+        try {
+          const user = await User.get(watcher._id);
+          await User.delete(user._id);
+          notify.info(`deleted user ${user._id}`);
+        } catch (err) {
+          $log.warn(err.message);
+        }
       } catch (err) {
         if (Number.isInteger(index)) {
           $scope.watchers.splice(index, 1);
         } else {
-          notify.error(`failto delete watcher, ${err}`);
+          notify.error(`fail to delete watcher, ${err}`);
         }
       }
     }
