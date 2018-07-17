@@ -20,7 +20,8 @@ export default class WatcherHandler {
   constructor(server, client, config) {
     this.server = server;
     this.config = !config ? getConfiguration(server) : config;
-    this.client = !client ? getElasticsearchClient(server, this.config) : client;
+    this.log = new Log(this.config.app_name, this.server, 'watcher_handler');
+    this.client = !client ? getElasticsearchClient({server, config: this.config}) : client;
     this.siren = isKibi(server);
     this.query = {
       watchers: {
@@ -47,6 +48,10 @@ export default class WatcherHandler {
     actionFactory(server, actions, payload, task);
   }
 
+  _docUuid(id) {
+    return id.split(':')[1] || id.split(':')[0];
+  }
+
   /**
   * Get user from user index
   *
@@ -54,18 +59,12 @@ export default class WatcherHandler {
   * @return {object} user data
   */
   async getUser(id) {
-    const request = {
-      index: this.config.es.default_index,
-      type: this.config.es.default_type,
-      id,
-    };
-
-    if (this.siren) {
-      request.type = this.config.es.watcher_type;
-    }
-
     try {
-      return await this.client.get(request);
+      return await this.client.get({
+        index: this.config.es.default_index,
+        type: this.siren ? this.config.es.user_type : this.config.es.default_type,
+        id: this.siren ? id : (this.config.es.user_type + ':' + this._docUuid(id)),
+      });
     } catch (err) {
       throw new ErrorAndLog(this.log, err, `fail to get user: ${err.message}`);
     }
@@ -397,16 +396,20 @@ export default class WatcherHandler {
   */
   async getImpersonatedClient(id) {
     try {
-      const resp = this.getUser(id);
-      if (!resp.found) {
-        throw new Error('fail to authenticate watcher, user was not found');
+      const user = await this.getUser(id);
+      if (!user.found) {
+        throw new Error('fail to impersonate watcher, user was not found. Create watcher user first.');
       }
 
-      const impersonate = {
-        username: resp._source.username,
-        sha: resp._source.sha
-      };
-      return getElasticsearchClient(this.server, this.config, 'data', impersonate);
+      // this.log.debug(`watcher with id "${id}" is impersonated by user: "${JSON.stringify(user, null, 2)}"`);
+      return getElasticsearchClient({
+        server: this.server,
+        config: this.config,
+        impersonateUsername: get(user, '_source.username') || get(user, `_source[${this.config.es.user_type}].username`),
+        impersonateSha: get(user, '_source.sha') || get(user, `_source[${this.config.es.user_type}].sha`),
+        impersonatePassword: get(user, '_source.password') || get(user, `_source[${this.config.es.user_type}].password`),
+        impersonateId: user._id,
+      });
     } catch (err) {
       throw new ErrorAndLog(this.log, err, `fail to impersonate Elasticsearch API client: ${err.message}`);
     }

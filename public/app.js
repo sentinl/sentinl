@@ -18,9 +18,6 @@
  */
 
 import './app.module';
-import './services/kibana/saved_watchers';
-import './services/kibana/saved_scripts';
-import './services/kibana/saved_users';
 
 import './pages/watcher_edit';
 import './pages/watcher_raw_edit';

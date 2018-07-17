@@ -42,7 +42,15 @@ function esClient(config, username, password) {
 * Get Elasticsearch client
 *
 */
-export default function getElasticsearchClient(server, config, type = 'data', impersonate = null) {
+export default function getElasticsearchClient({
+  server,
+  config,
+  type = 'data',
+  impersonateUsername = null,
+  impersonateSha = null,
+  impersonatePassword = null,
+  impersonateId = null
+}) {
   const log = new Log(config.app_name, server, 'get_elasticsearch_client');
 
   const auth = config.settings.authentication;
@@ -50,17 +58,21 @@ export default function getElasticsearchClient(server, config, type = 'data', im
   if (auth.enabled) {
     const crypto = new Crypto(auth.encryption);
 
-    if (impersonate) {
-      log.debug(`impersonating Elasticsearch client by ${auth.username}:${auth.sha}`);
-      return esClient(config, impersonate.username, crypto.decrypt(impersonate.sha));
+    if (impersonateUsername && (impersonateSha || impersonatePassword)) {
+      log.debug(`impersonate watcher "${impersonateId}" by its user: "${impersonateUsername}"`);
+      if (!impersonateSha) {
+        log.debug(`impersonate watcher "${impersonateId}", no SHA found, use clear text password`);
+        return esClient(config, impersonateUsername, impersonatePassword);
+      }
+      return esClient(config, impersonateUsername, crypto.decrypt(impersonateSha));
     }
 
     if (auth.sha) {
-      log.debug(`impersonating Elasticsearch client by ${auth.username}:${auth.sha}`);
+      log.debug(`impersonate Sentinl and all watchers by common user from config: "${auth.username}" and its SHA`);
       return esClient(config, auth.username, crypto.decrypt(auth.sha));
     }
 
-    log.debug(`impersonating Elasticsearch client by ${auth.username}:${auth.password}`);
+    log.debug(`impersonate Sentinl and all watchers by common user from config: "${auth.username}"`);
     return esClient(config, auth.username, auth.password);
   }
 
@@ -83,7 +95,7 @@ export default function getElasticsearchClient(server, config, type = 'data', im
     });
   }
 
-  log.debug('auth via Kibana server elasticseaarch plugin');
+  log.debug('auth via Kibana server elasticsearch plugin');
   if (type === 'data') {
     return server.plugins.elasticsearch.getCluster('data').getClient();
   }

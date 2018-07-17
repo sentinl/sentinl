@@ -87,11 +87,16 @@ function EditorController(sentinlConfig, $rootScope, $scope, $route, $interval,
     };
 
     // get authentication config info
-    ServerConfig.get()
-      .then((response) => {
-        $scope.watcher.$$authentication = response.data.authentication;
-      })
-      .catch(notify.error);
+    $scope.watcher.$$authentication = {
+      impersonate: false,
+      username: null,
+      password: null,
+    };
+    ServerConfig.get().then((resp) => {
+      $scope.watcher.$$authentication = {
+        impersonate: get(resp, 'data.authentication.impersonate'),
+      };
+    }).catch(notify.error);
 
     /**
     * Checks action type.
@@ -454,7 +459,7 @@ function EditorController(sentinlConfig, $rootScope, $scope, $route, $interval,
     const saveUser = function (auth) {
       if (auth) {
         return User.new(
-          $scope.watcher.id,
+          $scope.watcher.id || $scope.watcher._id,
           $scope.watcher.$$authentication.username,
           $scope.watcher.$$authentication.password
         ).then(function (user) {

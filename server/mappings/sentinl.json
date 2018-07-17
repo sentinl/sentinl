@@ -66,6 +66,9 @@
       },
       "sha": {
         "type":  "text"
+      },
+      "password": {
+        "type":  "text"
       }
     }
   }

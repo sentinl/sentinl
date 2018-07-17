@@ -21,16 +21,10 @@ import { once, has, forEach, includes } from 'lodash';
 import url from 'url';
 import getScheduler from './server/lib/scheduler';
 import initIndices from './server/lib/initIndices';
-import getElasticsearchClient from './server/lib/get_elasticsearch_client';
 import getConfiguration from './server/lib/get_configuration';
 import {existsSync} from 'fs';
 import Log from './server/lib/log';
-
-const routes = {
-  watcherRoutes: require('./server/routes/routes'),
-  watcherEditRoutes: require('./server/routes/watcher_edit'),
-  esRoutes: require('./server/routes/es'),
-};
+import routes from './server/routes/routes';
 
 const mappings = {
   alarm: require('./server/mappings/alarm_index'),
@@ -65,7 +59,7 @@ const init = once(function (server) {
   log.info('initializing ...');
 
   if (!includes(['horseman', 'puppeteer'], config.settings.report.engine)) {
-    log.error(`unsupported authentication engine: ${config.settings.report.engine}` +
+    log.error(`unsupported authentication engine: ${config.settings.report.engine}. ` +
       'Supported engines: horseman, puppeteer');
   }
 
@@ -75,9 +69,7 @@ const init = once(function (server) {
   };
 
   // Load Sentinl routes.
-  forEach(routes, function (routeSet) {
-    routeSet(server);
-  });
+  routes(server);
 
   // auto detect elasticsearch host, protocol and port
   const esUrl = url.parse(server.config().get('elasticsearch.url'));

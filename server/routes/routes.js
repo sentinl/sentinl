@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import {pick} from 'lodash';
 import handleESError from '../lib/handle_es_error';
 import getConfiguration from  '../lib/get_configuration';
 import Joi from 'joi';
@@ -19,7 +19,7 @@ const delay = function (ms) {
 /* ES Functions */
 var getAlarms = async function (type, server, req, reply) {
   const config = getConfiguration(server);
-  const client = getElasticsearchClient(server, config);
+  const client = getElasticsearchClient({server, config});
   const log = new Log(config.app_name, server, 'routes');
 
   var timeInterval;
@@ -68,7 +68,7 @@ var getAlarms = async function (type, server, req, reply) {
 
 export default function routes(server) {
   const config = getConfiguration(server);
-  const client = getElasticsearchClient(server, config);
+  const client = getElasticsearchClient({server, config});
   const log = new Log(config.app_name, server, 'routes');
 
   // Current Time
@@ -229,6 +229,241 @@ export default function routes(server) {
         return reply(resp).code(201);
       } catch (err) {
         return reply(Boom.serverUnavailable(err));
+      }
+    }
+  });
+
+  /**
+  * Hash clear text
+  *
+  * @param {object} SHA hash
+  */
+  server.route({
+    method: 'POST',
+    path: '/api/sentinl/hash',
+    config: {
+      validate: {
+        payload: {
+          text: Joi.string().required(),
+        },
+      },
+    },
+    handler: async function (request, reply) {
+      const text = request.payload.text;
+      const crypto = new Crypto(config.settings.authentication.encryption);
+
+      try {
+        return reply({
+          sha: crypto.encrypt(text),
+        });
+      } catch (err) {
+        return reply(Boom.notAcceptable(err.message));
+      }
+    }
+  });
+
+  server.route({
+    path: '/api/sentinl/watcher/editor/count',
+    method: 'POST',
+    config: {
+      validate: {
+        payload: {
+          es_params: Joi.object({
+            index: Joi.array().items(Joi.string().default('*')).default(),
+            number: Joi.number().default(config.es.results),
+            allowNoIndices: Joi.boolean().default(config.es.allow_no_indices),
+            ignoreUnavailable: Joi.boolean().default(config.es.ignore_unavailable),
+          }).default(),
+          query: Joi.string(),
+        },
+      },
+    },
+    handler: async function (req, reply) {
+      const esParams = req.payload.es_params;
+
+      try {
+        const body = JSON.parse(req.payload.query);
+        log.debug('COUNT QUERY BODY:', JSON.stringify(body, null, 2));
+        log.debug('INDEX:', esParams.index);
+
+        const resp = await client.search({
+          index: esParams.index,
+          ignoreUnavailable: esParams.ignoreUnavailable,
+          allowNoIndices: esParams.allowNoIndices,
+          body,
+        });
+
+        return reply(resp);
+      } catch (err) {
+        return reply(Boom.serverUnavailable(err.message));
+      }
+    }
+  });
+
+  server.route({
+    path: '/api/sentinl/watcher/editor/average',
+    method: 'POST',
+    config: {
+      validate: {
+        payload: {
+          es_params: Joi.object({
+            index: Joi.array().items(Joi.string().default('*')).default(),
+            number: Joi.number().default(config.es.results),
+            allowNoIndices: Joi.boolean().default(config.es.allow_no_indices),
+            ignoreUnavailable: Joi.boolean().default(config.es.ignore_unavailable),
+          }).default(),
+          query: Joi.string(),
+        },
+      },
+    },
+    handler: async function (req, reply) {
+      const esParams = req.payload.es_params;
+
+      try {
+        const body = JSON.parse(req.payload.query);
+        log.debug('AVERAGE QUERY BODY:', JSON.stringify(body, null, 2));
+        log.debug('INDEX:', esParams.index);
+
+        const resp = await client.search({
+          index: esParams.index,
+          ignoreUnavailable: esParams.ignoreUnavailable,
+          allowNoIndices: esParams.allowNoIndices,
+          body,
+        });
+
+        return reply(resp);
+      } catch (err) {
+        return reply(Boom.serverUnavailable(err.message));
+      }
+    }
+  });
+
+  server.route({
+    path: '/api/sentinl/watcher/editor/min',
+    method: 'POST',
+    config: {
+      validate: {
+        payload: {
+          es_params: Joi.object({
+            index: Joi.array().items(Joi.string().default('*')).default(),
+            number: Joi.number().default(config.es.results),
+            allowNoIndices: Joi.boolean().default(config.es.allow_no_indices),
+            ignoreUnavailable: Joi.boolean().default(config.es.ignore_unavailable),
+          }).default(),
+          query: Joi.string(),
+        },
+      },
+    },
+    handler: async function (req, reply) {
+      const esParams = req.payload.es_params;
+
+      try {
+        const body = JSON.parse(req.payload.query);
+        log.debug('MIN QUERY BODY:', JSON.stringify(body, null, 2));
+        log.debug('INDEX:', esParams.index);
+
+        const resp = await client.search({
+          index: esParams.index,
+          ignoreUnavailable: esParams.ignoreUnavailable,
+          allowNoIndices: esParams.allowNoIndices,
+          body,
+        });
+
+        return reply(resp);
+      } catch (err) {
+        return reply(Boom.serverUnavailable(err.message));
+      }
+    }
+  });
+
+  server.route({
+    path: '/api/sentinl/watcher/editor/max',
+    method: 'POST',
+    config: {
+      validate: {
+        payload: {
+          es_params: Joi.object({
+            index: Joi.array().items(Joi.string().default('*')).default(),
+            number: Joi.number().default(config.es.results),
+            allowNoIndices: Joi.boolean().default(config.es.allow_no_indices),
+            ignoreUnavailable: Joi.boolean().default(config.es.ignore_unavailable),
+          }).default(),
+          query: Joi.string(),
+        },
+      },
+    },
+    handler: async function (req, reply) {
+      const esParams = req.payload.es_params;
+
+      try {
+        const body = JSON.parse(req.payload.query);
+        log.debug('MAX QUERY BODY:', JSON.stringify(body, null, 2));
+        log.debug('INDEX:', esParams.index);
+
+        const resp = await client.search({
+          index: esParams.index,
+          ignoreUnavailable: esParams.ignoreUnavailable,
+          allowNoIndices: esParams.allowNoIndices,
+          body,
+        });
+
+        return reply(resp);
+      } catch (err) {
+        return reply(Boom.serverUnavailable(err.message));
+      }
+    }
+  });
+
+  server.route({
+    path: '/api/sentinl/watcher/editor/sum',
+    method: 'POST',
+    config: {
+      validate: {
+        payload: {
+          es_params: Joi.object({
+            index: Joi.array().items(Joi.string().default('*')).default(),
+            number: Joi.number().default(config.es.results),
+            allowNoIndices: Joi.boolean().default(config.es.allow_no_indices),
+            ignoreUnavailable: Joi.boolean().default(config.es.ignore_unavailable),
+          }).default(),
+          query: Joi.string(),
+        },
+      },
+    },
+    handler: async function (req, reply) {
+      const esParams = req.payload.es_params;
+
+      try {
+        const body = JSON.parse(req.payload.query);
+        log.debug('SUM QUERY BODY:', JSON.stringify(body, null, 2));
+        log.debug('INDEX:', esParams.index);
+
+        const resp = await client.search({
+          index: esParams.index,
+          ignoreUnavailable: esParams.ignoreUnavailable,
+          allowNoIndices: esParams.allowNoIndices,
+          body,
+        });
+
+        return reply(resp);
+      } catch (err) {
+        return reply(Boom.serverUnavailable(err.message));
+      }
+    }
+  });
+
+  server.route({
+    path: '/api/sentinl/es/indexes',
+    method: 'GET',
+    handler: async function (req, reply) {
+      try {
+        const resp = await client.cat.indices({
+          format: 'json',
+        });
+
+        return reply(resp);
+      } catch (err) {
+        return reply(Boom.serverUnavailable(err.message));
       }
     }
   });
