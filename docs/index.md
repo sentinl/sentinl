@@ -17,7 +17,7 @@
 No Fear! Check out our SENTINL [presentation](https://www.slideshare.net/secret/gobTp9S3omqn9a) to get started off right!
 
 ### First time issues?
-Check out our [FAQ](SENTINL-FAQ) to see if your problem was already handled.
+Check out our [FAQ](FAQ) to see if your problem was already handled.
 
 ### Watcher Life-Cycle
 ![image](https://user-images.githubusercontent.com/1423657/30432947-77a4506c-9963-11e7-93a0-6595fc353a8c.png)
