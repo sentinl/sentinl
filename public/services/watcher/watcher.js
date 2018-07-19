@@ -35,7 +35,7 @@ class Watcher extends SavedObjects {
       'actions', 'input',
       'condition', 'transform',
       'trigger', 'disable',
-      'report', 'title', 'wizard', 'save_payload', 'spy',
+      'report', 'title', 'wizard', 'save_payload', 'spy', 'impersonate', 'username', 'password',
     ];
   }
 

@@ -16,6 +16,7 @@ module.factory('SavedWatcher', function (courier) {
 
         mapping: {
           title: 'string',
+          username: 'string',
           input: 'object',
           actions: 'object',
           transform: 'object',
@@ -23,6 +24,7 @@ module.factory('SavedWatcher', function (courier) {
           report: 'boolean',
           disable: 'boolean',
           save_payload: 'boolean',
+          impersonate: 'boolean',
           spy: 'boolean',
           trigger: 'object',
           wizard: 'object',

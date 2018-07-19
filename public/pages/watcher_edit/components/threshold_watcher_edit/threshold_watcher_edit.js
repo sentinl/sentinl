@@ -3,8 +3,8 @@ import template from './threshold_watcher_edit.html';
 import { get, has, forEach, keys, isObject, isEmpty, includes, union } from 'lodash';
 
 class ThresholdWatcherEdit {
-  constructor($scope, $log, $window, kbnUrl, sentinlLog, confirmModal, createNotifier,
-    Watcher, wizardHelper, watcherEditorEsService, sentinlConfig) {
+  constructor($scope, $window, kbnUrl, sentinlLog, confirmModal, createNotifier,
+    Watcher, User, wizardHelper, watcherEditorEsService, sentinlConfig) {
     this.$scope = $scope;
     this.watcher = this.watcher || this.$scope.watcher;
 
@@ -12,6 +12,7 @@ class ThresholdWatcherEdit {
     this.kbnUrl = kbnUrl;
     this.confirmModal = confirmModal;
     this.watcherService = Watcher;
+    this.userService = User;
     this.wizardHelper = wizardHelper;
     this.watcherEditorEsService = watcherEditorEsService;
     this.sentinlConfig = sentinlConfig;
@@ -217,11 +218,19 @@ class ThresholdWatcherEdit {
   async _saveWatcherEditor() {
     try {
       this.watcher._source.actions = this._renameActionsIfNeeded(this.watcher._source.actions);
-      const resp = await this.watcherService.save(this.watcher);
+      const id = await this.watcherService.save(this.watcher);
+      if (this.watcher.username && this.watcher.password) {
+        await this.userService.new(id, this.watcher.username, this.watcher.password);
+      }
+      this._cleanWatcher(this.watcher);
       this._cancelWatcherEditor();
     } catch (err) {
       this.notify.error(err.message);
     }
+  }
+
+  _cleanWatcher(watcher) {
+    delete watcher.password;
   }
 
   _renameActionsIfNeeded(actions) {

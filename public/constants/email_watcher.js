@@ -3,6 +3,7 @@ export default {
   disable: false,
   report: false,
   save_payload: false,
+  impersonate: false,
   spy: false,
   trigger: {
     schedule: {

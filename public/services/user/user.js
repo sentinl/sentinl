@@ -4,7 +4,7 @@ import SavedObjects from '../saved_objects';
 
 class User extends SavedObjects {
 
-  constructor($http, $injector, Promise, ServerConfig) {
+  constructor($http, $injector, Promise, ServerConfig, sentinlLog) {
     super($http, $injector, Promise, ServerConfig, 'user');
     this.$injector = $injector;
     // Siren: inject saved objects api related modules if they exist.
@@ -16,6 +16,8 @@ class User extends SavedObjects {
     if (this.isSiren) {
       this.savedObjects = this.savedUsers;
     }
+    this.log = sentinlLog;
+    this.log.initLocation('User');
   }
 
   /**
@@ -37,7 +39,38 @@ class User extends SavedObjects {
       }
       return await user.save();
     } catch (err) {
-      throw new Error(`fail to create new user ${username} ${id}, ${err}`);
+      throw new Error(`create new user "${username}" for watcher "${id}": ${err.message || err.statusText}`);
+    }
+  }
+
+  /**
+  * get username by id
+  *
+  * @param {string} id of watcher or user
+  * @return {object} username
+  */
+  async username(id) {
+    try {
+      const resp = await this.$http.post('../api/sentinl/user/username', { id });
+      return resp.data;
+    } catch (err) {
+      if (err.status === 404) {
+        this.log.warn(`user "${id}" was not found`);
+      } else {
+        throw new Error(`get username of "${id}": ${err.message || err.statusText}`);
+      }
+    }
+  }
+
+  async get(id) {
+    try {
+      return await super.get(id);
+    } catch (err) {
+      if (err.status === 404) {
+        this.log.warn(`user "${id}" was not found`);
+      } else {
+        throw new Error(`user "${id}": ${err.message}`);
+      }
     }
   }
 }

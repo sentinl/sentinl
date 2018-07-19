@@ -1,14 +1,13 @@
-import {pick} from 'lodash';
+import {get, pick} from 'lodash';
 import handleESError from '../lib/handle_es_error';
 import getConfiguration from  '../lib/get_configuration';
 import Joi from 'joi';
 import dateMath from '@elastic/datemath';
 import getElasticsearchClient from '../lib/get_elasticsearch_client';
-import es from 'elasticsearch';
 import Crypto from '../lib/crypto';
 import WatcherHandler from '../lib/watcher_handler';
-import Boom from 'boom';
 import Log from '../lib/log';
+import { isKibi } from '../lib/helpers';
 
 const delay = function (ms) {
   return new Promise(function (resolve) {
@@ -207,7 +206,7 @@ export default function routes(server) {
         const resp = await watcherHandler.execute(request.payload);
         return reply(resp);
       } catch (err) {
-        return reply(Boom.notAcceptable(err.message));
+        return reply(handleESError(err));
       }
     }
   });
@@ -228,7 +227,7 @@ export default function routes(server) {
         const resp = await client.indices.getMapping({index});
         return reply(resp).code(201);
       } catch (err) {
-        return reply(Boom.serverUnavailable(err));
+        return reply(handleESError(err));
       }
     }
   });
@@ -257,7 +256,7 @@ export default function routes(server) {
           sha: crypto.encrypt(text),
         });
       } catch (err) {
-        return reply(Boom.notAcceptable(err.message));
+        return reply(handleESError(err));
       }
     }
   });
@@ -295,7 +294,7 @@ export default function routes(server) {
 
         return reply(resp);
       } catch (err) {
-        return reply(Boom.serverUnavailable(err.message));
+        return reply(handleESError(err));
       }
     }
   });
@@ -333,7 +332,7 @@ export default function routes(server) {
 
         return reply(resp);
       } catch (err) {
-        return reply(Boom.serverUnavailable(err.message));
+        return reply(handleESError(err));
       }
     }
   });
@@ -371,7 +370,7 @@ export default function routes(server) {
 
         return reply(resp);
       } catch (err) {
-        return reply(Boom.serverUnavailable(err.message));
+        return reply(handleESError(err));
       }
     }
   });
@@ -409,7 +408,7 @@ export default function routes(server) {
 
         return reply(resp);
       } catch (err) {
-        return reply(Boom.serverUnavailable(err.message));
+        return reply(handleESError(err));
       }
     }
   });
@@ -447,7 +446,7 @@ export default function routes(server) {
 
         return reply(resp);
       } catch (err) {
-        return reply(Boom.serverUnavailable(err.message));
+        return reply(handleESError(err));
       }
     }
   });
@@ -463,7 +462,42 @@ export default function routes(server) {
 
         return reply(resp);
       } catch (err) {
-        return reply(Boom.serverUnavailable(err.message));
+        return reply(handleESError(err));
+      }
+    }
+  });
+
+  server.route({
+    path: '/api/sentinl/user/username',
+    method: 'POST',
+    config: {
+      validate: {
+        payload: {
+          id: Joi.string(),
+        },
+      },
+    },
+    handler: async function (req, reply) {
+      const id = req.payload.id;
+
+      try {
+        const body = {
+          index: config.es.default_index,
+          type: config.es.default_type,
+          id: config.es.user_type + ':' + id,
+        };
+
+        if (isKibi(server)) {
+          body.type = config.es.user_type;
+          body.id = id;
+        }
+
+        const user = await client.get(body);
+        return reply({
+          username: get(user, '_source.username') || get(user, `_source[${config.es.user_type}].username`),
+        });
+      } catch (err) {
+        return reply(handleESError(err));
       }
     }
   });

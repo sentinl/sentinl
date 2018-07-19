@@ -89,7 +89,7 @@ export default class WatcherWizardHandler extends WatcherHandler {
     this.log = new Log(this.config.app_name, this.server, `watcher (wizard) ${task._id}`);
     try {
       const {method, request, condition, transform, actions} = this._checkWatcher(task);
-      if (this.config.settings.authentication.impersonate) {
+      if (this.config.settings.authentication.impersonate || task._source.impersonate) {
         this.client = await this.getImpersonatedClient(task._id);
       }
       return await this._execute(task, method, request, condition, transform, actions);

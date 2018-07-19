@@ -18,6 +18,7 @@ import './components/condition_panel_watcher_edit/components/dd_watcher_agg_time
 import './components/condition_panel_watcher_edit/components/dd_watcher_agg_interval';
 import './components/condition_panel_watcher_edit/components/dd_watcher_agg_threshold';
 import './components/action_panel_watcher_edit';
+import './components/impersonation_panel_watcher_edit';
 import './components/action_panel_watcher_edit/components/watcher_edit_add_action';
 import './components/action_panel_watcher_edit/components/watcher_edit_email_action';
 import './components/action_panel_watcher_edit/components/watcher_edit_report_action';

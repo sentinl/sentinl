@@ -1,10 +1,11 @@
 class WatcherRawEdit {
-  constructor($scope, $injector, navMenu, sentinlLog, createNotifier, confirmModal, kbnUrl, Watcher) {
+  constructor($scope, $injector, navMenu, sentinlLog, createNotifier, confirmModal, kbnUrl, Watcher, User) {
     const $route = $injector.get('$route');
     this.$scope = $scope;
     this.confirmModal = confirmModal;
     this.kbnUrl = kbnUrl;
     this.watcherService = Watcher;
+    this.userService = User;
 
     this.locationName = 'WatcherRawEdit';
     this.log = sentinlLog;
@@ -54,11 +55,19 @@ class WatcherRawEdit {
   async _saveWatcherSource() {
     try {
       this.watcher._source = JSON.parse(this.watcherSourceText);
-      await this.watcherService.save(this.watcher);
+      const id = await this.watcherService.save(this.watcher);
+      if (this.watcher.username && this.watcher.password) {
+        await this.userService.new(id, this.watcher.username, this.watcher.password);
+      }
+      this._cleanWatcher(this.watcher);
       this._cancelWatcherEditor();
     } catch (err) {
       this.notify.error(`fail to save watcher: ${err.message}`);
     }
+  }
+
+  _cleanWatcher(watcher) {
+    delete watcher.password;
   }
 
   aceConfig(mode = 'json', maxLines = 50, minLines = 30) {

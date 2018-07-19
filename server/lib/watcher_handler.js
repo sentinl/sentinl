@@ -377,7 +377,7 @@ export default class WatcherHandler {
     if (!isEmpty(this.getActions(task._source.actions))) {
       try {
         const {method, request, condition, transform, actions} = this._checkWatcher(task);
-        if (this.config.settings.authentication.impersonate) {
+        if (this.config.settings.authentication.impersonate || task._source.impersonate) {
           this.client = await this.getImpersonatedClient(task._id);
         }
         return await this._execute(task, method, request, condition, transform, actions);
@@ -409,6 +409,7 @@ export default class WatcherHandler {
         impersonateSha: get(user, '_source.sha') || get(user, `_source[${this.config.es.user_type}].sha`),
         impersonatePassword: get(user, '_source.password') || get(user, `_source[${this.config.es.user_type}].password`),
         impersonateId: user._id,
+        isSiren: this.siren,
       });
     } catch (err) {
       throw new ErrorAndLog(this.log, err, `fail to impersonate Elasticsearch API client: ${err.message}`);

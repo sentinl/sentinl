@@ -20,6 +20,7 @@ module.factory('SavedWatcherKibana', function (courier, EMAILWATCHER) {
     // if type:sentinl-watcher has no mapping, we push this mapping into ES
     static mapping = {
       title: 'string',
+      username: 'string',
       input: 'object',
       actions: 'object',
       transform: 'object',
@@ -27,6 +28,7 @@ module.factory('SavedWatcherKibana', function (courier, EMAILWATCHER) {
       report: 'boolean',
       disable: 'boolean',
       save_payload: 'boolean',
+      impersonate: 'boolean',
       spy: 'boolean',
       trigger: 'object',
       wizard: 'object',
