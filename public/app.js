@@ -19,9 +19,6 @@
 
 import './app.module';
 
-import './pages/watcher_edit';
-import './pages/watcher_raw_edit';
-
 /* routes */
 import './app.routes';
 
