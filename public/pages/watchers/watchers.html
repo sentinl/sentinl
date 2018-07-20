@@ -46,7 +46,7 @@
                 >{{watcher._source.title}}</a>
                 <a
                   ng-if="wizardHelper.isWizardWatcher(watcher)"
-                  ng-href="#/watcher/{{watcher._id}}/edit"
+                  ng-href="#/watcher/{{watcher._id}}/wizard"
                 >{{watcher._source.title}}</a>
               </td>
               <td class="col-md-2"
@@ -72,7 +72,7 @@
                   title="Wizard"
                   class="show-rule"
                   ng-if="wizardHelper.isWizardWatcher(watcher)"
-                  ng-href="#/watcher/{{watcher._id}}/edit"
+                  ng-href="#/watcher/{{watcher._id}}/wizard"
                 > wizard
                   <i class="fa fa-magic"></i>
                 </a>

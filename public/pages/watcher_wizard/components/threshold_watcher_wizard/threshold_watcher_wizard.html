@@ -1,0 +1,49 @@
+<div class="panel-group">
+  <div class="panel panel-default">
+    <div class="panel-body">
+      <title-panel-watcher-wizard
+        watcher="thresholdWatcherWizard.watcher"
+        on-index-change="thresholdWatcherWizard.indexChange({index: index})"
+        on-schedule-change="thresholdWatcherWizard.scheduleChange(mode, text)"
+      ></title-panel-watcher-wizard>
+    </div>
+  </div>
+  <div class="panel panel-default"
+    ng-if="thresholdWatcherWizard.watcher._source.impersonate"
+  >
+    <div class="panel-body">
+      <impersonation-panel-watcher-wizard
+        user-name="thresholdWatcherWizard.watcher._source.username"
+        pass-word="thresholdWatcherWizard.watcher._source.password"
+      ></impersonation-panel-watcher-wizard>
+    </div>
+  </div>
+  <div class="panel panel-default"
+    ng-if="!thresholdWatcherWizard.wizardHelper.isSpyWatcher(thresholdWatcherWizard.watcher) && thresholdWatcherWizard.condition.show"
+  >
+    <div class="panel-body">
+      <condition-panel-watcher-wizard
+        watcher="thresholdWatcherWizard.watcher"
+        update-status="thresholdWatcherWizard.condition.updateStatus(isSuccess)"
+        on-query-change="thresholdWatcherWizard.queryChange(body)"
+        on-condition-change="thresholdWatcherWizard.conditionChange(condition)"
+        ace-options="thresholdWatcherWizard.aceOptions({mode: mode, maxLines: maxLines, minLines: minLines})"
+        turn-into-advanced="thresholdWatcherWizard.turnIntoAdvanced()"
+        indexes-data="thresholdWatcherWizard.indexesData"
+        error-message="thresholdWatcherWizard.errorMessage(err)"
+      ></condition-panel-watcher-wizard>
+    </div>
+  </div>
+  <div class="panel panel-default"
+    ng-if="thresholdWatcherWizard.actions.show"
+  >
+    <div class="panel-body">
+      <action-panel-watcher-wizard
+        watcher="thresholdWatcherWizard.watcher"
+        on-add="thresholdWatcherWizard.actionAdd({actionName: actionName, actionSettings: actionSettings})"
+        on-delete="thresholdWatcherWizard.actionDelete({actionName: actionName})"
+        ace-options="thresholdWatcherWizard.aceOptions({mode: mode, maxLines: maxLines, minLines: minLines})"
+      ></action-panel-watcher-wizard>
+    </div>
+  </div>
+</div>

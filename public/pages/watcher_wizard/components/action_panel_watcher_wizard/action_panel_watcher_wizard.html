@@ -1,0 +1,58 @@
+<section>
+  <form name="actionPanelWatcherWizard.form" ng-model-options="{ getterSetter: true }" novalidate>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="panel-body">
+          <div class="row watcher-wizard-panel-header">
+            <div class="col-md-6">
+              <header>
+                <h4 class="form-text">
+                  Actions
+                </h4>
+                <small class="form-text text-muted">
+                  Set action properties to make it work
+                </small>
+              </header>
+            </div>
+          </div> <!-- END header -->
+          <hr>
+          <div class="row">
+            <div class="col-md-2">
+              <div class="form-group">
+                <watcher-wizard-add-action
+                  on-add="actionPanelWatcherWizard.onAdd({actionName: actionName, actionSettings: actionSettings})"
+                ></watcher-wizard-add-action>
+              </div>
+            </div>
+            <div class="col-md-10">
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12">
+              <div class="form-group">
+                <uib-accordion close-others="actionPanelWatcherWizard.status.closeOthers">
+                  <div ng-repeat="(actionName, actionSettings) in actionPanelWatcherWizard.watcher._source.actions track by $index">
+                    <watcher-wizard-email-action
+                      ng-if="actionPanelWatcherWizard.isAction(actionSettings, 'email')"
+                      action-name="{{actionName}}"
+                      action-settings="actionSettings"
+                      action-delete="actionPanelWatcherWizard.onDelete({actionName: actionName})"
+                      ace-options="actionPanelWatcherWizard.aceOptions({mode: mode, maxLines: maxLines, minLines: minLines})"
+                    ></watcher-wizard-email-action>
+                    <watcher-wizard-report-action
+                      ng-if="actionPanelWatcherWizard.isAction(actionSettings, 'report')"
+                      action-name="{{actionName}}"
+                      action-settings="actionSettings"
+                      action-delete="actionPanelWatcherWizard.onDelete({actionName: actionName})"
+                      ace-options="actionPanelWatcherWizard.aceOptions({mode: mode, maxLines: maxLines, minLines: minLines})"
+                    ></watcher-wizard-report-action>
+                  </div>
+                </uib-accordion>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</section>

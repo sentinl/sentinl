@@ -1,7 +1,7 @@
 /* global angular */
 
-import './watcher_edit';
-import './watcher_raw_edit';
+import './watcher_wizard';
+import './watcher_advanced';
 
 import watchersPage from './watchers';
 import aboutPage from './about';

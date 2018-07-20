@@ -1,0 +1,140 @@
+<div uib-accordion-group class="panel-default" is-open="watcherWizardEmailAction.status.isOpen">
+  <uib-accordion-heading>
+    <i class="fa fa-envelope"></i> {{watcherWizardEmailAction.type}} action: {{watcherWizardEmailAction.actionSettings.name}} <i class="pull-right glyphicon"
+    ng-class="{'glyphicon-chevron-down': watcherWizardEmailAction.status.isOpen, 'glyphicon-chevron-right': !watcherWizardEmailAction.status.isOpen}"></i>
+  </uib-accordion-heading>
+  <form name="watcherWizardEmailAction.form" ng-model-options="{ getterSetter: true }" novalidate>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="form-group">
+          <label class="control-label" for="watcherWizardEmailActionTitle">Title</label> 
+          <input
+            id="watcherWizardEmailActionTitle"
+            name="watcherWizardEmailActionTitle"
+            placeholder="title"
+            type="text"
+            class="form-control"
+            ng-model="watcherWizardEmailAction.actionSettings.name"
+          >
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-2">
+        <div class="form-group">
+          <label for="watcherWizardEmailActionThrottle" class="control-label">Throttle</label> 
+          <div class="input-group">
+            <div class="input-group-addon">
+              <i class="fa fa-snowflake-o" aria-hidden="true"></i>
+            </div> 
+            <input
+              id="watcherWizardEmailThrottle"
+              name="watcherWizardEmailThrottle"
+              placeholder="0h15m0s"
+              type="text"
+              class="form-control"
+              ng-model="watcherWizardEmailAction.actionSettings.throttle_period"
+            >
+          </div> 
+        </div>
+      </div>
+      <div class="col-md-2">
+        <div class="form-group">
+          <label for="watcherWizardEmailActionPriority" class="control-label">Priority</label> 
+          <select
+            id="watcherWizardEmailActionPriority"
+            name="watcherWizardEmailActionPriority"
+            class="select form-control"
+            ng-model="watcherWizardEmailAction.priority.selected"
+            ng-options="o as o for o in watcherWizardEmailAction.priority.options"
+            ng-change="watcherWizardEmailAction.priority.handleChange()"
+          ></select>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label for="watcherWizardEmailActionPreferences" class="control-label">
+            <i class="fa fa-cog"></i> Preferences
+          </label> 
+          <div>
+            <label class="checkbox-inline">
+              <input
+                type="checkbox"
+                name="watcherWizardEmailActionPreferences"
+                ng-model="watcherWizardEmailAction.actionSettings.email.stateless"
+                ng-checked="!watcherWizardEmailAction.actionSettings.email.stateless"
+                ng-true-value="false"
+                ng-false-value="true"
+              >record action log
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="form-group">
+          <label for="watcherWizardEmailActionTo" class="control-label">To</label> 
+          <div class="input-group">
+            <div class="input-group-addon">
+              <i class="fa fa-address-card" aria-hidden="true"></i>
+            </div> 
+            <input
+              id="watcherWizardEmailActionTo"
+              name="watcherWizardEmailActionTo"
+              placeholder="Email destination address"
+              type="text"
+              class="form-control"
+              aria-describedby="watcherWizardEmailActionToHelpBlock"
+              ng-model="watcherWizardEmailAction.actionSettings.email.to"
+            >
+          </div> 
+          <span id="watcherWizardEmailActionToHelpBlock" class="help-block">Put multiple addresses separating them by ','</span>
+        </div>
+        <div class="form-group">
+          <label for="watcherWizardEmailActionFrom" class="control-label">From</label> 
+          <div class="input-group">
+            <div class="input-group-addon">
+              <i class="fa fa-address-card"></i>
+            </div> 
+            <input
+              id="watcherWizardEmailActionFrom"
+              name="watcherWizardEmailActionFrom"
+              placeholder="Email source address"
+              type="text"
+              aria-describedby="watcherWizardEmailActionFromHelpBlock"
+              class="form-control"
+              ng-model="watcherWizardEmailAction.actionSettings.email.from"
+            >
+          </div> 
+          <span id="watcherWizardEmailActionFromHelpBlock" class="help-block">Put multiple addresses separating them by ','</span>
+        </div>
+        <div class="form-group">
+          <label for="watcherWizardEmailActionSubject" class="control-label">Subject</label> 
+          <input
+            id="watcherWizardEmailActionSubject"
+            name="watcherWizardEmailActionSubject"
+            placeholder="Subject"
+            type="text"
+            class="form-control"
+            ng-model="watcherWizardEmailAction.actionSettings.email.subject"
+          >
+        </div>
+        <div class="form-group">
+          <label class="control-label" for="watcherWizardEmailActionContent">Content</label> 
+            <div id="watcherWizardEmailActionContent"
+              ng-model="watcherWizardEmailAction.actionSettings.email.body"
+              ui-ace="watcherWizardEmailAction.aceOptions({maxLines: 30})">
+            </div>
+        </div> 
+      </div> 
+    </div> 
+    <div class="row">
+      <div class="col-md-12">
+        <div class="form-group">
+          <button name="submit" type="submit" class="btn btn-sm btn-danger" ng-click="watcherWizardEmailAction.deleteAction()">Delete</button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
