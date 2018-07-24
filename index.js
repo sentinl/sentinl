@@ -164,6 +164,7 @@ export default function (kibana) {
             )),
             enabled: Joi.boolean().default(false),
             impersonate: Joi.boolean().default(false),
+            provider: Joi.string().default('sg'),
             username: Joi.string().default('sentinl'),
             password: Joi.string().default('password'),
             sha: Joi.string(),
