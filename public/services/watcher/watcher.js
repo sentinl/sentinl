@@ -1,4 +1,4 @@
-import {isObject, forEach, has} from 'lodash';
+import {isObject, forEach, has, cloneDeep} from 'lodash';
 import uuid from 'uuid/v4';
 import SavedObjects from '../saved_objects';
 
@@ -73,7 +73,7 @@ class Watcher extends SavedObjects {
   */
   async new(type) {
     try {
-      this.savedObjects.Class.defaults = type === 'report' ? this.REPORTWATCHER : this.EMAILWATCHER;
+      this.savedObjects.Class.defaults = type === 'report' ? cloneDeep(this.REPORTWATCHER) : cloneDeep(this.EMAILWATCHER);
       let watcher = await this.savedObjects.get();
       return this.nestedSource(watcher, this.fields);
     } catch (err) {

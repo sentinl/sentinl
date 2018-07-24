@@ -69,7 +69,8 @@ function EditorController(sentinlConfig, $rootScope, $scope, $route, $interval,
         {operator:  '>', name: 'Greater than'},
         {operator:  '<', name: 'Less than'},
         {operator: '>=', name: 'Greater than or equal'},
-        {operator: '<=', name: 'Less than or equal'}
+        {operator: '<=', name: 'Less than or equal'},
+        {operator: '==', name: 'Equal'}
       ];
       $scope.watcher.$$condition_operator = $scope.watcher.$$condition_operators[0].operator; // setting the default operator (gte)
     }
@@ -87,11 +88,16 @@ function EditorController(sentinlConfig, $rootScope, $scope, $route, $interval,
     };
 
     // get authentication config info
-    ServerConfig.get()
-      .then((response) => {
-        $scope.watcher.$$authentication = response.data.authentication;
-      })
-      .catch(notify.error);
+    $scope.watcher.$$authentication = {
+      impersonate: false,
+      username: null,
+      password: null,
+    };
+    ServerConfig.get().then((resp) => {
+      $scope.watcher.$$authentication = {
+        impersonate: get(resp, 'data.authentication.impersonate'),
+      };
+    }).catch(notify.error);
 
     /**
     * Checks action type.
@@ -449,22 +455,6 @@ function EditorController(sentinlConfig, $rootScope, $scope, $route, $interval,
     };
 
     /**
-    * Saves authentication pair (username/password) for watcher authentication.
-    */
-    const saveUser = function (auth) {
-      if (auth) {
-        return User.new(
-          $scope.watcher.id,
-          $scope.watcher.$$authentication.username,
-          $scope.watcher.$$authentication.password
-        ).then(function (user) {
-          notify.info(`Saved user "${user}"`);
-        });
-      }
-      return Promise.resolve();
-    };
-
-    /**
     * Saves the editor values as watcher properties and saves the watcher.
     */
     $scope.saveEditor = function () {
@@ -546,26 +536,37 @@ function EditorController(sentinlConfig, $rootScope, $scope, $route, $interval,
       }
 
       if ($scope.watcherForm.$valid) {
-        saveUser($scope.watcher.$$authentication.impersonate).then(function () {
-          if (later.parse.text($scope.watcher._source.trigger.schedule.later).error > -1) {
-            notify.error('Schedule is invalid.');
-            $log.error('schedule is invalid:', $scope.watcher._source.trigger.schedule.later);
-            init({
-              fields: false
-            });
-            return;
-          }
-
-          return Watcher.save($scope.watcher).then(function (id) {
-            const title = $scope.watcher.title ? $scope.watcher.title : get($scope.watcher, '_source.title');
-            notify.info(`Saved watcher "${title}"`);
-            $scope.cancelEditor();
-          }).then(function () {
-            $rootScope.$broadcast('editorCtrl-Watcher.save');
+        if (later.parse.text($scope.watcher._source.trigger.schedule.later).error > -1) {
+          notify.error('Schedule is invalid.');
+          $log.error('schedule is invalid:', $scope.watcher._source.trigger.schedule.later);
+          init({
+            fields: false
           });
-        }).catch(notify.error);
+          return;
+        }
+
+        return Watcher.save($scope.watcher).then(function (id) {
+          const title = $scope.watcher.title || get($scope.watcher, '_source.title');
+          notify.info(`Saved watcher "${title}"`);
+
+          if ($scope.watcher.$$authentication.impersonate) {
+            return User.new(
+              id,
+              $scope.watcher.$$authentication.username,
+              $scope.watcher.$$authentication.password
+            ).then(function (user) {
+              notify.info(`Saved user "${user}"`);
+            });
+          }
+        }).then(function () {
+          $scope.cancelEditor();
+          $rootScope.$broadcast('editorCtrl-Watcher.save');
+        }).catch(function (err) {
+          notify.error('fail to save: ' + err.message);
+        });
       }
     };
+
 
     /**
     * Exits to watcher list.

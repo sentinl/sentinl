@@ -19,7 +19,6 @@ module.service('savedUsersKibana', function (Promise, SavedUserKibana, kbnIndex,
     return kbnUrl.eval('#/{{id}}', { id: id });
   };
 
-  // Customize loader properties since adding an 's' on type doesn't work for type 'sentinl-script'.
   savedUserLoader.loaderProperties = {
     name: 'sentinl-user',
     noun: 'Saved Users',

@@ -16,7 +16,6 @@ module.factory('SavedUser', function (courier) {
         type: SavedUser.type,
 
         mapping: {
-          watcher_id: 'string',
           username: 'string',
           password: 'string'
         },
