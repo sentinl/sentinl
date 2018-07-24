@@ -143,10 +143,9 @@ class ThresholdWatcherWizard {
   }
 
   turnIntoAdvanced() {
-    delete this.watcher._source.wizard.chart_query_params;
     const confirmModalOptions = {
       onCancel: () => true,
-      onConfirm: () => this._saveWatcherWizard(),
+      onConfirm: () => this._saveWatcherWizard({convertToAdvanced: true}),
       confirmButtonText: 'Yes',
     };
     this.confirmModal('Are you sure you want to turn this watcher into advanced watcher?' +
@@ -215,13 +214,20 @@ class ThresholdWatcherWizard {
     }
   }
 
-  async _saveWatcherWizard() {
+  async _saveWatcherWizard({convertToAdvanced = false, clean = true} = {}) {
     try {
+      if (convertToAdvanced) {
+        delete this.watcher._source.wizard.chart_query_params;
+      }
+
       const id = await this.watcherService.save(this.watcher);
       if (this.watcher.username && this.watcher.password) {
         await this.userService.new(id, this.watcher.username, this.watcher.password);
       }
-      this._cleanWatcher(this.watcher);
+
+      if (clean) {
+        this._cleanWatcher(this.watcher);
+      }
       this._cancelWatcherWizard();
     } catch (err) {
       this.notify.error(err.message);
