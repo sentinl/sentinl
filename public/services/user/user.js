@@ -61,18 +61,6 @@ class User extends SavedObjects {
       }
     }
   }
-
-  async get(id) {
-    try {
-      return await super.get(id);
-    } catch (err) {
-      if (err.status === 404) {
-        this.log.warn(`user "${id}" was not found`);
-      } else {
-        throw new Error(`user "${id}": ${err.message}`);
-      }
-    }
-  }
 }
 
 export default User;

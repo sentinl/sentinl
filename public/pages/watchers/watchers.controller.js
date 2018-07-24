@@ -101,23 +101,19 @@ function  WatchersController($rootScope, $scope, $route, $interval,
 
     async function doDelete() {
       try {
-        const id = await Watcher.delete(watcher._id);
+        await Watcher.delete(watcher._id);
         notify.info(`deleted watcher ${watcher._source.title}`);
         $scope.watchers.splice(index, 1);
 
-        const user = await User.get(watcher._id);
         try {
+          const user = await User.get(watcher._id);
           await User.delete(user._id);
           notify.info(`deleted user ${user._id}`);
         } catch (err) {
           $log.warn(err.message);
         }
       } catch (err) {
-        if (Number.isInteger(index)) {
-          $scope.watchers.splice(index, 1);
-        } else {
-          notify.error(`fail to delete watcher, ${err}`);
-        }
+        notify.error(`fail to delete watcher: ${err}`);
       }
     }
 
