@@ -111,12 +111,14 @@ class Watcher extends SavedObjects {
   /**
    * Check watcher access
    * Simple get request for indices, if it returns error on any, it should return false
-   * 
+   *
    * @param {object} watcher object
    * @return {boolean} ok or not to create watcher for indices
    */
   async check(watcher) {
     try {
+      const resp = this.$http.post('../api/sentinl/watcher/_check', watcher);
+      console.log(resp);
       const config = await this.ServerConfig.get();
       if (config.authenticate) {
         if (config.authenticate.provider) {
@@ -125,6 +127,8 @@ class Watcher extends SavedObjects {
             case 'sg':
               console.log('SG detected, performing search request.');
               // for each index, perform a simple search request
+
+              // do this with server/lib/watcher_handler perhaps?
 
               break;
             case 'xp':

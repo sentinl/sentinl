@@ -217,6 +217,29 @@ export default function routes(server) {
   });
 
   /**
+   * Search ES
+   *
+   * @param {object} request.payload - watcher object
+   */
+  server.route({
+    method: 'POST',
+    path:'/api/sentinl/watcher/_check',
+    handler: async function (request, reply) {
+      const watcherHandler = new WatcherHandler(server);
+      const watcher = request.payload;
+
+      try {
+        if (watcher._source) {
+          const resp = await watcherHandler.search(watcher._source.input.search.request);
+          return reply(resp);
+        }
+      } catch(err) {
+        return reply(Boom.notAcceptable(err.message));
+      }
+    }
+  });
+
+  /**
   * Hash clear text
   *
   * @param {object} SHA hash
