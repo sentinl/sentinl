@@ -14,6 +14,10 @@ class WizardHelper {
   isWizardWatcher(watcher) {
     return get(watcher, '_source.wizard.chart_query_params');
   }
+
+  getUniqueTagId(name, uuid) {
+    return name + '_' + uuid.replace(/-/g, '');
+  }
 }
 
 export default WizardHelper;

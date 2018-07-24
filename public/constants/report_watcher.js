@@ -27,6 +27,11 @@ export default {
     report_admin: {
       throttle_period: '15m',
       report: {
+        name: 'report screenshot',
+        auth: {
+          active: false,
+          mode: 'basic',
+        },
         stateless: false,
         to: 'to@email.com',
         from: 'from@email.com',

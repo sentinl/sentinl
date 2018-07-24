@@ -1,12 +1,14 @@
 import template from './watcher_wizard_email_action.html';
 
-import {cloneDeep} from 'lodash';
+import {capitalize} from 'lodash';
 
 class WatcherWizardEmailAction {
-  constructor($scope) {
+  constructor($scope, wizardHelper) {
     this.$scope = $scope;
-    this.actionName = this.actionName || this.$scope.actionName;
+    this.wizardHelper = wizardHelper;
+    this.actionId = this.actionId || this.$scope.actionId;
     this.actionSettings = this.actionSettings || this.$scope.actionSettings;
+    this.actionPropertyNormalization = this.actionPropertyNormalization || this.$scope.actionPropertyNormalization;
     this.actionDelete = this.actionDelete || this.$scope.actionDelete;
     this.aceOptions = this.aceOptions || this.$scope.aceOptions;
 
@@ -14,7 +16,6 @@ class WatcherWizardEmailAction {
     this.status = {
       isOpen: false,
     };
-    this.actionSettings.name = this.actionName;
     this.priority = {
       selected: this.actionSettings.email.priority,
       options: ['low', 'medium', 'high'],
@@ -24,8 +25,13 @@ class WatcherWizardEmailAction {
     };
   }
 
+  getTagId(name = 'action') {
+    name = name === 'action' ? 'watcherWizardEmailAction' : ('watcherWizardEmailAction' + capitalize(name));
+    return this.wizardHelper.getUniqueTagId(name, this.actionId);
+  }
+
   deleteAction() {
-    this.actionDelete({origActionName: this.actionName});
+    this.actionDelete({actionId: this.actionId});
   }
 }
 
@@ -34,16 +40,18 @@ function watcherWizardEmailAction() {
     template,
     restrict: 'E',
     scope: {
-      actionName: '@',
+      actionId: '@',
       actionSettings: '=',
+      actionPropertyNormalization: '&',
       actionDelete: '&',
       aceOptions: '&',
     },
     controller:  WatcherWizardEmailAction,
     controllerAs: 'watcherWizardEmailAction',
     bindToController: {
-      actionName: '@',
+      actionId: '@',
       actionSettings: '=',
+      actionPropertyNormalization: '&',
       actionDelete: '&',
       aceOptions: '&',
     },

@@ -213,7 +213,7 @@ describe('WatcherHandler', function () {
     watcherHandler.execute(watcher).then(function (resp) {
       expect(resp.ok).to.be(true);
       expect(resp.warning).to.be(true);
-      expect(resp.message).to.eql('no data was found that match the used "script" conditions');
+      expect(resp.message).to.eql('no data satisfy "script" condition');
       done();
     }).catch(done);
   });

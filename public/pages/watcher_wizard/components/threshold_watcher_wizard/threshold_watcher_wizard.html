@@ -40,8 +40,9 @@
     <div class="panel-body">
       <action-panel-watcher-wizard
         watcher="thresholdWatcherWizard.watcher"
-        on-add="thresholdWatcherWizard.actionAdd({actionName: actionName, actionSettings: actionSettings})"
-        on-delete="thresholdWatcherWizard.actionDelete({actionName: actionName})"
+        on-add="thresholdWatcherWizard.actionAdd({actionId: actionId, actionSettings: actionSettings})"
+        on-delete="thresholdWatcherWizard.actionDelete({actionId: actionId})"
+        action-property-normalization="thresholdWatcherWizard.actionPropertyNormalization({propertyName: propertyName})"
         ace-options="thresholdWatcherWizard.aceOptions({mode: mode, maxLines: maxLines, minLines: minLines})"
       ></action-panel-watcher-wizard>
     </div>

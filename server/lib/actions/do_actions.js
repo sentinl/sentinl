@@ -140,8 +140,8 @@ export default function (server, actions, payload, task) {
 
 
   /* Loop Actions */
-  _.forEach(actions, function (action, actionName) {
-    log.debug(`processing action: ${actionName}`);
+  _.forEach(actions, function (action, actionId) {
+    log.debug(`processing action "${action.name}", id: ${actionId}`);
 
     /* ***************************************************************************** */
     /*
@@ -160,8 +160,8 @@ export default function (server, actions, payload, task) {
       message = mustache.render(formatterConsole, {payload: payload});
       log.debug('console payload', payload);
       esHistory({
-        title: task._source.title,
-        actionType: actionName,
+        watcherTitle: task._source.title,
+        actionName: action.name,
         message: toString(message),
         level: priority,
         payload: !task._source.save_payload ? {} : payload,
@@ -176,12 +176,12 @@ export default function (server, actions, payload, task) {
     /*
     /* ***************************************************************************** */
     if (_.has(action, 'throttle_period')) {
-      const id = `${task._id}_${actionName}`;
+      const id = `${task._id}_${actionId}`;
       if (debounce(id, action.throttle_period)) {
-        log.info(`action throttled, watcher id: ${task._id}, action name: ${actionName}`);
+        log.info(`action throttled, watcher id: ${task._id}, action name: ${actionId}`);
         esHistory({
-          title: task._source.title,
-          actionType: actionName,
+          watcherTitle: task._source.title,
+          actionName: action.name,
           message: `Action Throttled for ${action.throttle_period}`,
           level: priority,
           payload: {}
@@ -207,7 +207,7 @@ export default function (server, actions, payload, task) {
     var subject;
     var text;
     if (_.has(action, 'email')) {
-      formatterSubject = action.email.subject ? action.email.subject : 'SENTINL: ' + actionName;
+      formatterSubject = action.email.subject ? action.email.subject : 'SENTINL: ' + actionId;
       formatterBody = action.email.body ? action.email.body : 'Series Alarm {{ payload._id}}: {{payload.hits.total}}';
       subject = mustache.render(formatterSubject, {payload: payload});
       text = mustache.render(formatterBody, {payload: payload});
@@ -232,8 +232,8 @@ export default function (server, actions, payload, task) {
       if (!action.email.stateless) {
         // Log Event
         esHistory({
-          title: task._source.title,
-          actionType: actionName,
+          watcherTitle: task._source.title,
+          actionName: action.name,
           message: toString(text),
           level: priority,
           payload: !task._source.save_payload ? {} : payload,
@@ -257,7 +257,7 @@ export default function (server, actions, payload, task) {
     */
     var html;
     if (_.has(action, 'email_html')) {
-      formatterSubject = action.email_html.subject ? action.email_html.subject : 'SENTINL: ' + actionName;
+      formatterSubject = action.email_html.subject ? action.email_html.subject : 'SENTINL: ' + actionId;
       formatterBody = action.email_html.body ? action.email_html.body : 'Series Alarm {{ payload._id}}: {{payload.hits.total}}';
       formatterConsole = action.email_html.html ? action.email_html.html : '<p>Series Alarm {{ payload._id}}: {{payload.hits.total}}</p>';
       subject = mustache.render(formatterSubject, {payload: payload});
@@ -292,8 +292,8 @@ export default function (server, actions, payload, task) {
       if (!action.email_html.stateless) {
         // Log Event
         esHistory({
-          title: task._source.title,
-          actionType: actionName,
+          watcherTitle: task._source.title,
+          actionName: action.name,
           message: toString(text),
           level: priority,
           payload: !task._source.save_payload ? {} : payload,
@@ -327,7 +327,7 @@ export default function (server, actions, payload, task) {
     if (_.has(action, 'report')) {
       (async () => {
         try {
-          await reportAction(server, email, task, action.report, actionName, payload);
+          await reportAction(server, email, task, action.report, action.name, payload);
         } catch (err) {
           log.error(`report action: ${err.message}`);
         }
@@ -368,8 +368,8 @@ export default function (server, actions, payload, task) {
       if (!action.slack.stateless) {
         // Log Event
         esHistory({
-          title: task._source.title,
-          actionType: actionName,
+          watcherTitle: task._source.title,
+          actionName: action.name,
           message: toString(message),
           level: priority,
           payload: !task._source.save_payload ? {} : payload,
@@ -415,8 +415,8 @@ export default function (server, actions, payload, task) {
       if (action.webhook.create_alert && payload.constructor === Object && Object.keys(payload).length) {
         if (!action.webhook.stateless) {
           esHistory({
-            title: task._source.title,
-            actionType: actionName,
+            watcherTitle: task._source.title,
+            actionName: action.name,
             message:  toString(action.webhook.message),
             level: action.webhook.priority,
             payload: !task._source.save_payload ? {} : payload,
@@ -458,8 +458,8 @@ export default function (server, actions, payload, task) {
       log.debug(`logged message to elastic: ${message}`);
       // Log Event
       esHistory({
-        title: task._source.title,
-        actionType: actionName,
+        watcherTitle: task._source.title,
+        actionName: action.name,
         message: toString(message),
         level: priority,
         payload: !task._source.save_payload ? {} : payload,

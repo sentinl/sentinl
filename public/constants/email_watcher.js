@@ -1,3 +1,5 @@
+import uuid from 'uuid/v4';
+
 export default {
   title: 'watcher_title',
   disable: false,
@@ -24,7 +26,8 @@ export default {
     }
   },
   actions: {
-    email_alarm: {
+    ['email_alarm_' + uuid()]: {
+      name: 'email alarm',
       throttle_period: '1m',
       email: {
         stateless: false,

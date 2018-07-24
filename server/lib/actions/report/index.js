@@ -143,8 +143,8 @@ export default async function doReport(server, email, task, action, actionName, 
       try {
         return await logHistory({
           server,
-          title: task._source.title,
-          actionType: actionName,
+          watcherTitle: task._source.title,
+          actionName,
           level: action.priority || 'INFO',
           payload: {},
           report: true,
@@ -155,8 +155,8 @@ export default async function doReport(server, email, task, action, actionName, 
         if (!action.stateless) {
           return await logHistory({
             server,
-            title: task._source.title,
-            actionType: actionName,
+            watcherTitle: task._source.title,
+            actionName,
             message: isObject(err) ? JSON.stringify(err) : err,
           });
         }

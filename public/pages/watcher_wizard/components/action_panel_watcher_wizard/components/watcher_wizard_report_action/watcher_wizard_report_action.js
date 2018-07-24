@@ -1,11 +1,12 @@
 import template from './watcher_wizard_report_action.html';
 
-import {cloneDeep} from 'lodash';
+import {capitalize} from 'lodash';
 
 class WatcherWizardReportAction {
-  constructor($scope) {
+  constructor($scope, wizardHelper) {
     this.$scope = $scope;
-    this.actionName = this.actionName || this.$scope.actionName;
+    this.wizardHelper = wizardHelper;
+    this.actionId = this.actionId || this.$scope.actionId;
     this.actionSettings = this.actionSettings || this.$scope.actionSettings;
     this.actionDelete = this.actionDelete || this.$scope.actionDelete;
     this.aceOptions = this.aceOptions || this.$scope.aceOptions;
@@ -14,7 +15,6 @@ class WatcherWizardReportAction {
     this.status = {
       isOpen: false,
     };
-    this.actionSettings.name = this.actionName;
     this.priority = {
       selected: this.actionSettings.report.priority || 'low',
       options: ['low', 'medium', 'high'],
@@ -26,8 +26,13 @@ class WatcherWizardReportAction {
     this.authModes = ['basic', 'customselector', 'xpack', 'searchguard'];
   }
 
+  getTagId(name = 'action') {
+    name = name === 'action' ? 'watcherWizardReportAction' : ('watcherWizardReportAction' + capitalize(name));
+    return this.wizardHelper.getUniqueTagId(name, this.actionId);
+  }
+
   deleteAction() {
-    this.actionDelete({origActionName: this.actionName});
+    this.actionDelete({actionId: this.actionId});
   }
 }
 
@@ -36,7 +41,7 @@ function watcherWizardReportAction() {
     template,
     restrict: 'E',
     scope: {
-      actionName: '@',
+      actionId: '@',
       actionSettings: '=',
       actionDelete: '&',
       aceOptions: '&',
@@ -44,7 +49,7 @@ function watcherWizardReportAction() {
     controller:  WatcherWizardReportAction,
     controllerAs: 'watcherWizardReportAction',
     bindToController: {
-      actionName: '@',
+      actionId: '@',
       actionSettings: '=',
       actionDelete: '&',
       aceOptions: '&',

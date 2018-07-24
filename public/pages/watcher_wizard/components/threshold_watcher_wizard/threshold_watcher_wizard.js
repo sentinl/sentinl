@@ -195,12 +195,12 @@ class ThresholdWatcherWizard {
     this.watcher._source.input.search.request.body = body;
   }
 
-  actionAdd({actionName, actionSettings}) {
-    this.watcher._source.actions[actionName] = actionSettings;
+  actionAdd({actionId, actionSettings}) {
+    this.watcher._source.actions[actionId] = actionSettings;
   }
 
-  actionDelete({actionName}) {
-    delete this.watcher._source.actions[actionName];
+  actionDelete({actionId}) {
+    delete this.watcher._source.actions[actionId];
   }
 
   _isWatcherValid() {
@@ -217,7 +217,6 @@ class ThresholdWatcherWizard {
 
   async _saveWatcherWizard() {
     try {
-      this.watcher._source.actions = this._renameActionsIfNeeded(this.watcher._source.actions);
       const id = await this.watcherService.save(this.watcher);
       if (this.watcher.username && this.watcher.password) {
         await this.userService.new(id, this.watcher.username, this.watcher.password);
@@ -231,16 +230,6 @@ class ThresholdWatcherWizard {
 
   _cleanWatcher(watcher) {
     delete watcher.password;
-  }
-
-  _renameActionsIfNeeded(actions) {
-    const result = {};
-    forEach(actions, function (action) {
-      action.name = action.name.replace(/ /g, '_');
-      result[action.name] = action;
-      delete result[action.name].name;
-    });
-    return result;
   }
 
   _isSchedule(watcher) {

@@ -55,8 +55,8 @@
               </td>
               <td class="col-md-2">{{watcher._source.input.search.request.index.join(',')}}</td>
               <td class="col-md-3">
-                <span ng-repeat="(key,value) in watcher._source.actions">
-                  <p>{{ key }}</p>
+                <span ng-repeat="(id, settings) in watcher._source.actions">
+                  <p>{{ settings.name }}</p>
                 </span>
               </td>
               <td class="col-md-3 text-right edit-group">

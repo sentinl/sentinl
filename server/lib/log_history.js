@@ -17,8 +17,7 @@ import Log from './log';
 import getConfiguration from './get_configuration';
 import getElasticsearchClient from './get_elasticsearch_client';
 
-async function logEvent(args) {
-  let {server, title, actionType, message, level, payload, report, object} = args;
+async function logEvent({server, watcherTitle, actionName, message, level, payload, report, object} = {}) {
   const config = getConfiguration(server);
   const client = getElasticsearchClient({server, config});
 
@@ -27,17 +26,17 @@ async function logEvent(args) {
   report = report || false;
 
   const log = new Log(config.app_name, server, 'log_history');
-  log.debug(`storing alarm to Elasticsearch, action: ${actionType}`);
+  log.debug(`storing alarm to Elasticsearch, action: ${actionName}`);
 
   const doc = {
     type: config.es.alarm_type,
     date: '-' + new Date().toISOString().substr(0, 10).replace(/-/g, '.'),
     body: {
       '@timestamp': new Date().toISOString(),
-      watcher: title,
+      watcher: watcherTitle,
       level,
       message,
-      action: actionType,
+      action: actionName,
       payload,
       report,
     },
@@ -52,7 +51,7 @@ async function logEvent(args) {
     return await client.index({index: doc.index, type: doc.type, body: doc.body});
   } catch (err) {
     log.error(err);
-    throw new Error(`fail to store alarm ${title}, action ${actionType}`);
+    throw new Error(`fail to store alarm ${watcherTitle}, action ${actionName}`);
   }
 }
 
