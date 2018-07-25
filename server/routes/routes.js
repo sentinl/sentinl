@@ -217,7 +217,7 @@ export default function routes(server) {
   });
 
   /**
-   * Search ES
+   * Search ES to check access restrictions of an user.
    *
    * @param {object} request.payload - watcher object
    */
@@ -227,14 +227,19 @@ export default function routes(server) {
     handler: async function (request, reply) {
       const watcherHandler = new WatcherHandler(server);
       const watcher = request.payload;
+      log.debug('Checking permissions for users by searching for indices.');
 
       try {
         if (watcher._source) {
-          const resp = await watcherHandler.search(watcher._source.input.search.request);
+          let body = watcher._source.input.search.request;
+          if (!body.size) {
+            body.size = 0;
+          }
+          const resp = await watcherHandler.search(body);
           return reply(resp);
         }
-      } catch(err) {
-        return reply(Boom.notAcceptable(err.message));
+      } catch (err) {
+        return reply(handleESError(err));
       }
     }
   });

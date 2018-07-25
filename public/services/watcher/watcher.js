@@ -49,8 +49,10 @@ class Watcher extends SavedObjects {
     try {
       const watcher = await this.get(id);
       const check = await this.check(watcher);
-      const resp = await this.$http.post('../api/sentinl/watcher/_execute', watcher);
-      return resp.data;
+      if (check) {
+        const resp = await this.$http.post('../api/sentinl/watcher/_execute', watcher);
+        return resp.data;
+      }
     } catch (err) {
       throw err.data;
     }
@@ -110,40 +112,17 @@ class Watcher extends SavedObjects {
 
   /**
    * Check watcher access
-   * Simple get request for indices, if it returns error on any, it should return false
+   * Simple get request for indices, if it returns error on any, it should return false/throw
    *
    * @param {object} watcher object
    * @return {boolean} ok or not to create watcher for indices
    */
   async check(watcher) {
-    try {
-      const resp = this.$http.post('../api/sentinl/watcher/_check', watcher);
-      console.log(resp);
-      const config = await this.ServerConfig.get();
-      if (config.authenticate) {
-        if (config.authenticate.provider) {
-          console.log(JSON.stringify(config.authenticate), JSON.stringify(watcher));
-          switch (config.authenticate.provider) {
-            case 'sg':
-              console.log('SG detected, performing search request.');
-              // for each index, perform a simple search request
-
-              // do this with server/lib/watcher_handler perhaps?
-
-              break;
-            case 'xp':
-              console.log('XP detected, performing search request.');
-              break;
-            default:
-              console.log('In defalt: ', JSON.stringify(config.authenticate));
-              break;
-          }
-          return true;
-        }
-      }
-    } catch (err) {
-      throw new Error(`fail to check access for indices ${err}`);
-    }
+    return this.$http.post('../api/sentinl/watcher/_check', watcher).then(function () {
+      return true;
+    }).catch(function (err) {
+      throw new Error(`fail to get permission for indices requested: ${err}`);
+    });
   }
 
 }
