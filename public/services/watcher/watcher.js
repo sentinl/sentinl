@@ -48,15 +48,17 @@ class Watcher extends SavedObjects {
   async play(id) {
     try {
       const watcher = await this.get(id);
-      const resp = await this.$http.post('../api/sentinl/watcher/_execute', watcher);
-      return resp.data;
-      /*
+      //const resp = await this.$http.post('../api/sentinl/watcher/_execute', watcher);
+      //return resp.data;
       const check = await this.check(watcher);
+
+      // if user is allowed, allow manual execution
       if (check) {
         const resp = await this.$http.post('../api/sentinl/watcher/_execute', watcher);
         return resp.data;
-      }
-      */
+      } /* else {
+        throw new Error(`Fuck! ${check}`);
+      } */
     } catch (err) {
       throw err.data;
     }
@@ -122,11 +124,11 @@ class Watcher extends SavedObjects {
    * @return {boolean} ok or not to create watcher for indices
    */
   async check(watcher) {
-    return this.$http.post('../api/sentinl/watcher/_check', watcher).then(function () {
-      return true;
-    }).catch(function (err) {
-      throw new Error(`fail to get permission for indices requested: ${err}`);
-    });
+    try {
+      return await this.$http.post('../api/sentinl/watcher/_check', watcher._source.input.search.request);
+    } catch (err) {
+      throw err;
+    }
   }
 
 }

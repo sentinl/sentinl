@@ -219,15 +219,24 @@ export default function routes(server) {
   /**
    * Search ES to check access restrictions of an user.
    *
-   * @param {object} request.payload - watcher object
+   * @param {object} request.payload - request
+   * Simply queries elasticsearch and throws on error.
    */
   server.route({
     method: 'POST',
     path:'/api/sentinl/watcher/_check',
     handler: async function (request, reply) {
       const watcherHandler = new WatcherHandler(server);
-      const watcher = request.payload;
-      log.debug('Checking permissions for users by searching for indices.');
+      let body = request.payload;
+      if (!body.size) {
+        body.size = 0;
+      }
+      watcherHandler.search(body).then(()=>{
+        return reply(true);
+      }).catch((err) => {
+        throw new Error(`Error accessing requested indices: ${err.message}.`);
+      });
+      /*log.debug('Checking permissions for users by searching for indices.');
 
       try {
         if (watcher._source) {
@@ -236,11 +245,13 @@ export default function routes(server) {
             body.size = 0;
           }
           const resp = await watcherHandler.search(body);
+          log.debug('Access ok.');
           return reply(resp);
         }
       } catch (err) {
-        return reply(handleESError(err));
+        throw err;
       }
+      */
     }
   });
 
