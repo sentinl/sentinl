@@ -48,11 +48,15 @@ class Watcher extends SavedObjects {
   async play(id) {
     try {
       const watcher = await this.get(id);
+      const resp = await this.$http.post('../api/sentinl/watcher/_execute', watcher);
+      return resp.data;
+      /*
       const check = await this.check(watcher);
       if (check) {
         const resp = await this.$http.post('../api/sentinl/watcher/_execute', watcher);
         return resp.data;
       }
+      */
     } catch (err) {
       throw err.data;
     }
