@@ -219,8 +219,8 @@ export default function routes(server) {
   /**
    * Search ES to check access restrictions of an user.
    *
-   * @param {object} request.payload - request
-   * Simply queries elasticsearch and throws on error.
+   * @param {object} request.payload - elasticsearch request
+   * Simply queries elasticsearch and throws on error if user has no access.
    */
   server.route({
     method: 'POST',
@@ -236,22 +236,6 @@ export default function routes(server) {
       }).catch((err) => {
         throw new Error(`Error accessing requested indices: ${err.message}.`);
       });
-      /*log.debug('Checking permissions for users by searching for indices.');
-
-      try {
-        if (watcher._source) {
-          let body = watcher._source.input.search.request;
-          if (!body.size) {
-            body.size = 0;
-          }
-          const resp = await watcherHandler.search(body);
-          log.debug('Access ok.');
-          return reply(resp);
-        }
-      } catch (err) {
-        throw err;
-      }
-      */
     }
   });
 
