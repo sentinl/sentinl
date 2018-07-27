@@ -1,4 +1,4 @@
-import {isObject, forEach, has, cloneDeep} from 'lodash';
+import { isObject, forEach, has, cloneDeep } from 'lodash';
 import uuid from 'uuid/v4';
 import SavedObjects from '../saved_objects';
 
@@ -48,8 +48,17 @@ class Watcher extends SavedObjects {
   async play(id) {
     try {
       const watcher = await this.get(id);
-      const resp = await this.$http.post('../api/sentinl/watcher/_execute', watcher);
-      return resp.data;
+      //const resp = await this.$http.post('../api/sentinl/watcher/_execute', watcher);
+      //return resp.data;
+      const check = await this.check(watcher);
+
+      // if user is allowed, allow manual execution
+      if (check) {
+        const resp = await this.$http.post('../api/sentinl/watcher/_execute', watcher);
+        return resp.data;
+      } /* else {
+        throw new Error(`Fuck! ${check}`);
+      } */
     } catch (err) {
       throw err.data;
     }
@@ -106,6 +115,22 @@ class Watcher extends SavedObjects {
       throw new Error(`fail to save watcher, ${err}`);
     }
   }
+
+  /**
+   * Check watcher access
+   * Simple get request for indices, if it returns error on any, it should return false/throw
+   *
+   * @param {object} watcher object
+   * @return {boolean} ok or not to create watcher for indices
+   */
+  async check(watcher) {
+    try {
+      return await this.$http.post('../api/sentinl/watcher/_check', watcher._source.input.search.request);
+    } catch (err) {
+      throw err;
+    }
+  }
+
 }
 
 export default Watcher;

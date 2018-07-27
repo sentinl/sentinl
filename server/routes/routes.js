@@ -216,6 +216,29 @@ export default function routes(server) {
   });
 
   /**
+   * Search ES to check access restrictions of an user.
+   *
+   * @param {object} request.payload - elasticsearch request
+   * Simply queries elasticsearch and throws on error if user has no access.
+   */
+  server.route({
+    method: 'POST',
+    path:'/api/sentinl/watcher/_check',
+    handler: async function (request, reply) {
+      const watcherHandler = new WatcherHandler(server);
+      let body = request.payload;
+      if (!body.size) {
+        body.size = 0;
+      }
+      watcherHandler.search(body).then(()=>{
+        return reply(true);
+      }).catch((err) => {
+        throw new Error(`Error accessing requested indices: ${err.message}.`);
+      });
+    }
+  });
+
+  /**
   * Hash clear text
   *
   * @param {object} SHA hash
