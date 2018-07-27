@@ -32,25 +32,6 @@ For example, correct stdout (from Kibana start till watcher execution) is Kibana
 Notice, all messages which have `Sentinl` in its status are messages related to Sentinl. 
 
 ----------
-### No alert emails
-Basic config, kibana.yml:
-```
-logging.verbose: true
-sentinl:
-  settings:
-    email:
-      active: true
-      host: beast-cave
-      ssl: false
-    report:
-      active: true
-      tmp_path: /tmp/
-```
-Check your server using some email client, for example `mailx`:
-```
-mailx -S smtp=<smtp-server-address> -r <from-address> -s <subject> -v <to-address> < body.txt
-```  
-----------
 ### Security exception while using Search Guard
 For example, this message
 ```
@@ -69,4 +50,48 @@ sg_kibana_server:
 ```
 Don't forget to apply Search Guard configuration change using `sgadmin.sh`. 
 
- 
+----------
+### No alert emails
+
+1. Install and run test email on the Kibana host
+```
+$ npm install -g maildev
+$ maildev
+MailDev webapp running at http://0.0.0.0:1080
+MailDev SMTP Server running at 0.0.0.0:1025
+```
+
+2. Configure Sentinl in kibana.yml
+```
+sentinl:
+  settings:
+    email:
+      active: true
+      host: localhost
+      port: 1025
+```
+
+3. Restart Kibana
+
+4. Execute watcher
+
+Click on the play icon on the right.
+![image](https://user-images.githubusercontent.com/7104356/43213205-f21eaf42-902d-11e8-9919-5a7e2240a05d.png)
+
+
+4. Check email
+
+Open a browser with URL http://localhost:1080. If you see emails, it means Sentinl sends emails. 
+![screenshot from 2018-07-25 17-36-52](https://user-images.githubusercontent.com/5389745/43212438-3dfaba4a-9034-11e8-9aba-eb66327bced7.png)
+
+#### Still no emails using your production email server?
+A problem can be in many places: email server misconfigured,  firewall blocks the connection or there is a network issue.
+
+1. Check if your server accepts connection:
+```
+tcpdump -vv -x -X -s 1500 -i eth1 'port 25'
+```
+2. Check if your server can send emails:
+```
+echo "How are you?" | mail -s "Hi, it is me" youremailaddr@gmail.com
+```  
