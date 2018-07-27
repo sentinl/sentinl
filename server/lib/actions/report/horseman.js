@@ -1,5 +1,5 @@
-process.env.DEBUG = 'horseman';
-const debug = require('debug')('horsemanFactory');
+// process.env.DEBUG = 'horseman';
+// const debug = require('debug')('horsemanFactory');
 
 import url from 'url';
 import os from 'os';
