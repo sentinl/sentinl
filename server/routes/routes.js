@@ -121,7 +121,6 @@ export default function routes(server) {
         },
         authentication: {
           impersonate: config.settings.authentication.impersonate,
-          provider: config.settings.authentication.provider,
         }
       });
     }
