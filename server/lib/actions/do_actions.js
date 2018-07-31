@@ -23,6 +23,7 @@ import { assign, pick } from 'lodash';
 import url from 'url';
 import Promise from 'bluebird';
 import moment from 'moment';
+import rison from 'rison';
 import mustache from 'mustache';
 import getConfiguration from '../get_configuration';
 import getElasticsearchClient from '../get_elasticsearch_client';
@@ -138,6 +139,9 @@ export default function (server, actions, payload, task) {
     }
   };
 
+  if (task._source.dashboard_link) {
+    task._source.dashboard_link = _updateDashboardLinkTimeRange(task._source.dashboard_link, moment().subtract(1, 'hour'), moment());
+  }
 
   /* Loop Actions */
   _.forEach(actions, function (action, actionId) {
@@ -524,4 +528,32 @@ export default function (server, actions, payload, task) {
       req.end();
     }
   });
+}
+
+function _updateDashboardLinkTimeRange(url, from, to) {
+  const [urlBase, query] = url.split('?', 2);
+  let queryParameters = {};
+  query.split('&').forEach(parameter => {
+    const [key, value] = parameter.split('=');
+    queryParameters[key] = rison.decode(value);
+  });
+
+  const dashboardName = queryParameters._a.id;
+  queryParameters = {
+    _a: {
+      filters: queryParameters._a.filters
+    },
+    _k: {
+      d: {
+        [dashboardName]: {
+          t: {
+            m: 'absolute',
+            f: from.toISOString(),
+            t: to.toISOString()
+          }
+        }
+      }
+    }
+  };
+  return urlBase + '?' + _.map(queryParameters, (value, key) => `${key}=${rison.encode(value)}`).join('&');
 }

@@ -32,6 +32,7 @@ module.factory('SavedWatcherKibana', function (courier, EMAILWATCHERADVANCED) {
       spy: 'boolean',
       trigger: 'object',
       wizard: 'object',
+      dashboard_link: 'string'
     };
 
     static defaults = EMAILWATCHERADVANCED;

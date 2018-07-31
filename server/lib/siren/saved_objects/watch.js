@@ -18,6 +18,7 @@ const WatchConfiguration = {
     spy: Joi.boolean(),
     trigger: Joi.any(),
     wizard: Joi.any(),
+    dashboard_link: Joi.string()
   })
 };
 

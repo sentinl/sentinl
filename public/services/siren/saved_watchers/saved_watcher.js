@@ -28,6 +28,7 @@ module.factory('SavedWatcher', function (courier) {
           spy: 'boolean',
           trigger: 'object',
           wizard: 'object',
+          dashboard_link: 'string'
         },
         // if this is null/undefined then the SavedObject will be assigned the defaults
         id: id,

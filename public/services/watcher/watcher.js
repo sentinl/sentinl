@@ -33,10 +33,8 @@ class Watcher extends SavedObjects {
       this.savedObjects = this.savedWatchers;
     }
     this.fields = [
-      'actions', 'input',
-      'condition', 'transform',
-      'trigger', 'disable',
-      'report', 'title', 'wizard', 'save_payload', 'spy', 'impersonate', 'username', 'password',
+      'actions', 'input', 'condition', 'transform', 'trigger', 'disable', 'report', 'title', 'wizard',
+      'save_payload', 'spy', 'impersonate', 'username', 'password', 'dashboard_link'
     ];
   }
 

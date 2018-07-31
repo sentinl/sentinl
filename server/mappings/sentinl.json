@@ -49,6 +49,9 @@
       "sentinl": {
         "type": "object",
         "enabled": false
+      },
+      "dashboard_link": {
+        "type": "text"
       }
     }
   },

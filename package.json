@@ -45,6 +45,7 @@
     "node-slack": "0.0.7",
     "phantom": "6.0.3",
     "puppeteer": "1.5.0",
+    "rison": "^0.1.1",
     "sanitize-html": "^1.18.2",
     "sum-time": "1.0.0",
     "url-join": "4.0.0",
