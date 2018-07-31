@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-import {existsSync, readFileSync, appendFileSync, chmodSync} from 'fs';
+import {existsSync, readFileSync, appendFileSync, chmodSync, accessSync, constants as fsConstants} from 'fs';
 import urljoin from 'url-join';
 import {join} from 'path';
 import { forEach, difference } from 'lodash';
@@ -49,6 +49,14 @@ function loadLibs(kibana, requirements) {
   return requirements;
 }
 
+function makeExecutableIfNecessary(filename) {
+  try {
+    accessSync(filename, fsConstants.X_OK);
+  } catch (err) {
+    chmodSync(filename, '755');
+  }
+}
+
 export default function (kibana) {
   let requirements = ['kibana', 'elasticsearch'];
 
@@ -59,7 +67,7 @@ export default function (kibana) {
   }
 
   const phantomjsDefaultPath = urljoin(__dirname, 'node_modules/phantomjs-prebuilt/bin/phantomjs');
-  chmodSync(phantomjsDefaultPath, '755');
+  makeExecutableIfNecessary(phantomjsDefaultPath);
 
   let chromeDefaultPath = urljoin(__dirname, '/node_modules/puppeteer/.local-chromium');
   try {
@@ -68,7 +76,7 @@ export default function (kibana) {
       throw new Error('puppeter chrome was not found');
     }
     chromeDefaultPath = chromeDefaultPath[0];
-    chmodSync(chromeDefaultPath, '755');
+    makeExecutableIfNecessary(chromeDefaultPath);
   } catch (err) {
     chromeDefaultPath = null;
     console.log(`[sentinl] fail to make report engine executable: ${err.message}!`);

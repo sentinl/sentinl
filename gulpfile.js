@@ -27,6 +27,7 @@ var include = [
   'README.md',
   'index.js',
   'init.js',
+  'postinst.js',
   'server',
   'lib',
   'public',
