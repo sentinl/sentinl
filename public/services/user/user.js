@@ -21,12 +21,12 @@ class User extends SavedObjects {
   }
 
   /**
-  * Creates new user.
-  *
-  * @param {string} id of watcher.
-  * @param {string} username
-  * @param {string} password
-  */
+   * Creates new user.
+   *
+   * @param {string} id of watcher.
+   * @param {string} username
+   * @param {string} password
+   */
   async new(id, username, password) {
     try {
       const user = await this.savedObjects.get();
@@ -44,14 +44,14 @@ class User extends SavedObjects {
   }
 
   /**
-  * get username by id
-  *
-  * @param {string} id of watcher or user
-  * @return {object} username
-  */
+   * get username by id
+   *
+   * @param {string} id of watcher or user
+   * @return {object} username
+   */
   async username(id) {
     try {
-      const resp = await this.$http.post('../api/sentinl/user/username', { id });
+      const resp = await this.$http.post('../api/sentinl/user/username', {id});
       return resp.data;
     } catch (err) {
       if (err.status === 404) {

@@ -1,7 +1,7 @@
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/sentinl');
 
-module.factory('SavedWatcherKibana', function (courier, EMAILWATCHER) {
+module.factory('SavedWatcherKibana', function (courier, EMAILWATCHERADVANCED) {
   class SavedWatcherKibana extends courier.SavedObject {
     constructor(id) {
       super({
@@ -34,7 +34,7 @@ module.factory('SavedWatcherKibana', function (courier, EMAILWATCHER) {
       wizard: 'object',
     };
 
-    static defaults = EMAILWATCHER;
+    static defaults = EMAILWATCHERADVANCED;
 
     // Order these fields to the top, the rest are alphabetical
     static fieldOrder = ['title'];

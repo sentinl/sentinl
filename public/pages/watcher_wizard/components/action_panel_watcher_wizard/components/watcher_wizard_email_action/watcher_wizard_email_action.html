@@ -7,7 +7,7 @@
     <div class="row">
       <div class="col-md-12">
         <div class="form-group">
-          <label class="control-label" for="watcherWizardEmailActionTitle">Title</label> 
+          <label class="control-label" for="watcherWizardEmailActionTitle">Title</label>
           <input
             id="{{watcherWizardEmailAction.getTagId('title')}}"
             name="{{watcherWizardEmailAction.getTagId('title')}}"
@@ -22,11 +22,11 @@
     <div class="row">
       <div class="col-md-2">
         <div class="form-group">
-          <label for="watcherWizardEmailActionThrottle" class="control-label">Throttle</label> 
+          <label for="watcherWizardEmailActionThrottle" class="control-label">Throttle</label>
           <div class="input-group">
             <div class="input-group-addon">
               <i class="fa fa-snowflake-o" aria-hidden="true"></i>
-            </div> 
+            </div>
             <input
               id="{{watcherWizardEmailAction.getTagId('throttle')}}"
               name="{{watcherWizardEmailAction.getTagId('throttle')}}"
@@ -35,12 +35,12 @@
               class="form-control"
               ng-model="watcherWizardEmailAction.actionSettings.throttle_period"
             >
-          </div> 
+          </div>
         </div>
       </div>
       <div class="col-md-2">
         <div class="form-group">
-          <label for="watcherWizardEmailActionPriority" class="control-label">Priority</label> 
+          <label for="watcherWizardEmailActionPriority" class="control-label">Priority</label>
           <select
             id="{{watcherWizardEmailAction.getTagId('priority')}}"
             name="{{watcherWizardEmailAction.getTagId('priority')}}"
@@ -55,7 +55,7 @@
         <div class="form-group">
           <label for="watcherWizardEmailActionPreferences" class="control-label">
             <i class="fa fa-cog"></i> Preferences
-          </label> 
+          </label>
           <div>
             <label class="checkbox-inline">
               <input
@@ -75,11 +75,11 @@
     <div class="row">
       <div class="col-md-12">
         <div class="form-group">
-          <label for="watcherWizardEmailActionTo" class="control-label">To</label> 
+          <label for="watcherWizardEmailActionTo" class="control-label">To</label>
           <div class="input-group">
             <div class="input-group-addon">
               <i class="fa fa-address-card" aria-hidden="true"></i>
-            </div> 
+            </div>
             <input
               id="{{watcherWizardEmailAction.getTagId('to')}}"
               name="{{watcherWizardEmailAction.getTagId('to')}}"
@@ -89,15 +89,15 @@
               aria-describedby="watcherWizardEmailActionToHelpBlock"
               ng-model="watcherWizardEmailAction.actionSettings.email.to"
             >
-          </div> 
+          </div>
           <span class="help-block">Put multiple addresses separating them by ','</span>
         </div>
         <div class="form-group">
-          <label for="watcherWizardEmailActionFrom" class="control-label">From</label> 
+          <label for="watcherWizardEmailActionFrom" class="control-label">From</label>
           <div class="input-group">
             <div class="input-group-addon">
               <i class="fa fa-address-card"></i>
-            </div> 
+            </div>
             <input
               id="{{watcherWizardEmailAction.getTagId('from')}}"
               name="{{watcherWizardEmailAction.getTagId('from')}}"
@@ -107,11 +107,11 @@
               class="form-control"
               ng-model="watcherWizardEmailAction.actionSettings.email.from"
             >
-          </div> 
+          </div>
           <span class="help-block">Put multiple addresses separating them by ','</span>
         </div>
         <div class="form-group">
-          <label for="watcherWizardEmailActionSubject" class="control-label">Subject</label> 
+          <label for="watcherWizardEmailActionSubject" class="control-label">Subject</label>
           <input
             id="{{watcherWizardEmailAction.getTagId('subject')}}"
             name="{{watcherWizardEmailAction.getTagId('subject')}}"
@@ -121,15 +121,14 @@
             ng-model="watcherWizardEmailAction.actionSettings.email.subject"
           >
         </div>
-        <div class="form-group">
-          <label class="control-label" for="watcherWizardEmailActionContent">Content</label> 
-            <div
-              ng-model="watcherWizardEmailAction.actionSettings.email.body"
-              ui-ace="watcherWizardEmailAction.aceOptions({maxLines: 30})">
-            </div>
-        </div> 
-      </div> 
-    </div> 
+
+        <mustache-template-input
+          content="watcherWizardEmailAction.actionSettings.email.body"
+          injected-data="{payload: {hits: {total: 10}}, watcher: watcherWizardEmailAction.watcher._source}"
+          ace-options="watcherWizardEmailAction.aceOptions({maxLines: 30})"
+        >The query result and watcher information are provided in the <code>payload</code> and <code>watcher</code> variables and uses <a target="_blank" href="https://mustache.github.io/mustache.5.html">Mustache syntax</a>.</mustache-template-input>
+      </div>
+    </div>
     <div class="row">
       <div class="col-md-12">
         <div class="form-group">

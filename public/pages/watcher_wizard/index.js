@@ -21,6 +21,7 @@ import './components/action_panel_watcher_wizard';
 import './components/impersonation_panel_watcher_wizard';
 import './components/action_panel_watcher_wizard/components/watcher_wizard_add_action';
 import './components/action_panel_watcher_wizard/components/watcher_wizard_email_action';
+import './components/action_panel_watcher_wizard/components/watcher_wizard_email_html_action';
 import './components/action_panel_watcher_wizard/components/watcher_wizard_report_action';
 
 import template from './watcher_wizard.html';
@@ -54,7 +55,7 @@ routes
         }
 
         if (!watcherId) {
-          return watcherService.new('watcher').then(function (watcher) {
+          return watcherService.new('wizard').then(function (watcher) {
             if (spyBtnWatcher) {
               watcher._source = spyBtnWatcher._source;
             }

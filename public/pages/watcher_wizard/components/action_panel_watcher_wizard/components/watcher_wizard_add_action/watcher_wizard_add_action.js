@@ -12,16 +12,25 @@ class WatcherWizardAddAction {
       isOpen: false,
     };
     this.actions = {
-      email: {
-        name: 'email alarm',
+      Email: {
+        name: 'Email alarm',
         throttle_period: '15m',
         email: {
           priority: 'low',
           stateless: false,
         },
       },
-      report: {
-        name: 'report screenshot',
+      'HTML email': {
+        name: 'HTML email alarm',
+        throttle_period: '1m',
+        email_html: {
+          html: '',
+          priority: 'low',
+          stateless: false
+        }
+      },
+      Report: {
+        name: 'Report screenshot',
         throttle_period: '15m',
         report: {
           auth: {

@@ -35,10 +35,19 @@
                     <watcher-wizard-email-action
                       ng-if="actionPanelWatcherWizard.isAction(actionSettings, 'email')"
                       action-id="{{actionId}}"
+                      watcher="actionPanelWatcherWizard.watcher"
                       action-settings="actionSettings"
                       action-delete="actionPanelWatcherWizard.onDelete({actionId: actionId})"
                       ace-options="actionPanelWatcherWizard.aceOptions({mode: mode, maxLines: maxLines, minLines: minLines})"
                     ></watcher-wizard-email-action>
+                    <watcher-wizard-email-html-action
+                      ng-if="actionPanelWatcherWizard.isAction(actionSettings, 'email_html')"
+                      action-id="{{actionId}}"
+                      watcher="actionPanelWatcherWizard.watcher"
+                      action-settings="actionSettings"
+                      action-delete="actionPanelWatcherWizard.onDelete({actionId: actionId})"
+                      ace-options="actionPanelWatcherWizard.aceOptions({mode: mode, maxLines: maxLines, minLines: minLines})"
+                    ></watcher-wizard-email-html-action>
                     <watcher-wizard-report-action
                       ng-if="actionPanelWatcherWizard.isAction(actionSettings, 'report')"
                       action-id="{{actionId}}"

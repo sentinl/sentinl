@@ -14,9 +14,10 @@ class Watcher extends SavedObjects {
   * @param {object} Promise
   * @param {object} ServerConfig service
   */
-  constructor($http, $injector, Promise, ServerConfig, EMAILWATCHER, REPORTWATCHER) {
+  constructor($http, $injector, Promise, ServerConfig, EMAILWATCHERADVANCED, EMAILWATCHERWIZARD, REPORTWATCHER) {
     super($http, $injector, Promise, ServerConfig, 'watcher');
-    this.EMAILWATCHER = EMAILWATCHER;
+    this.EMAILWATCHERADVANCED = EMAILWATCHERADVANCED;
+    this.EMAILWATCHERWIZARD = EMAILWATCHERWIZARD;
     this.REPORTWATCHER = REPORTWATCHER;
     this.$http = $http;
     this.$injector = $injector;
@@ -73,7 +74,16 @@ class Watcher extends SavedObjects {
   */
   async new(type) {
     try {
-      this.savedObjects.Class.defaults = type === 'report' ? cloneDeep(this.REPORTWATCHER) : cloneDeep(this.EMAILWATCHER);
+      switch (type) {
+        case 'report':
+          this.savedObjects.Class.defaults = cloneDeep(this.REPORTWATCHER);
+          break;
+        case 'advanced':
+          this.savedObjects.Class.defaults = cloneDeep(this.EMAILWATCHERADVANCED);
+          break;
+        default:
+          this.savedObjects.Class.defaults = cloneDeep(this.EMAILWATCHERWIZARD);
+      }
       let watcher = await this.savedObjects.get();
       return this.nestedSource(watcher, this.fields);
     } catch (err) {

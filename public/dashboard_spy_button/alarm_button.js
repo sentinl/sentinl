@@ -21,7 +21,7 @@ import { stripObjectPropertiesByNameRegex } from '../lib/sentinl_helper';
 
 import _ from 'lodash';
 import { SpyModesRegistryProvider } from 'ui/registry/spy_modes';
-import EMAILWATCHER from '../constants/email_watcher';
+import EMAILWATCHERADVANCED from '../constants/email_watcher_advanced';
 
 const timeFractions = [60,60,24,7]; // 60s/min, 60m/hr, 24hr/day, 7day/week
 const timeUnits = ['s','m','h','d','w']; // second, minute, hour, day, week
@@ -69,7 +69,7 @@ const dashboardSpyButton = function ($scope, config) {
         _type: 'sentinl-watcher',
         _id: undefined,
         _new: 'true',
-        _source: _.cloneDeep(EMAILWATCHER)
+        _source: _.cloneDeep(EMAILWATCHERADVANCED)
       };
       alarm._source.spy = true;
 

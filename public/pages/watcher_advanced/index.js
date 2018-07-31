@@ -23,7 +23,7 @@ routes
         const watcherId = $route.current.params.id;
 
         if (!watcherId) {
-          return watcherService.new('watcher').catch(function (err) {
+          return watcherService.new('advanced').catch(function (err) {
             notifier.error(err);
             kbnUrl.redirect('/');
           });

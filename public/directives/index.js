@@ -9,6 +9,7 @@ import reportAction from './report_action';
 import slackAction from './slack_action';
 import webhookAction from './webhook_action';
 import popOver from './pop_over';
+import mustacheTemplateInput from './mustache_template_input';
 
 export default angular.module('apps/sentinl.directives', [
   consoleAction.name,
@@ -20,4 +21,5 @@ export default angular.module('apps/sentinl.directives', [
   slackAction.name,
   webhookAction.name,
   popOver.name,
+  mustacheTemplateInput.name
 ]);

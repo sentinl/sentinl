@@ -157,7 +157,7 @@ export default function (server, actions, payload, task) {
     if (_.has(action, 'console')) {
       priority = action.console.priority ? action.console.priority : 'INFO';
       formatterConsole = action.console.message ? action.console.message : '{{ payload }}';
-      message = mustache.render(formatterConsole, {payload: payload});
+      message = mustache.render(formatterConsole, {payload: payload, watcher: task._source});
       log.debug('console payload', payload);
       esHistory({
         watcherTitle: task._source.title,
@@ -209,8 +209,8 @@ export default function (server, actions, payload, task) {
     if (_.has(action, 'email')) {
       formatterSubject = action.email.subject ? action.email.subject : 'SENTINL: ' + actionId;
       formatterBody = action.email.body ? action.email.body : 'Series Alarm {{ payload._id}}: {{payload.hits.total}}';
-      subject = mustache.render(formatterSubject, {payload: payload});
-      text = mustache.render(formatterBody, {payload: payload});
+      subject = mustache.render(formatterSubject, {payload: payload, watcher: task._source});
+      text = mustache.render(formatterBody, {payload: payload, watcher: task._source});
       priority = action.email.priority ? action.email.priority : 'INFO';
       log.debug(`subject: ${subject}, body: ${text}`);
 
@@ -260,9 +260,9 @@ export default function (server, actions, payload, task) {
       formatterSubject = action.email_html.subject ? action.email_html.subject : 'SENTINL: ' + actionId;
       formatterBody = action.email_html.body ? action.email_html.body : 'Series Alarm {{ payload._id}}: {{payload.hits.total}}';
       formatterConsole = action.email_html.html ? action.email_html.html : '<p>Series Alarm {{ payload._id}}: {{payload.hits.total}}</p>';
-      subject = mustache.render(formatterSubject, {payload: payload});
-      text = mustache.render(formatterBody, {payload: payload});
-      html = mustache.render(formatterConsole, {payload: payload});
+      subject = mustache.render(formatterSubject, {payload: payload, watcher: task._source});
+      text = mustache.render(formatterBody, {payload: payload, watcher: task._source});
+      html = mustache.render(formatterConsole, {payload: payload, watcher: task._source});
       priority = action.email_html.priority ? action.email_html.priority : 'INFO';
       log.debug(`subject: ${subject}, body: ${text}, HTML: ${html}`);
 
@@ -346,7 +346,7 @@ export default function (server, actions, payload, task) {
     if (_.has(action, 'slack')) {
       let formatter;
       formatter = action.slack.message ? action.slack.message : 'Series Alarm {{ payload._id}}: {{payload.hits.total}}';
-      message = mustache.render(formatter, {payload: payload});
+      message = mustache.render(formatter, {payload: payload, watcher: task._source});
       priority = action.slack.priority ? action.slack.priority : 'INFO';
       log.debug(`webhook to #${action.slack.channel}, message: ${message}`);
 
@@ -406,7 +406,10 @@ export default function (server, actions, payload, task) {
         auth: action.webhook.auth ? action.webhook.auth : undefined
       };
 
-      let dataToWrite = action.webhook.body ? mustache.render(action.webhook.body, {payload: payload}) : action.webhook.params;
+      let dataToWrite = action.webhook.body ? mustache.render(action.webhook.body, {
+        payload: payload,
+        watcher: task._source
+      }) : action.webhook.params;
       if (dataToWrite) {
         options.headers['Content-Length'] = Buffer.byteLength(dataToWrite);
       }
@@ -453,7 +456,7 @@ export default function (server, actions, payload, task) {
       let message;
       let esFormatter;
       esFormatter = action.local.message ? action.local.message : '{{ payload }}';
-      message = mustache.render(esFormatter, {payload: payload});
+      message = mustache.render(esFormatter, {payload: payload, watcher: task._source});
       priority = action.local.priority ? action.local.priority : 'INFO';
       log.debug(`logged message to elastic: ${message}`);
       // Log Event

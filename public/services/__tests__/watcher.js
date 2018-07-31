@@ -12,18 +12,18 @@ describe('Watcher', function () {
   let $httpBackend;
   let savedWatchers;
   let Promise;
-  let EMAILWATCHER;
+  let EMAILWATCHERADVANCED;
   let REPORTWATCHER;
 
   const init = function () {
     ngMock.module('kibana');
 
-    ngMock.inject(($injector, _Watcher_, _$httpBackend_, _Promise_, _REPORTWATCHER_, _EMAILWATCHER_) => {
+    ngMock.inject(($injector, _Watcher_, _$httpBackend_, _Promise_, _REPORTWATCHER_, _EMAILWATCHERADVANCED_) => {
       Promise = _Promise_;
       Watcher = _Watcher_;
       savedWatchers = $injector.has('savedWatchers') ? $injector.get('savedWatchers') : undefined;
       $httpBackend = _$httpBackend_;
-      EMAILWATCHER = _EMAILWATCHER_;
+      EMAILWATCHERADVANCED = _EMAILWATCHERADVANCED_;
       REPORTWATCHER = _REPORTWATCHER_;
     });
   };
@@ -45,7 +45,7 @@ describe('Watcher', function () {
   it('make _source flat', function () {
     let watcher = {
       _id: uuid(),
-      _source: cloneDeep(EMAILWATCHER)
+      _source: cloneDeep(EMAILWATCHERADVANCED)
     };
 
     watcher = Watcher.flatSource(watcher);
@@ -60,7 +60,7 @@ describe('Watcher', function () {
   });
 
   it('make _source nested', function () {
-    let watcher = cloneDeep(EMAILWATCHER);
+    let watcher = cloneDeep(EMAILWATCHERADVANCED);
     watcher.id = uuid();
 
     watcher = Watcher.nestedSource(watcher);
@@ -124,7 +124,7 @@ describe('Watcher', function () {
       const id = '123';
 
       sinon.stub(savedWatchers, 'get', () => {
-        const watcher = cloneDeep(EMAILWATCHER);
+        const watcher = cloneDeep(EMAILWATCHERADVANCED);
         watcher.id = id;
         return Promise.resolve(watcher);
       });
@@ -133,7 +133,7 @@ describe('Watcher', function () {
         .then((watcher) => {
           expect(watcher._id).to.eql(id);
           expect(watcher._source).to.be.an('object');
-          expect(isEqual(keys(watcher._source).sort(), keys(EMAILWATCHER).sort())).to.be(true);
+          expect(isEqual(keys(watcher._source).sort(), keys(EMAILWATCHERADVANCED).sort())).to.be(true);
         })
         .catch(done)
         .finally(done);
@@ -148,7 +148,7 @@ describe('Watcher', function () {
       const type = 'email';
 
       sinon.stub(savedWatchers, 'get', () => {
-        const watcher = cloneDeep(EMAILWATCHER);
+        const watcher = cloneDeep(EMAILWATCHERADVANCED);
         watcher.id = id;
         return Promise.resolve(watcher);
       });
@@ -156,7 +156,7 @@ describe('Watcher', function () {
       Watcher.new(type)
         .then((watcher) => {
           expect(watcher._source).to.be.an('object');
-          expect(isEqual(keys(watcher._source).sort(), keys(EMAILWATCHER).sort())).to.be(true);
+          expect(isEqual(keys(watcher._source).sort(), keys(EMAILWATCHERADVANCED).sort())).to.be(true);
         })
         .catch(done)
         .finally(done);
@@ -170,7 +170,7 @@ describe('Watcher', function () {
       const id = '123';
       const watcher = {
         _id: id,
-        _source: cloneDeep(EMAILWATCHER),
+        _source: cloneDeep(EMAILWATCHERADVANCED),
         save: function () { return Promise.resolve(id); }
       };
 

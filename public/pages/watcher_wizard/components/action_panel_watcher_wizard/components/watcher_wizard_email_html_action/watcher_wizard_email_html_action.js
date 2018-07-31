@@ -1,9 +1,9 @@
-import template from './watcher_wizard_email_action.html';
+import template from './watcher_wizard_email_html_action.html';
 
 import {capitalize} from 'lodash';
 
-class WatcherWizardEmailAction {
-  constructor($scope, wizardHelper) {
+class WatcherWizardEmailHtmlAction {
+  constructor($scope, $sce, wizardHelper) {
     this.$scope = $scope;
     this.wizardHelper = wizardHelper;
     this.actionId = this.actionId || this.$scope.actionId;
@@ -13,21 +13,21 @@ class WatcherWizardEmailAction {
     this.actionDelete = this.actionDelete || this.$scope.actionDelete;
     this.aceOptions = this.aceOptions || this.$scope.aceOptions;
 
-    this.type = 'email';
+    this.type = 'email_html';
     this.status = {
       isOpen: false,
     };
     this.priority = {
-      selected: this.actionSettings.email.priority,
+      selected: this.actionSettings.email_html.priority,
       options: ['low', 'medium', 'high'],
       handleChange: () => {
-        this.actionSettings.email.priority = this.priority.selected;
+        this.actionSettings.email_html.priority = this.priority.selected;
       },
     };
   }
 
   getTagId(name = 'action') {
-    name = name === 'action' ? 'watcherWizardEmailAction' : ('watcherWizardEmailAction' + capitalize(name));
+    name = name === 'action' ? 'watcherWizardEmailHtmlAction' : ('watcherWizardEmailHtmlAction' + capitalize(name));
     return this.wizardHelper.getUniqueTagId(name, this.actionId);
   }
 
@@ -36,7 +36,7 @@ class WatcherWizardEmailAction {
   }
 }
 
-function watcherWizardEmailAction() {
+function watcherWizardEmailHtmlAction() {
   return {
     template,
     restrict: 'E',
@@ -48,8 +48,8 @@ function watcherWizardEmailAction() {
       actionDelete: '&',
       aceOptions: '&',
     },
-    controller:  WatcherWizardEmailAction,
-    controllerAs: 'watcherWizardEmailAction',
+    controller: WatcherWizardEmailHtmlAction,
+    controllerAs: 'watcherWizardEmailHtmlAction',
     bindToController: {
       actionId: '@',
       watcher: '=',
@@ -61,4 +61,4 @@ function watcherWizardEmailAction() {
   };
 }
 
-export default watcherWizardEmailAction;
+export default watcherWizardEmailHtmlAction;
