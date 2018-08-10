@@ -181,6 +181,16 @@ class ThresholdWatcherWizard {
     }
   }
 
+  inputAdvChange({input, condition}) {
+    if (input) {
+      this.watcher._source.input = input;
+    }
+
+    if (condition) {
+      this.watcher._source.condition = condition;
+    }
+  }
+
   scheduleChange(mode, text) {
     this.watcher._source.wizard.chart_query_params.scheduleType = mode;
     this.watcher._source.trigger.schedule.later = text;

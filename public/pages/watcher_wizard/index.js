@@ -18,11 +18,12 @@ import './components/condition_panel_watcher_wizard/components/dd_watcher_agg_ti
 import './components/condition_panel_watcher_wizard/components/dd_watcher_agg_interval';
 import './components/condition_panel_watcher_wizard/components/dd_watcher_agg_threshold';
 import './components/action_panel_watcher_wizard';
-import './components/impersonation_panel_watcher_wizard';
 import './components/action_panel_watcher_wizard/components/watcher_wizard_add_action';
 import './components/action_panel_watcher_wizard/components/watcher_wizard_email_action';
 import './components/action_panel_watcher_wizard/components/watcher_wizard_email_html_action';
 import './components/action_panel_watcher_wizard/components/watcher_wizard_report_action';
+import './components/impersonation_panel_watcher_wizard';
+import './components/input_advanced_panel_watcher_wizard';
 
 import template from './watcher_wizard.html';
 import controller from './watcher_wizard';

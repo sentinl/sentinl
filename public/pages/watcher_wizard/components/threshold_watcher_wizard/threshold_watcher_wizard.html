@@ -19,6 +19,17 @@
     </div>
   </div>
   <div class="panel panel-default"
+    ng-if="thresholdWatcherWizard.watcher._source.spy"
+  >
+    <div class="panel-body">
+      <input_advanced-panel-watcher-wizard
+        watcher="thresholdWatcherWizard.watcher"
+        ace-options="thresholdWatcherWizard.aceOptions({mode: mode, maxLines: maxLines, minLines: minLines})"
+        on-input-adv-change="thresholdWatcherWizard.inputAdvChange({input, condition})"
+      ></input_advanced-panel-watcher-wizard>
+    </div>
+  </div>
+  <div class="panel panel-default"
     ng-if="!thresholdWatcherWizard.wizardHelper.isSpyWatcher(thresholdWatcherWizard.watcher) && thresholdWatcherWizard.condition.show"
   >
     <div class="panel-body">
