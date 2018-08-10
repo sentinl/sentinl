@@ -1,138 +1,128 @@
-process.env.DEBUG = 'horseman';
-const debug = require('debug')('horsemanFactory');
+// USEFUL FOR DEBUGGING - do not remove
+// process.env.DEBUG = 'horseman';
+// const debug = require('debug')('horsemanFactory');
 
 import url from 'url';
-import os from 'os';
-import SuccessAndLog from '../../messages/success_and_log';
+import Promise from 'bluebird';
 
-/**
- * Return a Promise resolved with a Horseman instance.
- *
- * @param {string} domain - An optional authentication domain.
- * @return {object} Horseman.
- */
-const horsemanFactory = async function ({
-  domain,
-  kibiAccessControl,
-  phantomPath
-}) {
-  try {
-    if (kibiAccessControl) {
-      return await kibiAccessControl.getSentinlHorseman(domain);
-    } else {
-      const Horseman = require('node-horseman');
-      return new Horseman({
-        ignoreSSLErrors: true,
-        bluebirdDebug: true,
-        phantomPath,
-      });
-    }
-  } catch (err) {
-    throw new Error(`horsemanFactory: ${err.message}`);
+function horsemanFactory({domain, investigateAccessControl, ignoreSSLErrors, bluebirdDebug, phantomPath}) {
+  if (!!investigateAccessControl) {
+    return investigateAccessControl.getSentinlHorseman(domain);
+  } else {
+    const Horseman = require('node-horseman');
+    return Promise.resolve(new Horseman({
+      ignoreSSLErrors,
+      bluebirdDebug,
+      phantomPath,
+    }));
   }
-};
+}
 
-const customSelectorAuth = async function ({horseman, selectorUsername, authUsername, selectorPassword, authPassword, selectorLoginBtn}) {
-  try {
-    await horseman.type(selectorUsername, authUsername);
-  } catch (err) {
-    throw new Error(`type in username input with CSS selector "${selectorPassword}"`);
-  }
-  try {
-    await horseman.type(selectorPassword, authPassword);
-  } catch (err) {
-    throw new Error(`type in password input with CSS selector "${selectorPassword}"`);
-  }
-  try {
-    await horseman.click(selectorLoginBtn);
-  } catch (err) {
-    throw new Error(`click login btn with CSS selector "${selectorLoginBtn}"`);
-  }
-  return null;
-};
-
-/**
-* Do report (pdf or png)
-*
-*/
 export default async function horsemanReport({
-  server,
+  browserPath,
+  filePath,
+  fileType,
   reportUrl,
-  reportRes,
-  reportType,
-  reportDelay,
-  reportFilePath,
-  username,
-  password,
-  usernameSelector,
-  passwordSelector,
-  loginBtnSelector,
-  log,
-  pdfFormat = 'A4',
-  pdfLandscape = true,
+  delay,
+  viewPortWidth,
+  viewPortHeight,
+  pdfFormat,
+  pdfLandscape,
   authMode,
-  authActive = false,
+  authActive,
   authUsername,
   authPassword,
-  selectorUsername,
-  selectorPassword,
-  selectorLoginBtn,
-  phantomPath,
+  authSelectorUsername,
+  authSelectorPassword,
+  authSelectorLoginBtn,
+  ignoreHTTPSErrors = true,
+  phantomBluebirdDebug = true,
+  investigateAccessControl,
+  collapseNavbarSelector,
 }) {
   let horseman;
 
   try {
-    log.debug('horseman running ...');
+    try {
+      delay = +delay;
+      viewPortWidth = +viewPortWidth;
+      viewPortHeight = +viewPortHeight;
+      authActive = String(authActive) === 'true';
+      ignoreHTTPSErrors = String(ignoreHTTPSErrors) === 'true';
+      phantomBluebirdDebug = String(phantomBluebirdDebug) === 'true';
+    } catch (err) {
+      throw new Error('sanitize args: ' + err.toString());
+    }
 
-    const { hostname } = url.parse(reportUrl);
-    log.debug(`hostname: ${hostname}`);
-    log.debug(`phantomjs path: ${phantomPath}`);
-    log.debug(`kibi access control: ${!!server.plugins.kibi_access_control}`);
+    const parsedUrl = url.parse(reportUrl);
 
     horseman = await horsemanFactory({
-      hostname,
-      phantomPath,
-      kibiAccessControl: !!server.plugins.kibi_access_control,
+      domain: parsedUrl.hostname,
+      investigateAccessControl,
+      ignoreSSLErrors: ignoreHTTPSErrors,
+      bluebirdDebug: phantomBluebirdDebug,
+      phantomPath: browserPath,
     });
 
-    await horseman.viewport(reportRes.split('x')[0], reportRes.split('x')[1]);
+    await horseman.viewport(viewPortWidth, viewPortHeight);
 
-    if (authActive && authMode === 'basic') {
-      log.debug('basic authentication');
+    if (!investigateAccessControl && authActive && authMode === 'basic') { // for test: http://httpbin.org/basic-auth/user/passwd (username: user, password: passwd)
       await horseman.authentication(authUsername, authPassword);
     }
 
-    await horseman.open(reportUrl);
-    await horseman.wait(reportDelay);
+    await horseman.open(reportUrl).wait(delay);
 
-    if (authActive) {
-      await customSelectorAuth({
-        horseman,
-        selectorUsername,
-        authUsername,
-        selectorPassword,
-        authPassword,
-        selectorLoginBtn,
-      });
+    if (!investigateAccessControl && authActive && authMode !== 'basic') { // for test: http://testing-ground.scraping.pro/login (username: admin, password: 12345)
+      try {
+        await horseman
+          .waitForSelector(authSelectorUsername, { timeout: delay })
+          .type(authSelectorUsername, authUsername)
+          .waitForSelector(authSelectorPassword, { timeout: delay })
+          .type(authSelectorPassword, authPassword)
+          .waitForSelector(authSelectorLoginBtn, { timeout: delay })
+          .click(authSelectorLoginBtn)
+          .wait(delay);
+      } catch (err) {
+        throw new Error('login form: ' + err.toString());
+      }
     }
-    await horseman.wait(reportDelay);
 
-    if (reportType === 'pdf') {
-      await horseman.pdf(reportFilePath, {
-        width: reportRes.split('x')[0] + 'px',
-        height: reportRes.split('x')[1] + 'px',
-        margin: '1px',
+    if (!!collapseNavbarSelector) {
+      try {
+        await horseman.waitForSelector(collapseNavbarSelector, { timeout: delay })
+          .click(collapseNavbarSelector)
+          .wait(delay / 2);
+      } catch (err) {
+        throw new Error('collapse navbar: ' + err.toString());
+      }
+    }
+
+    if (fileType === 'pdf') {
+      await horseman.pdf(filePath, {
         format: pdfFormat,
         orientation: pdfLandscape ? 'landscape' : 'portrait',
       });
     } else {
-      await horseman.screenshot(reportFilePath);
+      await horseman.screenshot(filePath);
     }
 
     await horseman.close();
-    return new SuccessAndLog(log, 'successfully finished horseman report');
+    return filePath;
   } catch (err) {
-    await horseman.close();
-    throw new Error(`horseman report: ${err.message}`);
+    if (horseman) {
+      await horseman.close();
+    }
+    err = err.toString();
+    if (err.includes('Phantom immediately exited with: 126')) {
+      throw new Error('cannot execute phantom binary, incorrect format');
+    } else if (err.includes('Phantom immediately exited with: 127')) {
+      throw new Error('you need to install libs for Reporting to work: fontconfig and freetype');
+    } else if (err.includes('extract phantom ports')) {
+      throw new Error('you need to install netstat');
+    } else if (err.includes('timeout during .waitFor()')) {
+      throw new Error('invalid CSS selector: ' + err);
+    } else {
+      throw new Error(err);
+    }
   }
-};
+}

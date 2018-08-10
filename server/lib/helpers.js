@@ -25,7 +25,12 @@ const listAllFilesSync = function (dir, filesArr) {
   return filesArr;
 };
 
+const pickDefinedValues = function (obj) {
+  return JSON.parse(JSON.stringify(obj));
+};
+
 module.exports = {
   isKibi,
   listAllFilesSync,
+  pickDefinedValues,
 };

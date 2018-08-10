@@ -1,9 +1,9 @@
 import { has } from 'lodash';
 import Log from './log';
-import ErrorAndLog from './messages/error_and_log';
 import WarningAndLog from './messages/warning_and_log';
 import SuccessAndLog from './messages/success_and_log';
 import WatcherHandler from './watcher_handler';
+import logHistory from './log_history';
 
 /**
 * Helper class to handle watchers
@@ -33,7 +33,7 @@ export default class WatcherWizardHandler extends WatcherHandler {
           return new WarningAndLog(this.log, 'no data satisfy condition');
         }
       } catch (err) {
-        throw new ErrorAndLog(this.log, err, `fail to apply condition "script": ${err.message}`);
+        throw new Error('apply condition "script": ' + err.toString());
       }
     }
     return new SuccessAndLog(this.log, 'successfully applied condition', { payload });
@@ -60,10 +60,6 @@ export default class WatcherWizardHandler extends WatcherHandler {
       throw err;
     }
 
-    if (!payload) {
-      throw new Error('input search query is malformed or missing key parameters');
-    }
-
     try {
       const resp = this._executeCondition(payload, condition);
       if (resp && resp.warning) {
@@ -86,7 +82,6 @@ export default class WatcherWizardHandler extends WatcherHandler {
   * @param {object} task - Elasticsearch watcher object
   */
   async execute(task) {
-    this.log = new Log(this.config.app_name, this.server, `watcher (wizard) ${task._id}`);
     try {
       const {method, request, condition, transform, actions} = this._checkWatcher(task);
       if (this.config.settings.authentication.impersonate || task._source.impersonate) {
@@ -94,7 +89,14 @@ export default class WatcherWizardHandler extends WatcherHandler {
       }
       return await this._execute(task, method, request, condition, transform, actions);
     } catch (err) {
-      throw new ErrorAndLog(this.log, err, `[wizard] fail to execute watcher: ${err.message}`);
+      logHistory({
+        server: this.server,
+        watcherTitle: task._source.title,
+        message: 'execute wizard watcher: ' + err.toString(),
+        level: 'high',
+        isError: true,
+      });
+      throw new Error('execute wizard watcher: ' + err.toString());
     }
   }
 }

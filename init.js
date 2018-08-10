@@ -19,12 +19,15 @@
 import later from 'later';
 import { once, has, forEach, includes } from 'lodash';
 import url from 'url';
+import path from 'path';
 import getScheduler from './server/lib/scheduler';
 import initIndices from './server/lib/initIndices';
 import getConfiguration from './server/lib/get_configuration';
-import {existsSync} from 'fs';
+import { existsSync, chmodSync } from 'fs';
 import Log from './server/lib/log';
 import routes from './server/routes/routes';
+import getChromePath from './server/lib/actions/report/get_chrome_path';
+import installPhantomjs from './server/lib/actions/report/install_phantomjs';
 
 const mappings = {
   alarm: require('./server/mappings/alarm_index'),
@@ -58,10 +61,17 @@ const init = once(function (server) {
 
   log.info('initializing ...');
 
-  if (!includes(['horseman', 'puppeteer'], config.settings.report.engine)) {
-    log.error(`unsupported authentication engine: ${config.settings.report.engine}. ` +
-      'Supported engines: horseman, puppeteer');
+  try {
+    server.expose('chrome_path', getChromePath());
+  } catch (err) {
+    log.error('setting puppeteer report engine: ' + err.toString());
   }
+
+  installPhantomjs().then((pkg) => {
+    server.expose('phantomjs_path', pkg.binary);
+  }).catch((err) => {
+    log.error('setting horseman report engines: ' + err.toString());
+  });
 
   // Object to hold different runtime values.
   server.sentinlStore = {

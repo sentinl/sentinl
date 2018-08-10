@@ -181,7 +181,8 @@ describe('WatcherHandler', function () {
   });
 
   it('transform chain', function (done) {
-    watcherHandler.execute(watcher).then(function (resp) {
+    const _watcher = cloneDeep(watcher);
+    watcherHandler.execute(_watcher).then(function (resp) {
       expect(resp.ok).to.be(true);
       expect(resp.success).to.be(true);
       expect(resp.warning).to.be(undefined);
@@ -190,17 +191,18 @@ describe('WatcherHandler', function () {
   });
 
   it('transform "script", JavaScript error', function (done) {
-    watcher._source.transform.chain[1].script.script = 'testerrorhere++';
-    watcherHandler.execute(watcher).catch(function (err) {
-      expect(err.message).to.eql('fail to execute watcher: fail to apply transform "chain": ' +
-        'fail to apply transform "script": testerrorhere is not defined');
+    const _watcher = cloneDeep(watcher);
+    _watcher._source.transform.chain[1].script.script = 'testerrorhere++';
+    watcherHandler.execute(_watcher).catch(function (err) {
+      expect(err.message.includes('testerrorhere is not defined')).to.be(true);
       done();
     });
   });
 
   it('no transform', function (done) {
-    delete watcher._source.transform;
-    watcherHandler.execute(watcher).then(function (resp) {
+    const _watcher = cloneDeep(watcher);
+    delete _watcher._source.transform;
+    watcherHandler.execute(_watcher).then(function (resp) {
       expect(resp.ok).to.be(true);
       expect(resp.success).to.be(true);
       expect(resp.warning).to.be(undefined);
@@ -209,19 +211,21 @@ describe('WatcherHandler', function () {
   });
 
   it('condition "script", no data to match the condition', function (done) {
-    watcher._source.condition.script.script = 'payload.hits.total > 999999';
-    watcherHandler.execute(watcher).then(function (resp) {
+    const _watcher = cloneDeep(watcher);
+    _watcher._source.condition.script.script = 'payload.hits.total > 999999';
+    watcherHandler.execute(_watcher).then(function (resp) {
       expect(resp.ok).to.be(true);
       expect(resp.warning).to.be(true);
-      expect(resp.message).to.eql('no data satisfy "script" condition');
+      expect(resp.message.includes('no data satisfy "script" condition')).to.be(true);
       done();
     }).catch(done);
   });
 
   it('condition "script", JavaScript error', function (done) {
-    watcher._source.condition.script.script = 'testerrorhere++';
-    watcherHandler.execute(watcher).catch(function (err) {
-      expect(err.message).to.eql('fail to execute watcher: fail to apply condition "script": testerrorhere is not defined');
+    const _watcher = cloneDeep(watcher);
+    _watcher._source.condition.script.script = 'testerrorhere++';
+    watcherHandler.execute(_watcher).catch(function (err) {
+      expect(err.message.includes('testerrorhere is not defined')).to.be(true);
       done();
     });
   });

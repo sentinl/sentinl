@@ -8,10 +8,10 @@ import getElasticsearchClient from './get_elasticsearch_client';
 import getConfiguration from './get_configuration';
 import actionFactory from './actions';
 import Log from './log';
-import ErrorAndLog from './messages/error_and_log';
 import WarningAndLog from './messages/warning_and_log';
 import SuccessAndLog from './messages/success_and_log';
 import { isKibi } from './helpers';
+import logHistory from './log_history';
 
 /**
 * Helper class to handle watchers
@@ -66,7 +66,7 @@ export default class WatcherHandler {
         id: this.siren ? id : (this.config.es.user_type + ':' + this._docUuid(id)),
       });
     } catch (err) {
-      throw new ErrorAndLog(this.log, err, `fail to get user: ${err.message}`);
+      throw new Error('get user: ' + err.toString());
     }
   }
 
@@ -90,7 +90,7 @@ export default class WatcherHandler {
     try {
       return await this.client.count(request);
     } catch (err) {
-      throw new ErrorAndLog(this.log, err, `fail to count watchers: ${err.message}`);
+      throw new Error('count watchers: ' + err.toString());
     }
   }
 
@@ -116,7 +116,7 @@ export default class WatcherHandler {
     try {
       return await this.search(request);
     } catch (err) {
-      throw new ErrorAndLog(this.log, err, `fail to get watchers: ${err.message}`);
+      throw new Error('get watchers: ' + err.toString());
     }
   }
 
@@ -131,7 +131,7 @@ export default class WatcherHandler {
     try {
       return await this.client[method](request);
     } catch (err) {
-      throw new ErrorAndLog(this.log, err, `fail to search: ${err.message}`);
+      throw new Error('input search: ' + err.toString());
     }
   }
 
@@ -171,7 +171,7 @@ export default class WatcherHandler {
           return new WarningAndLog(this.log, 'no data satisfy "script" condition');
         }
       } catch (err) {
-        throw new ErrorAndLog(this.log, err, `fail to apply condition "script": ${err.message}`);
+        throw new Error('apply condition "script": ' + err.toString());
       }
     }
 
@@ -182,7 +182,7 @@ export default class WatcherHandler {
           return new WarningAndLog(this.log, 'no data satisfy "compare" condition');
         }
       } catch (err) {
-        throw new ErrorAndLog(this.log, err, 'fail to apply condition "compare"');
+        throw new Error('apply condition "compare": ' + err.toString());
       }
     }
 
@@ -193,7 +193,7 @@ export default class WatcherHandler {
           return new WarningAndLog(this.log, 'no data satisfy "array compare" condition');
         }
       } catch (err) {
-        throw new ErrorAndLog(this.log, err, `fail to apply condition "array compare": ${err.message}`);
+        throw new Error('apply condition "array compare": ' + err.toString());
       }
     }
 
@@ -202,7 +202,7 @@ export default class WatcherHandler {
       try {
         payload = anomaly.check(payload, condition);
       } catch (err) {
-        throw new ErrorAndLog(this.log, err, `fail to apply condition "anomaly": ${err.message}`);
+        throw new Error('apply condition "anomaly": ' + err.toString());
       }
     }
 
@@ -211,7 +211,7 @@ export default class WatcherHandler {
       try {
         payload = range.check(payload, condition);
       } catch (err) {
-        throw new ErrorAndLog(this.log, err, `fail to apply condition "range": ${err.message}`);
+        throw new Error('apply condition "range": ' + err.toString());
       }
     }
     return new SuccessAndLog(this.log, 'successfully applied condition', { payload });
@@ -234,7 +234,7 @@ export default class WatcherHandler {
           // transform global payload
           eval(link.script.script); // eslint-disable-line no-eval
         } catch (err) {
-          throw new ErrorAndLog(this.log, err, `fail to apply transform "script": ${err.message}`);
+          throw new Error('apply transform "script": ' + err.toString());
         }
       }
       // search in transform
@@ -242,7 +242,7 @@ export default class WatcherHandler {
         try {
           payload = await this.search(link.search.request, method);
         } catch (err) {
-          throw new ErrorAndLog(this.log, err, `fail to apply transform "search": ${err.message}`);
+          throw new Error('apply transform "search": ' + err.toString());
         }
       }
       return null;
@@ -255,7 +255,7 @@ export default class WatcherHandler {
         }
         return new SuccessAndLog(this.log, 'successfully applied "chain" transform', { payload });
       }).catch((err) => {
-        throw new ErrorAndLog(this.log, err, `fail to apply transform "chain": ${err.message}`);
+        throw new Error('apply transform "chain": ' + err.toString());
       });
     } else if (transform && size(transform)) { // transform
       try {
@@ -265,7 +265,7 @@ export default class WatcherHandler {
         }
         return new SuccessAndLog(this.log, 'successfully applied transform', { payload });
       } catch (err) {
-        throw new ErrorAndLog(this.log, err, `fail to apply transform: ${err.message}`);
+        throw new Error('apply transform: ' + err.toString());
       }
     }
 
@@ -288,13 +288,8 @@ export default class WatcherHandler {
 
     try {
       payload = await this.search(request, method); // data from Elasticsearch
-      // this.log.debug(`payload: ${JSON.stringify(payload)}`);
     } catch (err) {
-      throw err;
-    }
-
-    if (!payload) {
-      throw new Error('input search query is malformed or missing key parameters');
+      throw new Error('get payload: ' + err.toString());
     }
 
     const isAnomaly = has(task._source, 'sentinl.condition.anomaly') ? true : false;
@@ -309,7 +304,7 @@ export default class WatcherHandler {
         payload = resp.payload;
       }
     } catch (err) {
-      throw err;
+      throw new Error('exec condition: ' + err.toString());
     }
 
     try {
@@ -321,7 +316,7 @@ export default class WatcherHandler {
         payload = resp.payload;
       }
     } catch (err) {
-      throw err;
+      throw new Error('exec transform: ' + err.toString());
     }
 
     this.doActions(payload, this.server, actions, task);
@@ -378,11 +373,18 @@ export default class WatcherHandler {
       try {
         const {method, request, condition, transform, actions} = this._checkWatcher(task);
         if (this.config.settings.authentication.impersonate || task._source.impersonate) {
-          this.client = await this.getImpersonatedClient(task._id);
+          this.client = await this.getImpersonatedClient(task._id, task._source.title);
         }
         return await this._execute(task, method, request, condition, transform, actions);
       } catch (err) {
-        throw new ErrorAndLog(this.log, err, `fail to execute watcher: ${err.message}`);
+        logHistory({
+          server: this.server,
+          watcherTitle: task._source.title,
+          message: 'execute advanced watcher: ' + err.toString(),
+          level: 'high',
+          isError: true,
+        });
+        throw new Error('execute watcher: ' + err.toString());
       }
     }
     return new WarningAndLog(this.log, 'no actions found');
@@ -391,17 +393,15 @@ export default class WatcherHandler {
   /**
   * Impersonate ES client
   *
-  * @param {string} id = watcher/user id
   * @return {promise} client - impersonated client
   */
-  async getImpersonatedClient(id) {
+  async getImpersonatedClient(watcherId, watcherTitle) {
     try {
-      const user = await this.getUser(id);
+      const user = await this.getUser(watcherId);
       if (!user.found) {
         throw new Error('fail to impersonate watcher, user was not found. Create watcher user first.');
       }
 
-      // this.log.debug(`watcher with id "${id}" is impersonated by user: "${JSON.stringify(user, null, 2)}"`);
       return getElasticsearchClient({
         server: this.server,
         config: this.config,
@@ -412,7 +412,7 @@ export default class WatcherHandler {
         isSiren: this.siren,
       });
     } catch (err) {
-      throw new ErrorAndLog(this.log, err, `fail to impersonate Elasticsearch API client: ${err.message}`);
+      throw new Error('impersonate Elasticsearch API client: ' + err.toString());
     }
   }
 }
