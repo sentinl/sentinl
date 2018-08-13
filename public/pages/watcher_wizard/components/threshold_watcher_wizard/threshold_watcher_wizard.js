@@ -28,7 +28,7 @@ class ThresholdWatcherWizard {
     this.condition = {
       show: false,
       updateStatus: (isSuccess) => {
-        this.actions.show = isSuccess && this.condition.show;
+        this.actions.show = (isSuccess && this.condition.show) || this.watcher.$edit;
       },
     };
 

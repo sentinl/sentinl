@@ -67,7 +67,10 @@ routes
           });
         }
 
-        return watcherService.get(watcherId).catch(function (err) {
+        return watcherService.get(watcherId).then(function (watcher) {
+          watcher.$edit = true;
+          return watcher;
+        }).catch(function (err) {
           notifier.error(`get watcher: ${err.message}`);
           kbnUrl.redirect('/');
         });
