@@ -60,6 +60,15 @@ export default function (kibana) {
     uiExports: {
       spyModes: ['plugins/sentinl/dashboard_spy_button/alarm_button'],
       mappings: require('./server/mappings/sentinl.json'),
+      home: [
+        'plugins/sentinl/register_feature'
+      ],
+      uiSettingDefaults: {
+        'sentinl:experimental': {
+          value: false,
+          description: 'Enable Experimental features in SENTINL'
+        },
+      },
       app: {
         title: 'Sentinl',
         description: 'Kibana Alert App for Elasticsearch',
