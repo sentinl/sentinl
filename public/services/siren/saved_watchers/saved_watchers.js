@@ -15,16 +15,23 @@ savedObjectManagementRegistry.register({
 });
 
 // This is the only thing that gets injected into controllers
-module.service('savedWatchers', function (savedObjectsAPI, savedObjectsAPITypes, Private, SavedWatcher, kbnIndex, esAdmin, kbnUrl) {
+module.service('savedWatchers', function (savedObjectsAPI, savedObjectsAPITypes, Private, SavedWatcher, kbnIndex, esAdmin, kbnUrl, $http) {
   savedObjectsAPITypes.add('sentinl-watcher');
 
   const options = {
     caching: {
       find: true,
+      get: true,
       cache: Private(CacheProvider)
     },
-    savedObjectsAPI
+    savedObjectsAPI,
+    $http
   };
 
-  return new SavedObjectLoader(SavedWatcher, kbnIndex, esAdmin, kbnUrl, options);
+  const savedWatcherLoader = new SavedObjectLoader(SavedWatcher, kbnIndex, esAdmin, kbnUrl, options);
+  savedWatcherLoader.urlFor = function (id) {
+    return kbnUrl.eval('#/{{id}}', { id });
+  };
+
+  return savedWatcherLoader;
 });
