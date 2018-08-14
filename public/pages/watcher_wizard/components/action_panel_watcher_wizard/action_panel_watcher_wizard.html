@@ -55,6 +55,14 @@
                       action-delete="actionPanelWatcherWizard.onDelete({actionId: actionId})"
                       ace-options="actionPanelWatcherWizard.aceOptions({mode: mode, maxLines: maxLines, minLines: minLines})"
                     ></watcher-wizard-report-action>
+                    <watcher-wizard-console-action
+                      ng-if="actionPanelWatcherWizard.isAction(actionSettings, 'console')"
+                      action-id="{{actionId}}"
+                      watcher="actionPanelWatcherWizard.watcher"
+                      action-settings="actionSettings"
+                      action-delete="actionPanelWatcherWizard.onDelete({actionId: actionId})"
+                      ace-options="actionPanelWatcherWizard.aceOptions({mode: mode, maxLines: maxLines, minLines: minLines})"
+                    ></watcher-wizard-console-action>
                   </div>
                 </uib-accordion>
               </div>

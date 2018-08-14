@@ -1,5 +1,5 @@
 import template from './watcher_wizard_report_action.html';
-
+import priorities from '../../action_priorities';
 import {capitalize} from 'lodash';
 
 class WatcherWizardReportAction {
@@ -17,7 +17,7 @@ class WatcherWizardReportAction {
     };
     this.priority = {
       selected: this.actionSettings.report.priority || 'low',
-      options: ['low', 'medium', 'high'],
+      options: priorities,
       handleChange: () => {
         this.actionSettings.report.priority = this.priority.selected;
       },

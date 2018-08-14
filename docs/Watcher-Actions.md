@@ -101,7 +101,7 @@ Take a website Snapshot using PhantomJS and send it via Email/SMTP
 Store Query results and message to Elasticsearch index
 ```json
   "elastic" : {
-	   "priority" : "DEBUG",
+	   "priority" : "medium",
 	   "message" : "Avg {{payload.aggregations.avg.value}} measurements in 5 minutes"
 	   }
 ```
@@ -111,7 +111,7 @@ Store Query results and message to Elasticsearch index
 Output Query results and message to Console
 ```json
    "console" : {
-	  "priority" : "DEBUG",
+	  "priority" : "low",
 	  "message" : "Average {{payload.aggregations.avg.value}}"
 	  }
 ```

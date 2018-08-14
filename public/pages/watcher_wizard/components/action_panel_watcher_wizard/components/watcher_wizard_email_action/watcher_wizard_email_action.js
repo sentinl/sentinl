@@ -1,5 +1,5 @@
 import template from './watcher_wizard_email_action.html';
-
+import priorities from '../../action_priorities';
 import {capitalize} from 'lodash';
 
 class WatcherWizardEmailAction {
@@ -19,7 +19,7 @@ class WatcherWizardEmailAction {
     };
     this.priority = {
       selected: this.actionSettings.email.priority,
-      options: ['low', 'medium', 'high'],
+      options: priorities,
       handleChange: () => {
         this.actionSettings.email.priority = this.priority.selected;
       },

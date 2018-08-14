@@ -1,33 +1,31 @@
-import template from './watcher_wizard_email_html_action.html';
+import template from './watcher_wizard_console_action.html';
 import priorities from '../../action_priorities';
 import {capitalize} from 'lodash';
 
-class WatcherWizardEmailHtmlAction {
-  constructor($scope, $sce, wizardHelper) {
+class WatcherWizardConsoleAction {
+  constructor($scope, wizardHelper) {
     this.$scope = $scope;
     this.wizardHelper = wizardHelper;
     this.actionId = this.actionId || this.$scope.actionId;
     this.watcher = this.watcher || this.$scope.watcher;
     this.actionSettings = this.actionSettings || this.$scope.actionSettings;
-    this.actionPropertyNormalization = this.actionPropertyNormalization || this.$scope.actionPropertyNormalization;
     this.actionDelete = this.actionDelete || this.$scope.actionDelete;
-    this.aceOptions = this.aceOptions || this.$scope.aceOptions;
 
-    this.type = 'email_html';
+    this.type = 'console';
     this.status = {
       isOpen: false,
     };
     this.priority = {
-      selected: this.actionSettings.email_html.priority,
+      selected: this.actionSettings.console.priority,
       options: priorities,
       handleChange: () => {
-        this.actionSettings.email_html.priority = this.priority.selected;
+        this.actionSettings.console.priority = this.priority.selected;
       },
     };
   }
 
   getTagId(name = 'action') {
-    name = name === 'action' ? 'watcherWizardEmailHtmlAction' : ('watcherWizardEmailHtmlAction' + capitalize(name));
+    name = name === 'action' ? 'watcherWizardConsoleAction' : ('watcherWizardConsoleAction' + capitalize(name));
     return this.wizardHelper.getUniqueTagId(name, this.actionId);
   }
 
@@ -36,7 +34,7 @@ class WatcherWizardEmailHtmlAction {
   }
 }
 
-function watcherWizardEmailHtmlAction() {
+function watcherWizardConsoleAction() {
   return {
     template,
     restrict: 'E',
@@ -44,21 +42,19 @@ function watcherWizardEmailHtmlAction() {
       actionId: '@',
       watcher: '=',
       actionSettings: '=',
-      actionPropertyNormalization: '&',
       actionDelete: '&',
       aceOptions: '&',
     },
-    controller: WatcherWizardEmailHtmlAction,
-    controllerAs: 'watcherWizardEmailHtmlAction',
+    controller:  WatcherWizardConsoleAction,
+    controllerAs: 'watcherWizardConsoleAction',
     bindToController: {
       actionId: '@',
       watcher: '=',
       actionSettings: '=',
-      actionPropertyNormalization: '&',
       actionDelete: '&',
       aceOptions: '&',
     },
   };
 }
 
-export default watcherWizardEmailHtmlAction;
+export default watcherWizardConsoleAction;

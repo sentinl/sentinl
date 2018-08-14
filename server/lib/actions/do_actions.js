@@ -129,7 +129,7 @@ export default function (server, actions, payload, task) {
     /* ***************************************************************************** */
     /*
     *   "console" : {
-    *      "priority" : "DEBUG",
+    *      "priority" : "low",
     *      "message" : "Average {{payload.aggregations.avg.value}}",
     *    }
     */
@@ -140,9 +140,9 @@ export default function (server, actions, payload, task) {
     if (action.console) {
       (async () => {
         try {
-          priority = action.console.priority ? action.console.priority : 'INFO';
+          priority = action.console.priority || 'medium';
           formatterConsole = action.console.message ? action.console.message : '{{ payload }}';
-          message = mustache.render(formatterConsole, {payload: payload});
+          message = mustache.render(formatterConsole, {payload: payload,});
           log.debug('console payload', payload);
 
           await logHistory({
@@ -222,9 +222,9 @@ export default function (server, actions, payload, task) {
         try {
           formatterSubject = action.email.subject || ('SENTINL: ' + actionId);
           formatterBody = action.email.body || 'Series Alarm {{ payload._id}}: {{payload.hits.total}}';
-          subject = mustache.render(formatterSubject, {payload: payload});
-          text = mustache.render(formatterBody, {payload: payload});
-          priority = action.email.priority ? action.email.priority : 'INFO';
+          subject = mustache.render(formatterSubject, {payload: payload, watcher: task._source});
+          text = mustache.render(formatterBody, {payload: payload, watcher: task._source});
+          priority = action.email.priority || 'medium';
 
           if (!action.email.stateless) {
             // Log Event
@@ -283,10 +283,10 @@ export default function (server, actions, payload, task) {
           formatterSubject = action.email_html.subject ? action.email_html.subject : 'SENTINL: ' + actionId;
           formatterBody = action.email_html.body || 'Series Alarm {{ payload._id}}: {{payload.hits.total}}';
           let formatterConsole = action.email_html.html || '<p>Series Alarm {{ payload._id}}: {{payload.hits.total}}</p>';
-          subject = mustache.render(formatterSubject, {payload: payload});
-          text = mustache.render(formatterBody, {payload: payload});
-          html = mustache.render(formatterConsole, {payload: payload});
-          priority = action.email_html.priority ? action.email_html.priority : 'INFO';
+          subject = mustache.render(formatterSubject, {payload: payload, watcher: task._source});
+          text = mustache.render(formatterBody, {payload: payload, watcher: task._source});
+          html = mustache.render(formatterConsole, {payload: payload, watcher: task._source});
+          priority = action.email_html.priority || 'medium';
 
           if (!action.email_html.stateless) {
             // Log Event
@@ -396,8 +396,8 @@ export default function (server, actions, payload, task) {
         try {
           let formatter;
           formatter = action.slack.message ? action.slack.message : 'Series Alarm {{ payload._id}}: {{payload.hits.total}}';
-          message = mustache.render(formatter, {payload: payload});
-          priority = action.slack.priority ? action.slack.priority : 'INFO';
+          message = mustache.render(formatter, {payload: payload, watcher: task._source});
+          priority = action.slack.priority || 'medium';
           log.debug(`webhook to #${action.slack.channel}, message: ${message}`);
 
           if (!action.slack.stateless) {
@@ -482,7 +482,10 @@ export default function (server, actions, payload, task) {
             auth: action.webhook.auth ? action.webhook.auth : undefined
           };
 
-          let dataToWrite = action.webhook.body ? mustache.render(action.webhook.body, {payload: payload}) : action.webhook.params;
+          let dataToWrite = action.webhook.body ? mustache.render(action.webhook.body, {
+            payload: payload,
+            watcher: task._source
+          }) : action.webhook.params;
           if (dataToWrite) {
             options.headers['Content-Length'] = Buffer.byteLength(dataToWrite);
           }
@@ -517,7 +520,7 @@ export default function (server, actions, payload, task) {
     /* ***************************************************************************** */
     /*
     *   "elastic" : {
-    *      "priority" : "DEBUG",
+    *      "priority" : "low",
     *      "message" : "Avg {{payload.aggregations.avg.value}} measurements in 5 minutes"
     *    }
     */
@@ -528,8 +531,8 @@ export default function (server, actions, payload, task) {
           let message;
           let esFormatter;
           esFormatter = action.local.message ? action.local.message : '{{ payload }}';
-          message = mustache.render(esFormatter, {payload: payload});
-          priority = action.local.priority ? action.local.priority : 'INFO';
+          message = mustache.render(esFormatter, {payload: payload, watcher: task._source});
+          priority = action.local.priority || 'medium';
           log.debug(`logged message to elastic: ${message}`);
           // Log Event
           await logHistory({

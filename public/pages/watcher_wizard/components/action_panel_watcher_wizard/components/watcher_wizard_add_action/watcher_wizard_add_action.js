@@ -51,7 +51,16 @@ class WatcherWizardAddAction {
             type: 'png'
           }
         }
-      }
+      },
+      Console: {
+        name: 'Console alarm',
+        throttle_period: '1s',
+        console: {
+          priority: 'low',
+          stateless: false,
+        },
+      },
+
     };
     this.actionTypes = Object.keys(this.actions);
   }
