@@ -12,7 +12,7 @@ class TitlePanelWatcherWizard {
     this.log.initLocation('TitlePanelWatcherWizard');
 
     this.schedule = {
-      selected: get(this.watcher, '_source.wizard.chart_query_params.scheduleType') || 'every',
+      selected: get(this.watcher, 'wizard.chart_query_params.scheduleType') || 'every',
       options: ['every', 'text'],
       handleChange: (mode, text) => {
         this.onScheduleChange({mode, text});

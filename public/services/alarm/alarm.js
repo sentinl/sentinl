@@ -9,7 +9,7 @@ class Alarm {
   */
   list() {
     return this.$http.get('../api/sentinl/list/alarms').catch(function (err) {
-      throw new Error(`fail to list alarms: ${err.message}`);
+      throw new Error('Alarm list: ' + err.toString());
     });
   }
 
@@ -25,7 +25,7 @@ class Alarm {
     return this.$http.delete(`../api/sentinl/alarm/${index}/${type}/${id}`).then(function () {
       return id;
     }).catch(function (err) {
-      throw new Error(`fail to delete alarm or report: ${err.message}`);
+      throw new Error('Alarm delete: ' + err.toString());
     });
   }
 
@@ -36,7 +36,7 @@ class Alarm {
   */
   updateFilter(timeInterval) {
     return this.$http.get('../api/sentinl/set/interval/' + JSON.stringify(timeInterval).replace(/\//g, '%2F')).catch(function (err) {
-      throw new Error(`fail to set time filter: ${err.message}`);
+      throw new Error('Alarm update filter: ' + err.toString());
     });
   }
 }

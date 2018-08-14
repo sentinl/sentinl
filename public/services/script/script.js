@@ -39,12 +39,9 @@ class Script extends SavedObjects {
   async new(doc) {
     try {
       const script = await this.savedObjects.get();
-      forEach(doc._source, (val, key) => {
-        script[key] = val;
-      });
       return await script.save();
     } catch (err) {
-      throw new Error(`fail to create script ${doc.id}, ${err}`);
+      throw new Error('Script new: ' + err.toString());
     }
   }
 }

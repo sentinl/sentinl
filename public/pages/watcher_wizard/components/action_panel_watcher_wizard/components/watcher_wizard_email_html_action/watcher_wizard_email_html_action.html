@@ -124,12 +124,12 @@
         <mustache-template-input
           language="html"
           content="watcherWizardEmailHtmlAction.actionSettings.email_html.html"
-          injected-data="{payload: {hits: {total: 10}}, watcher: watcherWizardEmailHtmlAction.watcher._source}"
+          injected-data="{payload: {hits: {total: 10}}, watcher: watcherWizardEmailHtmlAction.watcher}"
           ace-options="watcherWizardEmailHtmlAction.aceOptions({mode: 'html', maxLines: 30})"
         >
           The query result and watcher information are provided in the <code>payload</code> and <code>watcher</code> variables and uses
           <a target="_blank" href="https://mustache.github.io/mustache.5.html">Mustache syntax</a>.
-          <span ng-if="watcherWizardEmailHtmlAction.watcher._source.dashboard_link">
+          <span ng-if="watcherWizardEmailHtmlAction.watcher.dashboard_link">
             The time range in the dashboard link will be updated each time the watcher is executed.
           </span>
         </mustache-template-input>

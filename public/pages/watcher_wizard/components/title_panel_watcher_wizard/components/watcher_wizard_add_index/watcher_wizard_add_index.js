@@ -17,10 +17,10 @@ class WatcherWizardAddIndex {
   }
 
   _getIndex() {
-    if (Array.isArray(this.watcher._source.input.search.request.index)) {
-      return this.watcher._source.input.search.request.index.join(',');
+    if (Array.isArray(this.watcher.input.search.request.index)) {
+      return this.watcher.input.search.request.index.join(',');
     }
-    return this.watcher._source.input.search.request.index;
+    return this.watcher.input.search.request.index;
   }
 
   async getIndexNames(name) {
@@ -28,8 +28,8 @@ class WatcherWizardAddIndex {
       let indexes = await this.watcherWizardEsService.getAllIndexes();
       return this._filterIndexesByNamePrefix(indexes, this.selected);
     } catch (err) {
-      this.notify(err.message);
-      this.log.error(err.message);
+      this.notify(err.toString());
+      this.log.error(err.toString());
     }
   }
 

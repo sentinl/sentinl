@@ -14,7 +14,7 @@ class WatcherWizardEverySchedule {
   }
 
   _getNumber() {
-    const number = /every\s(\d+)\s\w+/.exec(this.watcher._source.trigger.schedule.later);
+    const number = /every\s(\d+)\s\w+/.exec(this.watcher.trigger.schedule.later);
     if (!number) return 1;
     return +number[1];
   }

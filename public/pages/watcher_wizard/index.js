@@ -1,6 +1,7 @@
 import { uiModules } from 'ui/modules';
 import { Notifier } from 'ui/notify/notifier';
 import routes from 'ui/routes';
+import { assign } from 'lodash';
 
 import './services/wizard_helper';
 import './services/watcher_wizard_es_service';
@@ -51,18 +52,18 @@ routes
             delete window.localStorage.sentinl_saved_query;
           }
         } catch (err) {
-          notifier.error(`parse spy button watcher: ${err.message}`);
+          notifier.error(`parse spy button watcher: ${err.toString()}`);
           kbnUrl.redirect('/');
         }
 
         if (!watcherId) {
           return watcherService.new('wizard').then(function (watcher) {
             if (spyBtnWatcher) {
-              watcher._source = spyBtnWatcher._source;
+              assign(watcher, spyBtnWatcher);
             }
             return watcher;
           }).catch(function (err) {
-            notifier.error(`create new watcher: ${err.message}`);
+            notifier.error(`create new watcher: ${err.toString()}`);
             kbnUrl.redirect('/');
           });
         }
@@ -71,7 +72,7 @@ routes
           watcher.$edit = true;
           return watcher;
         }).catch(function (err) {
-          notifier.error(`get watcher: ${err.message}`);
+          notifier.error(`get watcher: ${err.toString()}`);
           kbnUrl.redirect('/');
         });
       },

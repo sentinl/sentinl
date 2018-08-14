@@ -75,29 +75,23 @@ const dashboardSpyButton = function ($scope) {
 
     $scope.createWatcher = function () {
       const watcherRange = 'now-1h';
-      const alarm = {
-        _index: 'watcher',
-        _type: 'sentinl-watcher',
-        _id: undefined,
-        _new: 'true',
-        _source: _.cloneDeep(EMAILWATCHERDASHBOARD)
-      };
-      alarm._source.spy = true;
-      alarm._source.dashboard_link = _getDashbaordUrl();
+      const alarm = _.cloneDeep(EMAILWATCHERDASHBOARD);
+      alarm.spy = true;
+      alarm.dashboard_link = _getDashbaordUrl();
 
       // Set Index
-      alarm._source.input.search.request.index = $scope.indices;
+      alarm.input.search.request.index = $scope.indices;
       // Set Request Body
       if (req.fetchParams && req.fetchParams.body) {
-        alarm._source.input.search.request.body = req.fetchParams.body;
+        alarm.input.search.request.body = req.fetchParams.body;
       }
       // Patch Range
       if (indexPattern && indexPattern.getTimeField()) {
-        if (!alarm._source.input.search.request.body.query.bool.must) {
-          alarm._source.input.search.request.body.query.bool.must = [];
+        if (!alarm.input.search.request.body.query.bool.must) {
+          alarm.input.search.request.body.query.bool.must = [];
         }
 
-        alarm._source.input.search.request.body.query.bool.must.push({
+        alarm.input.search.request.body.query.bool.must.push({
           range: {
             [indexPattern.timeFieldName]: {
               from: watcherRange
@@ -105,8 +99,8 @@ const dashboardSpyButton = function ($scope) {
           }
         });
       }
-      if (alarm._source.input.search.request.body.query.bool.must) {
-        let must = alarm._source.input.search.request.body.query.bool.must;
+      if (alarm.input.search.request.body.query.bool.must) {
+        let must = alarm.input.search.request.body.query.bool.must;
         var newTimestamp = {};
         for (var key in must) {
           if (must.hasOwnProperty(key) && must[key].range) {
@@ -139,7 +133,7 @@ const dashboardSpyButton = function ($scope) {
                   }
                   newTimestamp.gte = 'now-' + relativeTime + timeUnits[largestUnit] + '/' + timeUnits[largestUnit];
                   newTimestamp.lte = 'now/' + timeUnits[largestUnit];
-                  alarm._source.input.search.request.body.query.bool.must[key].range['@timestamp'] = newTimestamp;
+                  alarm.input.search.request.body.query.bool.must[key].range['@timestamp'] = newTimestamp;
                 }
               }
             }
@@ -147,7 +141,7 @@ const dashboardSpyButton = function ($scope) {
         }
       }
 
-      stripObjectPropertiesByNameRegex(alarm._source.input.search, /\$.*/);
+      stripObjectPropertiesByNameRegex(alarm.input.search, /\$.*/);
       window.localStorage.setItem('sentinl_saved_query', JSON.stringify(alarm));
     };
   });

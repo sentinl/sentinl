@@ -9,23 +9,23 @@
     </div>
   </div>
   <div class="panel panel-default"
-    ng-if="thresholdWatcherWizard.watcher._source.impersonate"
+    ng-if="thresholdWatcherWizard.watcher.impersonate"
   >
     <div class="panel-body">
       <impersonation-panel-watcher-wizard
-        user-name="thresholdWatcherWizard.watcher._source.username"
-        pass-word="thresholdWatcherWizard.watcher._source.password"
+        user-name="thresholdWatcherWizard.watcher.username"
+        pass-word="thresholdWatcherWizard.watcher.password"
       ></impersonation-panel-watcher-wizard>
     </div>
   </div>
   <div class="panel panel-default"
-    ng-if="thresholdWatcherWizard.watcher._source.spy"
+    ng-if="thresholdWatcherWizard.watcher.spy"
   >
     <div class="panel-body">
       <input_advanced-panel-watcher-wizard
         watcher="thresholdWatcherWizard.watcher"
         ace-options="thresholdWatcherWizard.aceOptions({mode: mode, maxLines: maxLines, minLines: minLines})"
-        on-input-adv-change="thresholdWatcherWizard.inputAdvChange({input, condition})"
+        on-input-adv-change="thresholdWatcherWizard.inputAdvChange({input: input, condition: condition})"
       ></input_advanced-panel-watcher-wizard>
     </div>
   </div>

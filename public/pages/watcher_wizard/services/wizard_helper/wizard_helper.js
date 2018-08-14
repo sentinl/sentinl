@@ -1,4 +1,4 @@
-import {get} from 'lodash';
+import { get } from 'lodash';
 
 class WizardHelper {
   constructor() {}
@@ -8,11 +8,11 @@ class WizardHelper {
   }
 
   isSpyWatcher(watcher) {
-    return get(watcher, '_source.spy') || watcher.spy;
+    return get(watcher, 'spy') || watcher.spy;
   }
 
   isWizardWatcher(watcher) {
-    return get(watcher, '_source.wizard.chart_query_params');
+    return get(watcher, 'wizard.chart_query_params');
   }
 
   getUniqueTagId(name, uuid) {

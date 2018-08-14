@@ -14,7 +14,7 @@ class Watcher extends SavedObjects {
   * @param {object} Promise
   * @param {object} ServerConfig service
   */
-  constructor($http, $injector, Promise, ServerConfig, EMAILWATCHERADVANCED, EMAILWATCHERWIZARD, REPORTWATCHER) {
+  constructor($http, $injector, Promise, ServerConfig, sentinlHelper, EMAILWATCHERADVANCED, EMAILWATCHERWIZARD, REPORTWATCHER) {
     super($http, $injector, Promise, ServerConfig, 'watcher');
     this.EMAILWATCHERADVANCED = EMAILWATCHERADVANCED;
     this.EMAILWATCHERWIZARD = EMAILWATCHERWIZARD;
@@ -23,6 +23,7 @@ class Watcher extends SavedObjects {
     this.$injector = $injector;
     this.Promise = Promise;
     this.ServerConfig = ServerConfig;
+    this.sentinlHelper = sentinlHelper;
     this.savedWatchersKibana = this.$injector.has('savedWatchersKibana') ? this.$injector.get('savedWatchersKibana') : null;
     // Kibi: inject saved objects api related modules if they exist.
     this.savedObjectsAPI = this.$injector.has('savedObjectsAPI') ? this.$injector.get('savedObjectsAPI') : null;
@@ -32,10 +33,6 @@ class Watcher extends SavedObjects {
     if (this.isSiren) {
       this.savedObjects = this.savedWatchers;
     }
-    this.fields = [
-      'actions', 'input', 'condition', 'transform', 'trigger', 'disable', 'report', 'title', 'wizard',
-      'save_payload', 'spy', 'impersonate', 'username', 'password', 'dashboard_link'
-    ];
   }
 
   /**
@@ -47,10 +44,13 @@ class Watcher extends SavedObjects {
   async play(id) {
     try {
       const watcher = await this.get(id);
-      const resp = await this.$http.post('../api/sentinl/watcher/_execute', watcher);
+      const resp = await this.$http.post('../api/sentinl/watcher/_execute', {
+        id: watcher.id,
+        _source: this.sentinlHelper.pickWatcherSource(watcher)
+      });
       return resp.data;
     } catch (err) {
-      throw err.data;
+      throw new Error('Watcher play: ' + err.toString());
     }
   }
 
@@ -61,7 +61,7 @@ class Watcher extends SavedObjects {
   * @return {object} doc
   */
   get(id) {
-    return super.get(id, this.fields);
+    return super.get(id);
   }
 
   /**
@@ -82,10 +82,10 @@ class Watcher extends SavedObjects {
         default:
           this.savedObjects.Class.defaults = cloneDeep(this.EMAILWATCHERWIZARD);
       }
-      let watcher = await this.savedObjects.get();
-      return this.nestedSource(watcher, this.fields);
+
+      return await this.savedObjects.get();
     } catch (err) {
-      throw new Error(`fail to create new watcher, ${err}`);
+      throw new Error('Watcher new: ' + err.toString());
     }
   }
 
@@ -98,20 +98,17 @@ class Watcher extends SavedObjects {
   async save(watcher) {
     if (watcher.hasOwnProperty('save')) {
       try {
-        return await this.flatSource(watcher).save();
+        return await watcher.save();
       } catch (err) {
         throw new Error(`fail to save watcher, ${err}`);
       }
     }
 
     try {
-      const savedWatcher = await this.savedObjects.get(watcher._id);
-      forEach(watcher._source, (val, key) => {
-        savedWatcher[key] = val;
-      });
+      const savedWatcher = await this.savedObjects.get(watcher.id);
       return await savedWatcher.save();
     } catch (err) {
-      throw new Error(`fail to save watcher, ${err}`);
+      throw new Error('Watcher save: ' + err.toString());
     }
   }
 }

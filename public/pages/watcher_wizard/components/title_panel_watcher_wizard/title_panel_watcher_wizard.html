@@ -29,7 +29,7 @@
                   id="watcherName"
                   input-focus
                   required
-                  ng-model="titlePanelWatcherWizard.watcher._source.title"
+                  ng-model="titlePanelWatcherWizard.watcher.title"
                   ng-model-options="{ debounce: 500 }"
                   placeholder="My Watcher"
                 >
@@ -52,16 +52,16 @@
                     <input
                       type="checkbox"
                       name="watcherPreferences"
-                      ng-model="titlePanelWatcherWizard.watcher._source.save_payload"
-                      ng-checked="titlePanelWatcherWizard.watcher._source.save_payload"
+                      ng-model="titlePanelWatcherWizard.watcher.save_payload"
+                      ng-checked="titlePanelWatcherWizard.watcher.save_payload"
                     >save payload
                   </label>
                   <label class="checkbox-inline">
                     <input
                       type="checkbox"
                       name="watcherPreferences"
-                      ng-model="titlePanelWatcherWizard.watcher._source.impersonate"
-                      ng-checked="titlePanelWatcherWizard.watcher._source.impersonate"
+                      ng-model="titlePanelWatcherWizard.watcher.impersonate"
+                      ng-checked="titlePanelWatcherWizard.watcher.impersonate"
                     >impersonate
                   </label>
                 </div>

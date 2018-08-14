@@ -39,7 +39,7 @@ class User extends SavedObjects {
       }
       return await user.save();
     } catch (err) {
-      throw new Error(`create new user "${username}" for watcher "${id}": ${err.message || err.statusText}`);
+      throw new Error(`create new user "${username}" for watcher "${id}": ${err.toString() || err.statusText}`);
     }
   }
 
@@ -57,7 +57,7 @@ class User extends SavedObjects {
       if (err.status === 404) {
         this.log.warn(`user "${id}" was not found`);
       } else {
-        throw new Error(`get username of "${id}": ${err.message || err.statusText}`);
+        throw new Error(`get username of "${id}": ${err.toString() || err.statusText}`);
       }
     }
   }

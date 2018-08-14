@@ -1,3 +1,5 @@
+import { get } from 'lodash';
+
 class WatcherWizardChartService {
   constructor($http, API, sentinlLog) {
     this.$http = $http;
@@ -17,10 +19,11 @@ class WatcherWizardChartService {
         query,
       });
     } catch (err) {
-      if (err.status === 503 && err.data.message.includes('index_not_found_exception')) {
-        this.log.warn(err.data.message);
+      err = get(err, 'data.message') || err.toString();
+      if (err.includes('index_not_found_exception')) {
+        this.log.warn(err);
       } else {
-        throw new Error(`fail to fetch chart data for ${queryType}: ` + err.data.message || err.data.error);
+        throw new Error(`ChartService fetch data for ${queryType}: ` + err);
       }
     }
   }

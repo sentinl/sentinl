@@ -4,7 +4,7 @@ class WatcherWizard {
     this.watcher = $route.current.locals.watcher;
     this.$scope = $scope;
     this.topNavMenu = navMenu.getTopNav('editor');
-    this.tabsMenu = navMenu.getTabs('editor', [{ name: `Wizard: ${this.watcher._id || 'new watcher'}`, url: '#/editor' }]);
+    this.tabsMenu = navMenu.getTabs('editor', [{ name: `Wizard: ${this.watcher.id || 'new watcher'}`, url: '#/editor' }]);
   }
 }
 

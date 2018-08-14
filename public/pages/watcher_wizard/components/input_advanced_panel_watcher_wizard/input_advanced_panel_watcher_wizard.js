@@ -1,18 +1,25 @@
+/* global angular */
+
 import template from './input_advanced_panel_watcher_wizard.html';
 
 class InputAdvancedPanelWatcherWizard {
-  constructor($scope, sentinlLog) {
+  constructor($scope, sentinlLog, sentinlHelper) {
     this.$scope = $scope;
     this.watcher = this.watcher || this.$scope.watcher;
+    this.sentinlHelper = sentinlHelper;
     this.onInputAdvChange = this.onInputAdvChange || this.$scope.onInputAdvChange;
     this.aceOptions = this.aceOptions || this.$scope.aceOptions;
 
     this.log = sentinlLog;
     this.log.initLocation('InputAdvancedPanelWatcherWizard');
 
+    this.init = {
+      watcherSource: this.sentinlHelper.pickWatcherSource(this.watcher)
+    };
+
     this.raw = {
-      input: JSON.stringify(this.watcher._source.input, null, 2),
-      condition: JSON.stringify(this.watcher._source.condition, null, 2),
+      input: angular.toJson(this.init.watcherSource.input, true),
+      condition: angular.toJson(this.init.watcherSource.condition, true),
     };
   }
 

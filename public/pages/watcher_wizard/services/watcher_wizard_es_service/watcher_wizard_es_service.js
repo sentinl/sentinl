@@ -1,3 +1,5 @@
+import { get } from 'lodash';
+
 class WatcherWizardEsService {
   constructor($http, API) {
     this.$http = $http;
@@ -9,7 +11,8 @@ class WatcherWizardEsService {
       const resp = await this.$http.post(this.API.ES.GET_MAPPING, {index});
       return resp.data;
     } catch (err) {
-      throw new Error(`fetch index "${index}" mapping: ${err.data.message}`);
+      err = get(err, 'data.message') || err.toString();
+      throw new Error(`EsService fetch index "${index}" mapping: ` + err);
     }
   }
 
@@ -21,7 +24,8 @@ class WatcherWizardEsService {
       }
       throw new Error(`get all indexes: ${res.status} ${res.statusText}`);
     } catch (err) {
-      throw new Error(`get all indexes: ${err.message}`);
+      err = get(err, 'data.message') || err.toString();
+      throw new Error('EsService get indices: ' + err);
     }
   }
 }

@@ -1,11 +1,15 @@
+/* global angular */
+import { assign } from 'lodash';
+
 class WatcherAdvanced {
-  constructor($scope, $injector, navMenu, sentinlLog, createNotifier, confirmModal, kbnUrl, Watcher, User) {
+  constructor($scope, $injector, navMenu, sentinlLog, createNotifier, confirmModal, kbnUrl, Watcher, User, sentinlHelper) {
     const $route = $injector.get('$route');
     this.$scope = $scope;
     this.confirmModal = confirmModal;
     this.kbnUrl = kbnUrl;
     this.watcherService = Watcher;
     this.userService = User;
+    this.sentinlHelper = sentinlHelper;
 
     this.locationName = 'WatcherAdvanced';
     this.log = sentinlLog;
@@ -15,14 +19,18 @@ class WatcherAdvanced {
     });
 
     this.watcher = $route.current.locals.watcher;
+    this.init = {
+      watcherSource: this.sentinlHelper.pickWatcherSource(this.watcher)
+    };
+
     try {
-      this.watcherSourceText = JSON.stringify(this.watcher._source, null, 2);
+      this.watcherSourceText = angular.toJson(this.init.watcherSource, true);
     } catch (err) {
-      this.log.error(`Parse watcher doc: ${err.message}`);
+      this.log.error(`Parse watcher doc: ${err.toString()}`);
     }
 
     this.topNavMenu = navMenu.getTopNav('editor');
-    this.tabsMenu = navMenu.getTabs('editor', [{ name: `Advanced: ${this.watcher._id || 'new watcher'}`, url: '#/editor' }]);
+    this.tabsMenu = navMenu.getTabs('editor', [{ name: `Advanced: ${this.watcher.id || 'new watcher'}`, url: '#/editor' }]);
 
     this.$scope.$on('navMenu:cancelEditor', () => {
       const confirmModalOptions = {
@@ -43,7 +51,7 @@ class WatcherAdvanced {
         };
         this.confirmModal('Save this watcher?', confirmModalOptions);
       } catch (err) {
-        this.notify.error(`watcher syntax is invalid: ${err.message}`);
+        this.notify.error(`watcher syntax is invalid: ${err.toString()}`);
       }
     });
   }
@@ -54,7 +62,7 @@ class WatcherAdvanced {
 
   async _saveWatcherSource() {
     try {
-      this.watcher._source = JSON.parse(this.watcherSourceText);
+      assign(this.watcher, angular.fromJson(this.watcherSourceText));
       const id = await this.watcherService.save(this.watcher);
       if (this.watcher.username && this.watcher.password) {
         await this.userService.new(id, this.watcher.username, this.watcher.password);
@@ -62,7 +70,7 @@ class WatcherAdvanced {
       this._cleanWatcher(this.watcher);
       this._cancelWatcherEditor();
     } catch (err) {
-      this.notify.error(`fail to save watcher: ${err.message}`);
+      this.notify.error(`fail to save watcher: ${err.toString()}`);
     }
   }
 

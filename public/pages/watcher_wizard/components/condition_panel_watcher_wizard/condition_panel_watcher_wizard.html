@@ -20,7 +20,7 @@
               <ul>
                 <li class="watcher-wizard-condition-dd">
                   <dd-watcher-agg-type
-                    agg-type-selected="conditionPanelWatcherWizard.watcher._source.wizard.chart_query_params.queryType"
+                    agg-type-selected="conditionPanelWatcherWizard.watcher.wizard.chart_query_params.queryType"
                     agg-type-on-select="conditionPanelWatcherWizard.condition.type.handleSelect(type)"
                     text-limit="conditionPanelWatcherWizard.condition.textLimit"
                   ></dd-watcher-agg-type/>
@@ -28,9 +28,9 @@
                 <li class="watcher-wizard-condition-dd">
                   <dd-watcher-agg-field
                     agg-enabled="conditionPanelWatcherWizard.condition.field.aggEnabled"
-                    active-field="{{conditionPanelWatcherWizard.watcher._source.wizard.chart_query_params.field}}"
+                    active-field="{{conditionPanelWatcherWizard.watcher.wizard.chart_query_params.field}}"
                     field-names="conditionPanelWatcherWizard.indexesData.fieldNames"
-                    time-field="{{conditionPanelWatcherWizard.watcher._source.wizard.chart_query_params.timeField}}"
+                    time-field="{{conditionPanelWatcherWizard.watcher.wizard.chart_query_params.timeField}}"
                     on-select-field="conditionPanelWatcherWizard.condition.field.handleFieldSelect(field)"
                     on-select-time-field="conditionPanelWatcherWizard.condition.field.handleTimeFieldSelect(timeField)"
                     text-limit="conditionPanelWatcherWizard.condition.textLimit"
@@ -38,7 +38,7 @@
                 </li>
                 <li class="watcher-wizard-condition-dd">
                   <dd-watcher-agg-over
-                    agg-over-options="conditionPanelWatcherWizard.watcher._source.wizard.chart_query_params.over"
+                    agg-over-options="conditionPanelWatcherWizard.watcher.wizard.chart_query_params.over"
                     agg-field-names="conditionPanelWatcherWizard.indexesData.fieldNames"
                     agg-over-on-select="conditionPanelWatcherWizard.condition.over.handleSelect(over)"
                     text-limit="conditionPanelWatcherWizard.condition.textLimit"
@@ -46,21 +46,21 @@
                 </li>
                 <li class="watcher-wizard-condition-dd">
                   <dd-watcher-agg-threshold
-                    agg-threshold-options="conditionPanelWatcherWizard.watcher._source.wizard.chart_query_params.threshold"
+                    agg-threshold-options="conditionPanelWatcherWizard.watcher.wizard.chart_query_params.threshold"
                     agg-threshold-on-select="conditionPanelWatcherWizard.condition.threshold.handleSelect(direction, n)"
                     text-limit="conditionPanelWatcherWizard.condition.textLimit"
                   ></dd-watcher-agg-threshold/>
                 </li>
                 <li class="watcher-wizard-condition-dd">
                   <dd-watcher-agg-time
-                    agg-time-options="conditionPanelWatcherWizard.watcher._source.wizard.chart_query_params.last"
+                    agg-time-options="conditionPanelWatcherWizard.watcher.wizard.chart_query_params.last"
                     agg-time-on-select="conditionPanelWatcherWizard.condition.last.handleSelect(unit, n)"
                     text-limit="conditionPanelWatcherWizard.condition.textLimit"
                   ></dd-watcher-agg-time/>
                 </li>
                 <li class="watcher-wizard-condition-dd">
                   <dd-watcher-agg-interval
-                    agg-interval-options="conditionPanelWatcherWizard.watcher._source.wizard.chart_query_params.interval"
+                    agg-interval-options="conditionPanelWatcherWizard.watcher.wizard.chart_query_params.interval"
                     agg-interval-on-select="conditionPanelWatcherWizard.condition.interval.handleSelect(unit, n)"
                     text-limit="conditionPanelWatcherWizard.condition.textLimit"
                   ></dd-watcher-agg-interval/>

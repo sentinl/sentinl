@@ -12,16 +12,18 @@ describe('Script', () => {
   let savedScripts;
   let $httpBackend;
   let Promise;
+  let sentinlHelper;
   let WATCHERSCRIPT;
 
   const init = function () {
     ngMock.module('kibana');
 
-    ngMock.inject(($injector, _Script_, _$httpBackend_, _Promise_, _WATCHERSCRIPT_) => {
+    ngMock.inject(($injector, _Script_, _$httpBackend_, _Promise_, _sentinlHelper_, _WATCHERSCRIPT_) => {
       Promise = _Promise_;
       Script = _Script_;
       savedScripts = $injector.has('savedScripts') ? $injector.get('savedScripts') : undefined;
       $httpBackend = _$httpBackend_;
+      sentinlHelper = _sentinlHelper_;
       WATCHERSCRIPT = _WATCHERSCRIPT_;
     });
   };
@@ -75,8 +77,8 @@ describe('Script', () => {
       Script.list()
         .then((response) => {
           expect(response.length).to.eql(2);
-          expect(response[0]._source).to.be.an('object');
-          expect(_.isEqual(response[0]._source, WATCHERSCRIPT)).to.be(true);
+          expect(response[0]).to.be.an('object');
+          expect(_.isEqual(sentinlHelper.pickWatcherSource(response[0]), WATCHERSCRIPT)).to.be(true);
         })
         .catch(done);
 

@@ -31,14 +31,14 @@ function  WatchersController($rootScope, $scope, $route, $interval,
   */
   $scope.playWatcher = async function (task) {
     try {
-      const resp = await Watcher.play(task._id);
+      const resp = await Watcher.play(task.id);
       if (resp.warning) {
         notify.warning(resp.message);
       } else {
         notify.info('watcher executed');
       }
     } catch (err) {
-      notify.error(err.message);
+      notify.error(err.toString());
     }
   };
 
@@ -96,24 +96,24 @@ function  WatchersController($rootScope, $scope, $route, $interval,
   * @param {string} id of watcher
   */
   $scope.deleteWatcher = function (id) {
-    const index = $scope.watchers.findIndex((watcher) => watcher._id === id);
+    const index = $scope.watchers.findIndex((watcher) => watcher.id === id);
     const watcher = $scope.watchers[index];
 
     async function doDelete() {
       try {
-        await Watcher.delete(watcher._id);
-        notify.info(`deleted watcher ${watcher._source.title}`);
+        await Watcher.delete(watcher.id);
+        notify.info(`deleted watcher ${watcher.title}`);
         $scope.watchers.splice(index, 1);
 
         try {
-          const user = await User.get(watcher._id);
-          await User.delete(user._id);
-          notify.info(`deleted user ${user._id}`);
+          const user = await User.get(watcher.id);
+          await User.delete(user.id);
+          notify.info(`deleted user ${user.id}`);
         } catch (err) {
-          $log.warn(err.message);
+          $log.warn(err.toString());
         }
       } catch (err) {
-        notify.error(`fail to delete watcher: ${err}`);
+        notify.error(`fail to delete watcher: ${err.toString()}`);
       }
     }
 
@@ -122,7 +122,7 @@ function  WatchersController($rootScope, $scope, $route, $interval,
       confirmButtonText: 'Delete watcher',
     };
 
-    confirmModal(`Are you sure you want to delete the watcher ${watcher._source.title}?`, confirmModalOptions);
+    confirmModal(`Are you sure you want to delete the watcher ${watcher.title}?`, confirmModalOptions);
   };
 
   /**
@@ -133,9 +133,9 @@ function  WatchersController($rootScope, $scope, $route, $interval,
   const saveWatcher = function (index) {
     Watcher.save($scope.watchers[index])
       .then(function (id) {
-        const status = $scope.watchers[index]._source.disable ? 'Disabled' : 'Enabled';
-        const watcher = find($scope.watchers, (watcher) => watcher._id === id);
-        notify.info(`${status} watcher "${watcher._source.title}"`);
+        const status = $scope.watchers[index].disable ? 'Disabled' : 'Enabled';
+        const watcher = find($scope.watchers, (watcher) => watcher.id === id);
+        notify.info(`${status} watcher "${watcher.title}"`);
       })
       .catch(notify.error);
   };
@@ -146,8 +146,8 @@ function  WatchersController($rootScope, $scope, $route, $interval,
   * @param {string} id - watcher id.
   */
   $scope.toggleWatcher = function (id) {
-    const index = $scope.watchers.findIndex((watcher) => watcher._id === id);
-    $scope.watchers[index]._source.disable = !$scope.watchers[index]._source.disable;
+    const index = $scope.watchers.findIndex((watcher) => watcher.id === id);
+    $scope.watchers[index].disable = !$scope.watchers[index].disable;
     saveWatcher(index);
   };
 
@@ -177,7 +177,7 @@ function  WatchersController($rootScope, $scope, $route, $interval,
     return Script.list(field).then(function (_templates_) {
       if (_templates_.length) {
         forEach(_templates_, function (template) {
-          templates[field][template._id] = template;
+          templates[field][template.id] = template;
         });
       }
       return null;

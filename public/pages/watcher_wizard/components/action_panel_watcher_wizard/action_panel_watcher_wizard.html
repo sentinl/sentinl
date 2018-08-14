@@ -31,7 +31,7 @@
             <div class="col-md-12">
               <div class="form-group">
                 <uib-accordion close-others="actionPanelWatcherWizard.status.closeOthers">
-                  <div ng-repeat="(actionId, actionSettings) in actionPanelWatcherWizard.watcher._source.actions track by $index">
+                  <div ng-repeat="(actionId, actionSettings) in actionPanelWatcherWizard.watcher.actions track by $index">
                     <watcher-wizard-email-action
                       ng-if="actionPanelWatcherWizard.isAction(actionSettings, 'email')"
                       action-id="{{actionId}}"

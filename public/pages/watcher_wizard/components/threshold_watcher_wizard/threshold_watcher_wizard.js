@@ -36,7 +36,7 @@ class ThresholdWatcherWizard {
       show: this.wizardHelper.isSpyWatcher(this.watcher) || this.condition.show,
     };
 
-    this.$scope.$watch('thresholdWatcherWizard.watcher._source', () => {
+    this.$scope.$watch('thresholdWatcherWizard.watcher', () => {
       if (this.wizardHelper.isSpyWatcher(this.watcher)) {
         this.actions.show = this._isTitlePanelValid(this.watcher);
       } else {
@@ -72,8 +72,8 @@ class ThresholdWatcherWizard {
       }
     });
 
-    if (!get(this.watcher, '_source.wizard.chart_query_params') && !this.wizardHelper.isSpyWatcher(this.watcher)) {
-      this.watcher._source.wizard = {
+    if (!get(this.watcher, 'wizard.chart_query_params') && !this.wizardHelper.isSpyWatcher(this.watcher)) {
+      this.watcher.wizard = {
         chart_query_params: {
           timezoneName: get(this.sentinlConfig, 'es.timezone'), // Europe/Amsterdam
           timeField: get(this.sentinlConfig, 'es.timefield'),
@@ -82,7 +82,7 @@ class ThresholdWatcherWizard {
           over: get(this.sentinlConfig, 'wizard.condition.over'),
           last: get(this.sentinlConfig, 'wizard.condition.last'),
           interval: get(this.sentinlConfig, 'wizard.condition.interval'),
-          threshold: this._getThreshold(this.watcher._source.condition.script.script),
+          threshold: this._getThreshold(this.watcher.condition.script.script),
         }
       };
     }
@@ -96,10 +96,10 @@ class ThresholdWatcherWizard {
     };
 
     try {
-      const mappings = await this.watcherWizardEsService.getMapping(this.watcher._source.input.search.request.index);
+      const mappings = await this.watcherWizardEsService.getMapping(this.watcher.input.search.request.index);
       this.indexesData.fieldNames = this._getIndexFieldNames(mappings).sort();
     } catch (err) {
-      this.errorMessage(`get index "${this.watcher._source.input.search.request.index}" field names: ${err.message}`);
+      this.errorMessage(`get index "${this.watcher.input.search.request.index}" field names: ${err.toString()}`);
     }
   }
 
@@ -168,48 +168,48 @@ class ThresholdWatcherWizard {
   }
 
   async indexChange({index}) {
-    this.watcher._source.input.search.request.index = index;
+    this.watcher.input.search.request.index = index;
     this.actions.show = this._isTitlePanelValid(this.watcher);
     if (!this.wizardHelper.isSpyWatcher(this.watcher)) {
-      this.watcher._source.wizard.chart_query_params.index = index;
+      this.watcher.wizard.chart_query_params.index = index;
       try {
         const mappings = await this.watcherWizardEsService.getMapping(index);
         this.indexesData.fieldNames = this._getIndexFieldNames(mappings).sort();
       } catch (err) {
-        this.errorMessage(`get index "${index}" field names: ${err.message}`);
+        this.errorMessage(`get index "${index}" field names: ${err.toString()}`);
       }
     }
   }
 
   inputAdvChange({input, condition}) {
     if (input) {
-      this.watcher._source.input = input;
+      this.watcher.input = input;
     }
 
     if (condition) {
-      this.watcher._source.condition = condition;
+      this.watcher.condition = condition;
     }
   }
 
   scheduleChange(mode, text) {
-    this.watcher._source.wizard.chart_query_params.scheduleType = mode;
-    this.watcher._source.trigger.schedule.later = text;
+    this.watcher.wizard.chart_query_params.scheduleType = mode;
+    this.watcher.trigger.schedule.later = text;
   }
 
   conditionChange(condition) {
-    this.watcher._source.condition.script.script = condition;
+    this.watcher.condition.script.script = condition;
   }
 
   queryChange(body) {
-    this.watcher._source.input.search.request.body = body;
+    this.watcher.input.search.request.body = body;
   }
 
   actionAdd({actionId, actionSettings}) {
-    this.watcher._source.actions[actionId] = actionSettings;
+    this.watcher.actions[actionId] = actionSettings;
   }
 
   actionDelete({actionId}) {
-    delete this.watcher._source.actions[actionId];
+    delete this.watcher.actions[actionId];
   }
 
   _isWatcherValid() {
@@ -227,7 +227,7 @@ class ThresholdWatcherWizard {
   async _saveWatcherWizard({convertToAdvanced = false, clean = true} = {}) {
     try {
       if (convertToAdvanced) {
-        delete this.watcher._source.wizard.chart_query_params;
+        delete this.watcher.wizard.chart_query_params;
       }
 
       const id = await this.watcherService.save(this.watcher);
@@ -240,7 +240,7 @@ class ThresholdWatcherWizard {
       }
       this._cancelWatcherWizard();
     } catch (err) {
-      this.notify.error(err.message);
+      this.notify.error(err.toString());
     }
   }
 
@@ -249,17 +249,17 @@ class ThresholdWatcherWizard {
   }
 
   _isSchedule(watcher) {
-    const sched = get(watcher, '_source.trigger.schedule.later');
+    const sched = get(watcher, 'trigger.schedule.later');
     return sched && !!sched.length;
   }
 
   _isIndex(watcher) {
-    const index = get(watcher, '_source.input.search.request.index');
+    const index = get(watcher, 'input.search.request.index');
     return index && Array.isArray(index) && !!index.length;
   }
 
   _isTitle(watcher) {
-    const title = get(watcher, '_source.title');
+    const title = get(watcher, 'title');
     return title && !!title.length;
   }
 
@@ -283,7 +283,7 @@ class ThresholdWatcherWizard {
 
   errorMessage(err) {
     err = err || 'unknown error, bad implementation';
-    err = err.message || (isObject(err) ? JSON.stringify(err) : err);
+    err = err.toString();
     if (err.match(/(parsing_exception)|(illegal_argument_exception)|(index_not_found_exception)/)) {
       this._warning(err);
     } else {

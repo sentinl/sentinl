@@ -42,20 +42,20 @@
               <td class="col-md-2">
                 <a
                   ng-if="!wizardHelper.isWizardWatcher(watcher)"
-                  ng-href="#/watcher/raw/{{watcher._id}}/edit"
-                >{{watcher._source.title}}</a>
+                  ng-href="#/watcher/raw/{{watcher.id}}/edit"
+                >{{watcher.title}}</a>
                 <a
                   ng-if="wizardHelper.isWizardWatcher(watcher)"
-                  ng-href="#/watcher/{{watcher._id}}/wizard"
-                >{{watcher._source.title}}</a>
+                  ng-href="#/watcher/{{watcher.id}}/wizard"
+                >{{watcher.title}}</a>
               </td>
               <td class="col-md-2"
-                ng-show="watcher._source.trigger.schedule.later">
-                {{ watcher._source.trigger.schedule.later }}
+                ng-show="watcher.trigger.schedule.later">
+                {{ watcher.trigger.schedule.later }}
               </td>
-              <td class="col-md-2">{{watcher._source.input.search.request.index.join(',')}}</td>
+              <td class="col-md-2">{{watcher.input.search.request.index.join(',')}}</td>
               <td class="col-md-3">
-                <span ng-repeat="(id, settings) in watcher._source.actions">
+                <span ng-repeat="(id, settings) in watcher.actions">
                   <p>{{ settings.name }}</p>
                 </span>
               </td>
@@ -64,7 +64,7 @@
                   title="Raw Edit"
                   class="show-rule"
                   ng-if="!wizardHelper.isWizardWatcher(watcher)"
-                  ng-href="#/watcher/raw/{{watcher._id}}/edit"
+                  ng-href="#/watcher/raw/{{watcher.id}}/edit"
                 > advanced
                   <i class="fa fa-file-code-o"></i>
                 </a>
@@ -72,7 +72,7 @@
                   title="Wizard"
                   class="show-rule"
                   ng-if="wizardHelper.isWizardWatcher(watcher)"
-                  ng-href="#/watcher/{{watcher._id}}/wizard"
+                  ng-href="#/watcher/{{watcher.id}}/wizard"
                 > wizard
                   <i class="fa fa-magic"></i>
                 </a>
@@ -86,23 +86,23 @@
                 <a
                   title="Delete"
                   class="delete-rule"
-                  ng-click="deleteWatcher(watcher._id)"
+                  ng-click="deleteWatcher(watcher.id)"
                 >
                   <i class="fa fa-trash"></i>
                 </a>
                 <a
                   title="Disabled"
                   class="delete-rule"
-                  ng-click="toggleWatcher(watcher._id)"
-                  ng-show="watcher._source.disable"
+                  ng-click="toggleWatcher(watcher.id)"
+                  ng-show="watcher.disable"
                 >
                   <i class="fa fa-toggle-off"></i>
                 </a>
                 <a
                   title="Enabled"
                   class="delete-rule"
-                  ng-click="toggleWatcher(watcher._id)"
-                  ng-show="!watcher._source.disable"
+                  ng-click="toggleWatcher(watcher.id)"
+                  ng-show="!watcher.disable"
                 >
                   <i class="fa fa-toggle-on"></i>
                 </a>

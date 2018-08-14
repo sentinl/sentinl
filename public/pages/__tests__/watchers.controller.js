@@ -45,15 +45,15 @@ describe('watchersController', function () {
 
       sinon.stub(Watcher, 'list', () => {
         return Promise.resolve([
-          { _id: '123' },
-          { _id: '456' }
+          { id: '123' },
+          { id: '456' }
         ]);
       });
 
       sinon.stub(Script, 'list', () => {
         return Promise.resolve([
-          { _id: '123' },
-          { _id: '456' }
+          { id: '123' },
+          { id: '456' }
         ]);
       });
 
@@ -107,29 +107,4 @@ describe('watchersController', function () {
       $httpBackend.flush();
     });
   });
-
-  it('create new watcher', function (done) {
-    const watcher = {
-      _id: '123',
-      _type: 'sentinl-watcher',
-      _source: _.cloneDeep(EMAILWATCHERADVANCED)
-    };
-
-    sinon.stub(Watcher, 'new', () => {
-      return Promise.resolve(watcher);
-    });
-
-    $scope.newWatcher();
-
-    setTimeout(function () {
-      expect($location.path()).to.equal('/editor');
-
-      const watcherFromStorage = dataTransfer.getWatcher();
-      expect(watcherFromStorage._id).to.equal(watcher._id);
-      expect(_.isEqual(_.keys(watcherFromStorage._source).sort(), _.keys(watcher._source).sort())).to.be(true);
-
-      done();
-    });
-  });
-
 });
