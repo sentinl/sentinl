@@ -12,6 +12,7 @@ import ErrorAndLog from './messages/error_and_log';
 import WarningAndLog from './messages/warning_and_log';
 import SuccessAndLog from './messages/success_and_log';
 import { isKibi } from './helpers';
+import sirenFederateHelper from './siren/federate_helper';
 
 /**
 * Helper class to handle watchers
@@ -336,15 +337,13 @@ export default class WatcherHandler {
     if (!isEmpty(this.getActions(task._source.actions))) {
       this.log.info('executing');
 
-      let sirenFederateAvailable = false;
+      let method = 'search';
       try {
-        const elasticsearchPlugins = this.server.config().get('investigate_core.clusterplugins');
-        if (elasticsearchPlugins && (elasticsearchPlugins.indexOf('siren-vanguard') > -1 ||
-            elasticsearchPlugins.indexOf('siren-federate') > -1)) {
-          sirenFederateAvailable = true;
+        if (sirenFederateHelper.federateIsAvailable(this.server)) {
+          method = sirenFederateHelper.getClientMethod(this.client);
         }
       } catch (err) {
-        this.log.warning('"elasticsearch.plugins" not available when running from kibana');
+        this.log.warning('Siren federate: "elasticsearch.plugins" is not available when running from kibana: ' + err.toString());
       }
 
       const actions = this.getActions(task._source.actions);
@@ -357,16 +356,6 @@ export default class WatcherHandler {
       }
       if (!condition) {
         throw new Error('condition is malformed');
-      }
-
-      let method = 'search';
-      if (sirenFederateAvailable) {
-        for (let candidate of ['investigate_search', 'kibi_search', 'vanguard_search', 'search']) {
-          if (this.client[candidate]) {
-            method = candidate;
-            break;
-          }
-        }
       }
 
       try {
