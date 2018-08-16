@@ -1,4 +1,4 @@
-import {isObject, forEach, has, cloneDeep} from 'lodash';
+import { assign, isObject, forEach, has, cloneDeep } from 'lodash';
 import uuid from 'uuid/v4';
 import SavedObjects from '../saved_objects';
 
@@ -100,12 +100,13 @@ class Watcher extends SavedObjects {
       try {
         return await watcher.save();
       } catch (err) {
-        throw new Error(`fail to save watcher, ${err}`);
+        throw new Error('Watcher save: ', err.toString());
       }
     }
 
     try {
       const savedWatcher = await this.savedObjects.get(watcher.id);
+      assign(savedWatcher, watcher);
       return await savedWatcher.save();
     } catch (err) {
       throw new Error('Watcher save: ' + err.toString());
