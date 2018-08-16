@@ -1,5 +1,3 @@
-import Promise from 'bluebird';
-import path from 'path';
 const {readdirSync, chmodSync, lstatSync} = require('fs');
 const {join} = require('path');
 

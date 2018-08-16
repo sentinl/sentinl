@@ -15,7 +15,7 @@ class SavedObjects {
   * @param {object} ServerConfig service
   * @param {object} type of worker (script or watcher)
   */
-  constructor($http, $injector, Promise, ServerConfig, type) {
+  constructor($http, $injector, Promise, ServerConfig, type, sentinlHelper) {
     this.$http = $http;
     this.$injector = $injector;
     this.type = type;
@@ -24,6 +24,7 @@ class SavedObjects {
     // Kibi: inject saved objects api related modules if they exist.
     this.savedObjects = {};
     this.isSiren = isObject(this.savedObjectsAPI);
+    this.sentinlHelper = sentinlHelper;
   }
 
   /**
@@ -36,7 +37,7 @@ class SavedObjects {
     try {
       return await this.savedObjects.get(id);
     } catch (err) {
-      throw new Error('SavedObjects get: ' + err.toString());
+      throw new Error(this.sentinlHelper.apiErrMsg(err, 'SavedObjects get'));
     }
   }
 
@@ -60,7 +61,7 @@ class SavedObjects {
 
       return res.hits;
     } catch (err) {
-      throw new Error('SavedObjects list: ' + err.toString());
+      throw new Error(this.sentinlHelper.apiErrMsg(err, 'SavedObjects list'));
     }
   }
 
@@ -76,7 +77,7 @@ class SavedObjects {
       await this.savedObjects.delete(id);
       return id;
     } catch (err) {
-      throw new Error('SavedObjects delete: ' + err.toString());
+      throw new Error(this.sentinlHelper.apiErrMsg(err, 'SavedObjects delete'));
     }
   }
 
@@ -85,7 +86,7 @@ class SavedObjects {
       const resp = await this.$http.post('../api/sentinl/hash', { text });
       return resp.data.sha;
     } catch (err) {
-      throw new Error('SavedObjects hash text: ' + err.toString());
+      throw new Error(this.sentinlHelper.apiErrMsg(err, 'SavedObjects hash text'));
     }
   }
 }

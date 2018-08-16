@@ -62,16 +62,27 @@ const init = once(function (server) {
   log.info('initializing ...');
 
   try {
-    server.expose('chrome_path', getChromePath());
+    if (config.settings.report.puppeteer.browser_path) {
+      server.expose('chrome_path', config.settings.report.puppeteer.browser_path);
+    } else {
+      server.expose('chrome_path', getChromePath());
+    }
+    log.info('Chrome bin found at: ' + server.plugins.sentinl.chrome_path);
   } catch (err) {
     log.error('setting puppeteer report engine: ' + err.toString());
   }
 
-  installPhantomjs().then((pkg) => {
-    server.expose('phantomjs_path', pkg.binary);
-  }).catch((err) => {
-    log.error('setting horseman report engines: ' + err.toString());
-  });
+  if (config.settings.report.horseman.browser_path) {
+    server.expose('phantomjs_path', config.settings.report.horseman.browser_path);
+    log.info('PhantomJS bin found at: ' + server.plugins.sentinl.phantomjs_path);
+  } else {
+    installPhantomjs().then((pkg) => {
+      server.expose('phantomjs_path', pkg.binary);
+      log.info('PhantomJS bin found at: ' + server.plugins.sentinl.phantomjs_path);
+    }).catch((err) => {
+      log.error('setting horseman report engines: ' + err.toString());
+    });
+  }
 
   // Object to hold different runtime values.
   server.sentinlStore = {

@@ -44,6 +44,7 @@ export default async function puppeteerReport({
       devtools: chromeDevtools,
       ignoreHTTPSErrors,
       args: chromeArgs,
+      executablePath: browserPath,
     });
 
     page = await browser.newPage();

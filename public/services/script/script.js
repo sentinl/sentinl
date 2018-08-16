@@ -13,8 +13,8 @@ class Script extends SavedObjects {
   * @param {object} Promise
   * @param {object} ServerConfig service
   */
-  constructor($http, $injector, Promise, ServerConfig) {
-    super($http, $injector, Promise, ServerConfig, 'script');
+  constructor($http, $injector, Promise, ServerConfig, sentinlLog) {
+    super($http, $injector, Promise, ServerConfig, 'script', sentinlLog);
     this.$http = $http;
     this.$injector = $injector;
     this.ServerConfig = ServerConfig;
@@ -41,7 +41,7 @@ class Script extends SavedObjects {
       const script = await this.savedObjects.get();
       return await script.save();
     } catch (err) {
-      throw new Error('Script new: ' + err.toString());
+      throw new Error(this.sentinlHelper.apiErrMsg(err, 'Script new'));
     }
   }
 }

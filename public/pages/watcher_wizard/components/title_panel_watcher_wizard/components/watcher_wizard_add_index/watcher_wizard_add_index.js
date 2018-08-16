@@ -28,8 +28,8 @@ class WatcherWizardAddIndex {
       let indexes = await this.watcherWizardEsService.getAllIndexes();
       return this._filterIndexesByNamePrefix(indexes, this.selected);
     } catch (err) {
-      this.notify(err.toString());
-      this.log.error(err.toString());
+      this.notify('get index names: ' + err.toString());
+      this.log.error('get index names: ' + err.toString());
     }
   }
 

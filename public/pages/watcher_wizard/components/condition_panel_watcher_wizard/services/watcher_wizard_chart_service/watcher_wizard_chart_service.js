@@ -1,11 +1,10 @@
 import { get } from 'lodash';
 
 class WatcherWizardChartService {
-  constructor($http, API, sentinlLog) {
+  constructor($http, API, sentinlHelper) {
     this.$http = $http;
     this.API = API.WATCHER_EDIT;
-    this.log = sentinlLog;
-    this.log.initLocation('WatcherWizardChartService');
+    this.sentinlHelper = sentinlHelper;
   }
 
   async _query({ queryType = 'count', index = [], query }) {
@@ -19,12 +18,7 @@ class WatcherWizardChartService {
         query,
       });
     } catch (err) {
-      err = get(err, 'data.message') || err.toString();
-      if (err.includes('index_not_found_exception')) {
-        this.log.warn(err);
-      } else {
-        throw new Error(`ChartService fetch data for ${queryType}: ` + err);
-      }
+      throw new Error(this.sentinlHelper.apiErrMsg(err, `ChartService fetch data for ${queryType}`));
     }
   }
 

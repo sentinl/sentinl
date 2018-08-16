@@ -1,4 +1,4 @@
-import { assign, isObject, forEach, has, cloneDeep } from 'lodash';
+import { get, assign, isObject, forEach, has, cloneDeep } from 'lodash';
 import uuid from 'uuid/v4';
 import SavedObjects from '../saved_objects';
 
@@ -15,7 +15,7 @@ class Watcher extends SavedObjects {
   * @param {object} ServerConfig service
   */
   constructor($http, $injector, Promise, ServerConfig, sentinlHelper, EMAILWATCHERADVANCED, EMAILWATCHERWIZARD, REPORTWATCHER) {
-    super($http, $injector, Promise, ServerConfig, 'watcher');
+    super($http, $injector, Promise, ServerConfig, 'watcher', sentinlHelper);
     this.EMAILWATCHERADVANCED = EMAILWATCHERADVANCED;
     this.EMAILWATCHERWIZARD = EMAILWATCHERWIZARD;
     this.REPORTWATCHER = REPORTWATCHER;
@@ -50,7 +50,7 @@ class Watcher extends SavedObjects {
       });
       return resp.data;
     } catch (err) {
-      throw new Error('Watcher play: ' + err.toString());
+      throw new Error(this.sentinlHelper.apiErrMsg(err, 'Watcher play'));
     }
   }
 
@@ -85,7 +85,7 @@ class Watcher extends SavedObjects {
 
       return await this.savedObjects.get();
     } catch (err) {
-      throw new Error('Watcher new: ' + err.toString());
+      throw new Error(this.sentinlHelper.apiErrMsg(err, 'Watcher new'));
     }
   }
 
@@ -100,7 +100,7 @@ class Watcher extends SavedObjects {
       try {
         return await watcher.save();
       } catch (err) {
-        throw new Error('Watcher save: ', err.toString());
+        throw new Error(this.sentinlHelper.apiErrMsg(err, 'Watcher save'));
       }
     }
 
@@ -109,7 +109,7 @@ class Watcher extends SavedObjects {
       assign(savedWatcher, watcher);
       return await savedWatcher.save();
     } catch (err) {
-      throw new Error('Watcher save: ' + err.toString());
+      throw new Error(this.sentinlHelper.apiErrMsg(err, 'Watcher save'));
     }
   }
 }
