@@ -33,17 +33,31 @@ Send Query results and message via Email/SMTP using HTML body
 ```
 
 #### webHook
-Deliver message to remote web API
+Deliver a POST request to a remote web API
 ```json
    "webhook" : {
 	   "method" : "POST", 
 	   "host" : "remote.server", 
 	   "port" : 9200, 
-	   "path": ":/{{payload.watcher_id}}", 
-	   "body" : "{{payload.watcher_id}}:{{payload.hits.total}}",
-           "create_alert" : true
+	   "path" : "/{{payload.watcher_id}}", 
+	   "body" : "{{payload.watcher_id}}:{{payload.hits.total}}"
 	  }
 ```
+
+Deliver a GET request to a remote web API
+```json
+   "webhook" : {
+	   "method" : "GET", 
+	   "host" : "remote.server", 
+	   "port" : 9200, 
+	   "path" : "/trigger", 
+	   "params" : {
+	     "watcher": "{{watcher.title}}",
+	     "query_count": "{{payload.hits.total}}"
+	   }
+	  }
+```
+
 #### webHook via Proxy
 Deliver message to remote API via Proxy - Telegram example:
 ```json
@@ -55,8 +69,7 @@ Deliver message to remote API via Proxy - Telegram example:
           "body": "chat_id={chatId}&text=Count+total+hits:%20{{payload.hits.total}}",
           "headers": {
             "Content-Type": "application/x-www-form-urlencoded"
-          },
-          "create_alert" : true
+          }
         }
 ```
 

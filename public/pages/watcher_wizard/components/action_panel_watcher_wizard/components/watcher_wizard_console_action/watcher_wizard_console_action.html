@@ -1,6 +1,6 @@
 <div uib-accordion-group class="panel-default" is-open="watcherWizardConsoleAction.status.isOpen">
   <uib-accordion-heading>
-    <i class="fa fa-envelope"></i> {{watcherWizardConsoleAction.type}} action: {{watcherWizardConsoleAction.actionSettings.name}} <i class="pull-right glyphicon"
+    <i class="fa fa-terminal"></i> {{watcherWizardConsoleAction.type}} action: {{watcherWizardConsoleAction.actionSettings.name}} <i class="pull-right glyphicon"
     ng-class="{'glyphicon-chevron-down': watcherWizardConsoleAction.status.isOpen, 'glyphicon-chevron-right': !watcherWizardConsoleAction.status.isOpen}"></i>
   </uib-accordion-heading>
   <form name="{{watcherWizardConsoleAction.getTagId()}}.form" ng-model-options="{ getterSetter: true }" novalidate>
@@ -79,7 +79,7 @@
         <div class="form-group">
           <mustache-template-input
             content="watcherWizardConsoleAction.actionSettings.console.message"
-            injected-data="{payload: {hits: {total: 10}}, watcher: watcherWizardConsoleAction.watcher._source}"
+            injected-data="{payload: {hits: {total: 10}}, watcher: watcherWizardConsoleAction.watcher}"
             ace-options="watcherWizardConsoleAction.aceOptions({maxLines: 30})"
           >The query result and watcher information are provided in the <code>payload</code> and <code>watcher</code> variables and uses <a target="_blank" href="https://mustache.github.io/mustache.5.html">Mustache syntax</a>.</mustache-template-input>
         </div>

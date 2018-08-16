@@ -18,6 +18,7 @@
  */
 
 import fs from 'fs';
+import querystring from 'querystring';
 import _ from 'lodash';
 import { assign, pick, isObject } from 'lodash';
 import url from 'url';
@@ -456,36 +457,44 @@ export default function (server, actions, payload, task) {
       (async () => {
         try {
           // Log Alarm Event
-          if (action.webhook.create_alert && payload.constructor === Object && Object.keys(payload).length) {
-            if (!action.webhook.stateless) {
-              await logHistory({
-                server,
-                watcherTitle: task._source.title,
-                actionName,
-                message:  toString(action.webhook.message),
-                level: action.webhook.priority,
-                payload: !task._source.save_payload ? {} : payload,
-              });
-            }
+          if (!action.webhook.stateless && payload.constructor === Object && Object.keys(payload).length) {
+            await logHistory({
+              server,
+              watcherTitle: task._source.title,
+              actionName,
+              message: toString(action.webhook.message),
+              level: action.webhook.priority,
+              payload: !task._source.save_payload ? {} : payload,
+            });
           }
 
           const http = action.webhook.use_https ? require('https') : require('http');
+          const templateData = {
+            payload: payload,
+            watcher: task._source
+          };
           let options;
           let req;
 
           options = {
             hostname: action.webhook.host ? action.webhook.host : 'localhost',
             port: action.webhook.port ? action.webhook.port : 80,
-            path: action.webhook.path ? action.webhook.path : '/',
             method: action.webhook.method ? action.webhook.method : 'GET',
             headers: action.webhook.headers ? action.webhook.headers : {},
-            auth: action.webhook.auth ? action.webhook.auth : undefined
+            auth: action.webhook.auth ? action.webhook.auth : undefined,
+            path: mustache.render(action.webhook.path, templateData)
           };
 
-          let dataToWrite = action.webhook.body ? mustache.render(action.webhook.body, {
-            payload: payload,
-            watcher: task._source
-          }) : action.webhook.params;
+          if (options.method === 'GET' && action.webhook.params) {
+            const params = {};
+            for (const [param, value] of Object.entries(action.webhook.params)) {
+              params[param] = mustache.render(value, templateData);
+            }
+            options.path += '?' + querystring.stringify(params);
+          }
+
+          const dataToWrite = (options.method !== 'GET' && action.webhook.body) ?
+            mustache.render(action.webhook.body, templateData) : undefined;
           if (dataToWrite) {
             options.headers['Content-Length'] = Buffer.byteLength(dataToWrite);
           }

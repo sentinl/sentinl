@@ -60,7 +60,31 @@ class WatcherWizardAddAction {
           stateless: false,
         },
       },
-
+      Webhook: {
+        name: 'Webhook',
+        throttle_period: '1m',
+        webhook: {
+          priority: 'low',
+          stateless: false,
+          method: 'POST',
+          host: '',
+          port: '80',
+          path: '',
+          body: JSON.stringify({
+            watcher: '{{watcher.title}}',
+            payload_count: '{{payload.hits.total}}'
+          }, null, 2),
+          params: {
+            watcher: '{{watcher.title}}',
+            payload_count: '{{payload.hits.total}}'
+          },
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          auth: '',
+          message: ''
+        },
+      }
     };
     this.actionTypes = Object.keys(this.actions);
   }

@@ -258,7 +258,8 @@ export default function (kibana) {
             host: Joi.string(),
             port: Joi.number(),
             path: Joi.string().default(':/{{payload.watcher_id}'),
-            body: Joi.string().default('{{payload.watcher_id}}{payload.hits.total}}')
+            body: Joi.string().default('{{payload.watcher_id}}{payload.hits.total}}'),
+            params: Joi.object()
           }).default(),
           report: Joi.object({
             action: Joi.object({
