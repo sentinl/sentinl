@@ -539,9 +539,9 @@ export default function (server, actions, payload, task) {
         try {
           let message;
           let esFormatter;
-          esFormatter = action.local.message ? action.local.message : '{{ payload }}';
+          esFormatter = action.elastic.message || '{{payload}}';
           message = mustache.render(esFormatter, {payload: payload, watcher: task._source});
-          priority = action.local.priority || 'medium';
+          priority = action.elastic.priority || 'medium';
           log.debug(`logged message to elastic: ${message}`);
           // Log Event
           await logHistory({

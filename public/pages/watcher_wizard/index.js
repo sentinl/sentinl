@@ -25,6 +25,7 @@ import './components/action_panel_watcher_wizard/components/watcher_wizard_email
 import './components/action_panel_watcher_wizard/components/watcher_wizard_report_action';
 import './components/action_panel_watcher_wizard/components/watcher_wizard_console_action';
 import './components/action_panel_watcher_wizard/components/watcher_wizard_webhook_action';
+import './components/action_panel_watcher_wizard/components/watcher_wizard_elastic_action';
 import './components/impersonation_panel_watcher_wizard';
 import './components/input_advanced_panel_watcher_wizard';
 

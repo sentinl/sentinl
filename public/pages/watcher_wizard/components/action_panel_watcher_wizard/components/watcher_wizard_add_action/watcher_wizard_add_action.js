@@ -84,7 +84,15 @@ class WatcherWizardAddAction {
           auth: '',
           message: ''
         },
-      }
+      },
+      Elastic: {
+        name: 'Elasticsearch alarm',
+        throttle_period: '1s',
+        elastic: {
+          priority: 'low',
+          stateless: false,
+        },
+      },
     };
     this.actionTypes = Object.keys(this.actions);
   }
