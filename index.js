@@ -289,7 +289,7 @@ export default function (kibana) {
               }).default(),
             }).default(),
             active: Joi.boolean().default(true),
-            engine: Joi.string().default('puppeteer'), // puppeteer, horseman
+            engine: Joi.string().default('horseman'), // puppeteer, horseman
             executable_path: Joi.any().forbidden().error(new Error(
               'Option "report.executable_path" was deprecated. The path is handled automatically!'
             )),
