@@ -1,5 +1,6 @@
+/*global later:false*/
 import moment from 'moment';
-import later from 'later';
+import 'later/later';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 

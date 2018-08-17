@@ -16,7 +16,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import later from 'later';
+/*global later:false*/
+import 'later/later';
 import { once, has, forEach, includes } from 'lodash';
 import url from 'url';
 import path from 'path';

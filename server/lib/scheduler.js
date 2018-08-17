@@ -16,9 +16,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+/*global later:false*/
 import { has, forEach, difference, map, keys, isObject, isEmpty, assign } from 'lodash';
-import later from 'later';
+import 'later/later';
 import getConfiguration from './get_configuration';
 import WatcherHandler from './watcher_handler';
 import WatcherWizardHandler from './watcher_wizard_handler';

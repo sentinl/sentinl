@@ -1,6 +1,6 @@
-/* global angular */
+/* global angular, later:false */
 import moment from 'moment-timezone';
-import later from 'later';
+import 'later/later';
 
 /*
 * Get the next occurence of from the 'later' lib text schedule
