@@ -1,10 +1,29 @@
-<ul class="fa-ul">
-  <li>
-    <i class="fa fa-magic"></i>
-    <a title="New Watcher" ng-href="#/watcher/wizard/new">Watcher Wizard</a>
-  </li>
-  <li>
-    <i class="fa fa-file-code-o"></i>
-    <a title="New Watcher" ng-href="#/watcher/raw/advanced/new">Watcher Advanced</a>
-  </li>
-</ul>
+<div class="kuiCardGroup" role="group">
+  <div class="kuiCard euiPanel" style="flex: 0 0 250px">
+    <div class="kuiCard__description">
+      <div class="kuiCard__descriptionTitle" role="heading"><span class="fa fa-magic fa-4x"></span>
+        <p>Wizard</p>
+      </div>
+      <div class="kuiCard__descriptionText">Guided Wizard to create Timeseries Alerts</div>
+    </div>
+    <div class="kuiCard__footer">
+      <a class="kuiButton kuiButton--primary" href="#/watcher/wizard/new">
+        <span class="kuiButton__inner ">Watcher Wizard</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="kuiCard euiPanel " style="flex: 0 0 250px">
+    <div class="kuiCard__description ">
+      <div class="kuiCard__descriptionTitle " role="heading"><span class="fa fa-file-code-o fa-4x "></span>
+        <p>Advanced</p>
+      </div>
+      <div class="kuiCard__descriptionText ">Advanced Watcher editor, ideal when You are the Wizard</div>
+    </div>
+    <div class="kuiCard__footer ">
+      <a class="kuiButton kuiButton--primary " href="#/watcher/raw/advanced/new ">
+        <span class="kuiButton__inner">Watcher Advanced</span>
+      </a>
+    </div>
+  </div>
+</div>
