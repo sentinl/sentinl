@@ -6,9 +6,10 @@ import Alarm from '../alarm/alarm';
 
 class Report extends Alarm {
 
-  constructor($http) {
+  constructor($http, sentinlHelper) {
     super($http);
     this.$http = $http;
+    this.sentinlHelper = sentinlHelper;
   }
 
   /**
@@ -16,7 +17,7 @@ class Report extends Alarm {
   */
   list() {
     return this.$http.get('../api/sentinl/list/reports').catch(function (err) {
-      throw new Error('Report list: ' + err.toString());
+      throw new Error(this.sentinlHelper.apiErrMsg(err, 'Report list'));
     });
   };
 };

@@ -312,11 +312,13 @@ export default function (kibana) {
             }).default(),
             ignore_https_errors: Joi.boolean().default(true),
             puppeteer: Joi.object({
+              browser_path: Joi.string(),
               chrome_args: Joi.array().default(['--no-sandbox', '--disable-setuid-sandbox']),
               chrome_headless: Joi.boolean().default(true),
               chrome_devtools: Joi.boolean().default(false),
             }).default(),
             horseman: Joi.object({
+              browser_path: Joi.string(),
               phantom_bluebird_debug: Joi.boolean().default(false),
             }).default(),
             search_guard: Joi.any().forbidden().error(new Error(

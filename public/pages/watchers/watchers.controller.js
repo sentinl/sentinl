@@ -6,7 +6,7 @@ import ace from 'ace';
 
 // WATCHERS CONTROLLER
 function  WatchersController($rootScope, $scope, $route, $interval,
-  $timeout, timefilter, Private, createNotifier, $window, $http, $uibModal, $log, navMenu,
+  $timeout, timefilter, Private, createNotifier, $window, $http, $uibModal, sentinlLog, navMenu,
   globalNavState, $location, dataTransfer, Watcher, User, Script, Promise, COMMON, confirmModal, wizardHelper) {
   'ngInject';
 
@@ -16,6 +16,13 @@ function  WatchersController($rootScope, $scope, $route, $interval,
   const notify = createNotifier({
     location: COMMON.watchers.title,
   });
+  const log = sentinlLog;
+  log.initLocation(COMMON.watchers.title);
+
+  function errorMessage(err) {
+    log.error(err);
+    notify.error(err);
+  }
 
   $scope.topNavMenu = navMenu.getTopNav('watchers');
   $scope.tabsMenu = navMenu.getTabs();
@@ -38,7 +45,7 @@ function  WatchersController($rootScope, $scope, $route, $interval,
         notify.info('watcher executed');
       }
     } catch (err) {
-      notify.error(err.toString());
+      errorMessage(err);
     }
   };
 
@@ -78,7 +85,7 @@ function  WatchersController($rootScope, $scope, $route, $interval,
   const listWatchers = async function () {
     return Watcher.list().then(function (resp) {
       $scope.watchers = resp;
-    }).catch(notify.error).then(function () {
+    }).catch(errorMessage).then(function () {
       importWatcherFromLocalStorage();
     });
   };
@@ -110,10 +117,10 @@ function  WatchersController($rootScope, $scope, $route, $interval,
           await User.delete(user.id);
           notify.info(`deleted user ${user.id}`);
         } catch (err) {
-          $log.warn(err.toString());
+          log.warn(err.toString());
         }
       } catch (err) {
-        notify.error(`fail to delete watcher: ${err.toString()}`);
+        errorMessage(err);
       }
     }
 
@@ -137,7 +144,7 @@ function  WatchersController($rootScope, $scope, $route, $interval,
         const watcher = find($scope.watchers, (watcher) => watcher.id === id);
         notify.info(`${status} watcher "${watcher.title}"`);
       })
-      .catch(notify.error);
+      .catch(errorMessage);
   };
 
   /**
@@ -159,7 +166,7 @@ function  WatchersController($rootScope, $scope, $route, $interval,
   $scope.newWatcher = function (type) {
     Watcher.new(type)
       .then((watcher) => $scope.editWatcher(watcher, 'editor'))
-      .catch(notify.error);
+      .catch(errorMessage);
   };
 
   const templates = {
@@ -185,7 +192,7 @@ function  WatchersController($rootScope, $scope, $route, $interval,
   }).then(function () {
     dataTransfer.setTemplates(templates);
     return null;
-  }).catch(notify.error);
+  }).catch(errorMessage);
 
   const currentTime = moment($route.current.locals.currentTime);
   $scope.currentTime = currentTime.format('HH:mm:ss');

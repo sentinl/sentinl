@@ -4,8 +4,8 @@ import SavedObjects from '../saved_objects';
 
 class User extends SavedObjects {
 
-  constructor($http, $injector, Promise, ServerConfig, sentinlLog) {
-    super($http, $injector, Promise, ServerConfig, 'user');
+  constructor($http, $injector, Promise, ServerConfig, sentinlLog, sentinlHelper) {
+    super($http, $injector, Promise, ServerConfig, 'user', sentinlHelper);
     this.$injector = $injector;
     // Siren: inject saved objects api related modules if they exist.
     this.savedUsersKibana = this.$injector.has('savedUsersKibana') ? this.$injector.get('savedUsersKibana') : null;
@@ -18,6 +18,7 @@ class User extends SavedObjects {
     }
     this.log = sentinlLog;
     this.log.initLocation('User');
+    this.sentinlHelper = sentinlHelper;
   }
 
   /**
@@ -39,7 +40,7 @@ class User extends SavedObjects {
       }
       return await user.save();
     } catch (err) {
-      throw new Error(`create new user "${username}" for watcher "${id}": ${err.toString() || err.statusText}`);
+      throw new Error(this.sentinlHelper.apiErrMsg(err, 'User new'));
     }
   }
 
@@ -57,7 +58,7 @@ class User extends SavedObjects {
       if (err.status === 404) {
         this.log.warn(`user "${id}" was not found`);
       } else {
-        throw new Error(`get username of "${id}": ${err.toString() || err.statusText}`);
+        throw new Error(this.sentinlHelper.apiErrMsg(err, 'User username'));
       }
     }
   }

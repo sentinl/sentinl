@@ -4,7 +4,7 @@ import { get, has, forEach, keys, isObject, isEmpty, includes, union } from 'lod
 
 class ThresholdWatcherWizard {
   constructor($scope, $window, kbnUrl, sentinlLog, confirmModal, createNotifier,
-    Watcher, User, wizardHelper, watcherWizardEsService, sentinlConfig) {
+    Watcher, User, wizardHelper, watcherWizardEsService, sentinlConfig, sentinlHelper) {
     this.$scope = $scope;
     this.watcher = this.watcher || this.$scope.watcher;
 
@@ -16,6 +16,7 @@ class ThresholdWatcherWizard {
     this.wizardHelper = wizardHelper;
     this.watcherWizardEsService = watcherWizardEsService;
     this.sentinlConfig = sentinlConfig;
+    this.sentinlHelper = sentinlHelper;
 
     this.locationName = 'ThresholdWatcherWizard';
 
@@ -231,6 +232,8 @@ class ThresholdWatcherWizard {
       }
 
       const id = await this.watcherService.save(this.watcher);
+      this.notify.info('watcher saved: ' + id);
+
       if (this.watcher.username && this.watcher.password) {
         await this.userService.new(id, this.watcher.username, this.watcher.password);
       }
@@ -240,7 +243,7 @@ class ThresholdWatcherWizard {
       }
       this._cancelWatcherWizard();
     } catch (err) {
-      this.notify.error(err.toString());
+      this.errorMessage(err);
     }
   }
 
@@ -283,7 +286,7 @@ class ThresholdWatcherWizard {
 
   errorMessage(err) {
     err = err || 'unknown error, bad implementation';
-    err = err.toString();
+    err = this.sentinlHelper.apiErrMsg(err);
     if (err.match(/(parsing_exception)|(illegal_argument_exception)|(index_not_found_exception)/)) {
       this._warning(err);
     } else {

@@ -1,5 +1,5 @@
 import { isObject, stripObjectPropertiesByNameRegex } from '../../lib/sentinl_helper';
-import { pick, omit } from 'lodash';
+import { get, pick, omit } from 'lodash';
 
 const WATCHER_SRC_FIELDS = [
   'actions', 'input', 'condition', 'transform', 'trigger', 'disable', 'report', 'title', 'wizard',
@@ -19,6 +19,13 @@ class SentinlHelper {
 
   omitWatcherSource(watcher, fields = WATCHER_SRC_FIELDS) {
     return omit(watcher, fields);
+  }
+
+  apiErrMsg(err, msg) {
+    if (msg) {
+      return msg + ': ' + (err.message || get(err, 'data.message') || err.toString());
+    }
+    return err.message || get(err, 'data.message') || err.toString();
   }
 }
 

@@ -51,7 +51,7 @@ class WatcherAdvanced {
         };
         this.confirmModal('Save this watcher?', confirmModalOptions);
       } catch (err) {
-        this.notify.error(`watcher syntax is invalid: ${err.toString()}`);
+        this.errorMessage(`watcher syntax is invalid: ${err.toString()}`);
       }
     });
   }
@@ -64,18 +64,26 @@ class WatcherAdvanced {
     try {
       assign(this.watcher, angular.fromJson(this.watcherSourceText));
       const id = await this.watcherService.save(this.watcher);
+      this.notify.info('watcher saved: ' + id);
+
       if (this.watcher.username && this.watcher.password) {
         await this.userService.new(id, this.watcher.username, this.watcher.password);
       }
+
       this._cleanWatcher(this.watcher);
       this._cancelWatcherEditor();
     } catch (err) {
-      this.notify.error(`fail to save watcher: ${err.toString()}`);
+      this.errorMessage(err);
     }
   }
 
   _cleanWatcher(watcher) {
     delete watcher.password;
+  }
+
+  errorMessage(err) {
+    this.log.error(err);
+    this.notify.error(err);
   }
 
   aceConfig(mode = 'json', maxLines = 50, minLines = 30) {

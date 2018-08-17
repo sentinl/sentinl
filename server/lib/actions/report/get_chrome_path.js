@@ -1,10 +1,17 @@
 import path from 'path';
 import { chmodSync } from 'fs';
 import { listAllFilesSync } from '../../helpers';
+import os from 'os';
 
 export default function getChromePath() {
   let chromePath = path.join(__dirname, '../../../../node_modules/puppeteer/.local-chromium');
-  chromePath = listAllFilesSync(chromePath).filter((f) => f.split('/').pop() === 'chrome');
+
+  let binName = 'chrome';
+  if (os.platform() === 'darwin') {
+    binName = 'Chromium';
+  }
+
+  chromePath = listAllFilesSync(chromePath).filter((f) => f.split('/').pop() === binName);
 
   if (chromePath.length !== 1) {
     throw new Error('puppeter chrome was not found');
