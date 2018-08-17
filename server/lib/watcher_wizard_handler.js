@@ -83,11 +83,11 @@ export default class WatcherWizardHandler extends WatcherHandler {
   */
   async execute(task) {
     try {
-      const {method, request, condition, transform, actions} = this._checkWatcher(task);
+      const {method, search, condition, transform, actions} = this._checkWatcher(task);
       if (this.config.settings.authentication.impersonate || task._source.impersonate) {
         this.client = await this.getImpersonatedClient(task._id);
       }
-      return await this._execute(task, method, request, condition, transform, actions);
+      return await this._execute(task, method, search.request, condition, transform, actions);
     } catch (err) {
       logHistory({
         server: this.server,
