@@ -16,13 +16,13 @@ describe('watchersController', function () {
   let Script;
   let Promise;
   let dataTransfer;
-  let EMAILWATCHER;
+  let EMAILWATCHERADVANCED;
 
   const init = function (done) {
     ngMock.module('kibana');
 
     ngMock.inject(function ($rootScope, $controller, _$location_, _$httpBackend_, _$route_, _Watcher_,
-      _Script_, _dataTransfer_, _Promise_, _EMAILWATCHER_) {
+      _Script_, _dataTransfer_, _Promise_, _EMAILWATCHERADVANCED_) {
       $scope = $rootScope;
       $route = _$route_;
       $location = _$location_;
@@ -31,7 +31,7 @@ describe('watchersController', function () {
       Script = _Script_;
       dataTransfer = _dataTransfer_;
       Promise = _Promise_;
-      EMAILWATCHER = _EMAILWATCHER_;
+      EMAILWATCHERADVANCED = _EMAILWATCHERADVANCED_;
 
       $httpBackend.when('GET', '../api/sentinl/config').respond(200, {
         es: {
@@ -45,15 +45,15 @@ describe('watchersController', function () {
 
       sinon.stub(Watcher, 'list', () => {
         return Promise.resolve([
-          { _id: '123' },
-          { _id: '456' }
+          { id: '123' },
+          { id: '456' }
         ]);
       });
 
       sinon.stub(Script, 'list', () => {
         return Promise.resolve([
-          { _id: '123' },
-          { _id: '456' }
+          { id: '123' },
+          { id: '456' }
         ]);
       });
 
@@ -107,29 +107,4 @@ describe('watchersController', function () {
       $httpBackend.flush();
     });
   });
-
-  it('create new watcher', function (done) {
-    const watcher = {
-      _id: '123',
-      _type: 'sentinl-watcher',
-      _source: _.cloneDeep(EMAILWATCHER)
-    };
-
-    sinon.stub(Watcher, 'new', () => {
-      return Promise.resolve(watcher);
-    });
-
-    $scope.newWatcher();
-
-    setTimeout(function () {
-      expect($location.path()).to.equal('/editor');
-
-      const watcherFromStorage = dataTransfer.getWatcher();
-      expect(watcherFromStorage._id).to.equal(watcher._id);
-      expect(_.isEqual(_.keys(watcherFromStorage._source).sort(), _.keys(watcher._source).sort())).to.be(true);
-
-      done();
-    });
-  });
-
 });

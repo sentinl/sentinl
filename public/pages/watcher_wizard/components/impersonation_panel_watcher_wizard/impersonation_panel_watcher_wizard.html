@@ -1,0 +1,61 @@
+<section>
+  <form name="impersonationPanelWatcherWizard.form" ng-model-options="{ getterSetter: true }" novalidate>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="panel-body">
+          <div class="row watcher-wizard-panel-header">
+            <div class="col-md-6">
+              <header>
+                <h4 class="form-text">
+                  Impersonate
+                </h4>
+                <small class="form-text text-muted">
+                  Set credentials to authenticate this watcher search request
+                </small>
+              </header>
+            </div>
+          </div> <!-- END header -->
+          <hr>
+          <div class="row">
+            <div class="col-md-12">
+              <div class="form-group">
+                <label for="impersonationPanelWatcherWizardUsername" class="control-label">Username</label> 
+                <div class="input-group">
+                  <div class="input-group-addon">
+                    <i class="fa fa-user" aria-hidden="true"></i>
+                  </div> 
+                  <input
+                    id="impersonationPanelWatcherWizardUsername"
+                    name="impersonationPanelWatcherWizardUsername"
+                    placeholder="username here"
+                    type="text"
+                    class="form-control"
+                    autocomplete="off"
+                    ng-model="impersonationPanelWatcherWizard.userName"
+                  >
+                </div> 
+              </div>
+              <div class="form-group">
+                <label for="impersonationPanelWatcherWizardPassword" class="control-label">Password</label> 
+                <div class="input-group">
+                  <div class="input-group-addon">
+                    <i class="fa fa-key" aria-hidden="true"></i>
+                  </div> 
+                  <input
+                    id="impersonationPanelWatcherWizardPassword"
+                    name="impersonationPanelWatcherWizardPassword"
+                    placeholder="password here"
+                    type="password"
+                    class="form-control"
+                    autocomplete="new-password"
+                    ng-model="impersonationPanelWatcherWizard.passWord"
+                  >
+                </div> 
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</section>

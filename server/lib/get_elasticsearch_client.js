@@ -8,11 +8,17 @@ import fs from 'fs';
 import Crypto from './crypto';
 import Log from './log';
 
+let log;
+
 /**
 * Get client
 *
 */
-function esClient(config, username, password) {
+function esClient(server, isSiren, clusterType, config, username, password) {
+  if (isSiren) {
+    return server.plugins.elasticsearch.getCluster(clusterType).createClient({ username, password });
+  }
+
   const options = {
     host: [
       {
@@ -22,6 +28,7 @@ function esClient(config, username, password) {
       }
     ]
   };
+  log.debug('es client options (password hidden): ' + JSON.stringify(options.host, null, 2));
 
   if (username && password) {
     options.host[0].auth = username + ':' + password;
@@ -49,9 +56,10 @@ export default function getElasticsearchClient({
   impersonateUsername = null,
   impersonateSha = null,
   impersonatePassword = null,
-  impersonateId = null
+  impersonateId = null,
+  isSiren = false,
 }) {
-  const log = new Log(config.app_name, server, 'get_elasticsearch_client');
+  log = new Log(config.app_name, server, 'get_elasticsearch_client');
 
   const auth = config.settings.authentication;
   // Basic authentication
@@ -62,18 +70,20 @@ export default function getElasticsearchClient({
       log.debug(`impersonate watcher "${impersonateId}" by its user: "${impersonateUsername}"`);
       if (!impersonateSha) {
         log.debug(`impersonate watcher "${impersonateId}", no SHA found, use clear text password`);
-        return esClient(config, impersonateUsername, impersonatePassword);
+        return esClient(server, isSiren, type, config, impersonateUsername, impersonatePassword);
       }
-      return esClient(config, impersonateUsername, crypto.decrypt(impersonateSha));
+      return esClient(server, isSiren, type, config, impersonateUsername, crypto.decrypt(impersonateSha));
     }
 
     if (auth.sha) {
-      log.debug(`impersonate Sentinl and all watchers by common user from config: "${auth.username}" and its SHA`);
-      return esClient(config, auth.username, crypto.decrypt(auth.sha));
+      log.debug(`impersonate Sentinl by common user from config: "${auth.username}" and its SHA`);
+      return esClient(server, isSiren, type, config, auth.username, crypto.decrypt(auth.sha));
     }
 
-    log.debug(`impersonate Sentinl and all watchers by common user from config: "${auth.username}"`);
-    return esClient(config, auth.username, auth.password);
+    if (!server.plugins.investigate_access_control && !server.plugins.kibi_access_control) {
+      log.debug(`impersonate Sentinl by common user from config: "${auth.username}"`);
+      return esClient(server, isSiren, type, config, auth.username, auth.password);
+    }
   }
 
   // Authentication via Kibi Access Control app
@@ -96,9 +106,5 @@ export default function getElasticsearchClient({
   }
 
   log.debug('auth via Kibana server elasticsearch plugin');
-  if (type === 'data') {
-    return server.plugins.elasticsearch.getCluster('data').getClient();
-  }
-
-  return server.plugins.elasticsearch.getCluster('admin').getClient();
+  return server.plugins.elasticsearch.getCluster(type).getClient();
 }

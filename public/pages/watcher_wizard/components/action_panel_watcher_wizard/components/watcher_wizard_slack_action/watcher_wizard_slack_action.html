@@ -1,0 +1,121 @@
+<div uib-accordion-group class="panel-default" is-open="watcherWizardSlackAction.status.isOpen">
+  <uib-accordion-heading>
+    <i class="fa fa-slack"></i> {{watcherWizardSlackAction.type}} action: {{watcherWizardSlackAction.actionSettings.name}} <i class="pull-right glyphicon"
+    ng-class="{'glyphicon-chevron-down': watcherWizardSlackAction.status.isOpen, 'glyphicon-chevron-right': !watcherWizardSlackAction.status.isOpen}"></i>
+  </uib-accordion-heading>
+  <form name="{{watcherWizardSlackAction.getTagId()}}.form" ng-model-options="{ getterSetter: true }" novalidate>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="form-group">
+          <label class="control-label" for="watcherWizardSlackActionTitle">Title</label>
+          <input
+            id="{{watcherWizardSlackAction.getTagId('title')}}"
+            name="{{watcherWizardSlackAction.getTagId('title')}}"
+            placeholder="title"
+            type="text"
+            class="form-control"
+            ng-model="watcherWizardSlackAction.actionSettings.name"
+          >
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-2">
+        <div class="form-group">
+          <label for="watcherWizardSlackActionThrottle" class="control-label">Throttle</label>
+          <div class="input-group">
+            <div class="input-group-addon">
+              <i class="fa fa-snowflake-o" aria-hidden="true"></i>
+            </div>
+            <input
+              id="{{watcherWizardSlackAction.getTagId('throttle')}}"
+              name="{{watcherWizardSlackAction.getTagId('throttle')}}"
+              placeholder="0h0m1s"
+              type="text"
+              class="form-control"
+              ng-model="watcherWizardSlackAction.actionSettings.throttle_period"
+            >
+          </div>
+        </div>
+      </div>
+      <div class="col-md-2">
+        <div class="form-group">
+          <label for="watcherWizardSlackActionPriority" class="control-label">Priority</label>
+          <select
+            id="{{watcherWizardSlackAction.getTagId('priority')}}"
+            name="{{watcherWizardSlackAction.getTagId('priority')}}"
+            class="select form-control"
+            ng-model="watcherWizardSlackAction.priority.selected"
+            ng-options="o as o for o in watcherWizardSlackAction.priority.options"
+            ng-change="watcherWizardSlackAction.priority.handleChange()"
+          ></select>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label for="watcherWizardSlackActionPreferences" class="control-label">
+            <i class="fa fa-cog"></i> Preferences
+          </label>
+          <div>
+            <label class="checkbox-inline">
+              <input
+                type="checkbox"
+                id="{{watcherWizardSlackAction.getTagId('preferences')}}"
+                name="{{watcherWizardSlackAction.getTagId('preferences')}}"
+                ng-model="watcherWizardSlackAction.actionSettings.slack.stateless"
+                ng-checked="!watcherWizardSlackAction.actionSettings.slack.stateless"
+                ng-true-value="false"
+                ng-false-value="true"
+              >record action log
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <label class="col-md-12 control-label">Channel</label>
+      <div class="col-md-4">
+        <div class="form-group">
+          <input
+            id="{{watcherWizardSlackAction.getTagId('channel')}}"
+            name="{{watcherWizardSlackAction.getTagId('channel')}}"
+            type="text"
+            class="form-control"
+            ng-model="watcherWizardSlackAction.actionSettings.slack.channel"
+          >
+        </div>
+      </div>
+      <div class="col-md-6  ">
+        <span class="help-block">Prefix with <code>#</code> for channels and <code>@</code> for direct messages (e.g. <code>#general</code>)</span>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-12">
+        <div class="form-group">
+          <mustache-template-input
+            content="watcherWizardSlackAction.actionSettings.slack.message"
+            injected-data="{payload: {hits: {total: 10}}, watcher: watcherWizardSlackAction.watcher}"
+            ace-options="watcherWizardSlackAction.aceOptions({maxLines: 30})"
+          >The query result and watcher information are provided in the <code>payload</code> and <code>watcher</code> variables and uses
+            <a target="_blank" href="https://mustache.github.io/mustache.5.html">Mustache syntax</a>.</mustache-template-input>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="form-group">
+          <button
+            id="{{watcherWizardSlackAction.getTagId('delete')}}"
+            name="{{watcherWizardSlackAction.getTagId('delete')}}"
+            type="submit"
+            class="btn btn-sm btn-danger"
+            ng-click="watcherWizardSlackAction.deleteAction()"
+          >Delete</button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>

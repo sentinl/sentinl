@@ -1,0 +1,118 @@
+<section>
+  <form name="titlePanelWatcherWizard.form" ng-model-options="{ getterSetter: true }" novalidate>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="panel-body">
+          <div class="row watcher-wizard-panel-header">
+            <div class="col-md-6">
+              <header>
+                <h3 class="form-text">
+                  Watcher
+                </h3>
+                <small class="form-text text-muted">
+                  Send alert via different channels when conditions are met
+                </small>
+              </header>
+            </div>
+          </div> <!-- END header -->
+          <hr>
+          <div class="row">
+            <div class="col-sm-6">
+              <div class="form-group">
+                <label for="watcherName">
+                  Name
+                </label>
+                <input
+                  class="form-control"
+                  type="text"
+                  name="watcherName"
+                  id="watcherName"
+                  input-focus
+                  required
+                  ng-model="titlePanelWatcherWizard.watcher.title"
+                  ng-model-options="{ debounce: 500 }"
+                  placeholder="My Watcher"
+                >
+                <small
+                  id="watcherNameValidationMessage"
+                  class="form-text text-danger"
+                  ng-if="titlePanelWatcherWizard.isValidationMessageVisible('watcherName', 'required')"
+                >
+                  A name is required.
+                </small>
+              </div>
+            </div>
+            <div class="col-sm-2">
+              <div class="form-group">
+                <label for="watcherPreferences">
+                  <i class="fa fa-cog"></i> Preferences
+                </label>
+                <div>
+                  <label class="checkbox-inline">
+                    <input
+                      type="checkbox"
+                      name="watcherPreferences"
+                      ng-model="titlePanelWatcherWizard.watcher.save_payload"
+                      ng-checked="titlePanelWatcherWizard.watcher.save_payload"
+                    >save payload
+                  </label>
+                  <label class="checkbox-inline">
+                    <input
+                      type="checkbox"
+                      name="watcherPreferences"
+                      ng-model="titlePanelWatcherWizard.watcher.impersonate"
+                      ng-checked="titlePanelWatcherWizard.watcher.impersonate"
+                    >impersonate
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div> <!-- END title -->
+          <div class="row">
+            <div class="col-sm-6">
+              <div class="form-group">
+                <label for="watcherIndex">
+                  Select an Index
+                </label>
+                <watcher-wizard-add-index
+                  watcher="titlePanelWatcherWizard.watcher"
+                  on-index-change="titlePanelWatcherWizard.onIndexChange({index: index})"
+                ></watcher-wizard-add-index>
+              </div>
+            </div> <!-- END select indices -->
+            <div class="col-sm-2">
+              <div class="form-group">
+                <label for="watcherScheduleMode">
+                  <i class="fa fa-calendar"></i> Schedule mode
+                </label>
+                <select
+                  name="watcherScheduleMode"
+                  id="watcherScheduleMode"
+                  class="form-control condition-select"
+                  ng-model="titlePanelWatcherWizard.schedule.selected"
+                  ng-options="o as o for o in titlePanelWatcherWizard.schedule.options"
+                  ng-model-options="{ debounce: 500 }"
+                  ng-change="titlePanelWatcherWizard.handleModeChange()"
+                ></select>
+              </div>
+            </div>
+            <div class="col-sm-4">
+              <div class="form-group" ng-if="titlePanelWatcherWizard.showScheduleMode('text')">
+                <watcher-wizard-human-schedule
+                  watcher="titlePanelWatcherWizard.watcher"
+                  on-select="titlePanelWatcherWizard.schedule.handleChange(mode, text)"
+                ></watcher-wizard-human-schedule>
+              </div>
+              <div class="form-group" ng-if="titlePanelWatcherWizard.showScheduleMode('every')">
+                <watcher-wizard-every-schedule
+                  watcher="titlePanelWatcherWizard.watcher"
+                  on-select="titlePanelWatcherWizard.schedule.handleChange(mode, text)"
+                ></watcher-wizard-every-schedule>
+              </div>
+            </div> <!-- END schedule -->
+          </div> <!-- END index and schedule -->
+        </div>
+      </div>
+    </div>
+  </form>
+</section>

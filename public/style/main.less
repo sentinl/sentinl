@@ -1,5 +1,4 @@
 .sentinl {
-
   body {
     font-size: 13px;
   }
@@ -7,6 +6,14 @@
   img {
     max-width: 100%;
     max-height: 100%;
+  }
+
+  a {
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
   }
 
   .container {
@@ -61,77 +68,83 @@
     background-color: #ffd000;
   }
 
+  .alarm-error-row {
+    color: black;
+    background-color: #ff4136;
+  }
+
+  .alarm-error-row-odd {
+    color: black;
+    background-color: #ff4140;
+  }
+
   .aceditor {
     /** Setting height for ace editor **/
     min-height: 350px;
   }
 
-  #watcher-editor {
+  #watcher-wizard {
     min-height: 400px;
   }
 
-  #watcher-editor .form-group a {
-    text-decoration: none;
-  }
-
-  #watcher-editor .form-group label {
+  #watcher-wizard .form-group label {
     text-align: left;
   }
 
-  #watcher-editor .tab-content {
+  #watcher-wizard .tab-content {
     padding-top: 20px;
   }
 
-  #watcher-editor .form-group .dropdown button {
+  #watcher-wizard .form-group .dropdown button {
     width: 160px;
   }
 
-  #watcher-editor .form-group button {
+  #watcher-wizard .form-group button {
     width: 80px;
   }
 
-  #watcher-editor .control-actions button {
+  #watcher-wizard .control-actions button {
     margin-right: 15px;
     margin-top: 20px;
     margin-bottom: 0px;
   }
 
-  #watcher-editor .panel-group .panel-body {
+  #watcher-wizard .panel-group .panel-body {
     margin-top: 0px;
     padding-top: 0px;
     margin-bottom: 0px;
     padding-bottom: 0px;
   }
 
-  #watcher-editor .panel-group .panel-body .well {
+  #watcher-wizard .panel-group .panel-body .well {
     margin: 10px 10px 10px 10px;
     padding-top: 5px;
     padding-bottom: 0px;
   }
 
-  #watcher-editor .panel-group .panel-body .well {
+  #watcher-wizard .panel-group .panel-body .well {
     margin: 10px 10px 10px 10px;
     padding-top: 5px;
     padding-bottom: 0px;
   }
 
-  #watcher-editor .panel-group .panel-body .well .page-header {
+  #watcher-wizard .panel-group .panel-body .well .page-header {
     margin-top: 0px;
   }
 
-  #watcher-editor .text-warning {
+  #watcher-wizard .text-warning {
     margin-left: 15px;
   }
 
-  #watcher-editor .text-info {
+  #watcher-wizard .text-info {
     margin-left: 15px;
   }
 
-  #watcher-editor .text-danger {
+  #watcher-wizard .text-danger {
     margin-left: 15px;
   }
 
-  #watcher-editor .text-success {
+  #watcher-wizard .text-success {
     margin-left: 15px;
   }
 
@@ -139,29 +152,15 @@
     padding-bottom: 10px;
   }
 
-  .period-tag {
-    display: flex;
-    flex-direction: row;
-  }
-
-  .period-tag input {
-    display: block;
-    width: 80px;
-  }
-
-  .period-tag label {
-    display: block;
-    padding-top: 5px;
-  }
-
-  .period-tag-label {
-    padding-top: 5px;
-  }
-
   object {
     max-width: 100%;
     width: 100%;
   }
+
+  #watchersList td {
+    word-break: break-all;
+  }
+
   .container .form-inline .checkbox label {
     padding-right: 10px;
   }

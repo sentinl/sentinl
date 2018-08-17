@@ -1,0 +1,32 @@
+<form iname="ddWatcherAggThreshold.form" ng-model-options="{ getterSetter: true }" novalidate>
+  <a pop-over pop-over-title="{{ddWatcherAggThreshold.selected | uppercase}}">
+    <strong class="pop-over-btn-text">IS {{ddWatcherAggThreshold.selected | uppercase}}</strong> {{ddWatcherAggThreshold.number | limitText: WatcherAggThreshold.textLimit}}
+  </a>
+  <div ng-hide="true" class="pop-over-content">
+    <div class="row">
+      <div class="col-md-6">
+        <div class="form-group">
+          <select
+            class="form-control condition-select"
+            ng-model="ddWatcherAggThreshold.selected"
+            ng-model-options="{ debounce: 500 }"
+            ng-options="o as o for o in ddWatcherAggThreshold.options"
+            ng-change="ddWatcherAggThreshold.handleChange()"
+          ></select>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <input
+            class="form-control"
+            type="number"
+            id="ddWatcherAggThresholdNumber"
+            ng-model="ddWatcherAggThreshold.number"
+            ng-model-options="{ debounce: 500 }"
+            ng-change="ddWatcherAggThreshold.handleChange()"
+          >
+        </div>
+      </div>
+    </div>
+  </div>
+</form>

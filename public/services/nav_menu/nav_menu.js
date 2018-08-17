@@ -45,12 +45,9 @@ class NavMenu {
           testId: 'saveEditor'
         }
       ];
-
       forEach(editorMenu, (menu) => nav.unshift(menu));
-
       return nav;
     }
-
     return nav;
   }
 

@@ -1,0 +1,339 @@
+<div uib-accordion-group class="panel-default" is-open="watcherWizardReportAction.status.isOpen">
+  <uib-accordion-heading>
+    <i class="fa fa-envelope"></i> {{watcherWizardReportAction.type}} action: {{watcherWizardReportAction.actionSettings.name}} <i class="pull-right glyphicon"
+    ng-class="{'glyphicon-chevron-down': watcherWizardReportAction.status.isOpen, 'glyphicon-chevron-right': !watcherWizardReportAction.status.isOpen}"></i>
+  </uib-accordion-heading>
+  <form name="{{watcherWizardReportAction.getTagId()}}.form" ng-model-options="{ getterSetter: true }" novalidate>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="form-group">
+          <label class="control-label" for="watcherWizardReportActionTitle">Title</label> 
+          <input
+            id="{{watcherWizardReportAction.getTagId('title')}}"
+            name="{{watcherWizardReportAction.getTagId('title')}}"
+            placeholder="title"
+            type="text"
+            class="form-control"
+            ng-model="watcherWizardReportAction.actionSettings.name"
+          >
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-2">
+        <div class="form-group">
+          <label for="watcherWizardReportActionThrottle" class="control-label">Throttle</label> 
+          <div class="input-group">
+            <div class="input-group-addon">
+              <i class="fa fa-snowflake-o" aria-hidden="true"></i>
+            </div> 
+            <input
+              id="{{watcherWizardReportAction.getTagId('throttle')}}"
+              name="{{watcherWizardReportAction.getTagId('throttle')}}"
+              placeholder="0h15m0s"
+              type="text"
+              class="form-control"
+              ng-model="watcherWizardReportAction.actionSettings.throttle_period"
+            >
+          </div> 
+        </div>
+      </div>
+      <div class="col-md-2">
+        <div class="form-group">
+          <label for="watcherWizardReportActionPriority" class="control-label">Priority</label> 
+          <select
+            id="{{watcherWizardReportAction.getTagId('priority')}}"
+            name="{{watcherWizardReportAction.getTagId('priority')}}"
+            class="select form-control"
+            ng-model="watcherWizardReportAction.priority.selected"
+            ng-options="o as o for o in watcherWizardReportAction.priority.options"
+            ng-change="watcherWizardReportAction.priority.handleChange()"
+          ></select>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label for="watcherWizardReportActionPreferences" class="control-label">
+            <i class="fa fa-cog"></i> Preferences
+          </label> 
+          <div>
+            <label class="checkbox-inline">
+              <input
+                type="checkbox"
+                id="{{watcherWizardReportAction.getTagId('record')}}"
+                name="{{watcherWizardReportAction.getTagId('record')}}"
+                ng-model="watcherWizardReportAction.actionSettings.report.stateless"
+                ng-checked="!watcherWizardReportAction.actionSettings.report.stateless"
+                ng-true-value="false"
+                ng-false-value="true"
+              >record action log
+            </label>
+            <label class="checkbox-inline">
+              <input
+                type="checkbox"
+                id="{{watcherWizardReportAction.getTagId('save')}}"
+                name="{{watcherWizardReportAction.getTagId('save')}}"
+                ng-model="watcherWizardReportAction.actionSettings.report.save"
+                ng-checked="watcherWizardReportAction.actionSettings.report.save"
+              >save
+            </label>
+            <label class="checkbox-inline">
+              <input
+                type="checkbox"
+                id="{{watcherWizardReportAction.getTagId('crop')}}"
+                name="{{watcherWizardReportAction.getTagId('crop')}}"
+                ng-model="watcherWizardReportAction.actionSettings.report.snapshot.params.crop"
+                ng-checked="watcherWizardReportAction.actionSettings.report.snapshot.params.crop"
+              >crop
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="form-group">
+          <label for="watcherWizardReportActionTo" class="control-label">To</label> 
+          <div class="input-group">
+            <div class="input-group-addon">
+              <i class="fa fa-address-card" aria-hidden="true"></i>
+            </div> 
+            <input
+              id="{{watcherWizardReportAction.getTagId('to')}}"
+              name="{{watcherWizardReportAction.getTagId('to')}}"
+              placeholder="Report destination address"
+              type="text"
+              class="form-control"
+              aria-describedby="watcherWizardReportActionToHelpBlock"
+              ng-model="watcherWizardReportAction.actionSettings.report.to"
+            >
+          </div> 
+          <span class="help-block">Put multiple addresses separating them by ','</span>
+        </div>
+        <div class="form-group">
+          <label for="watcherWizardReportActionFrom" class="control-label">From</label> 
+          <div class="input-group">
+            <div class="input-group-addon">
+              <i class="fa fa-address-card"></i>
+            </div> 
+            <input
+              id="{{watcherWizardReportAction.getTagId('from')}}"
+              name="{{watcherWizardReportAction.getTagId('from')}}"
+              placeholder="Report source address"
+              type="text"
+              aria-describedby="watcherWizardReportActionFromHelpBlock"
+              class="form-control"
+              ng-model="watcherWizardReportAction.actionSettings.report.from"
+            >
+          </div> 
+          <span class="help-block">Put multiple addresses separating them by ','</span>
+        </div>
+        <div class="form-group">
+          <label for="watcherWizardReportActionSubject" class="control-label">Subject</label> 
+          <input
+            id="{{watcherWizardReportAction.getTagId('subject')}}"
+            name="{{watcherWizardReportAction.getTagId('subject')}}"
+            placeholder="Subject"
+            type="text"
+            class="form-control"
+            ng-model="watcherWizardReportAction.actionSettings.report.subject"
+          >
+        </div>
+        <div class="form-group">
+          <label class="control-label" for="watcherWizardReportActionContent">Content</label> 
+          <div
+            ng-model="watcherWizardReportAction.actionSettings.report.body"
+            ui-ace="watcherWizardReportAction.aceOptions({maxLines: 30})">
+          </div>
+        </div> 
+      </div> 
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <hr>
+        <h4>Screenshot preferences</h4>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-2">
+        <div class="form-group">
+          <label class="control-label" for="watcherWizardReportResolution">Resolution</label>
+          <input
+            type="text"
+            id="{{watcherWizardReportAction.getTagId('resolution')}}"
+            name="{{watcherWizardReportAction.getTagId('resolution')}}"
+            value="{{watcherWizardReportAction.actionSettings.report.snapshot.res}}"
+            class="form-control"
+            placeholder="1280x900"
+            ng-model="watcherWizardReportAction.actionSettings.report.snapshot.res"
+          />
+        </div>
+      </div> 
+      <div class="col-md-2">
+        <div class="form-group">
+          <label class="control-label" for="watcherWizardReportDelay">Delay</label>
+          <input
+            type="number"
+            min="0"
+            id="{{watcherWizardReportAction.getTagId('delay')}}"
+            name="{{watcherWizardReportAction.getTagId('delay')}}"
+            class="form-control"
+            placeholder="5000"
+            ng-model="watcherWizardReportAction.actionSettings.report.snapshot.params.delay"
+          />
+        </div>
+      </div> 
+    </div> 
+    <div class="row">
+      <div class="col-md-12">
+        <div class="form-group">
+          <label class="control-label" for="watcherWizardReportUrl">URL</label>
+          <input
+            type="text"
+            id="{{watcherWizardReportAction.getTagId('url')}}"
+            name="{{watcherWizardReportAction.getTagId('url')}}"
+            class="form-control"
+            placeholder="http://www.google.com"
+            ng-model="watcherWizardReportAction.actionSettings.report.snapshot.url"
+          />
+        </div> <!-- end form-group -->
+        <div class="form-group">
+          <label class="control-label" for="watcherWizardReportPath">Report Name</label>
+          <input
+            type="text"
+            id="{{watcherWizardReportAction.getTagId('path')}}"
+            name="{{watcherWizardReportAction.getTagId('path')}}"
+            class="form-control"
+            placeholder="my_report"
+            ng-model="watcherWizardReportAction.actionSettings.report.snapshot.name"
+          />
+        </div>
+        <div class="form-group">
+          <div class="btn-group" uib-dropdown is-open="watcherWizardReportAction.isTypeOpen">
+            <button type="button" class="btn btn-sm btn-primary dropdown-toggle" uib-dropdown-toggle>
+              {{watcherWizardReportAction.actionSettings.report.snapshot.type || 'report type'}} <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" uib-dropdown-menu role="menu">
+              <li><a href="javascript:void(0)" ng-click="watcherWizardReportAction.applyReportType('png')">PNG</a></li>
+              <li><a href="javascript:void(0)" ng-click="watcherWizardReportAction.applyReportType('pdf')">PDF</a></li>
+            </ul>
+          </div>
+        </div>
+      <div>
+    </div> 
+    <div class="row">
+      <div class="col-md-12">
+        <hr>
+        <h4>Authentication preferences</h4>
+      </div> 
+    </div> 
+    <div class="row">
+      <div class="col-md-2">
+        <div class="form-group">
+          <label class="control-label" for="watcherWizardReportMode">Mode</label>
+          <select
+            id="{{watcherWizardReportAction.getTagId('mode')}}"
+            name="{{watcherWizardReportAction.getTagId('mode')}}"
+            class="form-control condition-select"
+            ng-disabled="!watcherWizardReportAction.actionSettings.report.auth.active"
+            ng-model="watcherWizardReportAction.actionSettings.report.auth.mode"
+            ng-options="o as o for o in watcherWizardReportAction.authModes"
+          ></select>
+        </div>
+      </div>
+      <div class="col-md-2">
+        <div class="form-group">
+          <label for="watcherWizardReportActionPreferences" class="control-label">
+            <i class="fa fa-cog"></i> Preferences
+          </label> 
+          <div>
+            <label class="checkbox-inline">
+              <input
+                type="checkbox"
+                ng-model="watcherWizardReportAction.actionSettings.report.auth.active"
+                ng-checked="watcherWizardReportAction.actionSettings.report.auth.active"
+              /> active
+            </label>
+          </div>
+        </div>
+      </div> 
+    </div> 
+    <div class="row">
+      <div class="col-md-12">
+        <div class="form-group">
+          <label class="control-label" for="watcherWizardReportUsername">Username</label>
+          <input
+            type="text"
+            id="{{watcherWizardReportAction.getTagId('username')}}"
+            name="{{watcherWizardReportAction.getTagId('username')}}"
+            class="form-control"
+            ng-disabled="!watcherWizardReportAction.actionSettings.report.auth.active"
+            autocomplete="off"
+            ng-model="watcherWizardReportAction.actionSettings.report.auth.username"
+          />
+        </div> <!-- end form-group -->
+        <div class="form-group">
+          <label class="control-label" for="watcherWizardReportPassword">Password</label>
+          <input
+            type="password"
+            id="{{watcherWizardReportAction.getTagId('password')}}"
+            name="{{watcherWizardReportAction.getTagId('password')}}"
+            class="form-control"
+            ng-disabled="!watcherWizardReportAction.actionSettings.report.auth.active"
+            autocomplete="new-password"
+            ng-model="watcherWizardReportAction.actionSettings.report.auth.password"
+          />
+        </div> <!-- end form-group -->
+        <div class="form-group" ng-show="watcherWizardReportAction.actionSettings.report.auth.mode === 'customselector'">
+          <label class="control-label" for="watcherWizardReportSelectorUsername">CSS Selector for username</label>
+          <input
+            type="text"
+            id="{{watcherWizardReportAction.getTagId('usernameSelector')}}"
+            name="{{watcherWizardReportAction.getTagId('usernameSelector')}}"
+            class="form-control"
+            ng-disabled="!watcherWizardReportAction.actionSettings.report.auth.active"
+            placeholder="form input[name='username']"
+            ng-model="watcherWizardReportAction.actionSettings.report.auth.selector_username"
+          />
+        </div> <!-- end form-group -->
+        <div class="form-group" ng-show="watcherWizardReportAction.actionSettings.report.auth.mode === 'customselector'">
+          <label class="control-label" for="watcherWizardReportSelectorPassword">CSS Selector for password</label>
+          <input
+            type="text"
+            id="{{watcherWizardReportAction.getTagId('passwordSelector')}}"
+            name="{{watcherWizardReportAction.getTagId('passwordSelector')}}"
+            class="form-control"
+            ng-disabled="!watcherWizardReportAction.actionSettings.report.auth.active"
+            placeholder="form input[name='password']"
+            ng-model="watcherWizardReportAction.actionSettings.report.auth.selector_password"
+          />
+        </div> <!-- end form-group -->
+        <div class="form-group" ng-show="watcherWizardReportAction.actionSettings.report.auth.mode === 'customselector'">
+          <label class="control-label" for="watcherWizardReportSelectorLoginBtn">CSS Selector for login btn</label>
+          <input
+            type="text"
+            id="{{watcherWizardReportAction.getTagId('loginSelector')}}"
+            name="{{watcherWizardReportAction.getTagId('loginSelector')}}"
+            class="form-control"
+            ng-disabled="!watcherWizardReportAction.actionSettings.report.auth.active"
+            placeholder="form button.btn.btn-login"
+            ng-model="watcherWizardReportAction.actionSettings.report.auth.selector_login_btn"
+          />
+        </div> <!-- end form-group -->
+      </div>
+    </div> 
+    <div class="row">
+      <div class="col-md-12">
+        <div class="form-group">
+          <button
+            id="{{watcherWizardReportAction.getTagId('delete')}}"
+            name="{{watcherWizardReportAction.getTagId('delete')}}"
+            type="submit"
+            class="btn btn-sm btn-danger"
+            ng-click="watcherWizardReportAction.deleteAction()"
+          >Delete</button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>

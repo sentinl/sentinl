@@ -17,13 +17,10 @@
  * limitations under the License.
  */
 
-import {existsSync, readFileSync, appendFileSync, chmodSync} from 'fs';
-import urljoin from 'url-join';
-import {join} from 'path';
+import { existsSync, readFileSync, appendFileSync } from 'fs';
 import { forEach, difference } from 'lodash';
-import {listAllFilesSync} from './server/lib/helpers';
 
-function loadLibs(kibana, requirements) {
+function loadLibs(requirements) {
   const sirenSavedObjectsAPI = __dirname.split('/').slice(0, -2).join('/') + '/src/siren_core_plugins/saved_objects_api';
   const appFile = __dirname + '/public/app.js';
 
@@ -53,25 +50,9 @@ export default function (kibana) {
   let requirements = ['kibana', 'elasticsearch'];
 
   try {
-    requirements = loadLibs(kibana, requirements);
+    requirements = loadLibs(requirements);
   } catch (err) {
     throw new Error('put libs into app.js: ' + err.message);
-  }
-
-  const phantomjsDefaultPath = urljoin(__dirname, 'node_modules/phantomjs-prebuilt/bin/phantomjs');
-  chmodSync(phantomjsDefaultPath, '755');
-
-  let chromeDefaultPath = urljoin(__dirname, '/node_modules/puppeteer/.local-chromium');
-  try {
-    chromeDefaultPath = listAllFilesSync(chromeDefaultPath).filter((f) => f.split('/').pop() === 'chrome');
-    if (chromeDefaultPath.length !== 1) {
-      throw new Error('puppeter chrome was not found');
-    }
-    chromeDefaultPath = chromeDefaultPath[0];
-    chmodSync(chromeDefaultPath, '755');
-  } catch (err) {
-    chromeDefaultPath = null;
-    console.log(`[sentinl] fail to make report engine executable: ${err.message}!`);
   }
 
   return new kibana.Plugin({
@@ -79,6 +60,12 @@ export default function (kibana) {
     uiExports: {
       spyModes: ['plugins/sentinl/dashboard_spy_button/alarm_button'],
       mappings: require('./server/mappings/sentinl.json'),
+      uiSettingDefaults: {
+        'sentinl:experimental': {
+          value: false,
+          description: 'Enable Experimental features in SENTINL'
+        },
+      },
       app: {
         title: 'Sentinl',
         description: 'Kibana Alert App for Elasticsearch',
@@ -94,9 +81,20 @@ export default function (kibana) {
               appName: config.get('sentinl.app_name'),
               es: {
                 watcher: {
-                  schedule_timezone: config.get('sentinl.es.watcher.schedule_timezone')
-                }
-              }
+                  schedule_timezone: config.get('sentinl.es.watcher.schedule_timezone'),
+                },
+                timezone: config.get('sentinl.es.timezone'),
+                timefield: config.get('sentinl.es.timefield'),
+              },
+              wizard: {
+                condition: {
+                  query_type: config.get('sentinl.settings.wizard.condition.query_type'),
+                  schedule_type: config.get('sentinl.settings.wizard.condition.schedule_type'),
+                  over: config.get('sentinl.settings.wizard.condition.over'),
+                  last: config.get('sentinl.settings.wizard.condition.last'),
+                  interval: config.get('sentinl.settings.wizard.condition.interval'),
+                },
+              },
             }
           };
         }
@@ -119,6 +117,7 @@ export default function (kibana) {
           protocol: Joi.string().default('http'),
           port: Joi.number().default(9200),
           timefield: Joi.string().default('@timestamp'),
+          timezone: Joi.string().default('Europe/Amsterdam'),
           type: Joi.any().forbidden().error(new Error(
             'Option "sentinl.es.type" was deprecated. Use "sentinl.es.default_type" instead!'
           )),
@@ -135,6 +134,23 @@ export default function (kibana) {
           }).default(),
         }).default(),
         settings: Joi.object({
+          wizard: Joi.object({
+            condition: Joi.object({
+              query_type: Joi.string().default('count'),
+              schedule_type: Joi.string().default('every'), // options: every, text
+              over: Joi.object({
+                type: Joi.string().default('all docs'),
+              }).default(),
+              last: Joi.object({
+                n: Joi.number().default(15),
+                unit: Joi.string().default('minutes'),
+              }).default(),
+              interval: Joi.object({
+                n: Joi.number().default(1),
+                unit: Joi.string().default('minutes'),
+              }).default(),
+            }).default(),
+          }).default(),
           authentication: Joi.object({
             https: Joi.any().forbidden().error(new Error(
               'Option "sentinl.settings.authentication.https" was deprecated. Use "sentinl.es.protocol" instead!'
@@ -213,19 +229,25 @@ export default function (kibana) {
             domain: Joi.string(),
             ssl: Joi.boolean().default(false),
             tls: Joi.boolean().default(false),
-            cert: Joi.object({
+            sslopt: Joi.object({
               key: Joi.string(), // full system path
               cert: Joi.string(), // full system path
               ca: Joi.string(), // full system path
             }),
+            tlsopt: Joi.object({
+              key: Joi.string(), // full system path
+              cert: Joi.string(), // full system path
+              ca: Joi.string(), // full system path
+            }),
+            cert: Joi.any().forbidden().error(new Error(
+              'Option "email.cert" was deprecated. Use "email.tlsopt" for TLS options and "email.sslopt" for SSL options!'
+            )),
             authentication: Joi.array().default(['PLAIN', 'LOGIN', 'CRAM-MD5', 'XOAUTH2']),
             timeout: Joi.number().default(5000),
           }).default(),
           slack: Joi.object({
             active: Joi.boolean().default(false),
-            username: Joi.string(),
-            hook: Joi.string(),
-            channel: Joi.string(),
+            token: Joi.string(),
           }).default(),
           webhook: Joi.object({
             active: Joi.boolean().default(false),
@@ -234,39 +256,74 @@ export default function (kibana) {
             host: Joi.string(),
             port: Joi.number(),
             path: Joi.string().default(':/{{payload.watcher_id}'),
-            body: Joi.string().default('{{payload.watcher_id}}{payload.hits.total}}')
+            body: Joi.string().default('{{payload.watcher_id}}{payload.hits.total}}'),
+            params: Joi.object()
           }).default(),
           report: Joi.object({
+            action: Joi.object({
+              priority: Joi.string().default('info'),
+              subject: Joi.string().default('Report'),
+              body: Joi.string().default('Look for the report in the attachment.'),
+              snapshot: Joi.object({
+                res: Joi.string().default('1280x900'),
+                url: Joi.string().default('http://google.com'),
+                type: Joi.string().default('png'),
+                pdf_landscape: Joi.boolean().default(true),
+                pdf_format: Joi.string().default('A4'),
+                params: Joi.object({
+                  delay: Joi.number().default(5000),
+                  crop: Joi.boolean().default(false),
+                }).default(),
+              }).default(),
+              selectors: Joi.object({
+                collapse_navbar_selector: Joi.string(),
+              }),
+              auth: Joi.object({
+                mode: Joi.string().default('basic'), // basic, customselector, xpack, searchguard
+                active: Joi.boolean().default(false),
+                username: Joi.string(),
+                password: Joi.string(),
+                selector_login_btn: Joi.string(),
+                selector_password: Joi.string(),
+                selector_username: Joi.string(),
+              }).default(),
+            }).default(),
             active: Joi.boolean().default(true),
-            engine: Joi.string().default('horseman'), // options: puppeteer, horseman
-            phantomjs_path: Joi.string().default(phantomjsDefaultPath),
-            chrome_path: Joi.string().default(chromeDefaultPath),
+            engine: Joi.string().default('horseman'), // puppeteer, horseman
             executable_path: Joi.any().forbidden().error(new Error(
-              'Option "report.executable_path" was deprecated. Use "report.chrome_path" instead!'
+              'Option "report.executable_path" was deprecated. The path is handled automatically!'
             )),
             auth: Joi.object({
+              modes: Joi.array().default(['basic', 'customselector', 'xpack', 'searchguard']),
               css_selectors: Joi.object({
                 searchguard: Joi.object({
-                  username: Joi.string().default('form input[name="username"]'),
-                  password: Joi.string().default('form input[name="password"]'),
-                  login_btn: Joi.string().default('form button.btn.btn-login'),
+                  username: Joi.string().default('form input[id=username]'),
+                  password: Joi.string().default('form input[id=password]'),
+                  login_btn: Joi.string().default('form button[type=submit]'),
                 }).default(),
                 xpack: Joi.object({
-                  username: Joi.string().default('form input[data-test-subj="loginUsername"]'),
-                  password: Joi.string().default('form input[data-test-subj="loginPassword"]'),
-                  login_btn: Joi.string().default('form button[data-test-subj="loginSubmit"]'),
+                  username: Joi.string().default('form input[id=username]'),
+                  password: Joi.string().default('form input[id=password]'),
+                  login_btn: Joi.string().default('form button[type=submit]'),
                 }).default(),
               }).default(),
             }).default(),
-            debug: Joi.object({
-              headless: Joi.boolean().default(true),
-              devtools: Joi.boolean().default(false),
+            ignore_https_errors: Joi.boolean().default(true),
+            puppeteer: Joi.object({
+              browser_path: Joi.string(),
+              chrome_args: Joi.array().default(['--no-sandbox', '--disable-setuid-sandbox']),
+              chrome_headless: Joi.boolean().default(true),
+              chrome_devtools: Joi.boolean().default(false),
+            }).default(),
+            horseman: Joi.object({
+              browser_path: Joi.string(),
+              phantom_bluebird_debug: Joi.boolean().default(false),
             }).default(),
             search_guard: Joi.any().forbidden().error(new Error(
-              'Option "report.search_guard" was deprecated. Use "report.authentication.mode.searchguard" instead!'
+              'Option "report.search_guard" was deprecated. Authenticatiobn is set per watcher!'
             )),
             simple_authentication: Joi.any().forbidden().error(new Error(
-              'Option "report.simple_authentication" was deprecated. Use "report.authentication.mode.basic" instead!'
+              'Option "report.simple_authentication" was deprecated. Authenticatiobn is set per watcher!'
             )),
             tmp_path: Joi.any().forbidden().error(new Error(
               'Option "report.tmp_path" is not needed anymore. Just delete it from config!'
@@ -279,19 +336,19 @@ export default function (kibana) {
               mode: Joi.object({
                 searchguard: Joi.any().forbidden().error(new Error(
                   'Option "report.authentication.mode.searchguard" was deprecated. Enable mode per watcher instead: ' +
-                  'watcher._source.actions[name].report.auth.mode="searchguard". Options: searchguard, xpack, basic, custom.'
+                  'watcher._source.actions[name].report.auth.mode="searchguard". Options: searchguard, xpack, basic, customselector.'
                 )),
                 xpack: Joi.any().forbidden().error(new Error(
                   'Option "report.authentication.mode.xpack" was deprecated. Enable mode per watcher instead: ' +
-                  'watcher._source.actions[name].report.auth.mode="xpack". Options: searchguard, xpack, basic, custom.'
+                  'watcher._source.actions[name].report.auth.mode="xpack". Options: searchguard, xpack, basic, customselector.'
                 )),
                 basic: Joi.any().forbidden().error(new Error(
                   'Option "report.authentication.mode.basic" was deprecated. Enable mode per watcher instead: ' +
-                  'watcher._source.actions[name].report.auth.mode="basic". Options: searchguard, xpack, basic, custom.'
+                  'watcher._source.actions[name].report.auth.mode="basic". Options: searchguard, xpack, basic, customselector.'
                 )),
                 custom: Joi.any().forbidden().error(new Error(
                   'Option "report.authentication.mode.custom" was deprecated. Enable mode per watcher instead: ' +
-                  'watcher._source.actions[name].report.auth.mode="customselector". Options: searchguard, xpack, basic, custom.'
+                  'watcher._source.actions[name].report.auth.mode="customselector". Options: searchguard, xpack, basic, customselector.'
                 )),
               }).default(),
               custom: Joi.object({
@@ -330,10 +387,7 @@ export default function (kibana) {
               'watcher._source.actions[name].report.snapshot.params.delay=5000'
             )),
           }).default(),
-          pushapps: Joi.object({
-            active: Joi.boolean().default(false),
-            api_key: Joi.string()
-          }).default()
+          pushapps: Joi.any().forbidden().error(new Error('Option "pushapps" was deprecated.'))
         }).default()
       }).default();
     },

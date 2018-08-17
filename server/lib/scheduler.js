@@ -16,11 +16,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+/*global later:false*/
 import { has, forEach, difference, map, keys, isObject, isEmpty, assign } from 'lodash';
-import later from 'later';
+import 'later/later';
 import getConfiguration from './get_configuration';
 import WatcherHandler from './watcher_handler';
+import WatcherWizardHandler from './watcher_wizard_handler';
 import Log from './log';
 
 /**
@@ -32,6 +33,7 @@ export default function Scheduler(server) {
   const log = new Log(config.app_name, server, 'scheduler');
 
   let watcherHandler;
+  let watcherWizardHandler;
 
   /**
   * Remove unused watchers watcher.
@@ -70,7 +72,12 @@ export default function Scheduler(server) {
     }
 
     try {
-      const resp = await watcherHandler.execute(task);
+      let resp;
+      if (task._source.wizard) {
+        resp = await watcherWizardHandler.execute(task);
+      } else {
+        resp = await watcherHandler.execute(task);
+      }
       if (!resp.ok) {
         log.error(`${prefix}: fail to execute`, resp);
       }
@@ -119,13 +126,13 @@ export default function Scheduler(server) {
 
   async function alert(server) {
     log.debug('reloading watchers...');
-    log.debug(`auth enabled: ${config.settings.authentication.enabled}`);
 
     if (!server.sentinlStore.schedule) {
       server.sentinlStore.schedule = [];
     }
 
     watcherHandler = new WatcherHandler(server);
+    watcherWizardHandler = new WatcherWizardHandler(server);
 
     try {
       let resp = await watcherHandler.getCount();

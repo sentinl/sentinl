@@ -197,8 +197,7 @@ Watchers can be as simple or complex as the query and aggregations they use. Her
          "body": "{{#payload.aggregations.metrics.buckets}}{\"index\":{\"_index\":\"aggregated_requests\", \"_type\":\"data\"}}\n{\"url\":\"{{key}}\", \"count\":\"{{doc_count}}\", \"execution_time\":\"tbd\"}\n{{/payload.aggregations.metrics.buckets}}",
          "headers": {
            "Content-Type": "text/plain; charset=ISO-8859-1"
-         },
-         "create_alert": true
+         }
        }
      }
    }

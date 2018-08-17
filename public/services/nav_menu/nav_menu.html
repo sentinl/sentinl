@@ -1,2 +1,29 @@
-<p ng-click="newWatcher('email')"><span title="New watcher"><i class="fa fa-plus"></i></span>&nbsp;Watcher</p>
-<p ng-click="newWatcher('report')"><span title="New reporter"><i class="fa fa-camera"></i></span>&nbsp;Reporter</p>
+<div class="kuiCardGroup" role="group">
+  <div class="kuiCard euiPanel" style="flex: 0 0 250px">
+    <div class="kuiCard__description">
+      <div class="kuiCard__descriptionTitle" role="heading"><span class="fa fa-magic fa-4x"></span>
+        <p>Wizard</p>
+      </div>
+      <div class="kuiCard__descriptionText">Guided Wizard to create Timeseries Alerts</div>
+    </div>
+    <div class="kuiCard__footer">
+      <a class="kuiButton kuiButton--primary" href="#/watcher/wizard/new">
+        <span class="kuiButton__inner ">Watcher Wizard</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="kuiCard euiPanel " style="flex: 0 0 250px">
+    <div class="kuiCard__description ">
+      <div class="kuiCard__descriptionTitle " role="heading"><span class="fa fa-file-code-o fa-4x "></span>
+        <p>Advanced</p>
+      </div>
+      <div class="kuiCard__descriptionText ">Advanced Watcher editor, ideal when You are the Wizard</div>
+    </div>
+    <div class="kuiCard__footer ">
+      <a class="kuiButton kuiButton--primary " href="#/watcher/raw/advanced/new ">
+        <span class="kuiButton__inner">Watcher Advanced</span>
+      </a>
+    </div>
+  </div>
+</div>

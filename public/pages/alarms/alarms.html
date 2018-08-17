@@ -51,7 +51,10 @@
               <th></th>
             </tr>
           <tbody ng-repeat="alarm in alarms | orderBy:'_source[\'@timestamp\']':true">
-            <tr ng-class-odd="'alarm-row-odd'" ng-class-even="'alarm-row'">
+           <tr
+              ng-class-odd="alarm._source.error ? 'alarm-error-row-odd': 'alarm-row-odd'"
+              ng-class-even="alarm._source.error ? 'alarm-error-row' : 'alarm-row'"
+            >
               <td>{{ alarm._source['@timestamp'] | dateFormat }}</td>
               <td ng-repeat="col in alarmColumns" ng-if="col.visible">{{alarm._source[col.name] || alarm[col.name]}}</td>
               <td class="text-center edit-group">

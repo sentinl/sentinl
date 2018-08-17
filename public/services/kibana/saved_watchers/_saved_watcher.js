@@ -1,7 +1,7 @@
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/sentinl');
 
-module.factory('SavedWatcherKibana', function (courier, EMAILWATCHER) {
+module.factory('SavedWatcherKibana', function (courier, EMAILWATCHERADVANCED) {
   class SavedWatcherKibana extends courier.SavedObject {
     constructor(id) {
       super({
@@ -20,16 +20,22 @@ module.factory('SavedWatcherKibana', function (courier, EMAILWATCHER) {
     // if type:sentinl-watcher has no mapping, we push this mapping into ES
     static mapping = {
       title: 'string',
+      username: 'string',
       input: 'object',
       actions: 'object',
       transform: 'object',
       condition: 'object',
       report: 'boolean',
       disable: 'boolean',
+      save_payload: 'boolean',
+      impersonate: 'boolean',
+      spy: 'boolean',
       trigger: 'object',
+      wizard: 'object',
+      dashboard_link: 'string'
     };
 
-    static defaults = EMAILWATCHER;
+    static defaults = EMAILWATCHERADVANCED;
 
     // Order these fields to the top, the rest are alphabetical
     static fieldOrder = ['title'];

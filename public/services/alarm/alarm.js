@@ -1,7 +1,7 @@
 class Alarm {
-
-  constructor($http) {
+  constructor($http, sentinlHelper) {
     this.$http = $http;
+    this.sentinlHelper = sentinlHelper;
   }
 
   /**
@@ -9,7 +9,7 @@ class Alarm {
   */
   list() {
     return this.$http.get('../api/sentinl/list/alarms').catch(function (err) {
-      throw new Error(`fail to list alarms: ${err.message}`);
+      throw new Error(this.sentinlHelper.apiErrMsg(err, 'Alarm list'));
     });
   }
 
@@ -25,7 +25,7 @@ class Alarm {
     return this.$http.delete(`../api/sentinl/alarm/${index}/${type}/${id}`).then(function () {
       return id;
     }).catch(function (err) {
-      throw new Error(`fail to delete alarm or report: ${err.message}`);
+      throw new Error(this.sentinlHelper.apiErrMsg(err, 'Alarm delete'));
     });
   }
 
@@ -36,7 +36,7 @@ class Alarm {
   */
   updateFilter(timeInterval) {
     return this.$http.get('../api/sentinl/set/interval/' + JSON.stringify(timeInterval).replace(/\//g, '%2F')).catch(function (err) {
-      throw new Error(`fail to set time filter: ${err.message}`);
+      throw new Error(this.sentinlHelper.apiErrMsg(err, 'Alarm update time filter'));
     });
   }
 }

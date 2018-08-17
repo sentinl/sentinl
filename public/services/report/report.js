@@ -6,24 +6,20 @@ import Alarm from '../alarm/alarm';
 
 class Report extends Alarm {
 
-  constructor($http) {
+  constructor($http, sentinlHelper) {
     super($http);
     this.$http = $http;
+    this.sentinlHelper = sentinlHelper;
   }
 
   /**
   * Lists all available reports.
   */
   list() {
-    return this.$http.get('../api/sentinl/list/reports')
-      .then((response) => {
-        if (response.status !== 200) {
-          throw new Error('Fail to list reports');
-        }
-        return response;
-      });
+    return this.$http.get('../api/sentinl/list/reports').catch(function (err) {
+      throw new Error(this.sentinlHelper.apiErrMsg(err, 'Report list'));
+    });
   };
-
 };
 
 export default Report;

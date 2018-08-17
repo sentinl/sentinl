@@ -1,0 +1,36 @@
+<form iname="watcherWizardEverySchedule.form" ng-model-options="{ getterSetter: true }" novalidate>
+  <div class="row">
+    <div class="col-md-6">
+      <div class="form-group">
+        <label for="watcherWizardEverySchedule">
+          Every
+        </label>
+        <input
+          class="form-control"
+          id="number"
+          type="number"
+          ng-model="watcherWizardEverySchedule.number"
+          ng-model-options="{ debounce: 500 }"
+          ng-change="watcherWizardEverySchedule.handleChange()"
+        >
+        <small class="form-text text-muted">
+          <span>Timezone: {{watcherWizardEverySchedule.schedule_timezone}}</span>
+        </small>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="form-group">
+        <label for="watcherWizardEverySchedule">
+          Unit
+        </label>
+        <select
+          class="form-control condition-select"
+          ng-model="watcherWizardEverySchedule.selected"
+          ng-model-options="{ debounce: 500 }"
+          ng-options="o as o for o in watcherWizardEverySchedule.options"
+          ng-change="watcherWizardEverySchedule.handleChange()"
+        ></select>
+      </div>
+    </div>
+  </div>
+</form>

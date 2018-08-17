@@ -1,4 +1,4 @@
-import {isObject, forEach, has, cloneDeep} from 'lodash';
+import { get, assign, isObject, forEach, has, cloneDeep } from 'lodash';
 import uuid from 'uuid/v4';
 import SavedObjects from '../saved_objects';
 
@@ -14,14 +14,16 @@ class Watcher extends SavedObjects {
   * @param {object} Promise
   * @param {object} ServerConfig service
   */
-  constructor($http, $injector, Promise, ServerConfig, EMAILWATCHER, REPORTWATCHER) {
-    super($http, $injector, Promise, ServerConfig, 'watcher');
-    this.EMAILWATCHER = EMAILWATCHER;
+  constructor($http, $injector, Promise, ServerConfig, sentinlHelper, EMAILWATCHERADVANCED, EMAILWATCHERWIZARD, REPORTWATCHER) {
+    super($http, $injector, Promise, ServerConfig, 'watcher', sentinlHelper);
+    this.EMAILWATCHERADVANCED = EMAILWATCHERADVANCED;
+    this.EMAILWATCHERWIZARD = EMAILWATCHERWIZARD;
     this.REPORTWATCHER = REPORTWATCHER;
     this.$http = $http;
     this.$injector = $injector;
     this.Promise = Promise;
     this.ServerConfig = ServerConfig;
+    this.sentinlHelper = sentinlHelper;
     this.savedWatchersKibana = this.$injector.has('savedWatchersKibana') ? this.$injector.get('savedWatchersKibana') : null;
     // Kibi: inject saved objects api related modules if they exist.
     this.savedObjectsAPI = this.$injector.has('savedObjectsAPI') ? this.$injector.get('savedObjectsAPI') : null;
@@ -31,12 +33,6 @@ class Watcher extends SavedObjects {
     if (this.isSiren) {
       this.savedObjects = this.savedWatchers;
     }
-    this.fields = [
-      'actions', 'input',
-      'condition', 'transform',
-      'trigger', 'disable',
-      'report', 'title'
-    ];
   }
 
   /**
@@ -48,10 +44,13 @@ class Watcher extends SavedObjects {
   async play(id) {
     try {
       const watcher = await this.get(id);
-      const resp = await this.$http.post('../api/sentinl/watcher/_execute', watcher);
+      const resp = await this.$http.post('../api/sentinl/watcher/_execute', {
+        id: watcher.id,
+        _source: this.sentinlHelper.pickWatcherSource(watcher)
+      });
       return resp.data;
     } catch (err) {
-      throw err.data;
+      throw new Error(this.sentinlHelper.apiErrMsg(err, 'Watcher play'));
     }
   }
 
@@ -62,7 +61,7 @@ class Watcher extends SavedObjects {
   * @return {object} doc
   */
   get(id) {
-    return super.get(id, this.fields);
+    return super.get(id);
   }
 
   /**
@@ -73,11 +72,20 @@ class Watcher extends SavedObjects {
   */
   async new(type) {
     try {
-      this.savedObjects.Class.defaults = type === 'report' ? cloneDeep(this.REPORTWATCHER) : cloneDeep(this.EMAILWATCHER);
-      let watcher = await this.savedObjects.get();
-      return this.nestedSource(watcher, this.fields);
+      switch (type) {
+        case 'report':
+          this.savedObjects.Class.defaults = cloneDeep(this.REPORTWATCHER);
+          break;
+        case 'advanced':
+          this.savedObjects.Class.defaults = cloneDeep(this.EMAILWATCHERADVANCED);
+          break;
+        default:
+          this.savedObjects.Class.defaults = cloneDeep(this.EMAILWATCHERWIZARD);
+      }
+
+      return await this.savedObjects.get();
     } catch (err) {
-      throw new Error(`fail to create new watcher, ${err}`);
+      throw new Error(this.sentinlHelper.apiErrMsg(err, 'Watcher new'));
     }
   }
 
@@ -90,20 +98,18 @@ class Watcher extends SavedObjects {
   async save(watcher) {
     if (watcher.hasOwnProperty('save')) {
       try {
-        return await this.flatSource(watcher).save();
+        return await watcher.save();
       } catch (err) {
-        throw new Error(`fail to save watcher, ${err}`);
+        throw new Error(this.sentinlHelper.apiErrMsg(err, 'Watcher save'));
       }
     }
 
     try {
-      const savedWatcher = await this.savedObjects.get(watcher._id);
-      forEach(watcher._source, (val, key) => {
-        savedWatcher[key] = val;
-      });
+      const savedWatcher = await this.savedObjects.get(watcher.id);
+      assign(savedWatcher, watcher);
       return await savedWatcher.save();
     } catch (err) {
-      throw new Error(`fail to save watcher, ${err}`);
+      throw new Error(this.sentinlHelper.apiErrMsg(err, 'Watcher save'));
     }
   }
 }

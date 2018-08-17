@@ -1,0 +1,17 @@
+<kbn-top-nav name="sentinl" config="topNavMenu">
+  <!-- Transcluded elements. -->
+  <div data-transclude-slots>
+
+    <!-- Tabs. -->
+    <div data-transclude-slot="bottomRow" class="kuiLocalTabs">
+      <a
+        ng-repeat="item in tabsMenu.list"
+        class="kuiLocalTab"
+        ng-class="{'kuiLocalTab-isSelected': tabsMenu.currentPath === item.url}"
+        kbn-href="{{::item.url}}"
+      > 
+        {{::item.display}}
+      </a>
+    </div>
+  </div>
+</kbn-top-nav>

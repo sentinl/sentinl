@@ -22,7 +22,10 @@ sentinl:
 ```
 
 ##### Example (extended)
+<<<<<<< HEAD
+=======
 
+>>>>>>> master
 ```
 sentinl:
   es:
@@ -47,10 +50,8 @@ sentinl:
       ssl: true
       timeout: 10000  # mail server connection timeout
     slack:
-      active: false
-      username: username
-      hook: 'https://hooks.slack.com/services/<token>'
-      channel: '#channel'
+      active: true
+      token: 'xoxp-265182-395150-419610-7ba6fb346bcddec9'
     webhook:
       active: false
       method: POST
@@ -87,7 +88,11 @@ sentinl:
 ```
 
 ##### Example (extended)
+<<<<<<< HEAD
+The commented configuration is optional and are applied by default if not specified otherwise.
+=======
 The commented ('#') configuration is optional and is applied by default if not specified otherwise.
+>>>>>>> master
 
 ```yaml
 sentinl:
@@ -118,9 +123,13 @@ sentinl:
       #   ca: '/full/sys/path/to/ca/file'
     slack:
       active: false
+<<<<<<< HEAD
+      token: 'xoxp-265182-395150-419610-7ba6fb346bcddec9'
+=======
       username: 'username'
       hook: 'https://hooks.slack.com/services/<token>'
       channel: '#channel'
+>>>>>>> master
     webhook:
       active: false
       host: 'localhost'
@@ -129,6 +138,14 @@ sentinl:
       # path: ':/{{payload.watcher_id}}'
       # body: '{{payload.watcher_id}}{payload.hits.total}}'
       # method: POST
+<<<<<<< HEAD
+    report:
+      # active: true
+      # puppeteer:
+      #   browser_path: /path/to/chrome
+      # horseman:
+      #   browser_path: /path/to/phantomjs
+=======
     pushapps:
       active: false
       api_key: '<pushapps API Key>'  
@@ -150,4 +167,5 @@ sentinl:
       #         username: 'form input[data-test-subj="loginUsername"]' 
       #         password: 'form input[data-test-subj="loginPassword"]' 
       #         login_btn: 'form button[data-test-subj="loginSubmit"]' 
+>>>>>>> master
 ```

@@ -12,18 +12,20 @@ describe('Watcher', function () {
   let $httpBackend;
   let savedWatchers;
   let Promise;
-  let EMAILWATCHER;
+  let sentinlHelper;
+  let EMAILWATCHERADVANCED;
   let REPORTWATCHER;
 
   const init = function () {
     ngMock.module('kibana');
 
-    ngMock.inject(($injector, _Watcher_, _$httpBackend_, _Promise_, _REPORTWATCHER_, _EMAILWATCHER_) => {
+    ngMock.inject(($injector, _Watcher_, _$httpBackend_, _Promise_, _sentinlHelper_, _REPORTWATCHER_, _EMAILWATCHERADVANCED_) => {
       Promise = _Promise_;
       Watcher = _Watcher_;
       savedWatchers = $injector.has('savedWatchers') ? $injector.get('savedWatchers') : undefined;
       $httpBackend = _$httpBackend_;
-      EMAILWATCHER = _EMAILWATCHER_;
+      sentinlHelper = _sentinlHelper_;
+      EMAILWATCHERADVANCED = _EMAILWATCHERADVANCED_;
       REPORTWATCHER = _REPORTWATCHER_;
     });
   };
@@ -40,38 +42,6 @@ describe('Watcher', function () {
 
   it('can get an instance of the factory', function () {
     expect(Watcher).to.be.a('object');
-  });
-
-  it('make _source flat', function () {
-    let watcher = {
-      _id: uuid(),
-      _source: cloneDeep(EMAILWATCHER)
-    };
-
-    watcher = Watcher.flatSource(watcher);
-    const flattedFields = keys(watcher).filter((field) => field !== 'id');
-
-    forEach(flattedFields.sort(), function (field) {
-      expect(includes(Watcher.fields.sort(), field)).to.be(true);
-    });
-    expect(watcher._source).to.be(undefined);
-    expect(watcher._id).to.be(undefined);
-    expect(watcher.id).to.be.a('string');
-  });
-
-  it('make _source nested', function () {
-    let watcher = cloneDeep(EMAILWATCHER);
-    watcher.id = uuid();
-
-    watcher = Watcher.nestedSource(watcher);
-    const nestedFields = keys(watcher._source);
-
-    forEach(nestedFields.sort(), function (field) {
-      expect(includes(Watcher.fields.sort(), field)).to.be(true);
-    });
-    expect(watcher._source).to.be.an('object');
-    expect(watcher.id).to.be(undefined);
-    expect(watcher._id).to.be.a('string');
   });
 
 
@@ -124,16 +94,16 @@ describe('Watcher', function () {
       const id = '123';
 
       sinon.stub(savedWatchers, 'get', () => {
-        const watcher = cloneDeep(EMAILWATCHER);
+        const watcher = cloneDeep(EMAILWATCHERADVANCED);
         watcher.id = id;
         return Promise.resolve(watcher);
       });
 
       Watcher.get(id)
         .then((watcher) => {
-          expect(watcher._id).to.eql(id);
-          expect(watcher._source).to.be.an('object');
-          expect(isEqual(keys(watcher._source).sort(), keys(EMAILWATCHER).sort())).to.be(true);
+          expect(watcher.id).to.eql(id);
+          expect(watcher).to.be.an('object');
+          expect(isEqual(keys(sentinlHelper.pickWatcherSource(watcher)).sort(), keys(EMAILWATCHERADVANCED).sort())).to.be(true);
         })
         .catch(done)
         .finally(done);
@@ -148,15 +118,15 @@ describe('Watcher', function () {
       const type = 'email';
 
       sinon.stub(savedWatchers, 'get', () => {
-        const watcher = cloneDeep(EMAILWATCHER);
+        const watcher = cloneDeep(EMAILWATCHERADVANCED);
         watcher.id = id;
         return Promise.resolve(watcher);
       });
 
       Watcher.new(type)
         .then((watcher) => {
-          expect(watcher._source).to.be.an('object');
-          expect(isEqual(keys(watcher._source).sort(), keys(EMAILWATCHER).sort())).to.be(true);
+          expect(watcher).to.be.an('object');
+          expect(isEqual(keys(sentinlHelper.pickWatcherSource(watcher)).sort(), keys(EMAILWATCHERADVANCED).sort())).to.be(true);
         })
         .catch(done)
         .finally(done);
@@ -167,16 +137,13 @@ describe('Watcher', function () {
         return done();
       }
 
-      const id = '123';
-      const watcher = {
-        _id: id,
-        _source: cloneDeep(EMAILWATCHER),
-        save: function () { return Promise.resolve(id); }
-      };
+      const watcher = cloneDeep(EMAILWATCHERADVANCED);
+      watcher.id = '123';
+      watcher.save = function () { return Promise.resolve(watcher.id); };
 
       Watcher.save(watcher)
         .then((response) => {
-          expect(response).to.be.eql(id);
+          expect(response).to.be.eql(watcher.id);
         })
         .catch(done)
         .finally(done);

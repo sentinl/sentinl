@@ -1,0 +1,32 @@
+<form iname="ddWatcherAggInterval.form" ng-model-options="{ getterSetter: true }" novalidate>
+  <a pop-over pop-over-title="{{ddWatcherAggInterval.title | uppercase}}">
+    <strong class="pop-over-btn-text">INTERVAL</strong> {{ddWatcherAggInterval.number | limitText: ddWatcherAggInterval.textLimit}} {{ddWatcherAggInterval.selected | limitTo: 3}}
+  </a>
+  <div ng-hide="true" class="pop-over-content">
+    <div class="row">
+      <div class="col-md-6">
+        <div class="form-group">
+          <input
+            class="form-control"
+            id="ddWatcherAggIntervalNumber"
+            type="number"
+            ng-model="ddWatcherAggInterval.number"
+            ng-change="ddWatcherAggInterval.handleChange()"
+            ng-model-options="{ debounce: 500 }"
+          >
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <select
+            class="form-control condition-select"
+            ng-model="ddWatcherAggInterval.selected"
+            ng-model-options="{ debounce: 500 }"
+            ng-options="o as o for o in ddWatcherAggInterval.options"
+            ng-change="ddWatcherAggInterval.handleChange()"
+          ></select>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
