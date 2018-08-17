@@ -60,6 +60,9 @@ export default function (kibana) {
     uiExports: {
       spyModes: ['plugins/sentinl/dashboard_spy_button/alarm_button'],
       mappings: require('./server/mappings/sentinl.json'),
+      home: [
+        'plugins/sentinl/register_feature'
+      ],
       uiSettingDefaults: {
         'sentinl:experimental': {
           value: false,
