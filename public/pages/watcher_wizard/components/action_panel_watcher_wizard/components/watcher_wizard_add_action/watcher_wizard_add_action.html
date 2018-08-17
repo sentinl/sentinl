@@ -1,0 +1,10 @@
+<div class="btn-group" uib-dropdown is-open="watcherWizardAddAction.status.isOpen">
+  <button id="watcher-wizard-add-action-button" type="button" class="btn btn-sm btn-primary" uib-dropdown-toggle ng-disabled="disabled">
+    <i class="fa fa-plus"></i> Add action <span class="caret"></span>
+  </button>
+  <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="watcher-wizard-add-action-button">
+    <li role="menuitem" ng-repeat="action in watcherWizardAddAction.actionTypes">
+      <a href="javascript:void(0)" ng-click="watcherWizardAddAction.addAction(action)">{{action}}</a>
+    </li>
+  </ul>
+</div>

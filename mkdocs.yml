@@ -1,0 +1,37 @@
+site_name: SENTINL Docs
+site_url: https://github.com/sirensolutions/sentinl
+repo_url: https://github.com/sirensolutions/sentinl
+site_author: Lorenzo Mangani <lorenzo.mangani@gmail.com>
+copyright: "2018 QXIP BV and Siren Solutions"
+extra:
+    name: 'SENTINL'
+    link: 'https://github.com/sirensolutions/sentinl'
+pages:
+- Home: 
+    - 'index.md'
+    - 'Introduction.md'
+    - 'Installation.md'
+    - 'Config-Example.md'
+    - 'Authentication.md'
+    - 'Troubleshoot.md'
+    - 'FAQ.md'
+- User Guide:
+    - 'Alerts as Annotations': 'HOWTO-Kibana-Annotations.md'
+    - 'Alerts in Dashboards': 'HOWTO-Alerts-in-Dashboard.md'
+    - 'Alerts to Nagios NRDP': 'HOWTO-Alerts-in-Nagios-NRDP.md'
+    - 'Anomaly Detection': 'HOWTO-Anomaly-Detection.md'
+    - 'Anomaly Detection (ATLAS)': 'HOWTO-Statistical-Anomaly-Detector.md'
+    - 'Outlier Detection': 'HOWTO-Outlier-Detection.md'
+    - 'Watcher from SPY': 'HOWTO-Form-Watchers-from-SPY-Panel.md'
+    - 'SearchGuard Usage': 'HOWTO-Sentinl-and-SearchGuard.md'
+    - 'Transform Examples': 'HOWTO-Transform-Examples.md'
+- Watchers:
+    - 'Anatomy': 'Watcher-Anatomy.md'
+    - 'Controls': 'Watcher-Controls.md'
+    - 'Actions': 'Watcher-Actions.md'
+    - 'Wizard': 'Watcher-Wizard.md'
+- Examples:
+    - 'Watchers': 'Watcher-Examples.md'
+    - 'Reports': 'HOWTO-Create-Reports.md'
+- Development:
+    - 'API': 'API.md'

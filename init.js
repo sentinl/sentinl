@@ -16,15 +16,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import later from 'later';
+/*global later:false*/
+import 'later/later';
 import { once, has, forEach, includes } from 'lodash';
 import url from 'url';
-import masterRoute from './server/routes/routes';
+import path from 'path';
 import getScheduler from './server/lib/scheduler';
 import initIndices from './server/lib/initIndices';
 import getConfiguration from './server/lib/get_configuration';
-import {existsSync} from 'fs';
+import { existsSync } from 'fs';
 import Log from './server/lib/log';
+import getChromePath from './server/lib/actions/report/get_chrome_path';
+import installPhantomjs from './server/lib/actions/report/install_phantomjs';
+
+import sentinlRoutes from './server/routes/routes';
+import kableRoutes from './server/routes/kable';
+import timelionRoutes from './server/routes/timelion';
 
 const mappings = {
   alarm: require('./server/mappings/alarm_index'),
@@ -58,9 +65,27 @@ const init = once(function (server) {
 
   log.info('initializing ...');
 
-  if (!includes(['horseman', 'puppeteer'], config.settings.report.engine)) {
-    log.error(`unsupported authentication engine: ${config.settings.report.engine}. ` +
-      'Supported engines: horseman, puppeteer');
+  try {
+    if (config.settings.report.puppeteer.browser_path) {
+      server.expose('chrome_path', config.settings.report.puppeteer.browser_path);
+    } else {
+      server.expose('chrome_path', getChromePath());
+    }
+    log.info('Chrome bin found at: ' + server.plugins.sentinl.chrome_path);
+  } catch (err) {
+    log.error('setting puppeteer report engine: ' + err.toString());
+  }
+
+  if (config.settings.report.horseman.browser_path) {
+    server.expose('phantomjs_path', config.settings.report.horseman.browser_path);
+    log.info('PhantomJS bin found at: ' + server.plugins.sentinl.phantomjs_path);
+  } else {
+    installPhantomjs().then((pkg) => {
+      server.expose('phantomjs_path', pkg.binary);
+      log.info('PhantomJS bin found at: ' + server.plugins.sentinl.phantomjs_path);
+    }).catch((err) => {
+      log.error('setting horseman report engines: ' + err.toString());
+    });
   }
 
   // Object to hold different runtime values.
@@ -69,7 +94,9 @@ const init = once(function (server) {
   };
 
   // Load Sentinl routes.
-  masterRoute(server);
+  sentinlRoutes(server);
+  kableRoutes(server);
+  timelionRoutes(server);
 
   // auto detect elasticsearch host, protocol and port
   const esUrl = url.parse(server.config().get('elasticsearch.url'));

@@ -9,12 +9,16 @@ Thanks for taking time to report an issue. Please try to:
 This section will NOT appear in your Issue report!
 -->
 
+1. Sentinl and Kibana version 
 
-1. Issue Description
+2. Issue description
 
-2. Reproducing the Issue step-by-step
+3. Reproducing the issue step-by-step
 
-3. Expected Results vs. Actual Results
+4. Expected results vs. actual results
 
-4. Additional Details
+5. Sample of data
+
+6. Additional details
+
 

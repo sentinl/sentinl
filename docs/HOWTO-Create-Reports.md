@@ -58,8 +58,6 @@ sentinl:
 ```
 
 ##### Sentinl v6
-Two report engines are supported: horseman (default) and puppeteer.
-
 ```
 sentinl:
   settings:
@@ -67,6 +65,7 @@ sentinl:
       active: true
       host: localhost
     report:
+      active: true
       engine: horseman # options: horseman, puppeteer
 ```
 

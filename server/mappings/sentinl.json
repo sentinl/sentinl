@@ -1,6 +1,10 @@
 {
   "sentinl-watcher": {
     "properties": {
+      "wizard": {
+        "type": "object",
+        "enabled": false
+      },
       "input": {
         "type": "object",
         "enabled": false
@@ -27,12 +31,27 @@
       "disable": {
         "type": "boolean"
       },
+      "save_payload": {
+        "type": "boolean"
+      },
+      "impersonate": {
+        "type": "boolean"
+      },
+      "spy": {
+        "type": "boolean"
+      },
       "title": {
+        "type": "text"
+      },
+      "username": {
         "type": "text"
       },
       "sentinl": {
         "type": "object",
         "enabled": false
+      },
+      "dashboard_link": {
+        "type": "text"
       }
     }
   },

@@ -16,13 +16,19 @@ module.factory('SavedWatcher', function (courier) {
 
         mapping: {
           title: 'string',
+          username: 'string',
           input: 'object',
           actions: 'object',
           transform: 'object',
           condition: 'object',
           report: 'boolean',
           disable: 'boolean',
-          trigger: 'object'
+          save_payload: 'boolean',
+          impersonate: 'boolean',
+          spy: 'boolean',
+          trigger: 'object',
+          wizard: 'object',
+          dashboard_link: 'string'
         },
         // if this is null/undefined then the SavedObject will be assigned the defaults
         id: id,

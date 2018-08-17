@@ -11,7 +11,7 @@ function getClientMethod(client) {
   }
 }
 
-export {
+export default {
   federateIsAvailable,
   getClientMethod
 };

@@ -1,0 +1,102 @@
+<div uib-accordion-group class="panel-default" is-open="watcherWizardConsoleAction.status.isOpen">
+  <uib-accordion-heading>
+    <i class="fa fa-terminal"></i> {{watcherWizardConsoleAction.type}} action: {{watcherWizardConsoleAction.actionSettings.name}} <i class="pull-right glyphicon"
+    ng-class="{'glyphicon-chevron-down': watcherWizardConsoleAction.status.isOpen, 'glyphicon-chevron-right': !watcherWizardConsoleAction.status.isOpen}"></i>
+  </uib-accordion-heading>
+  <form name="{{watcherWizardConsoleAction.getTagId()}}.form" ng-model-options="{ getterSetter: true }" novalidate>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="form-group">
+          <label class="control-label" for="watcherWizardConsoleActionTitle">Title</label>
+          <input
+            id="{{watcherWizardConsoleAction.getTagId('title')}}"
+            name="{{watcherWizardConsoleAction.getTagId('title')}}"
+            placeholder="title"
+            type="text"
+            class="form-control"
+            ng-model="watcherWizardConsoleAction.actionSettings.name"
+          >
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-2">
+        <div class="form-group">
+          <label for="watcherWizardConsoleActionThrottle" class="control-label">Throttle</label>
+          <div class="input-group">
+            <div class="input-group-addon">
+              <i class="fa fa-snowflake-o" aria-hidden="true"></i>
+            </div>
+            <input
+              id="{{watcherWizardConsoleAction.getTagId('throttle')}}"
+              name="{{watcherWizardConsoleAction.getTagId('throttle')}}"
+              placeholder="0h0m1s"
+              type="text"
+              class="form-control"
+              ng-model="watcherWizardConsoleAction.actionSettings.throttle_period"
+            >
+          </div>
+        </div>
+      </div>
+      <div class="col-md-2">
+        <div class="form-group">
+          <label for="watcherWizardConsoleActionPriority" class="control-label">Priority</label>
+          <select
+            id="{{watcherWizardConsoleAction.getTagId('priority')}}"
+            name="{{watcherWizardConsoleAction.getTagId('priority')}}"
+            class="select form-control"
+            ng-model="watcherWizardConsoleAction.priority.selected"
+            ng-options="o as o for o in watcherWizardConsoleAction.priority.options"
+            ng-change="watcherWizardConsoleAction.priority.handleChange()"
+          ></select>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label for="watcherWizardConsoleActionPreferences" class="control-label">
+            <i class="fa fa-cog"></i> Preferences
+          </label>
+          <div>
+            <label class="checkbox-inline">
+              <input
+                type="checkbox"
+                id="{{watcherWizardConsoleAction.getTagId('preferences')}}"
+                name="{{watcherWizardConsoleAction.getTagId('preferences')}}"
+                ng-model="watcherWizardConsoleAction.actionSettings.console.stateless"
+                ng-checked="!watcherWizardConsoleAction.actionSettings.console.stateless"
+                ng-true-value="false"
+                ng-false-value="true"
+              >record action log
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-12">
+        <div class="form-group">
+          <mustache-template-input
+            content="watcherWizardConsoleAction.actionSettings.console.message"
+            injected-data="{payload: {hits: {total: 10}}, watcher: watcherWizardConsoleAction.watcher}"
+            ace-options="watcherWizardConsoleAction.aceOptions({maxLines: 30})"
+          >The query result and watcher information are provided in the <code>payload</code> and <code>watcher</code> variables and uses <a target="_blank" href="https://mustache.github.io/mustache.5.html">Mustache syntax</a>.</mustache-template-input>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="form-group">
+          <button
+            id="{{watcherWizardConsoleAction.getTagId('delete')}}"
+            name="{{watcherWizardConsoleAction.getTagId('delete')}}"
+            type="submit"
+            class="btn btn-sm btn-danger"
+            ng-click="watcherWizardConsoleAction.deleteAction()"
+          >Delete</button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>

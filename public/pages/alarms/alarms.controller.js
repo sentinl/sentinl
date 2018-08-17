@@ -4,7 +4,7 @@ import uiChrome from 'ui/chrome';
 
 function AlarmsController($rootScope, $scope, $route, $interval,
   $timeout, $injector, timefilter, Private, createNotifier, $window, $uibModal, navMenu,
-  globalNavState, Alarm, COMMON, $log, confirmModal) {
+  globalNavState, Alarm, COMMON, confirmModal, sentinlLog) {
   'ngInject';
 
   $scope.title = COMMON.alarms.title;
@@ -37,13 +37,20 @@ function AlarmsController($rootScope, $scope, $route, $interval,
   const notify = createNotifier({
     location: COMMON.alarms.title,
   });
+  const log = sentinlLog;
+  log.initLocation(COMMON.alarms.title);
+
+  function errorMessage(err) {
+    log.error(err);
+    notify.error(err);
+  }
 
   timefilter.enabled = true;
   try {
     timefilter.enableAutoRefreshSelector();
     timefilter.enableTimeRangeSelector();
   } catch (err) {
-    $log.warn('Kibana v6.2.X feature:', err);
+    log.warn('Kibana v6.2.X feature:', err);
   }
 
   $scope.topNavMenu = navMenu.getTopNav('alarms');
@@ -59,7 +66,7 @@ function AlarmsController($rootScope, $scope, $route, $interval,
       .then((resp) => {
         return Alarm.list().then((resp) => $scope.alarms = resp.data.hits.hits);
       })
-      .catch(notify.error);
+      .catch(errorMessage);
   };
 
   getAlarms($scope.timeInterval);
@@ -76,7 +83,7 @@ function AlarmsController($rootScope, $scope, $route, $interval,
     if (timeInterval) {
       $scope.timeInterval = timeInterval;
       Alarm.updateFilter($scope.timeInterval)
-        .catch(notify.error);
+        .catch(errorMessage);
     }
   });
 
@@ -129,7 +136,7 @@ function AlarmsController($rootScope, $scope, $route, $interval,
         notify.info(`Deleted alarm ${resp}`);
         getAlarms($scope.timeInterval);
       } catch (err) {
-        notify.error(`fail to delete alarm, ${err}`);
+        errorMessage(err);
       }
     }
 

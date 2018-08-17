@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# This script creates Sentinl 5 packages for the releases below.
+# This script creates Sentinl 6 packages for the releases below.
 # Example:
-#     ./createReleases.sh ~/Downloads/5-release/
+#     ./createReleases.sh ~/Downloads/6/
 
 releases=(
 "5.5.0"

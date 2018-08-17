@@ -21,7 +21,8 @@ import { stripObjectPropertiesByNameRegex } from '../lib/sentinl_helper';
 
 import _ from 'lodash';
 import { SpyModesRegistryProvider } from 'ui/registry/spy_modes';
-import EMAILWATCHER from '../constants/email_watcher';
+import EMAILWATCHERDASHBOARD from '../constants/email_watcher_dashboard';
+import rison from 'rison';
 
 const timeFractions = [60,60,24,7]; // 60s/min, 60m/hr, 24hr/day, 7day/week
 const timeUnits = ['s','m','h','d','w']; // second, minute, hour, day, week
@@ -41,7 +42,18 @@ let getUTCArray = (baseValue, timeFractions) =>  {
   return timeData;
 };
 
-const dashboardSpyButton = function ($scope, config) {
+const _getDashbaordUrl = function () {
+  const [urlBase, query] = window.location.href.split('?', 2);
+  let queryParameters = {};
+  query.split('&').forEach(parameter => {
+    const [key, value] = parameter.split('=');
+    queryParameters[key] = (value.startsWith('h@')) ? JSON.parse(sessionStorage[value]) : rison.decode(value);
+  });
+
+  return urlBase + '?' + _.map(queryParameters, (value, key) => `${key}=${rison.encode(value)}`).join('&');
+};
+
+const dashboardSpyButton = function ($scope) {
   $scope.$bind('req', 'searchSource.history[searchSource.history.length - 1]');
   $scope.$watchMulti([
     'req',
@@ -62,29 +74,24 @@ const dashboardSpyButton = function ($scope, config) {
     }
 
     $scope.createWatcher = function () {
-      const watcherInterval = 'every 5 minutes';
       const watcherRange = 'now-1h';
-      const alarm = {
-        _index: 'watcher',
-        _type: 'sentinl-watcher',
-        _id: undefined,
-        _new: 'true',
-        _source: _.cloneDeep(EMAILWATCHER)
-      };
+      const alarm = _.cloneDeep(EMAILWATCHERDASHBOARD);
+      alarm.spy = true;
+      alarm.dashboard_link = _getDashbaordUrl();
 
       // Set Index
-      alarm._source.input.search.request.index = $scope.indices;
+      alarm.input.search.request.index = $scope.indices;
       // Set Request Body
       if (req.fetchParams && req.fetchParams.body) {
-        alarm._source.input.search.request.body = req.fetchParams.body;
+        alarm.input.search.request.body = req.fetchParams.body;
       }
       // Patch Range
       if (indexPattern && indexPattern.getTimeField()) {
-        if (!alarm._source.input.search.request.body.query.bool.must) {
-          alarm._source.input.search.request.body.query.bool.must = [];
+        if (!alarm.input.search.request.body.query.bool.must) {
+          alarm.input.search.request.body.query.bool.must = [];
         }
 
-        alarm._source.input.search.request.body.query.bool.must.push({
+        alarm.input.search.request.body.query.bool.must.push({
           range: {
             [indexPattern.timeFieldName]: {
               from: watcherRange
@@ -92,14 +99,14 @@ const dashboardSpyButton = function ($scope, config) {
           }
         });
       }
-      if (alarm._source.input.search.request.body.query.bool.must) {
-        let must = alarm._source.input.search.request.body.query.bool.must;
+      if (alarm.input.search.request.body.query.bool.must) {
+        let must = alarm.input.search.request.body.query.bool.must;
         var newTimestamp = {};
         for (var key in must) {
           if (must.hasOwnProperty(key) && must[key].range) {
             if (must[key].range['@timestamp']) {
               if (must[key].range['@timestamp'].format) {
-                if (_.includes(must[key].range['@timestamp'].format,'epoch_millis')) {
+                if (_.includes(must[key].range['@timestamp'].format, 'epoch_millis')) {
                   let start = new Date(must[key].range['@timestamp'].gte);
                   let end = new Date(must[key].range['@timestamp'].lte);
                   let diff = new Date(end - start).getTime() / 1000; // UTC timestamp in seconds
@@ -126,7 +133,7 @@ const dashboardSpyButton = function ($scope, config) {
                   }
                   newTimestamp.gte = 'now-' + relativeTime + timeUnits[largestUnit] + '/' + timeUnits[largestUnit];
                   newTimestamp.lte = 'now/' + timeUnits[largestUnit];
-                  alarm._source.input.search.request.body.query.bool.must[key].range['@timestamp'] = newTimestamp;
+                  alarm.input.search.request.body.query.bool.must[key].range['@timestamp'] = newTimestamp;
                 }
               }
             }
@@ -134,10 +141,9 @@ const dashboardSpyButton = function ($scope, config) {
         }
       }
 
-      stripObjectPropertiesByNameRegex(alarm._source.input.search, /\$.*/);
+      stripObjectPropertiesByNameRegex(alarm.input.search, /\$.*/);
       window.localStorage.setItem('sentinl_saved_query', JSON.stringify(alarm));
     };
-
   });
 };
 

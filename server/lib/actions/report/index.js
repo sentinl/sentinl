@@ -1,172 +1,127 @@
-import uuid from 'uuid/v4';
-import url from 'url';
-import os from 'os';
-import {readFileSync} from 'fs';
-import moment from 'moment';
-import mustache from 'mustache';
-import urljoin from 'url-join';
-import {isObject, includes, get} from 'lodash';
-import getConfiguration from '../../get_configuration';
 import logHistory from '../../log_history';
 import Log from '../../log';
-import SuccessAndLog from '../../messages/success_and_log';
-import horsemanReport from './horseman';
-import puppeteerReport from './puppeteer';
+import getConfiguration from '../../get_configuration';
+import reportFactory from './report_factory';
+import { defaultsDeep, get } from 'lodash';
+import { renderMustacheEmailSubjectAndText } from '../helpers';
 
-function createReportFileName(filename, type = 'png') {
-  if (!filename) {
-    return `report-${uuid()}-${moment().format('DD-MM-YYYY-h-m-s')}.${type}`;
-  }
-  return filename + '.' + type;
-};
+export default async function reportAction({
+  server,
+  action,
+  watcherTitle,
+  esPayload,
+  actionName,
+  emailClient,
+}) {
+  try {
+    const config = getConfiguration(server);
+    const log = new Log(config.app_name, server, 'report');
 
-function base64String(path) {
-  return new Buffer(readFileSync(path)).toString('base64');
-}
+    action.report = defaultsDeep(action.report, config.settings.report.action);
 
-function createReportAttachment(fileName, filePath, fileType = 'png') {
-  fileType = `image/${fileType}`;
-  let data = '<html><img src=\'cid:my-report\' width=\'100%\'></html>';
-  if (fileType === 'pdf') {
-    fileType = 'application/pdf';
-    data = '<html><p>Find PDF report in the attachment.</p></html>';
-  }
+    let browserPath = server.plugins.sentinl.phantomjs_path;
+    if (config.settings.report.engine === 'puppeteer') {
+      browserPath = server.plugins.sentinl.chrome_path;
+    }
 
-  return [
-    {
-      data,
-      alternative: true
-    },
-    {
-      data: base64String(filePath),
-      type: fileType,
-      name: fileName,
-      encoded: true,
-      headers: {
-        'Content-ID': '<my-report>',
+    const { subject, text } = renderMustacheEmailSubjectAndText(actionName, action.subject, action.body, esPayload);
+
+    let authSelectorUsername = action.report.auth.selector_username;
+    let authSelectorPassword = action.report.auth.selector_password;
+    let authSelectorLoginBtn = action.report.auth.selector_login_btn;
+
+    if (action.report.auth.active) {
+      if (!config.settings.report.auth.modes.includes(action.report.auth.mode)) {
+        throw new Error('wrong auth mode, available modes: ' + config.settings.report.auth.modes.toString());
+      }
+
+      if (action.report.auth.mode === 'xpack') {
+        authSelectorUsername = config.settings.report.auth.css_selectors.xpack.username;
+        authSelectorPassword = config.settings.report.auth.css_selectors.xpack.password;
+        authSelectorLoginBtn = config.settings.report.auth.css_selectors.xpack.login_btn;
+      }
+
+      if (action.report.auth.mode === 'searchguard') {
+        authSelectorUsername = config.settings.report.auth.css_selectors.searchguard.username;
+        authSelectorPassword = config.settings.report.auth.css_selectors.searchguard.password;
+        authSelectorLoginBtn = config.settings.report.auth.css_selectors.searchguard.login_btn;
       }
     }
-  ];
-};
-
-function mustacheEmailSubjectAndText(actionName, subject, body, payload) {
-  subject = !subject || !subject.length ? `SENTINL: ${actionName}` : subject;
-  body = !body || !body.length ? 'Series Report {{payload._id}}: {{payload.hits.total}}' : body;
-  return {
-    subject: mustache.render(subject, {payload}),
-    text: mustache.render(body, {payload}),
-  };
-}
-
-export default async function doReport(server, email, task, action, actionName, payload) {
-  try {
-    let config = getConfiguration(server);
-    const log = new Log(config.app_name, server, 'report');
-    config = config.settings.report;
-
-    if (!config.active) {
-      throw new Error('Reports Disabled: Action requires Email Settings!');
-    }
-
-    if (!action.snapshot.url.length) {
-      log.info('Report Disabled: No URL Settings!');
-    }
-
-    const {subject, text} = mustacheEmailSubjectAndText(actionName, action.subject, action.body, payload);
-    log.debug(`report email subject: ${subject}, body: ${text}`);
-    const reportFileName = createReportFileName(action.snapshot.name, action.snapshot.type);
-    const reportFilePath = urljoin(os.tmpdir(), reportFileName);
 
     const options = {
-      log,
+      investigateAccessControl: server.plugins.investigate_access_control,
       server,
-      reportFilePath,
-      reportUrl: action.snapshot.url,
-      reportRes: action.snapshot.res,
-      reportType: action.snapshot.type,
-      reportDelay: action.snapshot.params.delay,
-      pdfLandscape: action.snapshot.pdf_landscape || true,
-      pdfFormat: action.snapshot.pdf_format || 'A4',
+      browserPath,
+      actionName,
+      actionLevel: action.report.priority,
+      watcherTitle,
+      esPayload,
+      engineName: config.settings.report.engine,
+      reportUrl: action.report.snapshot.url,
+      fileName: action.report.snapshot.name,
+      fileType: action.report.snapshot.type,
+      nodePath: server.plugins.sentinl.kibana_node_path,
+      viewPortWidth: action.report.snapshot.res.split('x')[0],
+      viewPortHeight: action.report.snapshot.res.split('x')[1],
+      delay: action.report.snapshot.params.delay,
+      pdfLandscape: action.report.snapshot.pdf_landscape,
+      pdfFormat: action.report.snapshot.pdf_format,
+      isStateless: action.report.stateless,
+      emailSubject: subject,
+      emailText: text,
+      emailFrom: action.report.from,
+      emailTo: action.report.to,
+      emailClient,
+      authActive: action.report.auth.active,
+      authMode: action.report.auth.mode,
+      authUsername: action.report.auth.username,
+      authPassword: action.report.auth.password,
+      authSelectorUsername,
+      authSelectorPassword,
+      authSelectorLoginBtn,
+      ignoreHTTPSErrors: config.settings.report.ignore_https_errors,
+      phantomBluebirdDebug: config.settings.report.horseman.phantom_bluebird,
+      chromeHeadless: config.settings.report.puppeteer.chrome_headless,
+      chromeDevtools: config.settings.report.puppeteer.chrome_devtools,
+      chromeArgs: config.settings.report.puppeteer.chrome_args,
+      collapseNavbarSelector: get(action.report, 'selectors.collapse_navbar_selector'),
     };
 
-    if (action.auth && action.auth.active) {
-      /* Test auth
-       *
-       * basic (username: user, password: passwd): http://httpbin.org/basic-auth/user/passwd
-       * custom selector (username: admin, password: 12345): http://testing-ground.scraping.pro/login
-       */
-      log.debug(`authentication enabled, mode: ${action.auth.mode}`);
-      if (!includes(['basic', 'xpack', 'searchguard', 'customselector'], action.auth.mode)) {
-        throw new Error(`unsupported authentication mode: ${action.auth.mode}` +
-          'Available modes: searchguard, xpack, basic, customselector');
-      }
-      options.authMode = get(action, 'auth.mode');
-      options.authActive = get(action, 'auth.active');
-      options.authUsername = get(action, 'auth.username');
-      options.authPassword = get(action, 'auth.password');
-      options.selectorUsername = get(action, 'auth.selector_username') || get(config, `auth.css_selectors.${action.auth.mode}.username`);
-      options.selectorPassword = get(action, 'auth.selector_password') || get(config, `auth.css_selectors.${action.auth.mode}.password`);
-      options.selectorLoginBtn = get(action, 'auth.selector_login_btn') || get(config, `auth.css_selectors.${action.auth.mode}.login_btn`);
+    const attachment = await reportFactory(options);
 
-      log.debug(`login page form CSS selectors: "${options.selectorUsername}",` +
-        `"${options.selectorPassword}", "${options.selectorLoginBtn}"`);
-    } else {
-      log.debug('authentication disabled');
-    }
-
-    let file;
-    if (config.engine === 'horseman') {
-      options.phantomPath = config.phantomjs_path;
-      await horsemanReport(options);
-    } else { // puppeteer
-      options.chromePath = config.chrome_path;
-      options.chromeDevtools = config.debug.devtools;
-      await puppeteerReport(options);
-    }
-
-    log.debug(`generated report file: ${reportFilePath}`);
-    const attachment = createReportAttachment(reportFileName, reportFilePath, action.snapshot.type);
     try {
-      log.debug(`sending email, watcher ${task._id}, text ${text}`);
-      await email.send({
-        text,
-        from: action.from,
-        to: action.to,
-        subject,
+      if (!options.isStateless) {
+        logHistory({
+          server,
+          actionName,
+          watcherTitle,
+          level: options.actionLevel,
+          message: options.emailText,
+          isReport: true,
+          attachment,
+        });
+      }
+
+      await emailClient.send({
+        text: options.emailText,
+        from: options.emailFrom,
+        to: options.emailTo,
+        subject: options.emailSubject,
         attachment,
       });
     } catch (err) {
-      log.error(`fail to send report email: ${err.message}`);
+      log.error(`${watcherTitle} report, send email: ` + err.toString());
+      logHistory({
+        server,
+        actionName,
+        watcherTitle,
+        level: 'high',
+        message: `${watcherTitle} report, send email: ` + err.toString(),
+        isReport: true,
+        isError: true,
+      });
     }
-
-    if (!action.stateless) {
-      try {
-        return await logHistory({
-          server,
-          title: task._source.title,
-          actionType: actionName,
-          level: action.priority || 'INFO',
-          payload: {},
-          report: true,
-          message: text,
-          object: attachment,
-        });
-      } catch (err) {
-        if (!action.stateless) {
-          return await logHistory({
-            server,
-            title: task._source.title,
-            actionType: actionName,
-            message: isObject(err) ? JSON.stringify(err) : err,
-          });
-        }
-
-        throw new Error(`fail to save report in Elasticsearch: ${err.message}`);
-      }
-    }
-
-    return new SuccessAndLog(log, 'stateless report does not save data to Elasticsearch');
   } catch (err) {
-    throw new Error(`execute report: ${err.message}`);
+    throw new Error('exec: ' + err.toString());
   }
-}
+};

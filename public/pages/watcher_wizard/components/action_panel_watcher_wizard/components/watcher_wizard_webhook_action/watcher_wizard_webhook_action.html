@@ -1,0 +1,296 @@
+<div uib-accordion-group class="panel-default" is-open="watcherWizardWebhookAction.status.isOpen">
+  <uib-accordion-heading>
+    <i class="fa fa-share"></i> {{watcherWizardWebhookAction.type}} action: {{watcherWizardWebhookAction.actionSettings.name}} <i class="pull-right glyphicon"
+    ng-class="{'glyphicon-chevron-down': watcherWizardWebhookAction.status.isOpen, 'glyphicon-chevron-right': !watcherWizardWebhookAction.status.isOpen}"></i>
+  </uib-accordion-heading>
+  <form name="{{watcherWizardWebhookAction.getTagId()}}.form" ng-model-options="{ getterSetter: true }" novalidate>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="form-group">
+          <label class="control-label">Title</label>
+          <input
+            id="{{watcherWizardWebhookAction.getTagId('title')}}"
+            name="{{watcherWizardWebhookAction.getTagId('title')}}"
+            placeholder="title"
+            type="text"
+            class="form-control"
+            ng-model="watcherWizardWebhookAction.actionSettings.name"
+          >
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-2">
+        <div class="form-group">
+          <label class="control-label">Throttle</label>
+          <div class="input-group">
+            <div class="input-group-addon">
+              <i class="fa fa-snowflake-o" aria-hidden="true"></i>
+            </div>
+            <input
+              id="{{watcherWizardWebhookAction.getTagId('throttle')}}"
+              name="{{watcherWizardWebhookAction.getTagId('throttle')}}"
+              placeholder="0h0m1s"
+              type="text"
+              class="form-control"
+              ng-model="watcherWizardWebhookAction.actionSettings.throttle_period"
+            >
+          </div>
+        </div>
+      </div>
+      <div class="col-md-2">
+        <div class="form-group">
+          <label class="control-label">Priority</label>
+          <select
+            id="{{watcherWizardWebhookAction.getTagId('priority')}}"
+            name="{{watcherWizardWebhookAction.getTagId('priority')}}"
+            class="select form-control"
+            ng-model="watcherWizardWebhookAction.priority.selected"
+            ng-options="o as o for o in watcherWizardWebhookAction.priority.options"
+            ng-change="watcherWizardWebhookAction.priority.handleChange()"
+          ></select>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label class="control-label">
+            <i class="fa fa-cog"></i> Preferences
+          </label>
+          <div>
+            <label class="checkbox-inline">
+              <input
+                type="checkbox"
+                id="{{watcherWizardWebhookAction.getTagId('preferences')}}"
+                name="{{watcherWizardWebhookAction.getTagId('preferences')}}"
+                ng-model="watcherWizardWebhookAction.actionSettings.webhook.stateless"
+                ng-checked="!watcherWizardWebhookAction.actionSettings.webhook.stateless"
+                ng-true-value="false"
+                ng-false-value="true"
+              >record action log
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-12" ng-hide="watcherWizardWebhookAction.actionSettings.webhook.stateless">
+        <label class="control-label">Alarm Message</label>
+        <input
+          id="{{watcherWizardWebhookAction.getTagId('message')}}"
+          name="{{watcherWizardWebhookAction.getTagId('message')}}"
+          type="text"
+          class="form-control"
+          ng-model="watcherWizardWebhookAction.actionSettings.webhook.message"
+        >
+      </div>
+    </div>
+
+    <div class="input-segment">
+      <div class="row">
+        <div class="col-md-6 col-lg-4">
+          <div class="form-group">
+            <label class="control-label">Host</label>
+            <input
+              id="{{watcherWizardWebhookAction.getTagId('host')}}"
+              name="{{watcherWizardWebhookAction.getTagId('host')}}"
+              placeholder="localhost"
+              type="text"
+              class="form-control"
+              ng-model="watcherWizardWebhookAction.actionSettings.webhook.host"
+            >
+          </div>
+        </div>
+
+        <div class="col-md-2">
+          <div class="form-group">
+            <label class="control-label">Port</label>
+            <input
+              id="{{watcherWizardWebhookAction.getTagId('port')}}"
+              name="{{watcherWizardWebhookAction.getTagId('port')}}"
+              placeholder="80"
+              type="text"
+              class="form-control"
+              ng-model="watcherWizardWebhookAction.actionSettings.webhook.port"
+            >
+          </div>
+        </div>
+
+        <div class="col-md-2">
+          <div class="form-group">
+            <label class="control-label">Method</label>
+            <select
+              id="{{watcherWizardWebhookAction.getTagId('method')}}"
+              name="{{watcherWizardWebhookAction.getTagId('method')}}"
+              class="select form-control"
+              ng-model="watcherWizardWebhookAction.actionSettings.webhook.method"
+              ng-options="m for m in watcherWizardWebhookAction.method_options"
+            ></select>
+          </div>
+        </div>
+
+        <div class="col-md-2">
+          <div class="form-group">
+            <div>
+              <label class="control-label">Protocol</label>
+            </div>
+            <label class="checkbox-inline">
+              <input
+                type="checkbox"
+                id="{{watcherWizardWebhookAction.getTagId('use_https')}}"
+                name="{{watcherWizardWebhookAction.getTagId('use_https')}}"
+                ng-model="watcherWizardWebhookAction.actionSettings.webhook.use_https"
+                ng-checked="watcherWizardWebhookAction.actionSettings.webhook.use_https"
+              >Use HTTPS
+            </label>
+          </div>
+        </div>
+
+        <div class="col-md-12">
+          <div class="form-group">
+            <label class="control-label">Endpoint</label>
+            <input
+              id="{{watcherWizardWebhookAction.getTagId('endpoint')}}"
+              name="{{watcherWizardWebhookAction.getTagId('endpoint')}}"
+              placeholder="/path"
+              type="text"
+              class="form-control"
+              ng-model="watcherWizardWebhookAction.actionSettings.webhook.path"
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row input-segment">
+      <div class="col-md-5 col-lg-3">
+        <div class="form-group">
+          <label class="control-label">Username</label>
+          <input
+            id="{{watcherWizardWebhookAction.getTagId('username')}}"
+            name="{{watcherWizardWebhookAction.getTagId('username')}}"
+            type="text"
+            class="form-control"
+            ng-model="watcherWizardWebhookAction.auth.username"
+            ng-change="watcherWizardWebhookAction.auth.handleChange()"
+          >
+          <span class="help-block">Leave blank if authentication is not needed</span>
+        </div>
+      </div>
+
+      <div class="col-md-5 col-lg-3">
+        <div class="form-group">
+          <label class="control-label">Password</label>
+          <input
+            id="{{watcherWizardWebhookAction.getTagId('password')}}"
+            name="{{watcherWizardWebhookAction.getTagId('password')}}"
+            type="password"
+            class="form-control"
+            ng-model="watcherWizardWebhookAction.auth.password"
+            ng-change="watcherWizardWebhookAction.auth.handleChange()"
+          >
+        </div>
+      </div>
+    </div>
+
+    <div class="row input-segment">
+      <div class="col-md-12">
+        <label class="control-label show">Headers</label>
+        <div ng-repeat="header in watcherWizardWebhookAction.header.values" class="row form-group">
+          <div class="col-md-4 tablet-stacked-input">
+            <input
+              id="{{watcherWizardWebhookAction.getTagId('header_property_' + $index)}}"
+              name="{{watcherWizardWebhookAction.getTagId('header_property_' + $index)}}"
+              type="text"
+              class="form-control"
+              ng-model="header[0]"
+              ng-change="watcherWizardWebhookAction.header.handleChange()"
+            >
+          </div>
+
+          <div class="col-md-6 tablet-stacked-input">
+            <input
+              id="{{watcherWizardWebhookAction.getTagId('header_value_' + $index)}}"
+              name="{{watcherWizardWebhookAction.getTagId('header_value_' + $index)}}"
+              type="text"
+              class="form-control"
+              ng-model="header[1]"
+              ng-change="watcherWizardWebhookAction.header.handleChange()"
+            >
+          </div>
+          <div class="col-md-2">
+            <button type="button" class="btn btn-sm btn-danger" ng-click="watcherWizardWebhookAction.header.values.splice($index, 1); watcherWizardWebhookAction.header.handleChange()">Remove</button>
+          </div>
+        </div>
+        <button type="button" class="btn btn-sm btn-primary" ng-click="watcherWizardWebhookAction.header.values.push(['', ''])">
+          <i class="fa fa-plus"></i> Add header
+        </button>
+      </div>
+    </div>
+
+    <div class="row input-segment" ng-show="watcherWizardWebhookAction.actionSettings.webhook.method === 'GET'">
+      <div class="col-md-12">
+        <label class="control-label show">Query Parameters</label>
+        <div ng-repeat="param in watcherWizardWebhookAction.params.values" class="row form-group">
+          <div class="col-md-4 tablet-stacked-input">
+            <input
+              id="{{watcherWizardWebhookAction.getTagId('param_property_' + $index)}}"
+              name="{{watcherWizardWebhookAction.getTagId('param_property_' + $index)}}"
+              type="text"
+              class="form-control"
+              ng-model="param[0]"
+              ng-change="watcherWizardWebhookAction.params.handleChange()"
+            >
+          </div>
+
+          <div class="col-md-6 tablet-stacked-input">
+            <input
+              id="{{watcherWizardWebhookAction.getTagId('param_value_' + $index)}}"
+              name="{{watcherWizardWebhookAction.getTagId('param_value_' + $index)}}"
+              type="text"
+              class="form-control"
+              ng-model="param[1]"
+              ng-change="watcherWizardWebhookAction.params.handleChange()"
+            >
+          </div>
+          <div class="col-md-2">
+            <button type="button" class="btn btn-sm btn-danger" ng-click="watcherWizardWebhookAction.params.values.splice($index, 1); watcherWizardWebhookAction.params.handleChange()">Remove</button>
+          </div>
+        </div>
+        <span class="help-block">The query result and watcher information are provided in the <code>payload</code> and <code>watcher</code> variables and can be accessed using
+              <a target="_blank" href="https://mustache.github.io/mustache.5.html">Mustache syntax</a>.</span>
+        <button type="button" class="btn btn-sm btn-primary" ng-click="watcherWizardWebhookAction.params.values.push(['', ''])">
+          <i class="fa fa-plus"></i> Add param
+        </button>
+      </div>
+    </div>
+
+    <div class="row" ng-hide="watcherWizardWebhookAction.actionSettings.webhook.method === 'GET'">
+      <div class="col-md-12">
+        <div class="form-group">
+          <mustache-template-input
+            content="watcherWizardWebhookAction.actionSettings.webhook.body"
+            injected-data="{payload: {hits: {total: 10}}, watcher: watcherWizardWebhookAction.watcher}"
+            ace-options="watcherWizardWebhookAction.aceOptions({mode: 'json', maxLines: 30})"
+          >The query result and watcher information are provided in the <code>payload</code> and <code>watcher</code> variables and can be accessed using
+            <a target="_blank" href="https://mustache.github.io/mustache.5.html">Mustache syntax</a>.
+          </mustache-template-input>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-12">
+        <div class="form-group">
+          <button
+            id="{{watcherWizardWebhookAction.getTagId('delete')}}"
+            name="{{watcherWizardWebhookAction.getTagId('delete')}}"
+            type="submit"
+            class="btn btn-sm btn-danger"
+            ng-click="watcherWizardWebhookAction.deleteAction()"
+          >Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>

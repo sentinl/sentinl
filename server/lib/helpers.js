@@ -23,7 +23,21 @@ const listAllFilesSync = function (dir, filesArr) {
   return filesArr;
 };
 
+const pickDefinedValues = function (obj) {
+  return JSON.parse(JSON.stringify(obj));
+};
+
+const makeExecutableIfNecessary = function (filename) {
+  try {
+    fs.accessSync(filename, fs.constants.X_OK);
+  } catch (err) {
+    fs.chmodSync(filename, '755');
+  }
+};
+
 module.exports = {
   isKibi,
   listAllFilesSync,
+  pickDefinedValues,
+  makeExecutableIfNecessary,
 };

@@ -2,7 +2,7 @@ import { get, isNumber } from 'lodash';
 import moment from 'moment';
 
 function ReportsController($rootScope, $scope, $route, $interval,
-  $timeout, timefilter, Private, createNotifier, $window, $uibModal, navMenu, globalNavState, Report, COMMON, $log, confirmModal) {
+  $timeout, timefilter, Private, createNotifier, $window, $uibModal, navMenu, globalNavState, Report, COMMON, confirmModal, sentinlLog) {
   'ngInject';
 
   $scope.title = COMMON.reports.title;
@@ -14,13 +14,20 @@ function ReportsController($rootScope, $scope, $route, $interval,
   const notify = createNotifier({
     location: COMMON.reports.title,
   });
+  const log = sentinlLog;
+  log.initLocation(COMMON.reports.title);
+
+  function errorMessage(err) {
+    log.error(err);
+    notify.error(err);
+  }
 
   timefilter.enabled = true;
   try {
     timefilter.enableAutoRefreshSelector();
     timefilter.enableTimeRangeSelector();
   } catch (err) {
-    $log.warn('Kibana v6.2.X feature:', err);
+    log.warn('Kibana v6.2.X feature:', err);
   }
 
   /* First Boot */
@@ -41,7 +48,7 @@ function ReportsController($rootScope, $scope, $route, $interval,
       .then((resp) => {
         return Report.list().then((resp) => $scope.reports = resp.data.hits.hits);
       })
-      .catch(notify.error);
+      .catch(errorMessage);
   };
 
   getReports($scope.timeInterval);
@@ -58,7 +65,7 @@ function ReportsController($rootScope, $scope, $route, $interval,
     if (timeInterval) {
       $scope.timeInterval = timeInterval;
       Report.updateFilter($scope.timeInterval)
-        .catch(notify.error);
+        .catch(errorMessage);
     }
   });
 
@@ -115,7 +122,7 @@ function ReportsController($rootScope, $scope, $route, $interval,
         notify.info(`Deleted report ${resp}`);
         getReports($scope.timeInterval);
       } catch (err) {
-        notify.error(`fail to delete report, ${err}`);
+        errorMessage(err);
       }
     }
 

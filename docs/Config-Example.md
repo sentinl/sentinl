@@ -22,7 +22,6 @@ sentinl:
 ```
 
 ##### Example (extended)
-
 ```
 sentinl:
   es:
@@ -47,10 +46,8 @@ sentinl:
       ssl: true
       timeout: 10000  # mail server connection timeout
     slack:
-      active: false
-      username: username
-      hook: 'https://hooks.slack.com/services/<token>'
-      channel: '#channel'
+      active: true
+      token: 'xoxp-265182-395150-419610-7ba6fb346bcddec9'
     webhook:
       active: false
       method: POST
@@ -87,7 +84,7 @@ sentinl:
 ```
 
 ##### Example (extended)
-The commented ('#') configuration is optional and is applied by default if not specified otherwise.
+The commented configuration is optional and are applied by default if not specified otherwise.
 
 ```yaml
 sentinl:
@@ -118,9 +115,7 @@ sentinl:
       #   ca: '/full/sys/path/to/ca/file'
     slack:
       active: false
-      username: 'username'
-      hook: 'https://hooks.slack.com/services/<token>'
-      channel: '#channel'
+      token: 'xoxp-265182-395150-419610-7ba6fb346bcddec9'
     webhook:
       active: false
       host: 'localhost'
@@ -129,25 +124,10 @@ sentinl:
       # path: ':/{{payload.watcher_id}}'
       # body: '{{payload.watcher_id}}{payload.hits.total}}'
       # method: POST
-    pushapps:
-      active: false
-      api_key: '<pushapps API Key>'  
-      # report:
-      #   engine: horseman # options: horseman, puppeteer
-      #   chrome_path: '/usr/bin/chromium' # path to Chrome v59+ or Chromium v59+
-      #   phantomjs_path: '/opt/kibana/plugins/sentinl/node_modules/phantomjs-prebuilt/bin/phantomjs' # path to PhantomJS
-      #   active: true
-      #   debug:
-      #     headless: true
-      #     devtools: false
-      #   auth:
-      #     css_selectors: # howto find selectors: https://developers.google.com/web/updates/2015/05/search-dom-tree-by-css-selector
-      #       searchguard:
-      #         username: 'form input[name="username"]' 
-      #         password: 'form input[name="password"]' 
-      #         login_btn: 'form button.btn.btn-login' 
-      #       xpack:
-      #         username: 'form input[data-test-subj="loginUsername"]' 
-      #         password: 'form input[data-test-subj="loginPassword"]' 
-      #         login_btn: 'form button[data-test-subj="loginSubmit"]' 
+    report:
+      # active: true
+      # puppeteer:
+      #   browser_path: /path/to/chrome
+      # horseman:
+      #   browser_path: /path/to/phantomjs
 ```
