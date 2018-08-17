@@ -89,15 +89,6 @@ class SavedObjects {
       throw new Error(this.sentinlHelper.apiErrMsg(err, 'SavedObjects hash text'));
     }
   }
-
-  async hash(text) {
-    try {
-      const resp = await this.$http.post('../api/sentinl/hash', { text });
-      return resp.data.sha;
-    } catch (err) {
-      throw new Error('hash text: ' + err.message);
-    }
-  }
 }
 
 export default SavedObjects;
