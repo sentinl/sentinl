@@ -125,28 +125,9 @@ sentinl:
       # body: '{{payload.watcher_id}}{payload.hits.total}}'
       # method: POST
     report:
-      active: true
-      executable_path: '/usr/bin/chromium' # path to Chrome v59+ or Chromium v59+
-      timeout: 5000
-      # authentication:
-      #   enabled: true
-      #   mode:
-      #     searchguard: false
-      #     xpack: false
-      #     basic: false
-      #     custom: true
-      #   custom:
-      #     username_input_selector: '#username'
-      #     password_input_selector: '#password'
-      #     login_btn_selector: '#login-btn'
-      # file:
-      #   pdf:
-      #     format: 'A4'
-      #     landscape: true
-      #   screenshot:
-      #     width: 1280
-      #     height: 900
-    pushapps:
-      active: false
-      api_key: '<pushapps API Key>'  
+      # active: true
+      # puppeteer:
+      #   browser_path: /path/to/chrome
+      # horseman:
+      #   browser_path: /path/to/phantomjs
 ```

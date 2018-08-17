@@ -23,3 +23,4 @@ export default angular.module('apps/sentinl.services', [
   SentinlLog.name,
   SentinlHelper.name,
 ]);
+

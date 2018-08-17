@@ -14,6 +14,7 @@ import { isKibi } from './helpers';
 import logHistory from './log_history';
 import KableClient from './kable_client';
 import TimelionClient from './timelion_client';
+import sirenFederateHelper from './siren/federate_helper';
 
 /**
 * Helper class to handle watchers
@@ -345,29 +346,17 @@ export default class WatcherHandler {
   _checkWatcher(task) {
     this.log.info('executing');
 
-    let sirenFederateAvailable = false;
+    let method = 'search';
     try {
-      const elasticsearchPlugins = this.server.config().get('investigate_core.clusterplugins');
-      if (elasticsearchPlugins && (elasticsearchPlugins.indexOf('siren-vanguard') > -1 ||
-          elasticsearchPlugins.indexOf('siren-federate') > -1)) {
-        sirenFederateAvailable = true;
+      if (sirenFederateHelper.federateIsAvailable(this.server)) {
+        method = sirenFederateHelper.getClientMethod(this.client);
       }
     } catch (err) {
-      this.log.warning('"elasticsearch.plugins" not available when running from kibana');
-    }
-
-    let method = 'search';
-    if (sirenFederateAvailable) {
-      for (let candidate of ['investigate_search', 'kibi_search', 'vanguard_search', 'search']) {
-        if (this.client[candidate]) {
-          method = candidate;
-          break;
-        }
-      }
+      this.log.warning('Siren federate: "elasticsearch.plugins" is not available when running from kibana: ' + err.toString());
     }
 
     const actions = this.getActions(task._source.actions);
-    let search = get(task._source, 'input.search'); // search.request, search.kable
+    let search = get(task._source, 'input.search'); // search.request, search.kable, search.timelion
     let condition = task._source.condition;
     let transform = task._source.transform;
 
@@ -392,7 +381,7 @@ export default class WatcherHandler {
       try {
         const {method, search, condition, transform, actions} = this._checkWatcher(task);
         if (this.config.settings.authentication.impersonate || task._source.impersonate) {
-          this.client = await this.getImpersonatedClient(task._id, task._source.title);
+          this.client = await this.getImpersonatedClient(task._id);
         }
         return await this._execute(task, method, search, condition, transform, actions);
       } catch (err) {
@@ -414,7 +403,7 @@ export default class WatcherHandler {
   *
   * @return {promise} client - impersonated client
   */
-  async getImpersonatedClient(watcherId, watcherTitle) {
+  async getImpersonatedClient(watcherId) {
     try {
       const user = await this.getUser(watcherId);
       if (!user.found) {

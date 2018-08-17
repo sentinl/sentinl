@@ -24,7 +24,7 @@ import path from 'path';
 import getScheduler from './server/lib/scheduler';
 import initIndices from './server/lib/initIndices';
 import getConfiguration from './server/lib/get_configuration';
-import { existsSync, chmodSync } from 'fs';
+import { existsSync } from 'fs';
 import Log from './server/lib/log';
 import getChromePath from './server/lib/actions/report/get_chrome_path';
 import installPhantomjs from './server/lib/actions/report/install_phantomjs';
