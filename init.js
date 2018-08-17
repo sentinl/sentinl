@@ -25,9 +25,12 @@ import initIndices from './server/lib/initIndices';
 import getConfiguration from './server/lib/get_configuration';
 import { existsSync, chmodSync } from 'fs';
 import Log from './server/lib/log';
-import routes from './server/routes/routes';
 import getChromePath from './server/lib/actions/report/get_chrome_path';
 import installPhantomjs from './server/lib/actions/report/install_phantomjs';
+
+import sentinlRoutes from './server/routes/routes';
+import kableRoutes from './server/routes/kable';
+import timelionRoutes from './server/routes/timelion';
 
 const mappings = {
   alarm: require('./server/mappings/alarm_index'),
@@ -90,7 +93,9 @@ const init = once(function (server) {
   };
 
   // Load Sentinl routes.
-  routes(server);
+  sentinlRoutes(server);
+  kableRoutes(server);
+  timelionRoutes(server);
 
   // auto detect elasticsearch host, protocol and port
   const esUrl = url.parse(server.config().get('elasticsearch.url'));

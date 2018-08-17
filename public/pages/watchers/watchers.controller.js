@@ -1,5 +1,5 @@
 /* global angular */
-import { isObject, find, keys, forEach } from 'lodash';
+import { get, isObject, find, keys, forEach } from 'lodash';
 import moment from 'moment';
 import $ from 'jquery';
 import ace from 'ace';
@@ -30,6 +30,12 @@ function  WatchersController($rootScope, $scope, $route, $interval,
   timefilter.enabled = false;
   $scope.watchers = [];
   $scope.wizardHelper = wizardHelper;
+
+  $scope.inputInfo = function (watcher) {
+    const index = get(watcher, 'input.search.request.index');
+    if (index) return index.join(',');
+    return get(watcher, 'input.search.kable.expression') || get(watcher, 'input.search.timelion.sheet');
+  };
 
   /**
   * Run watcher on demand.

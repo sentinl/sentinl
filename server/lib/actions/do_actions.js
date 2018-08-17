@@ -222,10 +222,22 @@ export default function (server, actions, payload, task) {
       (async () => {
         try {
           formatterSubject = action.email.subject || ('SENTINL: ' + actionId);
-          formatterBody = action.email.body || 'Series Alarm {{ payload._id}}: {{payload.hits.total}}';
+
+          formatterBody = action.email.body;
+          if (!formatterBody) {
+            if (payload.docs) {
+              formatterBody = 'Number of documents: {{payload.docs.length}}';
+            } else if (payload.sheet) {
+              formatterBody = 'Number of 0 sheet data: {{payload.sheet[0].list[0].data.length}}';
+            } else { // hits
+              formatterBody = 'Series Alarm {{payload._id}}: {{payload.hits.total}}';
+            }
+          }
+
           subject = mustache.render(formatterSubject, {payload: payload, watcher: task._source});
           text = mustache.render(formatterBody, {payload: payload, watcher: task._source});
           priority = action.email.priority || 'medium';
+
 
           if (!action.email.stateless) {
             // Log Event
@@ -282,7 +294,18 @@ export default function (server, actions, payload, task) {
       (async () => {
         try {
           formatterSubject = action.email_html.subject ? action.email_html.subject : 'SENTINL: ' + actionId;
-          formatterBody = action.email_html.body || 'Series Alarm {{ payload._id}}: {{payload.hits.total}}';
+
+          formatterBody = action.email_html.body;
+          if (!formatterBody) {
+            if (payload.docs) {
+              formatterBody = 'Number of documents: {{payload.docs.length}}';
+            } else if (payload.sheet) {
+              formatterBody = 'Number of 0 sheet data: {{payload.sheet[0].list[0].data.length}}';
+            } else { // hits
+              formatterBody = 'Series Alarm {{payload._id}}: {{payload.hits.total}}';
+            }
+          }
+
           let formatterConsole = action.email_html.html || '<p>Series Alarm {{ payload._id}}: {{payload.hits.total}}</p>';
           subject = mustache.render(formatterSubject, {payload: payload, watcher: task._source});
           text = mustache.render(formatterBody, {payload: payload, watcher: task._source});

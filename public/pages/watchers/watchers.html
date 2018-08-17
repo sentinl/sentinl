@@ -53,7 +53,7 @@
                 ng-show="watcher.trigger.schedule.later">
                 {{ watcher.trigger.schedule.later }}
               </td>
-              <td class="col-md-2">{{watcher.input.search.request.index.join(',')}}</td>
+              <td class="col-md-2">{{ inputInfo(watcher) }}</td>
               <td class="col-md-3">
                 <span ng-repeat="(id, settings) in watcher.actions">
                   <p>{{ settings.name }}</p>

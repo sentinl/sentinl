@@ -12,6 +12,8 @@ import WarningAndLog from './messages/warning_and_log';
 import SuccessAndLog from './messages/success_and_log';
 import { isKibi } from './helpers';
 import logHistory from './log_history';
+import KableClient from './kable_client';
+import TimelionClient from './timelion_client';
 
 /**
 * Helper class to handle watchers
@@ -34,6 +36,8 @@ export default class WatcherHandler {
         }
       }
     };
+    this.kable = new KableClient(server);
+    this.timelion = new TimelionClient(server);
   }
 
   /**
@@ -277,23 +281,38 @@ export default class WatcherHandler {
   *
   * @param {object} task watcher
   * @param {string} ES search method name
-  * @param {object} ES search request of watcher
+  * @param {object} ES search request or kable
   * @param {object} condition of watcher
   * @param {object} transform of watcher
   * @param {object} actions of watcher
   * @return {object} success or warning message
   */
-  async _execute(task, method, request, condition, transform, actions) {
-    let payload;
-
-    try {
-      payload = await this.search(request, method); // data from Elasticsearch
-    } catch (err) {
-      throw new Error('get payload: ' + err.toString());
-    }
-
+  async _execute(task, method, search, condition, transform, actions) {
     const isAnomaly = has(task._source, 'sentinl.condition.anomaly') ? true : false;
     const isRange = has(task._source, 'sentinl.condition.range') ? true : false;
+    let payload;
+
+    if (search.timelion) {
+      try {
+        payload = await this.timelion.run(search.timelion);
+      } catch (err) {
+        throw new Error('timelion payload: ' + err.toString());
+      }
+    } else if (search.kable) {
+      try {
+        payload = await this.kable.run(search.kable);
+      } catch (err) {
+        throw new Error('get kable payload: ' + err.toString());
+      }
+    } else if (search.request) {
+      try {
+        payload = await this.search(search.request, method); // data from Elasticsearch
+      } catch (err) {
+        throw new Error('get payload: ' + err.toString());
+      }
+    } else {
+      throw new Error('unknown input: ' + JSON.stringify(search));
+    }
 
     try {
       const resp = this._executeCondition(payload, condition, isAnomaly, isRange);
@@ -348,18 +367,18 @@ export default class WatcherHandler {
     }
 
     const actions = this.getActions(task._source.actions);
-    let request = has(task._source, 'input.search.request') ? task._source.input.search.request : undefined;
-    let condition = size(task._source.condition) ? task._source.condition : undefined;
-    let transform = task._source.transform ? task._source.transform : undefined;
+    let search = get(task._source, 'input.search'); // search.request, search.kable
+    let condition = task._source.condition;
+    let transform = task._source.transform;
 
-    if (!request) {
-      throw new Error('search request is malformed');
+    if (!search) {
+      throw new Error('search request or kable is malformed');
     }
     if (!condition) {
       throw new Error('condition is malformed');
     }
 
-    return {method, request, condition, transform, actions};
+    return {method, search, condition, transform, actions};
   }
 
   /**
@@ -371,11 +390,11 @@ export default class WatcherHandler {
     this.log = new Log(this.config.app_name, this.server, `watcher ${task._id}`);
     if (!isEmpty(this.getActions(task._source.actions))) {
       try {
-        const {method, request, condition, transform, actions} = this._checkWatcher(task);
+        const {method, search, condition, transform, actions} = this._checkWatcher(task);
         if (this.config.settings.authentication.impersonate || task._source.impersonate) {
           this.client = await this.getImpersonatedClient(task._id, task._source.title);
         }
-        return await this._execute(task, method, request, condition, transform, actions);
+        return await this._execute(task, method, search, condition, transform, actions);
       } catch (err) {
         logHistory({
           server: this.server,
