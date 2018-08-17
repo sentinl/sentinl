@@ -46,10 +46,8 @@ sentinl:
       ssl: true
       timeout: 10000  # mail server connection timeout
     slack:
-      active: false
-      username: username
-      hook: 'https://hooks.slack.com/services/<token>'
-      channel: '#channel'
+      active: true
+      token: 'xoxp-265182-395150-419610-7ba6fb346bcddec9'
     webhook:
       active: false
       method: POST
@@ -117,9 +115,7 @@ sentinl:
       #   ca: '/full/sys/path/to/ca/file'
     slack:
       active: false
-      username: 'username'
-      hook: 'https://hooks.slack.com/services/<token>'
-      channel: '#channel'
+      token: 'xoxp-265182-395150-419610-7ba6fb346bcddec9'
     webhook:
       active: false
       host: 'localhost'

@@ -26,6 +26,7 @@ import Promise from 'bluebird';
 import moment from 'moment';
 import rison from 'rison';
 import mustache from 'mustache';
+import { WebClient } from '@slack/client';
 import getConfiguration from '../get_configuration';
 import getElasticsearchClient from '../get_elasticsearch_client';
 import logHistory from '../log_history';
@@ -71,11 +72,10 @@ export default function (server, actions, payload, task) {
   }
 
   /* Slack Settings */
-  var slack;
+  let slack;
   try {
     if (config.settings.slack.active) {
-      var Slack = require('node-slack');
-      slack = new Slack(config.settings.slack.hook);
+      slack = new WebClient(config.settings.slack.token);
     }
   } catch (err) {
     log.error('slack client: ' + err.toString());
@@ -441,16 +441,16 @@ export default function (server, actions, payload, task) {
           }
 
           try {
-            slack.send({
-              text: message,
+            const resp = await slack.chat.postMessage({
               channel: action.slack.channel,
-              username: config.settings.slack.username
+              text: message
             });
+            log.info(`Message sent to slack channel ${resp.channel} as ${resp.message.username}`);
           } catch (err) {
-            throw new Error(`fail sending to ${config.settings.slack.hook}, ${err}`);
+            throw new Error(`Failed to send message to channel ${action.slack.channel} using token ${config.settings.slack.token}, ${err}`);
           }
         } catch (err) {
-          server.log('slack action: ' + err.toString());
+          log.error(`${task._source.title}, report action: ` + err.toString());
           logHistory({
             server,
             watcherTitle: task._source.title,
@@ -537,7 +537,7 @@ export default function (server, actions, payload, task) {
           }
           req.end();
         } catch (err) {
-          server.log('webhook action: ' + err.toString());
+          log.error(`${task._source.title}, report action: ` + err.toString());
           logHistory({
             server,
             watcherTitle: task._source.title,
@@ -576,7 +576,7 @@ export default function (server, actions, payload, task) {
             payload: !task._source.save_payload ? {} : payload,
           });
         } catch (err) {
-          server.log('elastic action: ' + err.toString());
+          log.error(`${task._source.title}, report action: ` + err.toString());
           logHistory({
             server,
             watcherTitle: task._source.title,

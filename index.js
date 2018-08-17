@@ -247,9 +247,7 @@ export default function (kibana) {
           }).default(),
           slack: Joi.object({
             active: Joi.boolean().default(false),
-            username: Joi.string(),
-            hook: Joi.string(),
-            channel: Joi.string(),
+            token: Joi.string(),
           }).default(),
           webhook: Joi.object({
             active: Joi.boolean().default(false),

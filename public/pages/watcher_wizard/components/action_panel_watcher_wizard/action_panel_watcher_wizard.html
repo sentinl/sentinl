@@ -71,6 +71,14 @@
                       action-delete="actionPanelWatcherWizard.onDelete({actionId: actionId})"
                       ace-options="actionPanelWatcherWizard.aceOptions({mode: mode, maxLines: maxLines, minLines: minLines})"
                     ></watcher-wizard-webhook-action>
+                    <watcher-wizard-slack-action
+                      ng-if="actionPanelWatcherWizard.isAction(actionSettings, 'slack')"
+                      action-id="{{actionId}}"
+                      watcher="actionPanelWatcherWizard.watcher"
+                      action-settings="actionSettings"
+                      action-delete="actionPanelWatcherWizard.onDelete({actionId: actionId})"
+                      ace-options="actionPanelWatcherWizard.aceOptions({mode: mode, maxLines: maxLines, minLines: minLines})"
+                    ></watcher-wizard-slack-action>
                     <watcher-wizard-elastic-action
                       ng-if="actionPanelWatcherWizard.isAction(actionSettings, 'elastic')"
                       action-id="{{actionId}}"

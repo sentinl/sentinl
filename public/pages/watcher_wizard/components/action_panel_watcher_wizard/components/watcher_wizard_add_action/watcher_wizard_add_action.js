@@ -85,6 +85,14 @@ class WatcherWizardAddAction {
           message: ''
         },
       },
+      Slack: {
+        name: 'Slack alarm',
+        throttle_period: '1m',
+        slack: {
+          priority: 'low',
+          stateless: false,
+        },
+      },
       Elastic: {
         name: 'Elasticsearch alarm',
         throttle_period: '1s',
