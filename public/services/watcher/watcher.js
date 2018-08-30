@@ -45,7 +45,7 @@ class Watcher extends SavedObjects {
     try {
       const watcher = await this.get(id);
       const resp = await this.$http.post('../api/sentinl/watcher/_execute', {
-        id: watcher.id,
+        _id: watcher.id,
         _source: this.sentinlHelper.pickWatcherSource(watcher)
       });
       return resp.data;
