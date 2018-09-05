@@ -1,7 +1,7 @@
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/sentinl');
 
-module.factory('SavedScriptKibana', function (courier) {
+module.factory('SavedScriptKibana', function (courier, sentinlConfig) {
   class SavedScriptKibana extends courier.SavedObject {
     constructor(id) {
       super({
@@ -14,8 +14,8 @@ module.factory('SavedScriptKibana', function (courier) {
       });
     }
 
-    // save these objects with the 'sentinl-script' type
-    static type = 'sentinl-script';
+    // save these objects with the script type
+    static type = sentinlConfig.es.script_type;
 
     // if type:sentinl-script has no mapping, we push this mapping into ES
     static mapping = {

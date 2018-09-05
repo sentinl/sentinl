@@ -13,7 +13,7 @@ savedObjectManagementRegistry.register({
 });
 
 // This is the only thing that gets injected into controllers
-module.service('savedWatchersKibana', function (Promise, SavedWatcherKibana, kbnIndex, kbnUrl, $http, chrome) {
+module.service('savedWatchersKibana', function (Promise, SavedWatcherKibana, kbnIndex, kbnUrl, $http, chrome, sentinlConfig) {
   const savedWatcherLoader = new SavedObjectLoader(SavedWatcherKibana, kbnIndex, kbnUrl, $http, chrome);
   savedWatcherLoader.urlFor = function (id) {
     return kbnUrl.eval('#/{{id}}', { id: id });
@@ -21,7 +21,7 @@ module.service('savedWatchersKibana', function (Promise, SavedWatcherKibana, kbn
 
   // Customize loader properties since adding an 's' on type doesn't work for type 'sentinl-watcher'.
   savedWatcherLoader.loaderProperties = {
-    name: 'sentinl-watcher',
+    name: sentinlConfig.es.watcher_type,
     noun: 'Saved Watchers',
     nouns: 'saved watchers'
   };

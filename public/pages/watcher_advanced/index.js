@@ -17,7 +17,9 @@ routes
       watcher: function ($injector) {
         const $route = $injector.get('$route');
         const kbnUrl = $injector.get('kbnUrl');
-        const watcherService = $injector.get('Watcher');
+        const config = $injector.get('sentinlConfig');
+        const watcherFactory = $injector.get('watcherFactory');
+        const watcherService = watcherFactory.get(config.api.type);
         const notifier = new Notifier({ location: 'Watcher' });
 
         const watcherId = $route.current.params.id;

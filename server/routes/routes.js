@@ -7,7 +7,6 @@ import getElasticsearchClient from '../lib/get_elasticsearch_client';
 import Crypto from '../lib/crypto';
 import WatcherHandler from '../lib/watcher_handler';
 import Log from '../lib/log';
-import { isKibi } from '../lib/helpers';
 import { convert as convertSQLtoDSL } from 'elasql';
 
 const delay = function (ms) {
@@ -60,6 +59,7 @@ var getAlarms = async function (type, server, req, reply) {
         }
       }
     });
+
     return reply(resp);
   } catch (err) {
     return reply(handleESError(err));
@@ -106,46 +106,29 @@ export default function routes(server) {
     }
   });
 
-  /**
-  * Route to get some of Sentinl configurations.
-  */
-  server.route({
-    path: '/api/sentinl/config',
-    method: ['POST', 'GET'],
-    handler: function (req, reply) {
-      return reply({
-        es: {
-          index: config.es.default_index,
-          type: config.es.default_type,
-          number_of_results: config.es.results,
-          timezone: config.es.watcher.schedule_timezone,
-          timefield: config.es.timefield,
-        },
-        authentication: {
-          impersonate: config.settings.authentication.impersonate,
-        }
-      });
-    }
-  });
-
   server.route({
     method: 'DELETE',
-    path: '/api/sentinl/alarm/{index}/{type}/{id}',
+    path: '/api/sentinl/alarm/{id}/{index?}',
+    config: {
+      validate: {
+        params: {
+          id: Joi.string().required(),
+          index: Joi.string().required(),
+        },
+      },
+    },
     handler: async function (req, reply) {
-      // Check if alarm index and discard everything else
-      if (!req.params.index.substr(0, config.es.alarm_index.length) === config.es.alarm_index) {
-        log.error('forbidden delete request! ' + req.params);
-        return;
-      }
-
       try {
+        const { id, index } = req.params;
+
         const resp = await client.delete({
+          id,
+          index,
           refresh: true,
-          index: req.params.index,
-          type: req.params.type,
-          id: req.params.id
+          type: config.es.alarm_type,
         });
-        return reply({ok: true, resp});
+
+        return reply(resp).code(201);
       } catch (err) {
         return reply(handleESError(err));
       }
@@ -462,41 +445,6 @@ export default function routes(server) {
         });
 
         return reply(resp);
-      } catch (err) {
-        return reply(handleESError(err));
-      }
-    }
-  });
-
-  server.route({
-    path: '/api/sentinl/user/username',
-    method: 'POST',
-    config: {
-      validate: {
-        payload: {
-          id: Joi.string(),
-        },
-      },
-    },
-    handler: async function (req, reply) {
-      const id = req.payload.id;
-
-      try {
-        const body = {
-          index: config.es.default_index,
-          type: config.es.default_type,
-          id: config.es.user_type + ':' + id,
-        };
-
-        if (isKibi(server)) {
-          body.type = config.es.user_type;
-          body.id = id;
-        }
-
-        const user = await client.get(body);
-        return reply({
-          username: get(user, '_source.username') || get(user, `_source[${config.es.user_type}].username`),
-        });
       } catch (err) {
         return reply(handleESError(err));
       }
