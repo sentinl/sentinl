@@ -15,8 +15,9 @@ savedObjectManagementRegistry.register({
 });
 
 // This is the only thing that gets injected into controllers
-module.service('savedUsers', function (savedObjectsAPI, savedObjectsAPITypes, Private, SavedUser, kbnIndex, esAdmin, kbnUrl, $http) {
-  savedObjectsAPITypes.add('sentinl-user');
+module.service('savedUsers', function (savedObjectsAPI, savedObjectsAPITypes, Private, SavedUser,
+  kbnIndex, esAdmin, kbnUrl, $http, sentinlConfig) {
+  savedObjectsAPITypes.add(sentinlConfig.es.user_type);
 
   const options = {
     caching: {

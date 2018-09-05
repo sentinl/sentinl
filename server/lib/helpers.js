@@ -35,9 +35,18 @@ const makeExecutableIfNecessary = function (filename) {
   }
 };
 
+const flattenDocsSourceAndType = function (docs, type) {
+  docs.forEach(function (doc, i) {
+    doc._source[type].id = doc._id;
+    docs[i] = doc._source[type];
+  });
+  return docs;
+};
+
 module.exports = {
   isKibi,
   listAllFilesSync,
   pickDefinedValues,
   makeExecutableIfNecessary,
+  flattenDocsSourceAndType,
 };
