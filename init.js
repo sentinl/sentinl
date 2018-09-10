@@ -46,7 +46,7 @@ const siren = {
   SavedObjectsAPIMiddleware: require('./server/lib/siren/saved_objects_api'),
 };
 
-import Migration1 from './lib/migrations/migration_1';
+import Migration1 from './lib/migrations/migrations_5/migration_1';
 const migrations = [
   Migration1
 ];
