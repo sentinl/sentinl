@@ -46,6 +46,11 @@ const siren = {
   SavedObjectsAPIMiddleware: require('./server/lib/siren/saved_objects_api'),
 };
 
+import Migration1 from './lib/migrations/migration_1';
+const migrations = [
+  Migration1
+];
+
 /**
 * Initializes Sentinl app.
 *
@@ -55,6 +60,8 @@ const init = once(function (server) {
   const config = getConfiguration(server);
   const scheduler = getScheduler(server);
   const log = new Log(config.app_name, server, 'init');
+
+  server.expose('getMigrations', () => migrations);
 
   if (existsSync('/etc/sentinl.json')) {
     server.plugins.sentinl.status.red('Setting configuration values in /etc/sentinl.json is not supported anymore, please copy ' +
