@@ -1,13 +1,7 @@
-import uuid from 'uuid/v4';
 import Joi from 'joi';
 import handleESError from '../lib/handle_es_error';
-import getConfiguration from  '../lib/get_configuration';
-import getElasticsearchClient from '../lib/get_elasticsearch_client';
 
 export default function timelionRoutes(server) {
-  const config = getConfiguration(server);
-  const client = getElasticsearchClient({server, config});
-
   server.route({
     path: '/api/sentinl/timelion/run',
     method: 'POST',

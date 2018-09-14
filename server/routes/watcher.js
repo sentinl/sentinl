@@ -1,65 +1,16 @@
-import uuid from 'uuid/v4';
 import Joi from 'joi';
 import handleESError from '../lib/handle_es_error';
 import getConfiguration from  '../lib/get_configuration';
-import getElasticsearchClient from '../lib/get_elasticsearch_client';
-import { flattenDocsSourceAndType } from '../lib/helpers';
-import { get } from 'lodash';
-import { isKibi } from '../lib/helpers';
-
-async function listDocs({ client, type, config, size }) {
-  const resp = await client.search({
-    size: size || config.es.results,
-    index: config.es.default_index,
-    type: config.es.default_type,
-    allowNoIndices: config.es.allow_no_indices,
-    body: {
-      query: {
-        exists: { field: type }
-      }
-    }
-  });
-
-  resp.hits.hits = flattenDocsSourceAndType(resp.hits.hits, type);
-  return resp;
-}
-
-async function getDoc({ client, type, config, id }) {
-  const doc = await client.get({
-    index: config.es.default_index,
-    type: config.es.default_type,
-    id,
-  });
-
-  return flattenDocsSourceAndType([doc], type)[0];
-}
-
-async function putDoc({ client, type, config, body, id }) {
-  function creteSavedObjectsLikeId(id, docType) {
-    id = id || uuid();
-    if (id.includes(':')) {
-      return docType + ':' + id.split(':').slice(-1)[0];
-    }
-    return docType + ':' + id;
-  }
-
-  const req = {
-    refresh: true,
-    index: config.es.default_index,
-    type: config.es.default_type,
-    body: {
-      type,
-      [type]: body,
-    },
-    id: creteSavedObjectsLikeId(id, type),
-  };
-
-  return await client.index(req);
-}
+import { flatAttributes } from '../lib/helpers';
+import apiClient from '../lib/api_client';
+import WatcherHandler from '../lib/watcher_handler';
+import WatcherWizardHandler from '../lib/watcher_wizard_handler';
+import CustomWatcherHandler from '../lib/custom_watcher_handler';
+import Log from '../lib/log';
 
 export default function watcherRoutes(server) {
   const config = getConfiguration(server);
-  const client = getElasticsearchClient({server, config});
+  const log = new Log(config.app_name, server, 'watcher routes');
 
   server.route({
     method: ['POST', 'GET'],
@@ -67,19 +18,23 @@ export default function watcherRoutes(server) {
     config: {
       validate: {
         params: {
-          size: Joi.number(),
+          size: Joi.number().default(config.es.results),
         },
       },
     },
     handler: async function (req, reply) {
       try {
-        const resp = await listDocs({
-          client,
-          config,
+        const client = apiClient(server, config.api.type, req);
+
+        const resp = await client.find({
+          index: config.es.default_index,
           type: config.es.watcher_type,
-          size: req.params.size
+          perPage: req.params.size,
         });
-        return reply(resp).code(201);
+
+        resp.saved_objects = resp.saved_objects.map(flatAttributes);
+
+        return reply(resp).code(200);
       } catch (err) {
         return reply(handleESError(err));
       }
@@ -92,19 +47,17 @@ export default function watcherRoutes(server) {
     config: {
       validate: {
         params: {
-          id: Joi.string(),
+          id: Joi.string().required(),
         },
       },
     },
     handler: async function (req, reply) {
       try {
-        const resp = await getDoc({
-          client,
-          config,
-          type: config.es.watcher_type,
-          id: req.params.id
-        });
-        return reply(resp).code(201);
+        const client = apiClient(server, config.api.type, req);
+        let resp = await client.get(config.es.watcher_type, req.params.id, config.es.default_index);
+        resp = flatAttributes(resp);
+
+        return reply(resp).code(200);
       } catch (err) {
         return reply(handleESError(err));
       }
@@ -120,19 +73,16 @@ export default function watcherRoutes(server) {
           id: Joi.string(),
         },
         payload: {
-          body: Joi.object(),
+          attributes: Joi.object().required(),
         },
       },
     },
     handler: async function (req, reply) {
       try {
-        const resp = await putDoc({
-          client,
-          config,
-          type: config.es.watcher_type,
-          body: req.payload.body,
-          id: req.params.id
-        });
+        const client = apiClient(server, config.api.type, req);
+        const resp = await client.create(config.es.watcher_type, req.payload.attributes,
+          { id: req.params.id, overwrite: true }, config.es.default_index);
+
         return reply(resp).code(201);
       } catch (err) {
         return reply(handleESError(err));
@@ -146,20 +96,16 @@ export default function watcherRoutes(server) {
     config: {
       validate: {
         params: {
-          id: Joi.string(),
+          id: Joi.string().required(),
         },
       },
     },
     handler: async function (req, reply) {
       try {
-        const resp = await client.delete({
-          refresh: true,
-          index: config.es.default_index,
-          type: config.es.default_type,
-          id: req.params.id
-        });
+        const client = apiClient(server, config.api.type, req);
+        const resp = await client.delete(config.es.watcher_type, req.params.id, config.es.default_index);
 
-        return reply(resp).code(201);
+        return reply(resp).code(200);
       } catch (err) {
         return reply(handleESError(err));
       }
@@ -167,78 +113,25 @@ export default function watcherRoutes(server) {
   });
 
   server.route({
-    method: ['POST', 'GET'],
-    path: '/api/sentinl/list/users/{size?}',
+    method: 'POST',
+    path: '/api/sentinl/watcher/search',
     config: {
       validate: {
-        params: {
-          size: Joi.number(),
-        },
-      },
-    },
-    handler: async function (req, reply) {
-      try {
-        const resp = await listDocs({
-          client,
-          config,
-          type: config.es.user_type,
-          size: req.params.size
-        });
-        return reply(resp).code(201);
-      } catch (err) {
-        return reply(handleESError(err));
-      }
-    }
-  });
-
-  server.route({
-    method: ['POST', 'GET'],
-    path: '/api/sentinl/user/{id}',
-    config: {
-      validate: {
-        params: {
-          id: Joi.string(),
-        },
-      },
-    },
-    handler: async function (req, reply) {
-      try {
-        const resp = await getDoc({
-          client,
-          config,
-          type: config.es.user_type,
-          id: req.params.id
-        });
-        return reply(resp).code(201);
-      } catch (err) {
-        return reply(handleESError(err));
-      }
-    }
-  });
-
-  server.route({
-    method: ['PUT'],
-    path: '/api/sentinl/user/{id?}',
-    config: {
-      validate: {
-        params: {
-          id: Joi.string(),
-        },
         payload: {
-          body: Joi.object(),
+          request: Joi.object().required(),
+          method: Joi.string().default('search')
         },
       },
     },
     handler: async function (req, reply) {
       try {
-        const resp = await putDoc({
-          client,
-          config,
-          type: config.es.user_type,
-          body: req.payload.body,
-          id: req.params.id
-        });
-        return reply(resp).code(201);
+        // Use Elasticsearch API because Kibana savedObjectsClient
+        // can't search in a specific index and doesn't allow custom query body
+        const client = apiClient(server, 'elasticsearchAPI');
+        const { method, request } = req.payload;
+
+        const resp = await client.search(request);
+        return reply(resp).code(200);
       } catch (err) {
         return reply(handleESError(err));
       }
@@ -246,103 +139,259 @@ export default function watcherRoutes(server) {
   });
 
   server.route({
-    method: 'DELETE',
-    path: '/api/sentinl/user/{id}',
+    method: 'POST',
+    path: '/api/sentinl/watcher/_execute',
     config: {
       validate: {
-        params: {
-          id: Joi.string(),
-        },
-      },
-    },
-    handler: async function (req, reply) {
-      try {
-        const resp = await client.delete({
-          refresh: true,
-          index: config.es.default_index,
-          type: config.es.default_type,
-          id: req.params.id
-        });
-
-        return reply(resp).code(201);
-      } catch (err) {
-        return reply(handleESError(err));
-      }
-    }
-  });
-
-  server.route({
-    method: ['POST', 'GET'],
-    path: '/api/sentinl/list/scripts/{size?}',
-    config: {
-      validate: {
-        params: {
-          size: Joi.number(),
-        },
-      },
-    },
-    handler: async function (req, reply) {
-      try {
-        const resp = await listDocs({
-          client,
-          config,
-          type: config.es.script_type,
-          size: req.params.size
-        });
-        return reply(resp).code(201);
-      } catch (err) {
-        return reply(handleESError(err));
-      }
-    }
-  });
-
-  server.route({
-    method: ['POST', 'GET'],
-    path: '/api/sentinl/script/{id}',
-    config: {
-      validate: {
-        params: {
-          id: Joi.string(),
-        },
-      },
-    },
-    handler: async function (req, reply) {
-      try {
-        const resp = await getDoc({
-          client,
-          config,
-          type: config.es.script_type,
-          id: req.params.id
-        });
-        return reply(resp).code(201);
-      } catch (err) {
-        return reply(handleESError(err));
-      }
-    }
-  });
-
-  server.route({
-    method: ['PUT'],
-    path: '/api/sentinl/script/{id?}',
-    config: {
-      validate: {
-        params: {
-          id: Joi.string(),
-        },
         payload: {
-          body: Joi.object(),
+          attributes: Joi.object().required(),
         },
       },
     },
     handler: async function (req, reply) {
+      const attributes = req.payload.attributes;
+
+      let watcherHandler;
+      if (attributes.wizard) {
+        watcherHandler = new WatcherWizardHandler(server);
+      } else if (attributes.custom) {
+        watcherHandler = new CustomWatcherHandler(server);
+      } else {
+        watcherHandler = new WatcherHandler(server);
+      }
+
       try {
-        const resp = await putDoc({
-          client,
-          config,
-          type: config.es.script_type,
-          body: req.payload.body,
-          id: req.params.id
+        const resp = await watcherHandler.execute(req.payload.attributes);
+        return reply(resp);
+      } catch (err) {
+        return reply(handleESError(err));
+      }
+    }
+  });
+
+  server.route({
+    path: '/api/sentinl/watcher/wizard/count',
+    method: 'POST',
+    config: {
+      validate: {
+        payload: {
+          es_params: Joi.object({
+            index: Joi.array().items(Joi.string().default('*')).default(),
+            number: Joi.number().default(config.es.results),
+            allowNoIndices: Joi.boolean().default(config.es.allow_no_indices),
+            ignoreUnavailable: Joi.boolean().default(config.es.ignore_unavailable),
+          }).default(),
+          query: Joi.string(),
+        },
+      },
+    },
+    handler: async function (req, reply) {
+      const esParams = req.payload.es_params;
+
+      try {
+        const body = JSON.parse(req.payload.query);
+        log.debug('COUNT QUERY BODY:', JSON.stringify(body, null, 2));
+        log.debug('INDEX:', esParams.index);
+        // Use Elasticsearch API because Kibana savedObjectsClient
+        // can't search in a specific index and doesn't allow custom query body
+        const client = apiClient(server, 'elasticsearchAPI');
+
+        const resp = await client.search({
+          index: esParams.index,
+          ignoreUnavailable: esParams.ignoreUnavailable,
+          allowNoIndices: esParams.allowNoIndices,
+          body,
         });
+
+        return reply(resp);
+      } catch (err) {
+        return reply(handleESError(err));
+      }
+    }
+  });
+
+  server.route({
+    path: '/api/sentinl/watcher/wizard/average',
+    method: 'POST',
+    config: {
+      validate: {
+        payload: {
+          es_params: Joi.object({
+            index: Joi.array().items(Joi.string().default('*')).default(),
+            number: Joi.number().default(config.es.results),
+            allowNoIndices: Joi.boolean().default(config.es.allow_no_indices),
+            ignoreUnavailable: Joi.boolean().default(config.es.ignore_unavailable),
+          }).default(),
+          query: Joi.string(),
+        },
+      },
+    },
+    handler: async function (req, reply) {
+      const esParams = req.payload.es_params;
+
+      try {
+        const body = JSON.parse(req.payload.query);
+        log.debug('AVERAGE QUERY BODY:', JSON.stringify(body, null, 2));
+        log.debug('INDEX:', esParams.index);
+        // Use Elasticsearch API because Kibana savedObjectsClient
+        // can't search in a specific index and doesn't allow custom query body
+        const client = apiClient(server, 'elasticsearchAPI');
+
+        const resp = await client.search({
+          index: esParams.index,
+          ignoreUnavailable: esParams.ignoreUnavailable,
+          allowNoIndices: esParams.allowNoIndices,
+          body,
+        });
+
+        return reply(resp);
+      } catch (err) {
+        return reply(handleESError(err));
+      }
+    }
+  });
+
+  server.route({
+    path: '/api/sentinl/watcher/wizard/min',
+    method: 'POST',
+    config: {
+      validate: {
+        payload: {
+          es_params: Joi.object({
+            index: Joi.array().items(Joi.string().default('*')).default(),
+            number: Joi.number().default(config.es.results),
+            allowNoIndices: Joi.boolean().default(config.es.allow_no_indices),
+            ignoreUnavailable: Joi.boolean().default(config.es.ignore_unavailable),
+          }).default(),
+          query: Joi.string(),
+        },
+      },
+    },
+    handler: async function (req, reply) {
+      const esParams = req.payload.es_params;
+
+      try {
+        const body = JSON.parse(req.payload.query);
+        log.debug('MIN QUERY BODY:', JSON.stringify(body, null, 2));
+        log.debug('INDEX:', esParams.index);
+        // Use Elasticsearch API because Kibana savedObjectsClient
+        // can't search in a specific index and doesn't allow custom query body
+        const client = apiClient(server, 'elasticsearchAPI');
+
+        const resp = await client.search({
+          index: esParams.index,
+          ignoreUnavailable: esParams.ignoreUnavailable,
+          allowNoIndices: esParams.allowNoIndices,
+          body,
+        });
+
+        return reply(resp);
+      } catch (err) {
+        return reply(handleESError(err));
+      }
+    }
+  });
+
+  server.route({
+    path: '/api/sentinl/watcher/wizard/max',
+    method: 'POST',
+    config: {
+      validate: {
+        payload: {
+          es_params: Joi.object({
+            index: Joi.array().items(Joi.string().default('*')).default(),
+            number: Joi.number().default(config.es.results),
+            allowNoIndices: Joi.boolean().default(config.es.allow_no_indices),
+            ignoreUnavailable: Joi.boolean().default(config.es.ignore_unavailable),
+          }).default(),
+          query: Joi.string(),
+        },
+      },
+    },
+    handler: async function (req, reply) {
+      const esParams = req.payload.es_params;
+
+      try {
+        const body = JSON.parse(req.payload.query);
+        log.debug('MAX QUERY BODY:', JSON.stringify(body, null, 2));
+        log.debug('INDEX:', esParams.index);
+        // Use Elasticsearch API because Kibana savedObjectsClient
+        // can't search in a specific index and doesn't allow custom query body
+        const client = apiClient(server, 'elasticsearchAPI');
+
+        const resp = await client.search({
+          index: esParams.index,
+          ignoreUnavailable: esParams.ignoreUnavailable,
+          allowNoIndices: esParams.allowNoIndices,
+          body,
+        });
+
+        return reply(resp);
+      } catch (err) {
+        return reply(handleESError(err));
+      }
+    }
+  });
+
+  server.route({
+    path: '/api/sentinl/watcher/wizard/sum',
+    method: 'POST',
+    config: {
+      validate: {
+        payload: {
+          es_params: Joi.object({
+            index: Joi.array().items(Joi.string().default('*')).default(),
+            number: Joi.number().default(config.es.results),
+            allowNoIndices: Joi.boolean().default(config.es.allow_no_indices),
+            ignoreUnavailable: Joi.boolean().default(config.es.ignore_unavailable),
+          }).default(),
+          query: Joi.string(),
+        },
+      },
+    },
+    handler: async function (req, reply) {
+      const esParams = req.payload.es_params;
+
+      try {
+        const body = JSON.parse(req.payload.query);
+        log.debug('SUM QUERY BODY:', JSON.stringify(body, null, 2));
+        log.debug('INDEX:', esParams.index);
+        // Use Elasticsearch API because Kibana savedObjectsClient
+        // can't search in a specific index and doesn't allow custom query body
+        const client = apiClient(server, 'elasticsearchAPI');
+
+        const resp = await client.search({
+          index: esParams.index,
+          ignoreUnavailable: esParams.ignoreUnavailable,
+          allowNoIndices: esParams.allowNoIndices,
+          body,
+        });
+
+        return reply(resp);
+      } catch (err) {
+        return reply(handleESError(err));
+      }
+    }
+  });
+
+  server.route({
+    method: 'POST',
+    path: '/api/sentinl/watcher/wizard/getmapping',
+    config: {
+      validate: {
+        payload: {
+          index: Joi.array().required(),
+        },
+      },
+    },
+    handler: async function (request, reply) {
+      const {index} = request.payload;
+      try {
+        // Use Elasticsearch API because Kibana savedObjectsClient
+        // can't search in a specific index and doesn't allow custom query body
+        const client = apiClient(server, 'elasticsearchAPI');
+
+        const resp = await client.getMapping(index);
         return reply(resp).code(201);
       } catch (err) {
         return reply(handleESError(err));
@@ -351,25 +400,16 @@ export default function watcherRoutes(server) {
   });
 
   server.route({
-    method: 'DELETE',
-    path: '/api/sentinl/script/{id}',
-    config: {
-      validate: {
-        params: {
-          id: Joi.string(),
-        },
-      },
-    },
+    path: '/api/sentinl/watcher/wizard/indexes',
+    method: 'GET',
     handler: async function (req, reply) {
       try {
-        const resp = await client.delete({
-          refresh: true,
-          index: config.es.default_index,
-          type: config.es.default_type,
-          id: req.params.id
-        });
+        // Use Elasticsearch API because Kibana savedObjectsClient
+        // can't search in a specific index and doesn't allow custom query body
+        const client = apiClient(server, 'elasticsearchAPI');
 
-        return reply(resp).code(201);
+        const resp = await client.getIndices();
+        return reply(resp);
       } catch (err) {
         return reply(handleESError(err));
       }

@@ -50,13 +50,13 @@
               <th ng-repeat="col in alarmColumns" ng-if="col.visible">{{col.label}}</th>
               <th></th>
             </tr>
-          <tbody ng-repeat="alarm in alarms | orderBy:'_source[\'@timestamp\']':true">
+          <tbody ng-repeat="alarm in alarms | orderBy:'[\'@timestamp\']':true">
            <tr
-              ng-class-odd="alarm._source.error ? 'alarm-error-row-odd': 'alarm-row-odd'"
-              ng-class-even="alarm._source.error ? 'alarm-error-row' : 'alarm-row'"
+              ng-class-odd="alarm.error ? 'alarm-error-row-odd': 'alarm-row-odd'"
+              ng-class-even="alarm.error ? 'alarm-error-row' : 'alarm-row'"
             >
-              <td>{{ alarm._source['@timestamp'] | dateFormat }}</td>
-              <td ng-repeat="col in alarmColumns" ng-if="col.visible">{{alarm._source[col.name] || alarm[col.name]}}</td>
+              <td>{{ alarm['@timestamp'] | dateFormat }}</td>
+              <td ng-repeat="col in alarmColumns" ng-if="col.visible">{{alarm[col.name] || alarm[col.name]}}</td>
               <td class="text-center edit-group">
                 <span ng-click="collapse=!collapse" ng-model="collapse" class="show-rule"><i class="fa fa-ellipsis-h"></i></span>
                 <span ng-click="deleteAlarm($index, alarm)" class="delete-rule"><i class="fa fa-trash"></i></span>
@@ -64,7 +64,7 @@
             </tr>
             <tr ng-if=collapse>
               <td colspan="100%">
-                <pre><code>{{ alarm._source | json }}</code></pre>
+                <pre><code>{{ alarm | json }}</code></pre>
               </td>
             </tr>
           </tbody>

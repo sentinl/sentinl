@@ -3,15 +3,15 @@ import { assign } from 'lodash';
 
 class WatcherAdvanced {
   constructor($scope, $injector, navMenu, sentinlLog, createNotifier, confirmModal, kbnUrl,
-    sentinlHelper, sentinlConfig, watcherFactory, userFactory) {
+    sentinlHelper, sentinlConfig, watcherService, userService) {
     const $route = $injector.get('$route');
     this.$scope = $scope;
     this.confirmModal = confirmModal;
     this.kbnUrl = kbnUrl;
     this.sentinlHelper = sentinlHelper;
 
-    this.watcherService = watcherFactory.get(sentinlConfig.api.type);
-    this.userService = userFactory.get(sentinlConfig.api.type);
+    this.watcherService = watcherService;
+    this.userService = userService;
 
     this.locationName = 'WatcherAdvanced';
     this.log = sentinlLog;

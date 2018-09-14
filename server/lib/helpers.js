@@ -35,12 +35,21 @@ const makeExecutableIfNecessary = function (filename) {
   }
 };
 
-const flattenDocsSourceAndType = function (docs, type) {
-  docs.forEach(function (doc, i) {
-    doc._source[type].id = doc._id;
-    docs[i] = doc._source[type];
-  });
-  return docs;
+const flatAttributes = function (doc) {
+  if (!doc.attributes) {
+    return doc;
+  }
+
+  if (doc._index) {
+    doc.attributes._index = doc._index;
+  }
+
+  doc.attributes.id = doc.id;
+  return doc.attributes;
+};
+
+const getCurrentTime = function () {
+  return new Date().toISOString();
 };
 
 const createMultipleHapijsRoutes = function (routes) {
@@ -51,11 +60,17 @@ const createMultipleHapijsRoutes = function (routes) {
   }, []);
 };
 
+const trimIdTypePrefix = function (id) {
+  return id.includes(':') ? id.split(':')[1] : id;
+};
+
 module.exports = {
+  trimIdTypePrefix,
+  getCurrentTime,
+  flatAttributes,
   isKibi,
   listAllFilesSync,
   pickDefinedValues,
   makeExecutableIfNecessary,
-  flattenDocsSourceAndType,
   createMultipleHapijsRoutes,
 };
