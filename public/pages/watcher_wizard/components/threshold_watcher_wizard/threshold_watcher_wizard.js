@@ -4,19 +4,20 @@ import { get, has, forEach, keys, isObject, isEmpty, includes, union } from 'lod
 
 class ThresholdWatcherWizard {
   constructor($scope, $window, kbnUrl, sentinlLog, confirmModal, createNotifier,
-    Watcher, User, wizardHelper, watcherWizardEsService, sentinlConfig, sentinlHelper) {
+    wizardHelper, watcherWizardEsService, sentinlConfig, sentinlHelper, watcherFactory, userFactory) {
     this.$scope = $scope;
     this.watcher = this.watcher || this.$scope.watcher;
 
     this.$window = $window;
     this.kbnUrl = kbnUrl;
     this.confirmModal = confirmModal;
-    this.watcherService = Watcher;
-    this.userService = User;
     this.wizardHelper = wizardHelper;
     this.watcherWizardEsService = watcherWizardEsService;
     this.sentinlConfig = sentinlConfig;
     this.sentinlHelper = sentinlHelper;
+
+    this.watcherService = watcherFactory.get(sentinlConfig.api.type);
+    this.userService = userFactory.get(sentinlConfig.api.type);
 
     this.locationName = 'ThresholdWatcherWizard';
 
@@ -208,24 +209,20 @@ class ThresholdWatcherWizard {
         delete this.watcher.wizard.chart_query_params;
       }
 
+      const password = this.watcher.password;
+      delete this.watcher.password;
+
       const id = await this.watcherService.save(this.watcher);
       this.notify.info('watcher saved: ' + id);
 
-      if (this.watcher.username && this.watcher.password) {
-        await this.userService.new(id, this.watcher.username, this.watcher.password);
+      if (this.watcher.username && password) {
+        await this.userService.new(id, this.watcher.username, password);
       }
 
-      if (clean) {
-        this._cleanWatcher(this.watcher);
-      }
       this._cancelWatcherWizard();
     } catch (err) {
       this.errorMessage(err);
     }
-  }
-
-  _cleanWatcher(watcher) {
-    delete watcher.password;
   }
 
   _isSchedule(watcher) {

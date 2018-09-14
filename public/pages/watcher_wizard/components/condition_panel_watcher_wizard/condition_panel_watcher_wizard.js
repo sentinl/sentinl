@@ -25,7 +25,7 @@ class Chart {
 }
 
 class ConditionPanelWatcherWizard {
-  constructor($http, $scope, watcherWizardChartService, createNotifier, sentinlLog, ServerConfig, wizardHelper, sentinlHelper) {
+  constructor($http, $scope, watcherWizardChartService, createNotifier, sentinlLog, wizardHelper, sentinlHelper) {
     this.$scope = $scope;
     this.watcher = this.watcher || this.$scope.watcher;
     this.onQueryChange = this.onQueryChange || this.$scope.onQueryChange;
