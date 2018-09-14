@@ -131,6 +131,7 @@ export default function Scheduler(server) {
     watcherHandler = new WatcherHandler(server);
     watcherWizardHandler = new WatcherWizardHandler(server);
     customWatcherHandler = new CustomWatcherHandler(server);
+    const sentinlClient = new SentinlClient(server);
 
     try {
       let tasks = await client.listWatchers();
