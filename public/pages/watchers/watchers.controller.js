@@ -8,7 +8,7 @@ import ace from 'ace';
 function  WatchersController($rootScope, $scope, $route, $interval,
   $timeout, timefilter, Private, createNotifier, $window, $http, $uibModal, sentinlLog, navMenu,
   globalNavState, $location, dataTransfer, Promise, COMMON, confirmModal,
-  wizardHelper, watcherFactory, userFactory, sentinlConfig) {
+  wizardHelper, watcherService, userService, sentinlConfig) {
   'ngInject';
 
   $scope.title = COMMON.watchers.title;
@@ -32,8 +32,8 @@ function  WatchersController($rootScope, $scope, $route, $interval,
   $scope.watchers = [];
   $scope.wizardHelper = wizardHelper;
 
-  $scope.watcherService = watcherFactory.get(sentinlConfig.api.type);
-  $scope.userService = userFactory.get(sentinlConfig.api.type);
+  $scope.watcherService = watcherService;
+  $scope.userService = userService;
 
   $scope.inputInfo = function (watcher) {
     const index = get(watcher, 'input.search.request.index');
@@ -155,8 +155,7 @@ function  WatchersController($rootScope, $scope, $route, $interval,
     $scope.watcherService.save($scope.watchers[index])
       .then(function (id) {
         const status = $scope.watchers[index].disable ? 'Disabled' : 'Enabled';
-        const watcher = find($scope.watchers, (watcher) => watcher.id === id);
-        notify.info(`${status} watcher "${watcher.title}"`);
+        notify.info(`${status} watcher "${$scope.watchers[index].title}"`);
       })
       .catch(errorMessage);
   };

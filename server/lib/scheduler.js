@@ -23,13 +23,16 @@ import getConfiguration from './get_configuration';
 import WatcherHandler from './watcher_handler';
 import WatcherWizardHandler from './watcher_wizard_handler';
 import CustomWatcherHandler from './custom_watcher_handler';
+import apiClient from './api_client';
 import Log from './log';
 
 /**
 * Schedules and executes watchers in background
 */
 export default function Scheduler(server) {
-
+  // Use Elasticsearch API because Kibana savedObjectsClient
+  // can't be used without session user from request
+  const client = apiClient(server, 'elasticsearchAPI');
   const config = getConfiguration(server);
   const log = new Log(config.app_name, server, 'scheduler');
 
@@ -59,25 +62,25 @@ export default function Scheduler(server) {
   * @param {object} task - watcher configuration.
   */
   async function watching(task) {
-    const prefix = `watcher ${task._id}`;
+    const prefix = `watcher ${task.id}`;
 
-    if (!task._source || task._source.disable) {
+    if (!task || task.disable) {
       log.debug(prefix, 'do not execute disabled watcher');
       return;
     }
 
     log.info(prefix, 'executing');
 
-    if (!task._source.actions || isEmpty(task._source.actions)) {
+    if (!task.actions || isEmpty(task.actions)) {
       log.warning(prefix, 'watcher has no actions');
       return;
     }
 
     try {
       let resp;
-      if (task._source.wizard) {
+      if (task.wizard) {
         resp = await watcherWizardHandler.execute(task);
-      } else if (task._source.custom) {
+      } else if (task.custom) {
         resp = await customWatcherHandler.execute(task);
       } else {
         resp = await watcherHandler.execute(task);
@@ -86,7 +89,7 @@ export default function Scheduler(server) {
         log.error(`${prefix}: fail to execute`, resp);
       }
     } catch (err) {
-      log.error(`${prefix}: fail to execute`, err.message);
+      log.error(`${prefix}: schedule execute: ${err.toString()}: ${err.stack}`);
     }
   };
 
@@ -96,37 +99,27 @@ export default function Scheduler(server) {
   * @param {object} task - watcher configuration.
   */
   function scheduleWatcher(task) {
-    if (has(server.sentinlStore.schedule, `[${task._id}].later`)) {
-      log.debug(`clearing watcher ${task._id}`);
-      server.sentinlStore.schedule[task._id].later.clear();
+    if (has(server.sentinlStore.schedule, `[${task.id}].later`)) {
+      log.debug(`clearing watcher ${task.id}`);
+      server.sentinlStore.schedule[task.id].later.clear();
     }
-    server.sentinlStore.schedule[task._id] = {task};
+    server.sentinlStore.schedule[task.id] = {task};
 
     if (config.es.watcher.schedule_timezone === 'local') {
       later.date.localTime();
     }
 
     // https://bunkat.github.io/later/parsers.html#text
-    const schedule = later.parse.text(task._source.trigger.schedule.later);
-    server.sentinlStore.schedule[task._id].schedule = task._source.trigger.schedule.later;
+    const schedule = later.parse.text(task.trigger.schedule.later);
+    server.sentinlStore.schedule[task.id].schedule = task.trigger.schedule.later;
 
     /* Run Watcher in schedule */
-    server.sentinlStore.schedule[task._id].later = later.setInterval(function () {
+    server.sentinlStore.schedule[task.id].later = later.setInterval(function () {
       watching(task);
     }, schedule);
 
-    log.info(`scheduled watcher ${task._id}, to run every ${server.sentinlStore.schedule[task._id].schedule}`);
+    log.debug(`scheduled watcher ${task.id}, to run every ${server.sentinlStore.schedule[task.id].schedule}`);
   };
-
-  function putPropertiesUnderSource(watchers) {
-    watchers.forEach(function (w) {
-      if (w._source[config.es.watcher_type]) {
-        assign(w._source, w._source[config.es.watcher_type]);
-        delete w._source[config.es.watcher_type];
-      }
-    });
-    return watchers;
-  }
 
   async function alert(server) {
     log.debug('reloading watchers...');
@@ -140,9 +133,8 @@ export default function Scheduler(server) {
     customWatcherHandler = new CustomWatcherHandler(server);
 
     try {
-      let resp = await watcherHandler.getCount();
-      resp = await watcherHandler.getWatchers(resp.count);
-      let tasks = resp.hits.hits;
+      let tasks = await client.listWatchers();
+      tasks = tasks.saved_objects;
 
       try {
         removeOrphans(tasks);
@@ -151,8 +143,6 @@ export default function Scheduler(server) {
       }
 
       if (tasks.length) {
-        tasks = putPropertiesUnderSource(tasks);
-
         /* Schedule watchers */
         tasks.forEach(function (t) {
           scheduleWatcher(t);

@@ -4,7 +4,7 @@ import { get, has, forEach, keys, isObject, isEmpty, includes, union } from 'lod
 
 class ThresholdWatcherWizard {
   constructor($scope, $window, kbnUrl, sentinlLog, confirmModal, createNotifier,
-    wizardHelper, watcherWizardEsService, sentinlConfig, sentinlHelper, watcherFactory, userFactory) {
+    wizardHelper, watcherWizardEsService, sentinlConfig, sentinlHelper, watcherService, userService) {
     this.$scope = $scope;
     this.watcher = this.watcher || this.$scope.watcher;
 
@@ -16,8 +16,8 @@ class ThresholdWatcherWizard {
     this.sentinlConfig = sentinlConfig;
     this.sentinlHelper = sentinlHelper;
 
-    this.watcherService = watcherFactory.get(sentinlConfig.api.type);
-    this.userService = userFactory.get(sentinlConfig.api.type);
+    this.watcherService = watcherService;
+    this.userService = userService;
 
     this.locationName = 'ThresholdWatcherWizard';
 
