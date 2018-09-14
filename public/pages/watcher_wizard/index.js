@@ -41,8 +41,7 @@ routes
         const $route = $injector.get('$route');
         const kbnUrl = $injector.get('kbnUrl');
         const config = $injector.get('sentinlConfig');
-        const watcherFactory = $injector.get('watcherFactory');
-        const watcherService = watcherFactory.get(config.api.type);
+        const watcherService = $injector.get('watcherService');
         const notifier = new Notifier({ location: 'Watcher' });
         const watcherId = $route.current.params.id;
 
@@ -70,7 +69,7 @@ routes
         }
 
         return watcherService.get(watcherId).then(function (watcher) {
-          watcher.$edit = true;
+          watcher._edit = true;
           return watcher;
         }).catch(function (err) {
           notifier.error(`get watcher: ${err.toString()}`);

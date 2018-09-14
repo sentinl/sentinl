@@ -32,8 +32,11 @@ import { isKibi } from './server/lib/helpers';
 
 import sentinlRoutes from './server/routes/routes';
 import watcherRoutes from './server/routes/watcher';
+import alarmRoutes from './server/routes/alarm';
+import userRoutes from './server/routes/user';
 import kableRoutes from './server/routes/kable';
 import timelionRoutes from './server/routes/timelion';
+import sqlRoutes from './server/routes/sql';
 
 const mappings = {
   alarm: require('./server/mappings/alarm_index'),
@@ -46,7 +49,6 @@ const siren = {
     script: require('./server/lib/siren/saved_objects/script'),
     user: require('./server/lib/siren/saved_objects/user'),
   },
-  SavedObjectsAPIMiddleware: require('./server/lib/siren/saved_objects_api'),
 };
 
 async function prepareIndices(server, log, config, mappings) {
@@ -131,8 +133,11 @@ const init = once(function (server) {
   // Load Sentinl routes.
   sentinlRoutes(server);
   watcherRoutes(server);
+  alarmRoutes(server);
+  userRoutes(server);
   kableRoutes(server);
   timelionRoutes(server);
+  sqlRoutes(server);
 
   // auto detect elasticsearch host, protocol and port
   const esUrl = url.parse(server.config().get('elasticsearch.url'));
@@ -151,9 +156,6 @@ const init = once(function (server) {
     forEach(siren.schema, (schema) => {
       server.plugins.saved_objects_api.registerType(schema);
     });
-
-    const middleware = new siren.SavedObjectsAPIMiddleware(server);
-    server.plugins.saved_objects_api.registerMiddleware(middleware);
   }
 
   (async () => {

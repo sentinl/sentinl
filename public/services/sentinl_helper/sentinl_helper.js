@@ -7,12 +7,6 @@ const WATCHER_SRC_FIELDS = [
 ];
 
 class SentinlHelper {
-  constructor($injector) {
-    this.EMAILWATCHERADVANCED = $injector.get('EMAILWATCHERADVANCED');
-    this.EMAILWATCHERWIZARD = $injector.get('EMAILWATCHERWIZARD');
-    this.REPORTWATCHER = $injector.get('REPORTWATCHER');
-  }
-
   stripObjectPropertiesByNameRegex(obj, nameRegexp) {
     stripObjectPropertiesByNameRegex(obj, nameRegexp);
   }
