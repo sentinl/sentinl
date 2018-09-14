@@ -32,6 +32,8 @@ import { isKibi } from './server/lib/helpers';
 
 import sentinlRoutes from './server/routes/routes';
 import watcherRoutes from './server/routes/watcher';
+import alarmRoutes from './server/routes/alarm';
+import userRoutes from './server/routes/user';
 import kableRoutes from './server/routes/kable';
 import timelionRoutes from './server/routes/timelion';
 
@@ -131,6 +133,8 @@ const init = once(function (server) {
   // Load Sentinl routes.
   sentinlRoutes(server);
   watcherRoutes(server);
+  alarmRoutes(server);
+  userRoutes(server);
   kableRoutes(server);
   timelionRoutes(server);
 

@@ -23,6 +23,7 @@ import getConfiguration from './get_configuration';
 import WatcherHandler from './watcher_handler';
 import WatcherWizardHandler from './watcher_wizard_handler';
 import CustomWatcherHandler from './custom_watcher_handler';
+import SentinlClient from './sentinl_client';
 import Log from './log';
 
 /**
@@ -59,23 +60,23 @@ export default function Scheduler(server) {
   * @param {object} task - watcher configuration.
   */
   async function watching(task) {
-    const prefix = `watcher ${task._id}`;
+    const prefix = `watcher ${task.id}`;
 
-    if (!task._source || task._source.disable) {
+    if (!task || task.disable) {
       log.debug(prefix, 'do not execute disabled watcher');
       return;
     }
 
     log.info(prefix, 'executing');
 
-    if (!task._source.actions || isEmpty(task._source.actions)) {
+    if (!task.actions || isEmpty(task.actions)) {
       log.warning(prefix, 'watcher has no actions');
       return;
     }
 
     try {
       let resp;
-      if (task._source.wizard) {
+      if (task.wizard) {
         resp = await watcherWizardHandler.execute(task);
       } else if (task._source.custom) {
         resp = await customWatcherHandler.execute(task);
@@ -96,37 +97,27 @@ export default function Scheduler(server) {
   * @param {object} task - watcher configuration.
   */
   function scheduleWatcher(task) {
-    if (has(server.sentinlStore.schedule, `[${task._id}].later`)) {
-      log.debug(`clearing watcher ${task._id}`);
-      server.sentinlStore.schedule[task._id].later.clear();
+    if (has(server.sentinlStore.schedule, `[${task.id}].later`)) {
+      log.debug(`clearing watcher ${task.id}`);
+      server.sentinlStore.schedule[task.id].later.clear();
     }
-    server.sentinlStore.schedule[task._id] = {task};
+    server.sentinlStore.schedule[task.id] = {task};
 
     if (config.es.watcher.schedule_timezone === 'local') {
       later.date.localTime();
     }
 
     // https://bunkat.github.io/later/parsers.html#text
-    const schedule = later.parse.text(task._source.trigger.schedule.later);
-    server.sentinlStore.schedule[task._id].schedule = task._source.trigger.schedule.later;
+    const schedule = later.parse.text(task.trigger.schedule.later);
+    server.sentinlStore.schedule[task.id].schedule = task.trigger.schedule.later;
 
     /* Run Watcher in schedule */
-    server.sentinlStore.schedule[task._id].later = later.setInterval(function () {
+    server.sentinlStore.schedule[task.id].later = later.setInterval(function () {
       watching(task);
     }, schedule);
 
-    log.info(`scheduled watcher ${task._id}, to run every ${server.sentinlStore.schedule[task._id].schedule}`);
+    log.info(`scheduled watcher ${task.id}, to run every ${server.sentinlStore.schedule[task.id].schedule}`);
   };
-
-  function putPropertiesUnderSource(watchers) {
-    watchers.forEach(function (w) {
-      if (w._source[config.es.watcher_type]) {
-        assign(w._source, w._source[config.es.watcher_type]);
-        delete w._source[config.es.watcher_type];
-      }
-    });
-    return watchers;
-  }
 
   async function alert(server) {
     log.debug('reloading watchers...');
@@ -138,11 +129,11 @@ export default function Scheduler(server) {
     watcherHandler = new WatcherHandler(server);
     watcherWizardHandler = new WatcherWizardHandler(server);
     customWatcherHandler = new CustomWatcherHandler(server);
+    const sentinlClient = new SentinlClient(server);
 
     try {
-      let resp = await watcherHandler.getCount();
-      resp = await watcherHandler.getWatchers(resp.count);
-      let tasks = resp.hits.hits;
+      let tasks = await sentinlClient.listWatchers();
+      tasks = tasks.saved_objects;
 
       try {
         removeOrphans(tasks);
@@ -151,8 +142,6 @@ export default function Scheduler(server) {
       }
 
       if (tasks.length) {
-        tasks = putPropertiesUnderSource(tasks);
-
         /* Schedule watchers */
         tasks.forEach(function (t) {
           scheduleWatcher(t);

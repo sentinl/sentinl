@@ -3,7 +3,7 @@ import Log from './log';
 import WarningAndLog from './messages/warning_and_log';
 import SuccessAndLog from './messages/success_and_log';
 import WatcherHandler from './watcher_handler';
-import logHistory from './log_history';
+import SentinlClient from './sentinl_client';
 
 /**
 * Helper class to handle watchers
@@ -11,6 +11,7 @@ import logHistory from './log_history';
 export default class WatcherWizardHandler extends WatcherHandler {
   constructor(server, client, config) {
     super(server, client, config);
+    this.sentinlClient = new SentinlClient(server);
   }
 
 
@@ -54,8 +55,7 @@ export default class WatcherWizardHandler extends WatcherHandler {
     let payload;
 
     try {
-      payload = await this.search(request, method); // data from Elasticsearch
-      // this.log.debug(`payload: ${JSON.stringify(payload)}`);
+      payload = await this.sentinlClient.search(request, method); // data from Elasticsearch
     } catch (err) {
       throw err;
     }
@@ -84,14 +84,14 @@ export default class WatcherWizardHandler extends WatcherHandler {
   async execute(task) {
     try {
       const {method, search, condition, transform, actions} = this._checkWatcher(task);
-      if (this.config.settings.authentication.impersonate || task._source.impersonate) {
+      if (this.config.settings.authentication.impersonate || task.impersonate) {
         this.client = await this.getImpersonatedClient(task._id);
       }
       return await this._execute(task, method, search.request, condition, transform, actions);
     } catch (err) {
-      logHistory({
+      this.setninlClient.log({
         server: this.server,
-        watcherTitle: task._source.title,
+        watcherTitle: task.title,
         message: 'execute wizard watcher: ' + err.toString(),
         level: 'high',
         isError: true,

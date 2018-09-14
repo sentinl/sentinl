@@ -11,10 +11,10 @@ import Log from './log';
 import WarningAndLog from './messages/warning_and_log';
 import SuccessAndLog from './messages/success_and_log';
 import { isKibi } from './helpers';
-import logHistory from './log_history';
 import KableClient from './kable_client';
 import TimelionClient from './timelion_client';
 import sirenFederateHelper from './siren/federate_helper';
+import SentinlClient from './sentinl_client';
 
 /**
 * Helper class to handle watchers
@@ -24,10 +24,10 @@ export default class WatcherHandler {
     this.server = server;
     this.config = !config ? getConfiguration(server) : config;
     this.log = new Log(this.config.app_name, this.server, 'watcher_handler');
-    this.client = !client ? getElasticsearchClient({server, config: this.config}) : client;
     this.siren = isKibi(server);
     this.kable = new KableClient(server);
     this.timelion = new TimelionClient(server);
+    this.sentinlClient = new SentinlClient(server);
   }
 
   /**
@@ -40,106 +40,6 @@ export default class WatcherHandler {
   */
   doActions(payload, server, actions, task) {
     actionFactory(server, actions, payload, task);
-  }
-
-  /**
-  * Get user from user index
-  */
-  async getUser(watcherId) {
-    if (watcherId.includes(this.config.es.watcher_type)) {
-      watcherId = watcherId.split(':')[1];
-    }
-
-    try {
-      return await this.client.get({
-        index: this.config.es.default_index,
-        type: this.config.es.default_type,
-        id: this.config.es.user_type + ':' + watcherId,
-      });
-    } catch (err) {
-      throw new Error('get user: ' + err.toString());
-    }
-  }
-
-  /**
-  * Count watchers
-  *
-  * @return {object} count data
-  */
-  async getCount() {
-    const request = {
-      index: this.config.es.default_index,
-      type: this.config.es.default_type,
-      body: {
-        query: {
-          exists: {
-            field: this.config.es.watcher_type
-          }
-        }
-      }
-    };
-
-    try {
-      return await this.client.count(request);
-    } catch (err) {
-      throw new Error('count watchers: ' + err.toString());
-    }
-  }
-
-  /**
-  * Get watchers
-  *
-  * @param {number} count - number of watchers to get
-  * @return {object} watchers all data
-  */
-  async getWatchers(count) {
-    const request = {
-      index: this.config.es.default_index,
-      type: this.config.es.default_type,
-      size: count,
-      body: {
-        query: {
-          exists: {
-            field: this.config.es.watcher_type
-          }
-        }
-      }
-    };
-
-    try {
-      return await this.search(request);
-    } catch (err) {
-      throw new Error('get watchers: ' + err.toString());
-    }
-  }
-
-  /**
-  * Search
-  *
-  * @param {object} request query
-  * @param {string} method name
-  * @return {object} data from ES
-  */
-  async search(request, method = 'search') {
-    try {
-      return await this.client[method](request);
-    } catch (err) {
-      throw new Error('input search: ' + err.toString());
-    }
-  }
-
-  /**
-  * Get all watcher actions
-  *
-  * @param {object} actions
-  * @return {object} actions in normalized form
-  */
-  getActions(actions) {
-    const filteredActions = {};
-    forEach(actions, (settings, name) => {
-      filteredActions[name] = settings;
-    });
-    return filteredActions;
   }
 
   /**
@@ -233,7 +133,7 @@ export default class WatcherHandler {
       // search in transform
       if (has(link, 'search.request')) {
         try {
-          payload = await this.search(link.search.request, method);
+          payload = await this.sentinlClient.search(link.search.request, method);
         } catch (err) {
           throw new Error('apply transform "search": ' + err.toString());
         }
@@ -277,8 +177,8 @@ export default class WatcherHandler {
   * @return {object} success or warning message
   */
   async _execute(task, method, search, condition, transform, actions) {
-    const isAnomaly = has(task._source, 'sentinl.condition.anomaly') ? true : false;
-    const isRange = has(task._source, 'sentinl.condition.range') ? true : false;
+    const isAnomaly = has(task, 'sentinl.condition.anomaly') ? true : false;
+    const isRange = has(task, 'sentinl.condition.range') ? true : false;
     let payload;
 
     if (search.timelion) {
@@ -295,7 +195,7 @@ export default class WatcherHandler {
       }
     } else if (search.request) {
       try {
-        payload = await this.search(search.request, method); // data from Elasticsearch
+        payload = await this.sentinlClient.search(search.request, method); // data from Elasticsearch
       } catch (err) {
         throw new Error('get payload: ' + err.toString());
       }
@@ -343,10 +243,9 @@ export default class WatcherHandler {
       this.log.warning('Siren federate: "elasticsearch.plugins" is not available when running from kibana: ' + err.toString());
     }
 
-    const actions = this.getActions(task._source.actions);
-    let search = get(task._source, 'input.search'); // search.request, search.kable, search.timelion
-    let condition = task._source.condition;
-    let transform = task._source.transform;
+    let search = get(task, 'input.search'); // search.request, search.kable, search.timelion
+    let condition = task.condition;
+    let transform = task.transform;
 
     if (!search) {
       throw new Error('search request or kable is malformed');
@@ -355,7 +254,7 @@ export default class WatcherHandler {
       throw new Error('condition is malformed');
     }
 
-    return {method, search, condition, transform, actions};
+    return { method, search, condition, transform };
   }
 
   /**
@@ -364,18 +263,18 @@ export default class WatcherHandler {
   * @param {object} task - Elasticsearch watcher object
   */
   async execute(task) {
-    this.log = new Log(this.config.app_name, this.server, `watcher ${task._id}`);
-    if (!isEmpty(this.getActions(task._source.actions))) {
+    this.log = new Log(this.config.app_name, this.server, `watcher ${task.id}`);
+    if (!isEmpty(task.actions)) {
       try {
-        const {method, search, condition, transform, actions} = this._checkWatcher(task);
-        if (this.config.settings.authentication.impersonate || task._source.impersonate) {
-          this.client = await this.getImpersonatedClient(task._id);
+        const { method, search, condition, transform } = this._checkWatcher(task);
+        if (this.config.settings.authentication.impersonate || task.impersonate) {
+          this.client = await this.getImpersonatedClient(task.id);
         }
-        return await this._execute(task, method, search, condition, transform, actions);
+        return await this._execute(task, method, search, condition, transform, task.actions);
       } catch (err) {
-        logHistory({
+        this.sentinlClient.log({
           server: this.server,
-          watcherTitle: task._source.title,
+          watcherTitle: task.title,
           message: 'execute advanced watcher: ' + err.toString(),
           level: 'high',
           isError: true,
@@ -383,7 +282,6 @@ export default class WatcherHandler {
         throw new Error('execute watcher: ' + err.toString());
       }
     }
-    return new WarningAndLog(this.log, 'no actions found');
   }
 
   /**
@@ -393,7 +291,7 @@ export default class WatcherHandler {
   */
   async getImpersonatedClient(watcherId) {
     try {
-      const user = await this.getUser(watcherId);
+      const user = await this.sentinlClient.getUser(watcherId);
       if (!user.found) {
         throw new Error('fail to impersonate watcher, user was not found. Create watcher user first.');
       }
@@ -401,10 +299,10 @@ export default class WatcherHandler {
       return getElasticsearchClient({
         server: this.server,
         config: this.config,
-        impersonateUsername: get(user, '_source.username') || get(user, `_source[${this.config.es.user_type}].username`),
-        impersonateSha: get(user, '_source.sha') || get(user, `_source[${this.config.es.user_type}].sha`),
-        impersonatePassword: get(user, '_source.password') || get(user, `_source[${this.config.es.user_type}].password`),
-        impersonateId: user._id,
+        impersonateUsername: user.username,
+        impersonateSha: user.sha,
+        impersonatePassword: user.password,
+        impersonateId: user.id,
         isSiren: this.siren,
       });
     } catch (err) {

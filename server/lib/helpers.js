@@ -35,18 +35,28 @@ const makeExecutableIfNecessary = function (filename) {
   }
 };
 
-const flattenDocsSourceAndType = function (docs, type) {
-  docs.forEach(function (doc, i) {
-    doc._source[type].id = doc._id;
-    docs[i] = doc._source[type];
-  });
-  return docs;
+const flatAttributes = function (doc) {
+  if (!doc.attributes) {
+    return doc;
+  }
+
+  if (doc._index) {
+    doc.attributes._index = doc._index;
+  }
+
+  doc.attributes.id = doc.id;
+  return doc.attributes;
+};
+
+const getCurrentTime = function () {
+  return new Date().toISOString();
 };
 
 module.exports = {
+  getCurrentTime,
+  flatAttributes,
   isKibi,
   listAllFilesSync,
   pickDefinedValues,
   makeExecutableIfNecessary,
-  flattenDocsSourceAndType,
 };

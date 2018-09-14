@@ -1,4 +1,4 @@
-import { get } from 'lodash';
+import { get, pick, cloneDeep } from 'lodash';
 
 class SentinlApi {
   constructor(docType, $http, $injector) {
@@ -6,30 +6,24 @@ class SentinlApi {
       throw new TypeError('Abstract class "SentinlApi" cannot be instantiated directly.');
     }
     this.docType = docType;
-    this.apiType = 'SentinlAPI';
     this.$http = $http;
     this.helper = $injector.get('sentinlHelper');
   }
 
-  async hash(text) {
-    try {
-      const resp = await this.$http.post('../api/sentinl/hash', { text });
-      return get(resp, 'data.sha');
-    } catch (err) {
-      throw new Error(this.helper.apiErrMsg(err, `${this.docType} ${this.apiType} hash text`));
-    }
+  _removeTmpAttributes(attributes) {
+    return pick(attributes, Object.keys(attributes).filter(a => !a.startsWith('_')));
   }
 
   async play(id) {
     try {
       const watcher = await this.get(id);
-      const resp = await this.$http.post('../api/sentinl/watcher/_execute', {
-        _id: watcher.id,
-        _source: this.helper.pickWatcherSource(watcher)
-      });
+      const attributes = cloneDeep(watcher);
+      attributes.id = id;
+
+      const resp = await this.$http.post('../api/sentinl/watcher/_execute', { attributes });
       return resp.data;
     } catch (err) {
-      throw new Error(this.helper.apiErrMsg(err, `${this.docType} ${this.apiType} play`));
+      throw new Error(this.helper.apiErrMsg(err, `${this.docType} play`));
     }
   }
 
@@ -42,28 +36,64 @@ class SentinlApi {
     try {
       return await this.$http.get('../api/sentinl/set/interval/' + JSON.stringify(timeInterval).replace(/\//g, '%2F'));
     } catch (err) {
-      throw new Error(this.helper.apiErrMsg(err, `${this.docType} ${this.apiType} update time filter`));
+      throw new Error(this.helper.apiErrMsg(err, `${this.docType} update time filter`));
     }
   }
 
-  get() {
-    throw new Error('Should be ovveritten in subclass');
+  async get(id) {
+    try {
+      const resp = await this.$http.post(`../api/sentinl/${this.docType}/${id}`);
+      return resp.data || {};
+    } catch (err) {
+      throw new Error(this.helper.apiErrMsg(err, `${this.docType} get`));
+    }
   }
 
-  list() {
-    throw new Error('Should be ovveritten in subclass');
+  async list() {
+    try {
+      const resp = await this.$http.post(`../api/sentinl/list/${this.docType}s`);
+      return get(resp, 'data.saved_objects') || [];
+    } catch (err) {
+      throw new Error(this.helper.apiErrMsg(err, `${this.docType} list`));
+    }
   }
 
-  index() {
-    throw new Error('Should be ovveritten in subclass');
+  async index({id, ...keys}) {
+    try {
+      let url = `../api/sentinl/${this.docType}`;
+      if (id) {
+        url += `/${id}`;
+      }
+
+      const resp = await this.$http.put(url, {
+        attributes: this._removeTmpAttributes({...keys})
+      });
+      return get(resp, 'data.id');
+    } catch (err) {
+      throw new Error(this.helper.apiErrMsg(err, `${this.docType} index`));
+    }
   }
 
-  save() {
-    throw new Error('Should be ovveritten in subclass');
+  async save(attributes) {
+    try {
+      return await this.index(attributes);
+    } catch (err) {
+      throw new Error(this.helper.apiErrMsg(err, `${this.docType} save`));
+    }
   }
 
-  delete() {
-    throw new Error('Should be ovveritten in subclass');
+  async delete(id, index) {
+    try {
+      let url = `../api/sentinl/${this.docType}/${id}`;
+      if (index) {
+        url += '/' + index;
+      }
+
+      const resp = await this.$http.delete(url);
+      return id;
+    } catch (err) {
+      throw new Error(this.helper.apiErrMsg(err, `${this.docType} delete`));
+    }
   }
 
   new() {

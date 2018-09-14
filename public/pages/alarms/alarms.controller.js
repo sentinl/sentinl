@@ -4,7 +4,7 @@ import uiChrome from 'ui/chrome';
 
 function AlarmsController($rootScope, $scope, $route, $interval,
   $timeout, $injector, timefilter, Private, createNotifier, $window, $uibModal, navMenu,
-  globalNavState, alarmFactory, COMMON, confirmModal, sentinlLog) {
+  globalNavState, alarmService, COMMON, confirmModal, sentinlLog) {
   'ngInject';
 
   $scope.title = COMMON.alarms.title;
@@ -40,7 +40,7 @@ function AlarmsController($rootScope, $scope, $route, $interval,
   const log = sentinlLog;
   log.initLocation(COMMON.alarms.title);
 
-  $scope.alarmService = alarmFactory.get();
+  $scope.alarmService = alarmService;
 
   function errorMessage(err) {
     log.error(err);
@@ -133,7 +133,7 @@ function AlarmsController($rootScope, $scope, $route, $interval,
   $scope.deleteAlarm = function (index, alarm) {
     async function doDelete() {
       try {
-        const resp = await $scope.alarmService.delete(alarm._id, alarm._index);
+        const resp = await $scope.alarmService.delete(alarm.id, alarm._index);
         $scope.alarms.splice(index - 1, 1);
         notify.info(`Deleted alarm ${resp}`);
         getAlarms($scope.timeInterval);
@@ -147,7 +147,7 @@ function AlarmsController($rootScope, $scope, $route, $interval,
       confirmButtonText: 'Delete alarm',
     };
 
-    confirmModal(`Are you sure you want to delete the alarm ${alarm._source.watcher}?`, confirmModalOptions);
+    confirmModal(`Are you sure you want to delete the alarm ${alarm.watcher}?`, confirmModalOptions);
   };
 
   var currentTime = moment($route.current.locals.currentTime);
