@@ -58,7 +58,7 @@ async function loadWatcherTemplates(server, config) {
       type: 'script',
       perPage: 1000
     });
-    await Promise.map(watcherTemplates, filename => loadTemplate(filename, existingScripts, savedObjectsClient, savedObjectsAPI, log));
+    await Promise.all(watcherTemplates.map(filename => loadTemplate(filename, existingScripts, savedObjectsClient, savedObjectsAPI, log)));
   } else if (format.version === '5') {
     log.info('Skipping loading of scripts to let migrations run first');
   } else {
