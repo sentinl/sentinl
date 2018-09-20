@@ -121,7 +121,7 @@ gulp.task('lint', function (done) {
     'public/**/*.js',
     'server/**/*.js',
     '!**/webpackShims/**'
-  ]).pipe(eslint()).pipe(eslint.formatEach()).pipe(eslint.failOnError());
+  ]).pipe(eslint()).pipe(eslint.formatEach()).pipe(eslint.failAfterError());
 });
 
 gulp.task('clean', function (done) {

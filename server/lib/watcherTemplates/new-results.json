@@ -1,0 +1,6 @@
+{
+  "title": "New results",
+  "description": "Notifies you when you have new results for the search criteria",
+  "version": 2,
+  "type": "watcher"
+}

@@ -1,0 +1,65 @@
+<div id="custom-watcher" class="app-container sentinl">
+  <top-nav menu="customWatcher.topNavMenu" tabs="customWatcher.tabsMenu"></top-nav>
+  <div class="container custom-watcher">
+    <div class="panel-group">
+
+      <div class="panel panel-default">
+        <div class="panel-body">
+          <title-panel-watcher-wizard
+            title-text="Custom watcher: {{customWatcher.watcherTemplate.title}}"
+            watcher="customWatcher.watcher"
+            on-index-change="console.log"
+            on-schedule-change="customWatcher.scheduleChange(text)"
+            index-input-disabled>
+          </title-panel-watcher-wizard>
+        </div>
+      </div>
+
+      <div class="panel panel-default" ng-if="customWatcher.watcher.impersonate">
+        <div class="panel-body">
+          <impersonation-panel-watcher-wizard user-name="customWatcher.watcher.username" pass-word="customWatcher.watcher.password">
+          </impersonation-panel-watcher-wizard>
+        </div>
+      </div>
+
+      <div class="panel panel-default" ng-if="customWatcher.watcher.input.search.request.filters.length || customWatcher.getQueryString()">
+        <div class="panel-body">
+          <div class="panel-body">
+            <search-filter
+              query-string="{{customWatcher.getQueryString()}}"
+              filters="customWatcher.watcher.input.search.request.filters">
+            </search-filter>
+          </div>
+        </div>
+      </div>
+      <div class="panel panel-default" ng-if="customWatcher.watcherTemplate.template">
+        <div class="panel-body">
+          <div class="panel-body">
+            <header class="header-without-help-text">
+              <h4 class="form-text">Parameters</h4>
+            </header>
+            <hr>
+
+            <siren-script-transcluder
+              ng-if="customWatcher.data"
+              template="{{ customWatcher.watcherTemplate.id }}"
+              params-values="customWatcher.watcher.custom.params"
+              model-data="customWatcher.data">
+            </siren-script-transcluder>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel panel-default">
+        <div class="panel-body">
+          <action-panel-watcher-wizard
+            watcher="customWatcher.watcher"
+            on-add="customWatcher.actionAdd({actionId: actionId, actionSettings: actionSettings})"
+            on-delete="customWatcher.actionDelete({actionId: actionId})"
+            ace-options="customWatcher.aceOptions({mode: mode, maxLines: maxLines, minLines: minLines})"
+          ></action-panel-watcher-wizard>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

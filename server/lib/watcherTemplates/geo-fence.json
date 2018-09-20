@@ -1,0 +1,6 @@
+{
+  "title": "Geo fence",
+  "description": "Alert for entries found in the geo filter",
+  "version": 2,
+  "type": "watcher"
+}
