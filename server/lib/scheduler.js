@@ -23,14 +23,16 @@ import getConfiguration from './get_configuration';
 import WatcherHandler from './watcher_handler';
 import WatcherWizardHandler from './watcher_wizard_handler';
 import CustomWatcherHandler from './custom_watcher_handler';
-import SentinlClient from './sentinl_client';
+import apiClient from './api_client';
 import Log from './log';
 
 /**
 * Schedules and executes watchers in background
 */
 export default function Scheduler(server) {
-
+  // Use Elasticsearch API because Kibana savedObjectsClient
+  // can't be used without session user from request
+  const client = apiClient(server, 'elasticsearchAPI');
   const config = getConfiguration(server);
   const log = new Log(config.app_name, server, 'scheduler');
 
@@ -129,10 +131,9 @@ export default function Scheduler(server) {
     watcherHandler = new WatcherHandler(server);
     watcherWizardHandler = new WatcherWizardHandler(server);
     customWatcherHandler = new CustomWatcherHandler(server);
-    const sentinlClient = new SentinlClient(server);
 
     try {
-      let tasks = await sentinlClient.listWatchers();
+      let tasks = await client.listWatchers();
       tasks = tasks.saved_objects;
 
       try {

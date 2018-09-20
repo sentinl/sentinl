@@ -30,7 +30,7 @@ import mustache from 'mustache';
 import { WebClient } from '@slack/client';
 import getConfiguration from '../get_configuration';
 import getElasticsearchClient from '../get_elasticsearch_client';
-import SentinlClient from '../sentinl_client';
+import apiClient from '../api_client';
 import EmailClient from './email_client';
 import Log from '../log';
 
@@ -56,7 +56,9 @@ export default function (server, actions, payload, task) {
   const config = getConfiguration(server);
   let log = new Log(config.app_name, server, 'do_action');
 
-  const sentinlClient = new SentinlClient(server);
+  // Use Elasticsearch API because Kibana savedObjectsClient
+  // can't be used without session user from request
+  const client = apiClient(server, 'elasticsearchAPI');
 
   /* Email Settings */
   let email;
@@ -64,8 +66,7 @@ export default function (server, actions, payload, task) {
     email = new EmailClient(config.settings.email);
   } catch (err) {
     log.error('email client: ' + err.toString());
-    sentinlClient.log({
-      server,
+    client.logAlarm({
       watcherTitle: task.title,
       message: 'email client: ' + err.toString(),
       level: 'high',
@@ -81,8 +82,7 @@ export default function (server, actions, payload, task) {
     }
   } catch (err) {
     log.error('slack client: ' + err.toString());
-    sentinlClient.log({
-      server,
+    client.logAlarm({
       watcherTitle: task.title,
       message: 'slack client: ' + err.toString(),
       level: 'high',
@@ -149,8 +149,7 @@ export default function (server, actions, payload, task) {
           message = mustache.render(formatterConsole, {payload: payload,});
           log.debug('console payload', payload);
 
-          await sentinlClient.log({
-            server,
+          await client.logAlarm({
             watcherTitle: task.title,
             actionName,
             message: toString(message),
@@ -159,8 +158,7 @@ export default function (server, actions, payload, task) {
           });
         } catch (err) {
           log.error('console action: ' + err.toString());
-          sentinlClient.log({
-            server,
+          client.logAlarm({
             watcherTitle: task.title,
             message: 'console action: ' + err.toString(),
             level: 'high',
@@ -183,8 +181,7 @@ export default function (server, actions, payload, task) {
           const id = `${task._id}_${actionId}`;
           if (debounce(id, action.throttle_period)) {
             log.info(`action throttled, watcher id: ${task._id}, action name: ${actionId}`);
-            await sentinlClient.log({
-              server,
+            await client.logAlarm({
               watcherTitle: task.title,
               actionName,
               message: `Action Throttled for ${action.throttle_period}`,
@@ -195,8 +192,7 @@ export default function (server, actions, payload, task) {
           }
         } catch (err) {
           log.error('throttle: ' + err.toString());
-          sentinlClient.log({
-            server,
+          client.logAlarm({
             watcherTitle: task.title,
             message: 'throttle: ' + err.toString(),
             level: 'high',
@@ -246,8 +242,7 @@ export default function (server, actions, payload, task) {
 
           if (!action.email.stateless) {
             // Log Event
-            await sentinlClient.log({
-              server,
+            await client.logAlarm({
               watcherTitle: task.title,
               actionName,
               message: toString(text),
@@ -270,8 +265,7 @@ export default function (server, actions, payload, task) {
           }
         } catch (err) {
           log.error('email action: ' + err.toString());
-          sentinlClient.log({
-            server,
+          client.logAlarm({
             watcherTitle: task.title,
             message: 'email action: ' + err.toString(),
             level: 'high',
@@ -320,8 +314,7 @@ export default function (server, actions, payload, task) {
 
           if (!action.email_html.stateless) {
             // Log Event
-            await sentinlClient.log({
-              server,
+            await client.logAlarm({
               watcherTitle: task.title,
               actionName,
               message: toString(text),
@@ -350,8 +343,7 @@ export default function (server, actions, payload, task) {
           }
         } catch (err) {
           log.error('html email action: ' + err.toString());
-          sentinlClient.log({
-            server,
+          client.logAlarm({
             watcherTitle: task.title,
             message: 'html email action: ' + err.toString(),
             level: 'high',
@@ -401,8 +393,7 @@ export default function (server, actions, payload, task) {
           });
         } catch (err) {
           log.error(`${task.title}, report action: ` + err.toString());
-          sentinlClient.log({
-            server,
+          client.logAlarm({
             watcherTitle: task.title,
             message: 'report action: ' + err.toString(),
             level: 'high',
@@ -434,8 +425,7 @@ export default function (server, actions, payload, task) {
 
           if (!action.slack.stateless) {
             // Log Event
-            await sentinlClient.log({
-              server,
+            await client.logAlarm({
               watcherTitle: task.title,
               actionName,
               message: toString(message),
@@ -459,8 +449,7 @@ export default function (server, actions, payload, task) {
           }
         } catch (err) {
           log.error(`${task.title}, report action: ` + err.toString());
-          sentinlClient.log({
-            server,
+          client.logAlarm({
             watcherTitle: task.title,
             message: 'slack action: ' + err.toString(),
             level: 'high',
@@ -490,8 +479,7 @@ export default function (server, actions, payload, task) {
         try {
           // Log Alarm Event
           if (!action.webhook.stateless && payload.constructor === Object && Object.keys(payload).length) {
-            await sentinlClient.log({
-              server,
+            await client.logAlarm({
               watcherTitle: task.title,
               actionName,
               message: toString(action.webhook.message),
@@ -547,8 +535,7 @@ export default function (server, actions, payload, task) {
           req.end();
         } catch (err) {
           log.error(`${task.title}, report action: ` + err.toString());
-          sentinlClient.log({
-            server,
+          client.logAlarm({
             watcherTitle: task.title,
             message: 'webhook action: ' + err.toString(),
             level: 'high',
@@ -577,8 +564,7 @@ export default function (server, actions, payload, task) {
           priority = action.elastic.priority || 'medium';
           log.debug(`logged message to elastic: ${message}`);
           // Log Event
-          await sentinlClient.log({
-            server,
+          await client.logAlarm({
             watcherTitle: task.title,
             actionName,
             message: toString(message),
@@ -587,8 +573,7 @@ export default function (server, actions, payload, task) {
           });
         } catch (err) {
           log.error(`${task.title}, report action: ` + err.toString());
-          sentinlClient.log({
-            server,
+          client.logAlarm({
             watcherTitle: task.title,
             message: 'elastic action: ' + err.toString(),
             level: 'high',

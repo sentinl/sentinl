@@ -3,7 +3,7 @@ import Log from './log';
 import WarningAndLog from './messages/warning_and_log';
 import SuccessAndLog from './messages/success_and_log';
 import WatcherHandler from './watcher_handler';
-import SentinlClient from './sentinl_client';
+import apiClient from './api_client';
 
 /**
 * Helper class to handle watchers
@@ -11,7 +11,9 @@ import SentinlClient from './sentinl_client';
 export default class WatcherWizardHandler extends WatcherHandler {
   constructor(server, client, config) {
     super(server, client, config);
-    this.sentinlClient = new SentinlClient(server);
+    // Use Elasticsearch API because Kibana savedObjectsClient
+    // can't be used without session user from request
+    this._client = apiClient(server, 'elasticsearchAPI');
   }
 
 
@@ -55,7 +57,7 @@ export default class WatcherWizardHandler extends WatcherHandler {
     let payload;
 
     try {
-      payload = await this.sentinlClient.search(request, method); // data from Elasticsearch
+      payload = await this._client.search(request, method); // data from Elasticsearch
     } catch (err) {
       throw err;
     }
@@ -83,11 +85,11 @@ export default class WatcherWizardHandler extends WatcherHandler {
   */
   async execute(task) {
     try {
-      const {method, search, condition, transform, actions} = this._checkWatcher(task);
+      const { method, search, condition, transform } = this._checkWatcher(task);
       if (this.config.settings.authentication.impersonate || task.impersonate) {
-        this.client = await this.getImpersonatedClient(task._id);
+        await this._client.impersonate(task.id);
       }
-      return await this._execute(task, method, search.request, condition, transform, actions);
+      return await this._execute(task, method, search.request, condition, transform, task.actions);
     } catch (err) {
       this.setninlClient.log({
         server: this.server,

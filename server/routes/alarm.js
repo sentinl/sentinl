@@ -27,7 +27,7 @@ async function getAlarms(isReport, server, req, reply) {
   try {
     // Use Elasticsearch API because Kibana savedObjectsClient
     // can't search in a specific index and doesn't allow custom query body
-    const client = apiClient(server, req, 'elasticsearchAPI');
+    const client = apiClient(server, 'elasticsearchAPI');
     const resp = await client.find({
       index: config.es.alarm_index + '*',
       type: config.es.alarm_type,
@@ -59,7 +59,6 @@ async function getAlarms(isReport, server, req, reply) {
 
 export default function routes(server) {
   const config = getConfiguration(server);
-  const isAlarm = true;
 
   function getCurrentAlarmIndex() {
     return config.es.alarm_index + '-' + new Date().toISOString().substr(0, 10).replace(/-/g, '.');
@@ -123,8 +122,8 @@ export default function routes(server) {
         const { id, index } = req.params;
         // Use Elasticsearch API because Kibana savedObjectsClient
         // can't search in a specific index and doesn't allow custom query body
-        const client = apiClient(server, req, 'elasticsearchAPI');
-        const resp = await client.delete(config.es.alarm_type, id, index, isAlarm);
+        const client = apiClient(server, 'elasticsearchAPI');
+        const resp = await client.delete(config.es.alarm_type, id, index);
 
         return reply(resp).code(200);
       } catch (err) {
@@ -150,9 +149,9 @@ export default function routes(server) {
       try {
         // Use Elasticsearch API because Kibana savedObjectsClient
         // can't search in a specific index and doesn't allow custom query body
-        const client = apiClient(server, req, 'elasticsearchAPI');
+        const client = apiClient(server, 'elasticsearchAPI');
         const resp = await client.create(config.es.alarm_type, req.payload.attributes,
-          { overwrite: true }, config.es.alarm_index, isAlarm);
+          { overwrite: true }, config.es.alarm_index);
 
         return reply(resp).code(201);
       } catch (err) {

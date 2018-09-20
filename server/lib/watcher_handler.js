@@ -14,20 +14,22 @@ import { isKibi } from './helpers';
 import KableClient from './kable_client';
 import TimelionClient from './timelion_client';
 import sirenFederateHelper from './siren/federate_helper';
-import SentinlClient from './sentinl_client';
+import apiClient from './api_client';
 
 /**
 * Helper class to handle watchers
 */
 export default class WatcherHandler {
-  constructor(server, client, config) {
+  constructor(server) {
     this.server = server;
-    this.config = !config ? getConfiguration(server) : config;
+    this.config = getConfiguration(server);
     this.log = new Log(this.config.app_name, this.server, 'watcher_handler');
     this.siren = isKibi(server);
     this.kable = new KableClient(server);
     this.timelion = new TimelionClient(server);
-    this.sentinlClient = new SentinlClient(server);
+    // Use Elasticsearch API because Kibana savedObjectsClient
+    // can't be used without session user from request
+    this._client = apiClient(server, 'elasticsearchAPI');
   }
 
   /**
@@ -133,7 +135,7 @@ export default class WatcherHandler {
       // search in transform
       if (has(link, 'search.request')) {
         try {
-          payload = await this.sentinlClient.search(link.search.request, method);
+          payload = await this._client.search(link.search.request, method);
         } catch (err) {
           throw new Error('apply transform "search": ' + err.toString());
         }
@@ -195,7 +197,7 @@ export default class WatcherHandler {
       }
     } else if (search.request) {
       try {
-        payload = await this.sentinlClient.search(search.request, method); // data from Elasticsearch
+        payload = await this._client.search(search.request, method); // data from Elasticsearch
       } catch (err) {
         throw new Error('get payload: ' + err.toString());
       }
@@ -268,12 +270,11 @@ export default class WatcherHandler {
       try {
         const { method, search, condition, transform } = this._checkWatcher(task);
         if (this.config.settings.authentication.impersonate || task.impersonate) {
-          this.client = await this.getImpersonatedClient(task.id);
+          await this._client.impersonate(task.id);
         }
         return await this._execute(task, method, search, condition, transform, task.actions);
       } catch (err) {
-        this.sentinlClient.log({
-          server: this.server,
+        this._client.logAlarm({
           watcherTitle: task.title,
           message: 'execute advanced watcher: ' + err.toString(),
           level: 'high',
@@ -281,32 +282,6 @@ export default class WatcherHandler {
         });
         throw new Error('execute watcher: ' + err.toString());
       }
-    }
-  }
-
-  /**
-  * Impersonate ES client
-  *
-  * @return {promise} client - impersonated client
-  */
-  async getImpersonatedClient(watcherId) {
-    try {
-      const user = await this.sentinlClient.getUser(watcherId);
-      if (!user.found) {
-        throw new Error('fail to impersonate watcher, user was not found. Create watcher user first.');
-      }
-
-      return getElasticsearchClient({
-        server: this.server,
-        config: this.config,
-        impersonateUsername: user.username,
-        impersonateSha: user.sha,
-        impersonatePassword: user.password,
-        impersonateId: user.id,
-        isSiren: this.siren,
-      });
-    } catch (err) {
-      throw new Error('impersonate Elasticsearch API client: ' + err.toString());
     }
   }
 }

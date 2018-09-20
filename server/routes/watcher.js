@@ -24,7 +24,7 @@ export default function watcherRoutes(server) {
     },
     handler: async function (req, reply) {
       try {
-        const client = apiClient(server, req, config.api.type);
+        const client = apiClient(server, config.api.type, req);
 
         const resp = await client.find({
           index: config.es.default_index,
@@ -53,7 +53,7 @@ export default function watcherRoutes(server) {
     },
     handler: async function (req, reply) {
       try {
-        const client = apiClient(server, req, config.api.type);
+        const client = apiClient(server, config.api.type, req);
         let resp = await client.get(config.es.watcher_type, req.params.id, config.es.default_index);
         resp = flatAttributes(resp);
 
@@ -79,7 +79,7 @@ export default function watcherRoutes(server) {
     },
     handler: async function (req, reply) {
       try {
-        const client = apiClient(server, req, config.api.type);
+        const client = apiClient(server, config.api.type, req);
         const resp = await client.create(config.es.watcher_type, req.payload.attributes,
           { id: req.params.id, overwrite: true }, config.es.default_index);
 
@@ -102,7 +102,7 @@ export default function watcherRoutes(server) {
     },
     handler: async function (req, reply) {
       try {
-        const client = apiClient(server, req, config.api.type);
+        const client = apiClient(server, config.api.type, req);
         const resp = await client.delete(config.es.watcher_type, req.params.id, config.es.default_index);
 
         return reply(resp).code(200);
@@ -127,7 +127,7 @@ export default function watcherRoutes(server) {
       try {
         // Use Elasticsearch API because Kibana savedObjectsClient
         // can't search in a specific index and doesn't allow custom query body
-        const client = apiClient(server, req, 'elasticsearchAPI');
+        const client = apiClient(server, 'elasticsearchAPI');
         const { method, request } = req.payload;
 
         const resp = await client.search(request);
@@ -162,6 +162,253 @@ export default function watcherRoutes(server) {
 
       try {
         const resp = await watcherHandler.execute(req.payload.attributes);
+        return reply(resp);
+      } catch (err) {
+        return reply(handleESError(err));
+      }
+    }
+  });
+
+  server.route({
+    path: '/api/sentinl/watcher/wizard/count',
+    method: 'POST',
+    config: {
+      validate: {
+        payload: {
+          es_params: Joi.object({
+            index: Joi.array().items(Joi.string().default('*')).default(),
+            number: Joi.number().default(config.es.results),
+            allowNoIndices: Joi.boolean().default(config.es.allow_no_indices),
+            ignoreUnavailable: Joi.boolean().default(config.es.ignore_unavailable),
+          }).default(),
+          query: Joi.string(),
+        },
+      },
+    },
+    handler: async function (req, reply) {
+      const esParams = req.payload.es_params;
+
+      try {
+        const body = JSON.parse(req.payload.query);
+        log.debug('COUNT QUERY BODY:', JSON.stringify(body, null, 2));
+        log.debug('INDEX:', esParams.index);
+        // Use Elasticsearch API because Kibana savedObjectsClient
+        // can't search in a specific index and doesn't allow custom query body
+        const client = apiClient(server, 'elasticsearchAPI');
+
+        const resp = await client.search({
+          index: esParams.index,
+          ignoreUnavailable: esParams.ignoreUnavailable,
+          allowNoIndices: esParams.allowNoIndices,
+          body,
+        });
+
+        return reply(resp);
+      } catch (err) {
+        return reply(handleESError(err));
+      }
+    }
+  });
+
+  server.route({
+    path: '/api/sentinl/watcher/wizard/average',
+    method: 'POST',
+    config: {
+      validate: {
+        payload: {
+          es_params: Joi.object({
+            index: Joi.array().items(Joi.string().default('*')).default(),
+            number: Joi.number().default(config.es.results),
+            allowNoIndices: Joi.boolean().default(config.es.allow_no_indices),
+            ignoreUnavailable: Joi.boolean().default(config.es.ignore_unavailable),
+          }).default(),
+          query: Joi.string(),
+        },
+      },
+    },
+    handler: async function (req, reply) {
+      const esParams = req.payload.es_params;
+
+      try {
+        const body = JSON.parse(req.payload.query);
+        log.debug('AVERAGE QUERY BODY:', JSON.stringify(body, null, 2));
+        log.debug('INDEX:', esParams.index);
+        // Use Elasticsearch API because Kibana savedObjectsClient
+        // can't search in a specific index and doesn't allow custom query body
+        const client = apiClient(server, 'elasticsearchAPI');
+
+        const resp = await client.search({
+          index: esParams.index,
+          ignoreUnavailable: esParams.ignoreUnavailable,
+          allowNoIndices: esParams.allowNoIndices,
+          body,
+        });
+
+        return reply(resp);
+      } catch (err) {
+        return reply(handleESError(err));
+      }
+    }
+  });
+
+  server.route({
+    path: '/api/sentinl/watcher/wizard/min',
+    method: 'POST',
+    config: {
+      validate: {
+        payload: {
+          es_params: Joi.object({
+            index: Joi.array().items(Joi.string().default('*')).default(),
+            number: Joi.number().default(config.es.results),
+            allowNoIndices: Joi.boolean().default(config.es.allow_no_indices),
+            ignoreUnavailable: Joi.boolean().default(config.es.ignore_unavailable),
+          }).default(),
+          query: Joi.string(),
+        },
+      },
+    },
+    handler: async function (req, reply) {
+      const esParams = req.payload.es_params;
+
+      try {
+        const body = JSON.parse(req.payload.query);
+        log.debug('MIN QUERY BODY:', JSON.stringify(body, null, 2));
+        log.debug('INDEX:', esParams.index);
+        // Use Elasticsearch API because Kibana savedObjectsClient
+        // can't search in a specific index and doesn't allow custom query body
+        const client = apiClient(server, 'elasticsearchAPI');
+
+        const resp = await client.search({
+          index: esParams.index,
+          ignoreUnavailable: esParams.ignoreUnavailable,
+          allowNoIndices: esParams.allowNoIndices,
+          body,
+        });
+
+        return reply(resp);
+      } catch (err) {
+        return reply(handleESError(err));
+      }
+    }
+  });
+
+  server.route({
+    path: '/api/sentinl/watcher/wizard/max',
+    method: 'POST',
+    config: {
+      validate: {
+        payload: {
+          es_params: Joi.object({
+            index: Joi.array().items(Joi.string().default('*')).default(),
+            number: Joi.number().default(config.es.results),
+            allowNoIndices: Joi.boolean().default(config.es.allow_no_indices),
+            ignoreUnavailable: Joi.boolean().default(config.es.ignore_unavailable),
+          }).default(),
+          query: Joi.string(),
+        },
+      },
+    },
+    handler: async function (req, reply) {
+      const esParams = req.payload.es_params;
+
+      try {
+        const body = JSON.parse(req.payload.query);
+        log.debug('MAX QUERY BODY:', JSON.stringify(body, null, 2));
+        log.debug('INDEX:', esParams.index);
+        // Use Elasticsearch API because Kibana savedObjectsClient
+        // can't search in a specific index and doesn't allow custom query body
+        const client = apiClient(server, 'elasticsearchAPI');
+
+        const resp = await client.search({
+          index: esParams.index,
+          ignoreUnavailable: esParams.ignoreUnavailable,
+          allowNoIndices: esParams.allowNoIndices,
+          body,
+        });
+
+        return reply(resp);
+      } catch (err) {
+        return reply(handleESError(err));
+      }
+    }
+  });
+
+  server.route({
+    path: '/api/sentinl/watcher/wizard/sum',
+    method: 'POST',
+    config: {
+      validate: {
+        payload: {
+          es_params: Joi.object({
+            index: Joi.array().items(Joi.string().default('*')).default(),
+            number: Joi.number().default(config.es.results),
+            allowNoIndices: Joi.boolean().default(config.es.allow_no_indices),
+            ignoreUnavailable: Joi.boolean().default(config.es.ignore_unavailable),
+          }).default(),
+          query: Joi.string(),
+        },
+      },
+    },
+    handler: async function (req, reply) {
+      const esParams = req.payload.es_params;
+
+      try {
+        const body = JSON.parse(req.payload.query);
+        log.debug('SUM QUERY BODY:', JSON.stringify(body, null, 2));
+        log.debug('INDEX:', esParams.index);
+        // Use Elasticsearch API because Kibana savedObjectsClient
+        // can't search in a specific index and doesn't allow custom query body
+        const client = apiClient(server, 'elasticsearchAPI');
+
+        const resp = await client.search({
+          index: esParams.index,
+          ignoreUnavailable: esParams.ignoreUnavailable,
+          allowNoIndices: esParams.allowNoIndices,
+          body,
+        });
+
+        return reply(resp);
+      } catch (err) {
+        return reply(handleESError(err));
+      }
+    }
+  });
+
+  server.route({
+    method: 'POST',
+    path: '/api/sentinl/watcher/wizard/getmapping',
+    config: {
+      validate: {
+        payload: {
+          index: Joi.array().required(),
+        },
+      },
+    },
+    handler: async function (request, reply) {
+      const {index} = request.payload;
+      try {
+        // Use Elasticsearch API because Kibana savedObjectsClient
+        // can't search in a specific index and doesn't allow custom query body
+        const client = apiClient(server, 'elasticsearchAPI');
+
+        const resp = await client.getMapping(index);
+        return reply(resp).code(201);
+      } catch (err) {
+        return reply(handleESError(err));
+      }
+    }
+  });
+
+  server.route({
+    path: '/api/sentinl/watcher/wizard/indexes',
+    method: 'GET',
+    handler: async function (req, reply) {
+      try {
+        // Use Elasticsearch API because Kibana savedObjectsClient
+        // can't search in a specific index and doesn't allow custom query body
+        const client = apiClient(server, 'elasticsearchAPI');
+
+        const resp = await client.getIndices();
         return reply(resp);
       } catch (err) {
         return reply(handleESError(err));

@@ -20,7 +20,7 @@ export default function userRoutes(server) {
     },
     handler: async function (req, reply) {
       try {
-        const client = apiClient(server, req, config.api.type);
+        const client = apiClient(server, config.api.type, req);
 
         const resp = await client.find({
           index: config.es.default_index,
@@ -49,7 +49,7 @@ export default function userRoutes(server) {
     },
     handler: async function (req, reply) {
       try {
-        const client = apiClient(server, req, config.api.type);
+        const client = apiClient(server, config.api.type, req);
         let resp = await client.get(config.es.user_type, req.params.id, config.es.default_index);
         resp = flatAttributes(resp);
 
@@ -81,9 +81,8 @@ export default function userRoutes(server) {
         attributes.sha = crypto.encrypt(attributes.password);
         delete attributes.password;
 
-        const client = apiClient(server, req, config.api.type);
-        const resp = await client.create(config.es.user_type, req.payload.attributes,
-          { id: req.params.id, overwrite: true }, config.es.default_index);
+        const client = apiClient(server, config.api.type, req);
+        const resp = await client.addUser(req.params.id, attributes);
 
         return reply(resp).code(201);
       } catch (err) {
@@ -104,7 +103,7 @@ export default function userRoutes(server) {
     },
     handler: async function (req, reply) {
       try {
-        const client = apiClient(server, req, config.api.type);
+        const client = apiClient(server, config.api.type, req);
         const resp = await client.delete(config.es.user_type, req.params.id, config.es.default_index);
 
         return reply(resp).code(200);

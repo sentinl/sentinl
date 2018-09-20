@@ -3,7 +3,7 @@ import getConfiguration from '../../get_configuration';
 import reportFactory from './report_factory';
 import { defaultsDeep, get } from 'lodash';
 import { renderMustacheEmailSubjectAndText } from '../helpers';
-import SentinlClient from '../../sentinl_client';
+import apiClient from '../../api_client';
 
 export default async function reportAction({
   server,
@@ -16,8 +16,7 @@ export default async function reportAction({
   try {
     const config = getConfiguration(server);
     const log = new Log(config.app_name, server, 'report');
-
-    const sentinlClient = new SentinlClient(server);
+    const client = apiClient(server, 'elasticsearchAPI');
 
     action.report = defaultsDeep(action.report, config.settings.report.action);
 
@@ -93,8 +92,7 @@ export default async function reportAction({
 
     try {
       if (!options.isStateless) {
-        sentinlClient.log({
-          server,
+        client.logAlarm({
           actionName,
           watcherTitle,
           level: options.actionLevel,
@@ -113,8 +111,7 @@ export default async function reportAction({
       });
     } catch (err) {
       log.error(`${watcherTitle} report, send email: ` + err.toString());
-      sentinlClient.log({
-        server,
+      client.logAlarm({
         actionName,
         watcherTitle,
         level: 'high',

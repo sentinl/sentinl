@@ -36,6 +36,7 @@ import alarmRoutes from './server/routes/alarm';
 import userRoutes from './server/routes/user';
 import kableRoutes from './server/routes/kable';
 import timelionRoutes from './server/routes/timelion';
+import sqlRoutes from './server/routes/sql';
 
 const mappings = {
   alarm: require('./server/mappings/alarm_index'),
@@ -137,6 +138,7 @@ const init = once(function (server) {
   userRoutes(server);
   kableRoutes(server);
   timelionRoutes(server);
+  sqlRoutes(server);
 
   // auto detect elasticsearch host, protocol and port
   const esUrl = url.parse(server.config().get('elasticsearch.url'));
