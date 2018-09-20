@@ -1,0 +1,6 @@
+{
+  "title": "Proximity",
+  "description": "Detect when entities are further or closer than a specified distance",
+  "version": 2,
+  "type": "watcher"
+}

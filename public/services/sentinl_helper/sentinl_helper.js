@@ -3,7 +3,7 @@ import { get, pick, omit, cloneDeep } from 'lodash';
 
 const WATCHER_SRC_FIELDS = [
   'actions', 'input', 'condition', 'transform', 'trigger', 'disable', 'report', 'title', 'wizard',
-  'save_payload', 'spy', 'impersonate', 'username', 'password', 'dashboard_link'
+  'save_payload', 'spy', 'impersonate', 'username', 'password', 'dashboard_link', 'custom'
 ];
 
 class SentinlHelper {

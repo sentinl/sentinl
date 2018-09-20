@@ -23,6 +23,7 @@ import _ from 'lodash';
 import { assign, pick, isObject } from 'lodash';
 import url from 'url';
 import Promise from 'bluebird';
+import later from 'later';
 import moment from 'moment';
 import rison from 'rison';
 import mustache from 'mustache';
@@ -117,7 +118,8 @@ export default function (server, actions, payload, task) {
   };
 
   if (task._source.dashboard_link) {
-    task._source.dashboard_link = _updateDashboardLinkTimeRange(task._source.dashboard_link, moment().subtract(1, 'hour'), moment());
+    const scheduleStartTime = moment(later.schedule(later.parse.text(task._source.trigger.schedule.later)).prev(2)[1]);
+    task._source.dashboard_link = _updateDashboardLinkTimeRange(task._source.dashboard_link, scheduleStartTime, moment());
   }
 
   /* Loop Actions */
@@ -609,7 +611,8 @@ function _updateDashboardLinkTimeRange(url, from, to) {
   const dashboardName = queryParameters._a.id;
   queryParameters = {
     _a: {
-      filters: queryParameters._a.filters
+      filters: queryParameters._a.filters,
+      query: queryParameters._a.query
     },
     _k: {
       d: {

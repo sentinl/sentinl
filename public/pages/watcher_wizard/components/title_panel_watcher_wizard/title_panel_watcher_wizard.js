@@ -4,6 +4,8 @@ import template from './title_panel_watcher_wizard.html';
 class TitlePanelWatcherWizard {
   constructor($scope, sentinlLog) {
     this.$scope = $scope;
+    this.titleText = this.titleText || this.$scope.titleText || 'Watcher';
+    this._indexInputDisabled = (this.indexInputDisabled || this.$scope.indexInputDisabled) !== undefined;
     this.watcher = this.watcher || this.$scope.watcher;
     this.onScheduleChange = this.onScheduleChange || this.$scope.onScheduleChange;
     this.onIndexChange = this.onIndexChange || this.$scope.onIndexChange;
@@ -50,6 +52,8 @@ function titlePanelWatcherWizard() {
     template,
     restrict: 'E',
     scope: {
+      titleText: '@',
+      indexInputDisabled: '@',
       watcher: '=',
       onScheduleChange: '&',
       onIndexChange: '&',
@@ -57,6 +61,8 @@ function titlePanelWatcherWizard() {
     controller:  TitlePanelWatcherWizard,
     controllerAs: 'titlePanelWatcherWizard',
     bindToController: {
+      titleText: '@',
+      indexInputDisabled: '@',
       watcher: '=',
       onScheduleChange: '&',
       onIndexChange: '&',

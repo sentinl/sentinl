@@ -59,6 +59,7 @@ export default function (kibana) {
     require: requirements,
     uiExports: {
       spyModes: ['plugins/sentinl/dashboard_spy_button/alarm_button'],
+      navbarExtensions: ['plugins/sentinl/dashboard_button/dashboard_button'],
       mappings: require('./server/mappings/sentinl.json'),
       uiSettingDefaults: {
         'sentinl:experimental': {
@@ -140,7 +141,7 @@ export default function (kibana) {
           alarm_index: Joi.string().default('watcher_alarms'),
           user_type: Joi.string().default('sentinl-user'), // if you change this, also change the corresponding object type name here ./server/mappings/sentinl.json
           watcher_type: Joi.string().default('sentinl-watcher'), // if you change this, also change the corresponding object type name here ./server/mappings/sentinl.json
-          script_type: Joi.string().default('sentinl-script'), // if you change this, also change the corresponding object type name here ./server/mappings/sentinl.json
+          script_type: Joi.string().default('script'), // if you change this, also change the corresponding object type name here ./server/mappings/sentinl.json
           alarm_type: Joi.string().default('sentinl-alarm'),
           watcher: Joi.object({
             schedule_timezone: Joi.string().default('utc'), // local, utc

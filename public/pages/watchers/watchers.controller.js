@@ -37,7 +37,11 @@ function  WatchersController($rootScope, $scope, $route, $interval,
 
   $scope.inputInfo = function (watcher) {
     const index = get(watcher, 'input.search.request.index');
-    if (index) return index.join(',');
+    if (Array.isArray(index)) {
+      return index.join(',');
+    } else if (index) {
+      return index;
+    }
     return get(watcher, 'input.search.kable.expression') || get(watcher, 'input.search.timelion.sheet');
   };
 
@@ -189,6 +193,15 @@ function  WatchersController($rootScope, $scope, $route, $interval,
   }, 1000);
   $scope.$watch('$destroy', unsubscribe);
 
+  $scope.getWatcherType = function (watcher) {
+    if (get(watcher, 'wizard.chart_query_params')) {
+      return 'wizard';
+    } else if (get(watcher, 'custom.type')) {
+      return 'custom';
+    } else {
+      return 'advanced';
+    }
+  };
 };
 
 export default WatchersController;

@@ -28,7 +28,8 @@ module.factory('SavedWatcher', function (courier, sentinlConfig) {
           spy: 'boolean',
           trigger: 'object',
           wizard: 'object',
-          dashboard_link: 'string'
+          dashboard_link: 'string',
+          custom: 'object'
         },
         // if this is null/undefined then the SavedObject will be assigned the defaults
         id: id,

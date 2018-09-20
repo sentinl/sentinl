@@ -6,6 +6,7 @@ import dateMath from '@elastic/datemath';
 import getElasticsearchClient from '../lib/get_elasticsearch_client';
 import Crypto from '../lib/crypto';
 import WatcherHandler from '../lib/watcher_handler';
+import CustomWatcherHandler from '../lib/custom_watcher_handler';
 import Log from '../lib/log';
 import { convert as convertSQLtoDSL } from 'elasql';
 
@@ -184,10 +185,10 @@ export default function routes(server) {
     method: 'POST',
     path: '/api/sentinl/watcher/_execute',
     handler: async function (request, reply) {
-      const watcherHandler = new WatcherHandler(server);
+      const handler = (request.payload._source.custom) ? new CustomWatcherHandler(server) : new WatcherHandler(server);
 
       try {
-        const resp = await watcherHandler.execute(request.payload);
+        const resp = await handler.execute(request.payload, { async: true });
         return reply(resp);
       } catch (err) {
         return reply(handleESError(err));
