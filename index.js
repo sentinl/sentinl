@@ -20,21 +20,22 @@
 import { existsSync, readFileSync, appendFileSync } from 'fs';
 import { forEach, difference } from 'lodash';
 
-function loadLibs(requirements) {
-  const sirenSavedObjectsAPI = __dirname.split('/').slice(0, -2).join('/') + '/src/siren_core_plugins/saved_objects_api';
+function loadLibs(requirements, platformIsSiren) {
   const appFile = __dirname + '/public/app.js';
 
+  const libsToImport = [];
   let customer = 'kibana';
-  if (existsSync(sirenSavedObjectsAPI)) {
+  if (platformIsSiren) {
     requirements.push('saved_objects_api');
+    libsToImport.push('import \'./pages/custom_watcher\';');
     customer = 'siren';
   }
 
-  const libsToImport = [
+  libsToImport.push(
     `import './services/${customer}/saved_watchers/index';`,
     `import './services/${customer}/saved_users/index';`,
     `import './services/${customer}/saved_scripts/index';`,
-  ];
+  );
 
   const data = readFileSync(appFile);
   const libs = data.toString().trim().split('\n');
@@ -49,8 +50,11 @@ function loadLibs(requirements) {
 export default function (kibana) {
   let requirements = ['kibana', 'elasticsearch'];
 
+  const platformIsSiren = existsSync(__dirname.split('/').slice(0, -2).join('/') + '/src/siren_core_plugins/saved_objects_api');
+  const navbarExtensions = platformIsSiren ? ['plugins/sentinl/dashboard_button/dashboard_button'] : [];
+
   try {
-    requirements = loadLibs(requirements);
+    requirements = loadLibs(requirements, platformIsSiren);
   } catch (err) {
     throw new Error('put libs into app.js: ' + err.message);
   }
@@ -59,7 +63,7 @@ export default function (kibana) {
     require: requirements,
     uiExports: {
       spyModes: ['plugins/sentinl/dashboard_spy_button/alarm_button'],
-      navbarExtensions: ['plugins/sentinl/dashboard_button/dashboard_button'],
+      navbarExtensions,
       mappings: require('./server/mappings/sentinl.json'),
       uiSettingDefaults: {
         'sentinl:experimental': {
