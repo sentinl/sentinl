@@ -49,7 +49,6 @@ const siren = {
     script: require('./server/lib/siren/saved_objects/script'),
     user: require('./server/lib/siren/saved_objects/user'),
   },
-  SavedObjectsAPIMiddleware: require('./server/lib/siren/saved_objects_api'),
 };
 
 async function prepareIndices(server, log, config, mappings) {
@@ -157,9 +156,6 @@ const init = once(function (server) {
     forEach(siren.schema, (schema) => {
       server.plugins.saved_objects_api.registerType(schema);
     });
-
-    const middleware = new siren.SavedObjectsAPIMiddleware(server);
-    server.plugins.saved_objects_api.registerMiddleware(middleware);
   }
 
   (async () => {
