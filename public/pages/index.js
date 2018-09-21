@@ -2,7 +2,6 @@
 
 import './watcher_wizard';
 import './watcher_advanced';
-import './custom_watcher';
 
 import watchersPage from './watchers';
 import aboutPage from './about';

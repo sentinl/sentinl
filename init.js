@@ -29,7 +29,6 @@ import Log from './server/lib/log';
 import getChromePath from './server/lib/actions/report/get_chrome_path';
 import installPhantomjs from './server/lib/actions/report/install_phantomjs';
 import { isKibi } from './server/lib/helpers';
-import loadWatcherTemplates from './server/lib/load_watcher_templates';
 
 import sentinlRoutes from './server/routes/routes';
 import watcherRoutes from './server/routes/watcher';
@@ -171,9 +170,11 @@ const init = once(function (server) {
         });
       }
 
-      loadWatcherTemplates(server, config)
-        .then(() => log.info('Loaded sample scripts'))
-        .catch(error => log.error(error));
+      if (isKibi(server)) {
+        require('./server/lib/load_watcher_templates')(server, config)
+          .then(() => log.info('Loaded sample scripts'))
+          .catch(error => log.error(error));
+      }
 
       // Schedule watchers execution.
       const sched = later.parse.recur().on(25, 55).second();
