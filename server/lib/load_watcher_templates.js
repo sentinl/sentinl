@@ -24,7 +24,7 @@ async function loadTemplate(scriptFilename, savedObjectsClient, savedObjectsAPI,
       try {
         await savedObjectsClient.create('script', scriptDefinition, { id }, savedObjectsAPI.getServerCredentials());
       } catch (error) {
-        log.error(`Could not create script [${id}]: ${err}`);
+        log.error(`Could not create script [${id}]: ${error}`);
       }
     } else {
       log.error(`Could not get script [${id}]: ${err}`);
