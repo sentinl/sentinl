@@ -10,25 +10,24 @@ const watcherTemplates = [
   'proximity',
 ];
 
-async function loadTemplate(scriptFilename, existingScripts, savedObjectsClient, savedObjectsAPI, log) {
+async function loadTemplate(scriptFilename, savedObjectsClient, savedObjectsAPI, log) {
   const scriptDefinition = require(path.join(__dirname, 'watcherTemplates', scriptFilename + '.json'));
   scriptDefinition.scriptSource = fs.readFileSync(path.join(__dirname, 'watcherTemplates', scriptFilename + '-source' + '.js'), 'utf-8');
 
   const id = kibiUtils.slugifyId(scriptDefinition.title);
 
   // if we find the script already loaded just skip it, a migration will kick in if necessary.
-  if (find(existingScripts.saved_objects, { id })) {
-    return;
-  }
-
   try {
-    await savedObjectsClient.create('script', scriptDefinition, { id }, savedObjectsAPI.getServerCredentials());
-  } catch (error) {
-    if (error.statusCode === 409) {
-      log.info(`Script [${id}] already exists`);
+    await savedObjectsClient.get('script', id, savedObjectsAPI.getServerCredentials());
+  } catch (err) {
+    if (err.statusCode === 404) {
+      try {
+        await savedObjectsClient.create('script', scriptDefinition, { id }, savedObjectsAPI.getServerCredentials());
+      } catch (error) {
+        log.error(`Could not create script [${id}]: ${err}`);
+      }
     } else {
-      error.message = `Could not load script [${id}]: ` + error.message;
-      throw error;
+      log.error(`Could not get script [${id}]: ${err}`);
     }
   }
 
@@ -54,11 +53,7 @@ async function loadWatcherTemplates(server, config) {
   if (format.statusCode === 404 || (format.statusCode === 200 && format.version === '6')) {
     // If ES6 format or empty Elasticsearch
     log.info('Loading watcher templates');
-    const existingScripts = await savedObjectsClient.find({
-      type: 'script',
-      perPage: 1000
-    });
-    await Promise.all(watcherTemplates.map(filename => loadTemplate(filename, existingScripts, savedObjectsClient, savedObjectsAPI, log)));
+    await Promise.all(watcherTemplates.map(filename => loadTemplate(filename, savedObjectsClient, savedObjectsAPI, log)));
   } else if (format.version === '5') {
     log.info('Skipping loading of scripts to let migrations run first');
   } else {
