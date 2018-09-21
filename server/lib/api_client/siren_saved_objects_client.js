@@ -1,4 +1,5 @@
 import getConfiguration from  '../get_configuration';
+import { trimIdTypePrefix } from '../helpers';
 
 export default class SirenSavedObjectsClient {
   constructor(server, request) {
@@ -10,7 +11,7 @@ export default class SirenSavedObjectsClient {
   }
 
   addUser(id, attributes) {
-    return this.create(this._config.es.user_type, attributes, { id: this._trimIdTypePrefix(id) });
+    return this.create(this._config.es.user_type, attributes, { id: trimIdTypePrefix(id) });
   }
 
   find({...args}) {
@@ -28,9 +29,5 @@ export default class SirenSavedObjectsClient {
 
   delete(type, id) {
     return this._client.delete(type, id, this._request);
-  }
-
-  _trimIdTypePrefix(id) {
-    return id.includes(':') ? id.split(':')[1] : id;
   }
 }

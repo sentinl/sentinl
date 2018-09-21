@@ -52,7 +52,12 @@ const getCurrentTime = function () {
   return new Date().toISOString();
 };
 
+const trimIdTypePrefix = function (id) {
+  return id.includes(':') ? id.split(':')[1] : id;
+};
+
 module.exports = {
+  trimIdTypePrefix,
   getCurrentTime,
   flatAttributes,
   isKibi,

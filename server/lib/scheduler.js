@@ -118,7 +118,7 @@ export default function Scheduler(server) {
       watching(task);
     }, schedule);
 
-    log.info(`scheduled watcher ${task.id}, to run every ${server.sentinlStore.schedule[task.id].schedule}`);
+    log.debug(`scheduled watcher ${task.id}, to run every ${server.sentinlStore.schedule[task.id].schedule}`);
   };
 
   async function alert(server) {

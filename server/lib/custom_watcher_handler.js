@@ -5,8 +5,8 @@ import WarningAndLog from './messages/warning_and_log';
 import SuccessAndLog from './messages/success_and_log';
 import WatcherHandler from './watcher_handler';
 import kibiUtils from 'kibiutils';
-import logHistory from './log_history';
 import sirenFederateHelper from './siren/federate_helper';
+import apiClient from './api_client';
 
 /**
 * Helper class to handle watchers
@@ -14,6 +14,9 @@ import sirenFederateHelper from './siren/federate_helper';
 export default class CustomWatcherHandler extends WatcherHandler {
   constructor(server, client, config) {
     super(server, client, config);
+    // Use Elasticsearch API because Kibana savedObjectsClient
+    // can't be used without session user from request
+    this._client = apiClient(server, 'elasticsearchAPI');
     this.savedObjectsClient = this.server.savedObjectsClientFactory({
       callCluster: this.server.plugins.elasticsearch.getCluster('admin')
     });
@@ -74,8 +77,7 @@ export default class CustomWatcherHandler extends WatcherHandler {
       }
 
     } catch (err) {
-      logHistory({
-        server: this.server,
+      this._client.logAlarm({
         watcherTitle: task._source.title,
         message: 'execute custom watcher: ' + err.toString(),
         level: 'high',

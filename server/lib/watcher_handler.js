@@ -4,7 +4,6 @@ import range from './validators/range';
 import anomaly from './validators/anomaly';
 import compare from './validators/compare';
 import compareArray from './validators/compare_array';
-import getElasticsearchClient from './get_elasticsearch_client';
 import getConfiguration from './get_configuration';
 import actionFactory from './actions';
 import Log from './log';

@@ -29,7 +29,6 @@ import rison from 'rison';
 import mustache from 'mustache';
 import { WebClient } from '@slack/client';
 import getConfiguration from '../get_configuration';
-import getElasticsearchClient from '../get_elasticsearch_client';
 import apiClient from '../api_client';
 import EmailClient from './email_client';
 import Log from '../log';

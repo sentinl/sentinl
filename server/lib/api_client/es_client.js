@@ -1,15 +1,20 @@
 import uuid from 'uuid';
 import getConfiguration from  '../get_configuration';
-import getElasticsearchClient from '../get_elasticsearch_client';
 import { getCurrentTime, flatAttributes } from '../helpers';
-import { isKibi } from '../helpers';
+import { isKibi, trimIdTypePrefix } from '../helpers';
+import getElasticsearchClient from '../get_elasticsearch_client';
 
 export default class EsApi {
   constructor(server) {
     this._server = server;
     this._config = getConfiguration(server);
-    this._client = getElasticsearchClient({server, config: this._config});
     this._rootType = this._config.es.default_type;
+    this._internal_client = getElasticsearchClient({ server, config: this._config });
+    this._impersonated_client = null;
+  }
+
+  get _client() {
+    return this._impersonated_client || this._internal_client;
   }
 
   getMapping(index) {
@@ -22,7 +27,7 @@ export default class EsApi {
 
   async impersonate(watcherId) {
     try {
-      const id = this._trimIdTypePrefix(watcherId, this._config.es.watcher_type);
+      const id = trimIdTypePrefix(watcherId);
       let user = await this.get(this._config.es.user_type, id, this._config.es.default_index);
 
       if (!user.id) {
@@ -31,7 +36,7 @@ export default class EsApi {
 
       user = flatAttributes(user);
 
-      this._client = getElasticsearchClient({
+      this._impersonated_client = getElasticsearchClient({
         server: this._server,
         config: this._config,
         impersonateUsername: user.username,
@@ -184,7 +189,7 @@ export default class EsApi {
         total: resp.hits.total,
         saved_objects: resp.hits.hits.map(hit => {
           return {
-            id: this._trimIdTypePrefix(hit._id, type),
+            id: trimIdTypePrefix(hit._id),
             _index: hit._index,
             type,
             version: hit._version,
@@ -224,10 +229,15 @@ export default class EsApi {
     };
 
     try {
-      const resp = await this._client[method](esOptions);
+      let resp;
+      if (attributes.error) { // log errors using internal client to bypass impersonated client auth fail
+        resp = await this._internal_client[method](esOptions);
+      } else {
+        resp = await this._client[method](esOptions);
+      }
 
       return {
-        id: this._trimIdTypePrefix(resp._id, type),
+        id: trimIdTypePrefix(resp._id),
         type,
         version: resp._version,
         attributes
@@ -288,14 +298,6 @@ export default class EsApi {
     } catch (err) {
       throw new Error('EsApi get: ' + err.toString());
     }
-  }
-
-  _trimIdTypePrefix(id, type) {
-    const prefix = type + ':';
-    if (!id.startsWith(prefix)) {
-      return id;
-    }
-    return id.slice(prefix.length);
   }
 
   _generateId(type, id) {

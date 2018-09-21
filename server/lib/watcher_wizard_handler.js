@@ -91,7 +91,7 @@ export default class WatcherWizardHandler extends WatcherHandler {
       }
       return await this._execute(task, method, search.request, condition, transform, task.actions);
     } catch (err) {
-      this.setninlClient.log({
+      this._client.logAlarm({
         server: this.server,
         watcherTitle: task.title,
         message: 'execute wizard watcher: ' + err.toString(),
