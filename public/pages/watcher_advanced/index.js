@@ -24,19 +24,13 @@ routes
         const watcherId = $route.current.params.id;
 
         if (!watcherId) {
-          return watcherService.new('advanced').then(resp => {
-            debugger;
-            return resp;
-          }).catch(function (err) {
+          return watcherService.new('advanced').catch(function (err) {
             notifier.error(err);
             kbnUrl.redirect('/');
           });
         }
 
-        return watcherService.get(watcherId).then(resp => {
-          debugger;
-          return resp;
-        }).catch(function (err) {
+        return watcherService.get(watcherId).catch(function (err) {
           notifier.error(err);
           kbnUrl.redirect('/');
         });
