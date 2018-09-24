@@ -32,7 +32,7 @@ import 'ui/kbn_top_nav';
 import 'ui/listen';
 import 'ui/timepicker';
 import 'ui/timefilter';
-import 'ui/directives/pretty_duration';
+//import 'ui/directives/pretty_duration'; // Deprecated in Kibana 6.4
 
 import 'ui/courier';
 import 'ui/modals';

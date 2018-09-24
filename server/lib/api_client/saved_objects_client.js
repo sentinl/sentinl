@@ -2,9 +2,7 @@ import getConfiguration from  '../get_configuration';
 
 export default class SavedObjectsClient {
   constructor(server, request) {
-    const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
-    const callCluster = (...args) => callWithRequest(request, ...args);
-    this._client = server.savedObjectsClientFactory({ callCluster });
+    this._client = request.getSavedObjectsClient();
     this._config = getConfiguration(server);
   }
 

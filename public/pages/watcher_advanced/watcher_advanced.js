@@ -85,7 +85,7 @@ class WatcherAdvanced {
 
   errorMessage(err) {
     this.log.error(err);
-    this.notify.error(err);
+    //this.notify.error(err); // Deprecated in Kibana 6.4
   }
 
   aceConfig(mode = 'json', maxLines = 50, minLines = 30) {

@@ -2,7 +2,7 @@ import { get, isNumber } from 'lodash';
 import moment from 'moment';
 
 function ReportsController($rootScope, $scope, $route, $interval,
-  $timeout, timefilter, Private, createNotifier, $window, $uibModal,
+  $timeout, Private, createNotifier, $window, $uibModal,
   navMenu, globalNavState, reportService, COMMON, confirmModal, sentinlLog) {
   'ngInject';
 
@@ -25,18 +25,18 @@ function ReportsController($rootScope, $scope, $route, $interval,
     notify.error(err);
   }
 
-  timefilter.enabled = true;
-  try {
-    timefilter.enableAutoRefreshSelector();
-    timefilter.enableTimeRangeSelector();
-  } catch (err) {
-    log.warn('Kibana v6.2.X feature:', err);
-  }
+  // timefilter.enabled = true;
+  // try {
+  //   timefilter.enableAutoRefreshSelector();
+  //   timefilter.enableTimeRangeSelector();
+  // } catch (err) {
+  //   log.warn('Kibana v6.2.X feature:', err);
+  // }
 
   /* First Boot */
 
   $scope.reports = [];
-  $scope.timeInterval = timefilter.time;
+  // $scope.timeInterval = timefilter.time;
 
   $scope.isData = function (report) {
     return report.attachment && report.attachment[1].data;
@@ -56,60 +56,60 @@ function ReportsController($rootScope, $scope, $route, $interval,
 
   getReports($scope.timeInterval);
 
-  $scope.$listen(timefilter, 'fetch', (res) => {
-    getReports($scope.timeInterval);
-  });
+  // $scope.$listen(timefilter, 'fetch', (res) => {
+  //   getReports($scope.timeInterval);
+  // });
 
   /* Listen for refreshInterval changes */
 
-  $rootScope.$watchCollection('timefilter.time', function (newvar, oldvar) {
-    if (newvar === oldvar) { return; }
-    let timeInterval = get($rootScope, 'timefilter.time');
-    if (timeInterval) {
-      $scope.timeInterval = timeInterval;
-      $scope.reportService.updateFilter($scope.timeInterval)
-        .catch(errorMessage);
-    }
-  });
+  // $rootScope.$watchCollection('timefilter.time', function (newvar, oldvar) {
+  //   if (newvar === oldvar) { return; }
+  //   let timeInterval = get($rootScope, 'timefilter.time');
+  //   if (timeInterval) {
+  //     $scope.timeInterval = timeInterval;
+  //     $scope.reportService.updateFilter($scope.timeInterval)
+  //       .catch(errorMessage);
+  //   }
+  // });
 
-  $rootScope.$watchCollection('timefilter.refreshInterval', function () {
-    let refreshValue = get($rootScope, 'timefilter.refreshInterval.value');
-    let refreshPause = get($rootScope, 'timefilter.refreshInterval.pause');
+  // $rootScope.$watchCollection('timefilter.refreshInterval', function () {
+  //   let refreshValue = get($rootScope, 'timefilter.refreshInterval.value');
+  //   let refreshPause = get($rootScope, 'timefilter.refreshInterval.pause');
 
-    // Kill any existing timer immediately
-    if ($scope.refreshreports) {
-      $timeout.cancel($scope.refreshreports);
-      $scope.refreshreports = undefined;
-    }
+  //   // Kill any existing timer immediately
+  //   if ($scope.refreshreports) {
+  //     $timeout.cancel($scope.refreshreports);
+  //     $scope.refreshreports = undefined;
+  //   }
 
-    // Check if Paused
-    if (refreshPause) {
-      if ($scope.refreshreports) {
-        $timeout.cancel($scope.refreshreports);
-      }
-      return;
-    }
+  //   // Check if Paused
+  //   if (refreshPause) {
+  //     if ($scope.refreshreports) {
+  //       $timeout.cancel($scope.refreshreports);
+  //     }
+  //     return;
+  //   }
 
-    // Process New Filter
-    if (refreshValue !== $scope.currentRefresh && refreshValue !== 0) {
-      // new refresh value
-      if (isNumber(refreshValue) && !refreshPause) {
-        $scope.newRefresh = refreshValue;
-        // Reset Interval & Schedule Next
-        $scope.refreshreports = $timeout(function () {
-          $route.reload();
-        }, refreshValue);
-        $scope.$watch('$destroy', $scope.refreshreports);
-      } else {
-        $scope.currentRefresh = 0;
-        $timeout.cancel($scope.refreshreports);
-      }
+  //   // Process New Filter
+  //   if (refreshValue !== $scope.currentRefresh && refreshValue !== 0) {
+  //     // new refresh value
+  //     if (isNumber(refreshValue) && !refreshPause) {
+  //       $scope.newRefresh = refreshValue;
+  //       // Reset Interval & Schedule Next
+  //       $scope.refreshreports = $timeout(function () {
+  //         $route.reload();
+  //       }, refreshValue);
+  //       $scope.$watch('$destroy', $scope.refreshreports);
+  //     } else {
+  //       $scope.currentRefresh = 0;
+  //       $timeout.cancel($scope.refreshreports);
+  //     }
 
-    } else {
-      $timeout.cancel($scope.refreshreports);
-    }
+  //   } else {
+  //     $timeout.cancel($scope.refreshreports);
+  //   }
 
-  });
+  // });
 
   /**
   * Delete report

@@ -6,7 +6,7 @@ import ace from 'ace';
 
 // WATCHERS CONTROLLER
 function  WatchersController($rootScope, $scope, $route, $interval,
-  $timeout, timefilter, Private, createNotifier, $window, $http, $uibModal, sentinlLog, navMenu,
+  $timeout, Private, createNotifier, $window, $http, $uibModal, sentinlLog, navMenu,
   globalNavState, $location, dataTransfer, Promise, COMMON, confirmModal,
   wizardHelper, watcherService, userService, sentinlConfig) {
   'ngInject';
@@ -22,13 +22,13 @@ function  WatchersController($rootScope, $scope, $route, $interval,
 
   function errorMessage(err) {
     log.error(err);
-    notify.error(err);
+    //notify.error(err); // Deprecated in Kibana 6.4
   }
 
   $scope.topNavMenu = navMenu.getTopNav('watchers');
   $scope.tabsMenu = navMenu.getTabs();
 
-  timefilter.enabled = false;
+  // timefilter.enabled = false; // Deprecated in Kibana 6.4
   $scope.watchers = [];
   $scope.wizardHelper = wizardHelper;
 
@@ -54,9 +54,9 @@ function  WatchersController($rootScope, $scope, $route, $interval,
     try {
       const resp = await $scope.watcherService.play(task.id);
       if (resp.warning) {
-        notify.warning(resp.message);
+        //notify.warning(resp.message); // Deprecated in Kibana 6.4
       } else {
-        notify.info('watcher executed');
+        //notify.info('watcher executed'); // Deprecated in Kibana 6.4
       }
     } catch (err) {
       errorMessage(err);
@@ -123,13 +123,13 @@ function  WatchersController($rootScope, $scope, $route, $interval,
     async function doDelete() {
       try {
         await $scope.watcherService.delete(watcher.id);
-        notify.info(`deleted watcher ${watcher.title}`);
+        //notify.info(`deleted watcher ${watcher.title}`); // Deprecated in Kibana 6.4
         $scope.watchers.splice(index, 1);
 
         try {
           const user = await $scope.userService.get(watcher.id);
           await $scope.userService.delete(user.id);
-          notify.info(`deleted user ${user.id}`);
+          //notify.info(`deleted user ${user.id}`); // Deprecated in Kibana 6.4
         } catch (err) {
           log.warn(err.toString());
         }
@@ -155,7 +155,7 @@ function  WatchersController($rootScope, $scope, $route, $interval,
     $scope.watcherService.save($scope.watchers[index])
       .then(function (id) {
         const status = $scope.watchers[index].disable ? 'Disabled' : 'Enabled';
-        notify.info(`${status} watcher "${$scope.watchers[index].title}"`);
+        //notify.info(`${status} watcher "${$scope.watchers[index].title}"`); // Deprecated in Kibana 6.4
       })
       .catch(errorMessage);
   };

@@ -161,12 +161,12 @@ class ConditionPanelWatcherWizard {
   _warning(msg) {
     msg = msg.replace(/fail/ig, '[warning]');
     this.log.warn(msg);
-    this.notify.warning(msg);
+    //this.notify.warning(msg); // Deprecated in Kibana 6.4
   }
 
   _error(msg) {
     this.log.error(msg);
-    this.notify.error(msg);
+    //this.notify.error(msg); // Deprecated in Kibana 6.4
   }
 
   _updateWatcherRawDoc(watcher) {

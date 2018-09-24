@@ -28,7 +28,7 @@ class WatcherWizardAddIndex {
       let indexes = await this.watcherWizardEsService.getAllIndexes();
       return this._filterIndexesByNamePrefix(indexes, this.selected);
     } catch (err) {
-      this.notify('get index names: ' + err.toString());
+      //this.notify('get index names: ' + err.toString()); // Deprecated in Kibana 6.4
       this.log.error('get index names: ' + err.toString());
     }
   }

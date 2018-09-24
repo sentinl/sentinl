@@ -245,18 +245,18 @@ class ThresholdWatcherWizard {
     try {
       return this._isSchedule(this.watcher) && this._isIndex(this.watcher) && this._isTitle(this.watcher);
     } catch (err) {
-      this.notify.error(`check title panel ${err}`);
+      // this.notify.error(`check title panel ${err}`); // Deprecated in Kibana 6.4
     }
   }
 
   _warning(msg) {
     this.log.warn(msg);
-    this.notify.warning(msg);
+    //this.notify.warning(msg); // Deprecated in Kibana 6.4
   }
 
   _error(err) {
     this.log.error(err);
-    this.notify.error(err);
+    //this.notify.error(err); // Deprecated in Kibana 6.4
   }
 
   errorMessage(err) {
