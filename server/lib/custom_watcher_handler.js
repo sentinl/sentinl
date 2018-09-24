@@ -52,25 +52,25 @@ export default class CustomWatcherHandler extends WatcherHandler {
    */
   async execute(task, { async = false } = {}) {
     try {
-      const templateScript = await this.getWatchersTemplate(task._source.custom.type);
+      const templateScript = await this.getWatchersTemplate(task.custom.type);
 
       const template = eval(templateScript.scriptSource); // eslint-disable-line no-eval
 
-      if (this.config.settings.authentication.impersonate || task._source.impersonate) {
+      if (this.config.settings.authentication.impersonate || task.impersonate) {
         this.client = await this.getImpersonatedClient(task._id);
       }
       const client = { search: this.client[this.getAvailableSearchMethod()].bind(this.client) };
 
       const searchParams = {
-        defaultRequest: this.createDefaultRequest(task._source.input.search.request, task._source.trigger.schedule.later, async),
-        ...task._source.input.search.request
+        defaultRequest: this.createDefaultRequest(task.input.search.request, task.trigger.schedule.later, async),
+        ...task.input.search.request
       };
 
-      const response = await template.search(client, searchParams, task._source.custom.params);
-      const condition = template.condition(response, searchParams, task._source.custom.params);
+      const response = await template.search(client, searchParams, task.custom.params);
+      const condition = template.condition(response, searchParams, task.custom.params);
 
       if (condition) {
-        this.doActions(response, this.server, task._source.actions, task);
+        this.doActions(response, this.server, task.actions, task);
         return new SuccessAndLog(this.log, 'successfuly executed');
       } else {
         return new WarningAndLog(this.log, 'no data satisfy condition');
@@ -78,7 +78,7 @@ export default class CustomWatcherHandler extends WatcherHandler {
 
     } catch (err) {
       this._client.logAlarm({
-        watcherTitle: task._source.title,
+        watcherTitle: task.title,
         message: 'execute custom watcher: ' + err.toString(),
         level: 'high',
         isError: true,

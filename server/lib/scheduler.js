@@ -80,7 +80,7 @@ export default function Scheduler(server) {
       let resp;
       if (task.wizard) {
         resp = await watcherWizardHandler.execute(task);
-      } else if (task._source.custom) {
+      } else if (task.custom) {
         resp = await customWatcherHandler.execute(task);
       } else {
         resp = await watcherHandler.execute(task);
