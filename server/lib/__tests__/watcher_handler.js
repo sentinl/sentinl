@@ -10,10 +10,6 @@ describe('WatcherHandler', function () {
   let payload;
 
   const init = function () {
-    const server = {
-      log: () => console.log,
-      plugins: {}
-    };
     const config = {
       es: {
         watcher_type: 'sentinl-watcher',
@@ -21,6 +17,21 @@ describe('WatcherHandler', function () {
       settings: {
         authentication: {}
       },
+    };
+    const server = {
+      log: () => console.log,
+      plugins: {
+        elasticsearch: {
+          getCluster: () => ({
+            getClient: () => ({
+              index: () => void 0
+            })
+          })
+        },
+      },
+      config: () => ({
+        get: property => property === 'sentinl' ? config : []
+      }),
     };
     const client = {};
 
