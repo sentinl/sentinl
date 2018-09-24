@@ -14,14 +14,14 @@ import sirenFederateHelper from './siren/federate_helper';
 export default class CustomWatcherHandler extends WatcherHandler {
   constructor(server, client, config) {
     super(server, client, config);
-  }
-
-  async getWatchersTemplate(type) {
-    const savedObjectsClient = this.server.savedObjectsClientFactory({
+    this.savedObjectsClient = this.server.savedObjectsClientFactory({
       callCluster: this.server.plugins.elasticsearch.getCluster('admin')
     });
-    const savedObjectsAPI = this.server.plugins.saved_objects_api;
-    return savedObjectsClient.get('script', kibiUtils.slugifyId(type), savedObjectsAPI.getServerCredentials())
+  }
+
+  getWatchersTemplate(type) {
+    return this.savedObjectsClient
+      .get('script', kibiUtils.slugifyId(type), this.server.plugins.saved_objects_api.getServerCredentials())
       .then(resp => resp.attributes);
   }
 

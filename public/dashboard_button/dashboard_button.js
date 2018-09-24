@@ -7,29 +7,14 @@ import './dashboard_button.less';
 import EMAILWATCHERDASHBOARD from '../constants/email_watcher_dashboard';
 
 function controller($scope, $http, kibiState, indexPatterns, savedScripts, Private) {
-  const dash = kibiState.getDashboardOnView();
-
-  kibiState.getState(kibiState.getCurrentDashboardId())
-    .then(state => checkForErrors(dash, state))
-    .then(state => indexPatterns.get(state.index))
-    .then(indexPattern => getTemplates(savedScripts, dash, indexPattern.title, $http))
-    .then(templates => {
-      $scope.templates = templates;
-      $scope.selectedTemplate = templates.sort((a, b) => get(a, 'dashboard.order', 9999) - get(b, 'dashboard.order', 9999))[0];
-    })
-    .catch(error => {
-      $scope.errorMessage = error.message;
-      $scope.selectDisabled = true;
-    });
-
   $scope.createWatcher = function () {
     const watcher = cloneDeep(EMAILWATCHERDASHBOARD);
-    watcher.dashboard_link = getDashbaordUrl();
+    watcher.dashboard_link = getDashboardUrl();
 
     const dash = kibiState.getDashboardOnView();
     watcher.title = `Watcher for ${dash.title}`;
 
-    kibiState.getState(kibiState.getCurrentDashboardId())
+    return kibiState.getState(kibiState.getCurrentDashboardId())
       .then(state => indexPatterns.get(state.index).then(indexPattern => {
         state.index = indexPattern.title;
         return state;
@@ -52,6 +37,20 @@ function controller($scope, $http, kibiState, indexPatterns, savedScripts, Priva
 
   const queryFilter = Private(FilterBarQueryFilterProvider);
   $scope.$listen(queryFilter, 'update', $scope.getErrors);
+
+  const dash = kibiState.getDashboardOnView();
+  return kibiState.getState(kibiState.getCurrentDashboardId())
+    .then(state => checkForErrors(dash, state))
+    .then(state => indexPatterns.get(state.index))
+    .then(indexPattern => getTemplates(savedScripts, dash, indexPattern.title, $http))
+    .then(templates => {
+      $scope.templates = templates;
+      $scope.selectedTemplate = templates.sort((a, b) => get(a, 'dashboard.order', 9999) - get(b, 'dashboard.order', 9999))[0];
+    })
+    .catch(error => {
+      $scope.errorMessage = error.message;
+      $scope.selectDisabled = true;
+    });
 }
 
 function checkForErrors(dash, state) {
@@ -76,7 +75,11 @@ async function filterApplicableWatcherTypes($http, dash, indexPattern, templates
   return templates.filter(template => !get(template, 'dashboard.show') || template.dashboard.show(dash, mapping.data));
 }
 
-function getDashbaordUrl() {
+function getDashboardUrl() {
+  if (!window.location.href.includes('?')) {
+    return window.location.href;
+  }
+
   const [urlBase, query] = window.location.href.split('?', 2);
   let queryParameters = {};
   query.split('&').forEach(parameter => {
