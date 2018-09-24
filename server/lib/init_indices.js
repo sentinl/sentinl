@@ -86,7 +86,7 @@ const createIndex = async function ({ server, config, index, mappings, alarmInde
       await client.indices.putTemplate({
         name: 'sentinl_watcher_alarms',
         body: {
-          [patternAttributeName]: [config.es.alarm_index] + '*',
+          [patternAttributeName]: config.es.alarm_index + '*',
           mappings: body.mappings
         }
       });
