@@ -12,7 +12,7 @@ function loadLibs(requirements) {
   const libs = data.toString().trim().split('\n');
 
   const libsToImport = [
-    `import './pages/custom_watcher';`;
+    `import './pages/custom_watcher';`
   ];
 
   forEach(difference(libsToImport, libs), (lib) => {
@@ -32,9 +32,10 @@ export default function registerSirenApp(kibana, requirements) {
     err.message += ': put libs into app.js';
     throw err;
   }
+  console.log(requirements);
 
   return new kibana.Plugin({
-    requirements,
+    require: requirements,
     uiExports,
     config: function (Joi) {
       return appConfig(Joi);
