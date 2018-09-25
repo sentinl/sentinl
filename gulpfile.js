@@ -32,7 +32,8 @@ var include = [
   'server',
   'lib',
   'public',
-  'phantomjs'
+  'phantomjs',
+  'register_app'
 ];
 
 var knownOptions = {
@@ -118,6 +119,7 @@ gulp.task('lint', function (done) {
     'index.js',
     'init.js',
     'gulpfile.js',
+    'register_app',
     'public/**/*.js',
     'server/**/*.js',
     '!**/webpackShims/**'
