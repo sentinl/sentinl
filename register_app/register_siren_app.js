@@ -28,8 +28,6 @@ export default function registerSirenApp(kibana, requirements) {
 
   try {
     requirements = loadLibs(requirements);
-    console.log('----------------------------------------------------------------- requirements');
-    console.log(requirements);
   } catch (err) {
     err.message += ': put libs into app.js';
     throw err;
