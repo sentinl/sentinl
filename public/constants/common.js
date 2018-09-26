@@ -1,4 +1,6 @@
-export default {
+/* global angular */
+
+const COMMON = {
   description: 'Report/Alarm application',
   reports: {
     title: 'Reports',
@@ -16,3 +18,5 @@ export default {
     title: 'About',
   },
 };
+
+angular.module('apps/sentinl.commonConstants', []).constant('COMMON', COMMON);

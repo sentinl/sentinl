@@ -12,4 +12,4 @@ class LimitText {
 }
 
 LimitText.factory.$inject = ['text', 'limit'];
-export default angular.module('limitText', []).filter('limitText', () => LimitText.factory);
+angular.module('apps/sentinl.limitText', []).filter('limitText', () => LimitText.factory);

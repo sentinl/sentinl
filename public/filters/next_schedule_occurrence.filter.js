@@ -38,4 +38,4 @@ class NextScheduleOccurrence {
 }
 
 NextScheduleOccurrence.factory.$inject = ['schedule', 'timezone'];
-export default angular.module('nextScheduleOccurrence', []).filter('nextScheduleOccurrence', () => NextScheduleOccurrence.factory);
+angular.module('apps/sentinl.nextScheduleOccurrence', []).filter('nextScheduleOccurrence', () => NextScheduleOccurrence.factory);

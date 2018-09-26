@@ -33,7 +33,7 @@ var include = [
   'lib',
   'public',
   'phantomjs',
-  'register_app'
+  'app_config.js',
 ];
 
 var knownOptions = {
@@ -119,10 +119,10 @@ gulp.task('lint', function (done) {
     'index.js',
     'init.js',
     'gulpfile.js',
-    'register_app',
     'public/**/*.js',
     'server/**/*.js',
-    '!**/webpackShims/**'
+    '!**/webpackShims/**',
+    'app_config.js',
   ]).pipe(eslint()).pipe(eslint.formatEach()).pipe(eslint.failAfterError());
 });
 

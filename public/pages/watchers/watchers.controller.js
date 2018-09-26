@@ -1,4 +1,5 @@
 /* global angular */
+import { notify, fatalError, toastNotifications } from 'ui/notify';
 import { get, isObject, find, keys, forEach } from 'lodash';
 import moment from 'moment';
 import $ from 'jquery';
@@ -8,21 +9,21 @@ import ace from 'ace';
 function  WatchersController($rootScope, $scope, $route, $interval,
   $timeout, Private, createNotifier, $window, $http, $uibModal, sentinlLog, navMenu,
   globalNavState, $location, dataTransfer, Promise, COMMON, confirmModal,
-  wizardHelper, watcherService, userService, sentinlConfig) {
+  wizardHelper, watcherService, userService, sentinlConfig, Notifier) {
   'ngInject';
 
   $scope.title = COMMON.watchers.title;
   $scope.description = COMMON.description;
 
-  const notify = createNotifier({
-    location: COMMON.watchers.title,
-  });
+  const location = COMMON.watchers.title;
+  const notify = new Notifier({ location });
+
   const log = sentinlLog;
   log.initLocation(COMMON.watchers.title);
 
   function errorMessage(err) {
     log.error(err);
-    //notify.error(err); // Deprecated in Kibana 6.4
+    fatalError(err, location); // Deprecated in Kibana 6.4
   }
 
   $scope.topNavMenu = navMenu.getTopNav('watchers');
@@ -53,11 +54,12 @@ function  WatchersController($rootScope, $scope, $route, $interval,
   $scope.playWatcher = async function (task) {
     try {
       const resp = await $scope.watcherService.play(task.id);
-      if (resp.warning) {
-        //notify.warning(resp.message); // Deprecated in Kibana 6.4
-      } else {
-        //notify.info('watcher executed'); // Deprecated in Kibana 6.4
-      }
+      // if (resp.warning) {
+      //   notify.warning(resp.message); // Deprecated in Kibana 6.4
+      // } else {
+      //   notify.info('watcher executed'); // Deprecated in Kibana 6.4
+      // }
+      toastNotifications.addSuccess(`Executed '${task.title}'`);
     } catch (err) {
       errorMessage(err);
     }
@@ -123,13 +125,15 @@ function  WatchersController($rootScope, $scope, $route, $interval,
     async function doDelete() {
       try {
         await $scope.watcherService.delete(watcher.id);
-        //notify.info(`deleted watcher ${watcher.title}`); // Deprecated in Kibana 6.4
+        // notify.info(`deleted watcher ${watcher.title}`); // Deprecated in Kibana 6.4
+        toastNotifications.addSuccess(`Deleted '${watcher.title}'`);
         $scope.watchers.splice(index, 1);
 
         try {
           const user = await $scope.userService.get(watcher.id);
           await $scope.userService.delete(user.id);
-          //notify.info(`deleted user ${user.id}`); // Deprecated in Kibana 6.4
+          // notify.info(`deleted user ${user.id}`); // Deprecated in Kibana 6.4
+          toastNotifications.addSuccess(`Deleted user for '${watcher.title}'`);
         } catch (err) {
           log.warn(err.toString());
         }
@@ -155,7 +159,9 @@ function  WatchersController($rootScope, $scope, $route, $interval,
     $scope.watcherService.save($scope.watchers[index])
       .then(function (id) {
         const status = $scope.watchers[index].disable ? 'Disabled' : 'Enabled';
-        //notify.info(`${status} watcher "${$scope.watchers[index].title}"`); // Deprecated in Kibana 6.4
+        // notify.info(`${status} watcher "${$scope.watchers[index].title}"`); // Deprecated in Kibana 6.4
+        fatalError(new Error('some err'), location);
+        toastNotifications.addSuccess(`Status of '${$scope.watchers[index].title}': ${status}`);
       })
       .catch(errorMessage);
   };

@@ -1,5 +1,6 @@
-import uuid from 'uuid/v4';
+/* global angular */
 
+import uuid from 'uuid/v4';
 
 const condition = ('{{queryType}} of {{over.type}} over the last {{last.n}} {{last.unit}} {{threshold.direction}} ' +
   '{{threshold.n}} in index {{index}}').replace(/{{/g, '{{watcher.wizard.chart_query_params.');
@@ -14,7 +15,7 @@ const emailBody = `<p>Hi {{watcher.username}}</p>
 </div>`;
 
 
-export default {
+const EMAILWATCHERWIZARD = {
   title: 'watcher_title',
   disable: false,
   report: false,
@@ -52,3 +53,5 @@ export default {
     }
   }
 };
+
+angular.module('apps/sentinl.emailwatcherwizardConstants', []).constant('EMAILWATCHERWIZARD', EMAILWATCHERWIZARD);

@@ -1,5 +1,5 @@
+/* global angular */
 import uuid from 'uuid/v4';
-
 
 const emailBody = `<p>Hi {{watcher.username}},</p>
 <p>There are {{payload.hits.total}} results found by the watcher <i>{{watcher.title}}</i>.</p>
@@ -9,7 +9,7 @@ const emailBody = `<p>Hi {{watcher.username}},</p>
   <ul><li>{{watcher.condition.script.script}}</li></ul>
 </div>`;
 
-export default {
+const EMAILWATCHERADVANCED = {
   title: 'watcher_title',
   disable: false,
   report: false,
@@ -49,3 +49,5 @@ export default {
     }
   }
 };
+
+angular.module('apps/sentinl.emailwatcheradvancedConstants', []).constant('EMAILWATCHERADVANCED', EMAILWATCHERADVANCED);

@@ -1,6 +1,7 @@
+/* global angular */
 import uuid from 'uuid/v4';
 
-export default {
+const EMAILWATCHER = {
   title: 'watcher_title',
   disable: false,
   report: false,
@@ -38,3 +39,5 @@ export default {
     }
   }
 };
+
+angular.module('apps/sentinl.emailwatcherConstants', []).constant('EMAILWATCHER', EMAILWATCHER);

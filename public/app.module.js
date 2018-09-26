@@ -1,36 +1,64 @@
 /* global angular */
 import { uiModules } from 'ui/modules';
-import 'bootstrap/dist/js/bootstrap';
-import 'bootstrap/dist/css/bootstrap.css';
-import 'angular-touch';
-import 'angular-ui-bootstrap';
-import 'chart.js';
-import 'angular-chart.js';
-import Filters from './filters';
-import Pages from './pages';
-import Services from './services';
-import Directives from './directives';
-import Components from './components';
 
-import './constants';
+(function getSentinlModuleNames(orig) {
+  angular.sentinlModules = [];
+  angular.module = function () {
+    if (arguments.length > 1 && arguments[0].includes('apps/sentinl.')) {
+      angular.sentinlModules.push(arguments[0]);
+    }
+    return orig.apply(null, arguments);
+  };
+}(angular.module));
+
+// Read for details: http://taoofcode.net/studying-the-angular-injector-loading-modules/
+function registerModule(moduleName, providers, $injector) {
+  const module = angular.module(moduleName);
+
+  // Execute this fn for every module required
+  if (module.requires) {
+    module.requires.forEach(function (module) {
+      registerModule(module);
+    });
+  }
+
+  // Register all module services by their respective providers
+  module._invokeQueue.forEach(function (invokeArgs) {
+    const provider = providers[invokeArgs[0]];
+    provider[invokeArgs[1]].apply(provider, invokeArgs[2]);
+  });
+
+  module._configBlocks.forEach(function (fn) {
+    $injector.invoke(fn);
+  });
+
+  module._runBlocks.forEach(function (fn) {
+    $injector.invoke(fn);
+  });
+}
 
 const app = uiModules.get('apps/sentinl', [
   'ui.bootstrap',
   'chart.js',
-  Filters.name,
-  Pages.name,
-  Services.name,
-  Directives.name,
-  Components.name,
 ]);
 
-app.config(function (ChartJsProvider) {
+app.config(function (ChartJsProvider, $injector, $controllerProvider, $compileProvider, $filterProvider, $provide) {
   'ngInject';
+
+  const providers = {
+    $compileProvider,
+    $controllerProvider,
+    $filterProvider,
+    $provide
+  };
+
+  angular.sentinlModuleNames.forEach(function (moduleName) {
+    registerModule(moduleName, providers, $injector);
+  });
+
   // Configure all charts
   ChartJsProvider.setOptions({
     chartColors: ['#0074D9', '#FF4136'],
     responsive: true,
   });
 });
-
-export { app };

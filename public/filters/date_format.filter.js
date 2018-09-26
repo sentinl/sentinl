@@ -30,4 +30,4 @@ class DateFormat {
 }
 
 DateFormat.factory.$inject = ['date'];
-export default angular.module('dateFormat', []).filter('dateFormat', () => DateFormat.factory);
+angular.module('apps/sentinl.dateFormat', []).filter('dateFormat', () => DateFormat.factory);

@@ -1,6 +1,7 @@
-const base = '../api/sentinl';
+/*global angular*/
 
-export default {
+const base = '../api/sentinl';
+const API = {
   WATCHER_EDIT: {
     COUNT: `${base}/watcher/wizard/count`,
     AVERAGE: `${base}/watcher/wizard/average`,
@@ -13,3 +14,5 @@ export default {
     GET_MAPPING: `${base}/watcher/wizard/getmapping`,
   },
 };
+
+angular.module('apps/sentinl.apiConstants', []).constant('API', API);
