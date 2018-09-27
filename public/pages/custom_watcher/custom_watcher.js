@@ -101,14 +101,16 @@ class CustomWatcher {
   async _saveWatcherSource() {
     try {
       const id = await this.watcherService.save(this.watcher);
-      this.notify.info('Watcher saved: ' + id);
+      if (id) {
+        this.notify.info('Watcher saved: ' + id);
 
-      if (this.watcher.username && this.watcher.password) {
-        await this.userService.new(id, this.watcher.username, this.watcher.password);
+        if (this.watcher.username && this.watcher.password) {
+          await this.userService.new(id, this.watcher.username, this.watcher.password);
+        }
+
+        delete this.watcher.password;
+        this._redirect();
       }
-
-      delete this.watcher.password;
-      this._redirect();
     } catch (err) {
       this.errorMessage(err);
     }
