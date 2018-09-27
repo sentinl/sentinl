@@ -19,10 +19,26 @@ export default class CustomWatcherHandler extends WatcherHandler {
     });
   }
 
-  getWatchersTemplate(type) {
-    return this.savedObjectsClient
-      .get('script', kibiUtils.slugifyId(type), this.server.plugins.saved_objects_api.getServerCredentials())
-      .then(resp => resp.attributes);
+  getWatchersTemplate(title) {
+    const req = this.server.plugins.saved_objects_api.getServerCredentials();
+    req.auth = {
+      credentials: {
+        roles: ['sirenalert']
+      }
+    };
+    return this.savedObjectsClient.find({
+      type: 'script',
+      search: title,
+      searchFields: ['title']
+    }, req)
+      .then(resp => {
+        const template = resp.saved_objects.find(savedObject => savedObject.attributes.title === title);
+        if (!template) {
+          throw new Error(`Could not find customer watcher type ${title}`);
+        } else {
+          return template.attributes;
+        }
+      });
   }
 
   /**
@@ -61,11 +77,11 @@ export default class CustomWatcherHandler extends WatcherHandler {
       logHistory({
         server: this.server,
         watcherTitle: task._source.title,
-        message: 'execute wizard watcher: ' + err.toString(),
+        message: 'execute custom watcher: ' + err.toString(),
         level: 'high',
         isError: true,
       });
-      err.message = 'execute wizard watcher: ' + err.message;
+      err.message = 'execute custom watcher: ' + err.message;
       throw err;
     }
   }
