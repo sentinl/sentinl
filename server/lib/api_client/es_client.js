@@ -3,6 +3,7 @@ import getConfiguration from  '../get_configuration';
 import { getCurrentTime, flatAttributes } from '../helpers';
 import { isKibi, trimIdTypePrefix } from '../helpers';
 import getElasticsearchClient from '../get_elasticsearch_client';
+import EsClientError from '../errors/es_client_error';
 
 export default class EsApi {
   constructor(server) {
@@ -31,7 +32,7 @@ export default class EsApi {
       let user = await this.get(this._config.es.user_type, id, this._config.es.default_index);
 
       if (!user.id) {
-        throw new Error('user was not found');
+        throw new EsClientError('user was not found');
       }
 
       user = flatAttributes(user);
@@ -46,7 +47,7 @@ export default class EsApi {
         isSiren: isKibi(this._server),
       });
     } catch (err) {
-      throw new Error('impersonate: ' + err.toString());
+      throw new EsClientError('impersonate', err);
     }
   }
 
@@ -62,7 +63,7 @@ export default class EsApi {
 
       return resp;
     } catch (err) {
-      throw new Error('EsApi list watchers: ' + err.toString());
+      throw new EsClientError('list watchers', err);
     }
   }
 
@@ -102,7 +103,7 @@ export default class EsApi {
       const resp = await this.create(this._config.es.alarm_type, attributes, { overwrite: true }, this._config.es.alarm_index, true);
       return resp;
     } catch (err) {
-      throw new Error('EsApi log alarm: ' + err.toString());
+      throw new EsClientError('log alarm', err);
     }
   }
 
@@ -124,7 +125,7 @@ export default class EsApi {
 
       return resp;
     } catch (err) {
-      throw new Error('EsApi search: ' + err.toString());
+      throw new EsClientError('search', err);
     }
   }
 
@@ -198,7 +199,7 @@ export default class EsApi {
         }),
       };
     } catch (err) {
-      throw new Error('EsApi find: ' + err.toString());
+      throw new EsClientError('find', err);
     }
   }
 
@@ -243,7 +244,7 @@ export default class EsApi {
         attributes
       };
     } catch (err) {
-      throw new Error('EsApi create: ' + err.toString());
+      throw new EsClientError('create', err);
     }
   }
 
@@ -268,10 +269,10 @@ export default class EsApi {
       }
 
       if (resp.result === 'not_found') {
-        throw new Error('not found: ' + id);
+        throw new EsClientError('not found:' + id);
       }
     } catch (err) {
-      throw new Error('EsApi delete: ' + err.toString());
+      throw new EsClientError('delete', err);
     }
   }
 
@@ -296,7 +297,7 @@ export default class EsApi {
         attributes: resp._source[type] ? resp._source[type] : resp._source,
       };
     } catch (err) {
-      throw new Error('EsApi get: ' + err.toString());
+      throw new EsClientError('get', err);
     }
   }
 

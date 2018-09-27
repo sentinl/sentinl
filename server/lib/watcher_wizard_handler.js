@@ -4,6 +4,7 @@ import WarningAndLog from './messages/warning_and_log';
 import SuccessAndLog from './messages/success_and_log';
 import WatcherHandler from './watcher_handler';
 import apiClient from './api_client';
+import WatcherWizardHandlerError from './errors/watcher_wizard_handler_error';
 
 /**
 * Helper class to handle watchers
@@ -36,7 +37,7 @@ export default class WatcherWizardHandler extends WatcherHandler {
           return new WarningAndLog(this.log, 'no data satisfy condition');
         }
       } catch (err) {
-        throw new Error('apply condition "script": ' + err.toString());
+        throw new WatcherWizardHandlerError('apply condition "script"', err);
       }
     }
     return new SuccessAndLog(this.log, 'successfully applied condition', { payload });
@@ -59,7 +60,7 @@ export default class WatcherWizardHandler extends WatcherHandler {
     try {
       payload = await this._client.search(request, method); // data from Elasticsearch
     } catch (err) {
-      throw err;
+      throw new WatcherWizardHandlerError('exec search', err);
     }
 
     try {
@@ -71,7 +72,7 @@ export default class WatcherWizardHandler extends WatcherHandler {
         payload = resp.payload;
       }
     } catch (err) {
-      throw err;
+      throw new WatcherWizardHandlerError('exec condition', err);
     }
 
     this.doActions(payload, this.server, actions, task);
@@ -91,14 +92,15 @@ export default class WatcherWizardHandler extends WatcherHandler {
       }
       return await this._execute(task, method, search.request, condition, transform, task.actions);
     } catch (err) {
+      err = new WatcherWizardHandlerError('execute wizard watcher', err);
       this._client.logAlarm({
         server: this.server,
         watcherTitle: task.title,
-        message: 'execute wizard watcher: ' + err.toString(),
+        message: err.toString(),
         level: 'high',
         isError: true,
       });
-      throw new Error('execute wizard watcher: ' + err.toString());
+      throw err;
     }
   }
 }

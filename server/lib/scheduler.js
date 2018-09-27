@@ -89,7 +89,7 @@ export default function Scheduler(server) {
         log.error(`${prefix}: fail to execute`, resp);
       }
     } catch (err) {
-      log.error(`${prefix}: fail to execute`, err.message);
+      log.error(`${prefix}: schedule execute: ${err.toString()}: ${err.stack}`);
     }
   };
 
