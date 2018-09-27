@@ -16,25 +16,4 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import './app.module';
-
-/* routes */
-import './app.routes';
-
-/* styles */
-import './style/main.less';
-import 'ui/autoload/styles';
-import 'font-awesome/css/font-awesome.css';
-
-/* libs */
-import 'ui/kbn_top_nav';
-import 'ui/listen';
-import 'ui/timepicker';
-import 'ui/timefilter';
-//import 'ui/directives/pretty_duration'; // Deprecated in Kibana 6.4
-
-import 'ui/courier';
-import 'ui/modals';
-import 'ui/react_components';
-/* dynamically inserted modules */
+/* ATTENTION! All UI modules are inserted dynamically. Do not add modules manually in this file! */
