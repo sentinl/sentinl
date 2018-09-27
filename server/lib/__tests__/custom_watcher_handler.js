@@ -46,7 +46,7 @@ describe('CustomWatcherHandler', function () {
             time: {
               range: {
                 '@timestamp': {}
-              },
+              }
             }
           }
         }
@@ -65,26 +65,27 @@ describe('CustomWatcherHandler', function () {
           getCluster: () => void 0
         },
         saved_objects_api: {
-          getServerCredentials: () => void 0
+          getServerCredentials: () => ({})
         }
       },
       savedObjectsClientFactory: () => ({
-        get: (_, templateName) => {
-          return Promise.resolve({
+        find: ({ search }) => Promise.resolve({
+          saved_objects: [{
             attributes: {
-              scriptSource: scriptSources[templateName.replace('script:', '')]
+              title: search,
+              scriptSource: scriptSources[search]
             }
-          });
-        }
+          }]
+        })
       })
     };
     const config = {
       es: {
-        watcher_type: 'sentinl-watcher',
+        watcher_type: 'sentinl-watcher'
       },
       settings: {
         authentication: {}
-      },
+      }
     };
     const client = {
       search: () => void 0
