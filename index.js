@@ -31,12 +31,6 @@ function loadLibs(requirements, platformIsSiren) {
     customer = 'siren';
   }
 
-  libsToImport.push(
-    `import './services/${customer}/saved_watchers/index';`,
-    `import './services/${customer}/saved_users/index';`,
-    `import './services/${customer}/saved_scripts/index';`,
-  );
-
   const data = readFileSync(appFile);
   const libs = data.toString().trim().split('\n');
 
