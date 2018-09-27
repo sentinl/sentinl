@@ -2,10 +2,10 @@
 import { uiModules } from 'ui/modules';
 
 (function getSentinlModuleNames(orig) {
-  angular.sentinlModules = [];
+  angular.sentinlModuleNames = [];
   angular.module = function () {
     if (arguments.length > 1 && arguments[0].includes('apps/sentinl.')) {
-      angular.sentinlModules.push(arguments[0]);
+      angular.sentinlModuleNames.push(arguments[0]);
     }
     return orig.apply(null, arguments);
   };
@@ -52,9 +52,14 @@ app.config(function (ChartJsProvider, $injector, $controllerProvider, $compilePr
     $provide
   };
 
-  angular.sentinlModuleNames.forEach(function (moduleName) {
-    registerModule(moduleName, providers, $injector);
-  });
+  try {
+    angular.sentinlModuleNames.forEach(function (moduleName) {
+      registerModule(moduleName, providers, $injector);
+    });
+  } catch (err) {
+    err.message += ': dynamically register Sentinl modules';
+    throw err;
+  }
 
   // Configure all charts
   ChartJsProvider.setOptions({
