@@ -213,13 +213,14 @@ class ThresholdWatcherWizard {
       delete this.watcher.password;
 
       const id = await this.watcherService.save(this.watcher);
-      this.notify.info('watcher saved: ' + id);
+      if (id) {
+        this.notify.info('watcher saved: ' + id);
 
-      if (this.watcher.username && password) {
-        await this.userService.new(id, this.watcher.username, password);
+        if (this.watcher.username && password) {
+          await this.userService.new(id, this.watcher.username, password);
+        }
+        this._cancelWatcherWizard();
       }
-
-      this._cancelWatcherWizard();
     } catch (err) {
       this.errorMessage(err);
     }
