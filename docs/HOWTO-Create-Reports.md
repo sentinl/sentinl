@@ -58,11 +58,8 @@ sentinl:
 ```
 
 ##### Sentinl v6
-<<<<<<< HEAD
-=======
 Two report engines are supported: horseman (default) and puppeteer.
 
->>>>>>> master
 ```
 sentinl:
   settings:
@@ -70,10 +67,7 @@ sentinl:
       active: true
       host: localhost
     report:
-<<<<<<< HEAD
       active: true
-=======
->>>>>>> master
       engine: horseman # options: horseman, puppeteer
 ```
 
