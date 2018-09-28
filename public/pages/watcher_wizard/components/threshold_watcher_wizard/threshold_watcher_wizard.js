@@ -4,20 +4,19 @@ import { get, has, forEach, keys, isObject, isEmpty, includes, union } from 'lod
 
 class ThresholdWatcherWizard {
   constructor($scope, $window, kbnUrl, sentinlLog, confirmModal, createNotifier,
-    wizardHelper, watcherWizardEsService, sentinlConfig, sentinlHelper, watcherFactory, userFactory) {
+    Watcher, User, wizardHelper, watcherWizardEsService, sentinlConfig, sentinlHelper) {
     this.$scope = $scope;
     this.watcher = this.watcher || this.$scope.watcher;
 
     this.$window = $window;
     this.kbnUrl = kbnUrl;
     this.confirmModal = confirmModal;
+    this.watcherService = Watcher;
+    this.userService = User;
     this.wizardHelper = wizardHelper;
     this.watcherWizardEsService = watcherWizardEsService;
     this.sentinlConfig = sentinlConfig;
     this.sentinlHelper = sentinlHelper;
-
-    this.watcherService = watcherFactory.get(sentinlConfig.api.type);
-    this.userService = userFactory.get(sentinlConfig.api.type);
 
     this.locationName = 'ThresholdWatcherWizard';
 
@@ -27,7 +26,25 @@ class ThresholdWatcherWizard {
       location: this.locationName,
     });
 
-    this.isSpyWatcher = !!this.watcher.spy;
+    this.condition = {
+      show: false,
+      updateStatus: (isSuccess) => {
+        this.actions.show = (isSuccess && this.condition.show) || this.watcher.$edit;
+      },
+    };
+
+    this.actions = {
+      show: this.wizardHelper.isSpyWatcher(this.watcher) || this.condition.show,
+    };
+
+    this.$scope.$watch('thresholdWatcherWizard.watcher', () => {
+      if (this.wizardHelper.isSpyWatcher(this.watcher)) {
+        this.actions.show = this._isTitlePanelValid(this.watcher);
+      } else {
+        this.condition.show = this._isTitlePanelValid(this.watcher);
+        this.actions.show = this.condition.show;
+      }
+    }, true);
 
     this.$scope.$on('navMenu:cancelEditor', () => {
       const confirmModalOptions = {
@@ -39,7 +56,7 @@ class ThresholdWatcherWizard {
     });
 
     this.$scope.$on('navMenu:saveEditor', () => {
-      if (this.isTitlePanelValid()) {
+      if (this._isWatcherValid()) {
         const confirmModalOptions = {
           onCancel: () => true,
           onConfirm: () => this._saveWatcherWizard(),
@@ -56,7 +73,7 @@ class ThresholdWatcherWizard {
       }
     });
 
-    if (!get(this.watcher, 'wizard.chart_query_params') && !this.isSpyWatcher) {
+    if (!get(this.watcher, 'wizard.chart_query_params') && !this.wizardHelper.isSpyWatcher(this.watcher)) {
       this.watcher.wizard = {
         chart_query_params: {
           timezoneName: get(this.sentinlConfig, 'es.timezone'), // Europe/Amsterdam
@@ -153,7 +170,8 @@ class ThresholdWatcherWizard {
 
   async indexChange({index}) {
     this.watcher.input.search.request.index = index;
-    if (!this.isSpyWatcher) {
+    this.actions.show = this._isTitlePanelValid(this.watcher);
+    if (!this.wizardHelper.isSpyWatcher(this.watcher)) {
       this.watcher.wizard.chart_query_params.index = index;
       try {
         const mappings = await this.watcherWizardEsService.getMapping(index);
@@ -195,8 +213,12 @@ class ThresholdWatcherWizard {
     delete this.watcher.actions[actionId];
   }
 
+  _isWatcherValid() {
+    return this.wizardHelper.isSpyWatcher(this.watcher) ? this.actions.show : this.condition.show && this.actions.show;
+  }
+
   _cancelWatcherWizard() {
-    if (this.isSpyWatcher) {
+    if (this.wizardHelper.isSpyWatcher(this.watcher)) {
       this.$window.location.href = this.$window.location.href.split('#')[0];
     } else {
       this.kbnUrl.redirect('/');
@@ -209,21 +231,24 @@ class ThresholdWatcherWizard {
         delete this.watcher.wizard.chart_query_params;
       }
 
-      const password = this.watcher.password;
-      delete this.watcher.password;
-
       const id = await this.watcherService.save(this.watcher);
-      if (id) {
-        this.notify.info('watcher saved: ' + id);
+      this.notify.info('watcher saved: ' + id);
 
-        if (this.watcher.username && password) {
-          await this.userService.new(id, this.watcher.username, password);
-        }
-        this._cancelWatcherWizard();
+      if (this.watcher.username && this.watcher.password) {
+        await this.userService.new(id, this.watcher.username, this.watcher.password);
       }
+
+      if (clean) {
+        this._cleanWatcher(this.watcher);
+      }
+      this._cancelWatcherWizard();
     } catch (err) {
       this.errorMessage(err);
     }
+  }
+
+  _cleanWatcher(watcher) {
+    delete watcher.password;
   }
 
   _isSchedule(watcher) {
@@ -241,9 +266,9 @@ class ThresholdWatcherWizard {
     return title && !!title.length;
   }
 
-  isTitlePanelValid() {
+  _isTitlePanelValid(watcher) {
     try {
-      return this._isSchedule(this.watcher) && this._isIndex(this.watcher) && this._isTitle(this.watcher);
+      return this._isSchedule(watcher) && this._isIndex(watcher) && this._isTitle(watcher);
     } catch (err) {
       this.notify.error(`check title panel ${err}`);
     }

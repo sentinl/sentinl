@@ -1,23 +1,22 @@
 # Using the Wizard
 
-SENTINL provides a wizard to help create watchers using a _step-by-step_ sequence.
+SENTINL provides a built-in wizard to assist forming proper watchers using a _step-by-step_ sequence
 
 #### Step 1: New Watcher
-The first step is to give our Watcher a name and choose an execution frequency. In this example, we choose to run every day. 
-
-![Header](https://i.imgur.com/dBNU5Pf.png)
-
-#### Step 2: Input Query and Condition
-Here you specify the query parameters and the condition to trigger on, based on a date histogram aggregation.
-In this example, the watcher will trigger an alert when there are more than two articles in an hour during the day.
-
-![Query and condition](https://i.imgur.com/hlCBv8s.png)
-
-In this section, you can also take a look at the search query sent to Elasticsearch, as well as the JSON representation of the watcher and the ability to convert to an advanced watcher.
-
-#### Step 3: Actions
-Time to send an alert! Here, you can setup a variety of actions to when your condition has been met.
-In this example, we send a HTML-formatted email injected with data from the watcher and query response using the mustache templating language.
-
-![Email action](https://i.imgur.com/FOiz09D.png)
-
+The first step is to give our Watcher a name and choose an execution frequency
+<img src="http://i.imgur.com/WTtFrDx.png" >
+#### Step 2: Input Query
+The input query is the focal part of our watcher. Make sure time-range fields are dynamic
+<img src="http://i.imgur.com/HxY0YHR.png" >
+#### Step 3: Condition
+Condition is used as a gate to validate if the results received back are worth processing
+<img src="http://i.imgur.com/XF2eurd.png" >
+#### Step 4: Transform
+Our data might need adjustments or post processing. Process our payload using a javascript expression/script
+<img src="http://i.imgur.com/TjpADFn.png" >
+#### Step 5: Actions
+Our data is ready! Let's form a notification using the mustache templating language
+<img src="http://i.imgur.com/swzR4fo.png" >
+#### Step 6: Expert Mode
+Here's our fully formed SENTINL JSON watcher in its naked beauty
+<img src="http://i.imgur.com/6CSyx59.png" >

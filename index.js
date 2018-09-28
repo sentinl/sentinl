@@ -75,24 +75,14 @@ export default function (kibana) {
         main: 'plugins/sentinl/app',
         icon: 'plugins/sentinl/style/sentinl.svg',
         injectVars: function (server, options) {
-          const config = server.config();
+          var config = server.config();
           return {
             kbnIndex: config.get('kibana.index'),
             esShardTimeout: config.get('elasticsearch.shardTimeout'),
             esApiVersion: config.get('elasticsearch.apiVersion'),
             sentinlConfig: {
               appName: config.get('sentinl.app_name'),
-              api: {
-                type: config.get('sentinl.api.type'),
-              },
               es: {
-                default_index: config.get('sentinl.es.default_index'),
-                default_type: config.get('sentinl.es.default_type'),
-                watcher_type: config.get('sentinl.es.watcher_type'),
-                script_type: config.get('sentinl.es.script_type'),
-                alarm_type: config.get('sentinl.es.alarm_type'),
-                user_type: config.get('sentinl.es.user_type'),
-                number_of_results: config.get('sentinl.es.results'),
                 watcher: {
                   schedule_timezone: config.get('sentinl.es.watcher.schedule_timezone'),
                 },
@@ -108,9 +98,6 @@ export default function (kibana) {
                   interval: config.get('sentinl.settings.wizard.condition.interval'),
                 },
               },
-              authentication: {
-                impersonate: config.get('sentinl.settings.authentication.impersonate'),
-              },
             }
           };
         }
@@ -123,13 +110,10 @@ export default function (kibana) {
         sentinl: Joi.any().forbidden().error(new Error(
           'Option "sentinl.sentinl.results" was deprecated. Use "sentinl.es.results" instead!'
         )),
-        api: Joi.object({
-          type: Joi.string().valid('elasticsearchAPI', 'savedObjectsAPI').default('savedObjectsAPI'),
-        }).default(),
         es: Joi.object({
           allow_no_indices: Joi.boolean().default(false),
           ignore_unavailable: Joi.boolean().default(false),
-          default_index: Joi.string(),
+          default_index: Joi.string().default('.kibana'),
           default_type: Joi.string().default('doc'),
           results: Joi.number().default(50),
           host: Joi.string().default('localhost'),
@@ -141,9 +125,9 @@ export default function (kibana) {
             'Option "sentinl.es.type" was deprecated. Use "sentinl.es.default_type" instead!'
           )),
           alarm_index: Joi.string().default('watcher_alarms'),
-          user_type: Joi.string().default('sentinl-user'), // if you change this, also change the corresponding object type name here ./server/mappings/sentinl.json
-          watcher_type: Joi.string().default('sentinl-watcher'), // if you change this, also change the corresponding object type name here ./server/mappings/sentinl.json
-          script_type: Joi.string().default('sentinl-script'), // if you change this, also change the corresponding object type name here ./server/mappings/sentinl.json
+          user_type: Joi.string().default('sentinl-user'),
+          watcher_type: Joi.string().default('sentinl-watcher'),
+          script_type: Joi.string().default('sentinl-script'),
           alarm_type: Joi.string().default('sentinl-alarm'),
           watcher: Joi.object({
             schedule_timezone: Joi.string().default('utc'), // local, utc

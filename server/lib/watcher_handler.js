@@ -26,6 +26,17 @@ export default class WatcherHandler {
     this.log = new Log(this.config.app_name, this.server, 'watcher_handler');
     this.client = !client ? getElasticsearchClient({server, config: this.config}) : client;
     this.siren = isKibi(server);
+    this.query = {
+      watchers: {
+        query: {
+          term: {
+            type: {
+              value: this.config.es.watcher_type,
+            }
+          }
+        }
+      }
+    };
     this.kable = new KableClient(server);
     this.timelion = new TimelionClient(server);
   }
@@ -42,19 +53,22 @@ export default class WatcherHandler {
     actionFactory(server, actions, payload, task);
   }
 
+  _docUuid(id) {
+    return id.split(':')[1] || id.split(':')[0];
+  }
+
   /**
   * Get user from user index
+  *
+  * @param {string} watcherId
+  * @return {object} user data
   */
-  async getUser(watcherId) {
-    if (watcherId.includes(this.config.es.watcher_type)) {
-      watcherId = watcherId.split(':')[1];
-    }
-
+  async getUser(id) {
     try {
       return await this.client.get({
         index: this.config.es.default_index,
-        type: this.config.es.default_type,
-        id: this.config.es.user_type + ':' + watcherId,
+        type: this.siren ? this.config.es.user_type : this.config.es.default_type,
+        id: this.siren ? id : (this.config.es.user_type + ':' + this._docUuid(id)),
       });
     } catch (err) {
       throw new Error('get user: ' + err.toString());
@@ -70,14 +84,13 @@ export default class WatcherHandler {
     const request = {
       index: this.config.es.default_index,
       type: this.config.es.default_type,
-      body: {
-        query: {
-          exists: {
-            field: this.config.es.watcher_type
-          }
-        }
-      }
+      body: this.query.watchers,
     };
+
+    if (this.siren) {
+      request.type = this.config.es.watcher_type;
+      delete request.body;
+    }
 
     try {
       return await this.client.count(request);
@@ -97,14 +110,13 @@ export default class WatcherHandler {
       index: this.config.es.default_index,
       type: this.config.es.default_type,
       size: count,
-      body: {
-        query: {
-          exists: {
-            field: this.config.es.watcher_type
-          }
-        }
-      }
+      body: this.query.watchers,
     };
+
+    if (this.siren) {
+      request.type = this.config.es.watcher_type;
+      delete request.body;
+    }
 
     try {
       return await this.search(request);

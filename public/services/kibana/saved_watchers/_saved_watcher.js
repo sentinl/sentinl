@@ -1,7 +1,7 @@
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/sentinl');
 
-module.factory('SavedWatcherKibana', function (courier, EMAILWATCHERADVANCED, sentinlConfig) {
+module.factory('SavedWatcherKibana', function (courier, EMAILWATCHERADVANCED) {
   class SavedWatcherKibana extends courier.SavedObject {
     constructor(id) {
       super({
@@ -14,8 +14,8 @@ module.factory('SavedWatcherKibana', function (courier, EMAILWATCHERADVANCED, se
       });
     }
 
-    // save these objects with the watcher type
-    static type = sentinlConfig.es.watcher_type;
+    // save these objects with the 'sentinl-watcher' type
+    static type = 'sentinl-watcher';
 
     // if type:sentinl-watcher has no mapping, we push this mapping into ES
     static mapping = {

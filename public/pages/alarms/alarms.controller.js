@@ -4,7 +4,7 @@ import uiChrome from 'ui/chrome';
 
 function AlarmsController($rootScope, $scope, $route, $interval,
   $timeout, $injector, timefilter, Private, createNotifier, $window, $uibModal, navMenu,
-  globalNavState, alarmFactory, COMMON, confirmModal, sentinlLog) {
+  globalNavState, Alarm, COMMON, confirmModal, sentinlLog) {
   'ngInject';
 
   $scope.title = COMMON.alarms.title;
@@ -40,8 +40,6 @@ function AlarmsController($rootScope, $scope, $route, $interval,
   const log = sentinlLog;
   log.initLocation(COMMON.alarms.title);
 
-  $scope.alarmService = alarmFactory.get();
-
   function errorMessage(err) {
     log.error(err);
     notify.error(err);
@@ -64,9 +62,9 @@ function AlarmsController($rootScope, $scope, $route, $interval,
   $scope.timeInterval = timefilter.time;
 
   const getAlarms = function (interval) {
-    $scope.alarmService.updateFilter(interval)
+    Alarm.updateFilter(interval)
       .then((resp) => {
-        return $scope.alarmService.list().then((resp) => $scope.alarms = resp);
+        return Alarm.list().then((resp) => $scope.alarms = resp.data.hits.hits);
       })
       .catch(errorMessage);
   };
@@ -84,7 +82,7 @@ function AlarmsController($rootScope, $scope, $route, $interval,
     let timeInterval = get($rootScope, 'timefilter.time');
     if (timeInterval) {
       $scope.timeInterval = timeInterval;
-      $scope.alarmService.updateFilter($scope.timeInterval)
+      Alarm.updateFilter($scope.timeInterval)
         .catch(errorMessage);
     }
   });
@@ -133,7 +131,7 @@ function AlarmsController($rootScope, $scope, $route, $interval,
   $scope.deleteAlarm = function (index, alarm) {
     async function doDelete() {
       try {
-        const resp = await $scope.alarmService.delete(alarm._id, alarm._index);
+        const resp = await Alarm.delete(alarm._index, alarm._type, alarm._id);
         $scope.alarms.splice(index - 1, 1);
         notify.info(`Deleted alarm ${resp}`);
         getAlarms($scope.timeInterval);
