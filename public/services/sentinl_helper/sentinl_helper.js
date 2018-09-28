@@ -7,8 +7,6 @@ const WATCHER_SRC_FIELDS = [
 ];
 
 class SentinlHelper {
-  constructor() {}
-
   stripObjectPropertiesByNameRegex(obj, nameRegexp) {
     stripObjectPropertiesByNameRegex(obj, nameRegexp);
   }

@@ -89,7 +89,7 @@ class SentinlApi {
         url += '/' + index;
       }
 
-      const resp = await this.$http.delete(url);
+      await this.$http.delete(url);
       return id;
     } catch (err) {
       throw new Error(this.helper.apiErrMsg(err, `${this.docType} delete`));
