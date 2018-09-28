@@ -1,7 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 const decompress = require('decompress');
-import { makeExecutableIfNecessary } from '../../helpers';
+const makeExecutableIfNecessary = require('../../helpers').makeExecutableIfNecessary;
 
 const ver = '2.1.1';
 const baseName = `phantomjs-${ver}`;
@@ -37,12 +37,17 @@ function getPackage(srcPath) {
 
 module.exports = function installPhantomjs({srcPath = defaultSrcPath} = {}) {
   const phantomPackage = getPackage(srcPath);
-  return decompress(path.join(phantomPackage.dir, phantomPackage.base), phantomPackage.dir)
-    .then(() => {
-      makeExecutableIfNecessary(phantomPackage.binary);
-      return phantomPackage;
-    })
-    .catch((err) => {
-      throw new Error('decompress PhantomJS archive and set permissions to 755: ' + err.toString());
-    });
+
+  if (fs.existsSync(phantomPackage.binary)) {
+    return Promise.resolve(phantomPackage);
+  } else {
+    return decompress(path.join(phantomPackage.dir, phantomPackage.base), phantomPackage.dir)
+      .then(() => {
+        makeExecutableIfNecessary(phantomPackage.binary);
+        return phantomPackage;
+      })
+      .catch((err) => {
+        throw new Error('decompress PhantomJS archive and set permissions to 755: ' + err.toString());
+      });
+  }
 };

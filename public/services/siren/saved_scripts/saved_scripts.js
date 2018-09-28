@@ -15,8 +15,9 @@ savedObjectManagementRegistry.register({
 });
 
 // This is the only thing that gets injected into controllers
-module.service('savedScripts', function (savedObjectsAPI, savedObjectsAPITypes, Private, SavedScript, kbnIndex, esAdmin, kbnUrl, $http) {
-  savedObjectsAPITypes.add('sentinl-script');
+module.service('savedScripts', function (savedObjectsAPI, savedObjectsAPITypes, Private, SavedScript,
+  kbnIndex, esAdmin, kbnUrl, $http, sentinlConfig) {
+  savedObjectsAPITypes.add(sentinlConfig.es.script_type);
 
   const options = {
     caching: {

@@ -1,7 +1,7 @@
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/sentinl');
 
-module.factory('SavedUserKibana', function (courier) {
+module.factory('SavedUserKibana', function (courier, sentinlConfig) {
   class SavedUserKibana extends courier.SavedObject {
     constructor(id) {
       super({
@@ -14,8 +14,8 @@ module.factory('SavedUserKibana', function (courier) {
       });
     }
 
-    // save these objects with the 'sentinl-user' type
-    static type = 'sentinl-user';
+    // save these objects with the user type
+    static type = sentinlConfig.es.user_type;
 
     // if type:sentinl-user has no mapping, we push this mapping into ES
     static mapping = {

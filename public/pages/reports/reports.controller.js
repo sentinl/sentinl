@@ -2,7 +2,8 @@ import { get, isNumber } from 'lodash';
 import moment from 'moment';
 
 function ReportsController($rootScope, $scope, $route, $interval,
-  $timeout, timefilter, Private, createNotifier, $window, $uibModal, navMenu, globalNavState, Report, COMMON, confirmModal, sentinlLog) {
+  $timeout, timefilter, Private, createNotifier, $window, $uibModal,
+  navMenu, globalNavState, reportFactory, COMMON, confirmModal, sentinlLog) {
   'ngInject';
 
   $scope.title = COMMON.reports.title;
@@ -16,6 +17,8 @@ function ReportsController($rootScope, $scope, $route, $interval,
   });
   const log = sentinlLog;
   log.initLocation(COMMON.reports.title);
+
+  $scope.reportService = reportFactory.get();
 
   function errorMessage(err) {
     log.error(err);
@@ -44,9 +47,9 @@ function ReportsController($rootScope, $scope, $route, $interval,
   };
 
   const getReports = function (interval) {
-    Report.updateFilter(interval)
+    $scope.reportService.updateFilter(interval)
       .then((resp) => {
-        return Report.list().then((resp) => $scope.reports = resp.data.hits.hits);
+        return $scope.reportService.list().then((resp) => $scope.reports = resp);
       })
       .catch(errorMessage);
   };
@@ -64,7 +67,7 @@ function ReportsController($rootScope, $scope, $route, $interval,
     let timeInterval = get($rootScope, 'timefilter.time');
     if (timeInterval) {
       $scope.timeInterval = timeInterval;
-      Report.updateFilter($scope.timeInterval)
+      $scope.reportService.updateFilter($scope.timeInterval)
         .catch(errorMessage);
     }
   });
@@ -117,7 +120,7 @@ function ReportsController($rootScope, $scope, $route, $interval,
   $scope.deleteReport = function (index, report) {
     async function doDelete() {
       try {
-        const resp = await Report.delete(report._index, report._type, report._id);
+        const resp = await $scope.reportService.delete(report._id, report._index);
         $scope.reports.splice(index - 1, 1);
         notify.info(`Deleted report ${resp}`);
         getReports($scope.timeInterval);

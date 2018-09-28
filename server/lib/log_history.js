@@ -13,8 +13,8 @@ async function logHistory({
   level = 'info',
   isReport = false,
   isError = false,
-  attachment = {},
-  payload = {},
+  attachment = null,
+  payload = null,
 }) {
   const config = getConfiguration(server);
   const client = getElasticsearchClient({server, config});
@@ -22,21 +22,29 @@ async function logHistory({
   const log = new Log(config.app_name, server, 'log_history');
   log.debug(`storing alarm to Elasticsearch, action: ${actionName}`);
 
+  const body = {
+    '@timestamp': new Date().toISOString(),
+    error: isError,
+    report: isReport,
+    watcher: watcherTitle,
+    action: actionName || 'unknown action',
+    level,
+    message
+  };
+
+  if (attachment) {
+    body.attachment = attachment;
+  }
+
+  if (payload) {
+    body.payload = payload;
+  }
+
   try {
     return await client.index({
       index: config.es.alarm_index + '-' + new Date().toISOString().substr(0, 10).replace(/-/g, '.'),
       type: config.es.alarm_type,
-      body: {
-        '@timestamp': new Date().toISOString(),
-        error: isError,
-        report: isReport,
-        watcher: watcherTitle,
-        action: actionName,
-        level,
-        message,
-        payload,
-        attachment,
-      }
+      body
     });
   } catch (err) {
     throw new Error('store alarm: ' + err.toString());
