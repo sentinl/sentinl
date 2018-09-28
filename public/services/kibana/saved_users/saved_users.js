@@ -13,14 +13,14 @@ savedObjectManagementRegistry.register({
 });
 
 // This is the only thing that gets injected into controllers
-module.service('savedUsersKibana', function (Promise, SavedUserKibana, kbnIndex, kbnUrl, $http, chrome) {
+module.service('savedUsersKibana', function (Promise, SavedUserKibana, kbnIndex, kbnUrl, $http, chrome, sentinlConfig) {
   const savedUserLoader = new SavedObjectLoader(SavedUserKibana, kbnIndex, kbnUrl, $http, chrome);
   savedUserLoader.urlFor = function (id) {
     return kbnUrl.eval('#/{{id}}', { id: id });
   };
 
   savedUserLoader.loaderProperties = {
-    name: 'sentinl-user',
+    name: sentinlConfig.es.user_type,
     noun: 'Saved Users',
     nouns: 'saved users'
   };

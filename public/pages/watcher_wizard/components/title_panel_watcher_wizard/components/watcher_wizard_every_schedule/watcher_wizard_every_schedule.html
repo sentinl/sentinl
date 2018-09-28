@@ -1,7 +1,7 @@
 <form iname="watcherWizardEverySchedule.form" ng-model-options="{ getterSetter: true }" novalidate>
   <div class="row">
     <div class="col-md-6">
-      <div class="form-group">
+      <div>
         <label for="watcherWizardEverySchedule">
           Every
         </label>
@@ -13,13 +13,10 @@
           ng-model-options="{ debounce: 500 }"
           ng-change="watcherWizardEverySchedule.handleChange()"
         >
-        <small class="form-text text-muted">
-          <span>Timezone: {{watcherWizardEverySchedule.schedule_timezone}}</span>
-        </small>
       </div>
     </div>
     <div class="col-md-6">
-      <div class="form-group">
+      <div>
         <label for="watcherWizardEverySchedule">
           Unit
         </label>
@@ -32,5 +29,10 @@
         ></select>
       </div>
     </div>
+    <small class="col-md-12 form-text text-muted">
+      <span>
+        Next execution: {{watcherWizardEverySchedule.schedule | nextScheduleOccurrence: watcherWizardEverySchedule.schedule_timezone}} {{watcherWizardEverySchedule.schedule_timezone.toUpperCase()}}
+      </span>
+    </small>
   </div>
 </form>

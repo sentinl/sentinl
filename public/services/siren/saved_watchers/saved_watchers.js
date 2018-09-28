@@ -15,8 +15,9 @@ savedObjectManagementRegistry.register({
 });
 
 // This is the only thing that gets injected into controllers
-module.service('savedWatchers', function (savedObjectsAPI, savedObjectsAPITypes, Private, SavedWatcher, kbnIndex, esAdmin, kbnUrl, $http) {
-  savedObjectsAPITypes.add('sentinl-watcher');
+module.service('savedWatchers', function (savedObjectsAPI, savedObjectsAPITypes, Private, SavedWatcher,
+  kbnIndex, esAdmin, kbnUrl, $http, sentinlConfig) {
+  savedObjectsAPITypes.add(sentinlConfig.es.watcher_type);
 
   const options = {
     caching: {
