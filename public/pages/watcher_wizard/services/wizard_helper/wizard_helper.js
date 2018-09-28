@@ -7,10 +7,6 @@ class WizardHelper {
     return !!scheduleString.match(/every\s(\d+)\s(seconds|minutes|hours|days|months|years)/);
   }
 
-  isSpyWatcher(watcher) {
-    return get(watcher, 'spy') || watcher.spy;
-  }
-
   isWizardWatcher(watcher) {
     return get(watcher, 'wizard.chart_query_params');
   }
