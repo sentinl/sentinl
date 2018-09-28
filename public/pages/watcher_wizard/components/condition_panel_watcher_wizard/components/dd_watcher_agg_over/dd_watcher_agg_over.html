@@ -1,0 +1,38 @@
+<form name="ddWatcherAggOver.form" ng-model-options="{ getterSetter: true }" novalidate>
+  <a pop-over pop-over-title="{{ddWatcherAggOver.title | uppercase}}">
+    <strong class="pop-over-btn-text">{{ddWatcherAggOver.topEnabled | uppercase}}</strong> {{ddWatcherAggOver.selected}} {{ddWatcherAggOver.topN | limitText: ddWatcherAggOver.textLimit}}
+  </a>
+  <div ng-hide="true" class="pop-over-content">
+    <div class="row">
+      <div class="col-sm-4">
+        <div class="form-group">
+          <select
+            class="form-control condition-select"
+            ng-model="ddWatcherAggOver.selected"
+            ng-options="o as o for o in ddWatcherAggOver.options"
+            ng-change="ddWatcherAggOver.handleChange()"
+          ></select>
+        </div>
+        <div class="form-group">
+          <input
+            class="form-control condition-select"
+            id="ddWatcherAggOverNumber"
+            type="number"
+            ng-show="ddWatcherAggOver.top.enabled"
+            ng-model="ddWatcherAggOver.top.n"
+            ng-change="ddWatcherAggOver.handleChange()"
+          >
+        </div>
+        <div class="form-group">
+          <select
+            class="form-control condition-select"
+            ng-show="ddWatcherAggOver.top.enabled"
+            ng-model="ddWatcherAggOver.top.selected"
+            ng-options="o as o for o in ddWatcherAggOver.aggFieldNames"
+            ng-change="ddWatcherAggOver.handleChange()"
+          ></select>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>

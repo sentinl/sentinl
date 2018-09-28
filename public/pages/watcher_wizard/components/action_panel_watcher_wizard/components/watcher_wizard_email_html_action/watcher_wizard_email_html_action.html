@@ -1,0 +1,152 @@
+<div uib-accordion-group class="panel-default" is-open="watcherWizardEmailHtmlAction.status.isOpen">
+  <uib-accordion-heading>
+    <i class="fa fa-envelope"></i> {{watcherWizardEmailHtmlAction.type}} action: {{watcherWizardEmailHtmlAction.actionSettings.name}} <i class="pull-right glyphicon"
+    ng-class="{'glyphicon-chevron-down': watcherWizardEmailHtmlAction.status.isOpen, 'glyphicon-chevron-right': !watcherWizardEmailHtmlAction.status.isOpen}"></i>
+  </uib-accordion-heading>
+  <form name="watcherWizardEmailHtmlAction.getTagId()" ng-model-options="{ getterSetter: true }" novalidate>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="form-group">
+          <label class="control-label" for="watcherWizardEmailHtmlActionTitle">Title</label>
+          <input
+            id="{{watcherWizardEmailHtmlAction.getTagId('title')}}"
+            name="{{watcherWizardEmailHtmlAction.getTagId('title')}}"
+            placeholder="title"
+            type="text"
+            class="form-control"
+            ng-model="watcherWizardEmailHtmlAction.actionSettings.name"
+          >
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-2">
+        <div class="form-group">
+          <label for="watcherWizardEmailHtmlActionThrottle" class="control-label">Throttle</label>
+          <div class="input-group">
+            <div class="input-group-addon">
+              <i class="fa fa-snowflake-o" aria-hidden="true"></i>
+            </div>
+            <input
+              id="{{watcherWizardEmailHtmlAction.getTagId('throttle')}}"
+              name="{{watcherWizardEmailHtmlAction.getTagId('throttle')}}"
+              placeholder="0h15m0s"
+              type="text"`
+              class="form-control"
+              ng-model="watcherWizardEmailHtmlAction.actionSettings.throttle_period"
+            >
+          </div>
+        </div>
+      </div>
+      <div class="col-md-2">
+        <div class="form-group">
+          <label for="watcherWizardEmailHtmlActionPriority" class="control-label">Priority</label>
+          <select
+            id="{{watcherWizardEmailHtmlAction.getTagId('priority')}}"
+            name="{{watcherWizardEmailHtmlAction.getTagId('priority')}}"
+            class="select form-control"
+            ng-model="watcherWizardEmailHtmlAction.priority.selected"
+            ng-options="o as o for o in watcherWizardEmailHtmlAction.priority.options"
+            ng-change="watcherWizardEmailHtmlAction.priority.handleChange()"
+          ></select>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label for="watcherWizardEmailHtmlActionPreferences" class="control-label">
+            <i class="fa fa-cog"></i> Preferences
+          </label>
+          <div>
+            <label class="checkbox-inline">
+              <input
+                type="checkbox"
+                id="{{watcherWizardEmailHtmlAction.getTagId('preferences')}}"
+                name="{{watcherWizardEmailHtmlAction.getTagId('preferences')}}"
+                ng-model="watcherWizardEmailHtmlAction.actionSettings.email_html.stateless"
+                ng-checked="!watcherWizardEmailHtmlAction.actionSettings.email_html.stateless"
+                ng-true-value="false"
+                ng-false-value="true"
+              >record action log
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="form-group">
+          <label for="watcherWizardEmailHtmlActionTo" class="control-label">To</label>
+          <div class="input-group">
+            <div class="input-group-addon">
+              <i class="fa fa-address-card" aria-hidden="true"></i>
+            </div>
+            <input
+              id="{{watcherWizardEmailHtmlAction.getTagId('to')}}"
+              name="{{watcherWizardEmailHtmlAction.getTagId('to')}}"
+              placeholder="Email destination address"
+              type="text"
+              class="form-control"
+              aria-describedby="watcherWizardEmailHtmlActionToHelpBlock"
+              ng-model="watcherWizardEmailHtmlAction.actionSettings.email_html.to"
+            >
+          </div>
+          <span class="help-block">Put multiple addresses separating them by ','</span>
+        </div>
+        <div class="form-group">
+          <label for="watcherWizardEmailHtmlActionFrom" class="control-label">From</label>
+          <div class="input-group">
+            <div class="input-group-addon">
+              <i class="fa fa-address-card"></i>
+            </div>
+            <input
+              id="{{watcherWizardEmailHtmlAction.getTagId('from')}}"
+              name="{{watcherWizardEmailHtmlAction.getTagId('from')}}"
+              placeholder="Email source address"
+              type="text"
+              aria-describedby="watcherWizardEmailHtmlActionFromHelpBlock"
+              class="form-control"
+              ng-model="watcherWizardEmailHtmlAction.actionSettings.email_html.from"
+            >
+          </div>
+          <span class="help-block">Put multiple addresses separating them by ','</span>
+        </div>
+        <div class="form-group">
+          <label for="watcherWizardEmailHtmlActionSubject" class="control-label">Subject</label>
+          <input
+            id="{{watcherWizardEmailHtmlAction.getTagId('subject')}}"
+            name="{{watcherWizardEmailHtmlAction.getTagId('subject')}}"
+            placeholder="Subject"
+            type="text"
+            class="form-control"
+            ng-model="watcherWizardEmailHtmlAction.actionSettings.email_html.subject"
+          >
+        </div>
+        <mustache-template-input
+          language="html"
+          content="watcherWizardEmailHtmlAction.actionSettings.email_html.html"
+          injected-data="{payload: {hits: {total: 10}}, watcher: watcherWizardEmailHtmlAction.watcher}"
+          ace-options="watcherWizardEmailHtmlAction.aceOptions({mode: 'html', maxLines: 30})"
+        >
+          The query result and watcher information are provided in the <code>payload</code> and <code>watcher</code> variables and uses
+          <a target="_blank" href="https://mustache.github.io/mustache.5.html">Mustache syntax</a>.
+          <span ng-if="watcherWizardEmailHtmlAction.watcher.dashboard_link">
+            The time range in the dashboard link will be updated each time the watcher is executed.
+          </span>
+        </mustache-template-input>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="form-group">
+          <button
+            id="{{watcherWizardEmailHtmlAction.getTagId('delete')}}"
+            name="{{watcherWizardEmailHtmlAction.getTagId('delete')}}"
+            type="submit"
+            class="btn btn-sm btn-danger"
+            ng-click="watcherWizardEmailHtmlAction.deleteAction()"
+          >Delete</button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>

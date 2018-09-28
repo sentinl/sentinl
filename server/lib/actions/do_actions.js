@@ -18,16 +18,19 @@
  */
 
 import fs from 'fs';
+import querystring from 'querystring';
 import _ from 'lodash';
-import { assign, pick } from 'lodash';
+import { assign, pick, isObject } from 'lodash';
 import url from 'url';
 import Promise from 'bluebird';
 import moment from 'moment';
+import rison from 'rison';
 import mustache from 'mustache';
+import { WebClient } from '@slack/client';
 import getConfiguration from '../get_configuration';
 import getElasticsearchClient from '../get_elasticsearch_client';
 import logHistory from '../log_history';
-import Email from './helpers/email';
+import EmailClient from './email_client';
 import Log from '../log';
 
 // actions
@@ -41,46 +44,6 @@ const toString = function (message) {
 };
 
 /**
-* Connect email
-*
-* @param {object} log
-* @param {object} config for email connection
-*/
-const connectEmail = function (log, config) {
-  const options = pick(config, ['user', 'password', 'host', 'port', 'tls', 'timeout', 'domain', 'authentication']);
-
-  if (!config.cert) {
-    options.ssl = config.ssl;
-  } else {
-    options.ssl = {};
-
-    try {
-      options.ssl.key = fs.readFileSync(config.cert.key, 'utf8');
-    } catch (err) {
-      log.warning(`email, SSL/TLS key was not set, ${err}`);
-    }
-
-    try {
-      options.ssl.cert = fs.readFileSync(config.cert.cert, 'utf8');
-    } catch (err) {
-      log.warning(`email, SSL/TLS cert was not set, ${err}`);
-    }
-
-    try {
-      options.ssl.ca = fs.readFileSync(config.cert.ca, 'utf8');
-    } catch (err) {
-      log.warning(`email, SSL/TLS ca was not set, ${err}`);
-    }
-
-    if (!options.ssl.key && !options.ssl.cert && !options.ssl.ca) {
-      log.error('email, no SSL/TLS keys were found');
-    }
-  }
-
-  return new Email(options);
-};
-
-/**
 * Perform actions
 *
 * @param {object} server hapi of Kibana
@@ -90,25 +53,40 @@ const connectEmail = function (log, config) {
 */
 export default function (server, actions, payload, task) {
   const config = getConfiguration(server);
-  const log = new Log(config.app_name, server, 'do_action');
+  let log = new Log(config.app_name, server, 'do_action');
   const client = getElasticsearchClient({server, config});
 
-  /* ES Indexing Functions */
-  var esHistory = function (args) {
-    args.server = server;
-    return logHistory(args);
-  };
-
   /* Email Settings */
-  const email = connectEmail(log, config.settings.email);
-
-  /* Slack Settings */
-  var slack;
-  if (config.settings.slack.active) {
-    var Slack = require('node-slack');
-    slack = new Slack(config.settings.slack.hook);
+  let email;
+  try {
+    email = new EmailClient(config.settings.email);
+  } catch (err) {
+    log.error('email client: ' + err.toString());
+    logHistory({
+      server,
+      watcherTitle: task._source.title,
+      message: 'email client: ' + err.toString(),
+      level: 'high',
+      isError: true,
+    });
   }
 
+  /* Slack Settings */
+  let slack;
+  try {
+    if (config.settings.slack.active) {
+      slack = new WebClient(config.settings.slack.token);
+    }
+  } catch (err) {
+    log.error('slack client: ' + err.toString());
+    logHistory({
+      server,
+      watcherTitle: task._source.title,
+      message: 'slack client: ' + err.toString(),
+      level: 'high',
+      isError: true,
+    });
+  }
 
   /* Debounce Function, returns true if throttled */
   var getDuration = require('sum-time');
@@ -138,36 +116,56 @@ export default function (server, actions, payload, task) {
     }
   };
 
+  if (task._source.dashboard_link) {
+    task._source.dashboard_link = _updateDashboardLinkTimeRange(task._source.dashboard_link, moment().subtract(1, 'hour'), moment());
+  }
 
   /* Loop Actions */
-  _.forEach(actions, function (action, actionName) {
-    log.debug(`processing action: ${actionName}`);
+  _.forEach(actions, function (action, actionId) {
+    log = new Log(config.app_name, server, task._id);
+    log.debug('processing action');
+
+    const actionName = action.name || actionId; // advanced watcher can be without name property
 
     /* ***************************************************************************** */
     /*
     *   "console" : {
-    *      "priority" : "DEBUG",
+    *      "priority" : "low",
     *      "message" : "Average {{payload.aggregations.avg.value}}",
-    *      "save_payload" : false
     *    }
     */
 
     var priority;
     var formatterConsole;
     var message;
-    if (_.has(action, 'console')) {
-      priority = action.console.priority ? action.console.priority : 'INFO';
-      formatterConsole = action.console.message ? action.console.message : '{{ payload }}';
-      message = mustache.render(formatterConsole, {payload: payload});
-      log.debug('console payload', payload);
-      esHistory({
-        title: task._source.title,
-        actionType: actionName,
-        message: toString(message),
-        level: priority,
-        payload: !action.console.save_payload ? {} : payload,
-        report: false
-      });
+    if (action.console) {
+      (async () => {
+        try {
+          priority = action.console.priority || 'medium';
+          formatterConsole = action.console.message ? action.console.message : '{{ payload }}';
+          message = mustache.render(formatterConsole, {payload: payload,});
+          log.debug('console payload', payload);
+
+          await logHistory({
+            server,
+            watcherTitle: task._source.title,
+            actionName,
+            message: toString(message),
+            level: priority,
+            payload: !task._source.save_payload ? {} : payload,
+          });
+        } catch (err) {
+          log.error('console action: ' + err.toString());
+          logHistory({
+            server,
+            watcherTitle: task._source.title,
+            message: 'console action: ' + err.toString(),
+            level: 'high',
+            isError: true,
+            actionName,
+          });
+        }
+      })();
     }
 
     /* ***************************************************************************** */
@@ -176,19 +174,34 @@ export default function (server, actions, payload, task) {
     /* "throttle_period": "5m"
     /*
     /* ***************************************************************************** */
-    if (_.has(action, 'throttle_period')) {
-      const id = `${task._id}_${actionName}`;
-      if (debounce(id, action.throttle_period)) {
-        log.info(`action throttled, watcher id: ${task._id}, action name: ${actionName}`);
-        esHistory({
-          title: task._source.title,
-          actionType: actionName,
-          message: `Action Throttled for ${action.throttle_period}`,
-          level: priority,
-          payload: {}
-        });
-        return;
-      }
+    if (action.throttle_period) {
+      (async () => {
+        try {
+          const id = `${task._id}_${actionId}`;
+          if (debounce(id, action.throttle_period)) {
+            log.info(`action throttled, watcher id: ${task._id}, action name: ${actionId}`);
+            await logHistory({
+              server,
+              watcherTitle: task._source.title,
+              actionName,
+              message: `Action Throttled for ${action.throttle_period}`,
+              level: priority,
+              payload: {}
+            });
+            return;
+          }
+        } catch (err) {
+          log.error('throttle: ' + err.toString());
+          logHistory({
+            server,
+            watcherTitle: task._source.title,
+            message: 'throttle: ' + err.toString(),
+            level: 'high',
+            isError: true,
+            actionName,
+          });
+        }
+      })();
     }
 
     /* ***************************************************************************** */
@@ -200,7 +213,6 @@ export default function (server, actions, payload, task) {
     *      "priority" : "high",
     *      "body" : "Series Alarm {{ payload._id}}: {{payload.hits.total}}",
     *      "stateless" : false,
-    *      "save_payload" : false
     *     }
     */
 
@@ -208,40 +220,63 @@ export default function (server, actions, payload, task) {
     var formatterBody;
     var subject;
     var text;
-    if (_.has(action, 'email')) {
-      formatterSubject = action.email.subject ? action.email.subject : 'SENTINL: ' + actionName;
-      formatterBody = action.email.body ? action.email.body : 'Series Alarm {{ payload._id}}: {{payload.hits.total}}';
-      subject = mustache.render(formatterSubject, {payload: payload});
-      text = mustache.render(formatterBody, {payload: payload});
-      priority = action.email.priority ? action.email.priority : 'INFO';
-      log.debug(`subject: ${subject}, body: ${text}`);
+    if (action.email) {
+      (async () => {
+        try {
+          formatterSubject = action.email.subject || ('SENTINL: ' + actionId);
 
-      if (!email || !config.settings.email.active) {
-        log.warning('email delivery disabled');
-      }
-      else {
-        email.send({
-          text,
-          from: action.email.from,
-          to: action.email.to,
-          subject
-        }).then(function (message) {
-          log.debug(`email sent, watcher: ${task._id}, message: ${message}`);
-        }).catch(function (error) {
-          log.error(`fail to send email, watcher: ${task._id}, ${error}`);
-        });
-      }
-      if (!action.email.stateless) {
-        // Log Event
-        esHistory({
-          title: task._source.title,
-          actionType: actionName,
-          message: toString(text),
-          level: priority,
-          payload: !action.email.save_payload ? {} : payload,
-          report: false
-        });
-      }
+          formatterBody = action.email.body;
+          if (!formatterBody) {
+            if (payload.docs) {
+              formatterBody = 'Number of documents: {{payload.docs.length}}';
+            } else if (payload.sheet) {
+              formatterBody = 'Number of 0 sheet data: {{payload.sheet[0].list[0].data.length}}';
+            } else { // hits
+              formatterBody = 'Series Alarm {{payload._id}}: {{payload.hits.total}}';
+            }
+          }
+
+          subject = mustache.render(formatterSubject, {payload: payload, watcher: task._source});
+          text = mustache.render(formatterBody, {payload: payload, watcher: task._source});
+          priority = action.email.priority || 'medium';
+
+
+          if (!action.email.stateless) {
+            // Log Event
+            await logHistory({
+              server,
+              watcherTitle: task._source.title,
+              actionName,
+              message: toString(text),
+              level: priority,
+              payload: !task._source.save_payload ? {} : payload,
+            });
+          }
+
+          log.info('sending email');
+
+          if (!config.settings.email.active) {
+            throw new Error('email delivery disabled');
+          } else {
+            await email.send({
+              text,
+              from: action.email.from,
+              to: action.email.to,
+              subject
+            });
+          }
+        } catch (err) {
+          log.error('email action: ' + err.toString());
+          logHistory({
+            server,
+            watcherTitle: task._source.title,
+            message: 'email action: ' + err.toString(),
+            level: 'high',
+            isError: true,
+            actionName,
+          });
+        }
+      })();
     }
 
 
@@ -255,54 +290,73 @@ export default function (server, actions, payload, task) {
     *      "body" : "Series Alarm {{ payload._id}}: {{payload.hits.total}}",
     *      "html" : "<p>Series Alarm {{ payload._id}}: {{payload.hits.total}}</p>",
     *      "stateless" : false,
-    *      "save_payload" : false
     *     }
     */
     var html;
-    if (_.has(action, 'email_html')) {
-      formatterSubject = action.email_html.subject ? action.email_html.subject : 'SENTINL: ' + actionName;
-      formatterBody = action.email_html.body ? action.email_html.body : 'Series Alarm {{ payload._id}}: {{payload.hits.total}}';
-      formatterConsole = action.email_html.html ? action.email_html.html : '<p>Series Alarm {{ payload._id}}: {{payload.hits.total}}</p>';
-      subject = mustache.render(formatterSubject, {payload: payload});
-      text = mustache.render(formatterBody, {payload: payload});
-      html = mustache.render(formatterConsole, {payload: payload});
-      priority = action.email_html.priority ? action.email_html.priority : 'INFO';
-      log.debug(`subject: ${subject}, body: ${text}, HTML: ${html}`);
+    if (action.email_html) {
+      (async () => {
+        try {
+          formatterSubject = action.email_html.subject ? action.email_html.subject : 'SENTINL: ' + actionId;
 
-      if (!email || !config.settings.email.active) {
-        log.warning('email html delivery disabled');
-      }
-      else {
-        log.debug('delivering to email server');
-        email.send({
-          text,
-          from: action.email_html.from,
-          to: action.email_html.to,
-          subject,
-          attachment: [
-            {
-              data: html,
-              alternative: true
+          formatterBody = action.email_html.body;
+          if (!formatterBody) {
+            if (payload.docs) {
+              formatterBody = 'Number of documents: {{payload.docs.length}}';
+            } else if (payload.sheet) {
+              formatterBody = 'Number of 0 sheet data: {{payload.sheet[0].list[0].data.length}}';
+            } else { // hits
+              formatterBody = 'Series Alarm {{payload._id}}: {{payload.hits.total}}';
             }
-          ]
-        }).then(function (message) {
-          log.debug(`email sent, watcher: ${task._id}, message: ${message}`);
-        }).catch(function (error) {
-          log.error(`fail to send email, watcher: ${task._id}, ${error}`);
-        });
-      }
+          }
 
-      if (!action.email_html.stateless) {
-        // Log Event
-        esHistory({
-          title: task._source.title,
-          actionType: actionName,
-          message: toString(text),
-          level: priority,
-          payload: !action.email_html.save_payload ? {} : payload,
-          report: false
-        });
-      }
+          let formatterConsole = action.email_html.html || '<p>Series Alarm {{ payload._id}}: {{payload.hits.total}}</p>';
+          subject = mustache.render(formatterSubject, {payload: payload, watcher: task._source});
+          text = mustache.render(formatterBody, {payload: payload, watcher: task._source});
+          html = mustache.render(formatterConsole, {payload: payload, watcher: task._source});
+          priority = action.email_html.priority || 'medium';
+
+          if (!action.email_html.stateless) {
+            // Log Event
+            await logHistory({
+              server,
+              watcherTitle: task._source.title,
+              actionName,
+              message: toString(text),
+              level: priority,
+              payload: !task._source.save_payload ? {} : payload,
+            });
+          }
+
+          log.info('processing html email');
+
+          if (!config.settings.email.active) {
+            throw new Error('email delivery disabled');
+          } else {
+            await email.send({
+              text,
+              from: action.email_html.from,
+              to: action.email_html.to,
+              subject,
+              attachment: [
+                {
+                  data: html,
+                  alternative: true
+                }
+              ]
+            });
+          }
+        } catch (err) {
+          log.error('html email action: ' + err.toString());
+          logHistory({
+            server,
+            watcherTitle: task._source.title,
+            message: 'html email action: ' + err.toString(),
+            level: 'high',
+            isError: true,
+            actionName,
+          });
+        }
+      })();
     }
 
     /* ***************************************************************************** */
@@ -327,12 +381,32 @@ export default function (server, actions, payload, task) {
     *      "stateless" : false
     *    }
     */
-    if (_.has(action, 'report')) {
+    if (action.report) {
       (async () => {
         try {
-          await reportAction(server, email, task, action.report, actionName, payload);
+          if (!config.settings.report.active) {
+            throw new Error('Reports disabled');
+          }
+
+          await reportAction({
+            server,
+            action,
+            watcherTitle: task._source.title,
+            esPayload: payload,
+            actionName,
+            emailClient: email,
+          });
         } catch (err) {
-          log.error(`report action: ${err.message}`);
+          log.error(`${task._source.title}, report action: ` + err.toString());
+          logHistory({
+            server,
+            watcherTitle: task._source.title,
+            message: 'report action: ' + err.toString(),
+            level: 'high',
+            isError: true,
+            isReport: true,
+            actionName,
+          });
         }
       })();
     }
@@ -343,43 +417,55 @@ export default function (server, actions, payload, task) {
     *      "channel": '#<channel>',
     *      "message" : "Series Alarm {{ payload._id}}: {{payload.hits.total}}",
     *      "stateless" : false,
-    *      "save_payload" : false
     *    }
     */
 
-    if (_.has(action, 'slack')) {
-      let formatter;
-      formatter = action.slack.message ? action.slack.message : 'Series Alarm {{ payload._id}}: {{payload.hits.total}}';
-      message = mustache.render(formatter, {payload: payload});
-      priority = action.slack.priority ? action.slack.priority : 'INFO';
-      log.debug(`webhook to #${action.slack.channel}, message: ${message}`);
-
-      if (!slack || !config.settings.slack.active) {
-        log.warning('slack message delivery disabled');
-      }
-      else {
+    if (action.slack) {
+      (async () => {
         try {
-          slack.send({
-            text: message,
-            channel: action.slack.channel,
-            username: config.settings.slack.username
-          });
-        } catch (err) {
-          log.error(`fail sending to ${config.settings.slack.hook}, ${err}`);
-        }
-      }
+          let formatter;
+          formatter = action.slack.message ? action.slack.message : 'Series Alarm {{ payload._id}}: {{payload.hits.total}}';
+          message = mustache.render(formatter, {payload: payload, watcher: task._source});
+          priority = action.slack.priority || 'medium';
+          log.debug(`webhook to #${action.slack.channel}, message: ${message}`);
 
-      if (!action.slack.stateless) {
-        // Log Event
-        esHistory({
-          title: task._source.title,
-          actionType: actionName,
-          message: toString(message),
-          level: priority,
-          payload: !action.slack.save_payload ? {} : payload,
-          report: false
-        });
-      }
+          if (!action.slack.stateless) {
+            // Log Event
+            await logHistory({
+              server,
+              watcherTitle: task._source.title,
+              actionName,
+              message: toString(message),
+              level: priority,
+              payload: !task._source.save_payload ? {} : payload,
+            });
+          }
+
+          if (!slack || !config.settings.slack.active) {
+            throw new Error('slack message delivery disabled');
+          }
+
+          try {
+            const resp = await slack.chat.postMessage({
+              channel: action.slack.channel,
+              text: message
+            });
+            log.info(`Message sent to slack channel ${resp.channel} as ${resp.message.username}`);
+          } catch (err) {
+            throw new Error(`Failed to send message to channel ${action.slack.channel} using token ${config.settings.slack.token}, ${err}`);
+          }
+        } catch (err) {
+          log.error(`${task._source.title}, report action: ` + err.toString());
+          logHistory({
+            server,
+            watcherTitle: task._source.title,
+            message: 'slack action: ' + err.toString(),
+            level: 'high',
+            isError: true,
+            actionName,
+          });
+        }
+      })();
     }
 
     /* ***************************************************************************** */
@@ -392,139 +478,150 @@ export default function (server, actions, payload, task) {
     *      "body" : "{{payload.watcher_id}}:{{payload.hits.total}}",
     *      "use_https" : false,
     *      "stateless" : false,
-    *      "save_payload" : false,
     *      "headers": {'Content-Type': 'text/plain'},
     *    }
     */
 
-    if (_.has(action, 'webhook')) {
-      const http = action.webhook.use_https ? require('https') : require('http');
-      let options;
-      let req;
+    if (action.webhook) {
+      (async () => {
+        try {
+          // Log Alarm Event
+          if (!action.webhook.stateless && payload.constructor === Object && Object.keys(payload).length) {
+            await logHistory({
+              server,
+              watcherTitle: task._source.title,
+              actionName,
+              message: toString(action.webhook.message),
+              level: action.webhook.priority,
+              payload: !task._source.save_payload ? {} : payload,
+            });
+          }
 
-      options = {
-        hostname: action.webhook.host ? action.webhook.host : 'localhost',
-        port: action.webhook.port ? action.webhook.port : 80,
-        path: action.webhook.path ? action.webhook.path : '/',
-        method: action.webhook.method ? action.webhook.method : 'GET',
-        headers: action.webhook.headers ? action.webhook.headers : {},
-        auth: action.webhook.auth ? action.webhook.auth : undefined
-      };
+          const http = action.webhook.use_https ? require('https') : require('http');
+          const templateData = {
+            payload: payload,
+            watcher: task._source
+          };
+          let options;
+          let req;
 
-      let dataToWrite = action.webhook.body ? mustache.render(action.webhook.body, {payload: payload}) : action.webhook.params;
-      if (dataToWrite) {
-        options.headers['Content-Length'] = Buffer.byteLength(dataToWrite);
-      }
+          options = {
+            hostname: action.webhook.host ? action.webhook.host : 'localhost',
+            port: action.webhook.port ? action.webhook.port : 80,
+            method: action.webhook.method ? action.webhook.method : 'GET',
+            headers: action.webhook.headers ? action.webhook.headers : {},
+            auth: action.webhook.auth ? action.webhook.auth : undefined,
+            path: mustache.render(action.webhook.path, templateData)
+          };
 
-      // Log Alarm Event
-      if (action.webhook.create_alert && payload.constructor === Object && Object.keys(payload).length) {
-        if (!action.webhook.stateless) {
-          esHistory({
-            title: task._source.title,
-            actionType: actionName,
-            message:  toString(action.webhook.message),
-            level: action.webhook.priority,
-            payload: !action.webhook.save_payload ? {} : payload,
-            report: false
+          if (options.method === 'GET' && action.webhook.params) {
+            const params = {};
+            for (const [param, value] of Object.entries(action.webhook.params)) {
+              params[param] = mustache.render(value, templateData);
+            }
+            options.path += '?' + querystring.stringify(params);
+          }
+
+          const dataToWrite = (options.method !== 'GET' && action.webhook.body) ?
+            mustache.render(action.webhook.body, templateData) : undefined;
+          if (dataToWrite) {
+            options.headers['Content-Length'] = Buffer.byteLength(dataToWrite);
+          }
+
+          req = http.request(options, function (res) { // to-do: refactor to use http client which returns promise, e.g. axios
+            res.setEncoding('utf8');
+            res.on('data', function (chunk) {
+              log.debug(`webhook response: ${chunk}`);
+            });
+          });
+
+          req.on('error', function (err) {
+            log.error(`fail to ship webhook, ${err}`);
+          });
+          if (dataToWrite) {
+            req.write(dataToWrite);
+          }
+          req.end();
+        } catch (err) {
+          log.error(`${task._source.title}, report action: ` + err.toString());
+          logHistory({
+            server,
+            watcherTitle: task._source.title,
+            message: 'webhook action: ' + err.toString(),
+            level: 'high',
+            isError: true,
+            actionName,
           });
         }
-      }
-
-      req = http.request(options, function (res) {
-        res.setEncoding('utf8');
-        res.on('data', function (chunk) {
-          log.debug(`webhook response: ${chunk}`);
-        });
-      });
-
-      req.on('error', function (err) {
-        log.error(`fail to ship webhook, ${err}`);
-      });
-      if (dataToWrite) {
-        req.write(dataToWrite);
-      }
-      req.end();
+      })();
     }
 
     /* ***************************************************************************** */
     /*
     *   "elastic" : {
-    *      "priority" : "DEBUG",
+    *      "priority" : "low",
     *      "message" : "Avg {{payload.aggregations.avg.value}} measurements in 5 minutes"
-    *      "save_payload" : false,
     *    }
     */
 
-    if (_.has(action, 'elastic')) {
-      let message;
-      let esFormatter;
-      esFormatter = action.local.message ? action.local.message : '{{ payload }}';
-      message = mustache.render(esFormatter, {payload: payload});
-      priority = action.local.priority ? action.local.priority : 'INFO';
-      log.debug(`logged message to elastic: ${message}`);
-      // Log Event
-      esHistory({
-        title: task._source.title,
-        actionType: actionName,
-        message: toString(message),
-        level: priority,
-        payload: !action.local.save_payload ? {} : payload,
-        report: false
-      });
-    }
-
-
-    /* ***************************************************************************** */
-    /*      you must set your api key in config.settings.pushapps.api_key
-    mandatory parameters are text and at least on element in platforms array, see https://docs.pushapps.mobi/docs/notifications-create-notification for more info
-    *   "pushapps" : {
-    *      "platforms" : [ "android" , "ios", "web", "fb-messenger", "whatsapp"],
-    *      "tags" : [ "<optional tag from PushApps>"],
-    *      "campaign_id" : "<optional campaign id from PushApps>",
-    *      "text" : "Series Alarm {{ payload._id}}: {{payload.hits.total}}",
-    *      "url" : "<optional url to present>",
-    *      "image_url" : "<optional image url for the notification or message>"
-    *    }
-    */
-
-    if (_.has(action, 'pushapps')) {
-      const querystring = require('querystring');
-      const http = require('http');
-      let options;
-      let req;
-
-      options = {
-        hostname: 'https://api.pushapps.mobi/v1',
-        port: 443,
-        path: '/notifications',
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Api-Key': config.settings.pushapps.api_key
+    if (action.elastic) {
+      (async () => {
+        try {
+          let message;
+          let esFormatter;
+          esFormatter = action.elastic.message || '{{payload}}';
+          message = mustache.render(esFormatter, {payload: payload, watcher: task._source});
+          priority = action.elastic.priority || 'medium';
+          log.debug(`logged message to elastic: ${message}`);
+          // Log Event
+          await logHistory({
+            server,
+            watcherTitle: task._source.title,
+            actionName,
+            message: toString(message),
+            level: priority,
+            payload: !task._source.save_payload ? {} : payload,
+          });
+        } catch (err) {
+          log.error(`${task._source.title}, report action: ` + err.toString());
+          logHistory({
+            server,
+            watcherTitle: task._source.title,
+            message: 'elastic action: ' + err.toString(),
+            level: 'high',
+            isError: true,
+            actionName,
+          });
         }
-      };
-
-      var postData = querystring.stringify({
-        text: action.text,
-        platforms: action.platform,
-        tags: action.tags,
-        campaign_id: action.campaign_id,
-        url: action.url,
-        image_url: action.image_url
-      });
-
-      req = http.request(options, function (res) {
-        res.setEncoding('utf8');
-        res.on('data', function (chunk) {
-          log.debug(`pushapps response: ${chunk}`);
-        });
-      });
-
-      req.on('error', function (err) {
-        log.error(`fail to create a PushApps notification, ${err}`);
-      });
-      req.write(postData);
-      req.end();
+      })();
     }
   });
+}
+
+function _updateDashboardLinkTimeRange(url, from, to) {
+  const [urlBase, query] = url.split('?', 2);
+  let queryParameters = {};
+  query.split('&').forEach(parameter => {
+    const [key, value] = parameter.split('=');
+    queryParameters[key] = rison.decode(value);
+  });
+
+  const dashboardName = queryParameters._a.id;
+  queryParameters = {
+    _a: {
+      filters: queryParameters._a.filters
+    },
+    _k: {
+      d: {
+        [dashboardName]: {
+          t: {
+            m: 'absolute',
+            f: from.toISOString(),
+            t: to.toISOString()
+          }
+        }
+      }
+    }
+  };
+  return urlBase + '?' + _.map(queryParameters, (value, key) => `${key}=${rison.encode(value)}`).join('&');
 }

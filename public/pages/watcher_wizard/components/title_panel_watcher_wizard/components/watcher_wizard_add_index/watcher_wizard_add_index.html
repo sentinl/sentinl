@@ -1,0 +1,24 @@
+<form iname="watcherWizardEverySchedule.form" ng-model-options="{ getterSetter: true }" novalidate>
+  <div class="row">
+    <div class="col-md-12">
+      <div class="form-group">
+        <input
+          class="form-control"
+          type="text"
+          ng-model="watcherWizardAddIndex.selected"
+          ng-model-options="{ debounce: 1000 }"
+          placeholder="Type index names here"
+          uib-typeahead="element.index for element in watcherWizardAddIndex.getIndexNames($viewValue)"
+          typeahead-loading="watcherWizardAddIndex.loadingLocations"
+          typeahead-no-results="watcherWizardAddIndex.noResults"
+          typeahead-on-select="watcherWizardAddIndex.handleChange($item, $model, $label, $event)" 
+          ng-change="watcherWizardAddIndex.handleChange()"
+        >
+        <i ng-show="watcherWizardAddIndex.loadingLocations" class="glyphicon glyphicon-refresh"></i>
+        <div ng-show="watcherWizardAddIndex.noResults">
+          <i class="glyphicon glyphicon-remove"></i> No Results Found
+        </div>
+      </div>
+    </div>
+  </div>
+</form>

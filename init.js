@@ -16,18 +16,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import later from 'later';
-import { once, has, forEach, includes } from 'lodash';
+/*global later:false*/
+import 'later/later';
+import { get, once, has, forEach, includes } from 'lodash';
 import url from 'url';
-import masterRoute from './server/routes/routes';
+import path from 'path';
 import getScheduler from './server/lib/scheduler';
-import initIndices from './server/lib/initIndices';
+import initIndices from './server/lib/init_indices';
 import getConfiguration from './server/lib/get_configuration';
-import {existsSync} from 'fs';
+import { existsSync } from 'fs';
 import Log from './server/lib/log';
+import getChromePath from './server/lib/actions/report/get_chrome_path';
+import installPhantomjs from './server/lib/actions/report/install_phantomjs';
+import { isKibi } from './server/lib/helpers';
+
+import sentinlRoutes from './server/routes/routes';
+import watcherRoutes from './server/routes/watcher';
+import kableRoutes from './server/routes/kable';
+import timelionRoutes from './server/routes/timelion';
 
 const mappings = {
   alarm: require('./server/mappings/alarm_index'),
+  watcher: require('./server/mappings/sentinl')
 };
 
 const siren = {
@@ -39,6 +49,30 @@ const siren = {
   SavedObjectsAPIMiddleware: require('./server/lib/siren/saved_objects_api'),
 };
 
+async function prepareIndices(server, log, config, mappings) {
+  try {
+    let resp;
+    resp = await initIndices.createIndex({
+      server,
+      config,
+      index: config.es.default_index,
+      mappings: mappings.watcher
+    });
+    log.debug(`create index ${config.es.default_index}: ${JSON.stringify(resp)}`);
+
+    resp = await initIndices.createIndex({
+      server,
+      config,
+      index: config.es.alarm_index,
+      mappings: mappings.alarm,
+      alarmIndex: true
+    });
+    log.debug(`create index ${config.es.alarm_index}: ${JSON.stringify(resp)}`);
+  } catch (err) {
+    throw new Error('init indices: ' + err.toString());
+  }
+}
+
 /**
 * Initializes Sentinl app.
 *
@@ -49,6 +83,14 @@ const init = once(function (server) {
   const scheduler = getScheduler(server);
   const log = new Log(config.app_name, server, 'init');
 
+  if (isKibi(server)) {
+    const Migration1 = require('./lib/migrations/migrations_5/migration_1');
+    const migrations = [
+      Migration1
+    ];
+    server.expose('getMigrations', () => migrations);
+  }
+
   if (existsSync('/etc/sentinl.json')) {
     server.plugins.sentinl.status.red('Setting configuration values in /etc/sentinl.json is not supported anymore, please copy ' +
                                       'your Sentinl configuration values to config/kibi.yml or config/kibana.yml, ' +
@@ -58,9 +100,27 @@ const init = once(function (server) {
 
   log.info('initializing ...');
 
-  if (!includes(['horseman', 'puppeteer'], config.settings.report.engine)) {
-    log.error(`unsupported authentication engine: ${config.settings.report.engine}. ` +
-      'Supported engines: horseman, puppeteer');
+  try {
+    if (config.settings.report.puppeteer.browser_path) {
+      server.expose('chrome_path', config.settings.report.puppeteer.browser_path);
+    } else {
+      server.expose('chrome_path', getChromePath());
+    }
+    log.info('Chrome bin found at: ' + server.plugins.sentinl.chrome_path);
+  } catch (err) {
+    log.error('setting puppeteer report engine: ' + err.toString());
+  }
+
+  if (config.settings.report.horseman.browser_path) {
+    server.expose('phantomjs_path', config.settings.report.horseman.browser_path);
+    log.info('PhantomJS bin found at: ' + server.plugins.sentinl.phantomjs_path);
+  } else {
+    installPhantomjs().then((pkg) => {
+      server.expose('phantomjs_path', pkg.binary);
+      log.info('PhantomJS bin found at: ' + server.plugins.sentinl.phantomjs_path);
+    }).catch((err) => {
+      log.error('setting horseman report engines: ' + err.toString());
+    });
   }
 
   // Object to hold different runtime values.
@@ -69,7 +129,10 @@ const init = once(function (server) {
   };
 
   // Load Sentinl routes.
-  masterRoute(server);
+  sentinlRoutes(server);
+  watcherRoutes(server);
+  kableRoutes(server);
+  timelionRoutes(server);
 
   // auto detect elasticsearch host, protocol and port
   const esUrl = url.parse(server.config().get('elasticsearch.url'));
@@ -81,7 +144,7 @@ const init = once(function (server) {
     config.settings.authentication.https = true;
   }
 
-  config.es.default_index = server.config().get('kibana.index');
+  config.es.default_index = config.es.default_index || server.config().get('kibana.index');
   config.settings.authentication.user_index = server.config().get('kibana.index');
 
   if (server.plugins.saved_objects_api) { // Siren: savedObjectsAPI.
@@ -93,34 +156,37 @@ const init = once(function (server) {
     server.plugins.saved_objects_api.registerMiddleware(middleware);
   }
 
-  initIndices.createIndex(server, config, config.es.alarm_index, config.es.alarm_type, mappings.alarm, 'alarm');
+  (async () => {
+    try {
+      await prepareIndices(server, log, config, mappings);
 
-  // Start cluster
-  let node;
-  if (config.settings.cluster.enabled) {
-    const GunMaster = require('gun-master');
-    node = new GunMaster(config.settings.cluster);
-    node.run().catch(function (err) {
-      log.error(`fail to run cluster node, ${err}`);
-    });
-  }
+      // Start cluster
+      let node;
+      if (config.settings.cluster.enabled) {
+        const GunMaster = require('gun-master');
+        node = new GunMaster(config.settings.cluster);
+        node.run().catch(function (err) {
+          log.error(`fail to run cluster node, ${err}`);
+        });
+      }
 
-  // Schedule watchers execution.
-  const sched = later.parse.recur().on(25,55).second();
-  const handleWatchers = later.setInterval(() => scheduler.doalert(server, node), sched);
+      // Schedule watchers execution.
+      const sched = later.parse.recur().on(25,55).second();
+      const handleWatchers = later.setInterval(() => scheduler.doalert(server, node), sched);
+    } catch (err) {
+      log.error('start: ' + err.toString());
+    }
+  })();
 });
 
 export default function (server, options) {
-
-  let status = server.plugins.elasticsearch.status;
-  if (status && status.state === 'green') {
+  if (server.plugins.elasticsearch.status.state === 'green') {
     init(server);
   } else {
-    status.on('change', () => {
+    server.plugins.elasticsearch.status.on('change', () => {
       if (server.plugins.elasticsearch.status.state === 'green') {
         init(server);
       }
     });
   }
-
 };

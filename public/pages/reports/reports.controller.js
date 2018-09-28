@@ -2,7 +2,8 @@ import { get, isNumber } from 'lodash';
 import moment from 'moment';
 
 function ReportsController($rootScope, $scope, $route, $interval,
-  $timeout, timefilter, Private, createNotifier, $window, $uibModal, navMenu, globalNavState, Report, COMMON, $log, confirmModal) {
+  $timeout, timefilter, Private, createNotifier, $window, $uibModal,
+  navMenu, globalNavState, reportFactory, COMMON, confirmModal, sentinlLog) {
   'ngInject';
 
   $scope.title = COMMON.reports.title;
@@ -14,13 +15,22 @@ function ReportsController($rootScope, $scope, $route, $interval,
   const notify = createNotifier({
     location: COMMON.reports.title,
   });
+  const log = sentinlLog;
+  log.initLocation(COMMON.reports.title);
+
+  $scope.reportService = reportFactory.get();
+
+  function errorMessage(err) {
+    log.error(err);
+    notify.error(err);
+  }
 
   timefilter.enabled = true;
   try {
     timefilter.enableAutoRefreshSelector();
     timefilter.enableTimeRangeSelector();
   } catch (err) {
-    $log.warn('Kibana v6.2.X feature:', err);
+    log.warn('Kibana v6.2.X feature:', err);
   }
 
   /* First Boot */
@@ -37,11 +47,11 @@ function ReportsController($rootScope, $scope, $route, $interval,
   };
 
   const getReports = function (interval) {
-    Report.updateFilter(interval)
+    $scope.reportService.updateFilter(interval)
       .then((resp) => {
-        return Report.list().then((resp) => $scope.reports = resp.data.hits.hits);
+        return $scope.reportService.list().then((resp) => $scope.reports = resp);
       })
-      .catch(notify.error);
+      .catch(errorMessage);
   };
 
   getReports($scope.timeInterval);
@@ -57,8 +67,8 @@ function ReportsController($rootScope, $scope, $route, $interval,
     let timeInterval = get($rootScope, 'timefilter.time');
     if (timeInterval) {
       $scope.timeInterval = timeInterval;
-      Report.updateFilter($scope.timeInterval)
-        .catch(notify.error);
+      $scope.reportService.updateFilter($scope.timeInterval)
+        .catch(errorMessage);
     }
   });
 
@@ -110,12 +120,12 @@ function ReportsController($rootScope, $scope, $route, $interval,
   $scope.deleteReport = function (index, report) {
     async function doDelete() {
       try {
-        const resp = await Report.delete(report._index, report._type, report._id);
+        const resp = await $scope.reportService.delete(report._id, report._index);
         $scope.reports.splice(index - 1, 1);
         notify.info(`Deleted report ${resp}`);
         getReports($scope.timeInterval);
       } catch (err) {
-        notify.error(`fail to delete report, ${err}`);
+        errorMessage(err);
       }
     }
 

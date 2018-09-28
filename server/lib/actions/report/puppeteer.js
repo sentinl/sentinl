@@ -1,111 +1,115 @@
 import puppeteer from 'puppeteer';
-import {delay} from 'bluebird';
-import {includes} from 'lodash';
-import SuccessAndLog from '../../messages/success_and_log';
-
-const customSelectorAuth = async function ({page, selectorUsername, authUsername, selectorPassword, authPassword, selectorLoginBtn}) {
-  try {
-    await page.type(selectorUsername, authUsername);
-  } catch (err) {
-    throw new Error(`type in username input with CSS selector "${selectorPassword}"`);
-  }
-  try {
-    await page.type(selectorPassword, authPassword);
-  } catch (err) {
-    throw new Error(`type in password input with CSS selector "${selectorPassword}"`);
-  }
-  try {
-    await page.click(selectorLoginBtn);
-  } catch (err) {
-    throw new Error(`click login btn with CSS selector "${selectorLoginBtn}"`);
-  }
-  return null;
-};
 
 export default async function puppeteerReport({
-  server,
+  browserPath,
+  filePath,
+  fileType,
   reportUrl,
-  reportRes,
-  reportType,
-  reportDelay,
-  reportFilePath,
-  log,
-  chromePath,
-  chromeHeadless = true,
-  chromeDevtools = false,
-  pdfFormat = 'A4',
-  pdfLandscape = true,
-  authActive = false,
-  authMode, // basic, customselector, xpack, searchguard
+  delay,
+  viewPortWidth,
+  viewPortHeight,
+  pdfFormat,
+  pdfLandscape,
+  authMode,
+  authActive,
   authUsername,
   authPassword,
-  selectorUsername,
-  selectorPassword,
-  selectorLoginBtn,
+  authSelectorUsername,
+  authSelectorPassword,
+  authSelectorLoginBtn,
+  ignoreHTTPSErrors,
+  chromeArgs = ['--no-sandbox', '--disable-setuid-sandbox'],
+  chromeHeadless = true,
+  chromeDevtools = false,
+  collapseNavbarSelector,
 }) {
   let browser;
+  let page;
 
   try {
-    log.debug('puppeteer running ...');
-    log.debug(`chrome path: ${chromePath}`);
-
-    const options = {
-      headless: chromeHeadless,
-      devtools: chromeDevtools,
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
-      ignoreHTTPSErrors: true,
-    };
-
-    if (chromePath) {
-      options.executablePath = chromePath;
+    try {
+      delay = +delay;
+      viewPortWidth = +viewPortWidth;
+      viewPortHeight = +viewPortHeight;
+      authActive = String(authActive) === 'true';
+      ignoreHTTPSErrors = String(ignoreHTTPSErrors) === 'true';
+      chromeHeadless = String(chromeHeadless) === 'true';
+      chromeDevtools = String(chromeDevtools) === 'true';
+    } catch (err) {
+      throw new Error('sanitize args: ' + err.toString());
     }
 
-    browser = await puppeteer.launch(options);
-    const page = await browser.newPage();
-    page.setViewport({
-      width: +reportRes.split('x')[0],
-      height: +reportRes.split('x')[0],
+    browser = await puppeteer.launch({
+      headless: chromeHeadless,
+      devtools: chromeDevtools,
+      ignoreHTTPSErrors,
+      args: chromeArgs,
+      executablePath: browserPath,
     });
 
-    if (authActive && authMode === 'basic') {
-      log.debug('basic authentication');
+    page = await browser.newPage();
+
+    await page.setViewport({
+      width: viewPortWidth,
+      height: viewPortHeight,
+    });
+
+    if (authActive && authMode === 'basic') { // for test: http://httpbin.org/basic-auth/user/passwd (username: user, password: passwd)
       await page.setExtraHTTPHeaders({
         Authorization: `Basic ${new Buffer(`${authUsername}:${authPassword}`).toString('base64')}`,
       });
     }
 
-    await page.goto(reportUrl, {waitUntil: 'networkidle0'});
-    await delay(reportDelay);
+    await page.goto(reportUrl, { timeout: delay });
 
-    if (authActive) {
-      await customSelectorAuth({
-        page,
-        selectorUsername,
-        authUsername,
-        selectorPassword,
-        authPassword,
-        selectorLoginBtn,
-      });
+    try {
+      if (authActive && authMode !== 'basic') { // for test: http://testing-ground.scraping.pro/login (username: admin, password: 12345)
+        await page.waitForSelector(authSelectorUsername, { timeout: delay });
+        await page.type(authSelectorUsername, authUsername);
+        await page.waitForSelector(authSelectorPassword, { timeout: delay });
+        await page.type(authSelectorPassword, authPassword);
+        await page.waitForSelector(authSelectorLoginBtn, { timeout: delay });
+        await page.click(authSelectorLoginBtn);
+        await page.waitFor(delay);
+      }
+    } catch (err) {
+      throw new Error('login form: ' + err.toString());
     }
-    await delay(reportDelay);
 
-    if (reportType === 'pdf') {
+    try {
+      if (!!collapseNavbarSelector) {
+        await page.waitForSelector(collapseNavbarSelector, { timeout: delay });
+        await page.click(collapseNavbarSelector);
+        await page.waitFor(delay / 2);
+      }
+    } catch (err) {
+      throw new Error('collapse navbar: ' + err.toString());
+    }
+
+    if (fileType === 'pdf') {
       await page.pdf({
-        path: reportFilePath,
+        path: filePath,
         format: pdfFormat,
         landscape: pdfLandscape,
       });
     } else {
       await page.screenshot({
-        path: reportFilePath,
-        type: reportType,
+        path: filePath,
+        type: fileType,
       });
     }
 
     await browser.close();
-    return new SuccessAndLog(log, 'successfully finished puppeteer report');
+    return filePath;
   } catch (err) {
-    await browser.close();
-    throw new Error(`puppeteer report: ${err.message}`);
+    if (browser) {
+      await browser.close();
+    }
+    err = err.toString();
+    if (err.includes('timeout during .waitFor()') || err.includes('is not a valid selector')) {
+      throw new Error('invalid CSS selector: ' + err);
+    } else {
+      throw new Error(err);
+    }
   }
-};
+}

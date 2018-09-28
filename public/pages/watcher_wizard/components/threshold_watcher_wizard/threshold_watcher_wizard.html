@@ -1,0 +1,58 @@
+<div class="panel-group">
+  <div class="panel panel-default">
+    <div class="panel-body">
+      <title-panel-watcher-wizard
+        watcher="thresholdWatcherWizard.watcher"
+        on-index-change="thresholdWatcherWizard.indexChange({index: index})"
+        on-schedule-change="thresholdWatcherWizard.scheduleChange(mode, text)"
+      ></title-panel-watcher-wizard>
+    </div>
+  </div>
+  <div class="panel panel-default"
+    ng-if="thresholdWatcherWizard.watcher.impersonate"
+  >
+    <div class="panel-body">
+      <impersonation-panel-watcher-wizard
+        user-name="thresholdWatcherWizard.watcher.username"
+        pass-word="thresholdWatcherWizard.watcher.password"
+      ></impersonation-panel-watcher-wizard>
+    </div>
+  </div>
+  <div class="panel panel-default"
+    ng-if="thresholdWatcherWizard.watcher.spy"
+  >
+    <div class="panel-body">
+      <input_advanced-panel-watcher-wizard
+        watcher="thresholdWatcherWizard.watcher"
+        ace-options="thresholdWatcherWizard.aceOptions({mode: mode, maxLines: maxLines, minLines: minLines})"
+        on-input-adv-change="thresholdWatcherWizard.inputAdvChange({input: input, condition: condition})"
+      ></input_advanced-panel-watcher-wizard>
+    </div>
+  </div>
+  <div class="panel panel-default"
+    ng-if="!thresholdWatcherWizard.isSpyWatcher && thresholdWatcherWizard.isTitlePanelValid()"
+  >
+    <div class="panel-body">
+      <condition-panel-watcher-wizard
+        watcher="thresholdWatcherWizard.watcher"
+        on-query-change="thresholdWatcherWizard.queryChange(body)"
+        on-condition-change="thresholdWatcherWizard.conditionChange(condition)"
+        ace-options="thresholdWatcherWizard.aceOptions({mode: mode, maxLines: maxLines, minLines: minLines})"
+        turn-into-advanced="thresholdWatcherWizard.turnIntoAdvanced()"
+        indexes-data="thresholdWatcherWizard.indexesData"
+        error-message="thresholdWatcherWizard.errorMessage(err)"
+      ></condition-panel-watcher-wizard>
+    </div>
+  </div>
+  <div class="panel panel-default" ng-if="thresholdWatcherWizard.isTitlePanelValid()">
+    <div class="panel-body">
+      <action-panel-watcher-wizard
+        watcher="thresholdWatcherWizard.watcher"
+        on-add="thresholdWatcherWizard.actionAdd({actionId: actionId, actionSettings: actionSettings})"
+        on-delete="thresholdWatcherWizard.actionDelete({actionId: actionId})"
+        action-property-normalization="thresholdWatcherWizard.actionPropertyNormalization({propertyName: propertyName})"
+        ace-options="thresholdWatcherWizard.aceOptions({mode: mode, maxLines: maxLines, minLines: minLines})"
+      ></action-panel-watcher-wizard>
+    </div>
+  </div>
+</div>

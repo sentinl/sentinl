@@ -1,13 +1,14 @@
 /* global angular */
-import { isObject, find, keys, forEach } from 'lodash';
+import { get, isObject, find, keys, forEach } from 'lodash';
 import moment from 'moment';
 import $ from 'jquery';
 import ace from 'ace';
 
 // WATCHERS CONTROLLER
 function  WatchersController($rootScope, $scope, $route, $interval,
-  $timeout, timefilter, Private, createNotifier, $window, $http, $uibModal, $log, navMenu,
-  globalNavState, $location, dataTransfer, Watcher, User, Script, Promise, COMMON, confirmModal) {
+  $timeout, timefilter, Private, createNotifier, $window, $http, $uibModal, sentinlLog, navMenu,
+  globalNavState, $location, dataTransfer, Promise, COMMON, confirmModal,
+  wizardHelper, watcherFactory, userFactory, sentinlConfig) {
   'ngInject';
 
   $scope.title = COMMON.watchers.title;
@@ -16,12 +17,29 @@ function  WatchersController($rootScope, $scope, $route, $interval,
   const notify = createNotifier({
     location: COMMON.watchers.title,
   });
+  const log = sentinlLog;
+  log.initLocation(COMMON.watchers.title);
+
+  function errorMessage(err) {
+    log.error(err);
+    notify.error(err);
+  }
 
   $scope.topNavMenu = navMenu.getTopNav('watchers');
   $scope.tabsMenu = navMenu.getTabs();
 
   timefilter.enabled = false;
   $scope.watchers = [];
+  $scope.wizardHelper = wizardHelper;
+
+  $scope.watcherService = watcherFactory.get(sentinlConfig.api.type);
+  $scope.userService = userFactory.get(sentinlConfig.api.type);
+
+  $scope.inputInfo = function (watcher) {
+    const index = get(watcher, 'input.search.request.index');
+    if (index) return index.join(',');
+    return get(watcher, 'input.search.kable.expression') || get(watcher, 'input.search.timelion.sheet');
+  };
 
   /**
   * Run watcher on demand.
@@ -30,14 +48,14 @@ function  WatchersController($rootScope, $scope, $route, $interval,
   */
   $scope.playWatcher = async function (task) {
     try {
-      const resp = await Watcher.play(task._id);
+      const resp = await $scope.watcherService.play(task.id);
       if (resp.warning) {
         notify.warning(resp.message);
       } else {
         notify.info('watcher executed');
       }
     } catch (err) {
-      notify.error(err.message);
+      errorMessage(err);
     }
   };
 
@@ -75,9 +93,9 @@ function  WatchersController($rootScope, $scope, $route, $interval,
   * Lists all existing watchers.
   */
   const listWatchers = async function () {
-    return Watcher.list().then(function (resp) {
+    return $scope.watcherService.list().then(function (resp) {
       $scope.watchers = resp;
-    }).catch(notify.error).then(function () {
+    }).catch(errorMessage).then(function () {
       importWatcherFromLocalStorage();
     });
   };
@@ -95,28 +113,24 @@ function  WatchersController($rootScope, $scope, $route, $interval,
   * @param {string} id of watcher
   */
   $scope.deleteWatcher = function (id) {
-    const index = $scope.watchers.findIndex((watcher) => watcher._id === id);
+    const index = $scope.watchers.findIndex((watcher) => watcher.id === id);
     const watcher = $scope.watchers[index];
 
     async function doDelete() {
       try {
-        const id = await Watcher.delete(watcher._id);
-        notify.info(`deleted watcher ${watcher._source.title}`);
+        await $scope.watcherService.delete(watcher.id);
+        notify.info(`deleted watcher ${watcher.title}`);
         $scope.watchers.splice(index, 1);
 
         try {
-          const user = await User.get(watcher._id);
-          await User.delete(user._id);
-          notify.info(`deleted user ${user._id}`);
+          const user = await $scope.userService.get(watcher.id);
+          await $scope.userService.delete(user.id);
+          notify.info(`deleted user ${user.id}`);
         } catch (err) {
-          $log.warn(err.message);
+          log.warn(err.toString());
         }
       } catch (err) {
-        if (Number.isInteger(index)) {
-          $scope.watchers.splice(index, 1);
-        } else {
-          notify.error(`fail to delete watcher, ${err}`);
-        }
+        errorMessage(err);
       }
     }
 
@@ -125,7 +139,7 @@ function  WatchersController($rootScope, $scope, $route, $interval,
       confirmButtonText: 'Delete watcher',
     };
 
-    confirmModal(`Are you sure you want to delete the watcher ${watcher._source.title}?`, confirmModalOptions);
+    confirmModal(`Are you sure you want to delete the watcher ${watcher.title}?`, confirmModalOptions);
   };
 
   /**
@@ -134,13 +148,13 @@ function  WatchersController($rootScope, $scope, $route, $interval,
   * @param {integer} index - index number of watcher in $scope.watchers array.
   */
   const saveWatcher = function (index) {
-    Watcher.save($scope.watchers[index])
+    $scope.watcherService.save($scope.watchers[index])
       .then(function (id) {
-        const status = $scope.watchers[index]._source.disable ? 'Disabled' : 'Enabled';
-        const watcher = find($scope.watchers, (watcher) => watcher._id === id);
-        notify.info(`${status} watcher "${watcher._source.title}"`);
+        const status = $scope.watchers[index].disable ? 'Disabled' : 'Enabled';
+        const watcher = find($scope.watchers, (watcher) => watcher.id === id);
+        notify.info(`${status} watcher "${watcher.title}"`);
       })
-      .catch(notify.error);
+      .catch(errorMessage);
   };
 
   /**
@@ -149,8 +163,8 @@ function  WatchersController($rootScope, $scope, $route, $interval,
   * @param {string} id - watcher id.
   */
   $scope.toggleWatcher = function (id) {
-    const index = $scope.watchers.findIndex((watcher) => watcher._id === id);
-    $scope.watchers[index]._source.disable = !$scope.watchers[index]._source.disable;
+    const index = $scope.watchers.findIndex((watcher) => watcher.id === id);
+    $scope.watchers[index].disable = !$scope.watchers[index].disable;
     saveWatcher(index);
   };
 
@@ -160,35 +174,10 @@ function  WatchersController($rootScope, $scope, $route, $interval,
   * @param {string} type - action type (email, report).
   */
   $scope.newWatcher = function (type) {
-    Watcher.new(type)
+    $scope.watcherService.new(type)
       .then((watcher) => $scope.editWatcher(watcher, 'editor'))
-      .catch(notify.error);
+      .catch(errorMessage);
   };
-
-  const templates = {
-    input: {},
-    condition: {},
-    transform: {}
-  };
-
-  /**
-  * Load templates for watcher fields.
-  *
-  * @param {array} templates - list of field names for templates
-  */
-  Promise.map(keys(templates), function (field) {
-    return Script.list(field).then(function (_templates_) {
-      if (_templates_.length) {
-        forEach(_templates_, function (template) {
-          templates[field][template._id] = template;
-        });
-      }
-      return null;
-    });
-  }).then(function () {
-    dataTransfer.setTemplates(templates);
-    return null;
-  }).catch(notify.error);
 
   const currentTime = moment($route.current.locals.currentTime);
   $scope.currentTime = currentTime.format('HH:mm:ss');

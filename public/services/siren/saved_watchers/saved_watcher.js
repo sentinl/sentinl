@@ -2,7 +2,7 @@ import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/sentinl');
 
 // Used only by the savedWatchers service, usually no reason to change this
-module.factory('SavedWatcher', function (courier) {
+module.factory('SavedWatcher', function (courier, sentinlConfig) {
   // SavedWatcher constructor. Usually you'd interact with an instance of this.
   // ID is option, without it one will be generated on save.
 
@@ -16,13 +16,19 @@ module.factory('SavedWatcher', function (courier) {
 
         mapping: {
           title: 'string',
+          username: 'string',
           input: 'object',
           actions: 'object',
           transform: 'object',
           condition: 'object',
           report: 'boolean',
           disable: 'boolean',
-          trigger: 'object'
+          save_payload: 'boolean',
+          impersonate: 'boolean',
+          spy: 'boolean',
+          trigger: 'object',
+          wizard: 'object',
+          dashboard_link: 'string'
         },
         // if this is null/undefined then the SavedObject will be assigned the defaults
         id: id,
@@ -31,7 +37,7 @@ module.factory('SavedWatcher', function (courier) {
       });
     }
 
-    static type = 'sentinl-watcher'
+    static type = sentinlConfig.es.watcher_type
   };
 
   return SavedWatcher;

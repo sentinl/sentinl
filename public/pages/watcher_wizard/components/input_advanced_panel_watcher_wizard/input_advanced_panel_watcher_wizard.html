@@ -1,0 +1,53 @@
+<section>
+  <form name="inputAdvancedPanelWatcherWizard.form" ng-model-options="{ getterSetter: true }" novalidate>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="panel-body">
+          <div class="row watcher-wizard-panel-header">
+            <div class="col-md-6">
+              <header>
+                <h4 class="form-text">
+                  Search and condition
+                </h4>
+                <small class="form-text text-muted">
+                  Edit search and condition
+                </small>
+              </header>
+            </div>
+          </div> <!-- END header -->
+          <hr>
+          <div class="row">
+            <div class="col-md-12">
+              <div class="form-group">
+                <label for="inputAdvancedPanelWatcherWizardUsername" class="control-label">Search</label> 
+                <div
+                  ui-ace="inputAdvancedPanelWatcherWizard.aceOptions({mode: 'json', maxLines: 20, minLines: 10})"
+                  ng-model="inputAdvancedPanelWatcherWizard.raw.input"
+                  ng-change="inputAdvancedPanelWatcherWizard.handleChange('input')"
+                  ng-model-options="{ debounce: 1000 }"
+                >
+                  {{inputAdvancedPanelWatcherWizard.raw.input}}
+                </div> 
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12">
+              <div class="form-group">
+                <label for="inputAdvancedPanelWatcherWizardUsername" class="control-label">Condition</label> 
+                <div
+                  ui-ace="inputAdvancedPanelWatcherWizard.aceOptions({mode: 'json', maxLines: 10, minLines: 5})"
+                  ng-model="inputAdvancedPanelWatcherWizard.raw.condition"
+                  ng-change="inputAdvancedPanelWatcherWizard.handleChange('condition')"
+                  ng-model-options="{ debounce: 1000 }"
+                >
+                  {{inputAdvancedPanelWatcherWizard.raw.condition}}
+                </div> 
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</section>

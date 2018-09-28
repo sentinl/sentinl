@@ -1,0 +1,99 @@
+<section>
+  <form name="actionPanelWatcherWizard.form" ng-model-options="{ getterSetter: true }" novalidate>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="panel-body">
+          <div class="row watcher-wizard-panel-header">
+            <div class="col-md-6">
+              <header>
+                <h4 class="form-text">
+                  Actions
+                </h4>
+                <small class="form-text text-muted">
+                  Set action properties to make it work
+                </small>
+              </header>
+            </div>
+          </div> <!-- END header -->
+          <hr>
+          <div class="row">
+            <div class="col-md-2">
+              <div class="form-group">
+                <watcher-wizard-add-action
+                  on-add="actionPanelWatcherWizard.onAdd({actionId: actionId, actionSettings: actionSettings})"
+                ></watcher-wizard-add-action>
+              </div>
+            </div>
+            <div class="col-md-10">
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12">
+              <div class="form-group">
+                <uib-accordion close-others="actionPanelWatcherWizard.status.closeOthers">
+                  <div ng-repeat="(actionId, actionSettings) in actionPanelWatcherWizard.watcher.actions track by $index">
+                    <watcher-wizard-email-action
+                      ng-if="actionPanelWatcherWizard.isAction(actionSettings, 'email')"
+                      action-id="{{actionId}}"
+                      watcher="actionPanelWatcherWizard.watcher"
+                      action-settings="actionSettings"
+                      action-delete="actionPanelWatcherWizard.onDelete({actionId: actionId})"
+                      ace-options="actionPanelWatcherWizard.aceOptions({mode: mode, maxLines: maxLines, minLines: minLines})"
+                    ></watcher-wizard-email-action>
+                    <watcher-wizard-email-html-action
+                      ng-if="actionPanelWatcherWizard.isAction(actionSettings, 'email_html')"
+                      action-id="{{actionId}}"
+                      watcher="actionPanelWatcherWizard.watcher"
+                      action-settings="actionSettings"
+                      action-delete="actionPanelWatcherWizard.onDelete({actionId: actionId})"
+                      ace-options="actionPanelWatcherWizard.aceOptions({mode: mode, maxLines: maxLines, minLines: minLines})"
+                    ></watcher-wizard-email-html-action>
+                    <watcher-wizard-report-action
+                      ng-if="actionPanelWatcherWizard.isAction(actionSettings, 'report')"
+                      action-id="{{actionId}}"
+                      action-settings="actionSettings"
+                      action-delete="actionPanelWatcherWizard.onDelete({actionId: actionId})"
+                      ace-options="actionPanelWatcherWizard.aceOptions({mode: mode, maxLines: maxLines, minLines: minLines})"
+                    ></watcher-wizard-report-action>
+                    <watcher-wizard-console-action
+                      ng-if="actionPanelWatcherWizard.isAction(actionSettings, 'console')"
+                      action-id="{{actionId}}"
+                      watcher="actionPanelWatcherWizard.watcher"
+                      action-settings="actionSettings"
+                      action-delete="actionPanelWatcherWizard.onDelete({actionId: actionId})"
+                      ace-options="actionPanelWatcherWizard.aceOptions({mode: mode, maxLines: maxLines, minLines: minLines})"
+                    ></watcher-wizard-console-action>
+                    <watcher-wizard-webhook-action
+                      ng-if="actionPanelWatcherWizard.isAction(actionSettings, 'webhook')"
+                      action-id="{{actionId}}"
+                      watcher="actionPanelWatcherWizard.watcher"
+                      action-settings="actionSettings"
+                      action-delete="actionPanelWatcherWizard.onDelete({actionId: actionId})"
+                      ace-options="actionPanelWatcherWizard.aceOptions({mode: mode, maxLines: maxLines, minLines: minLines})"
+                    ></watcher-wizard-webhook-action>
+                    <watcher-wizard-slack-action
+                      ng-if="actionPanelWatcherWizard.isAction(actionSettings, 'slack')"
+                      action-id="{{actionId}}"
+                      watcher="actionPanelWatcherWizard.watcher"
+                      action-settings="actionSettings"
+                      action-delete="actionPanelWatcherWizard.onDelete({actionId: actionId})"
+                      ace-options="actionPanelWatcherWizard.aceOptions({mode: mode, maxLines: maxLines, minLines: minLines})"
+                    ></watcher-wizard-slack-action>
+                    <watcher-wizard-elastic-action
+                      ng-if="actionPanelWatcherWizard.isAction(actionSettings, 'elastic')"
+                      action-id="{{actionId}}"
+                      watcher="actionPanelWatcherWizard.watcher"
+                      action-settings="actionSettings"
+                      action-delete="actionPanelWatcherWizard.onDelete({actionId: actionId})"
+                      ace-options="actionPanelWatcherWizard.aceOptions({mode: mode, maxLines: maxLines, minLines: minLines})"
+                    ></watcher-wizard-elastic-action>
+                  </div>
+                </uib-accordion>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</section>

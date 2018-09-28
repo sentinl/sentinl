@@ -15,16 +15,23 @@ savedObjectManagementRegistry.register({
 });
 
 // This is the only thing that gets injected into controllers
-module.service('savedUsers', function (savedObjectsAPI, savedObjectsAPITypes, Private, SavedUser, kbnIndex, esAdmin, kbnUrl) {
-  savedObjectsAPITypes.add('sentinl-user');
+module.service('savedUsers', function (savedObjectsAPI, savedObjectsAPITypes, Private, SavedUser,
+  kbnIndex, esAdmin, kbnUrl, $http, sentinlConfig) {
+  savedObjectsAPITypes.add(sentinlConfig.es.user_type);
 
   const options = {
     caching: {
       find: true,
       cache: Private(CacheProvider)
     },
-    savedObjectsAPI
+    savedObjectsAPI,
+    $http
   };
 
-  return new SavedObjectLoader(SavedUser, kbnIndex, esAdmin, kbnUrl, options);
+  const savedUserLoader = new SavedObjectLoader(SavedUser, kbnIndex, esAdmin, kbnUrl, options);
+  savedUserLoader.urlFor = function (id) {
+    return kbnUrl.eval('#/{{id}}', { id });
+  };
+
+  return savedUserLoader;
 });

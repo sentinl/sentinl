@@ -1,0 +1,169 @@
+<section>
+  <form name="conditionPanelWatcherWizard.form" ng-model-options="{ getterSetter: true }" novalidate>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="panel-body">
+          <div class="row watcher-wizard-panel-header">
+            <div class="col-md-6">
+              <header>
+                <h4 class="form-text">
+                  Match condition
+                </h4>
+                <small class="form-text text-muted">
+                  Build condition and visualize historical data
+                </small>
+              </header>
+            </div>
+          </div> <!-- END header -->
+          <div class="row watcher-wizard-panel-paragraph">
+            <div class="watcher-wizard-condition-dd-menu col-md-12">
+              <ul>
+                <li class="watcher-wizard-condition-dd">
+                  <dd-watcher-agg-type
+                    agg-type-selected="conditionPanelWatcherWizard.watcher.wizard.chart_query_params.queryType"
+                    agg-type-on-select="conditionPanelWatcherWizard.condition.type.handleSelect(type)"
+                    text-limit="conditionPanelWatcherWizard.condition.textLimit"
+                  ></dd-watcher-agg-type/>
+                </li>
+                <li class="watcher-wizard-condition-dd">
+                  <dd-watcher-agg-field
+                    agg-enabled="conditionPanelWatcherWizard.condition.field.aggEnabled"
+                    active-field="{{conditionPanelWatcherWizard.watcher.wizard.chart_query_params.field}}"
+                    field-names="conditionPanelWatcherWizard.indexesData.fieldNames"
+                    time-field="{{conditionPanelWatcherWizard.watcher.wizard.chart_query_params.timeField}}"
+                    on-select-field="conditionPanelWatcherWizard.condition.field.handleFieldSelect(field)"
+                    on-select-time-field="conditionPanelWatcherWizard.condition.field.handleTimeFieldSelect(timeField)"
+                    text-limit="conditionPanelWatcherWizard.condition.textLimit"
+                  ></dd-watcher-agg-field/>
+                </li>
+                <li class="watcher-wizard-condition-dd">
+                  <dd-watcher-agg-over
+                    agg-over-options="conditionPanelWatcherWizard.watcher.wizard.chart_query_params.over"
+                    agg-field-names="conditionPanelWatcherWizard.indexesData.fieldNames"
+                    agg-over-on-select="conditionPanelWatcherWizard.condition.over.handleSelect(over)"
+                    text-limit="conditionPanelWatcherWizard.condition.textLimit"
+                  ></dd-watcher-agg-over/>
+                </li>
+                <li class="watcher-wizard-condition-dd">
+                  <dd-watcher-agg-threshold
+                    agg-threshold-options="conditionPanelWatcherWizard.watcher.wizard.chart_query_params.threshold"
+                    agg-threshold-on-select="conditionPanelWatcherWizard.condition.threshold.handleSelect(direction, n)"
+                    text-limit="conditionPanelWatcherWizard.condition.textLimit"
+                  ></dd-watcher-agg-threshold/>
+                </li>
+                <li class="watcher-wizard-condition-dd">
+                  <dd-watcher-agg-time
+                    agg-time-options="conditionPanelWatcherWizard.watcher.wizard.chart_query_params.last"
+                    agg-time-on-select="conditionPanelWatcherWizard.condition.last.handleSelect(unit, n)"
+                    text-limit="conditionPanelWatcherWizard.condition.textLimit"
+                  ></dd-watcher-agg-time/>
+                </li>
+                <li class="watcher-wizard-condition-dd">
+                  <dd-watcher-agg-interval
+                    agg-interval-options="conditionPanelWatcherWizard.watcher.wizard.chart_query_params.interval"
+                    agg-interval-on-select="conditionPanelWatcherWizard.condition.interval.handleSelect(unit, n)"
+                    text-limit="conditionPanelWatcherWizard.condition.textLimit"
+                  ></dd-watcher-agg-interval/>
+                </li>
+              </ul>
+            </div>
+            <div id="watcher-wizard-condition-tabset">
+              <uib-tabset active="active">
+                <uib-tab index="0" heading="Chart">
+                  <div class="row">
+                    <div
+                      class="col-md-1"
+                      ng-if="conditionPanelWatcherWizard.areMultipleCharts && conditionPanelWatcherWizard.isAnyActiveChart"
+                    >
+                      <div class="form-inline">
+                        <div class="form-group">
+                          <button 
+                            type="button"
+                            class="btn btn-sm btn-default"
+                            aria-label="Left Align"
+                            ng-click="conditionPanelWatcherWizard.switchToLeftChart()"
+                          >
+                            <span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
+                          </button>
+                        </div>
+                        <div class="form-group">
+                          <button
+                            type="button"
+                            class="btn btn-sm btn-default"
+                            aria-label="Left Align"
+                            ng-click="conditionPanelWatcherWizard.switchToRightChart()"
+                          >
+                            <span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-11">
+                      <div class="form-group">
+                        <p ng-show="conditionPanelWatcherWizard.activeChart.enabled">
+                          <i class="fa fa-area-chart"></i> {{conditionPanelWatcherWizard.activeChart.name}}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row" id="watcher-wizard-condition-chart" >
+                    <div class="col-md-12">
+                      <div
+                        class="form-group chart-container"
+                        ng-show="conditionPanelWatcherWizard.activeChart.enabled">
+                        <small class="form-text text-muted">Historical data:</small>
+                        <canvas
+                          class="chart chart-line"
+                          chart-data="conditionPanelWatcherWizard.activeChart.yAxis"
+                          chart-labels="conditionPanelWatcherWizard.activeChart.xAxis"
+                          chart-options="conditionPanelWatcherWizard.activeChart.options"
+                          chart-click="conditionPanelWatcherWizard.onChartClick"
+                        ></canvas> 
+                      </div>
+                      <div class="alert alert-warning" role="alert" ng-show="!conditionPanelWatcherWizard.isAnyActiveChart">
+                        <p>{{conditionPanelWatcherWizard.messages.nodata}}</p>
+                      </div>
+                    </div>
+                  </div>
+                </uib-tab>
+                <uib-tab index="1" heading="Chart query">
+                  <div class="row" id="watcher-wizard-condition-chart-query" >
+                    <div class="col-md-12">
+                      <div class="form-group">
+                        <small class="form-text text-muted">Chart query (read only). <a ng-click="conditionPanelWatcherWizard.turnIntoAdvanced()">Convert to advanced</a></small>
+                        
+                        <div
+                          readonly
+                          ui-ace="conditionPanelWatcherWizard.aceOptions({mode: 'json', maxLines: 50, minLines: 50})"
+                          ng-model="conditionPanelWatcherWizard.rawDoc.chart.text"
+                        >
+                          {{conditionPanelWatcherWizard.rawDoc.chart.text}}
+                        </div>
+                      </div>
+                    </div>
+                  </div> <!-- END -->
+                </uib-tab>
+                <uib-tab index="2" heading="Watcher query">
+                  <div class="row" id="watcher-wizard-condition-whatcher-query" >
+                    <div class="col-md-12">
+                      <div class="form-group">
+                        <small class="form-text text-muted">Watcher raw (read only). <a ng-click="conditionPanelWatcherWizard.turnIntoAdvanced()">Convert to advanced</a></small>
+                        <div
+                          readonly
+                          ui-ace="conditionPanelWatcherWizard.aceOptions({mode: 'json', maxLines: 50, minLines: 50})"
+                          ng-model="conditionPanelWatcherWizard.rawDoc.watcher.text"
+                        >
+                          {{conditionPanelWatcherWizard.rawDoc.watcher.text}}
+                        </div>
+                      </div>
+                    </div>
+                  </div> <!-- END -->
+                </uib-tab>
+              </uib-tabset>
+            </div>
+          </div> <!-- END condition based query builder -->
+        </div>
+      </div>
+    </div>
+  </form>
+</section>

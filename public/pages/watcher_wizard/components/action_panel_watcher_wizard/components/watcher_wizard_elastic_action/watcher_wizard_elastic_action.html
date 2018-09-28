@@ -1,0 +1,82 @@
+<div uib-accordion-group class="panel-default" is-open="watcherWizardElasticAction.status.isOpen">
+  <uib-accordion-heading>
+    <i class="fa fa-database"></i> {{watcherWizardElasticAction.type}} action: {{watcherWizardElasticAction.actionSettings.name}} <i class="pull-right glyphicon"
+    ng-class="{'glyphicon-chevron-down': watcherWizardElasticAction.status.isOpen, 'glyphicon-chevron-right': !watcherWizardElasticAction.status.isOpen}"></i>
+  </uib-accordion-heading>
+  <form name="{{watcherWizardElasticAction.getTagId()}}.form" ng-model-options="{ getterSetter: true }" novalidate>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="form-group">
+          <label class="control-label">Title</label>
+          <input
+            id="{{watcherWizardElasticAction.getTagId('title')}}"
+            name="{{watcherWizardElasticAction.getTagId('title')}}"
+            placeholder="title"
+            type="text"
+            class="form-control"
+            ng-model="watcherWizardElasticAction.actionSettings.name"
+          >
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-2">
+        <div class="form-group">
+          <label class="control-label">Throttle</label>
+          <div class="input-group">
+            <div class="input-group-addon">
+              <i class="fa fa-snowflake-o" aria-hidden="true"></i>
+            </div>
+            <input
+              id="{{watcherWizardElasticAction.getTagId('throttle')}}"
+              name="{{watcherWizardElasticAction.getTagId('throttle')}}"
+              placeholder="0h0m1s"
+              type="text"
+              class="form-control"
+              ng-model="watcherWizardElasticAction.actionSettings.throttle_period"
+            >
+          </div>
+        </div>
+      </div>
+      <div class="col-md-2">
+        <div class="form-group">
+          <label class="control-label">Priority</label>
+          <select
+            id="{{watcherWizardElasticAction.getTagId('priority')}}"
+            name="{{watcherWizardElasticAction.getTagId('priority')}}"
+            class="select form-control"
+            ng-model="watcherWizardElasticAction.priority.selected"
+            ng-options="o as o for o in watcherWizardElasticAction.priority.options"
+            ng-change="watcherWizardElasticAction.priority.handleChange()"
+          ></select>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-12">
+        <div class="form-group">
+          <mustache-template-input
+            content="watcherWizardElasticAction.actionSettings.elastic.message"
+            injected-data="{payload: {hits: {total: 10}}, watcher: watcherWizardElasticAction.watcher}"
+            ace-options="watcherWizardElasticAction.aceOptions({maxLines: 30})"
+          >The query result and watcher information are provided in the <code>payload</code> and <code>watcher</code> variables and uses <a target="_blank" href="https://mustache.github.io/mustache.5.html">Mustache syntax</a>.</mustache-template-input>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="form-group">
+          <button
+            id="{{watcherWizardElasticAction.getTagId('delete')}}"
+            name="{{watcherWizardElasticAction.getTagId('delete')}}"
+            type="submit"
+            class="btn btn-sm btn-danger"
+            ng-click="watcherWizardElasticAction.deleteAction()"
+          >Delete</button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>

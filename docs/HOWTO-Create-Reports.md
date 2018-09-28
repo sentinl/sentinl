@@ -67,6 +67,7 @@ sentinl:
       active: true
       host: localhost
     report:
+      active: true
       engine: horseman # options: horseman, puppeteer
 ```
 
