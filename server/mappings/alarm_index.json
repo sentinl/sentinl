@@ -2,28 +2,10 @@
   "properties": {
     "payload": {
       "type": "object",
-      "dynamic": "true"
+      "dynamic": true
     },
     "attachment": {
       "type": "binary"
-    },
-    "error": {
-      "type": "boolean"
-    },
-    "report": {
-      "type": "boolean"
-    },
-    "watcher": {
-      "type": "text"
-    },
-    "action": {
-      "type": "text"
-    },
-    "level": {
-      "type": "text"
-    },
-    "message": {
-      "type": "text"
     }
   }
 }

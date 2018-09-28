@@ -2,16 +2,14 @@
 import { assign } from 'lodash';
 
 class WatcherAdvanced {
-  constructor($scope, $injector, navMenu, sentinlLog, createNotifier, confirmModal, kbnUrl,
-    sentinlHelper, sentinlConfig, watcherFactory, userFactory) {
+  constructor($scope, $injector, navMenu, sentinlLog, createNotifier, confirmModal, kbnUrl, Watcher, User, sentinlHelper) {
     const $route = $injector.get('$route');
     this.$scope = $scope;
     this.confirmModal = confirmModal;
     this.kbnUrl = kbnUrl;
+    this.watcherService = Watcher;
+    this.userService = User;
     this.sentinlHelper = sentinlHelper;
-
-    this.watcherService = watcherFactory.get(sentinlConfig.api.type);
-    this.userService = userFactory.get(sentinlConfig.api.type);
 
     this.locationName = 'WatcherAdvanced';
     this.log = sentinlLog;
@@ -65,22 +63,22 @@ class WatcherAdvanced {
   async _saveWatcherSource() {
     try {
       assign(this.watcher, angular.fromJson(this.watcherSourceText));
-      const password = this.watcher.password;
-      delete this.watcher.password;
-
       const id = await this.watcherService.save(this.watcher);
-      if (id) {
-        this.notify.info('watcher saved: ' + id);
+      this.notify.info('watcher saved: ' + id);
 
-        if (this.watcher.username && password) {
-          await this.userService.new(id, this.watcher.username, password);
-        }
-
-        this._cancelWatcherEditor();
+      if (this.watcher.username && this.watcher.password) {
+        await this.userService.new(id, this.watcher.username, this.watcher.password);
       }
+
+      this._cleanWatcher(this.watcher);
+      this._cancelWatcherEditor();
     } catch (err) {
       this.errorMessage(err);
     }
+  }
+
+  _cleanWatcher(watcher) {
+    delete watcher.password;
   }
 
   errorMessage(err) {

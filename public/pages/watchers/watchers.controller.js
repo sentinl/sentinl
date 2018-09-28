@@ -7,8 +7,7 @@ import ace from 'ace';
 // WATCHERS CONTROLLER
 function  WatchersController($rootScope, $scope, $route, $interval,
   $timeout, timefilter, Private, createNotifier, $window, $http, $uibModal, sentinlLog, navMenu,
-  globalNavState, $location, dataTransfer, Promise, COMMON, confirmModal,
-  wizardHelper, watcherFactory, userFactory, sentinlConfig) {
+  globalNavState, $location, dataTransfer, Watcher, User, Script, Promise, COMMON, confirmModal, wizardHelper) {
   'ngInject';
 
   $scope.title = COMMON.watchers.title;
@@ -32,9 +31,6 @@ function  WatchersController($rootScope, $scope, $route, $interval,
   $scope.watchers = [];
   $scope.wizardHelper = wizardHelper;
 
-  $scope.watcherService = watcherFactory.get(sentinlConfig.api.type);
-  $scope.userService = userFactory.get(sentinlConfig.api.type);
-
   $scope.inputInfo = function (watcher) {
     const index = get(watcher, 'input.search.request.index');
     if (index) return index.join(',');
@@ -48,7 +44,7 @@ function  WatchersController($rootScope, $scope, $route, $interval,
   */
   $scope.playWatcher = async function (task) {
     try {
-      const resp = await $scope.watcherService.play(task.id);
+      const resp = await Watcher.play(task.id);
       if (resp.warning) {
         notify.warning(resp.message);
       } else {
@@ -93,7 +89,7 @@ function  WatchersController($rootScope, $scope, $route, $interval,
   * Lists all existing watchers.
   */
   const listWatchers = async function () {
-    return $scope.watcherService.list().then(function (resp) {
+    return Watcher.list().then(function (resp) {
       $scope.watchers = resp;
     }).catch(errorMessage).then(function () {
       importWatcherFromLocalStorage();
@@ -118,13 +114,13 @@ function  WatchersController($rootScope, $scope, $route, $interval,
 
     async function doDelete() {
       try {
-        await $scope.watcherService.delete(watcher.id);
+        await Watcher.delete(watcher.id);
         notify.info(`deleted watcher ${watcher.title}`);
         $scope.watchers.splice(index, 1);
 
         try {
-          const user = await $scope.userService.get(watcher.id);
-          await $scope.userService.delete(user.id);
+          const user = await User.get(watcher.id);
+          await User.delete(user.id);
           notify.info(`deleted user ${user.id}`);
         } catch (err) {
           log.warn(err.toString());
@@ -148,7 +144,7 @@ function  WatchersController($rootScope, $scope, $route, $interval,
   * @param {integer} index - index number of watcher in $scope.watchers array.
   */
   const saveWatcher = function (index) {
-    $scope.watcherService.save($scope.watchers[index])
+    Watcher.save($scope.watchers[index])
       .then(function (id) {
         const status = $scope.watchers[index].disable ? 'Disabled' : 'Enabled';
         const watcher = find($scope.watchers, (watcher) => watcher.id === id);
@@ -174,10 +170,35 @@ function  WatchersController($rootScope, $scope, $route, $interval,
   * @param {string} type - action type (email, report).
   */
   $scope.newWatcher = function (type) {
-    $scope.watcherService.new(type)
+    Watcher.new(type)
       .then((watcher) => $scope.editWatcher(watcher, 'editor'))
       .catch(errorMessage);
   };
+
+  const templates = {
+    input: {},
+    condition: {},
+    transform: {}
+  };
+
+  /**
+  * Load templates for watcher fields.
+  *
+  * @param {array} templates - list of field names for templates
+  */
+  Promise.map(keys(templates), function (field) {
+    return Script.list(field).then(function (_templates_) {
+      if (_templates_.length) {
+        forEach(_templates_, function (template) {
+          templates[field][template.id] = template;
+        });
+      }
+      return null;
+    });
+  }).then(function () {
+    dataTransfer.setTemplates(templates);
+    return null;
+  }).catch(errorMessage);
 
   const currentTime = moment($route.current.locals.currentTime);
   $scope.currentTime = currentTime.format('HH:mm:ss');

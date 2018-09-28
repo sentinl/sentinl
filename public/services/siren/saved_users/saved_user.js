@@ -3,7 +3,7 @@ import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/sentinl');
 
 // Used only by the savedUsers service, usually no reason to change this
-module.factory('SavedUser', function (courier, sentinlConfig) {
+module.factory('SavedUser', function (courier) {
   // SavedUser constructor. Usually you'd interact with an instance of this.
   // ID is option, without it one will be generated on save.
 
@@ -26,7 +26,7 @@ module.factory('SavedUser', function (courier, sentinlConfig) {
       });
     }
 
-    static type = sentinlConfig.es.user_type
+    static type = 'sentinl-user'
   };
 
   return SavedUser;

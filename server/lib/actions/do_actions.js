@@ -162,7 +162,6 @@ export default function (server, actions, payload, task) {
             message: 'console action: ' + err.toString(),
             level: 'high',
             isError: true,
-            actionName,
           });
         }
       })();
@@ -198,7 +197,6 @@ export default function (server, actions, payload, task) {
             message: 'throttle: ' + err.toString(),
             level: 'high',
             isError: true,
-            actionName,
           });
         }
       })();
@@ -273,7 +271,6 @@ export default function (server, actions, payload, task) {
             message: 'email action: ' + err.toString(),
             level: 'high',
             isError: true,
-            actionName,
           });
         }
       })();
@@ -353,7 +350,6 @@ export default function (server, actions, payload, task) {
             message: 'html email action: ' + err.toString(),
             level: 'high',
             isError: true,
-            actionName,
           });
         }
       })();
@@ -405,7 +401,6 @@ export default function (server, actions, payload, task) {
             level: 'high',
             isError: true,
             isReport: true,
-            actionName,
           });
         }
       })();
@@ -462,7 +457,6 @@ export default function (server, actions, payload, task) {
             message: 'slack action: ' + err.toString(),
             level: 'high',
             isError: true,
-            actionName,
           });
         }
       })();
@@ -550,7 +544,6 @@ export default function (server, actions, payload, task) {
             message: 'webhook action: ' + err.toString(),
             level: 'high',
             isError: true,
-            actionName,
           });
         }
       })();
@@ -590,7 +583,6 @@ export default function (server, actions, payload, task) {
             message: 'elastic action: ' + err.toString(),
             level: 'high',
             isError: true,
-            actionName,
           });
         }
       })();

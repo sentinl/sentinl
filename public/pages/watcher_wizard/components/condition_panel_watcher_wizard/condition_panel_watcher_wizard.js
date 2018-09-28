@@ -25,9 +25,10 @@ class Chart {
 }
 
 class ConditionPanelWatcherWizard {
-  constructor($http, $scope, watcherWizardChartService, createNotifier, sentinlLog, wizardHelper, sentinlHelper) {
+  constructor($http, $scope, watcherWizardChartService, createNotifier, sentinlLog, ServerConfig, wizardHelper, sentinlHelper) {
     this.$scope = $scope;
     this.watcher = this.watcher || this.$scope.watcher;
+    this.updateStatus = this.updateStatus || this.$scope.updateStatus;
     this.onQueryChange = this.onQueryChange || this.$scope.onQueryChange;
     this.onConditionChange = this.onConditionChange || this.$scope.onConditionChange;
     this.aceOptions = this.aceOptions || this.$scope.aceOptions;
@@ -140,8 +141,10 @@ class ConditionPanelWatcherWizard {
       if (this.wizardHelper.isWizardWatcher(this.watcher)) {
         try {
           await this._fetchChartData();
+          this._reportStatusToThresholdWatcherWizard();
         } catch (err) {
           this.errorMessage({err});
+          this._reportStatusToThresholdWatcherWizard({success: false});
         }
       }
     }, true);
@@ -151,8 +154,10 @@ class ConditionPanelWatcherWizard {
         try {
           this._updateWatcherRawDoc(this.watcher);
           this._updateChartRawDoc(this.chartQuery);
+          this._reportStatusToThresholdWatcherWizard();
         } catch (err) {
           this.errorMessage({err});
+          this._reportStatusToThresholdWatcherWizard({success: false});
         }
       }
     }, true);
@@ -475,6 +480,11 @@ class ConditionPanelWatcherWizard {
     return null;
   }
 
+  _reportStatusToThresholdWatcherWizard({success = true} = {}) {
+    const isSuccess = !!this.charts.length && success || false;
+    this.updateStatus({ isSuccess });
+  }
+
   _updateCountChartWithNewData(chart, aggs, last, threshold) {
     this._purgeChartData(chart);
     this._updateChartAxisesForCount(chart, aggs, last.unit);
@@ -566,6 +576,7 @@ function conditionPanelWatcherWizard() {
     restrict: 'E',
     scope: {
       watcher: '=',
+      updateStatus: '&',
       onQueryChange: '&',
       onConditionChange: '&',
       aceOptions: '&',
@@ -577,6 +588,7 @@ function conditionPanelWatcherWizard() {
     controllerAs: 'conditionPanelWatcherWizard',
     bindToController: {
       watcher: '=',
+      updateStatus: '&',
       onQueryChange: '&',
       onConditionChange: '&',
       aceOptions: '&',

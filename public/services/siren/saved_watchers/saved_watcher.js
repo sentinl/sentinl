@@ -2,7 +2,7 @@ import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/sentinl');
 
 // Used only by the savedWatchers service, usually no reason to change this
-module.factory('SavedWatcher', function (courier, sentinlConfig) {
+module.factory('SavedWatcher', function (courier) {
   // SavedWatcher constructor. Usually you'd interact with an instance of this.
   // ID is option, without it one will be generated on save.
 
@@ -37,7 +37,7 @@ module.factory('SavedWatcher', function (courier, sentinlConfig) {
       });
     }
 
-    static type = sentinlConfig.es.watcher_type
+    static type = 'sentinl-watcher'
   };
 
   return SavedWatcher;

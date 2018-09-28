@@ -13,7 +13,7 @@ savedObjectManagementRegistry.register({
 });
 
 // This is the only thing that gets injected into controllers
-module.service('savedScriptsKibana', function (Promise, SavedScriptKibana, kbnIndex, kbnUrl, $http, chrome, sentinlConfig) {
+module.service('savedScriptsKibana', function (Promise, SavedScriptKibana, kbnIndex, kbnUrl, $http, chrome) {
   const savedScriptLoader = new SavedObjectLoader(SavedScriptKibana, kbnIndex, kbnUrl, $http, chrome);
   savedScriptLoader.urlFor = function (id) {
     return kbnUrl.eval('#/{{id}}', { id: id });
@@ -21,7 +21,7 @@ module.service('savedScriptsKibana', function (Promise, SavedScriptKibana, kbnIn
 
   // Customize loader properties since adding an 's' on type doesn't work for type 'sentinl-script'.
   savedScriptLoader.loaderProperties = {
-    name: sentinlConfig.es.script_type,
+    name: 'sentinl-script',
     noun: 'Saved Scripts',
     nouns: 'saved scripts'
   };
