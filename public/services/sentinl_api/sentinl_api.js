@@ -1,4 +1,5 @@
 import { get, pick, cloneDeep } from 'lodash';
+import SentinlError from '../../lib/sentinl_error';
 
 class SentinlApi {
   constructor(docType, $http, $injector) {
@@ -23,7 +24,7 @@ class SentinlApi {
       const resp = await this.$http.post('../api/sentinl/watcher/_execute', { attributes });
       return resp.data;
     } catch (err) {
-      throw new Error(this.helper.apiErrMsg(err, `${this.docType} play`));
+      throw new SentinlError(`Execute '${this.docType}'`, err);
     }
   }
 
@@ -36,7 +37,7 @@ class SentinlApi {
     try {
       return await this.$http.get('../api/sentinl/set/interval/' + JSON.stringify(timeInterval).replace(/\//g, '%2F'));
     } catch (err) {
-      throw new Error(this.helper.apiErrMsg(err, `${this.docType} update time filter`));
+      throw new SentinlError(`Update time filter '${this.docType}'`, err);
     }
   }
 
@@ -45,7 +46,7 @@ class SentinlApi {
       const resp = await this.$http.post(`../api/sentinl/${this.docType}/${id}`);
       return resp.data || {};
     } catch (err) {
-      throw new Error(this.helper.apiErrMsg(err, `${this.docType} get`));
+      throw new SentinlError(`Get '${this.docType}'`, err);
     }
   }
 
@@ -54,7 +55,7 @@ class SentinlApi {
       const resp = await this.$http.post(`../api/sentinl/list/${this.docType}s`);
       return get(resp, 'data.saved_objects') || [];
     } catch (err) {
-      throw new Error(this.helper.apiErrMsg(err, `${this.docType} list`));
+      throw new SentinlError(`List '${this.docType}'`, err);
     }
   }
 
@@ -70,7 +71,7 @@ class SentinlApi {
       });
       return get(resp, 'data.id');
     } catch (err) {
-      throw new Error(this.helper.apiErrMsg(err, `${this.docType} index`));
+      throw new SentinlError(`Index '${this.docType}'`, err);
     }
   }
 
@@ -78,7 +79,7 @@ class SentinlApi {
     try {
       return await this.index(attributes);
     } catch (err) {
-      throw new Error(this.helper.apiErrMsg(err, `${this.docType} save`));
+      throw new SentinlError(`Save '${this.docType}'`, err);
     }
   }
 
@@ -92,12 +93,12 @@ class SentinlApi {
       await this.$http.delete(url);
       return id;
     } catch (err) {
-      throw new Error(this.helper.apiErrMsg(err, `${this.docType} delete`));
+      throw new SentinlError(`Delete '${this.docType}'`, err);
     }
   }
 
   new() {
-    throw new Error('Should be ovveritten in subclass');
+    throw new SentinlError('Should be overitted in subclass');
   }
 }
 

@@ -5,7 +5,7 @@ import moment from 'moment';
 function ReportsController($rootScope, $scope, $route, $interval,
   $timeout, Private, $window, $uibModal,
   navMenu, globalNavState, reportService, COMMON, confirmModal, sentinlLog,
-  getToastNotifications, getNotifier) {
+  getToastNotifications, getNotifier, getTimefilter) {
   'ngInject';
 
   $scope.title = COMMON.reports.title;
@@ -17,6 +17,7 @@ function ReportsController($rootScope, $scope, $route, $interval,
   const location = COMMON.reports.title;
   const notify = getNotifier.create({ location });
   const toastNotifications = getToastNotifications;
+  const timefilter = getTimefilter;
   const log = sentinlLog;
   log.initLocation(location);
 
@@ -27,18 +28,16 @@ function ReportsController($rootScope, $scope, $route, $interval,
     notify.error(err);
   }
 
-  // timefilter.enabled = true;
-  // try {
-  //   timefilter.enableAutoRefreshSelector();
-  //   timefilter.enableTimeRangeSelector();
-  // } catch (err) {
-  //   log.warn('Kibana v6.2.X feature:', err);
-  // }
+  try {
+    timefilter.enableAutoRefreshSelector();
+    timefilter.enableTimeRangeSelector();
+  } catch (err) {
+    log.warn('Kibana v6.2.X feature:', err);
+  }
 
   /* First Boot */
 
   $scope.reports = [];
-  // $scope.timeInterval = timefilter.time;
 
   $scope.isData = function (report) {
     return report.attachment && report.attachment[1].data;
@@ -58,62 +57,23 @@ function ReportsController($rootScope, $scope, $route, $interval,
       });
   };
 
-  getReports($scope.timeInterval);
+  getReports(timefilter.getTime());
+  $scope.$listen(timefilter, 'fetch', getReports);
 
-  // $scope.$listen(timefilter, 'fetch', (res) => {
-  //   getReports($scope.timeInterval);
-  // });
-
-  /* Listen for refreshInterval changes */
-
-  // $rootScope.$watchCollection('timefilter.time', function (newvar, oldvar) {
-  //   if (newvar === oldvar) { return; }
-  //   let timeInterval = get($rootScope, 'timefilter.time');
-  //   if (timeInterval) {
-  //     $scope.timeInterval = timeInterval;
-  //     $scope.reportService.updateFilter($scope.timeInterval)
-  //       .catch(errorMessage);
-  //   }
-  // });
-
-  // $rootScope.$watchCollection('timefilter.refreshInterval', function () {
-  //   let refreshValue = get($rootScope, 'timefilter.refreshInterval.value');
-  //   let refreshPause = get($rootScope, 'timefilter.refreshInterval.pause');
-
-  //   // Kill any existing timer immediately
-  //   if ($scope.refreshreports) {
-  //     $timeout.cancel($scope.refreshreports);
-  //     $scope.refreshreports = undefined;
-  //   }
-
-  //   // Check if Paused
-  //   if (refreshPause) {
-  //     if ($scope.refreshreports) {
-  //       $timeout.cancel($scope.refreshreports);
-  //     }
-  //     return;
-  //   }
-
-  //   // Process New Filter
-  //   if (refreshValue !== $scope.currentRefresh && refreshValue !== 0) {
-  //     // new refresh value
-  //     if (isNumber(refreshValue) && !refreshPause) {
-  //       $scope.newRefresh = refreshValue;
-  //       // Reset Interval & Schedule Next
-  //       $scope.refreshreports = $timeout(function () {
-  //         $route.reload();
-  //       }, refreshValue);
-  //       $scope.$watch('$destroy', $scope.refreshreports);
-  //     } else {
-  //       $scope.currentRefresh = 0;
-  //       $timeout.cancel($scope.refreshreports);
-  //     }
-
-  //   } else {
-  //     $timeout.cancel($scope.refreshreports);
-  //   }
-
-  // });
+  let refresher;
+  $scope.$listen(timefilter, 'refreshIntervalUpdate', function () {
+    if (refresher) $timeout.cancel(refresher);
+    const interval = timefilter.getRefreshInterval();
+    if (interval.value > 0 && !interval.pause) {
+      function startRefresh() {
+        refresher = $timeout(function () {
+          if (!$scope.running) $scope.search();
+          startRefresh();
+        }, interval.value);
+      }
+      startRefresh();
+    }
+  });
 
   /**
   * Delete report
@@ -127,7 +87,7 @@ function ReportsController($rootScope, $scope, $route, $interval,
         await $scope.reportService.delete(report.id, report._index);
         $scope.reports.splice(index - 1, 1);
         toastNotifications.addSuccess(`Deleted '${report.id}'`);
-        getReports($scope.timeInterval);
+        getReports(timefilter.getTime());
       } catch (err) {
         errorMessage(new SentinlError('Delete report', err));
       }

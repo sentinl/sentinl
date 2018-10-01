@@ -6,7 +6,7 @@ import uiChrome from 'ui/chrome';
 function AlarmsController($rootScope, $scope, $route, $interval,
   $timeout, $injector, Private, $window, $uibModal, navMenu,
   globalNavState, alarmService, COMMON, confirmModal, sentinlLog,
-  getToastNotifications, getNotifier) {
+  getToastNotifications, getNotifier, getTimefilter) {
   'ngInject';
 
   $scope.title = COMMON.alarms.title;
@@ -39,6 +39,7 @@ function AlarmsController($rootScope, $scope, $route, $interval,
   const location = COMMON.alarms.title;
   const notify = getNotifier.create({ location });
   const toastNotifications = getToastNotifications;
+  const timefilter = getTimefilter;
 
   const log = sentinlLog;
   log.initLocation(location);
@@ -50,13 +51,12 @@ function AlarmsController($rootScope, $scope, $route, $interval,
     notify.error(err);
   }
 
-  // timefilter.enabled = true; // Deprecated in Kibana 6.4
-  // try {
-  //   timefilter.enableAutoRefreshSelector();
-  //   timefilter.enableTimeRangeSelector();
-  // } catch (err) {
-  //   log.warn('Kibana v6.2.X feature:', err);
-  // }
+  try {
+    timefilter.enableAutoRefreshSelector();
+    timefilter.enableTimeRangeSelector();
+  } catch (err) {
+    log.warn('Kibana v6.2.X+ feature:', err);
+  }
 
   $scope.topNavMenu = navMenu.getTopNav('alarms');
   $scope.tabsMenu = navMenu.getTabs('alarms');
@@ -64,7 +64,6 @@ function AlarmsController($rootScope, $scope, $route, $interval,
   /* First Boot */
 
   $scope.alarms = [];
-  // $scope.timeInterval = timefilter.time;
 
   const getAlarms = function (interval) {
     $scope.alarmService.updateFilter(interval)
@@ -76,58 +75,23 @@ function AlarmsController($rootScope, $scope, $route, $interval,
       });
   };
 
-  getAlarms($scope.timeInterval);
+  getAlarms(timefilter.getTime());
+  $scope.$listen(timefilter, 'fetch', getAlarms);
 
-  // $scope.$listen(timefilter, 'fetch', (res) => {
-  //   getAlarms($scope.timeInterval);
-  // });
-
-  /* Listen for refreshInterval changes */
-
-  // $rootScope.$watchCollection('timefilter.time', function (newvar, oldvar) {
-  //   if (newvar === oldvar) { return; }
-  //   let timeInterval = get($rootScope, 'timefilter.time');
-  //   if (timeInterval) {
-  //     $scope.timeInterval = timeInterval;
-  //     $scope.alarmService.updateFilter($scope.timeInterval)
-  //       .catch(errorMessage);
-  //   }
-  // });
-
-  //$rootScope.$watchCollection('timefilter.refreshInterval', function () {
-  //  let refreshValue = get($rootScope, 'timefilter.refreshInterval.value');
-  //  let refreshPause = get($rootScope, 'timefilter.refreshInterval.pause');
-
-  //  // Kill any existing timer immediately
-  //  if ($scope.refreshalarms) {
-  //    $timeout.cancel($scope.refreshalarms);
-  //    $scope.refreshalarms = undefined;
-  //  }
-
-  //  // Check if Paused
-  //  if (refreshPause) {
-  //    if ($scope.refreshalarms) $timeout.cancel($scope.refreshalarms);
-  //    return;
-  //  }
-
-  //  // Process New Filter
-  //  if (refreshValue !== $scope.currentRefresh && refreshValue !== 0) {
-  //    // new refresh value
-  //    if (isNumber(refreshValue) && !refreshPause) {
-  //      $scope.newRefresh = refreshValue;
-  //      // Reset Interval & Schedule Next
-  //      $scope.refreshalarms = $timeout(function () {
-  //        $route.reload();
-  //      }, refreshValue);
-  //      $scope.$watch('$destroy', $scope.refreshalarms);
-  //    } else {
-  //      $scope.currentRefresh = 0;
-  //      $timeout.cancel($scope.refreshalarms);
-  //    }
-  //  } else {
-  //    $timeout.cancel($scope.refreshalarms);
-  //  }
-  //});
+  let refresher;
+  $scope.$listen(timefilter, 'refreshIntervalUpdate', function () {
+    if (refresher) $timeout.cancel(refresher);
+    const interval = timefilter.getRefreshInterval();
+    if (interval.value > 0 && !interval.pause) {
+      function startRefresh() {
+        refresher = $timeout(function () {
+          if (!$scope.running) $scope.search();
+          startRefresh();
+        }, interval.value);
+      }
+      startRefresh();
+    }
+  });
 
   /**
   * Delete alarm
@@ -141,7 +105,7 @@ function AlarmsController($rootScope, $scope, $route, $interval,
         await $scope.alarmService.delete(alarm.id, alarm._index);
         $scope.alarms.splice(index - 1, 1);
         toastNotifications.addSuccess(`Deleted alarm '${alarm.id}'`);
-        getAlarms($scope.timeInterval);
+        getAlarms(timefilter.getTime());
       } catch (err) {
         errorMessage(new SentinlError('Delete alarm', err));
       }
