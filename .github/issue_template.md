@@ -19,6 +19,6 @@ This section will NOT appear in your Issue report!
 
 5. Sample of data
 
-6. Additional details
+6. Full watcher document
 
-
+7. Additional details
