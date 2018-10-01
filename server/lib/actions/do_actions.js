@@ -32,6 +32,7 @@ import getConfiguration from '../get_configuration';
 import apiClient from '../api_client';
 import EmailClient from './email_client';
 import Log from '../log';
+import ActionError from '../errors/action_error';
 
 // actions
 import reportAction from './report';
@@ -64,10 +65,11 @@ export default function (server, actions, payload, task) {
   try {
     email = new EmailClient(config.settings.email);
   } catch (err) {
-    log.error('email client: ' + err.toString());
+    err = new ActionError('email client', err);
+    log.error(`${task.title}: ${err.message}: ${err.stack}`);
     client.logAlarm({
       watcherTitle: task.title,
-      message: 'email client: ' + err.toString(),
+      message: err.toString(),
       level: 'high',
       isError: true,
     });
@@ -80,10 +82,11 @@ export default function (server, actions, payload, task) {
       slack = new WebClient(config.settings.slack.token);
     }
   } catch (err) {
-    log.error('slack client: ' + err.toString());
+    err = new ActionError('slack client', err);
+    log.error(`${task.title}: ${err.message}: ${err.stack}`);
     client.logAlarm({
       watcherTitle: task.title,
-      message: 'slack client: ' + err.toString(),
+      message: err.toString(),
       level: 'high',
       isError: true,
     });
@@ -156,10 +159,11 @@ export default function (server, actions, payload, task) {
             payload: !task.save_payload ? {} : payload,
           });
         } catch (err) {
-          log.error('console action: ' + err.toString());
+          err = new ActionError('console action', err);
+          log.error(`${task.title}: ${err.message}: ${err.stack}`);
           client.logAlarm({
             watcherTitle: task.title,
-            message: 'console action: ' + err.toString(),
+            message: err.toString(),
             level: 'high',
             isError: true,
             actionName,
@@ -190,10 +194,11 @@ export default function (server, actions, payload, task) {
             return;
           }
         } catch (err) {
-          log.error('throttle: ' + err.toString());
+          err = new ActionError('throttle', err);
+          log.error(`${task.title}: ${err.message}: ${err.stack}`);
           client.logAlarm({
             watcherTitle: task.title,
-            message: 'throttle: ' + err.toString(),
+            message: err.toString(),
             level: 'high',
             isError: true,
             actionName,
@@ -263,10 +268,11 @@ export default function (server, actions, payload, task) {
             });
           }
         } catch (err) {
-          log.error('email action: ' + err.toString());
+          err = new ActionError('email action', err);
+          log.error(`${task.title}: ${err.message}: ${err.stack}`);
           client.logAlarm({
             watcherTitle: task.title,
-            message: 'email action: ' + err.toString(),
+            message: err.toString(),
             level: 'high',
             isError: true,
             actionName,
@@ -341,10 +347,11 @@ export default function (server, actions, payload, task) {
             });
           }
         } catch (err) {
-          log.error('html email action: ' + err.toString());
+          err = new ActionError('html email action', err);
+          log.error(`${task.title}: ${err.message}: ${err.stack}`);
           client.logAlarm({
             watcherTitle: task.title,
-            message: 'html email action: ' + err.toString(),
+            message: err.toString(),
             level: 'high',
             isError: true,
             actionName,
@@ -391,10 +398,11 @@ export default function (server, actions, payload, task) {
             emailClient: email,
           });
         } catch (err) {
-          log.error(`${task.title}, report action: ` + err.toString());
+          err = new ActionError('report action', err);
+          log.error(`${task.title}: ${err.message}: ${err.stack}`);
           client.logAlarm({
             watcherTitle: task.title,
-            message: 'report action: ' + err.toString(),
+            message: err.toString(),
             level: 'high',
             isError: true,
             isReport: true,
@@ -444,13 +452,15 @@ export default function (server, actions, payload, task) {
             });
             log.info(`Message sent to slack channel ${resp.channel} as ${resp.message.username}`);
           } catch (err) {
-            throw new Error(`Failed to send message to channel ${action.slack.channel} using token ${config.settings.slack.token}, ${err}`);
+            const msg = `Failed to send message to channel ${action.slack.channel} using token ${config.settings.slack.token}`;
+            throw new ActionError(msg, err);
           }
         } catch (err) {
-          log.error(`${task.title}, report action: ` + err.toString());
+          err = new ActionError('slack action', err);
+          log.error(`${task.title}: ${err.message}: ${err.stack}`);
           client.logAlarm({
             watcherTitle: task.title,
-            message: 'slack action: ' + err.toString(),
+            message: err.toString(),
             level: 'high',
             isError: true,
             actionName,
@@ -533,10 +543,11 @@ export default function (server, actions, payload, task) {
           }
           req.end();
         } catch (err) {
-          log.error(`${task.title}, report action: ` + err.toString());
+          err = new ActionError('webhook action', err);
+          log.error(`${task.title}: ${err.message}: ${err.stack}`);
           client.logAlarm({
             watcherTitle: task.title,
-            message: 'webhook action: ' + err.toString(),
+            message: err.toString(),
             level: 'high',
             isError: true,
             actionName,
@@ -571,10 +582,11 @@ export default function (server, actions, payload, task) {
             payload: !task.save_payload ? {} : payload,
           });
         } catch (err) {
-          log.error(`${task.title}, report action: ` + err.toString());
+          err = new ActionError('elastic action', err);
+          log.error(`${task.title}: ${err.message}: ${err.stack}`);
           client.logAlarm({
             watcherTitle: task.title,
-            message: 'elastic action: ' + err.toString(),
+            message: err.toString(),
             level: 'high',
             isError: true,
             actionName,
