@@ -8,6 +8,14 @@ import 'moment-timezone';
 class WatcherWizardQueryBuilder {
   constructor({timezoneName = 'Europe/Amsterdam'} = {}) {
     this.timezoneName = timezoneName;
+    this.dateMathUnit = {
+      'seconds': 's',
+      'minutes': 'm',
+      'hours': 'h',
+      'days': 'd',
+      'months': 'M',
+      'years': 'y',
+    };
   }
 
   /*
@@ -642,11 +650,11 @@ class WatcherWizardQueryBuilder {
   }
 
   _dateMathNow(unit) {
-    return `now/${unit[0]}`;
+    return `now/${this.dateMathUnit[unit]}`;
   }
 
   _dateMathNUnitsAgo(n, unit) {
-    return `now-${n}${unit[0]}/${unit[0]}`;
+    return `now-${n}${this.dateMathUnit[unit]}/${this.dateMathUnit[unit]}`;
   }
 
   _epochTimeNow() {
