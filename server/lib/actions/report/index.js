@@ -18,8 +18,6 @@ export default async function reportAction({
     const log = new Log(config.app_name, server, 'report');
     const client = apiClient(server, 'elasticsearchAPI');
 
-    const sentinlClient = new SentinlClient(server);
-
     action.report = defaultsDeep(action.report, config.settings.report.action);
 
     let browserPath = server.plugins.sentinl.phantomjs_path;

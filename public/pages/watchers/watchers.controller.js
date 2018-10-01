@@ -200,8 +200,6 @@ function  WatchersController($rootScope, $scope, $route, $interval,
   $scope.getWatcherType = function (watcher) {
     if (get(watcher, 'wizard.chart_query_params')) {
       return 'wizard';
-    } else if (get(watcher, 'custom.type')) {
-      return 'custom';
     } else {
       return 'advanced';
     }
