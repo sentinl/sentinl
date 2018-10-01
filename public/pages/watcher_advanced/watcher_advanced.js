@@ -1,9 +1,11 @@
 /* global angular */
 import { assign } from 'lodash';
+import SentinlError from '../../lib/sentinl_error';
 
 class WatcherAdvanced {
-  constructor($scope, $injector, navMenu, sentinlLog, createNotifier, confirmModal, kbnUrl,
-    sentinlHelper, sentinlConfig, watcherService, userService) {
+  constructor($scope, $injector, navMenu, sentinlLog, confirmModal, kbnUrl,
+    sentinlHelper, sentinlConfig, watcherService, userService,
+    getToastNotifications, getNotifier) {
     const $route = $injector.get('$route');
     this.$scope = $scope;
     this.confirmModal = confirmModal;
@@ -13,12 +15,11 @@ class WatcherAdvanced {
     this.watcherService = watcherService;
     this.userService = userService;
 
-    this.locationName = 'WatcherAdvanced';
+    this.location = 'WatcherAdvanced';
     this.log = sentinlLog;
-    this.log.initLocation(this.locationName);
-    this.notify = createNotifier({
-      location: this.locationName,
-    });
+    this.log.initLocation(this.location);
+    this.notify = getNotifier.create({ location });
+    this.toastNotifications = getToastNotifications;
 
     this.watcher = $route.current.locals.watcher;
     this.init = {
@@ -28,7 +29,7 @@ class WatcherAdvanced {
     try {
       this.watcherSourceText = angular.toJson(this.init.watcherSource, true);
     } catch (err) {
-      this.log.error(`Parse watcher doc: ${err.toString()}`);
+      this.errorMessage(new SentinlError('Parse watcher doc', err));
     }
 
     this.topNavMenu = navMenu.getTopNav('editor');
@@ -53,7 +54,7 @@ class WatcherAdvanced {
         };
         this.confirmModal('Save this watcher?', confirmModalOptions);
       } catch (err) {
-        this.errorMessage(`watcher syntax is invalid: ${err.toString()}`);
+        this.errorMessage(new SentinlError('Watcher syntax is invalid', err));
       }
     });
   }
@@ -69,23 +70,21 @@ class WatcherAdvanced {
       delete this.watcher.password;
 
       const id = await this.watcherService.save(this.watcher);
-      if (id) {
-        this.notify.info('watcher saved: ' + id);
+      this.toastNotifications.addSuccess(`Watcher saved: '${id}'`);
 
-        if (this.watcher.username && password) {
-          await this.userService.new(id, this.watcher.username, password);
-        }
-
-        this._cancelWatcherEditor();
+      if (this.watcher.username && password) {
+        await this.userService.new(id, this.watcher.username, password);
       }
+
+      this._cancelWatcherEditor();
     } catch (err) {
-      this.errorMessage(err);
+      this.errorMessage(new SentinlError('Save watcher', err));
     }
   }
 
   errorMessage(err) {
     this.log.error(err);
-    //this.notify.error(err); // Deprecated in Kibana 6.4
+    this.notify.error(err);
   }
 
   aceConfig(mode = 'json', maxLines = 50, minLines = 30) {

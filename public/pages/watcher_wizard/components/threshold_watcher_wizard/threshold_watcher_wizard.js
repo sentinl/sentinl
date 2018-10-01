@@ -1,10 +1,12 @@
 import './threshold_watcher_wizard.less';
 import template from './threshold_watcher_wizard.html';
-import { get, has, forEach, keys, isObject, isEmpty, includes, union } from 'lodash';
+import { isError, get, has, forEach, keys, isObject, isEmpty, includes, union } from 'lodash';
+import SentinlError from '../../../../lib/sentinl_error';
 
 class ThresholdWatcherWizard {
-  constructor($scope, $window, kbnUrl, sentinlLog, confirmModal, createNotifier,
-    wizardHelper, watcherWizardEsService, sentinlConfig, sentinlHelper, watcherService, userService) {
+  constructor($scope, $window, kbnUrl, sentinlLog, confirmModal,
+    wizardHelper, watcherWizardEsService, sentinlConfig, sentinlHelper,
+    watcherService, userService, getToastNotifications, getNotifier) {
     this.$scope = $scope;
     this.watcher = this.watcher || this.$scope.watcher;
 
@@ -19,13 +21,11 @@ class ThresholdWatcherWizard {
     this.watcherService = watcherService;
     this.userService = userService;
 
-    this.locationName = 'ThresholdWatcherWizard';
-
+    this.location = 'ThresholdWatcherWizard';
     this.log = sentinlLog;
-    this.log.initLocation(this.locationName);
-    this.notify = createNotifier({
-      location: this.locationName,
-    });
+    this.log.initLocation(this.location);
+    this.notify = getNotifier.create({ location });
+    this.toastNotifications = getToastNotifications;
 
     this.isSpyWatcher = !!this.watcher.spy;
 
@@ -83,7 +83,7 @@ class ThresholdWatcherWizard {
       const mappings = await this.watcherWizardEsService.getMapping(this.watcher.input.search.request.index);
       this.indexesData.fieldNames = this._getIndexFieldNames(mappings).sort();
     } catch (err) {
-      this.errorMessage(`get index "${this.watcher.input.search.request.index}" field names: ${err.toString()}`);
+      this.errorMessage(new SentinlError(`Get index "${this.watcher.input.search.request.index}" field names`, err));
     }
   }
 
@@ -159,7 +159,7 @@ class ThresholdWatcherWizard {
         const mappings = await this.watcherWizardEsService.getMapping(index);
         this.indexesData.fieldNames = this._getIndexFieldNames(mappings).sort();
       } catch (err) {
-        this.errorMessage(`get index "${index}" field names: ${err.toString()}`);
+        this.errorMessage(new SentinlError(`Get index "${index}" field names`, err));
       }
     }
   }
@@ -213,16 +213,15 @@ class ThresholdWatcherWizard {
       delete this.watcher.password;
 
       const id = await this.watcherService.save(this.watcher);
-      if (id) {
-        this.notify.info('watcher saved: ' + id);
+      this.toastNotifications.addSuccess(`Watcher saved: '${id}'`);
 
-        if (this.watcher.username && password) {
-          await this.userService.new(id, this.watcher.username, password);
-        }
-        this._cancelWatcherWizard();
+      if (this.watcher.username && password) {
+        await this.userService.new(id, this.watcher.username, password);
       }
+
+      this._cancelWatcherWizard();
     } catch (err) {
-      this.errorMessage(err);
+      this.errorMessage(new SentinlError('Save wizard', err));
     }
   }
 
@@ -245,27 +244,29 @@ class ThresholdWatcherWizard {
     try {
       return this._isSchedule(this.watcher) && this._isIndex(this.watcher) && this._isTitle(this.watcher);
     } catch (err) {
-      // this.notify.error(`check title panel ${err}`); // Deprecated in Kibana 6.4
+      this.errorMessage(new SentinlError('Check title panel', err));
     }
   }
 
-  _warning(msg) {
+  _throwWarning(msg) {
     this.log.warn(msg);
-    //this.notify.warning(msg); // Deprecated in Kibana 6.4
+    this.toastNotifications.addWarning(msg);
   }
 
-  _error(err) {
+  _throwError(err) {
     this.log.error(err);
-    //this.notify.error(err); // Deprecated in Kibana 6.4
+    this.notify.error(err);
   }
 
   errorMessage(err) {
-    err = err || 'unknown error, bad implementation';
-    err = this.sentinlHelper.apiErrMsg(err);
-    if (err.match(/(parsing_exception)|(illegal_argument_exception)|(index_not_found_exception)/)) {
-      this._warning(err);
+    if (!isError(err)) {
+      return;
+    }
+
+    if (err.message.match(/(parsing_exception)|(illegal_argument_exception)|(index_not_found_exception)/)) {
+      this._throwWarning(err.message);
     } else {
-      this._error(err);
+      this._throwError(err);
     }
   }
 

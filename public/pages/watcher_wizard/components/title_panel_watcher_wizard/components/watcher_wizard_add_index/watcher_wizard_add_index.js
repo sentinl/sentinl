@@ -1,13 +1,14 @@
+import SentinlError from '../../../../../../lib/sentinl_error';
 import template from './watcher_wizard_add_index.html';
 
 class WatcherWizardAddIndex {
-  constructor($scope, watcherWizardEsService, createNotifier, sentinlLog) {
+  constructor($scope, watcherWizardEsService, getNotifier, sentinlLog) {
     this.$scope = $scope;
     this.watcher = this.watcher || this.$scope.watcher;
     this.onIndexChange = this.onIndexChange || this.$scope.onIndexChange;
 
     this.locationName = 'WatcherWizardAddIndex';
-    this.notify = createNotifier({
+    this.notify = getNotifier.create({
       location: this.locationName,
     });
     this.log = sentinlLog;
@@ -28,8 +29,9 @@ class WatcherWizardAddIndex {
       let indexes = await this.watcherWizardEsService.getAllIndexes();
       return this._filterIndexesByNamePrefix(indexes, this.selected);
     } catch (err) {
-      //this.notify('get index names: ' + err.toString()); // Deprecated in Kibana 6.4
-      this.log.error('get index names: ' + err.toString());
+      err = new SentinlError('Get index names', err);
+      this.notify(err);
+      this.log.error(err);
     }
   }
 

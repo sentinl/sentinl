@@ -7,6 +7,7 @@ import moment from 'moment';
 import { get, forEach, size, has, pick, includes } from 'lodash';
 import WatcherWizardQueryBuilder from './classes/watcher_wizard_query_builder';
 import WatcherWizardConditionBuilder from './classes/watcher_wizard_condition_builder';
+import SentinlError from '../../../../lib/sentinl_error';
 
 class Chart {
   constructor({name = 'all docs', enabled = true, message = '', xAxis = [], yAxis = [[], []], options} = {}) {
@@ -25,7 +26,7 @@ class Chart {
 }
 
 class ConditionPanelWatcherWizard {
-  constructor($http, $scope, watcherWizardChartService, createNotifier, sentinlLog, wizardHelper, sentinlHelper) {
+  constructor($http, $scope, watcherWizardChartService, sentinlLog, wizardHelper, sentinlHelper) {
     this.$scope = $scope;
     this.watcher = this.watcher || this.$scope.watcher;
     this.onQueryChange = this.onQueryChange || this.$scope.onQueryChange;
@@ -43,9 +44,6 @@ class ConditionPanelWatcherWizard {
 
     this.locationName = 'ConditionPanelWatcherWizard';
     this.log.initLocation(this.locationName);
-    this.notify = createNotifier({
-      location: this.locationName,
-    });
 
     this.messages = {
       nodata: 'The selected index or condition do not return any data!',
@@ -141,7 +139,7 @@ class ConditionPanelWatcherWizard {
         try {
           await this._fetchChartData();
         } catch (err) {
-          this.errorMessage({err});
+          this.errorMessage(new SentinlError('Fetch chart data', err));
         }
       }
     }, true);
@@ -152,21 +150,10 @@ class ConditionPanelWatcherWizard {
           this._updateWatcherRawDoc(this.watcher);
           this._updateChartRawDoc(this.chartQuery);
         } catch (err) {
-          this.errorMessage({err});
+          this.errorMessage(new SentinlError('Update watcher', err));
         }
       }
     }, true);
-  }
-
-  _warning(msg) {
-    msg = msg.replace(/fail/ig, '[warning]');
-    this.log.warn(msg);
-    //this.notify.warning(msg); // Deprecated in Kibana 6.4
-  }
-
-  _error(msg) {
-    this.log.error(msg);
-    //this.notify.error(msg); // Deprecated in Kibana 6.4
   }
 
   _updateWatcherRawDoc(watcher) {
@@ -296,14 +283,14 @@ class ConditionPanelWatcherWizard {
       try {
         await this._queryMetricAgg(params);
       } catch (err) {
-        throw new Error(`${params.metricAggType}: ${err.toString()}`);
+        throw new SentinlError(`Create query for agg type '${params.metricAggType}'`, err);
       }
     } else {
       if (get(this.watcher, 'wizard.chart_query_params.queryType') === 'count') {
         try {
           await this._queryCount(params);
         } catch (err) {
-          throw new Error(`count: ${err.toString()}`);
+          throw new SentinlError('Create count query', err);
         }
       }
     }
@@ -312,13 +299,13 @@ class ConditionPanelWatcherWizard {
       try {
         this._buildInputQuery(params);
       } catch (err) {
-        throw new Error(`build Elasticsearch query: ${err.toString()}`);
+        throw new SentinlError('Build watcher input', err);
       }
 
       try {
         this._buildCondition(params);
       } catch (err) {
-        throw new Error(`build Elasticsearch query: ${err.toString()}`);
+        throw new SentinlError('Build watcher condition', err);
       }
     }
 
@@ -399,7 +386,7 @@ class ConditionPanelWatcherWizard {
           resp = await this.watcherWizardChartService.metricAggMax({index, query: JSON.stringify(this.chartQuery)});
         }
       } catch (err) {
-        throw new Error(`query ES: ${err.toString()}`);
+        throw new SentinlError('Create query', err);
       }
 
       this.charts = [];
@@ -420,12 +407,12 @@ class ConditionPanelWatcherWizard {
           this._offChart(this.activeChart, this.messages.nodata);
         }
       } catch (err) {
-        throw new Error(`update chart data: ${err.toString()}`);
+        throw new SentinlError('Update chart data', err);
       }
     } catch (err) {
       this._offChart(this.activeChart, this.messages.nodata);
       this._offProgress();
-      throw err;
+      throw new SentinlError(`Process data for '${metricAggType}'`, err);
     }
     this._offProgress();
     return null;
@@ -443,7 +430,7 @@ class ConditionPanelWatcherWizard {
         this.chartQuery = this.queryBuilder.count({over, last, interval, field, timeField});
         resp = await this.watcherWizardChartService.count({index, query: JSON.stringify(this.chartQuery)});
       } catch (err) {
-        throw new Error(`query ES: ${err.toString()}`);
+        throw new SentinlError('Create query', err);
       }
 
       this.charts = [];
@@ -464,12 +451,12 @@ class ConditionPanelWatcherWizard {
           this._offChart(this.activeChart, this.messages.nodata);
         }
       } catch (err) {
-        throw new Error(`update chart data: ${err.toString()}`);
+        throw new SentinlError('Update chart', err);
       }
     } catch (err) {
       this._offChart(this.activeChart, this.messages.nodata);
       this._offProgress();
-      throw err;
+      throw new SentinlError('Process data for \'count\'', err);
     }
     this._offProgress();
     return null;

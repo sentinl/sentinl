@@ -1,9 +1,11 @@
 import { get, isNumber } from 'lodash';
+import SentinlError from '../../lib/sentinl_error';
 import moment from 'moment';
 
 function ReportsController($rootScope, $scope, $route, $interval,
-  $timeout, Private, createNotifier, $window, $uibModal,
-  navMenu, globalNavState, reportService, COMMON, confirmModal, sentinlLog) {
+  $timeout, Private, $window, $uibModal,
+  navMenu, globalNavState, reportService, COMMON, confirmModal, sentinlLog,
+  getToastNotifications, getNotifier) {
   'ngInject';
 
   $scope.title = COMMON.reports.title;
@@ -12,11 +14,11 @@ function ReportsController($rootScope, $scope, $route, $interval,
   $scope.topNavMenu = navMenu.getTopNav('reports');
   $scope.tabsMenu = navMenu.getTabs('reports');
 
-  const notify = createNotifier({
-    location: COMMON.reports.title,
-  });
+  const location = COMMON.reports.title;
+  const notify = getNotifier.create({ location });
+  const toastNotifications = getToastNotifications;
   const log = sentinlLog;
-  log.initLocation(COMMON.reports.title);
+  log.initLocation(location);
 
   $scope.reportService = reportService;
 
@@ -51,7 +53,9 @@ function ReportsController($rootScope, $scope, $route, $interval,
       .then((resp) => {
         return $scope.reportService.list().then((resp) => $scope.reports = resp);
       })
-      .catch(errorMessage);
+      .catch((err) => {
+        errorMessage(new SentinlError('Get reports', err));
+      });
   };
 
   getReports($scope.timeInterval);
@@ -120,12 +124,12 @@ function ReportsController($rootScope, $scope, $route, $interval,
   $scope.deleteReport = function (index, report) {
     async function doDelete() {
       try {
-        const resp = await $scope.reportService.delete(report.id, report._index);
+        await $scope.reportService.delete(report.id, report._index);
         $scope.reports.splice(index - 1, 1);
-        notify.info(`Deleted report ${resp}`);
+        toastNotifications.addSuccess(`Deleted '${report.id}'`);
         getReports($scope.timeInterval);
       } catch (err) {
-        errorMessage(err);
+        errorMessage(new SentinlError('Delete report', err));
       }
     }
 

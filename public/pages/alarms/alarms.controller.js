@@ -1,10 +1,12 @@
 import { get, isNumber } from 'lodash';
+import SentinlError from '../../lib/sentinl_error';
 import moment from 'moment';
 import uiChrome from 'ui/chrome';
 
 function AlarmsController($rootScope, $scope, $route, $interval,
-  $timeout, $injector, Private, createNotifier, $window, $uibModal, navMenu,
-  globalNavState, alarmService, COMMON, confirmModal, sentinlLog) {
+  $timeout, $injector, Private, $window, $uibModal, navMenu,
+  globalNavState, alarmService, COMMON, confirmModal, sentinlLog,
+  getToastNotifications, getNotifier) {
   'ngInject';
 
   $scope.title = COMMON.alarms.title;
@@ -34,17 +36,18 @@ function AlarmsController($rootScope, $scope, $route, $interval,
     }
   ];
 
-  const notify = createNotifier({
-    location: COMMON.alarms.title,
-  });
+  const location = COMMON.alarms.title;
+  const notify = getNotifier.create({ location });
+  const toastNotifications = getToastNotifications;
+
   const log = sentinlLog;
-  log.initLocation(COMMON.alarms.title);
+  log.initLocation(location);
 
   $scope.alarmService = alarmService;
 
   function errorMessage(err) {
     log.error(err);
-    // notify.error(err); // Deprecated in Kibana 6.4
+    notify.error(err);
   }
 
   // timefilter.enabled = true; // Deprecated in Kibana 6.4
@@ -68,7 +71,9 @@ function AlarmsController($rootScope, $scope, $route, $interval,
       .then((resp) => {
         return $scope.alarmService.list().then((resp) => $scope.alarms = resp);
       })
-      .catch(errorMessage);
+      .catch((err) => {
+        errorMessage(new SentinlError('Get alarms', err));
+      });
   };
 
   getAlarms($scope.timeInterval);
@@ -133,12 +138,12 @@ function AlarmsController($rootScope, $scope, $route, $interval,
   $scope.deleteAlarm = function (index, alarm) {
     async function doDelete() {
       try {
-        const resp = await $scope.alarmService.delete(alarm.id, alarm._index);
+        await $scope.alarmService.delete(alarm.id, alarm._index);
         $scope.alarms.splice(index - 1, 1);
-        //notify.info(`Deleted alarm ${resp}`); // Deprecated in Kibana 6.4
+        toastNotifications.addSuccess(`Deleted alarm '${alarm.id}'`);
         getAlarms($scope.timeInterval);
       } catch (err) {
-        errorMessage(err);
+        errorMessage(new SentinlError('Delete alarm', err));
       }
     }
 

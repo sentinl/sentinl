@@ -2,6 +2,7 @@ import { uiModules } from 'ui/modules';
 import { Notifier } from 'ui/notify/notifier';
 import routes from 'ui/routes';
 import { assign } from 'lodash';
+import SentinlError from '../../lib/sentinl_error';
 
 import './services/wizard_helper';
 import './services/watcher_wizard_es_service';
@@ -47,7 +48,8 @@ routes
         const kbnUrl = $injector.get('kbnUrl');
         const config = $injector.get('sentinlConfig');
         const watcherService = $injector.get('watcherService');
-        const notifier = new Notifier({ location: 'Watcher' });
+        const getNotifier = $injector.get('getNotifier');
+        const notify = getNotifier.create({ location: 'Watcher' });
         const watcherId = $route.current.params.id;
 
         let spyBtnWatcher;
@@ -57,7 +59,7 @@ routes
             delete window.localStorage.sentinl_saved_query;
           }
         } catch (err) {
-          notifier.error(`parse spy button watcher: ${err.toString()}`);
+          notify.error(new SentinlError('Parse spy button watcher', err));
           kbnUrl.redirect('/');
         }
 
@@ -68,7 +70,7 @@ routes
             }
             return watcher;
           }).catch(function (err) {
-            notifier.error(`create new watcher: ${err.toString()}`);
+            notify.error(new SentinlError('Create new watcher', err));
             kbnUrl.redirect('/');
           });
         }
@@ -77,7 +79,7 @@ routes
           watcher._edit = true;
           return watcher;
         }).catch(function (err) {
-          notifier.error(`get watcher: ${err.toString()}`);
+          notify.error(new SentinlError('Get watcher', err));
           kbnUrl.redirect('/');
         });
       },
