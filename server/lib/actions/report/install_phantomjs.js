@@ -47,7 +47,8 @@ module.exports = function installPhantomjs({srcPath = defaultSrcPath} = {}) {
         return phantomPackage;
       })
       .catch((err) => {
-        throw new Error('decompress PhantomJS archive and set permissions to 755: ' + err.toString());
+        err.message += ': decompress PhantomJS archive and set permissions to 755';
+        throw err;
       });
   }
 };

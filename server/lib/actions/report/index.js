@@ -4,6 +4,7 @@ import reportFactory from './report_factory';
 import { defaultsDeep, get } from 'lodash';
 import { renderMustacheEmailSubjectAndText } from '../helpers';
 import apiClient from '../../api_client';
+import ActionError from '../../errors/action_error';
 
 export default async function reportAction({
   server,
@@ -110,17 +111,18 @@ export default async function reportAction({
         attachment,
       });
     } catch (err) {
-      log.error(`${watcherTitle} report, send email: ` + err.toString());
+      err = new ActionError('index report and send email', err);
+      log.error([watcherTitle, err.message, err.stack].join(': '));
       client.logAlarm({
         actionName,
         watcherTitle,
         level: 'high',
-        message: `${watcherTitle} report, send email: ` + err.toString(),
+        message: err.toString(),
         isReport: true,
         isError: true,
       });
     }
   } catch (err) {
-    throw new Error('exec: ' + err.toString());
+    throw new ActionError('execute', err);
   }
 };

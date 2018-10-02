@@ -1,4 +1,5 @@
 import puppeteer from 'puppeteer';
+import ActionError from '../../errors/action_error';
 
 export default async function puppeteerReport({
   browserPath,
@@ -36,7 +37,7 @@ export default async function puppeteerReport({
       chromeHeadless = String(chromeHeadless) === 'true';
       chromeDevtools = String(chromeDevtools) === 'true';
     } catch (err) {
-      throw new Error('sanitize args: ' + err.toString());
+      throw new ActionError('sanitize args', err);
     }
 
     browser = await puppeteer.launch({
@@ -73,7 +74,7 @@ export default async function puppeteerReport({
         await page.waitFor(delay);
       }
     } catch (err) {
-      throw new Error('login form: ' + err.toString());
+      throw new ActionError('login form', err);
     }
 
     try {
@@ -83,7 +84,7 @@ export default async function puppeteerReport({
         await page.waitFor(delay / 2);
       }
     } catch (err) {
-      throw new Error('collapse navbar: ' + err.toString());
+      throw new ActionError('collapse navbar', err);
     }
 
     if (fileType === 'pdf') {
@@ -107,9 +108,9 @@ export default async function puppeteerReport({
     }
     err = err.toString();
     if (err.includes('timeout during .waitFor()') || err.includes('is not a valid selector')) {
-      throw new Error('invalid CSS selector: ' + err);
+      throw new ActionError('invalid CSS selector', err);
     } else {
-      throw new Error(err);
+      throw new ActionError('puppeteer work', err);
     }
   }
 }

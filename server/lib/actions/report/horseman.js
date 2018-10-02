@@ -4,6 +4,7 @@
 
 import url from 'url';
 import Promise from 'bluebird';
+import ActionError from '../../errors/action_error';
 
 function horsemanFactory({domain, investigateAccessControl, ignoreSSLErrors, bluebirdDebug, phantomPath}) {
   if (!!investigateAccessControl) {
@@ -51,7 +52,7 @@ export default async function horsemanReport({
       ignoreHTTPSErrors = String(ignoreHTTPSErrors) === 'true';
       phantomBluebirdDebug = String(phantomBluebirdDebug) === 'true';
     } catch (err) {
-      throw new Error('sanitize args: ' + err.toString());
+      throw new ActionError('sanitize args', err);
     }
 
     const parsedUrl = url.parse(reportUrl);
@@ -83,7 +84,7 @@ export default async function horsemanReport({
           .click(authSelectorLoginBtn)
           .wait(delay);
       } catch (err) {
-        throw new Error('login form: ' + err.toString());
+        throw new ActionError('login form', err);
       }
     }
 
@@ -93,7 +94,7 @@ export default async function horsemanReport({
           .click(collapseNavbarSelector)
           .wait(delay / 2);
       } catch (err) {
-        throw new Error('collapse navbar: ' + err.toString());
+        throw new ActionError('collapse navbar', err);
       }
     }
 
@@ -114,15 +115,15 @@ export default async function horsemanReport({
     }
     err = err.toString();
     if (err.includes('Phantom immediately exited with: 126')) {
-      throw new Error('cannot execute phantom binary, incorrect format');
+      throw new ActionError('cannot execute phantom binary, incorrect format', err);
     } else if (err.includes('Phantom immediately exited with: 127')) {
-      throw new Error('you need to install libs for Reporting to work: fontconfig and freetype');
+      throw new ActionError('you need to install libs for Reporting to work: fontconfig and freetype', err);
     } else if (err.includes('extract phantom ports')) {
-      throw new Error('you need to install netstat');
+      throw new ActionError('you need to install netstat', err);
     } else if (err.includes('timeout during .waitFor()')) {
-      throw new Error('invalid CSS selector: ' + err);
+      throw new ActionError('invalid CSS selector', err);
     } else {
-      throw new Error(err);
+      throw new ActionError('horseman work', err);
     }
   }
 }
