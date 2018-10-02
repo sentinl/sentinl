@@ -59,7 +59,9 @@ function ReportsController($rootScope, $scope, $route, $interval,
   };
 
   getReports(getTime());
-  $scope.$listen(timefilter, 'fetch', getReports);
+  $scope.$listen(timefilter, 'fetch', () =>{
+    getReports(getTime());
+  });
 
   let refresher;
   $scope.$listen(timefilter, 'refreshIntervalUpdate', function () {

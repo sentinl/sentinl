@@ -81,7 +81,9 @@ function AlarmsController($rootScope, $scope, $route, $interval,
   };
 
   getAlarms(getTime());
-  $scope.$listen(timefilter, 'fetch', getAlarms);
+  $scope.$listen(timefilter, 'fetch', () => {
+    getAlarms(getTime());
+  });
 
   let refresher;
   $scope.$listen(timefilter, 'refreshIntervalUpdate', function () {
