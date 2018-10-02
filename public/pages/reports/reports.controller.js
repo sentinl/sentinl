@@ -28,6 +28,11 @@ function ReportsController($rootScope, $scope, $route, $interval,
     notify.error(err);
   }
 
+  function getTime() {
+    // Kibana v6.3 .time, v6.4 .getTime()
+    return timefilter.time ? timefilter.time : timefilter.getTime();
+  }
+
   try {
     timefilter.enableAutoRefreshSelector();
     timefilter.enableTimeRangeSelector();
@@ -53,7 +58,7 @@ function ReportsController($rootScope, $scope, $route, $interval,
       });
   };
 
-  getReports(timefilter.getTime());
+  getReports(getTime());
   $scope.$listen(timefilter, 'fetch', getReports);
 
   let refresher;
@@ -83,7 +88,7 @@ function ReportsController($rootScope, $scope, $route, $interval,
         await $scope.reportService.delete(report.id, report._index);
         $scope.reports.splice(index - 1, 1);
         toastNotifications.addSuccess(`Deleted '${report.id}'`);
-        getReports(timefilter.getTime());
+        getReports(getTime());
       } catch (err) {
         errorMessage(new SentinlError('Delete report', err));
       }

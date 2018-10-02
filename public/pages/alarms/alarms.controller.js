@@ -51,6 +51,11 @@ function AlarmsController($rootScope, $scope, $route, $interval,
     notify.error(err);
   }
 
+  function getTime() {
+    // Kibana v6.3 .time, v6.4 .getTime()
+    return timefilter.time ? timefilter.time : timefilter.getTime();
+  }
+
   try {
     timefilter.enableAutoRefreshSelector();
     timefilter.enableTimeRangeSelector();
@@ -75,7 +80,7 @@ function AlarmsController($rootScope, $scope, $route, $interval,
       });
   };
 
-  getAlarms(timefilter.getTime());
+  getAlarms(getTime());
   $scope.$listen(timefilter, 'fetch', getAlarms);
 
   let refresher;
@@ -105,7 +110,7 @@ function AlarmsController($rootScope, $scope, $route, $interval,
         await $scope.alarmService.delete(alarm.id, alarm._index);
         $scope.alarms.splice(index - 1, 1);
         toastNotifications.addSuccess(`Deleted alarm '${alarm.id}'`);
-        getAlarms(timefilter.getTime());
+        getAlarms(getTime());
       } catch (err) {
         errorMessage(new SentinlError('Delete alarm', err));
       }
