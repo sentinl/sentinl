@@ -1,4 +1,5 @@
 import uuid from 'uuid';
+import { filter } from 'lodash';
 import getConfiguration from  '../get_configuration';
 import { getCurrentTime, flatAttributes } from '../helpers';
 import { isKibi, trimIdTypePrefix } from '../helpers';
@@ -92,7 +93,10 @@ export default class EsApi {
     };
 
     if (attachment) {
-      attributes.attachment = attachment;
+      const binary = filter(attachment, meta => meta.encoded && meta.data && !!meta.data.length)[0].data;
+      if (binary) {
+        attributes.attachment = binary;
+      }
     }
 
     if (payload) {
@@ -100,8 +104,7 @@ export default class EsApi {
     }
 
     try {
-      const resp = await this.create(this._config.es.alarm_type, attributes, { overwrite: true }, this._config.es.alarm_index, true);
-      return resp;
+      return await this.create(this._config.es.alarm_type, attributes, { overwrite: true }, this._config.es.alarm_index, true);
     } catch (err) {
       throw new EsClientError('log alarm', err);
     }
