@@ -39,7 +39,7 @@ function ReportsController($rootScope, $scope, $route, $interval,
   $scope.timeInterval = timefilter.time;
 
   $scope.isScreenshot = function (report) {
-    return report.attachment.charAt(0) === 'i';
+    return report._source.attachment.charAt(0) === 'i';
   };
 
   const getReports = function (interval) {
