@@ -136,14 +136,12 @@ export default function (server, actions, payload, task) {
     */
 
     var priority;
-    var formatterConsole;
-    var message;
     if (action.console) {
       (async () => {
         try {
           priority = action.console.priority || 'medium';
-          formatterConsole = action.console.message ? action.console.message : '{{ payload }}';
-          message = mustache.render(formatterConsole, {payload: payload,});
+          let formatterConsole = action.console.message ? action.console.message : '{{ payload }}';
+          let message = mustache.render(formatterConsole, {payload: payload,});
           log.debug('console payload', payload);
 
           await logHistory({
@@ -423,9 +421,8 @@ export default function (server, actions, payload, task) {
     if (action.slack) {
       (async () => {
         try {
-          let formatter;
-          formatter = action.slack.message ? action.slack.message : 'Series Alarm {{ payload._id}}: {{payload.hits.total}}';
-          message = mustache.render(formatter, {payload: payload, watcher: task._source});
+          let formatter = action.slack.message ? action.slack.message : 'Series Alarm {{ payload._id}}: {{payload.hits.total}}';
+          let message = mustache.render(formatter, {payload: payload, watcher: task._source});
           priority = action.slack.priority || 'medium';
           log.debug(`webhook to #${action.slack.channel}, message: ${message}`);
 
