@@ -185,10 +185,6 @@ class ConditionPanelWatcherWizard {
     return !!this.charts.find((chart) => chart.enabled === true);
   }
 
-  get isAnyChart() {
-    return !!this.charts.length;
-  }
-
   get areMultipleCharts() {
     return this.charts.length > 1;
   }
@@ -308,18 +304,16 @@ class ConditionPanelWatcherWizard {
       }
     }
 
-    if (this.isAnyChart) {
-      try {
-        this._buildInputQuery(params);
-      } catch (err) {
-        throw new Error(`build Elasticsearch query: ${err.toString()}`);
-      }
+    try {
+      this._buildInputQuery(params);
+    } catch (err) {
+      throw new Error(`build Elasticsearch query: ${err.toString()}`);
+    }
 
-      try {
-        this._buildCondition(params);
-      } catch (err) {
-        throw new Error(`build Elasticsearch query: ${err.toString()}`);
-      }
+    try {
+      this._buildCondition(params);
+    } catch (err) {
+      throw new Error(`build Elasticsearch query: ${err.toString()}`);
     }
 
     return null;
