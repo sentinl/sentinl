@@ -12,7 +12,7 @@ export default function getChromePath() {
     binName = 'Chromium';
   }
 
-  chromePath = listAllFilesSync(chromePath).filter((f) => f.split('/').pop() === binName);
+  chromePath = listAllFilesSync(chromePath).filter(file => path.basename(file) === binName);
 
   if (chromePath.length !== 1) {
     throw new Error('puppeter chrome was not found');

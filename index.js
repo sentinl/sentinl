@@ -17,6 +17,7 @@
  * limitations under the License.
  */
 
+import path from 'path';
 import { existsSync, readFileSync, appendFileSync } from 'fs';
 import { forEach, difference } from 'lodash';
 
@@ -50,7 +51,7 @@ function loadLibs(requirements, platformIsSiren) {
 export default function (kibana) {
   let requirements = ['kibana', 'elasticsearch'];
 
-  const platformIsSiren = existsSync(__dirname.split('/').slice(0, -2).join('/') + '/src/siren_core_plugins/saved_objects_api');
+  const platformIsSiren = existsSync(path.join(__dirname, '../../src/siren_core_plugins/saved_objects_api'));
   const navbarExtensions = platformIsSiren ? ['plugins/sentinl/dashboard_button/dashboard_button'] : [];
 
   try {
