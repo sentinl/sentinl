@@ -1,16 +1,8 @@
 <!--
-Thanks for taking time to report an issue. Please try to:
-
-* Be precise: describe expected results vs. actual results
-* Be clear: explain how to reproduce the problem, step by step
-* Include only one problem per report
-* Include details about your setup/system/os where possible
-
-This section will NOT appear in your Issue report!
--->
-
 Thanks for taking time to report an issue.
 Please fill all the following fields to make sure we have all the data we need to help you.
+This section will NOT appear in your Issue report!
+-->
 
 **Kibana version:**
 
