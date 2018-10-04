@@ -9,16 +9,52 @@ Thanks for taking time to report an issue. Please try to:
 This section will NOT appear in your Issue report!
 -->
 
-1. Sentinl and Kibana version 
+Thanks for taking time to report an issue.
+Please fill all the following fields to make sure we have all the data we need to help you.
 
-2. Issue description
+**Kibana version:**
 
-3. Reproducing the issue step-by-step
+**Elasticsearch version:**
 
-4. Expected results vs. actual results
+**Server OS version:**
 
-5. Sample of data
+**Browser version:**
 
-6. Full watcher document
+**Browser OS version:**
 
-7. Additional details
+**Original install method (e.g. release pkg link, gulp, from source, etc.):**
+
+**Describe the bug:**
+
+**Steps to reproduce:**
+1.
+2.
+3.
+
+**Expected behavior:**
+
+**Sample of data you have in Elasticsearch**
+
+**Full watcher document**
+
+**Screenshots (if relevant):**
+
+**Errors in browser console (if relevant):**
+
+**Provide Kibana logs and/or server output (if relevant):**
+
+**Any additional context:**
+
+**Tips:**
+
+1. Try to query Elasticsearch manually first. Do you receive the results you want for your query?
+For example, on Linux, you can query Elasticsearch using `curl`:
+```
+curl -X GET "localhost:9200/_search?pretty" -H 'Content-Type: application/json' -d'
+{
+  "query": { 
+    "match_all": {}
+  }
+}
+'
+```
