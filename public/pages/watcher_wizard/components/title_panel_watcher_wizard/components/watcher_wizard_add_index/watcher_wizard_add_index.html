@@ -6,7 +6,7 @@
           class="form-control"
           type="text"
           ng-model="watcherWizardAddIndex.selected"
-          ng-model-options="{ debounce: 1000 }"
+          ng-model-options="{ debounce: 1500 }"
           placeholder="Type index names here"
           uib-typeahead="element.index for element in watcherWizardAddIndex.getIndexNames($viewValue)"
           typeahead-loading="watcherWizardAddIndex.loadingLocations"
