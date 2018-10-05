@@ -28,9 +28,10 @@
                 <li class="watcher-wizard-condition-dd">
                   <dd-watcher-agg-field
                     agg-enabled="conditionPanelWatcherWizard.condition.field.aggEnabled"
-                    active-field="{{conditionPanelWatcherWizard.watcher.wizard.chart_query_params.field}}"
-                    field-names="conditionPanelWatcherWizard.indexesData.fieldNames"
-                    time-field="{{conditionPanelWatcherWizard.watcher.wizard.chart_query_params.timeField}}"
+                    index-numeric-fields="conditionPanelWatcherWizard.indexesData.fieldNames.numeric"
+                    index-date-fields="conditionPanelWatcherWizard.indexesData.fieldNames.date"
+                    selected-numeric-field="{{conditionPanelWatcherWizard.watcher.wizard.chart_query_params.field}}"
+                    selected-date-field="{{conditionPanelWatcherWizard.watcher.wizard.chart_query_params.timeField}}"
                     on-select-field="conditionPanelWatcherWizard.condition.field.handleFieldSelect(field)"
                     on-select-time-field="conditionPanelWatcherWizard.condition.field.handleTimeFieldSelect(timeField)"
                     text-limit="conditionPanelWatcherWizard.condition.textLimit"
@@ -39,7 +40,7 @@
                 <li class="watcher-wizard-condition-dd">
                   <dd-watcher-agg-over
                     agg-over-options="conditionPanelWatcherWizard.watcher.wizard.chart_query_params.over"
-                    agg-field-names="conditionPanelWatcherWizard.indexesData.fieldNames"
+                    index-text-fields="conditionPanelWatcherWizard.indexesData.fieldNames.text"
                     agg-over-on-select="conditionPanelWatcherWizard.condition.over.handleSelect(over)"
                     text-limit="conditionPanelWatcherWizard.condition.textLimit"
                   ></dd-watcher-agg-over/>
