@@ -4,44 +4,48 @@ class DdWatcherAggOver {
   constructor($scope) {
     this.$scope = $scope;
     this.aggOverOptions = this.aggOverOptions || this.$scope.aggOverOptions;
-    this.aggFieldNames = this.aggFieldNames || this.$scope.aggFieldNames;
+    this.indexTextFields = this.indexTextFields || this.$scope.indexTextFields;
     this.aggOverOnSelect = this.aggOverOnSelect || this.$scope.aggOverOnSelect;
     this.textLimit = this.textLimit || this.$scope.textLimit;
 
     this.title = 'over';
     this.options = ['all docs', 'top'];
-    const {type, n, field} = this.aggOverOptions;
-    this.selected = type;
+    const { type, n, field } = this.aggOverOptions;
+    this.selectedType = type;
     this.top = {
       enabled: type === 'top',
       n: n || 3,
-      selected: field,
+      field,
     };
+
+    this.$scope.$watch('ddWatcherAggField.indexTextFields', () => {
+      if (this.indexTextFields.length && !this.top.field) {
+        this.top.field = this.indexTextFields[0];
+        this.handleChange();
+      }
+    });
   }
 
-  get topN() {
-    return this.top.enabled ? this.top.n : '';
-  }
-
-  get topEnabled() {
+  get overHow() {
     return this.top.enabled ? 'grouped over' : 'over';
   }
 
   handleChange() {
-    if (this.selected !== 'top') {
+    if (this.selectedType !== 'top') {
       this.top.enabled = false;
       this.aggOverOnSelect({
         over: {
-          type: this.selected,
+          type: this.selectedType,
         }
       });
     } else {
       this.top.enabled = true;
+      this.top.field = this.top.field || (!!this.indexTextFields.length ? this.indexTextFields[0] : null);
       this.aggOverOnSelect({
         over: {
           type: 'top',
           n: this.top.n,
-          field: this.top.selected,
+          field: this.top.field,
         }
       });
     }
@@ -55,7 +59,7 @@ function ddWatcherAggOver() {
     scope: {
       textLimit: '=',
       aggOverOptions: '=',
-      aggFieldNames: '=',
+      indexTextFields: '=',
       aggOverOnSelect: '&',
     },
     controller:  DdWatcherAggOver,
@@ -63,7 +67,7 @@ function ddWatcherAggOver() {
     bindToController: {
       textLimit: '=',
       aggOverOptions: '=',
-      aggFieldNames: '=',
+      indexTextFields: '=',
       aggOverOnSelect: '&',
     },
   };

@@ -1,6 +1,12 @@
 <form name="ddWatcherAggField.form" ng-model-options="{ getterSetter: true }" novalidate>
   <a pop-over pop-over-title="{{ddWatcherAggField.title | uppercase}}">
-    <strong class="pop-over-btn-text">FIELD</strong> {{ddWatcherAggField.activeField | limitText: ddWatcherAggField.textLimit}} <strong>TIME</strong> {{ddWatcherAggField.timeField | limitText: ddWatcherAggField.textLimit}}
+    <span ng-if="ddWatcherAggField.aggEnabled">
+      <strong class="pop-over-btn-text">FIELD</strong> {{ddWatcherAggField.selectedNumericField | limitText: ddWatcherAggField.textLimit}}
+      <strong>TIME</strong> {{ddWatcherAggField.selectedDateField | limitText: ddWatcherAggField.textLimit}}
+    </span>
+    <span ng-if="!ddWatcherAggField.aggEnabled">
+      <strong class="pop-over-btn-text">FIELD TIME</strong> {{ddWatcherAggField.selectedDateField | limitText: ddWatcherAggField.textLimit}}
+    </span>
   </a>
   <div ng-hide="true" class="pop-over-content">
     <div class="row">
@@ -8,9 +14,9 @@
         <div class="form-group">
           <select
             class="form-control condition-select"
-            ng-show="ddWatcherAggField.aggEnabled"
-            ng-model="ddWatcherAggField.activeField"
-            ng-options="o as o for o in ddWatcherAggField.fieldNames"
+            ng-if="ddWatcherAggField.aggEnabled"
+            ng-model="ddWatcherAggField.selectedNumericField"
+            ng-options="o as o for o in ddWatcherAggField.indexNumericFields"
             ng-change="ddWatcherAggField.handleFieldChange()"
           ></select>
         </div>
@@ -18,8 +24,8 @@
           <p>Time</p>
           <select
             class="form-control condition-select"
-            ng-model="ddWatcherAggField.timeField"
-            ng-options="o as o for o in ddWatcherAggField.fieldNames"
+            ng-model="ddWatcherAggField.selectedDateField"
+            ng-options="o as o for o in ddWatcherAggField.indexDateFields"
             ng-change="ddWatcherAggField.handleTimeFieldChange()"
           ></select>
         </div>

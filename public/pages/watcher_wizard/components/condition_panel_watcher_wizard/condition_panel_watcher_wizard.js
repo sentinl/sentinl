@@ -4,7 +4,7 @@ import './condition_panel_watcher_wizard.less';
 import template from './condition_panel_watcher_wizard.html';
 
 import moment from 'moment';
-import { get, forEach, size, has, pick, includes } from 'lodash';
+import { assign, get, forEach, size, has, pick, isEmpty } from 'lodash';
 import WatcherWizardQueryBuilder from './classes/watcher_wizard_query_builder';
 import WatcherWizardConditionBuilder from './classes/watcher_wizard_condition_builder';
 
@@ -73,7 +73,7 @@ class ConditionPanelWatcherWizard {
         },
       },
       field: {
-        aggEnabled: false,
+        aggEnabled: get(this.watcher, 'wizard.chart_query_params.queryType') !== 'count',
         handleFieldSelect: (field) => {
           this.log.debug('select field:', field);
           this.watcher.wizard.chart_query_params.field = field;
@@ -84,11 +84,9 @@ class ConditionPanelWatcherWizard {
         },
       },
       over: {
-        handleSelect: (over) => {
-          this.log.debug('select over:', over);
-          if (over.type !== 'top' || !!over.n && (over.field && !!over.field.length)) {
-            this._updateChartQueryParamsOver(over);
-          }
+        handleSelect: (...params) => {
+          this.log.debug('select over:', ...params);
+          assign(this.watcher.wizard.chart_query_params.over, ...params);
         },
       },
       threshold: {
@@ -138,24 +136,36 @@ class ConditionPanelWatcherWizard {
 
     this.$scope.$watch('conditionPanelWatcherWizard.watcher.wizard', async () => {
       if (this.wizardHelper.isWizardWatcher(this.watcher)) {
-        try {
-          await this._fetchChartData();
-        } catch (err) {
-          this.errorMessage({err});
+        if (this._areChartQueryParamsValid()) {
+          try {
+            await this._fetchChartData();
+          } catch (err) {
+            this.errorMessage({err});
+          }
         }
       }
     }, true);
 
     this.$scope.$watch('conditionPanelWatcherWizard.watcher', () => {
       if (this.wizardHelper.isWizardWatcher(this.watcher)) {
-        try {
-          this._updateWatcherRawDoc(this.watcher);
-          this._updateChartRawDoc(this.chartQuery);
-        } catch (err) {
-          this.errorMessage({err});
+        if (this._areChartQueryParamsValid()) {
+          try {
+            this._updateWatcherRawDoc(this.watcher);
+            this._updateChartRawDoc(this.chartQuery);
+          } catch (err) {
+            this.errorMessage({err});
+          }
         }
       }
     }, true);
+  }
+
+  _areChartQueryParamsValid() {
+    const params = this.watcher.wizard.chart_query_params;
+    if (params.over.type === 'top' && isEmpty(params.over.field)) {
+      return false;
+    }
+    return params.timeField && this.queryTypes.metric.includes(params.queryType) === has(params, 'field');
   }
 
   _warning(msg) {
@@ -279,7 +289,6 @@ class ConditionPanelWatcherWizard {
   * Fetch chart data and fill its X and Y axises
   */
   async _fetchChartData() {
-    this._toggleConditionBuilderMetricAggOverField();
     const params = pick(this.watcher.wizard.chart_query_params,
       ['over', 'last', 'interval', 'field', 'threshold', 'queryType', 'timeField']);
     params.index = this.watcher.input.search.request.index;
@@ -323,14 +332,6 @@ class ConditionPanelWatcherWizard {
     return this.queryTypes.metric.includes(type);
   }
 
-  _toggleConditionBuilderMetricAggOverField() {
-    if (get(this.watcher, 'wizard.chart_query_params.queryType') === 'count') {
-      this.condition.field.aggEnabled = false;
-    } else {
-      this.condition.field.aggEnabled = true;
-    }
-  }
-
   /*
   * @param {integer} n on y axis
   */
@@ -339,13 +340,10 @@ class ConditionPanelWatcherWizard {
     chart.yAxis[1] = Array.apply(null, Array(len)).map(Number.prototype.valueOf, n);
   }
 
-  _updateChartQueryParamsOver(over) {
-    this.watcher.wizard.chart_query_params.over = pick(over, ['type', 'n', 'field']);
-  }
-
   _updateChartQueryParamsQueryType(type) {
+    this.condition.field.aggEnabled = type !== 'count';
     this.watcher.wizard.chart_query_params.queryType = type;
-    if (type === 'count') {
+    if (!this.condition.field.aggEnabled) {
       delete this.watcher.wizard.chart_query_params.field;
     }
   }

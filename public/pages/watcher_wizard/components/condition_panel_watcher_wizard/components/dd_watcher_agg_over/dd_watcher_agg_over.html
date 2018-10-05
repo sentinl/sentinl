@@ -1,6 +1,12 @@
 <form name="ddWatcherAggOver.form" ng-model-options="{ getterSetter: true }" novalidate>
   <a pop-over pop-over-title="{{ddWatcherAggOver.title | uppercase}}">
-    <strong class="pop-over-btn-text">{{ddWatcherAggOver.topEnabled | uppercase}}</strong> {{ddWatcherAggOver.selected}} {{ddWatcherAggOver.topN | limitText: ddWatcherAggOver.textLimit}}
+    <span ng-if="!ddWatcherAggOver.top.enabled">
+      <strong class="pop-over-btn-text">{{ddWatcherAggOver.overHow | uppercase}}</strong> {{ddWatcherAggOver.selectedType}}
+    </span>
+    <span ng-if="ddWatcherAggOver.top.enabled">
+      <strong class="pop-over-btn-text">{{ddWatcherAggOver.overHow | uppercase}}</strong>
+      {{ddWatcherAggOver.selectedType}} {{ddWatcherAggOver.top.n}} {{ ddWatcherAggOver.top.field | limitText: ddWatcherAggOver.textLimit}}
+    </span>
   </a>
   <div ng-hide="true" class="pop-over-content">
     <div class="row">
@@ -8,7 +14,7 @@
         <div class="form-group">
           <select
             class="form-control condition-select"
-            ng-model="ddWatcherAggOver.selected"
+            ng-model="ddWatcherAggOver.selectedType"
             ng-options="o as o for o in ddWatcherAggOver.options"
             ng-change="ddWatcherAggOver.handleChange()"
           ></select>
@@ -18,7 +24,7 @@
             class="form-control condition-select"
             id="ddWatcherAggOverNumber"
             type="number"
-            ng-show="ddWatcherAggOver.top.enabled"
+            ng-if="ddWatcherAggOver.top.enabled"
             ng-model="ddWatcherAggOver.top.n"
             ng-change="ddWatcherAggOver.handleChange()"
           >
@@ -26,9 +32,9 @@
         <div class="form-group">
           <select
             class="form-control condition-select"
-            ng-show="ddWatcherAggOver.top.enabled"
-            ng-model="ddWatcherAggOver.top.selected"
-            ng-options="o as o for o in ddWatcherAggOver.aggFieldNames"
+            ng-if="ddWatcherAggOver.top.enabled"
+            ng-model="ddWatcherAggOver.top.field"
+            ng-options="o as o for o in ddWatcherAggOver.indexTextFields"
             ng-change="ddWatcherAggOver.handleChange()"
           ></select>
         </div>
