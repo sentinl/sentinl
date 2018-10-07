@@ -72,6 +72,18 @@ export default class WatcherWizardHandler extends WatcherHandler {
       throw err;
     }
 
+    try {
+      const resp = await this._executeTransform(payload, transform, method);
+      if (resp && resp.warning) {
+        return resp; // payload is empty, do not execute actions
+      }
+      if (resp.payload) {
+        payload = resp.payload;
+      }
+    } catch (err) {
+      throw new Error('exec transform: ' + err.toString());
+    }    
+
     this.doActions(payload, this.server, actions, task);
     return new SuccessAndLog(this.log, 'successfuly executed');
   }
