@@ -51,7 +51,7 @@ function loadLibs(requirements, platformIsSiren) {
 export default function (kibana) {
   let requirements = ['kibana', 'elasticsearch'];
 
-  const platformIsSiren = existsSync(path.join(__dirname, '../../src/siren_core_plugins/saved_objects_api'));
+  const platformIsSiren = existsSync(path.resolve('src/siren_core_plugins/saved_objects_api'));
   const navbarExtensions = platformIsSiren ? ['plugins/sentinl/dashboard_button/dashboard_button'] : [];
 
   try {
