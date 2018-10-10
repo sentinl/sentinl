@@ -8,6 +8,7 @@ import Crypto from '../lib/crypto';
 import WatcherHandler from '../lib/watcher_handler';
 import CustomWatcherHandler from '../lib/custom_watcher_handler';
 import Log from '../lib/log';
+import { createMultipleHapijsRoutes } from '../lib/helpers';
 import { convert as convertSQLtoDSL } from 'elasql';
 
 const delay = function (ms) {
@@ -107,9 +108,12 @@ export default function routes(server) {
     }
   });
 
-  server.route({
+  server.route(createMultipleHapijsRoutes({
     method: 'DELETE',
-    path: '/api/sentinl/alarm/{id}/{index?}',
+    path: [
+      '/api/sentinl/alarm/{id}/{index?}',
+      '/api/sentinl/report/{id}/{index?}'
+    ],
     config: {
       validate: {
         params: {
@@ -129,12 +133,12 @@ export default function routes(server) {
           type: config.es.alarm_type,
         });
 
-        return reply(resp).code(201);
+        return reply(resp).code(200);
       } catch (err) {
         return reply(handleESError(err));
       }
     }
-  });
+  }));
 
   // Get/Set Time Interval
   server.route({
