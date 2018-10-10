@@ -72,6 +72,15 @@ export default function routes(server) {
   const client = getElasticsearchClient({server, config});
   const log = new Log(config.app_name, server, 'routes');
 
+  function deleteAlarm(id, index) {
+    return client.delete({
+      id,
+      index,
+      refresh: true,
+      type: config.es.alarm_type,
+    });
+  }
+
   // Current Time
   server.route({
     path: '/api/sentinl/time',
@@ -121,14 +130,29 @@ export default function routes(server) {
     handler: async function (req, reply) {
       try {
         const { id, index } = req.params;
+        const resp = await deleteAlarm(id, index);
+        return reply(resp).code(201);
+      } catch (err) {
+        return reply(handleESError(err));
+      }
+    }
+  });
 
-        const resp = await client.delete({
-          id,
-          index,
-          refresh: true,
-          type: config.es.alarm_type,
-        });
-
+  server.route({
+    method: 'DELETE',
+    path: '/api/sentinl/report/{id}/{index?}',
+    config: {
+      validate: {
+        params: {
+          id: Joi.string().required(),
+          index: Joi.string().required(),
+        },
+      },
+    },
+    handler: async function (req, reply) {
+      try {
+        const { id, index } = req.params;
+        const resp = await deleteAlarm(id, index);
         return reply(resp).code(201);
       } catch (err) {
         return reply(handleESError(err));
