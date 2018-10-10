@@ -73,7 +73,7 @@ Please [report](https://github.com/sirensolutions/sentinl/issues) any ideas, bug
 <pre>
 This software is licensed under the Apache License, version 2 ("ALv2"), quoted below.
 
-Copyright 2016, 2018 Siren Solutions
+Copyright 2016, 2018 Siren
 Copyright 2016, 2018 QXIP BV
 Copyright 2015, Lorenzo Mangani (lorenzo.mangani@gmail.com), Rao Chenlin (rao.chenlin@gmail.com)
 

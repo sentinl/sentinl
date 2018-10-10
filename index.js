@@ -17,6 +17,7 @@
  * limitations under the License.
  */
 
+import path from 'path';
 import { existsSync, readFileSync, appendFileSync } from 'fs';
 import { forEach, difference } from 'lodash';
 

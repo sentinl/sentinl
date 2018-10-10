@@ -1,6 +1,7 @@
 /**
  * Stores a Sentinl Watcher log and returns the query response.
  */
+import { filter } from 'lodash';
 import Log from './log';
 import getConfiguration from './get_configuration';
 import getElasticsearchClient from './get_elasticsearch_client';
@@ -33,7 +34,10 @@ async function logHistory({
   };
 
   if (attachment) {
-    body.attachment = attachment;
+    const binary = filter(attachment, meta => meta.encoded && meta.data && !!meta.data.length)[0].data;
+    if (binary) {
+      body.attachment = binary;
+    }
   }
 
   if (payload) {
