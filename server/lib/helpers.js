@@ -43,10 +43,19 @@ const flattenDocsSourceAndType = function (docs, type) {
   return docs;
 };
 
+const createMultipleHapijsRoutes = function (routes) {
+  routes = [].concat(routes);
+  return routes.reduce((collect, route) => {
+    const paths = [].concat(route.path);
+    return collect.concat(paths.map((path) => ({ ...route, path })));
+  }, []);
+};
+
 module.exports = {
   isKibi,
   listAllFilesSync,
   pickDefinedValues,
   makeExecutableIfNecessary,
   flattenDocsSourceAndType,
+  createMultipleHapijsRoutes,
 };
