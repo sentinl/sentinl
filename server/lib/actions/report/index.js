@@ -24,7 +24,7 @@ export default async function reportAction({
       browserPath = server.plugins.sentinl.chrome_path;
     }
 
-    const { subject, text } = renderMustacheEmailSubjectAndText(actionName, action.subject, action.body, esPayload);
+    const { subject, text } = renderMustacheEmailSubjectAndText(actionName, action.report.subject, action.report.body, esPayload);
 
     let authSelectorUsername = action.report.auth.selector_username;
     let authSelectorPassword = action.report.auth.selector_password;
