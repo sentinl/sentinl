@@ -175,33 +175,22 @@ export default function (server, actions, payload, task) {
     /*
     /* ***************************************************************************** */
     if (action.throttle_period) {
-      (async () => {
-        try {
-          const id = `${task._id}_${actionId}`;
-          if (debounce(id, action.throttle_period)) {
-            log.info(`action throttled, watcher id: ${task._id}, action name: ${actionId}`);
-            await logHistory({
-              server,
-              watcherTitle: task._source.title,
-              actionName,
-              message: `Action Throttled for ${action.throttle_period}`,
-              level: priority,
-              payload: {}
-            });
-            return;
-          }
-        } catch (err) {
-          log.error('throttle: ' + err.toString());
-          logHistory({
-            server,
-            watcherTitle: task._source.title,
-            message: 'throttle: ' + err.toString(),
-            level: 'high',
-            isError: true,
-            actionName,
-          });
-        }
-      })();
+      const id = `${task._id}_${actionId}`;
+
+      if (debounce(id, action.throttle_period)) {
+        log.info(`action throttled, watcher id: ${task._id}, action name: ${actionId}`);
+
+        logHistory({
+          server,
+          watcherTitle: task._source.title,
+          actionName,
+          message: `action Throttled for ${action.throttle_period}`,
+          level: priority,
+          payload: {}
+        });
+
+        return;
+      }
     }
 
     /* ***************************************************************************** */
