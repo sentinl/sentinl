@@ -88,19 +88,8 @@ class WatcherAdvanced {
     this.notify.error(err);
   }
 
-  aceConfig(mode = 'json', maxLines = 50, minLines = 30) {
-    return {
-      mode,
-      useWrapMode: true,
-      showGutter: true,
-      rendererOptions: {
-        maxLines,
-        minLines,
-      },
-      editorOptions: {
-        autoScrollEditorIntoView: false,
-      },
-    };
+  updateWatcherDoc({ value }) {
+    this.watcherSourceText = value;
   }
 }
 

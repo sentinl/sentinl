@@ -4,7 +4,7 @@ import './condition_panel_watcher_wizard.less';
 import template from './condition_panel_watcher_wizard.html';
 
 import moment from 'moment';
-import { assign, get, forEach, size, has, pick, isEmpty } from 'lodash';
+import { omit, isEqual, assign, filter, get, forEach, size, has, pick, isEmpty } from 'lodash';
 import WatcherWizardQueryBuilder from './classes/watcher_wizard_query_builder';
 import WatcherWizardConditionBuilder from './classes/watcher_wizard_condition_builder';
 
@@ -25,12 +25,12 @@ class Chart {
 }
 
 class ConditionPanelWatcherWizard {
-  constructor($http, $scope, watcherWizardChartService, createNotifier, sentinlLog, wizardHelper, sentinlHelper) {
+  constructor($http, $scope, watcherWizardChartService, createNotifier, sentinlLog, wizardHelper, sentinlHelper, $timeout) {
     this.$scope = $scope;
+    this.$timeout = $timeout;
     this.watcher = this.watcher || this.$scope.watcher;
     this.onQueryChange = this.onQueryChange || this.$scope.onQueryChange;
     this.onConditionChange = this.onConditionChange || this.$scope.onConditionChange;
-    this.aceOptions = this.aceOptions || this.$scope.aceOptions;
     this.indexesData = this.indexesData || this.$scope.indexesData;
     this.turnIntoAdvanced = this.turnIntoAdvanced || this.$scope.turnIntoAdvanced;
     this.errorMessage = this.errorMessage || this.$scope.errorMessage;
@@ -64,50 +64,21 @@ class ConditionPanelWatcherWizard {
       metric: ['average', 'min', 'max', 'sum'],
     };
 
-    this.condition = {
-      textLimit: 7,
-      type: {
-        handleSelect: (type) => {
-          this.log.debug('select type:', type);
-          this._updateChartQueryParamsQueryType(type);
-        },
-      },
-      field: {
-        aggEnabled: get(this.watcher, 'wizard.chart_query_params.queryType') !== 'count',
-        handleFieldSelect: (field) => {
-          this.log.debug('select field:', field);
-          this.watcher.wizard.chart_query_params.field = field;
-        },
-        handleTimeFieldSelect: (timeField) => {
-          this.log.debug('select time field:', timeField);
-          this.watcher.wizard.chart_query_params.timeField = timeField;
-        },
-      },
-      over: {
-        handleSelect: (...params) => {
-          this.log.debug('select over:', ...params);
-          assign(this.watcher.wizard.chart_query_params.over, ...params);
-        },
-      },
-      threshold: {
-        handleSelect: (direction, n) => {
-          this.log.debug('select threshold:', direction, n);
-          this._updateChartQueryParamsThreshold(n, direction);
-          this._drawChartThreshold(this.activeChart, this.watcher.wizard.chart_query_params.threshold.n);
-        },
-      },
-      last: {
-        handleSelect: (unit, n) => {
-          this.log.debug('select last:', unit, n);
-          this._updateChartQueryParamsLast(n, unit);
-        },
-      },
-      interval: {
-        handleSelect: (unit, n) => {
-          this.log.debug('select interval:', unit, n);
-          this._updateChartQueryParamsInterval(n, unit);
-        },
-      },
+    this.conditionExpression = {
+      handleChartParamsChange: (params) => {
+        if (params.queryType === 'count') {
+          delete params.field;
+          delete this.watcher.wizard.chart_query_params.field;
+        }
+
+        if (params.over.type === 'all docs') {
+          this.watcher.wizard.chart_query_params.over = { type: params.over.type };
+        }
+
+        this.$timeout(() => {
+          assign(this.watcher.wizard.chart_query_params, params);
+        });
+      }
     };
 
     this.rawDoc = {
@@ -148,16 +119,46 @@ class ConditionPanelWatcherWizard {
 
     this.$scope.$watch('conditionPanelWatcherWizard.watcher', () => {
       if (this.wizardHelper.isWizardWatcher(this.watcher)) {
-        if (this._areChartQueryParamsValid()) {
-          try {
-            this._updateWatcherRawDoc(this.watcher);
-            this._updateChartRawDoc(this.chartQuery);
-          } catch (err) {
-            this.errorMessage({err});
-          }
+        try {
+          this._updateWatcherRawDoc(this.watcher);
+          this._updateChartRawDoc(this.chartQuery);
+        } catch (err) {
+          this.errorMessage({err});
         }
       }
     }, true);
+
+    this.$scope.$watch('conditionPanelWatcherWizard.indexesData.fieldNames.text', () => {
+      this._selectChartQueryParamsOverField();
+    });
+
+    this.$scope.$watch('conditionPanelWatcherWizard.indexesData.fieldNames.numeric', () => {
+      this._selectChartQueryParamsNumericField();
+    });
+
+    this.$scope.$watch('conditionPanelWatcherWizard.indexesData.fieldNames.date', () => {
+      this._selectChartQueryParamsDateField();
+    });
+  }
+
+  _selectChartQueryParamsOverField() {
+    if (this.watcher.wizard.chart_query_params.over.type === 'top'
+      && !this.indexes.fieldNames.text.includes(this.watcher.wizard.chart_query_params.over.field)) {
+      this.watcher.wizard.chart_query_params.over.field = this.indexesData.fieldnames.text[0];
+    }
+  }
+
+  _selectChartQueryParamsNumericField() {
+    if (this.watcher.wizard.chart_query_params.type !== 'count'
+      && !this.indexesData.fieldNames.numeric.includes(this.watcher.wizard.chart_query_params.field)) {
+      this.watcher.wizard.chart_query_params.field = this.indexesData.fieldNames.numeric[0];
+    }
+  }
+
+  _selectChartQueryParamsDateField() {
+    if (!this.indexesData.fieldNames.date.includes(this.watcher.wizard.chart_query_params.timeField)) {
+      this.watcher.wizard.chart_query_params.timeField = this.indexesData.fieldNames.date[0];
+    }
   }
 
   _areChartQueryParamsValid() {
@@ -336,28 +337,11 @@ class ConditionPanelWatcherWizard {
   * @param {integer} n on y axis
   */
   _drawChartThreshold(chart, n) {
+    if (!chart) {
+      return;
+    }
     const len = chart.yAxis[0].length;
     chart.yAxis[1] = Array.apply(null, Array(len)).map(Number.prototype.valueOf, n);
-  }
-
-  _updateChartQueryParamsQueryType(type) {
-    this.condition.field.aggEnabled = type !== 'count';
-    this.watcher.wizard.chart_query_params.queryType = type;
-    if (!this.condition.field.aggEnabled) {
-      delete this.watcher.wizard.chart_query_params.field;
-    }
-  }
-
-  _updateChartQueryParamsLast(n, unit) {
-    this.watcher.wizard.chart_query_params.last = { unit, n: +n };
-  }
-
-  _updateChartQueryParamsInterval(n, unit) {
-    this.watcher.wizard.chart_query_params.interval = { unit, n: +n };
-  }
-
-  _updateChartQueryParamsThreshold(n, direction) {
-    this.watcher.wizard.chart_query_params.threshold = { direction, n: +n };
   }
 
   _isDateAggData(esResp) {
@@ -560,7 +544,6 @@ function conditionPanelWatcherWizard() {
       watcher: '=',
       onQueryChange: '&',
       onConditionChange: '&',
-      aceOptions: '&',
       turnIntoAdvanced: '&',
       indexesData: '=',
       errorMessage: '&',
@@ -571,7 +554,6 @@ function conditionPanelWatcherWizard() {
       watcher: '=',
       onQueryChange: '&',
       onConditionChange: '&',
-      aceOptions: '&',
       turnIntoAdvanced: '&',
       indexesData: '=',
       errorMessage: '&',
