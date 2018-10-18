@@ -262,7 +262,9 @@ class ThresholdWatcherWizard {
   errorMessage(err) {
     err = err || 'unknown error, bad implementation';
     err = this.sentinlHelper.apiErrMsg(err);
-    if (err.match(/(parsing_exception)|(illegal_argument_exception)|(index_not_found_exception)/)) {
+    if (err.match(/index_not_found_exception/gi)) {
+      return;
+    } else if (err.match(/(parsing_exception)|(illegal_argument_exception)/)) {
       this._warning(err);
     } else {
       this._error(err);
