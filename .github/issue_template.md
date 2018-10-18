@@ -1,24 +1,64 @@
 <!--
-Thanks for taking time to report an issue. Please try to:
-
-* Be precise: describe expected results vs. actual results
-* Be clear: explain how to reproduce the problem, step by step
-* Include only one problem per report
-* Include details about your setup/system/os where possible
-
+Thanks for taking time to report an issue.
+Please fill all the following fields to make sure we have all the data we need to help you.
 This section will NOT appear in your Issue report!
+
+**Tips:**
+
+1. If your watcher is not executed, try to query Elasticsearch manually first. Do you receive the results you want for your query?
+For example, on Linux, you can query Elasticsearch using `curl`:
+
+curl -X GET "localhost:9200/_search?pretty" -H 'Content-Type: application/json' -d'
+{
+  "query": { 
+    "match_all": {}
+  }
+}
+'
 -->
 
-1. Sentinl and Kibana version 
 
-2. Issue description
+### System Details
+#### Versions
 
-3. Reproducing the issue step-by-step
+| Type         | Version |
+|--------------|---------|
+| Kibana       |         |
+| Elasticsearc |         |
+| Server OS    |         |
+| Browser      |         |
 
-4. Expected results vs. actual results
+#### Original Install Method
 
-5. Sample of data
+- [ ] Release pkg link
+- [ ] Gulp
+- [ ] Source
+- Other: 
 
-6. Additional details
+### Bug Details
+#### Bug Description
 
+#### Steps to Reproduce
+1.
+1.
+1.
 
+#### Expected Behavior
+
+#### Sample of data you have in Elasticsearch
+```
+```
+
+#### Full Watcher JSON
+```
+```
+
+#### Screenshots (if relevant)
+
+#### Errors in Browser Console (if relevant)
+```
+```
+
+#### Kibana logs and/or server output (attached if relevant)
+
+#### Any additional information
