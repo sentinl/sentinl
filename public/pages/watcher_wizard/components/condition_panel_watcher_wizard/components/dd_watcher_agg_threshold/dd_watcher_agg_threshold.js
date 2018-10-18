@@ -1,4 +1,5 @@
 import template from './dd_watcher_agg_threshold.html';
+import { isNumber } from 'lodash';
 
 class DdWatcherAggThreshold {
   constructor($scope) {
@@ -8,7 +9,7 @@ class DdWatcherAggThreshold {
     this.textLimit = this.textLimit || this.$scope.textLimit;
 
     this.options = ['above', 'below', 'above eq', 'below eq'];
-    this.number = this.aggThresholdOptions.n || 5;
+    this.number = isNumber(+this.aggThresholdOptions.n) ? +this.aggThresholdOptions.n : 5;
     this.selected = this.aggThresholdOptions.direction || 'above';
   }
 
