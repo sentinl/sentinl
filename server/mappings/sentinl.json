@@ -59,19 +59,6 @@
       }
     }
   },
-  "sentinl-script": {
-    "properties": {
-      "title": {
-        "type": "text"
-      },
-      "description": {
-        "type": "text"
-      },
-      "body": {
-        "type": "text"
-      }
-    }
-  },
   "sentinl-user": {
     "properties": {
       "username": {

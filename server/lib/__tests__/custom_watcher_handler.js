@@ -28,26 +28,24 @@ describe('CustomWatcherHandler', function () {
   };
 
   const watcherOriginal = {
-    _source: {
-      title: 'CC',
-      disable: false,
-      report: false,
-      trigger: {
-        schedule: {
-          later: 'every 1 mins'
-        }
-      },
-      input: {
-        search: {
-          request: {
-            index: 'article',
-            queries: 'search query',
-            filters: [],
-            time: {
-              range: {
-                '@timestamp': {}
-              }
-            }
+    title: 'CC',
+    disable: false,
+    report: false,
+    trigger: {
+      schedule: {
+        later: 'every 1 mins'
+      }
+    },
+    input: {
+      search: {
+        request: {
+          index: 'article',
+          queries: 'search query',
+          filters: [],
+          time: {
+            range: {
+              '@timestamp': {}
+            },
           }
         }
       }
@@ -62,7 +60,11 @@ describe('CustomWatcherHandler', function () {
       log: () => void 0,
       plugins: {
         elasticsearch: {
-          getCluster: () => void 0
+          getCluster: () => ({
+            getClient: () => ({
+              index: () => void 0
+            })
+          })
         },
         saved_objects_api: {
           getServerCredentials: () => ({})
@@ -93,12 +95,21 @@ describe('CustomWatcherHandler', function () {
 
     customWatcherHandler = new CustomWatcherHandler(server, client, config);
 
+    sinon.stub(customWatcherHandler._client, 'logAlarm', function () {
+      return Promise.resolve({
+        type: 'sentinl-alarm',
+        id: 'SVq_IGYBYC6mQ4XVT2HW',
+        version: 1,
+        attributes: {}
+      });
+    });
+
     doActionsStub = sinon.stub(customWatcherHandler, 'doActions');
   });
 
   it('executes search and triggers actions', async () => {
     const watcher = cloneDeep(watcherOriginal);
-    watcher._source.custom = {
+    watcher.custom = {
       type: 'conditionTrue',
       params: { param1: true }
     };
@@ -109,7 +120,7 @@ describe('CustomWatcherHandler', function () {
 
   it('executes search, but does not trigger actions', async () => {
     const watcher = cloneDeep(watcherOriginal);
-    watcher._source.custom = {
+    watcher.custom = {
       type: 'conditionFalse',
       params: { param1: true }
     };
@@ -121,7 +132,7 @@ describe('CustomWatcherHandler', function () {
 
   it('executes search function with the correct parameters', async () => {
     const watcher = cloneDeep(watcherOriginal);
-    watcher._source.custom = {
+    watcher.custom = {
       type: 'testSearchParams',
       params: { param1: true }
     };
@@ -132,7 +143,7 @@ describe('CustomWatcherHandler', function () {
 
   it('executes condition function with the correct parameters', async () => {
     const watcher = cloneDeep(watcherOriginal);
-    watcher._source.custom = {
+    watcher.custom = {
       type: 'testConditionParams',
       params: { param1: true }
     };
