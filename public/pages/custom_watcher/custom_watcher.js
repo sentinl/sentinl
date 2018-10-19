@@ -5,7 +5,7 @@ import './custom_watcher.less';
 
 class CustomWatcher {
   constructor($scope, $route, $templateCache, navMenu, sentinlLog, createNotifier, confirmModal,
-              kbnUrl, watcherFactory, userFactory, sentinlConfig, sentinlHelper, watcherWizardEsService) {
+              kbnUrl, watcherService, userService, sentinlConfig, sentinlHelper, watcherWizardEsService) {
     this.$scope = $scope;
     this.watcherTemplate = $route.current.locals.watcherTemplate;
     $templateCache.put(this.watcherTemplate.id, this.watcherTemplate.template);
@@ -30,8 +30,6 @@ class CustomWatcher {
     this.tabsMenu = navMenu.getTabs('editor');
     this.confirmModal = confirmModal;
     this.kbnUrl = kbnUrl;
-    this.watcherService = watcherFactory.get(sentinlConfig.api.type);
-    this.userService = userFactory.get(sentinlConfig.api.type);
     this.sentinlHelper = sentinlHelper;
 
     this.log = sentinlLog;

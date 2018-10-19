@@ -16,8 +16,7 @@ routes
     bindToController: true,
     controllerAs: 'customWatcher',
     resolve: {
-      watcher: function ($route, kbnUrl, watcherFactory, sentinlConfig) {
-        const watcherService = watcherFactory.get(sentinlConfig.api.type);
+      watcher: function ($route, kbnUrl, watcherService, sentinlConfig) {
         const notifier = new Notifier({ location: 'Watcher' });
 
         const type = $route.current.params.type;
@@ -49,8 +48,7 @@ routes
             });
         }
       },
-      watcherTemplate: function ($route, kbnUrl, savedScripts, watcherFactory, sentinlConfig) {
-        const watcherService = watcherFactory.get(sentinlConfig.api.type);
+      watcherTemplate: function ($route, kbnUrl, savedScripts, watcherService, sentinlConfig) {
         const notifier = new Notifier({ location: 'Watcher' });
 
         if ($route.current.params.type) {

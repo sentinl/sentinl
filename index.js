@@ -74,27 +74,10 @@ export default function (kibana) {
         injectVars: function (server, options) {
           const config = server.config();
           return {
-            kbnIndex: config.get('kibana.index'),
-            esShardTimeout: config.get('elasticsearch.shardTimeout'),
-            esApiVersion: config.get('elasticsearch.apiVersion'),
             sentinlConfig: {
               appName: config.get('sentinl.app_name'),
-              api: {
-                type: config.get('sentinl.api.type'),
-              },
               es: {
-                default_index: config.get('sentinl.es.default_index'),
-                default_type: config.get('sentinl.es.default_type'),
-                watcher_type: config.get('sentinl.es.watcher_type'),
-                script_type: config.get('sentinl.es.script_type'),
-                alarm_type: config.get('sentinl.es.alarm_type'),
-                user_type: config.get('sentinl.es.user_type'),
-                number_of_results: config.get('sentinl.es.results'),
-                watcher: {
-                  schedule_timezone: config.get('sentinl.es.watcher.schedule_timezone'),
-                },
                 timezone: config.get('sentinl.es.timezone'),
-                timefield: config.get('sentinl.es.timefield'),
               },
               wizard: {
                 condition: {
@@ -104,9 +87,6 @@ export default function (kibana) {
                   last: config.get('sentinl.settings.wizard.condition.last'),
                   interval: config.get('sentinl.settings.wizard.condition.interval'),
                 },
-              },
-              authentication: {
-                impersonate: config.get('sentinl.settings.authentication.impersonate'),
               },
             }
           };

@@ -4,7 +4,6 @@ import moment from 'moment';
 import WarningAndLog from './messages/warning_and_log';
 import SuccessAndLog from './messages/success_and_log';
 import WatcherHandler from './watcher_handler';
-import kibiUtils from 'kibiutils';
 import sirenFederateHelper from './siren/federate_helper';
 import apiClient from './api_client';
 
