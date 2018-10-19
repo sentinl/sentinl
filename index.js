@@ -98,8 +98,8 @@ export default function (kibana) {
               },
               wizard: {
                 condition: {
-                  query_type: config.get('sentinl.settings.wizard.condition.query_type'),
-                  schedule_type: config.get('sentinl.settings.wizard.condition.schedule_type'),
+                  queryType: config.get('sentinl.settings.wizard.condition.query_type'),
+                  scheduleType: config.get('sentinl.settings.wizard.condition.schedule_type'),
                   over: config.get('sentinl.settings.wizard.condition.over'),
                   last: config.get('sentinl.settings.wizard.condition.last'),
                   interval: config.get('sentinl.settings.wizard.condition.interval'),

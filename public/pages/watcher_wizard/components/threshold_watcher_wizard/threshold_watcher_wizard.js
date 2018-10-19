@@ -1,6 +1,6 @@
 import './threshold_watcher_wizard.less';
 import template from './threshold_watcher_wizard.html';
-import { get, has, forEach, keys, isObject, isEmpty, includes, union } from 'lodash';
+import { cloneDeep, defaultsDeep, get, has, forEach, keys, isObject, isEmpty, includes, union } from 'lodash';
 
 class ThresholdWatcherWizard {
   constructor($scope, $window, kbnUrl, sentinlLog, confirmModal, createNotifier,
@@ -13,7 +13,7 @@ class ThresholdWatcherWizard {
     this.confirmModal = confirmModal;
     this.wizardHelper = wizardHelper;
     this.watcherWizardEsService = watcherWizardEsService;
-    this.sentinlConfig = sentinlConfig;
+    this.sentinlConfig = cloneDeep(sentinlConfig);
     this.sentinlHelper = sentinlHelper;
 
     this.watcherService = watcherService;
@@ -56,19 +56,16 @@ class ThresholdWatcherWizard {
       }
     });
 
-    if (!get(this.watcher, 'wizard.chart_query_params') && !this.isSpyWatcher) {
-      this.watcher.wizard = {
-        chart_query_params: {
-          timezoneName: get(this.sentinlConfig, 'es.timezone'), // Europe/Amsterdam
-          timeField: get(this.sentinlConfig, 'es.timefield'),
-          queryType: get(this.sentinlConfig, 'wizard.condition.query_type'),
-          scheduleType: get(this.sentinlConfig, 'wizard.condition.schedule_type'),
-          over: get(this.sentinlConfig, 'wizard.condition.over'),
-          last: get(this.sentinlConfig, 'wizard.condition.last'),
-          interval: get(this.sentinlConfig, 'wizard.condition.interval'),
-          threshold: this._getThreshold(this.watcher.condition.script.script),
+    if (!this.isSpyWatcher) {
+      defaultsDeep(this.watcher, {
+        wizard: {
+          chart_query_params: {
+            ...this.sentinlConfig.wizard.condition,
+            timezoneName: this.sentinlConfig.es.timezone,
+            threshold: this._getThreshold(this.watcher.condition.script.script)
+          }
         }
-      };
+      });
     }
 
     this._init();
@@ -76,38 +73,21 @@ class ThresholdWatcherWizard {
 
   async _init() {
     this.indexesData = {
-      fieldNames: [],
+      fieldNames: {
+        date: [],
+        text: [],
+        numeric: []
+      },
     };
 
     try {
-      const mappings = await this.watcherWizardEsService.getMapping(this.watcher.input.search.request.index);
-      this.indexesData.fieldNames = this._getIndexFieldNames(mappings).sort();
+      if (!isEmpty(this.watcher.input.search.request.index)) {
+        const mappings = await this.watcherWizardEsService.getMapping(this.watcher.input.search.request.index);
+        this.indexesData.fieldNames = this.sentinlHelper.getFieldsFromMappings(mappings);
+      }
     } catch (err) {
       this.errorMessage(`get index "${this.watcher.input.search.request.index}" field names: ${err.toString()}`);
     }
-  }
-
-  _getIndexFieldNames(mappings, result = []) {
-    if (!isObject(mappings) || isEmpty(mappings)) {
-      return result;
-    }
-
-    forEach(mappings, (mapping, key) => {
-      if (mapping.properties) {
-        result = union(result, keys(mapping.properties));
-      }
-      if (mapping.fields) {
-        forEach(mapping.fields, (mFieldMapping, mFieldName) => {
-          if (!includes(result, key + '.' + mFieldName)) {
-            result.push(key + '.' + mFieldName);
-          }
-        });
-      }
-      if (isObject(mapping)) {
-        result = this._getIndexFieldNames(mapping, result);
-      }
-    });
-    return result;
   }
 
   _getThreshold(conditionScript) {
@@ -152,16 +132,15 @@ class ThresholdWatcherWizard {
   }
 
   async indexChange({index}) {
-    this.watcher.input.search.request.index = index;
     if (!this.isSpyWatcher) {
-      this.watcher.wizard.chart_query_params.index = index;
       try {
         const mappings = await this.watcherWizardEsService.getMapping(index);
-        this.indexesData.fieldNames = this._getIndexFieldNames(mappings).sort();
+        this.indexesData.fieldNames = this.sentinlHelper.getFieldsFromMappings(mappings);
       } catch (err) {
         this.errorMessage(`get index "${index}" field names: ${err.toString()}`);
       }
     }
+    this.watcher.input.search.request.index = index;
   }
 
   inputAdvChange({input, condition}) {
@@ -262,7 +241,9 @@ class ThresholdWatcherWizard {
   errorMessage(err) {
     err = err || 'unknown error, bad implementation';
     err = this.sentinlHelper.apiErrMsg(err);
-    if (err.match(/(parsing_exception)|(illegal_argument_exception)|(index_not_found_exception)/)) {
+    if (err.match(/index_not_found_exception/gi)) {
+      return;
+    } else if (err.match(/(parsing_exception)|(illegal_argument_exception)/)) {
       this._warning(err);
     } else {
       this._error(err);

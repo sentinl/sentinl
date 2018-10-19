@@ -2,6 +2,7 @@
 import { uiModules } from 'ui/modules';
 import 'bootstrap/dist/js/bootstrap';
 import 'bootstrap/dist/css/bootstrap.css';
+import '@elastic/eui/dist/eui_theme_light.css';
 import 'angular-touch';
 import 'angular-ui-bootstrap';
 import 'chart.js';
@@ -13,6 +14,7 @@ import Directives from './directives';
 import Components from './components';
 
 import './constants';
+import './components/ui_code_editor';
 
 const app = uiModules.get('apps/sentinl', [
   'ui.bootstrap',

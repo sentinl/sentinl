@@ -13,7 +13,7 @@ class WatcherWizardQueryBuilder {
       'minutes': 'm',
       'hours': 'h',
       'days': 'd',
-      'months': 'M',
+      'month': 'M',
       'years': 'y',
     };
   }
@@ -706,7 +706,7 @@ class WatcherWizardQueryBuilder {
   }
 
   _dateAgg({field, interval, timeField}) {
-    interval = interval.n + interval.unit.substring(0, 1);
+    interval = interval.n + this.dateMathUnit[interval.unit];
     return {
       dateAgg: {
         date_histogram: {
