@@ -24,6 +24,8 @@
   },
   "dependencies": {
     "@elastic/datemath": "2.3.0",
+    "@elastic/eui": "4.3.0",
+    "@slack/client": "4.4.0",
     "angular": "1.4.8",
     "angular-chart.js": "1.1.1",
     "angular-touch": "1.4.8",
@@ -42,16 +44,17 @@
     "moment": "2.22.1",
     "moment-timezone": "0.5.16",
     "mustache": "2.3.0",
+    "ngreact": "0.5.1",
     "node-horseman": "3.3.0",
-    "@slack/client": "^4.4.0",
     "phantom": "6.0.3",
     "puppeteer": "1.5.0",
-    "rison": "^0.1.1",
-    "sanitize-html": "^1.18.2",
+    "react": "16.5.2",
+    "react-dom": "^16.5.2",
+    "rison": "0.1.1",
+    "sanitize-html": "1.18.2",
     "sum-time": "1.0.0",
     "url-join": "4.0.0",
-    "uuid": "3.1.0",
-    "kibiutils": "sirensolutions/kibiutils#1.8.0"
+    "uuid": "3.1.0"
   },
   "devDependencies": {
     "babel-eslint": "6.1.2",
