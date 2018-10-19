@@ -21,44 +21,15 @@ import path from 'path';
 import { existsSync, readFileSync, appendFileSync } from 'fs';
 import { forEach, difference } from 'lodash';
 
-function loadLibs(requirements, platformIsSiren) {
-  const appFile = __dirname + '/public/app.js';
-
-  const libsToImport = [];
-  let customer = 'kibana';
-  if (platformIsSiren) {
-    requirements.push('saved_objects_api');
-    libsToImport.push('import \'./pages/custom_watcher\';');
-    customer = 'siren';
-  }
-
-  const data = readFileSync(appFile);
-  const libs = data.toString().trim().split('\n');
-
-  forEach(difference(libsToImport, libs), (lib) => {
-    appendFileSync(appFile, `${lib}\n`);
-  });
-
-  return requirements;
-}
-
 export default function (kibana) {
   let requirements = ['kibana', 'elasticsearch'];
 
   const platformIsSiren = existsSync(path.resolve('src/siren_core_plugins/saved_objects_api'));
-  const navbarExtensions = platformIsSiren ? ['plugins/sentinl/dashboard_button/dashboard_button'] : [];
-
-  try {
-    requirements = loadLibs(requirements, platformIsSiren);
-  } catch (err) {
-    throw new Error('put libs into app.js: ' + err.message);
-  }
 
   return new kibana.Plugin({
     require: requirements,
     uiExports: {
       spyModes: ['plugins/sentinl/dashboard_spy_button/alarm_button'],
-      navbarExtensions,
       mappings: require('./server/mappings/sentinl.json'),
       home: [
         'plugins/sentinl/register_feature'
@@ -77,27 +48,10 @@ export default function (kibana) {
         injectVars: function (server, options) {
           const config = server.config();
           return {
-            kbnIndex: config.get('kibana.index'),
-            esShardTimeout: config.get('elasticsearch.shardTimeout'),
-            esApiVersion: config.get('elasticsearch.apiVersion'),
             sentinlConfig: {
               appName: config.get('sentinl.app_name'),
-              api: {
-                type: config.get('sentinl.api.type'),
-              },
               es: {
-                default_index: config.get('sentinl.es.default_index'),
-                default_type: config.get('sentinl.es.default_type'),
-                watcher_type: config.get('sentinl.es.watcher_type'),
-                script_type: config.get('sentinl.es.script_type'),
-                alarm_type: config.get('sentinl.es.alarm_type'),
-                user_type: config.get('sentinl.es.user_type'),
-                number_of_results: config.get('sentinl.es.results'),
-                watcher: {
-                  schedule_timezone: config.get('sentinl.es.watcher.schedule_timezone'),
-                },
                 timezone: config.get('sentinl.es.timezone'),
-                timefield: config.get('sentinl.es.timefield'),
               },
               wizard: {
                 condition: {
@@ -107,9 +61,6 @@ export default function (kibana) {
                   last: config.get('sentinl.settings.wizard.condition.last'),
                   interval: config.get('sentinl.settings.wizard.condition.interval'),
                 },
-              },
-              authentication: {
-                impersonate: config.get('sentinl.settings.authentication.impersonate'),
               },
             }
           };
