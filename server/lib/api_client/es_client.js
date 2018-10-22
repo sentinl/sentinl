@@ -1,5 +1,6 @@
 import uuid from 'uuid';
 import getConfiguration from  '../get_configuration';
+import { filter } from 'lodash';
 import { getCurrentTime, flatAttributes } from '../helpers';
 import { isKibi, trimIdTypePrefix } from '../helpers';
 import getElasticsearchClient from '../get_elasticsearch_client';
@@ -92,7 +93,10 @@ export default class EsApi {
     };
 
     if (attachment) {
-      attributes.attachment = attachment;
+      const binary = filter(attachment, meta => meta.encoded && meta.data && !!meta.data.length)[0].data;
+      if (binary) {
+        attributes.attachment = binary;
+      }
     }
 
     if (payload) {
