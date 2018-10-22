@@ -239,7 +239,7 @@ export default class WatcherHandler {
     let method = 'search';
     try {
       if (sirenFederateHelper.federateIsAvailable(this.server)) {
-        method = sirenFederateHelper.getClientMethod(this.client);
+        method = sirenFederateHelper.getClientMethod(this._client);
       }
     } catch (err) {
       this.log.warning('Siren federate: "elasticsearch.plugins" is not available when running from kibana: ' + err.toString());
