@@ -143,20 +143,23 @@ class ConditionPanelWatcherWizard {
 
   _selectChartQueryParamsOverField() {
     if (this.watcher.wizard.chart_query_params.over.type === 'top'
-      && !this.indexes.fieldNames.text.includes(this.watcher.wizard.chart_query_params.over.field)) {
+      && this.indexesData.fieldNames.text.length
+      && !this.indexesData.fieldNames.text.includes(this.watcher.wizard.chart_query_params.over.field)) {
       this.watcher.wizard.chart_query_params.over.field = this.indexesData.fieldnames.text[0];
     }
   }
 
   _selectChartQueryParamsNumericField() {
     if (this.watcher.wizard.chart_query_params.type !== 'count'
+      && this.indexesData.fieldNames.numeric.length
       && !this.indexesData.fieldNames.numeric.includes(this.watcher.wizard.chart_query_params.field)) {
       this.watcher.wizard.chart_query_params.field = this.indexesData.fieldNames.numeric[0];
     }
   }
 
   _selectChartQueryParamsDateField() {
-    if (!this.indexesData.fieldNames.date.includes(this.watcher.wizard.chart_query_params.timeField)) {
+    if (this.indexesData.fieldNames.numeric.length
+      && !this.indexesData.fieldNames.date.includes(this.watcher.wizard.chart_query_params.timeField)) {
       this.watcher.wizard.chart_query_params.timeField = this.indexesData.fieldNames.date[0];
     }
   }
