@@ -182,7 +182,7 @@ export default function (server, actions, payload, task) {
 
         client.logAlarm({
           server,
-          watcherTitle: task._source.title,
+          watcherTitle: task.title,
           actionName,
           message: `action Throttled for ${action.throttle_period}`,
           level: priority
