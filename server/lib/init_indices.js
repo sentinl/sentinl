@@ -17,6 +17,7 @@
  * limitations under the License.
  */
 
+import moment from 'moment';
 import getElasticsearchClient from './get_elasticsearch_client';
 import Log from './log';
 
@@ -49,6 +50,10 @@ const updateMappingTypes = function ({ mappings, watcherType, scriptType, userTy
 */
 const createIndex = async function ({ server, config, index, mappings, alarmIndex}) {
   const log = new Log(config.app_name, server, 'init_indices');
+
+  if (alarmIndex) {
+    index += '-' + moment().format('YYYY.MM.DD');
+  }
   log.info(`checking ${index} index ...`);
 
   try {
