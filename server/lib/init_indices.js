@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-import moment from 'moment';
+import { getTodaysAlarmIndex } from './helpers';
 import getElasticsearchClient from './get_elasticsearch_client';
 import Log from './log';
 
@@ -52,7 +52,7 @@ const createIndex = async function ({ server, config, index, mappings, alarmInde
   const log = new Log(config.app_name, server, 'init_indices');
 
   if (alarmIndex) {
-    index += '-' + moment().format('YYYY.MM.DD');
+    index = getTodaysAlarmIndex(index);
   }
   log.info(`checking ${index} index ...`);
 
