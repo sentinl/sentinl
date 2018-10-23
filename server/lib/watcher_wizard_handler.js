@@ -4,7 +4,7 @@ import WarningAndLog from './messages/warning_and_log';
 import SuccessAndLog from './messages/success_and_log';
 import WatcherHandler from './watcher_handler';
 import apiClient from './api_client';
-import WatcherWizardHandlerError from './errors/watcher_wizard_handler_error';
+import { WatcherWizardHandlerError } from './errors';
 
 /**
 * Helper class to handle watchers

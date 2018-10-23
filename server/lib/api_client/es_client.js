@@ -4,7 +4,7 @@ import { filter } from 'lodash';
 import { getCurrentTime, flatAttributes } from '../helpers';
 import { isKibi, trimIdTypePrefix } from '../helpers';
 import getElasticsearchClient from '../get_elasticsearch_client';
-import EsClientError from '../errors/es_client_error';
+import { EsClientError } from '../errors';
 
 export default class EsApi {
   constructor(server) {
