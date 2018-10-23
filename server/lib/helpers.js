@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const moment = require('moment');
 
 /**
 * Check if Kibi
@@ -64,6 +65,10 @@ const trimIdTypePrefix = function (id) {
   return id.includes(':') ? id.split(':')[1] : id;
 };
 
+const getTodaysAlarmIndex = function (indexName) {
+  return indexName + '-' + moment().format('YYYY.MM.DD');
+};
+
 module.exports = {
   trimIdTypePrefix,
   getCurrentTime,
@@ -73,4 +78,5 @@ module.exports = {
   pickDefinedValues,
   makeExecutableIfNecessary,
   createMultipleHapijsRoutes,
+  getTodaysAlarmIndex,
 };
