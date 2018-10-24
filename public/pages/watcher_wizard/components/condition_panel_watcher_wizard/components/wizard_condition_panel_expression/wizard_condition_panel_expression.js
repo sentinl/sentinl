@@ -234,7 +234,7 @@ export default class WizardConditionPanelExpression extends PureComponent {
               />
             </EuiFlexItem>
 
-            {this.props.chartQueryParams.over.type === 'top' && <EuiFlexItem grow={false} style={{ width: 60 }}>
+            {this.props.chartQueryParams.over.type === 'top' && <EuiFlexItem grow={false} style={{ width: 180 }}>
               <EuiFieldNumber
                 placeholder="N of buckets"
                 value={this.props.chartQueryParams.over.n}
@@ -269,7 +269,7 @@ export default class WizardConditionPanelExpression extends PureComponent {
               />
             </EuiFlexItem>
 
-            <EuiFlexItem grow={false} style={{ width: 60 }}>
+            <EuiFlexItem grow={false} style={{ width: 180 }}>
               <EuiFieldNumber
                 placeholder="N of buckets"
                 value={this.props.chartQueryParams.threshold.n}
@@ -296,7 +296,7 @@ export default class WizardConditionPanelExpression extends PureComponent {
               />
             </EuiFlexItem>
 
-            <EuiFlexItem grow={false} style={{ width: 60 }}>
+            <EuiFlexItem grow={false} style={{ width: 180 }}>
               <EuiFieldNumber
                 placeholder="N of buckets"
                 value={this.props.chartQueryParams.last.n}
@@ -323,7 +323,7 @@ export default class WizardConditionPanelExpression extends PureComponent {
               />
             </EuiFlexItem>
 
-            <EuiFlexItem grow={false} style={{ width: 60 }}>
+            <EuiFlexItem grow={false} style={{ width: 180 }}>
               <EuiFieldNumber
                 placeholder="N of buckets"
                 value={this.props.chartQueryParams.interval.n}
