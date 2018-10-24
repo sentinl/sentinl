@@ -143,7 +143,8 @@ export default function (server, actions, payload, task) {
         try {
           priority = action.console.priority || 'medium';
           let formatterConsole = action.console.message ? action.console.message : '{{ payload }}';
-          let message = mustache.render(formatterConsole, {payload: payload,});
+          let message = mustache.render(formatterConsole, { payload });
+          log.debug('console message', message);
           log.debug('console payload', payload);
 
           await client.logAlarm({
