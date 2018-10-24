@@ -1,8 +1,7 @@
 import uuid from 'uuid';
 import getConfiguration from  '../get_configuration';
 import { filter } from 'lodash';
-import { getCurrentTime, flatAttributes } from '../helpers';
-import { isKibi, trimIdTypePrefix } from '../helpers';
+import { getCurrentTime, flatAttributes, getTodaysAlarmIndex, isKibi, trimIdTypePrefix } from '../helpers';
 import getElasticsearchClient from '../get_elasticsearch_client';
 import { EsClientError } from '../errors';
 
@@ -103,8 +102,10 @@ export default class EsApi {
       attributes.payload = payload;
     }
 
+    const index = getTodaysAlarmIndex(this._config.es.alarm_index);
+
     try {
-      const resp = await this.create(this._config.es.alarm_type, attributes, { overwrite: true }, this._config.es.alarm_index, true);
+      const resp = await this.create(this._config.es.alarm_type, attributes, { overwrite: true }, index, true);
       return resp;
     } catch (err) {
       throw new EsClientError('log alarm', err);
