@@ -183,20 +183,22 @@ class ThresholdWatcherWizard {
   }
 
   async _saveWatcherWizard({convertToAdvanced = false, clean = true} = {}) {
+    const watcher = cloneDeep(this.watcher);
+
+    if (convertToAdvanced) {
+      delete watcher.wizard.chart_query_params;
+    }
+
+    const password = watcher.password;
+    delete watcher.password;
+
     try {
-      if (convertToAdvanced) {
-        delete this.watcher.wizard.chart_query_params;
-      }
-
-      const password = this.watcher.password;
-      delete this.watcher.password;
-
-      const id = await this.watcherService.save(this.watcher);
+      const id = await this.watcherService.save(watcher);
       if (id) {
         this.notify.info('watcher saved: ' + id);
 
-        if (this.watcher.username && password) {
-          await this.userService.new(id, this.watcher.username, password);
+        if (watcher.username && password) {
+          await this.userService.new(id, watcher.username, password);
         }
         this._cancelWatcherWizard();
       }
