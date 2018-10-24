@@ -150,7 +150,7 @@ class ConditionPanelWatcherWizard {
   }
 
   _selectChartQueryParamsNumericField() {
-    if (this.watcher.wizard.chart_query_params.type !== 'count'
+    if (this.watcher.wizard.chart_query_params.queryType !== 'count'
       && this.indexesData.fieldNames.numeric.length
       && !this.indexesData.fieldNames.numeric.includes(this.watcher.wizard.chart_query_params.field)) {
       this.watcher.wizard.chart_query_params.field = this.indexesData.fieldNames.numeric[0];
