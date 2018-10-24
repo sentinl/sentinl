@@ -30,6 +30,8 @@ class CustomWatcher {
     this.tabsMenu = navMenu.getTabs('editor');
     this.confirmModal = confirmModal;
     this.kbnUrl = kbnUrl;
+    this.watcherService = watcherService;
+    this.userService = userService;
     this.sentinlHelper = sentinlHelper;
 
     this.log = sentinlLog;

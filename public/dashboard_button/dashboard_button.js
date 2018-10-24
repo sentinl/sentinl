@@ -2,6 +2,7 @@ import { NavBarExtensionsRegistryProvider } from 'ui/registry/navbar_extensions'
 import { cloneDeep, assign, map, get } from 'lodash';
 import rison from 'rison';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
+import api from '../constants/api';
 import './dashboard_button.less';
 
 import EMAILWATCHERDASHBOARD from '../constants/email_watcher_dashboard';
@@ -71,7 +72,7 @@ function getTemplates(savedScripts, dash, indexPattern, $http) {
 }
 
 async function filterApplicableWatcherTypes($http, dash, indexPattern, templates) {
-  const mapping = await $http.post('../api/sentinl/es/getmapping', { index: [indexPattern] });
+  const mapping = await $http.post(api.ES.GET_MAPPING, { index: [indexPattern] });
   return templates.filter(template => !get(template, 'dashboard.show') || template.dashboard.show(dash, mapping.data));
 }
 

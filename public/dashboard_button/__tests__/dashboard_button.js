@@ -3,6 +3,7 @@ import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import sinon from 'sinon';
 import { assign, map } from 'lodash';
+import api from '../../constants/api';
 
 describe('Dashboard watcher button', function () {
   let $scope;
@@ -57,7 +58,7 @@ describe('Dashboard watcher button', function () {
     }));
 
     $httpStub = sinon.stub($http, 'post');
-    $httpStub.withArgs('../api/sentinl/es/getmapping', { index: ['article'] }).returns({});
+    $httpStub.withArgs(api.ES.GET_MAPPING, { index: ['article'] }).returns({});
 
     const navbarExtensionsRegistry = Private(NavBarExtensionsRegistryProvider);
     watcherNavbarController = navbarExtensionsRegistry.byAppName.dashboard.find(nav => nav.label === 'Watcher');

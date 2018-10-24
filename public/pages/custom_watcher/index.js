@@ -1,6 +1,7 @@
 import { uiModules } from 'ui/modules';
 import { Notifier } from 'ui/notify/notifier';
 import routes from 'ui/routes';
+import 'plugins/investigate_core/management/sections/scripts/services/saved_scripts.js';
 
 import './components/search_filter';
 
@@ -16,7 +17,7 @@ routes
     bindToController: true,
     controllerAs: 'customWatcher',
     resolve: {
-      watcher: function ($route, kbnUrl, watcherService, sentinlConfig) {
+      watcher: function ($route, kbnUrl, watcherService) {
         const notifier = new Notifier({ location: 'Watcher' });
 
         const type = $route.current.params.type;
@@ -48,7 +49,7 @@ routes
             });
         }
       },
-      watcherTemplate: function ($route, kbnUrl, savedScripts, watcherService, sentinlConfig) {
+      watcherTemplate: function ($route, kbnUrl, savedScripts, watcherService) {
         const notifier = new Notifier({ location: 'Watcher' });
 
         if ($route.current.params.type) {
