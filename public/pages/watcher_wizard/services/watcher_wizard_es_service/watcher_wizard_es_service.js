@@ -1,10 +1,10 @@
 import { get } from 'lodash';
+import { SentinlError } from '../../../../services';
 
 class WatcherWizardEsService {
-  constructor($http, API, sentinlHelper) {
+  constructor($http, API) {
     this.$http = $http;
     this.API = API;
-    this.sentinlHelper = sentinlHelper;
   }
 
   async getMapping(index) {
@@ -12,7 +12,7 @@ class WatcherWizardEsService {
       const resp = await this.$http.post(this.API.ES.GET_MAPPING, {index});
       return resp.data;
     } catch (err) {
-      throw new Error(this.sentinlHelper.apiErrMsg(err, `EsService fetch index "${index}" mapping`));
+      throw new SentinlError(`fetch index '${index}' mapping`, err);
     }
   }
 
@@ -21,7 +21,7 @@ class WatcherWizardEsService {
       const res = await this.$http.get(this.API.ES.ALL_INDEXES);
       return res.data;
     } catch (err) {
-      throw new Error(this.sentinlHelper.apiErrMsg(err, 'EsService get all indexes'));
+      throw new SentinlError('get all indexes', err);
     }
   }
 }

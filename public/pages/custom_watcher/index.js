@@ -1,5 +1,6 @@
 import { uiModules } from 'ui/modules';
 import { Notifier } from 'ui/notify/notifier';
+import { SentinlError } from '../../services';
 import routes from 'ui/routes';
 import 'plugins/investigate_core/management/sections/scripts/services/saved_scripts.js';
 
@@ -37,7 +38,7 @@ routes
                 });
             }
           } catch (err) {
-            notifier.error(`Could not parse watcher created from dashboard: ${err.toString()}`);
+            notifier.error(new SentinlError('Could not parse watcher created from dashboard', err));
             kbnUrl.redirect('/');
           }
         } else {

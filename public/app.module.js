@@ -9,7 +9,7 @@ import 'chart.js';
 import 'angular-chart.js';
 import Filters from './filters';
 import Pages from './pages';
-import Services from './services';
+import { AngularServices } from './services';
 import Directives from './directives';
 import Components from './components';
 
@@ -21,7 +21,7 @@ const app = uiModules.get('apps/sentinl', [
   'chart.js',
   Filters.name,
   Pages.name,
-  Services.name,
+  AngularServices.name,
   Directives.name,
   Components.name,
 ]);

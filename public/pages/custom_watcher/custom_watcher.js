@@ -1,11 +1,17 @@
 /* global angular */
 import { assign, get, every, forEach } from 'lodash';
+import { Notifier } from 'ui/notify';
+import { SentinlError } from '../../services';
+import { toastNotificationsFactory } from '../../factories';
 import 'ui/directives/siren_script_transcluder';
 import './custom_watcher.less';
 
+const toastNotifications = toastNotificationsFactory();
+const notify = new Notifier({ location: 'Custom watcher' });
+
 class CustomWatcher {
-  constructor($scope, $route, $templateCache, navMenu, sentinlLog, createNotifier, confirmModal,
-              kbnUrl, watcherService, userService, sentinlConfig, sentinlHelper, watcherWizardEsService) {
+  constructor($scope, $route, $templateCache, navMenu, sentinlLog, confirmModal,
+    kbnUrl, watcherService, userService, sentinlConfig, watcherWizardEsService) {
     this.$scope = $scope;
     this.watcherTemplate = $route.current.locals.watcherTemplate;
     $templateCache.put(this.watcherTemplate.id, this.watcherTemplate.template);
@@ -32,11 +38,9 @@ class CustomWatcher {
     this.kbnUrl = kbnUrl;
     this.watcherService = watcherService;
     this.userService = userService;
-    this.sentinlHelper = sentinlHelper;
 
     this.log = sentinlLog;
     this.log.initLocation('Custom watcher');
-    this.notify = createNotifier({ location: 'Custom watcher' });
     this.eventListeners = [];
 
     this.eventListeners.push(this.$scope.$on('navMenu:cancelEditor', () => {
@@ -89,7 +93,7 @@ class CustomWatcher {
         this.confirmModal('Not all parameters are filled in', confirmModalOptions);
       }
     } catch (err) {
-      this.errorMessage(`Watcher syntax is invalid: ${err.toString()}`);
+      this.errorMessage('watcher syntax is invalid', err);
     }
   }
 
@@ -102,7 +106,7 @@ class CustomWatcher {
     try {
       const id = await this.watcherService.save(this.watcher);
       if (id) {
-        this.notify.info('Watcher saved: ' + id);
+        toastNotifications.addSuccess('Watcher saved: ' + id);
 
         if (this.watcher.username && this.watcher.password) {
           await this.userService.new(id, this.watcher.username, this.watcher.password);
@@ -112,7 +116,7 @@ class CustomWatcher {
         this._redirect();
       }
     } catch (err) {
-      this.errorMessage(err);
+      this.errorMessage('save watcher', err);
     }
   }
 
@@ -147,9 +151,10 @@ class CustomWatcher {
     return get(this.watcher, 'input.search.request.queries[0].query_string.query', '');
   }
 
-  errorMessage(err) {
+  errorMessage(message, err) {
+    err = new SentinlError(message, err);
     this.log.error(err);
-    this.notify.error(err);
+    notify.error(err);
   }
 }
 
