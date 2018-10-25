@@ -1,10 +1,16 @@
 import './threshold_watcher_wizard.less';
 import template from './threshold_watcher_wizard.html';
 import { cloneDeep, defaultsDeep, get, has, forEach, keys, isObject, isEmpty, includes, union } from 'lodash';
+import { Notifier } from 'ui/notify';
+import { toastNotificationsFactory } from '../../../../factories';
+
+const notify = new Notifier({ location: 'Wizard watcher' });
+const toastNotifications = toastNotificationsFactory();
 
 class ThresholdWatcherWizard {
-  constructor($scope, $window, kbnUrl, sentinlLog, confirmModal, createNotifier,
-    wizardHelper, watcherWizardEsService, sentinlConfig, sentinlHelper, watcherService, userService) {
+  constructor($scope, $window, kbnUrl, sentinlLog, confirmModal,
+    wizardHelper, watcherWizardEsService, sentinlConfig, sentinlHelper,
+    watcherService, userService) {
     this.$scope = $scope;
     this.watcher = this.watcher || this.$scope.watcher;
 
@@ -19,13 +25,8 @@ class ThresholdWatcherWizard {
     this.watcherService = watcherService;
     this.userService = userService;
 
-    this.locationName = 'ThresholdWatcherWizard';
-
     this.log = sentinlLog;
-    this.log.initLocation(this.locationName);
-    this.notify = createNotifier({
-      location: this.locationName,
-    });
+    this.log.initLocation('Wizard watcher');
 
     this.isSpyWatcher = !!this.watcher.spy;
 
@@ -68,25 +69,8 @@ class ThresholdWatcherWizard {
       });
     }
 
-    this._init();
-  }
-
-  async _init() {
-    this.indexesData = {
-      fieldNames: {
-        date: [],
-        text: [],
-        numeric: []
-      },
-    };
-
-    try {
-      if (!isEmpty(this.watcher.input.search.request.index)) {
-        const mappings = await this.watcherWizardEsService.getMapping(this.watcher.input.search.request.index);
-        this.indexesData.fieldNames = this.sentinlHelper.getFieldsFromMappings(mappings);
-      }
-    } catch (err) {
-      this.errorMessage(`get index "${this.watcher.input.search.request.index}" field names: ${err.toString()}`);
+    if (!isEmpty(this.watcher.input.search.request.index)) {
+      this._getIndexFields(this.watcher.input.search.request.index);
     }
   }
 
@@ -131,16 +115,28 @@ class ThresholdWatcherWizard {
     };
   }
 
-  async indexChange({index}) {
+  async indexChange({ index }) {
     if (!this.isSpyWatcher) {
-      try {
-        const mappings = await this.watcherWizardEsService.getMapping(index);
-        this.indexesData.fieldNames = this.sentinlHelper.getFieldsFromMappings(mappings);
-      } catch (err) {
-        this.errorMessage(`get index "${index}" field names: ${err.toString()}`);
-      }
+      this._getIndexFields(index);
     }
     this.watcher.input.search.request.index = index;
+  }
+
+  async _getIndexFields(index) {
+    this.indexesData = {
+      fieldNames: {
+        date: [],
+        text: [],
+        numeric: []
+      },
+    };
+
+    try {
+      const mappings = await this.watcherWizardEsService.getMapping(index);
+      this.indexesData.fieldNames = this.sentinlHelper.getFieldsFromMappings(mappings);
+    } catch (err) {
+      this.errorMessage(`get index '${index}' field names`, err);
+    }
   }
 
   inputAdvChange({input, condition}) {
@@ -195,7 +191,7 @@ class ThresholdWatcherWizard {
     try {
       const id = await this.watcherService.save(watcher);
       if (id) {
-        this.notify.info('watcher saved: ' + id);
+        toastNotifications.addSuccess('watcher saved: ' + id);
 
         if (watcher.username && password) {
           await this.userService.new(id, watcher.username, password);
@@ -203,7 +199,7 @@ class ThresholdWatcherWizard {
         this._cancelWatcherWizard();
       }
     } catch (err) {
-      this.errorMessage(err);
+      this.errorMessage('save watcher', err);
     }
   }
 
@@ -226,32 +222,21 @@ class ThresholdWatcherWizard {
     try {
       return this._isSchedule(this.watcher) && this._isIndex(this.watcher) && this._isTitle(this.watcher);
     } catch (err) {
-      this.notify.error(`check title panel ${err}`);
+      toastNotifications.addDanger(`check title panel ${err.toString()}`);
     }
   }
 
-  _warning(msg) {
-    this.log.warn(msg);
-    this.notify.warning(msg);
-  }
-
-  _error(err) {
-    this.log.error(err);
-    this.notify.error(err);
-  }
-
-  errorMessage(err) {
-    err = err || 'unknown error, bad implementation';
-    err = this.sentinlHelper.apiErrMsg(err);
-    if (err.match(/index_not_found_exception/gi)) {
+  errorMessage(message, err) {
+    if (err.message.match(/index_not_found_exception/gi)) {
       return;
-    } else if (err.match(/(parsing_exception)|(illegal_argument_exception)/)) {
-      this._warning(err);
+    } else if (err.message.match(/(parsing_exception)|(illegal_argument_exception)/)) {
+      this.log.warn(err.message);
+      toastNotifications.addWarning(err.message);
     } else {
-      this._error(err);
+      this.log.error(err);
+      notify.error(err);
     }
   }
-
 }
 
 function thresholdWatcherWizard() {

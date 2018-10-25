@@ -19,13 +19,6 @@ class SentinlHelper {
     return omit(watcher, fields);
   }
 
-  apiErrMsg(err, msg) {
-    if (msg) {
-      return msg + ': ' + (err.message || get(err, 'data.message') || get(err, 'data.error') || err.toString());
-    }
-    return err.message || get(err, 'data.message') || err.toString();
-  }
-
   firstLetterToUpperCase(str) {
     return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
   }

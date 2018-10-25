@@ -1,8 +1,14 @@
 import { get, isNumber } from 'lodash';
 import moment from 'moment';
+import { Notifier } from 'ui/notify';
+import { SentinlError } from '../../services';
+import { toastNotificationsFactory } from '../../factories';
+
+const notify = new Notifier({ location: 'Reports' });
+const toastNotifications = toastNotificationsFactory();
 
 function ReportsController($rootScope, $scope, $route, $interval,
-  $timeout, timefilter, Private, createNotifier, $window, $uibModal,
+  $timeout, timefilter, Private, $window, $uibModal,
   navMenu, globalNavState, reportService, COMMON, confirmModal, sentinlLog) {
   'ngInject';
 
@@ -12,15 +18,13 @@ function ReportsController($rootScope, $scope, $route, $interval,
   $scope.topNavMenu = navMenu.getTopNav('reports');
   $scope.tabsMenu = navMenu.getTabs('reports');
 
-  const notify = createNotifier({
-    location: COMMON.reports.title,
-  });
   const log = sentinlLog;
-  log.initLocation(COMMON.reports.title);
+  log.initLocation('Reports');
 
   $scope.reportService = reportService;
 
-  function errorMessage(err) {
+  function errorMessage(message, err) {
+    err = new SentinlError(message, err);
     log.error(err);
     notify.error(err);
   }
@@ -42,12 +46,13 @@ function ReportsController($rootScope, $scope, $route, $interval,
     return report.attachment.charAt(0) === 'i';
   };
 
-  const getReports = function (interval) {
-    $scope.reportService.updateFilter(interval)
-      .then((resp) => {
-        return $scope.reportService.list().then((resp) => $scope.reports = resp);
-      })
-      .catch(errorMessage);
+  const getReports = async function (interval) {
+    try {
+      await $scope.reportService.updateFilter(interval);
+      $scope.reports = await $scope.reportService.list();
+    } catch (err) {
+      errorMessage('get reports', err);
+    }
   };
 
   getReports($scope.timeInterval);
@@ -63,8 +68,7 @@ function ReportsController($rootScope, $scope, $route, $interval,
     let timeInterval = get($rootScope, 'timefilter.time');
     if (timeInterval) {
       $scope.timeInterval = timeInterval;
-      $scope.reportService.updateFilter($scope.timeInterval)
-        .catch(errorMessage);
+      $scope.reportService.updateFilter($scope.timeInterval);
     }
   });
 
@@ -116,12 +120,12 @@ function ReportsController($rootScope, $scope, $route, $interval,
   $scope.deleteReport = function (index, report) {
     async function doDelete() {
       try {
-        const resp = await $scope.reportService.delete(report.id, report._index);
+        const id = await $scope.reportService.delete(report.id, report._index);
         $scope.reports.splice(index - 1, 1);
-        notify.info(`Deleted report ${resp}`);
+        toastNotifications.addSuccess(`report deleted ${id}`);
         getReports($scope.timeInterval);
       } catch (err) {
-        errorMessage(err);
+        errorMessage('delete report', err);
       }
     }
 
