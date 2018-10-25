@@ -5,7 +5,7 @@ export default function toastNotificationsFactory() {
     return notify.toastNotifications;
   }
 
-  // Kibana v5.6 - v6.2
+  // Kibana v5.6-6.2
   class ToastNotifications extends notify.Notifier {
     constructor() {
       super();

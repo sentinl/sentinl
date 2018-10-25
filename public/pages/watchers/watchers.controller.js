@@ -5,15 +5,15 @@ import $ from 'jquery';
 import ace from 'ace';
 import { Notifier } from 'ui/notify';
 import { SentinlError } from '../../services';
-import { toastNotificationsFactory } from '../../factories';
+import { toastNotificationsFactory, timefilterFactory } from '../../factories';
 
 const notify = new Notifier({ location: 'Watchers' });
 const toastNotifications = toastNotificationsFactory();
 
 // WATCHERS CONTROLLER
-function  WatchersController($rootScope, $scope, $route, $interval,
-  $timeout, timefilter, Private, $window, $http, $uibModal, sentinlLog, navMenu,
-  globalNavState, $location, dataTransfer, Promise, COMMON, confirmModal,
+function  WatchersController($injector, $scope, $route, $interval,
+  $timeout, Private, $window, $http, $uibModal, sentinlLog, navMenu,
+  globalNavState, $location, dataTransfer, Promise, confirmModal,
   wizardHelper, watcherService, userService, sentinlConfig) {
   'ngInject';
 
@@ -29,7 +29,9 @@ function  WatchersController($rootScope, $scope, $route, $interval,
   $scope.topNavMenu = navMenu.getTopNav('watchers');
   $scope.tabsMenu = navMenu.getTabs();
 
-  timefilter.enabled = false;
+  const timefilter = timefilterFactory($injector);
+  timefilter.enable(false);
+
   $scope.watchers = [];
   $scope.wizardHelper = wizardHelper;
 
