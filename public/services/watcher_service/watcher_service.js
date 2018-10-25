@@ -1,12 +1,12 @@
 import { cloneDeep } from 'lodash';
 import SentinlApi from '../sentinl_api';
+import { SentinlError } from '../';
 
 class WatcherService extends SentinlApi {
   constructor($http, $injector, Promise) {
     super('watcher', $http, $injector);
     this.docType = 'watcher';
     this.Promise = Promise;
-    this.helper = $injector.get('sentinlHelper');
     this.REPORTWATCHER = $injector.get('REPORTWATCHER');
     this.EMAILWATCHERADVANCED = $injector.get('EMAILWATCHERADVANCED');
     this.EMAILWATCHERWIZARD = $injector.get('EMAILWATCHERWIZARD');
@@ -27,7 +27,7 @@ class WatcherService extends SentinlApi {
       }
       return this.Promise.resolve(defaults);
     } catch (err) {
-      throw new Error(this.helper.apiErrMsg(err, `${this.docType} new`));
+      throw new SentinlError('create watcher', err);
     }
   }
 }

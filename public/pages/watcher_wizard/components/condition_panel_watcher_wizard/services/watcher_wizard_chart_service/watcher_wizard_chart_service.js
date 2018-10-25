@@ -1,10 +1,10 @@
 import { get } from 'lodash';
+import { SentinlError } from '../../../../../../services';
 
 class WatcherWizardChartService {
-  constructor($http, API, sentinlHelper) {
+  constructor($http, API) {
     this.$http = $http;
     this.API = API.WATCHER_EDIT;
-    this.sentinlHelper = sentinlHelper;
   }
 
   async _query({ queryType = 'count', index = [], query }) {
@@ -18,7 +18,7 @@ class WatcherWizardChartService {
         query,
       });
     } catch (err) {
-      throw new Error(this.sentinlHelper.apiErrMsg(err, `ChartService fetch data for ${queryType}`));
+      throw new SentinlError(`query for ${queryType}`, err);
     }
   }
 

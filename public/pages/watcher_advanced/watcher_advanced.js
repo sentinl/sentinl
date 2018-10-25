@@ -1,8 +1,14 @@
 /* global angular */
 import { assign } from 'lodash';
+import { Notifier } from 'ui/notify';
+import { SentinlError } from '../../services';
+import { toastNotificationsFactory } from '../../factories';
+
+const notify = new Notifier({ location: 'Advanced watcher' });
+const toastNotifications = toastNotificationsFactory();
 
 class WatcherAdvanced {
-  constructor($scope, $injector, navMenu, sentinlLog, createNotifier, confirmModal, kbnUrl,
+  constructor($scope, $injector, navMenu, sentinlLog, confirmModal, kbnUrl,
     sentinlHelper, sentinlConfig, watcherService, userService) {
     const $route = $injector.get('$route');
     this.$scope = $scope;
@@ -13,12 +19,8 @@ class WatcherAdvanced {
     this.watcherService = watcherService;
     this.userService = userService;
 
-    this.locationName = 'WatcherAdvanced';
     this.log = sentinlLog;
-    this.log.initLocation(this.locationName);
-    this.notify = createNotifier({
-      location: this.locationName,
-    });
+    this.log.initLocation('Advanced watcher');
 
     this.watcher = $route.current.locals.watcher;
     this.init = {
@@ -28,7 +30,7 @@ class WatcherAdvanced {
     try {
       this.watcherSourceText = angular.toJson(this.init.watcherSource, true);
     } catch (err) {
-      this.log.error(`Parse watcher doc: ${err.toString()}`);
+      this.errorMessage('parse watcher doc', err);
     }
 
     this.topNavMenu = navMenu.getTopNav('editor');
@@ -53,7 +55,7 @@ class WatcherAdvanced {
         };
         this.confirmModal('Save this watcher?', confirmModalOptions);
       } catch (err) {
-        this.errorMessage(`watcher syntax is invalid: ${err.toString()}`);
+        this.errorMessage('watcher syntax is invalid', err);
       }
     });
   }
@@ -70,7 +72,7 @@ class WatcherAdvanced {
 
       const id = await this.watcherService.save(this.watcher);
       if (id) {
-        this.notify.info('watcher saved: ' + id);
+        toastNotifications.addSuccess('watcher saved: ' + id);
 
         if (this.watcher.username && password) {
           await this.userService.new(id, this.watcher.username, password);
@@ -79,13 +81,14 @@ class WatcherAdvanced {
         this._cancelWatcherEditor();
       }
     } catch (err) {
-      this.errorMessage(err);
+      this.errorMessage('save watcher', err);
     }
   }
 
-  errorMessage(err) {
+  errorMessage(message, err) {
+    err = new SentinlError(message, err);
     this.log.error(err);
-    this.notify.error(err);
+    notify.error(err);
   }
 
   updateWatcherDoc({ value }) {

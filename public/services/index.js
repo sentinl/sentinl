@@ -9,7 +9,7 @@ import UserService from './user_service';
 import AlarmService from './alarm_service';
 import ReportService from './report_service';
 
-export default angular.module('apps/sentinl.services', [
+const AngularServices = angular.module('apps/sentinl.services', [
   NavMenu.name,
   DataTransfer.name,
   SentinlLog.name,
@@ -20,3 +20,5 @@ export default angular.module('apps/sentinl.services', [
   ReportService.name,
 ]);
 
+export { AngularServices };
+export { default as SentinlError } from './sentinl_error.js';

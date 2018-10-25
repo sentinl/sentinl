@@ -1,9 +1,15 @@
 import { get, isNumber } from 'lodash';
 import moment from 'moment';
 import uiChrome from 'ui/chrome';
+import { Notifier } from 'ui/notify';
+import { SentinlError } from '../../services';
+import { toastNotificationsFactory } from '../../factories';
+
+const toastNotifications = toastNotificationsFactory();
+const notify = new Notifier({ location: 'Alarms' });
 
 function AlarmsController($rootScope, $scope, $route, $interval,
-  $timeout, $injector, timefilter, Private, createNotifier, $window, $uibModal, navMenu,
+  $timeout, $injector, timefilter, Private, $window, $uibModal, navMenu,
   globalNavState, alarmService, COMMON, confirmModal, sentinlLog) {
   'ngInject';
 
@@ -34,15 +40,13 @@ function AlarmsController($rootScope, $scope, $route, $interval,
     }
   ];
 
-  const notify = createNotifier({
-    location: COMMON.alarms.title,
-  });
   const log = sentinlLog;
-  log.initLocation(COMMON.alarms.title);
+  log.initLocation('Alarms');
 
   $scope.alarmService = alarmService;
 
-  function errorMessage(err) {
+  function errorMessage(message, err) {
+    err = new SentinlError(message, err);
     log.error(err);
     notify.error(err);
   }
@@ -63,12 +67,13 @@ function AlarmsController($rootScope, $scope, $route, $interval,
   $scope.alarms = [];
   $scope.timeInterval = timefilter.time;
 
-  const getAlarms = function (interval) {
-    $scope.alarmService.updateFilter(interval)
-      .then((resp) => {
-        return $scope.alarmService.list().then((resp) => $scope.alarms = resp);
-      })
-      .catch(errorMessage);
+  const getAlarms = async function (interval) {
+    try {
+      await $scope.alarmService.updateFilter(interval);
+      $scope.alarms = await $scope.alarmService.list();
+    } catch (err) {
+      errorMessage('get alarms', err);
+    }
   };
 
   getAlarms($scope.timeInterval);
@@ -84,8 +89,7 @@ function AlarmsController($rootScope, $scope, $route, $interval,
     let timeInterval = get($rootScope, 'timefilter.time');
     if (timeInterval) {
       $scope.timeInterval = timeInterval;
-      $scope.alarmService.updateFilter($scope.timeInterval)
-        .catch(errorMessage);
+      $scope.alarmService.updateFilter($scope.timeInterval);
     }
   });
 
@@ -133,12 +137,12 @@ function AlarmsController($rootScope, $scope, $route, $interval,
   $scope.deleteAlarm = function (index, alarm) {
     async function doDelete() {
       try {
-        const resp = await $scope.alarmService.delete(alarm.id, alarm._index);
+        const id = await $scope.alarmService.delete(alarm.id, alarm._index);
         $scope.alarms.splice(index - 1, 1);
-        notify.info(`Deleted alarm ${resp}`);
+        toastNotifications.addSuccess(`alarm deleted ${id}`);
         getAlarms($scope.timeInterval);
       } catch (err) {
-        errorMessage(err);
+        errorMessage('delete alarm', err);
       }
     }
 

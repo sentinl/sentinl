@@ -7,6 +7,7 @@ import moment from 'moment';
 import { omit, isEqual, assign, filter, get, forEach, size, has, pick, isEmpty } from 'lodash';
 import WatcherWizardQueryBuilder from './classes/watcher_wizard_query_builder';
 import WatcherWizardConditionBuilder from './classes/watcher_wizard_condition_builder';
+import { SentinlError } from '../../../../services';
 
 class Chart {
   constructor({name = 'all docs', enabled = true, message = '', xAxis = [], yAxis = [[], []], options} = {}) {
@@ -25,7 +26,7 @@ class Chart {
 }
 
 class ConditionPanelWatcherWizard {
-  constructor($http, $scope, watcherWizardChartService, createNotifier, sentinlLog, wizardHelper, sentinlHelper, $timeout) {
+  constructor($http, $scope, watcherWizardChartService, sentinlLog, wizardHelper, sentinlHelper, $timeout) {
     this.$scope = $scope;
     this.$timeout = $timeout;
     this.watcher = this.watcher || this.$scope.watcher;
@@ -43,9 +44,6 @@ class ConditionPanelWatcherWizard {
 
     this.locationName = 'ConditionPanelWatcherWizard';
     this.log.initLocation(this.locationName);
-    this.notify = createNotifier({
-      location: this.locationName,
-    });
 
     this.messages = {
       nodata: 'The selected index or condition do not return any data!',
@@ -111,7 +109,7 @@ class ConditionPanelWatcherWizard {
           try {
             await this._fetchChartData();
           } catch (err) {
-            this.errorMessage({err});
+            this.errorMessage('watch fetch chart data', err);
           }
         }
       }
@@ -123,7 +121,7 @@ class ConditionPanelWatcherWizard {
           this._updateWatcherRawDoc(this.watcher);
           this._updateChartRawDoc(this.chartQuery);
         } catch (err) {
-          this.errorMessage({err});
+          this.errorMessage('watch update raw documents', err);
         }
       }
     }, true);
@@ -170,17 +168,6 @@ class ConditionPanelWatcherWizard {
       return false;
     }
     return params.timeField && this.queryTypes.metric.includes(params.queryType) === has(params, 'field');
-  }
-
-  _warning(msg) {
-    msg = msg.replace(/fail/ig, '[warning]');
-    this.log.warn(msg);
-    this.notify.warning(msg);
-  }
-
-  _error(msg) {
-    this.log.error(msg);
-    this.notify.error(msg);
   }
 
   _updateWatcherRawDoc(watcher) {
@@ -257,7 +244,7 @@ class ConditionPanelWatcherWizard {
         this.onQueryChange({ body });
         break;
       default:
-        throw new Error('build query: unknown query type');
+        throw new SentinlError('build query', new Error('unknown query type'));
     }
   }
 
@@ -285,7 +272,7 @@ class ConditionPanelWatcherWizard {
         this.onConditionChange({ condition });
         break;
       default:
-        throw new Error('build condition: unknown query type');
+        throw new SentinlError('build condition', new Error('unknown query type'));
     }
   }
 
@@ -305,14 +292,14 @@ class ConditionPanelWatcherWizard {
       try {
         await this._queryMetricAgg(params);
       } catch (err) {
-        throw new Error(`${params.metricAggType}: ${err.toString()}`);
+        throw new SentinlError(`query agg type ${params.metricAggType}`, err);
       }
     } else {
       if (get(this.watcher, 'wizard.chart_query_params.queryType') === 'count') {
         try {
           await this._queryCount(params);
         } catch (err) {
-          throw new Error(`count: ${err.toString()}`);
+          throw new SentinlError('query count', err);
         }
       }
     }
@@ -320,13 +307,13 @@ class ConditionPanelWatcherWizard {
     try {
       this._buildInputQuery(params);
     } catch (err) {
-      throw new Error(`build Elasticsearch query: ${err.toString()}`);
+      throw new SentinlError('build input query', err);
     }
 
     try {
       this._buildCondition(params);
     } catch (err) {
-      throw new Error(`build Elasticsearch query: ${err.toString()}`);
+      throw new SentinlError('build condiiton', err);
     }
 
     return null;
@@ -378,7 +365,7 @@ class ConditionPanelWatcherWizard {
           resp = await this.watcherWizardChartService.metricAggMax({index, query: JSON.stringify(this.chartQuery)});
         }
       } catch (err) {
-        throw new Error(`query ES: ${err.toString()}`);
+        throw new SentinlError('execute query', err);
       }
 
       this.charts = [];
@@ -399,12 +386,12 @@ class ConditionPanelWatcherWizard {
           this._offChart(this.activeChart, this.messages.nodata);
         }
       } catch (err) {
-        throw new Error(`update chart data: ${err.toString()}`);
+        throw new SentinlError('update chart data', err);
       }
     } catch (err) {
       this._offChart(this.activeChart, this.messages.nodata);
       this._offProgress();
-      throw err;
+      throw new SentinlError('query metric agg', err);
     }
     this._offProgress();
     return null;
@@ -422,7 +409,7 @@ class ConditionPanelWatcherWizard {
         this.chartQuery = this.queryBuilder.count({over, last, interval, field, timeField});
         resp = await this.watcherWizardChartService.count({index, query: JSON.stringify(this.chartQuery)});
       } catch (err) {
-        throw new Error(`query ES: ${err.toString()}`);
+        throw new SentinlError('execute query', err);
       }
 
       this.charts = [];
@@ -443,12 +430,12 @@ class ConditionPanelWatcherWizard {
           this._offChart(this.activeChart, this.messages.nodata);
         }
       } catch (err) {
-        throw new Error(`update chart data: ${err.toString()}`);
+        throw new SentinlError('update chart data', err);
       }
     } catch (err) {
       this._offChart(this.activeChart, this.messages.nodata);
       this._offProgress();
-      throw err;
+      throw new SentinlError('query count', err);
     }
     this._offProgress();
     return null;
@@ -549,7 +536,7 @@ function conditionPanelWatcherWizard() {
       onConditionChange: '&',
       turnIntoAdvanced: '&',
       indexesData: '=',
-      errorMessage: '&',
+      errorMessage: '=',
     },
     controller:  ConditionPanelWatcherWizard,
     controllerAs: 'conditionPanelWatcherWizard',
@@ -559,7 +546,7 @@ function conditionPanelWatcherWizard() {
       onConditionChange: '&',
       turnIntoAdvanced: '&',
       indexesData: '=',
-      errorMessage: '&',
+      errorMessage: '=',
     },
   };
 }
