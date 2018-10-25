@@ -1,6 +1,6 @@
 import moment from 'moment';
 
-function AboutController($scope, $route, $interval, timefilter, navMenu, globalNavState, COMMON, sentinlConfig) {
+function AboutController($scope, $route, $interval, timefilter, navMenu, globalNavState, sentinlConfig) {
   'ngInject';
 
   $scope.app = {
@@ -8,8 +8,6 @@ function AboutController($scope, $route, $interval, timefilter, navMenu, globalN
     logo: sentinlConfig.appName.toLowerCase() === 'sentinl' ? 'sentinl-logo-about' : 'siren-logo-about',
   };
 
-  $scope.title = COMMON.about.title;
-  $scope.description = COMMON.description;
   timefilter.enabled = false;
 
   $scope.topNavMenu = navMenu.getTopNav('about');
