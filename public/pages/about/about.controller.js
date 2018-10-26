@@ -1,6 +1,7 @@
 import moment from 'moment';
+import { timefilterFactory } from '../../factories';
 
-function AboutController($scope, $route, $interval, timefilter, navMenu, globalNavState, sentinlConfig) {
+function AboutController($scope, $injector, $route, $interval, navMenu, globalNavState, sentinlConfig) {
   'ngInject';
 
   $scope.app = {
@@ -8,10 +9,11 @@ function AboutController($scope, $route, $interval, timefilter, navMenu, globalN
     logo: sentinlConfig.appName.toLowerCase() === 'sentinl' ? 'sentinl-logo-about' : 'siren-logo-about',
   };
 
-  timefilter.enabled = false;
-
   $scope.topNavMenu = navMenu.getTopNav('about');
   $scope.tabsMenu = navMenu.getTabs('about');
+
+  const timefilter = timefilterFactory($injector);
+  timefilter.enable(false);
 
   if (!$scope.notified) {
     $scope.notified = true;

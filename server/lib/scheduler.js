@@ -22,7 +22,6 @@ import 'later/later';
 import getConfiguration from './get_configuration';
 import WatcherHandler from './watcher_handler';
 import WatcherWizardHandler from './watcher_wizard_handler';
-import CustomWatcherHandler from './custom_watcher_handler';
 import apiClient from './api_client';
 import Log from './log';
 
@@ -38,7 +37,6 @@ export default function Scheduler(server) {
 
   let watcherHandler;
   let watcherWizardHandler;
-  let customWatcherHandler;
 
   /**
   * Remove unused watchers watcher.
@@ -80,8 +78,6 @@ export default function Scheduler(server) {
       let resp;
       if (task.wizard) {
         resp = await watcherWizardHandler.execute(task);
-      } else if (task.custom) {
-        resp = await customWatcherHandler.execute(task);
       } else {
         resp = await watcherHandler.execute(task);
       }
@@ -130,7 +126,6 @@ export default function Scheduler(server) {
 
     watcherHandler = new WatcherHandler(server);
     watcherWizardHandler = new WatcherWizardHandler(server);
-    customWatcherHandler = new CustomWatcherHandler(server);
 
     try {
       let tasks = await client.listWatchers();
