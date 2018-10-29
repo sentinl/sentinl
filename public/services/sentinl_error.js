@@ -7,9 +7,10 @@ export default class SentinlError extends Error {
     const error = [...args].pop();
     if (error && error instanceof Error) {
       this.stack = error.stack;
-      this.message = message + ':' + error.message;
-    } else if (error && error.status === 404) {
-      this.message = [ message, error.data.error, error.data.message ].join(':');
+      this.message = message + ' : ' + error.message;
+    } else if (error && error.status >= 400) {
+      this.status = error.status;
+      this.message = message + ' : ' + error.data.message || error.data.error;
     } else {
       this.message = message;
     }
