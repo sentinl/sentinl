@@ -186,7 +186,7 @@ class ThresholdWatcherWizard {
     const watcher = cloneDeep(this.watcher);
 
     if (convertToAdvanced) {
-      delete watcher.wizard.chart_query_params;
+      delete watcher.wizard;
     }
 
     const password = watcher.password;
