@@ -29,6 +29,7 @@ var include = [
   'index.js',
   'init.js',
   'postinst.js',
+  'app_config.js',
   'server',
   'lib',
   'public',
@@ -116,6 +117,7 @@ gulp.task('sync', ['installPhantomjs'], function (done) {
 gulp.task('lint', function (done) {
   return gulp.src([
     'index.js',
+    'app_config.js',
     'init.js',
     'gulpfile.js',
     'public/**/*.js',
@@ -162,6 +164,7 @@ gulp.task('package_nochrome', ['build'], function (done) {
 gulp.task('dev', ['sync'], function (done) {
   gulp.watch([
     'index.js',
+    'app_config.js',
     'init.js',
     '*.json',
     'public/**/*',

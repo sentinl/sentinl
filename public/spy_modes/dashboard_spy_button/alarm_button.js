@@ -17,11 +17,11 @@
  * limitations under the License.
  */
 
-import { stripObjectPropertiesByNameRegex } from '../lib/sentinl_helper';
+import { stripObjectPropertiesByNameRegex } from '../../lib/sentinl_helper';
 
 import _ from 'lodash';
 import { SpyModesRegistryProvider } from 'ui/registry/spy_modes';
-import EMAILWATCHERDASHBOARD from '../constants/email_watcher_dashboard';
+import EMAILWATCHERDASHBOARD from '../../constants/email_watcher_dashboard';
 import rison from 'rison';
 
 const timeFractions = [60,60,24,7]; // 60s/min, 60m/hr, 24hr/day, 7day/week
@@ -154,6 +154,6 @@ SpyModesRegistryProvider.register(function () {
     name: 'setalarm',
     order: 1000,
     link: dashboardSpyButton,
-    template: require('plugins/sentinl/dashboard_spy_button/alarm_spy.html')
+    template: require('plugins/sentinl/spy_modes/dashboard_spy_button/alarm_spy.html')
   };
 });

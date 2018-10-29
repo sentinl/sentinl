@@ -31,8 +31,6 @@ import 'font-awesome/css/font-awesome.css';
 import 'ui/kbn_top_nav';
 import 'ui/listen';
 import 'ui/timepicker';
-import 'ui/timefilter';
-import 'ui/directives/pretty_duration';
 
 import 'ui/courier';
 import 'ui/modals';
