@@ -7,6 +7,7 @@ import Log from '../../log';
 import getConfiguration from '../../get_configuration';
 import horsemanReport from './horseman';
 import puppeteerReport from './puppeteer';
+import { ActionError } from '../../errors';
 
 function createReportFileName(filename, type = 'png') {
   if (!filename) {
@@ -136,9 +137,9 @@ export default async function reportFactory({
       filePath = await puppeteerReport(options);
     }
 
-    log.info(`${watcherTitle}, "${engineName}" report results: "${filePath}"`);
+    log.info(`${watcherTitle}, '${engineName}' report results: '${filePath}'`);
     return createReportAttachment(fileName, filePath, fileType);
   } catch (err) {
-    throw new Error(`exec "${engineName}" report: ` + err.toString());
+    throw new ActionError(`run '${engineName}' report`, err);
   }
 };

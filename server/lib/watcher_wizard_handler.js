@@ -3,7 +3,8 @@ import Log from './log';
 import WarningAndLog from './messages/warning_and_log';
 import SuccessAndLog from './messages/success_and_log';
 import WatcherHandler from './watcher_handler';
-import logHistory from './log_history';
+import apiClient from './api_client';
+import { WatcherWizardHandlerError } from './errors';
 
 /**
 * Helper class to handle watchers
@@ -11,6 +12,9 @@ import logHistory from './log_history';
 export default class WatcherWizardHandler extends WatcherHandler {
   constructor(server, client, config) {
     super(server, client, config);
+    // Use Elasticsearch API because Kibana savedObjectsClient
+    // can't be used without session user from request
+    this._client = apiClient(server, 'elasticsearchAPI');
   }
 
 
@@ -33,7 +37,7 @@ export default class WatcherWizardHandler extends WatcherHandler {
           return new WarningAndLog(this.log, 'no data satisfy condition');
         }
       } catch (err) {
-        throw new Error('apply condition "script": ' + err.toString());
+        throw new WatcherWizardHandlerError('apply condition "script"', err);
       }
     }
     return new SuccessAndLog(this.log, 'successfully applied condition', { payload });
@@ -54,10 +58,9 @@ export default class WatcherWizardHandler extends WatcherHandler {
     let payload;
 
     try {
-      payload = await this.search(request, method); // data from Elasticsearch
-      // this.log.debug(`payload: ${JSON.stringify(payload)}`);
+      payload = await this._client.search(request, method); // data from Elasticsearch
     } catch (err) {
-      throw err;
+      throw new WatcherWizardHandlerError('exec search', err);
     }
 
     try {
@@ -69,7 +72,7 @@ export default class WatcherWizardHandler extends WatcherHandler {
         payload = resp.payload;
       }
     } catch (err) {
-      throw err;
+      throw new WatcherWizardHandlerError('exec condition', err);
     }
 
     this.doActions(payload, this.server, actions, task);
@@ -83,20 +86,21 @@ export default class WatcherWizardHandler extends WatcherHandler {
   */
   async execute(task) {
     try {
-      const {method, search, condition, transform, actions} = this._checkWatcher(task);
-      if (this.config.settings.authentication.impersonate || task._source.impersonate) {
-        this.client = await this.getImpersonatedClient(task._id);
+      const { method, search, condition, transform } = this._checkWatcher(task);
+      if (this.config.settings.authentication.impersonate || task.impersonate) {
+        await this._client.impersonate(task.id);
       }
-      return await this._execute(task, method, search.request, condition, transform, actions);
+      return await this._execute(task, method, search.request, condition, transform, task.actions);
     } catch (err) {
-      logHistory({
+      err = new WatcherWizardHandlerError('execute wizard watcher', err);
+      this._client.logAlarm({
         server: this.server,
-        watcherTitle: task._source.title,
-        message: 'execute wizard watcher: ' + err.toString(),
+        watcherTitle: task.title,
+        message: err.toString(),
         level: 'high',
         isError: true,
       });
-      throw new Error('execute wizard watcher: ' + err.toString());
+      throw err;
     }
   }
 }

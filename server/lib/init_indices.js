@@ -17,6 +17,7 @@
  * limitations under the License.
  */
 
+import { getTodaysAlarmIndex } from './helpers';
 import getElasticsearchClient from './get_elasticsearch_client';
 import Log from './log';
 
@@ -49,6 +50,10 @@ const updateMappingTypes = function ({ mappings, watcherType, scriptType, userTy
 */
 const createIndex = async function ({ server, config, index, mappings, alarmIndex}) {
   const log = new Log(config.app_name, server, 'init_indices');
+
+  if (alarmIndex) {
+    index = getTodaysAlarmIndex(index);
+  }
   log.info(`checking ${index} index ...`);
 
   try {

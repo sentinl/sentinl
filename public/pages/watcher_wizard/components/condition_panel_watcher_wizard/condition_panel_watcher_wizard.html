@@ -17,55 +17,13 @@
           </div> <!-- END header -->
           <div class="row watcher-wizard-panel-paragraph">
             <div class="watcher-wizard-condition-dd-menu col-md-12">
-              <ul>
-                <li class="watcher-wizard-condition-dd">
-                  <dd-watcher-agg-type
-                    agg-type-selected="conditionPanelWatcherWizard.watcher.wizard.chart_query_params.queryType"
-                    agg-type-on-select="conditionPanelWatcherWizard.condition.type.handleSelect(type)"
-                    text-limit="conditionPanelWatcherWizard.condition.textLimit"
-                  ></dd-watcher-agg-type/>
-                </li>
-                <li class="watcher-wizard-condition-dd">
-                  <dd-watcher-agg-field
-                    agg-enabled="conditionPanelWatcherWizard.condition.field.aggEnabled"
-                    active-field="{{conditionPanelWatcherWizard.watcher.wizard.chart_query_params.field}}"
-                    field-names="conditionPanelWatcherWizard.indexesData.fieldNames"
-                    time-field="{{conditionPanelWatcherWizard.watcher.wizard.chart_query_params.timeField}}"
-                    on-select-field="conditionPanelWatcherWizard.condition.field.handleFieldSelect(field)"
-                    on-select-time-field="conditionPanelWatcherWizard.condition.field.handleTimeFieldSelect(timeField)"
-                    text-limit="conditionPanelWatcherWizard.condition.textLimit"
-                  ></dd-watcher-agg-field/>
-                </li>
-                <li class="watcher-wizard-condition-dd">
-                  <dd-watcher-agg-over
-                    agg-over-options="conditionPanelWatcherWizard.watcher.wizard.chart_query_params.over"
-                    agg-field-names="conditionPanelWatcherWizard.indexesData.fieldNames"
-                    agg-over-on-select="conditionPanelWatcherWizard.condition.over.handleSelect(over)"
-                    text-limit="conditionPanelWatcherWizard.condition.textLimit"
-                  ></dd-watcher-agg-over/>
-                </li>
-                <li class="watcher-wizard-condition-dd">
-                  <dd-watcher-agg-threshold
-                    agg-threshold-options="conditionPanelWatcherWizard.watcher.wizard.chart_query_params.threshold"
-                    agg-threshold-on-select="conditionPanelWatcherWizard.condition.threshold.handleSelect(direction, n)"
-                    text-limit="conditionPanelWatcherWizard.condition.textLimit"
-                  ></dd-watcher-agg-threshold/>
-                </li>
-                <li class="watcher-wizard-condition-dd">
-                  <dd-watcher-agg-time
-                    agg-time-options="conditionPanelWatcherWizard.watcher.wizard.chart_query_params.last"
-                    agg-time-on-select="conditionPanelWatcherWizard.condition.last.handleSelect(unit, n)"
-                    text-limit="conditionPanelWatcherWizard.condition.textLimit"
-                  ></dd-watcher-agg-time/>
-                </li>
-                <li class="watcher-wizard-condition-dd">
-                  <dd-watcher-agg-interval
-                    agg-interval-options="conditionPanelWatcherWizard.watcher.wizard.chart_query_params.interval"
-                    agg-interval-on-select="conditionPanelWatcherWizard.condition.interval.handleSelect(unit, n)"
-                    text-limit="conditionPanelWatcherWizard.condition.textLimit"
-                  ></dd-watcher-agg-interval/>
-                </li>
-              </ul>
+              <wizard-condition-panel-expression
+                index-numeric-fields="conditionPanelWatcherWizard.indexesData.fieldNames.numeric"
+                index-date-fields="conditionPanelWatcherWizard.indexesData.fieldNames.date"
+                index-text-fields="conditionPanelWatcherWizard.indexesData.fieldNames.text"
+                chart-query-params="conditionPanelWatcherWizard.watcher.wizard.chart_query_params"
+                on-change="conditionPanelWatcherWizard.conditionExpression.handleChartParamsChange"
+              ></wizard-condition-panel-expression>
             </div>
             <div id="watcher-wizard-condition-tabset">
               <uib-tabset active="active">
@@ -131,14 +89,7 @@
                     <div class="col-md-12">
                       <div class="form-group">
                         <small class="form-text text-muted">Chart query (read only). <a ng-click="conditionPanelWatcherWizard.turnIntoAdvanced()">Convert to advanced</a></small>
-                        
-                        <div
-                          readonly
-                          ui-ace="conditionPanelWatcherWizard.aceOptions({mode: 'json', maxLines: 50, minLines: 50})"
-                          ng-model="conditionPanelWatcherWizard.rawDoc.chart.text"
-                        >
-                          {{conditionPanelWatcherWizard.rawDoc.chart.text}}
-                        </div>
+                        <ui-code-editor value="conditionPanelWatcherWizard.rawDoc.chart.text" mode="json" max-lines="50" min-lines="50" is-read-only="true"></ui-code-editor>
                       </div>
                     </div>
                   </div> <!-- END -->
@@ -148,13 +99,7 @@
                     <div class="col-md-12">
                       <div class="form-group">
                         <small class="form-text text-muted">Watcher raw (read only). <a ng-click="conditionPanelWatcherWizard.turnIntoAdvanced()">Convert to advanced</a></small>
-                        <div
-                          readonly
-                          ui-ace="conditionPanelWatcherWizard.aceOptions({mode: 'json', maxLines: 50, minLines: 50})"
-                          ng-model="conditionPanelWatcherWizard.rawDoc.watcher.text"
-                        >
-                          {{conditionPanelWatcherWizard.rawDoc.watcher.text}}
-                        </div>
+                        <ui-code-editor value="conditionPanelWatcherWizard.rawDoc.watcher.text" mode="json" max-lines="50" min-lines="50" is-read-only="true"></ui-code-editor>
                       </div>
                     </div>
                   </div> <!-- END -->

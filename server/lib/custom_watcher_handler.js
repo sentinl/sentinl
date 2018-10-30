@@ -4,9 +4,8 @@ import moment from 'moment';
 import WarningAndLog from './messages/warning_and_log';
 import SuccessAndLog from './messages/success_and_log';
 import WatcherHandler from './watcher_handler';
-import kibiUtils from 'kibiutils';
-import logHistory from './log_history';
 import sirenFederateHelper from './siren/federate_helper';
+import apiClient from './api_client';
 
 /**
 * Helper class to handle watchers
@@ -14,6 +13,9 @@ import sirenFederateHelper from './siren/federate_helper';
 export default class CustomWatcherHandler extends WatcherHandler {
   constructor(server, client, config) {
     super(server, client, config);
+    // Use Elasticsearch API because Kibana savedObjectsClient
+    // can't be used without session user from request
+    this._client = apiClient(server, 'elasticsearchAPI');
     this.savedObjectsClient = this.server.savedObjectsClientFactory({
       callCluster: this.server.plugins.elasticsearch.getCluster('admin')
     });
@@ -49,34 +51,33 @@ export default class CustomWatcherHandler extends WatcherHandler {
    */
   async execute(task, { async = false } = {}) {
     try {
-      const templateScript = await this.getWatchersTemplate(task._source.custom.type);
+      const templateScript = await this.getWatchersTemplate(task.custom.type);
 
       const template = eval(templateScript.scriptSource); // eslint-disable-line no-eval
 
-      if (this.config.settings.authentication.impersonate || task._source.impersonate) {
-        this.client = await this.getImpersonatedClient(task._id);
+      if (this.config.settings.authentication.impersonate || task.impersonate) {
+        await this._client.impersonate(task.id);
       }
-      const client = { search: this.client[this.getAvailableSearchMethod()].bind(this.client) };
+      const client = { search: this._client[this.getAvailableSearchMethod()].bind(this._client) };
 
       const searchParams = {
-        defaultRequest: this.createDefaultRequest(task._source.input.search.request, task._source.trigger.schedule.later, async),
-        ...task._source.input.search.request
+        defaultRequest: this.createDefaultRequest(task.input.search.request, task.trigger.schedule.later, async),
+        ...task.input.search.request
       };
 
-      const response = await template.search(client, searchParams, task._source.custom.params);
-      const condition = template.condition(response, searchParams, task._source.custom.params);
+      const response = await template.search(client, searchParams, task.custom.params);
+      const condition = template.condition(response, searchParams, task.custom.params);
 
       if (condition) {
-        this.doActions(response, this.server, task._source.actions, task);
+        this.doActions(response, this.server, task.actions, task);
         return new SuccessAndLog(this.log, 'successfuly executed');
       } else {
         return new WarningAndLog(this.log, 'no data satisfy condition');
       }
 
     } catch (err) {
-      logHistory({
-        server: this.server,
-        watcherTitle: task._source.title,
+      this._client.logAlarm({
+        watcherTitle: task.title,
         message: 'execute custom watcher: ' + err.toString(),
         level: 'high',
         isError: true,
@@ -90,7 +91,7 @@ export default class CustomWatcherHandler extends WatcherHandler {
     let method = 'search';
     try {
       if (sirenFederateHelper.federateIsAvailable(this.server)) {
-        method = sirenFederateHelper.getClientMethod(this.client);
+        method = sirenFederateHelper.getClientMethod(this._client);
       }
     } catch (err) {
       this.log.warning('Siren federate: "elasticsearch.plugins" is not available when running from kibana: ' + err.toString());

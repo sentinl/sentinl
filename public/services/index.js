@@ -4,19 +4,19 @@ import DataTransfer from './data_transfer/index';
 import NavMenu from './nav_menu/index';
 import SentinlLog from './sentinl_log/index';
 import SentinlHelper from './sentinl_helper/index';
-import WatcherFactory from './watcher_factory/index';
-import UserFactory from './user_factory/index';
-import AlarmFactory from './alarm_factory/index';
-import ReportFactory from './report_factory/index';
+import WatcherService from './watcher_service';
+import UserService from './user_service';
+import AlarmService from './alarm_service';
+import ReportService from './report_service';
 
 export default angular.module('apps/sentinl.services', [
   NavMenu.name,
   DataTransfer.name,
   SentinlLog.name,
   SentinlHelper.name,
-  WatcherFactory.name,
-  UserFactory.name,
-  AlarmFactory.name,
-  ReportFactory.name,
+  WatcherService.name,
+  UserService.name,
+  AlarmService.name,
+  ReportService.name,
 ]);
 

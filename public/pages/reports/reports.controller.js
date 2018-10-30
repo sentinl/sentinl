@@ -3,7 +3,7 @@ import moment from 'moment';
 
 function ReportsController($rootScope, $scope, $route, $interval,
   $timeout, timefilter, Private, createNotifier, $window, $uibModal,
-  navMenu, globalNavState, reportFactory, COMMON, confirmModal, sentinlLog) {
+  navMenu, globalNavState, reportService, COMMON, confirmModal, sentinlLog) {
   'ngInject';
 
   $scope.title = COMMON.reports.title;
@@ -18,7 +18,7 @@ function ReportsController($rootScope, $scope, $route, $interval,
   const log = sentinlLog;
   log.initLocation(COMMON.reports.title);
 
-  $scope.reportService = reportFactory.get();
+  $scope.reportService = reportService;
 
   function errorMessage(err) {
     log.error(err);
@@ -39,7 +39,7 @@ function ReportsController($rootScope, $scope, $route, $interval,
   $scope.timeInterval = timefilter.time;
 
   $scope.isScreenshot = function (report) {
-    return report._source.attachment.charAt(0) === 'i';
+    return report.attachment.charAt(0) === 'i';
   };
 
   const getReports = function (interval) {
@@ -116,7 +116,7 @@ function ReportsController($rootScope, $scope, $route, $interval,
   $scope.deleteReport = function (index, report) {
     async function doDelete() {
       try {
-        const resp = await $scope.reportService.delete(report._id, report._index);
+        const resp = await $scope.reportService.delete(report.id, report._index);
         $scope.reports.splice(index - 1, 1);
         notify.info(`Deleted report ${resp}`);
         getReports($scope.timeInterval);

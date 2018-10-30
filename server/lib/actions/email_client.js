@@ -3,6 +3,7 @@ import Promise from 'bluebird';
 import { readFileSync } from 'fs';
 import { forEach, isObject } from 'lodash';
 import { pickDefinedValues } from '../helpers';
+import { ActionError } from '../errors';
 
 class Email {
   constructor({
@@ -35,7 +36,7 @@ class Email {
         });
       }
     } catch (err) {
-      throw new Error('read TLS options: ' + err.toString());
+      throw new ActionError('read TLS options', err);
     }
 
     try {
@@ -45,7 +46,7 @@ class Email {
         });
       }
     } catch (err) {
-      throw new Error('read SSL options: ' + err.toString());
+      throw new ActionError('read SSL options', err);
     }
 
     try {
@@ -63,19 +64,19 @@ class Email {
 
       this.client = emailjs.server.connect(request);
     } catch (err) {
-      throw new Error('invalid server settings: ' + err.toString());
+      throw new ActionError('invalid server settings', err);
     }
   }
 
   send({text, from, to, subject, attachment}) {
     if (!from || !to) {
-      return Promise.reject('obligatory options in email: from and to');
+      return Promise.reject(new ActionError('obligatory options in email: from and to'));
     }
 
     return new Promise((resolve, reject) => {
       this.client.send(pickDefinedValues({text, from, to, subject, attachment}), (err, message) => {
         if (err) {
-          reject('send email: ' + err.toString());
+          reject(new ActionError('send email', err));
         }
         resolve(JSON.stringify(message));
       });

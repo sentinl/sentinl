@@ -29,10 +29,10 @@ import rison from 'rison';
 import mustache from 'mustache';
 import { WebClient } from '@slack/client';
 import getConfiguration from '../get_configuration';
-import getElasticsearchClient from '../get_elasticsearch_client';
-import logHistory from '../log_history';
+import apiClient from '../api_client';
 import EmailClient from './email_client';
 import Log from '../log';
+import { ActionError } from '../errors';
 
 // actions
 import reportAction from './report';
@@ -55,18 +55,22 @@ const toString = function (message) {
 export default function (server, actions, payload, task) {
   const config = getConfiguration(server);
   let log = new Log(config.app_name, server, 'do_action');
-  const client = getElasticsearchClient({server, config});
+
+  // Use Elasticsearch API because Kibana savedObjectsClient
+  // can't be used without session user from request
+  const client = apiClient(server, 'elasticsearchAPI');
 
   /* Email Settings */
   let email;
   try {
     email = new EmailClient(config.settings.email);
   } catch (err) {
-    log.error('email client: ' + err.toString());
-    logHistory({
-      server,
-      watcherTitle: task._source.title,
-      message: 'email client: ' + err.toString(),
+    err = new ActionError('email client', err);
+    log.error(`${task.title}: ${err.message}: ${err.stack}`);
+
+    client.logAlarm({
+      watcherTitle: task.title,
+      message: err.toString(),
       level: 'high',
       isError: true,
     });
@@ -79,11 +83,12 @@ export default function (server, actions, payload, task) {
       slack = new WebClient(config.settings.slack.token);
     }
   } catch (err) {
-    log.error('slack client: ' + err.toString());
-    logHistory({
-      server,
-      watcherTitle: task._source.title,
-      message: 'slack client: ' + err.toString(),
+    err = new ActionError('slack client', err);
+    log.error(`${task.title}: ${err.message}: ${err.stack}`);
+
+    client.logAlarm({
+      watcherTitle: task.title,
+      message: err.toString(),
       level: 'high',
       isError: true,
     });
@@ -117,9 +122,9 @@ export default function (server, actions, payload, task) {
     }
   };
 
-  if (task._source.dashboard_link) {
-    const scheduleStartTime = moment(later.schedule(later.parse.text(task._source.trigger.schedule.later)).prev(2)[1]);
-    task._source.dashboard_link = _updateDashboardLinkTimeRange(task._source.dashboard_link, scheduleStartTime, moment());
+  if (task.dashboard_link) {
+    const scheduleStartTime = moment(later.schedule(later.parse.text(task.trigger.schedule.later)).prev(2)[1]);
+    task.dashboard_link = _updateDashboardLinkTimeRange(task.dashboard_link, scheduleStartTime, moment());
   }
 
   /* Loop Actions */
@@ -145,23 +150,24 @@ export default function (server, actions, payload, task) {
         try {
           priority = action.console.priority || 'medium';
           formatterConsole = action.console.message ? action.console.message : '{{ payload }}';
-          message = mustache.render(formatterConsole, {payload: payload,});
+          message = mustache.render(formatterConsole, { payload });
+          log.debug('console message', message);
           log.debug('console payload', payload);
 
-          await logHistory({
-            server,
-            watcherTitle: task._source.title,
+          await client.logAlarm({
+            watcherTitle: task.title,
             actionName,
             message: toString(message),
             level: priority,
-            payload: !task._source.save_payload ? {} : payload,
+            payload: !task.save_payload ? {} : payload,
           });
         } catch (err) {
-          log.error('console action: ' + err.toString());
-          logHistory({
-            server,
-            watcherTitle: task._source.title,
-            message: 'console action: ' + err.toString(),
+          err = new ActionError('console action', err);
+          log.error(`${task.title}: ${err.message}: ${err.stack}`);
+
+          client.logAlarm({
+            watcherTitle: task.title,
+            message: err.toString(),
             level: 'high',
             isError: true,
             actionName,
@@ -177,33 +183,21 @@ export default function (server, actions, payload, task) {
     /*
     /* ***************************************************************************** */
     if (action.throttle_period) {
-      (async () => {
-        try {
-          const id = `${task._id}_${actionId}`;
-          if (debounce(id, action.throttle_period)) {
-            log.info(`action throttled, watcher id: ${task._id}, action name: ${actionId}`);
-            await logHistory({
-              server,
-              watcherTitle: task._source.title,
-              actionName,
-              message: `Action Throttled for ${action.throttle_period}`,
-              level: priority,
-              payload: {}
-            });
-            return;
-          }
-        } catch (err) {
-          log.error('throttle: ' + err.toString());
-          logHistory({
-            server,
-            watcherTitle: task._source.title,
-            message: 'throttle: ' + err.toString(),
-            level: 'high',
-            isError: true,
-            actionName,
-          });
-        }
-      })();
+      const id = `${task._id}_${actionId}`;
+
+      if (debounce(id, action.throttle_period)) {
+        log.info(`action throttled, watcher id: ${task._id}, action name: ${actionId}`);
+
+        client.logAlarm({
+          server,
+          watcherTitle: task.title,
+          actionName,
+          message: `action Throttled for ${action.throttle_period}`,
+          level: priority
+        });
+
+        return;
+      }
     }
 
     /* ***************************************************************************** */
@@ -238,20 +232,19 @@ export default function (server, actions, payload, task) {
             }
           }
 
-          subject = mustache.render(formatterSubject, {payload: payload, watcher: task._source});
-          text = mustache.render(formatterBody, {payload: payload, watcher: task._source});
+          subject = mustache.render(formatterSubject, {payload: payload, watcher: task});
+          text = mustache.render(formatterBody, {payload: payload, watcher: task});
           priority = action.email.priority || 'medium';
 
 
           if (!action.email.stateless) {
             // Log Event
-            await logHistory({
-              server,
-              watcherTitle: task._source.title,
+            await client.logAlarm({
+              watcherTitle: task.title,
               actionName,
               message: toString(text),
               level: priority,
-              payload: !task._source.save_payload ? {} : payload,
+              payload: !task.save_payload ? {} : payload,
             });
           }
 
@@ -268,11 +261,12 @@ export default function (server, actions, payload, task) {
             });
           }
         } catch (err) {
-          log.error('email action: ' + err.toString());
-          logHistory({
-            server,
-            watcherTitle: task._source.title,
-            message: 'email action: ' + err.toString(),
+          err = new ActionError('email action', err);
+          log.error(`${task.title}: ${err.message}: ${err.stack}`);
+
+          client.logAlarm({
+            watcherTitle: task.title,
+            message: err.toString(),
             level: 'high',
             isError: true,
             actionName,
@@ -312,20 +306,19 @@ export default function (server, actions, payload, task) {
           }
 
           let formatterConsole = action.email_html.html || '<p>Series Alarm {{ payload._id}}: {{payload.hits.total}}</p>';
-          subject = mustache.render(formatterSubject, {payload: payload, watcher: task._source});
-          text = mustache.render(formatterBody, {payload: payload, watcher: task._source});
-          html = mustache.render(formatterConsole, {payload: payload, watcher: task._source});
+          subject = mustache.render(formatterSubject, {payload: payload, watcher: task});
+          text = mustache.render(formatterBody, {payload: payload, watcher: task});
+          html = mustache.render(formatterConsole, {payload: payload, watcher: task});
           priority = action.email_html.priority || 'medium';
 
           if (!action.email_html.stateless) {
             // Log Event
-            await logHistory({
-              server,
-              watcherTitle: task._source.title,
+            await client.logAlarm({
+              watcherTitle: task.title,
               actionName,
               message: toString(text),
               level: priority,
-              payload: !task._source.save_payload ? {} : payload,
+              payload: !task.save_payload ? {} : payload,
             });
           }
 
@@ -348,11 +341,12 @@ export default function (server, actions, payload, task) {
             });
           }
         } catch (err) {
-          log.error('html email action: ' + err.toString());
-          logHistory({
-            server,
-            watcherTitle: task._source.title,
-            message: 'html email action: ' + err.toString(),
+          err = new ActionError('html email action', err);
+          log.error(`${task.title}: ${err.message}: ${err.stack}`);
+
+          client.logAlarm({
+            watcherTitle: task.title,
+            message: err.toString(),
             level: 'high',
             isError: true,
             actionName,
@@ -393,17 +387,18 @@ export default function (server, actions, payload, task) {
           await reportAction({
             server,
             action,
-            watcherTitle: task._source.title,
+            watcherTitle: task.title,
             esPayload: payload,
             actionName,
             emailClient: email,
           });
         } catch (err) {
-          log.error(`${task._source.title}, report action: ` + err.toString());
-          logHistory({
-            server,
-            watcherTitle: task._source.title,
-            message: 'report action: ' + err.toString(),
+          err = new ActionError('report action', err);
+          log.error(`${task.title}: ${err.message}: ${err.stack}`);
+
+          client.logAlarm({
+            watcherTitle: task.title,
+            message: err.toString(),
             level: 'high',
             isError: true,
             isReport: true,
@@ -427,19 +422,18 @@ export default function (server, actions, payload, task) {
         try {
           let formatter;
           formatter = action.slack.message ? action.slack.message : 'Series Alarm {{ payload._id}}: {{payload.hits.total}}';
-          message = mustache.render(formatter, {payload: payload, watcher: task._source});
+          message = mustache.render(formatter, {payload: payload, watcher: task});
           priority = action.slack.priority || 'medium';
           log.debug(`webhook to #${action.slack.channel}, message: ${message}`);
 
           if (!action.slack.stateless) {
             // Log Event
-            await logHistory({
-              server,
-              watcherTitle: task._source.title,
+            await client.logAlarm({
+              watcherTitle: task.title,
               actionName,
               message: toString(message),
               level: priority,
-              payload: !task._source.save_payload ? {} : payload,
+              payload: !task.save_payload ? {} : payload,
             });
           }
 
@@ -454,14 +448,16 @@ export default function (server, actions, payload, task) {
             });
             log.info(`Message sent to slack channel ${resp.channel} as ${resp.message.username}`);
           } catch (err) {
-            throw new Error(`Failed to send message to channel ${action.slack.channel} using token ${config.settings.slack.token}, ${err}`);
+            const msg = `Failed to send message to channel ${action.slack.channel} using token ${config.settings.slack.token}`;
+            throw new ActionError(msg, err);
           }
         } catch (err) {
-          log.error(`${task._source.title}, report action: ` + err.toString());
-          logHistory({
-            server,
-            watcherTitle: task._source.title,
-            message: 'slack action: ' + err.toString(),
+          err = new ActionError('slack action', err);
+          log.error(`${task.title}: ${err.message}: ${err.stack}`);
+
+          client.logAlarm({
+            watcherTitle: task.title,
+            message: err.toString(),
             level: 'high',
             isError: true,
             actionName,
@@ -489,20 +485,19 @@ export default function (server, actions, payload, task) {
         try {
           // Log Alarm Event
           if (!action.webhook.stateless && payload.constructor === Object && Object.keys(payload).length) {
-            await logHistory({
-              server,
-              watcherTitle: task._source.title,
+            await client.logAlarm({
+              watcherTitle: task.title,
               actionName,
               message: toString(action.webhook.message),
               level: action.webhook.priority,
-              payload: !task._source.save_payload ? {} : payload,
+              payload: !task.save_payload ? {} : payload,
             });
           }
 
           const http = action.webhook.use_https ? require('https') : require('http');
           const templateData = {
             payload: payload,
-            watcher: task._source
+            watcher: task
           };
           let options;
           let req;
@@ -545,11 +540,12 @@ export default function (server, actions, payload, task) {
           }
           req.end();
         } catch (err) {
-          log.error(`${task._source.title}, report action: ` + err.toString());
-          logHistory({
-            server,
-            watcherTitle: task._source.title,
-            message: 'webhook action: ' + err.toString(),
+          err = new ActionError('webhook action', err);
+          log.error(`${task.title}: ${err.message}: ${err.stack}`);
+
+          client.logAlarm({
+            watcherTitle: task.title,
+            message: err.toString(),
             level: 'high',
             isError: true,
             actionName,
@@ -572,24 +568,24 @@ export default function (server, actions, payload, task) {
           let message;
           let esFormatter;
           esFormatter = action.elastic.message || '{{payload}}';
-          message = mustache.render(esFormatter, {payload: payload, watcher: task._source});
+          message = mustache.render(esFormatter, {payload: payload, watcher: task});
           priority = action.elastic.priority || 'medium';
           log.debug(`logged message to elastic: ${message}`);
           // Log Event
-          await logHistory({
-            server,
-            watcherTitle: task._source.title,
+          await client.logAlarm({
+            watcherTitle: task.title,
             actionName,
             message: toString(message),
             level: priority,
-            payload: !task._source.save_payload ? {} : payload,
+            payload: !task.save_payload ? {} : payload,
           });
         } catch (err) {
-          log.error(`${task._source.title}, report action: ` + err.toString());
-          logHistory({
-            server,
-            watcherTitle: task._source.title,
-            message: 'elastic action: ' + err.toString(),
+          err = new ActionError('elastic action', err);
+          log.error(`${task.title}: ${err.message}: ${err.stack}`);
+
+          client.logAlarm({
+            watcherTitle: task.title,
+            message: err.toString(),
             level: 'high',
             isError: true,
             actionName,

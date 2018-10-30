@@ -12,12 +12,7 @@ import './components/title_panel_watcher_wizard/components/watcher_wizard_every_
 import './components/title_panel_watcher_wizard/components/watcher_wizard_add_index';
 import './components/condition_panel_watcher_wizard';
 import './components/condition_panel_watcher_wizard/services/watcher_wizard_chart_service';
-import './components/condition_panel_watcher_wizard/components/dd_watcher_agg_type';
-import './components/condition_panel_watcher_wizard/components/dd_watcher_agg_field';
-import './components/condition_panel_watcher_wizard/components/dd_watcher_agg_over';
-import './components/condition_panel_watcher_wizard/components/dd_watcher_agg_time';
-import './components/condition_panel_watcher_wizard/components/dd_watcher_agg_interval';
-import './components/condition_panel_watcher_wizard/components/dd_watcher_agg_threshold';
+import './components/condition_panel_watcher_wizard/components/wizard_condition_panel_expression';
 import './components/action_panel_watcher_wizard';
 import './components/action_panel_watcher_wizard/components/watcher_wizard_add_action';
 import './components/action_panel_watcher_wizard/components/watcher_wizard_email_action';
@@ -46,8 +41,7 @@ routes
         const $route = $injector.get('$route');
         const kbnUrl = $injector.get('kbnUrl');
         const config = $injector.get('sentinlConfig');
-        const watcherFactory = $injector.get('watcherFactory');
-        const watcherService = watcherFactory.get(config.api.type);
+        const watcherService = $injector.get('watcherService');
         const notifier = new Notifier({ location: 'Watcher' });
         const watcherId = $route.current.params.id;
 
@@ -75,7 +69,7 @@ routes
         }
 
         return watcherService.get(watcherId).then(function (watcher) {
-          watcher.$edit = true;
+          watcher._edit = true;
           return watcher;
         }).catch(function (err) {
           notifier.error(`get watcher: ${err.toString()}`);
