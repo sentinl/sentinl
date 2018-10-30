@@ -8,7 +8,7 @@ class WatcherWizardEverySchedule {
     this.onSelect = this.onSelect || this.$scope.onSelect;
 
     this.schedule_timezone = get(sentinlConfig, 'es.watcher.schedule_timezone'); // local, utc
-    this.selected = 'minutes';
+    this.selected = this._getInterval();
     this.options = ['seconds', 'minutes', 'hours', 'days', 'months', 'years'];
     this.number = this._getNumber();
   }
@@ -17,6 +17,12 @@ class WatcherWizardEverySchedule {
     const number = /every\s(\d+)\s\w+/.exec(this.watcher.trigger.schedule.later);
     if (!number) return 1;
     return +number[1];
+  }
+
+  _getInterval() {
+    const interval = /every\s\d+\s(\w+)/.exec(this.watcher.trigger.schedule.later);
+    if (!interval) return 'minutes';
+    return interval[1];
   }
 
   handleChange() {

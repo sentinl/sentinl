@@ -34,7 +34,6 @@ import 'ui/timepicker';
 import 'ui/timefilter';
 import 'ui/directives/pretty_duration';
 
-import 'ui/saved_objects';
 import 'ui/courier';
 import 'ui/modals';
 import 'ui/react_components';

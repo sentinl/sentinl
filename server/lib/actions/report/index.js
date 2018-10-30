@@ -1,9 +1,9 @@
-import logHistory from '../../log_history';
 import Log from '../../log';
 import getConfiguration from '../../get_configuration';
 import reportFactory from './report_factory';
 import { defaultsDeep, get } from 'lodash';
 import { renderMustacheEmailSubjectAndText } from '../helpers';
+import apiClient from '../../api_client';
 
 export default async function reportAction({
   server,
@@ -16,6 +16,7 @@ export default async function reportAction({
   try {
     const config = getConfiguration(server);
     const log = new Log(config.app_name, server, 'report');
+    const client = apiClient(server, 'elasticsearchAPI');
 
     action.report = defaultsDeep(action.report, config.settings.report.action);
 
@@ -24,7 +25,7 @@ export default async function reportAction({
       browserPath = server.plugins.sentinl.chrome_path;
     }
 
-    const { subject, text } = renderMustacheEmailSubjectAndText(actionName, action.subject, action.body, esPayload);
+    const { subject, text } = renderMustacheEmailSubjectAndText(actionName, action.report.subject, action.report.body, esPayload);
 
     let authSelectorUsername = action.report.auth.selector_username;
     let authSelectorPassword = action.report.auth.selector_password;
@@ -91,8 +92,7 @@ export default async function reportAction({
 
     try {
       if (!options.isStateless) {
-        logHistory({
-          server,
+        client.logAlarm({
           actionName,
           watcherTitle,
           level: options.actionLevel,
@@ -111,8 +111,7 @@ export default async function reportAction({
       });
     } catch (err) {
       log.error(`${watcherTitle} report, send email: ` + err.toString());
-      logHistory({
-        server,
+      client.logAlarm({
         actionName,
         watcherTitle,
         level: 'high',

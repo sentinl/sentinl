@@ -18,7 +18,11 @@ const WatchConfiguration = {
     spy: Joi.boolean(),
     trigger: Joi.any(),
     wizard: Joi.any(),
-    dashboard_link: Joi.string()
+    dashboard_link: Joi.string(),
+    custom: Joi.object().keys({
+      type: Joi.string(),
+      params: Joi.any()
+    })
   })
 };
 

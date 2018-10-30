@@ -21,40 +21,10 @@ import path from 'path';
 import { existsSync, readFileSync, appendFileSync } from 'fs';
 import { forEach, difference } from 'lodash';
 
-function loadLibs(requirements) {
-  const sirenSavedObjectsAPI = __dirname.split('/').slice(0, -2).join('/') + '/src/siren_core_plugins/saved_objects_api';
-  const appFile = __dirname + '/public/app.js';
-
-  let customer = 'kibana';
-  if (existsSync(sirenSavedObjectsAPI)) {
-    requirements.push('saved_objects_api');
-    customer = 'siren';
-  }
-
-  const libsToImport = [
-    `import './services/${customer}/saved_watchers/index';`,
-    `import './services/${customer}/saved_users/index';`,
-    `import './services/${customer}/saved_scripts/index';`,
-  ];
-
-  const data = readFileSync(appFile);
-  const libs = data.toString().trim().split('\n');
-
-  forEach(difference(libsToImport, libs), (lib) => {
-    appendFileSync(appFile, `${lib}\n`);
-  });
-
-  return requirements;
-}
-
 export default function (kibana) {
   let requirements = ['kibana', 'elasticsearch'];
 
-  try {
-    requirements = loadLibs(requirements);
-  } catch (err) {
-    throw new Error('put libs into app.js: ' + err.message);
-  }
+  const platformIsSiren = existsSync(path.resolve('src/siren_core_plugins/saved_objects_api'));
 
   return new kibana.Plugin({
     require: requirements,
@@ -78,39 +48,19 @@ export default function (kibana) {
         injectVars: function (server, options) {
           const config = server.config();
           return {
-            kbnIndex: config.get('kibana.index'),
-            esShardTimeout: config.get('elasticsearch.shardTimeout'),
-            esApiVersion: config.get('elasticsearch.apiVersion'),
             sentinlConfig: {
               appName: config.get('sentinl.app_name'),
-              api: {
-                type: config.get('sentinl.api.type'),
-              },
               es: {
-                default_index: config.get('sentinl.es.default_index'),
-                default_type: config.get('sentinl.es.default_type'),
-                watcher_type: config.get('sentinl.es.watcher_type'),
-                script_type: config.get('sentinl.es.script_type'),
-                alarm_type: config.get('sentinl.es.alarm_type'),
-                user_type: config.get('sentinl.es.user_type'),
-                number_of_results: config.get('sentinl.es.results'),
-                watcher: {
-                  schedule_timezone: config.get('sentinl.es.watcher.schedule_timezone'),
-                },
                 timezone: config.get('sentinl.es.timezone'),
-                timefield: config.get('sentinl.es.timefield'),
               },
               wizard: {
                 condition: {
-                  query_type: config.get('sentinl.settings.wizard.condition.query_type'),
-                  schedule_type: config.get('sentinl.settings.wizard.condition.schedule_type'),
+                  queryType: config.get('sentinl.settings.wizard.condition.query_type'),
+                  scheduleType: config.get('sentinl.settings.wizard.condition.schedule_type'),
                   over: config.get('sentinl.settings.wizard.condition.over'),
                   last: config.get('sentinl.settings.wizard.condition.last'),
                   interval: config.get('sentinl.settings.wizard.condition.interval'),
                 },
-              },
-              authentication: {
-                impersonate: config.get('sentinl.settings.authentication.impersonate'),
               },
             }
           };
@@ -144,7 +94,7 @@ export default function (kibana) {
           alarm_index: Joi.string().default('watcher_alarms'),
           user_type: Joi.string().default('sentinl-user'), // if you change this, also change the corresponding object type name here ./server/mappings/sentinl.json
           watcher_type: Joi.string().default('sentinl-watcher'), // if you change this, also change the corresponding object type name here ./server/mappings/sentinl.json
-          script_type: Joi.string().default('sentinl-script'), // if you change this, also change the corresponding object type name here ./server/mappings/sentinl.json
+          script_type: Joi.string().default('script'), // if you change this, also change the corresponding object type name here ./server/mappings/sentinl.json
           alarm_type: Joi.string().default('sentinl-alarm'),
           watcher: Joi.object({
             schedule_timezone: Joi.string().default('utc'), // local, utc

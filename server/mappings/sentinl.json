@@ -52,19 +52,10 @@
       },
       "dashboard_link": {
         "type": "text"
-      }
-    }
-  },
-  "sentinl-script": {
-    "properties": {
-      "title": {
-        "type": "text"
       },
-      "description": {
-        "type": "text"
-      },
-      "body": {
-        "type": "text"
+      "custom": {
+        "type": "object",
+        "enabled": false
       }
     }
   },

@@ -24,6 +24,8 @@
   },
   "dependencies": {
     "@elastic/datemath": "2.3.0",
+    "@elastic/eui": "4.3.0",
+    "@slack/client": "4.4.0",
     "angular": "1.4.8",
     "angular-chart.js": "1.1.1",
     "angular-touch": "1.4.8",
@@ -42,22 +44,24 @@
     "moment": "2.22.1",
     "moment-timezone": "0.5.16",
     "mustache": "2.3.0",
+    "ngreact": "0.5.1",
     "node-horseman": "3.3.0",
-    "@slack/client": "4.4.0",
     "phantom": "6.0.3",
     "puppeteer": "1.5.0",
+    "react": "16.5.2",
+    "react-dom": "^16.5.2",
     "rison": "0.1.1",
-    "sanitize-html": "^1.18.2",
+    "sanitize-html": "1.18.2",
     "sum-time": "1.0.0",
     "url-join": "4.0.0",
-    "uuid": "3.1.0",
-    "kibiutils": "sirensolutions/kibiutils#1.8.0"
+    "uuid": "3.1.0"
   },
   "devDependencies": {
     "babel-eslint": "6.1.2",
     "babel-plugin-angularjs-annotate": "0.8.2",
     "eslint": "3.14.1",
     "eslint-plugin-mocha": "4.8.0",
+    "expect.js": "0.3.1",
     "gulp": "3.9.1",
     "gulp-eslint": "1.1.1",
     "gulp-util": "3.0.8",
@@ -68,7 +72,8 @@
     "mkdirp": "0.5.1",
     "node-debug": "0.1.0",
     "rimraf": "2.5.4",
-    "rsync": "0.4.0"
+    "rsync": "0.4.0",
+    "sinon": "1.17.2"
   },
   "license": "Apache-2.0"
 }

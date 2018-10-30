@@ -7,7 +7,7 @@
             <div class="col-md-6">
               <header>
                 <h3 class="form-text">
-                  Watcher
+                  {{titlePanelWatcherWizard.titleText}}
                 </h3>
                 <small class="form-text text-muted">
                   Send alert via different channels when conditions are met
@@ -42,7 +42,7 @@
                 </small>
               </div>
             </div>
-            <div class="col-sm-2">
+            <div class="col-sm-6">
               <div class="form-group">
                 <label for="watcherPreferences">
                   <i class="fa fa-cog"></i> Preferences
@@ -70,10 +70,12 @@
           </div> <!-- END title -->
           <div class="row">
             <div class="col-sm-6">
-              <div class="form-group">
-                <label for="watcherIndex">
-                  Select an Index
-                </label>
+              <div class="form-group" ng-show="titlePanelWatcherWizard._indexInputDisabled">
+                <label for="watcherIndex">Selected search</label>
+                <input disabled class="form-control" ng-model="this.watcher.input.search.request.index">
+              </div>
+              <div class="form-group" ng-hide="titlePanelWatcherWizard._indexInputDisabled">
+                <label for="watcherIndex">Select an Index</label>
                 <watcher-wizard-add-index
                   watcher="titlePanelWatcherWizard.watcher"
                   on-index-change="titlePanelWatcherWizard.onIndexChange({index: index})"

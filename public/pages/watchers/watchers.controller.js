@@ -3,24 +3,25 @@ import { get, isObject, find, keys, forEach } from 'lodash';
 import moment from 'moment';
 import $ from 'jquery';
 import ace from 'ace';
+import { Notifier } from 'ui/notify';
+import { SentinlError } from '../../services';
+import { toastNotificationsFactory, timefilterFactory } from '../../factories';
+
+const notify = new Notifier({ location: 'Watchers' });
+const toastNotifications = toastNotificationsFactory();
 
 // WATCHERS CONTROLLER
-function  WatchersController($rootScope, $scope, $route, $interval,
-  $timeout, timefilter, Private, createNotifier, $window, $http, $uibModal, sentinlLog, navMenu,
-  globalNavState, $location, dataTransfer, Promise, COMMON, confirmModal,
-  wizardHelper, watcherFactory, userFactory, sentinlConfig) {
+function  WatchersController($injector, $scope, $route, $interval,
+  $timeout, Private, $window, $http, $uibModal, sentinlLog, navMenu,
+  globalNavState, $location, dataTransfer, Promise, confirmModal,
+  wizardHelper, watcherService, userService, sentinlConfig) {
   'ngInject';
 
-  $scope.title = COMMON.watchers.title;
-  $scope.description = COMMON.description;
-
-  const notify = createNotifier({
-    location: COMMON.watchers.title,
-  });
   const log = sentinlLog;
-  log.initLocation(COMMON.watchers.title);
+  log.initLocation('Watchers');
 
-  function errorMessage(err) {
+  function errorMessage(message, err) {
+    err = new SentinlError(message, err);
     log.error(err);
     notify.error(err);
   }
@@ -28,16 +29,22 @@ function  WatchersController($rootScope, $scope, $route, $interval,
   $scope.topNavMenu = navMenu.getTopNav('watchers');
   $scope.tabsMenu = navMenu.getTabs();
 
-  timefilter.enabled = false;
+  const timefilter = timefilterFactory($injector);
+  timefilter.enable(false);
+
   $scope.watchers = [];
   $scope.wizardHelper = wizardHelper;
 
-  $scope.watcherService = watcherFactory.get(sentinlConfig.api.type);
-  $scope.userService = userFactory.get(sentinlConfig.api.type);
+  $scope.watcherService = watcherService;
+  $scope.userService = userService;
 
   $scope.inputInfo = function (watcher) {
     const index = get(watcher, 'input.search.request.index');
-    if (index) return index.join(',');
+    if (Array.isArray(index)) {
+      return index.join(',');
+    } else if (index) {
+      return index;
+    }
     return get(watcher, 'input.search.kable.expression') || get(watcher, 'input.search.timelion.sheet');
   };
 
@@ -50,12 +57,12 @@ function  WatchersController($rootScope, $scope, $route, $interval,
     try {
       const resp = await $scope.watcherService.play(task.id);
       if (resp.warning) {
-        notify.warning(resp.message);
+        toastNotifications.addWarning(resp.message);
       } else {
-        notify.info('watcher executed');
+        toastNotifications.addSuccess('watcher executed');
       }
     } catch (err) {
-      errorMessage(err);
+      errorMessage('play watcher', err);
     }
   };
 
@@ -93,11 +100,12 @@ function  WatchersController($rootScope, $scope, $route, $interval,
   * Lists all existing watchers.
   */
   const listWatchers = async function () {
-    return $scope.watcherService.list().then(function (resp) {
-      $scope.watchers = resp;
-    }).catch(errorMessage).then(function () {
+    try {
+      $scope.watchers = await $scope.watcherService.list();
+    } catch (err) {
+      errorMessage('list watchers', err);
       importWatcherFromLocalStorage();
-    });
+    }
   };
 
   listWatchers();
@@ -119,18 +127,18 @@ function  WatchersController($rootScope, $scope, $route, $interval,
     async function doDelete() {
       try {
         await $scope.watcherService.delete(watcher.id);
-        notify.info(`deleted watcher ${watcher.title}`);
+        toastNotifications.addSuccess(`deleted watcher ${watcher.title}`);
         $scope.watchers.splice(index, 1);
 
         try {
           const user = await $scope.userService.get(watcher.id);
           await $scope.userService.delete(user.id);
-          notify.info(`deleted user ${user.id}`);
+          toastNotifications.addSuccess(`deleted user ${user.id}`);
         } catch (err) {
           log.warn(err.toString());
         }
       } catch (err) {
-        errorMessage(err);
+        errorMessage('delete watcher', err);
       }
     }
 
@@ -147,14 +155,14 @@ function  WatchersController($rootScope, $scope, $route, $interval,
   *
   * @param {integer} index - index number of watcher in $scope.watchers array.
   */
-  const saveWatcher = function (index) {
-    $scope.watcherService.save($scope.watchers[index])
-      .then(function (id) {
-        const status = $scope.watchers[index].disable ? 'Disabled' : 'Enabled';
-        const watcher = find($scope.watchers, (watcher) => watcher.id === id);
-        notify.info(`${status} watcher "${watcher.title}"`);
-      })
-      .catch(errorMessage);
+  const saveWatcher = async function (index) {
+    try {
+      await $scope.watcherService.save($scope.watchers[index]);
+      const status = $scope.watchers[index].disable ? 'Disabled' : 'Enabled';
+      toastNotifications.addSuccess(`${status} watcher "${$scope.watchers[index].title}"`);
+    } catch (err) {
+      errorMessage('save watcher', err);
+    }
   };
 
   /**
@@ -173,10 +181,13 @@ function  WatchersController($rootScope, $scope, $route, $interval,
   *
   * @param {string} type - action type (email, report).
   */
-  $scope.newWatcher = function (type) {
-    $scope.watcherService.new(type)
-      .then((watcher) => $scope.editWatcher(watcher, 'editor'))
-      .catch(errorMessage);
+  $scope.newWatcher = async function (type) {
+    try {
+      const watcher = await $scope.watcherService.new(type);
+      $scope.editWatcher(watcher, 'editor');
+    } catch (err) {
+      errorMessage('create watcher', err);
+    }
   };
 
   const currentTime = moment($route.current.locals.currentTime);
@@ -189,6 +200,13 @@ function  WatchersController($rootScope, $scope, $route, $interval,
   }, 1000);
   $scope.$watch('$destroy', unsubscribe);
 
+  $scope.getWatcherType = function (watcher) {
+    if (get(watcher, 'wizard.chart_query_params')) {
+      return 'wizard';
+    } else {
+      return 'advanced';
+    }
+  };
 };
 
 export default WatchersController;

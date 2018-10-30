@@ -39,73 +39,31 @@
             </tr>
           <tbody ng-repeat='watcher in watchers | filter:searchWatchers'>
             <tr>
-              <td class="col-md-2">
-                <a
-                  ng-if="!wizardHelper.isWizardWatcher(watcher)"
-                  ng-href="#/watcher/raw/{{watcher.id}}/edit"
-                >{{watcher.title}}</a>
-                <a
-                  ng-if="wizardHelper.isWizardWatcher(watcher)"
-                  ng-href="#/watcher/{{watcher.id}}/wizard"
-                >{{watcher.title}}</a>
+              <td class="col-md-2" ng-switch="getWatcherType(watcher)">
+                <a ng-switch-when="advanced" ng-href="#/watcher/raw/{{watcher.id}}/edit">{{watcher.title}}</a>
+                <a ng-switch-when="wizard" ng-href="#/watcher/{{watcher.id}}/wizard">{{watcher.title}}</a>
               </td>
-              <td class="col-md-2"
-                ng-show="watcher.trigger.schedule.later">
-                {{ watcher.trigger.schedule.later }}
-              </td>
+
+              <td class="col-md-2" ng-show="watcher.trigger.schedule.later"> {{ watcher.trigger.schedule.later }}</td>
               <td class="col-md-2">{{ inputInfo(watcher) }}</td>
               <td class="col-md-3">
                 <span ng-repeat="(id, settings) in watcher.actions">
                   <p>{{ settings.name }}</p>
                 </span>
               </td>
-              <td class="col-md-3 text-right edit-group">
-                <a
-                  title="Raw Edit"
-                  class="show-rule"
-                  ng-if="!wizardHelper.isWizardWatcher(watcher)"
-                  ng-href="#/watcher/raw/{{watcher.id}}/edit"
-                > advanced
-                  <i class="fa fa-file-code-o"></i>
-                </a>
-                <a
-                  title="Wizard"
-                  class="show-rule"
-                  ng-if="wizardHelper.isWizardWatcher(watcher)"
-                  ng-href="#/watcher/{{watcher.id}}/wizard"
-                > wizard
-                  <i class="fa fa-magic"></i>
-                </a>
-                <a
-                  title="Execute"
-                  class="show-rule"
-                  ng-click="playWatcher(watcher)"
-                >
-                  <i class="fa fa-play-circle"></i>
-                </a>
-                <a
-                  title="Delete"
-                  class="delete-rule"
-                  ng-click="deleteWatcher(watcher.id)"
-                >
-                  <i class="fa fa-trash"></i>
-                </a>
-                <a
-                  title="Disabled"
-                  class="delete-rule"
-                  ng-click="toggleWatcher(watcher.id)"
-                  ng-show="watcher.disable"
-                >
-                  <i class="fa fa-toggle-off"></i>
-                </a>
-                <a
-                  title="Enabled"
-                  class="delete-rule"
-                  ng-click="toggleWatcher(watcher.id)"
-                  ng-show="!watcher.disable"
-                >
-                  <i class="fa fa-toggle-on"></i>
-                </a>
+
+              <td class="col-md-3 text-right">
+                <span ng-switch="getWatcherType(watcher)">
+                  <span ng-switch-when="advanced">Advanced<i class="fa fa-file-code-o"></i></span>
+                  <span ng-switch-when="wizard">Wizard<i class="fa fa-magic"></i></span>
+                </span>
+
+                <span class="edit-group">
+                  <a title="Execute" class="show-rule" ng-click="playWatcher(watcher)"><i class="fa fa-play-circle"></i></a>
+                  <a title="Delete" class="delete-rule" ng-click="deleteWatcher(watcher.id)"><i class="fa fa-trash"></i></a>
+                  <a title="Disabled" class="delete-rule" ng-click="toggleWatcher(watcher.id)" ng-show="watcher.disable"><i class="fa fa-toggle-off"></i></a>
+                  <a title="Enabled" class="delete-rule" ng-click="toggleWatcher(watcher.id)" ng-show="!watcher.disable"><i class="fa fa-toggle-on"></i></a>
+                </span>
               </td>
             </tr>
           </tbody>
