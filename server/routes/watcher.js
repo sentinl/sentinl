@@ -5,7 +5,6 @@ import { flatAttributes } from '../lib/helpers';
 import apiClient from '../lib/api_client';
 import WatcherHandler from '../lib/watcher_handler';
 import WatcherWizardHandler from '../lib/watcher_wizard_handler';
-import CustomWatcherHandler from '../lib/custom_watcher_handler';
 import Log from '../lib/log';
 
 export default function watcherRoutes(server) {
@@ -154,8 +153,6 @@ export default function watcherRoutes(server) {
       let watcherHandler;
       if (attributes.wizard) {
         watcherHandler = new WatcherWizardHandler(server);
-      } else if (attributes.custom) {
-        watcherHandler = new CustomWatcherHandler(server);
       } else {
         watcherHandler = new WatcherHandler(server);
       }
