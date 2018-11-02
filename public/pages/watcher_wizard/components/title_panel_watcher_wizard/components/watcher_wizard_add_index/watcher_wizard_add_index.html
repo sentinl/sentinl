@@ -11,7 +11,8 @@
           uib-typeahead="element.index for element in watcherWizardAddIndex.getIndexNames($viewValue)"
           typeahead-loading="watcherWizardAddIndex.loadingLocations"
           typeahead-no-results="watcherWizardAddIndex.noResults"
-          typeahead-on-select="watcherWizardAddIndex.handleChange($item, $model, $label, $event)" 
+          typeahead-on-select="watcherWizardAddIndex.handleChange($item, $model, $label, $event)"
+          typeahead-popup-template-url="customPopupTemplate"
           ng-change="watcherWizardAddIndex.handleChange()"
         >
         <i ng-show="watcherWizardAddIndex.loadingLocations" class="glyphicon glyphicon-refresh"></i>
@@ -22,3 +23,24 @@
     </div>
   </div>
 </form>
+
+<script type="text/ng-template" id="customPopupTemplate">
+  <ul
+      class="dropdown-menu"
+      ng-show="isOpen() && !moveInProgress"
+      ng-style="{top: position().top + 'px', left: position().left + 'px'}"
+      style="max-height: 400px; overflow-y: auto;"
+  >
+    <li
+        class="uib-typeahead-match"
+        ng-repeat="match in matches track by $index"
+        ng-class="{active: isActive($index) }"
+        ng-mouseenter="selectActive($index)"
+        ng-click="selectMatch($index, $event)"
+        role="option"
+        id="{{::match.id}}"
+    >
+      <div uib-typeahead-match index="$index" match="match" query="query" template-url="templateUrl"></div>
+    </li>
+  </ul>
+</script>
