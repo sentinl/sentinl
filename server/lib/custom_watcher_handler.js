@@ -23,11 +23,13 @@ export default class CustomWatcherHandler extends WatcherHandler {
 
   getWatchersTemplate(title) {
     const req = this.server.plugins.saved_objects_api.getServerCredentials();
-    req.auth = {
-      credentials: {
-        roles: ['sirenalert']
-      }
-    };
+    if (req) {
+      req.auth = {
+        credentials: {
+          roles: ['sirenalert']
+        }
+      };
+    }
     return this.savedObjectsClient.find({
       type: 'script',
       search: title,
