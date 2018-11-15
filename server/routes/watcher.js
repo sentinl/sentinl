@@ -128,9 +128,7 @@ export default function watcherRoutes(server) {
         // Use Elasticsearch API because Kibana savedObjectsClient
         // can't search in a specific index and doesn't allow custom query body
         const client = apiClient(server, 'elasticsearchAPI');
-        const { method, request } = req.payload;
-
-        const resp = await client.search(request);
+        const resp = await client.search(req.payload.request);
         return reply(resp).code(200);
       } catch (err) {
         return reply(handleESError(err));

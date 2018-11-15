@@ -47,18 +47,17 @@ export default class WatcherWizardHandler extends WatcherHandler {
   * Execute watcher
   *
   * @param {object} task watcher
-  * @param {string} ES search method name
   * @param {object} ES search request of watcher
   * @param {object} condition of watcher
   * @param {object} transform of watcher
   * @param {object} actions of watcher
   * @return {object} success or warning message
   */
-  async _execute(task, method, request, condition, transform, actions) {
+  async _execute(task, request, condition, transform, actions) {
     let payload;
 
     try {
-      payload = await this._client.search(request, method); // data from Elasticsearch
+      payload = await this._client.search(request); // data from Elasticsearch
     } catch (err) {
       throw new WatcherWizardHandlerError('exec search', err);
     }
@@ -86,11 +85,11 @@ export default class WatcherWizardHandler extends WatcherHandler {
   */
   async execute(task) {
     try {
-      const { method, search, condition, transform } = this._checkWatcher(task);
+      const { search, condition, transform } = this._checkWatcher(task);
       if (this.config.settings.authentication.impersonate || task.impersonate) {
         await this._client.impersonate(task.id);
       }
-      return await this._execute(task, method, search.request, condition, transform, task.actions);
+      return await this._execute(task, search.request, condition, transform, task.actions);
     } catch (err) {
       err = new WatcherWizardHandlerError('execute wizard watcher', err);
       this._client.logAlarm({

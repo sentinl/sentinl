@@ -60,7 +60,9 @@ export default class CustomWatcherHandler extends WatcherHandler {
       if (this.config.settings.authentication.impersonate || task.impersonate) {
         await this._client.impersonate(task.id);
       }
-      const client = { search: this._client[this.getAvailableSearchMethod()].bind(this._client) };
+      const client = {
+        search: ({ index, body }) => this._client.search({ index, body: this._translateToEs(body) })
+      };
 
       const searchParams = {
         defaultRequest: this.createDefaultRequest(task.input.search.request, task.trigger.schedule.later, async),
@@ -87,18 +89,6 @@ export default class CustomWatcherHandler extends WatcherHandler {
       err.message = 'execute custom watcher: ' + err.message;
       throw err;
     }
-  }
-
-  getAvailableSearchMethod() {
-    let method = 'search';
-    try {
-      if (sirenFederateHelper.federateIsAvailable(this.server)) {
-        method = sirenFederateHelper.getClientMethod(this._client);
-      }
-    } catch (err) {
-      this.log.warning('Siren federate: "elasticsearch.plugins" is not available when running from kibana: ' + err.toString());
-    }
-    return method;
   }
 
   createDefaultRequest(searchParams, textSchedule, async) {

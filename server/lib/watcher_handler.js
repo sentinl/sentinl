@@ -117,10 +117,9 @@ export default class WatcherHandler {
   *
   * @param {object} payload data from Elasticsearch
   * @param {object} transform
-  * @param {string} ES search method name
   * @return {object} null or warning message
   */
-  async _executeTransform(payload, transform, method) {
+  async _executeTransform(payload, transform) {
     this.log.debug(`transform: ${JSON.stringify(transform, null, 2)}`);
     const bulkTransform = async (link) => {
       // validate JS script in transform
@@ -135,7 +134,7 @@ export default class WatcherHandler {
       // search in transform
       if (has(link, 'search.request')) {
         try {
-          payload = await this._client.search(link.search.request, method);
+          payload = await this._client.search(link.search.request);
         } catch (err) {
           throw new WatcherHandlerError('apply transform "search"', err);
         }
@@ -171,14 +170,13 @@ export default class WatcherHandler {
   * Execute watcher
   *
   * @param {object} task watcher
-  * @param {string} ES search method name
   * @param {object} ES search request or kable
   * @param {object} condition of watcher
   * @param {object} transform of watcher
   * @param {object} actions of watcher
   * @return {object} success or warning message
   */
-  async _execute(task, method, search, condition, transform, actions) {
+  async _execute(task, search, condition, transform, actions) {
     const isAnomaly = has(task, 'sentinl.condition.anomaly') ? true : false;
     const isRange = has(task, 'sentinl.condition.range') ? true : false;
     let payload;
@@ -197,7 +195,7 @@ export default class WatcherHandler {
       }
     } else if (search.request) {
       try {
-        payload = await this._client.search(search.request, method); // data from Elasticsearch
+        payload = await this._client.search(this._translateToEs(search.request)); // data from Elasticsearch
       } catch (err) {
         throw new WatcherHandlerError('get elasticsearch payload', err);
       }
@@ -218,7 +216,7 @@ export default class WatcherHandler {
     }
 
     try {
-      const resp = await this._executeTransform(payload, transform, method);
+      const resp = await this._executeTransform(payload, transform);
       if (resp && resp.warning) {
         return resp; // payload is empty, do not execute actions
       }
@@ -233,17 +231,16 @@ export default class WatcherHandler {
     return new SuccessAndLog(this.log, 'successfuly executed');
   }
 
+  _translateToEs(query) {
+    if (get(this, 'server.plugins.elasticsearch.sirenJoinSequence')) {
+      return this.server.plugins.elasticsearch.sirenJoinSequence([query])[0];
+    } else {
+      return query;
+    }
+  }
+
   _checkWatcher(task) {
     this.log.info('executing');
-
-    let method = 'search';
-    try {
-      if (sirenFederateHelper.federateIsAvailable(this.server)) {
-        method = sirenFederateHelper.getClientMethod(this._client);
-      }
-    } catch (err) {
-      this.log.warning('Siren federate: "elasticsearch.plugins" is not available when running from kibana: ' + err.toString());
-    }
 
     let search = get(task, 'input.search'); // search.request, search.kable, search.timelion
     let condition = task.condition;
@@ -256,7 +253,7 @@ export default class WatcherHandler {
       throw new WatcherHandlerError('condition is malformed');
     }
 
-    return { method, search, condition, transform };
+    return { search, condition, transform };
   }
 
   /**
@@ -268,11 +265,11 @@ export default class WatcherHandler {
     this.log = new Log(this.config.app_name, this.server, `watcher ${task.id}`);
     if (!isEmpty(task.actions)) {
       try {
-        const { method, search, condition, transform } = this._checkWatcher(task);
+        const { search, condition, transform } = this._checkWatcher(task);
         if (this.config.settings.authentication.impersonate || task.impersonate) {
           await this._client.impersonate(task.id);
         }
-        return await this._execute(task, method, search, condition, transform, task.actions);
+        return await this._execute(task, search, condition, transform, task.actions);
       } catch (err) {
         err = new WatcherHandlerError('execute advanced watcher', err);
         this._client.logAlarm({
