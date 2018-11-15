@@ -3,6 +3,7 @@ import getConfiguration from  '../get_configuration';
 import { filter } from 'lodash';
 import { getCurrentTime, flatAttributes, getTodaysAlarmIndex, isKibi, trimIdTypePrefix } from '../helpers';
 import getElasticsearchClient from '../get_elasticsearch_client';
+import { getClientMethod } from '../siren/federate_helper';
 import { EsClientError } from '../errors';
 
 export default class EsApi {
@@ -11,6 +12,7 @@ export default class EsApi {
     this._config = getConfiguration(server);
     this._rootType = this._config.es.default_type;
     this._internal_client = getElasticsearchClient({ server, config: this._config });
+    this._method = getClientMethod(this._internal_client);
     this._impersonated_client = null;
   }
 
@@ -115,9 +117,9 @@ export default class EsApi {
   /**
    * @returns {promise} - { hits: { hits: [...docs] }, total }
    */
-  async search(body, method = 'search') {
+  async search(body) {
     try {
-      const resp = await this._client[method](body);
+      const resp = await this._client[this._method](body);
 
       if (resp.status === 404) {
         return {
@@ -144,7 +146,6 @@ export default class EsApi {
     perPage = 20,
     sortField,
     sortOrder = 'asc',
-    method = 'search',
     body,
   }) {
     const esOptions = {
@@ -178,7 +179,7 @@ export default class EsApi {
     }
 
     try {
-      const resp = await this._client[method](esOptions);
+      const resp = await this._client[this._method](esOptions);
 
       if (resp.status === 404) {
         return {
