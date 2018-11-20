@@ -54,13 +54,15 @@ const siren = {
 async function prepareIndices(server, log, config, mappings) {
   try {
     let resp;
-    resp = await initIndices.createIndex({
-      server,
-      config,
-      index: config.es.default_index,
-      mappings: mappings.watcher
-    });
-    log.debug(`create index ${config.es.default_index}: ${JSON.stringify(resp)}`);
+    if (config.es.default_index) {
+      resp = await initIndices.createIndex({
+        server,
+        config,
+        index: config.es.default_index,
+        mappings: mappings.watcher
+      });
+      log.debug(`create index ${config.es.default_index}: ${JSON.stringify(resp)}`);
+    }
 
     resp = await initIndices.createIndex({
       server,
@@ -149,7 +151,6 @@ const init = once(function (server) {
     config.settings.authentication.https = true;
   }
 
-  config.es.default_index = config.es.default_index || server.config().get('kibana.index');
   config.settings.authentication.user_index = server.config().get('kibana.index');
 
   if (server.plugins.saved_objects_api) { // Siren: savedObjectsAPI.
