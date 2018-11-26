@@ -58,35 +58,6 @@ When using ReadonlyREST, the following SENTINL exceptions should be added to its
 
 ---
 
-##### How can I use SENTINL with SearchGuard authentication?
-Here's an example provided by our Community to use SENTINL + SearchGuard. [Full demo configuration](HOWTO-Sentinl-and-SearchGuard).
-1. Edit the `sg_kibana_server` role in `sg_roles.yml`:
-    ```
-    sg_kibana_server:
-      cluster:
-          - CLUSTER_MONITOR
-          - CLUSTER_COMPOSITE_OPS
-      indices:
-        '?kibana':
-          '*':
-            - INDICES_ALL
-        'watcher*':
-          '*':
-           - MANAGE
-           - CREATE_INDEX
-           - INDEX
-           - READ
-           - WRITE
-           - DELETE
-    ```
-
-2. Reinitialize Search Guard afterwards:
-    ```
-    plugins/search-guard-5/tools/sgadmin.sh -cd plugins/search-guard-5/sgconfig/ -icl -ts config/truststore.jks -ks config/keystore.jks -h localhost -p 9300 -nhnv
-    ```
-
----
-
 ##### Why are prebuilt SENTINL packages so big?
 SENTINL packages include PhantomJS and Chrome binaries, occupying most of the archive space. These are used to generate screenshots for reports.
 
