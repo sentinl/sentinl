@@ -72,6 +72,7 @@ export default async function horsemanReport({
     }
 
     await horseman.open(reportUrl).wait(delay);
+    await horseman.wait(delay);
 
     if (!investigateAccessControl && authActive && authMode !== 'basic') { // for test: http://testing-ground.scraping.pro/login (username: admin, password: 12345)
       try {

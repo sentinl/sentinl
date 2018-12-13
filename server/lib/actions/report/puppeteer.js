@@ -1,5 +1,6 @@
 import puppeteer from 'puppeteer';
 import { ActionError } from '../../errors';
+import Promise from 'bluebird';
 
 export default async function puppeteerReport({
   browserPath,
@@ -49,6 +50,7 @@ export default async function puppeteerReport({
     });
 
     page = await browser.newPage();
+    await Promise.delay(delay);
 
     await page.setViewport({
       width: viewPortWidth,
