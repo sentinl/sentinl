@@ -50,7 +50,6 @@ export default async function puppeteerReport({
     });
 
     page = await browser.newPage();
-    await Promise.delay(delay);
 
     await page.setViewport({
       width: viewPortWidth,
@@ -64,6 +63,7 @@ export default async function puppeteerReport({
     }
 
     await page.goto(reportUrl, { timeout: delay });
+    await Promise.delay(delay);
 
     try {
       if (authActive && authMode !== 'basic') { // for test: http://testing-ground.scraping.pro/login (username: admin, password: 12345)
@@ -108,8 +108,7 @@ export default async function puppeteerReport({
     if (browser) {
       await browser.close();
     }
-    err = err.toString();
-    if (err.includes('timeout during .waitFor()') || err.includes('is not a valid selector')) {
+    if (err.toString().includes('timeout during .waitFor()') || err.toString().includes('is not a valid selector')) {
       throw new ActionError('invalid CSS selector', err);
     } else {
       throw new ActionError('puppeteer work', err);
