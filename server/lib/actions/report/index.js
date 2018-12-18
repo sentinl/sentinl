@@ -21,11 +21,7 @@ export default async function reportAction({
 
     action.report = defaultsDeep(action.report, config.settings.report.action);
 
-    let browserPath = server.plugins.sentinl.phantomjs_path;
-    if (config.settings.report.engine === 'puppeteer') {
-      browserPath = server.plugins.sentinl.chrome_path;
-    }
-
+    const browserPath = server.plugins.sentinl.chrome_path;
     const { subject, text } = renderMustacheEmailSubjectAndText(actionName, action.report.subject, action.report.body, esPayload);
 
     let authSelectorUsername = action.report.auth.selector_username;
@@ -82,7 +78,6 @@ export default async function reportAction({
       authSelectorPassword,
       authSelectorLoginBtn,
       ignoreHTTPSErrors: config.settings.report.ignore_https_errors,
-      phantomBluebirdDebug: config.settings.report.horseman.phantom_bluebird,
       chromeHeadless: config.settings.report.puppeteer.chrome_headless,
       chromeDevtools: config.settings.report.puppeteer.chrome_devtools,
       chromeArgs: config.settings.report.puppeteer.chrome_args,

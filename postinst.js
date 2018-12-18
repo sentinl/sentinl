@@ -32,14 +32,6 @@ function makeExecutableIfNecessary(filename) {
   }
 }
 
-let phantomjsDefaultPath = path.join(__dirname, 'node_modules/phantomjs-prebuilt/bin/phantomjs');
-try {
-  makeExecutableIfNecessary(phantomjsDefaultPath);
-} catch (err) {
-  phantomjsDefaultPath = null;
-  console.log(`[sentinl] fail to make phantomjs executable: ${err.message}!`);
-}
-
 let chromeDefaultPath = path.join(__dirname, '/node_modules/puppeteer/.local-chromium');
 try {
   chromeDefaultPath = helpers.listAllFilesSync(chromeDefaultPath).filter((f) => f.split('/').pop() === 'chrome');

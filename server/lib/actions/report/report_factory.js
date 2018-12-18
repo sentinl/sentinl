@@ -5,7 +5,6 @@ import moment from 'moment';
 import { readFileSync } from 'fs';
 import Log from '../../log';
 import getConfiguration from '../../get_configuration';
-import horsemanReport from './horseman';
 import puppeteerReport from './puppeteer';
 import { ActionError } from '../../errors';
 
@@ -76,7 +75,6 @@ export default async function reportFactory({
   authSelectorPassword,
   authSelectorLoginBtn,
   ignoreHTTPSErrors,
-  phantomBluebirdDebug,
   chromeHeadless,
   chromeDevtools,
   chromeArgs,
@@ -94,8 +92,8 @@ export default async function reportFactory({
       throw new Error('Report disabled: no url settings!');
     }
 
-    if (!['horseman', 'puppeteer'].includes(engineName)) {
-      throw new Error(`wrong report engine "${engineName}", engines available: horseman, puppeteer`);
+    if (engineName !== 'puppeteer') {
+      throw new Error(`wrong report engine "${engineName}", engines available: puppeteer`);
     }
 
     fileName = createReportFileName(fileName, fileType);
@@ -120,22 +118,13 @@ export default async function reportFactory({
       ignoreHTTPSErrors,
       collapseNavbarSelector,
       investigateAccessControl,
-      browserPath
+      browserPath,
+      chromeHeadless,
+      chromeDevtools,
+      chromeArgs
     };
 
-    if (engineName === 'puppeteer') {
-      options.chromeHeadless = chromeHeadless;
-      options.chromeDevtools = chromeDevtools;
-      options.chromeArgs = chromeArgs;
-    } else {
-      options.phantomBluebirdDebug = phantomBluebirdDebug;
-    }
-
-    if (engineName === 'horseman') {
-      filePath = await horsemanReport(options);
-    } else {
-      filePath = await puppeteerReport(options);
-    }
+    filePath = await puppeteerReport(options);
 
     log.info(`${watcherTitle}, '${engineName}' report results: '${filePath}'`);
     return createReportAttachment(fileName, filePath, fileType);

@@ -190,7 +190,7 @@ export default function appConfig(Joi) {
           }).default(),
         }).default(),
         active: Joi.boolean().default(true),
-        engine: Joi.string().default('puppeteer'), // puppeteer, horseman
+        engine: Joi.string().default('puppeteer'),
         executable_path: Joi.any().forbidden().error(new Error(
           'Option "report.executable_path" was deprecated. The path is handled automatically!'
         )),
@@ -215,10 +215,6 @@ export default function appConfig(Joi) {
           chrome_args: Joi.array().default(['--no-sandbox', '--disable-setuid-sandbox']),
           chrome_headless: Joi.boolean().default(true),
           chrome_devtools: Joi.boolean().default(false),
-        }).default(),
-        horseman: Joi.object({
-          browser_path: Joi.string(),
-          phantom_bluebird_debug: Joi.boolean().default(false),
         }).default(),
         search_guard: Joi.any().forbidden().error(new Error(
           'Option "report.search_guard" was deprecated. Authenticatiobn is set per watcher!'

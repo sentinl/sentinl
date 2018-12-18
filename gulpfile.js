@@ -11,7 +11,6 @@ var fs = require('fs');
 var spawn = require('child_process').spawn;
 var minimist = require('minimist');
 var util = require('gulp-util');
-var installPhantomjs = require('./server/lib/actions/report/install_phantomjs');
 
 var pkg = require('./package.json');
 var packageName = pkg.name;
@@ -32,8 +31,7 @@ var include = [
   'app_config.js',
   'server',
   'lib',
-  'public',
-  'phantomjs'
+  'public'
 ];
 
 var knownOptions = {
@@ -110,7 +108,7 @@ function applyVersion(path, version) {
   fs.writeFileSync(path, JSON.stringify(pkgConfig, null, 2), 'utf8');
 }
 
-gulp.task('sync', ['installPhantomjs'], function (done) {
+gulp.task('sync', [], function (done) {
   syncPluginTo(kibanaPluginDir, done);
 });
 
@@ -171,14 +169,6 @@ gulp.task('dev', ['sync'], function (done) {
     'server/**/*'
   ], ['sync', 'lint']);
 });
-
-gulp.task('installPhantomjs', function (done) {
-  installPhantomjs()
-    .then((pkg) => console.log('PhantomJS bin found at: ' + pkg.binary))
-    .catch((err) => console.error('Failed to install PhantomJS: ' + err.toString()))
-    .then(done);
-});
-
 
 gulp.task('test', ['sync'], function (done) {
   spawn('grunt', ['test:server', 'test:browser', '--grep=' + (util.env.grep ? util.env.grep : 'Sentinl')], {
