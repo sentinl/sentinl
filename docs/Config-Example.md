@@ -128,6 +128,4 @@ sentinl:
       # active: true
       # puppeteer:
       #   browser_path: /path/to/chrome
-      # horseman:
-      #   browser_path: /path/to/phantomjs
 ```

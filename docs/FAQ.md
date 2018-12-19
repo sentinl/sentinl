@@ -16,7 +16,7 @@ SENTINL uses `emailjs` to send emails. This NPM module requires a correct messag
 ---
 
 ##### Reports are not being generated. Why?
-SENTINL uses either `node-horseman` or `puppeteer` to generate reports. The `node-horseman` NPM module requires PhantomJS to be installed on the system running KaaE and Reports, and `puppeteer` requires Chrome. The default engine used is `puppeteer`, but this can be changed to `horseman` with the `sentinl.settings.report.engine` configuration property.
+SENTINL uses `puppeteer` to generate reports. The `puppeteer` requires Chrome or Chromium. Refer to [puppeteer trouobleshooting](https://github.com/GoogleChrome/puppeteer/blob/master/docs/troubleshooting.md) page if you have any problem.
 
 ---
 
