@@ -40,9 +40,11 @@ export default async function reportAction({
     const browserPath = server.plugins.sentinl.chrome_path;
     const { subject, text } = renderMustacheEmailSubjectAndText(actionName, action.report.subject, action.report.body, esPayload);
 
-    let authSelectorUsername = action.report.auth.selector_username;
-    let authSelectorPassword = action.report.auth.selector_password;
+    let authSelectorUsername = action.report.auth.selector_username || config.settings.report.auth.username;
+    let authSelectorPassword = action.report.auth.selector_password || config.settings.report.auth.username;
     let authSelectorLoginBtn = action.report.auth.selector_login_btn;
+    const collapseNavbarSelector = get(action.report, 'selectors.collapse_navbar_selector') ||
+      config.settings.report.css_selectors.collapse_navbar_selector;
 
     if (action.report.auth.active) {
       if (!config.settings.report.auth.modes.includes(action.report.auth.mode)) {
@@ -50,15 +52,15 @@ export default async function reportAction({
       }
 
       if (action.report.auth.mode === 'xpack') {
-        authSelectorUsername = config.settings.report.auth.css_selectors.xpack.username;
-        authSelectorPassword = config.settings.report.auth.css_selectors.xpack.password;
-        authSelectorLoginBtn = config.settings.report.auth.css_selectors.xpack.login_btn;
+        authSelectorUsername = authSelectorUsername || config.settings.report.auth.css_selectors.xpack.username;
+        authSelectorPassword = authSelectorPassword || config.settings.report.auth.css_selectors.xpack.password;
+        authSelectorLoginBtn = authSelectorLoginBtn || config.settings.report.auth.css_selectors.xpack.login_btn;
       }
 
       if (action.report.auth.mode === 'searchguard') {
-        authSelectorUsername = config.settings.report.auth.css_selectors.searchguard.username;
-        authSelectorPassword = config.settings.report.auth.css_selectors.searchguard.password;
-        authSelectorLoginBtn = config.settings.report.auth.css_selectors.searchguard.login_btn;
+        authSelectorUsername = authSelectorUsername || config.settings.report.auth.css_selectors.searchguard.username;
+        authSelectorPassword = authSelectorPassword || config.settings.report.auth.css_selectors.searchguard.password;
+        authSelectorLoginBtn = authSelectorLoginBtn || config.settings.report.auth.css_selectors.searchguard.login_btn;
       }
     }
 
@@ -81,14 +83,14 @@ export default async function reportAction({
       reportUrl: action.report.snapshot.url,
       fileType: action.report.snapshot.type,
       fileUrl: action.report.snapshot.url,
-      delay: action.report.snapshot.params.delay,
+      timeout: action.report.snapshot.params.delay,
       pdfFormat: action.report.snapshot.pdf_format,
       pdfLandscape: action.report.snapshot.pdf_landscape,
       viewPortWidth: action.report.snapshot.res.split('x')[0],
       viewPortHeight: action.report.snapshot.res.split('x')[1],
       authMode: action.report.auth.mode,
       authActive: action.report.auth.active,
-      authUsername: action.report.auth,
+      authUsername: action.report.auth.username,
       authPassword: action.report.auth.password,
       authSelectorUsername,
       authSelectorPassword,
@@ -97,7 +99,7 @@ export default async function reportAction({
       chromeHeadless: config.settings.report.puppeteer.chrome_headless,
       chromeDevtools: config.settings.report.puppeteer.chrome_devtools,
       chromeArgs: config.settings.report.puppeteer.chrome_args,
-      collapseNavbarSelector: get(action.report, 'selectors.collapse_navbar_selector'),
+      collapseNavbarSelector,
       browserPath,
     });
 

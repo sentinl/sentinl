@@ -194,18 +194,23 @@ export default function appConfig(Joi) {
         executable_path: Joi.any().forbidden().error(new Error(
           'Option "report.executable_path" was deprecated. The path is handled automatically!'
         )),
+        css_selectors: Joi.object({
+          collapse_navbar_selector: Joi.string(),
+        }).default(),
         auth: Joi.object({
+          username: Joi.string(),
+          password: Joi.string(),
           modes: Joi.array().default(['basic', 'customselector', 'xpack', 'searchguard']),
           css_selectors: Joi.object({
             searchguard: Joi.object({
-              username: Joi.string().default('form input[id=username]'),
-              password: Joi.string().default('form input[id=password]'),
-              login_btn: Joi.string().default('form button[type=submit]'),
+              username: Joi.string().default('#username'),
+              password: Joi.string().default('#password'),
+              login_btn: Joi.string().default('button[type=submit]'),
             }).default(),
             xpack: Joi.object({
-              username: Joi.string().default('form input[id=username]'),
-              password: Joi.string().default('form input[id=password]'),
-              login_btn: Joi.string().default('form button[type=submit]'),
+              username: Joi.string().default('#username'),
+              password: Joi.string().default('#password'),
+              login_btn: Joi.string().default('button[type=submit]'),
             }).default(),
           }).default(),
         }).default(),
