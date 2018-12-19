@@ -7,7 +7,7 @@ export default async function puppeteerReport({
   filePath,
   fileType,
   reportUrl,
-  delay,
+  timeout,
   viewPortWidth,
   viewPortHeight,
   pdfFormat,
@@ -30,7 +30,7 @@ export default async function puppeteerReport({
 
   try {
     try {
-      delay = +delay;
+      timeout = +timeout;
       viewPortWidth = +viewPortWidth;
       viewPortHeight = +viewPortHeight;
       authActive = String(authActive) === 'true';
@@ -62,28 +62,28 @@ export default async function puppeteerReport({
       });
     }
 
-    await page.goto(reportUrl, { timeout: delay });
-    await Promise.delay(delay);
+    await page.goto(reportUrl, { timeout });
+    await page.waitFor(timeout);
 
     try {
       if (authActive && authMode !== 'basic') { // for test: http://testing-ground.scraping.pro/login (username: admin, password: 12345)
-        await page.waitForSelector(authSelectorUsername, { timeout: delay });
+        await page.waitForSelector(authSelectorUsername, { timeout, visible: true });
         await page.type(authSelectorUsername, authUsername);
-        await page.waitForSelector(authSelectorPassword, { timeout: delay });
+        await page.waitForSelector(authSelectorPassword, { timeout, visible: true });
         await page.type(authSelectorPassword, authPassword);
-        await page.waitForSelector(authSelectorLoginBtn, { timeout: delay });
+        await page.waitForSelector(authSelectorLoginBtn, { timeout, visible: true });
         await page.click(authSelectorLoginBtn);
-        await page.waitFor(delay);
+        await page.waitFor(timeout);
       }
     } catch (err) {
       throw new ActionError('login form', err);
     }
 
     try {
-      if (!!collapseNavbarSelector) {
-        await page.waitForSelector(collapseNavbarSelector, { timeout: delay });
+      if (collapseNavbarSelector) {
+        await page.waitForSelector(collapseNavbarSelector, { timeout, visible: true });
         await page.click(collapseNavbarSelector);
-        await page.waitFor(delay / 2);
+        await page.waitFor(timeout);
       }
     } catch (err) {
       throw new ActionError('collapse navbar', err);
