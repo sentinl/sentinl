@@ -1,10 +1,15 @@
-import Log from '../../log';
+import uuid from 'uuid/v4';
+import os from 'os';
+import path from 'path';
+import moment from 'moment';
+import { readFileSync } from 'fs';
 import getConfiguration from '../../get_configuration';
-import reportFactory from './report_factory';
 import { defaultsDeep, get } from 'lodash';
 import { renderMustacheEmailSubjectAndText } from '../helpers';
 import apiClient from '../../api_client';
+import puppeteerReport from './puppeteer';
 import { ActionError } from '../../errors';
+import Log from '../../log';
 
 export default async function reportAction({
   server,
@@ -14,6 +19,17 @@ export default async function reportAction({
   actionName,
   emailClient,
 }) {
+  function createReportFileName(filename, type = 'png') {
+    if (!filename) {
+      return `report-${uuid()}-${moment().format('DD-MM-YYYY-h-m-s')}.${type}`;
+    }
+    return filename + '.' + type;
+  };
+
+  function base64String(path) {
+    return new Buffer(readFileSync(path)).toString('base64');
+  }
+
   try {
     const config = getConfiguration(server);
     const log = new Log(config.app_name, server, 'report');
@@ -46,33 +62,33 @@ export default async function reportAction({
       }
     }
 
-    const options = {
-      investigateAccessControl: server.plugins.investigate_access_control,
-      server,
-      browserPath,
-      actionName,
-      actionLevel: action.report.priority,
-      watcherTitle,
-      esPayload,
-      engineName: config.settings.report.engine,
+    log.info(`${watcherTitle}, executing report by "${config.settings.report.engine}"`);
+    log.info(`${watcherTitle}, browser: "${browserPath}"`);
+
+    if (!action.report.snapshot.url.length) {
+      throw new Error('Report disabled: no url settings!');
+    }
+
+    if (config.settings.report.engine !== 'puppeteer') {
+      throw new Error(`wrong report engine "${config.settings.report.engine}", engines available: puppeteer`);
+    }
+
+    const fileName = createReportFileName(action.report.snapshot.name, action.report.snapshot.type);
+    let filePath = path.join(os.tmpdir(), fileName);
+
+    filePath = await puppeteerReport({
+      filePath,
       reportUrl: action.report.snapshot.url,
-      fileName: action.report.snapshot.name,
       fileType: action.report.snapshot.type,
-      nodePath: server.plugins.sentinl.kibana_node_path,
+      fileUrl: action.report.snapshot.url,
+      delay: action.report.snapshot.params.delay,
+      pdfFormat: action.report.snapshot.pdf_format,
+      pdfLandscape: action.report.snapshot.pdf_landscape,
       viewPortWidth: action.report.snapshot.res.split('x')[0],
       viewPortHeight: action.report.snapshot.res.split('x')[1],
-      delay: action.report.snapshot.params.delay,
-      pdfLandscape: action.report.snapshot.pdf_landscape,
-      pdfFormat: action.report.snapshot.pdf_format,
-      isStateless: action.report.stateless,
-      emailSubject: subject,
-      emailText: text,
-      emailFrom: action.report.from,
-      emailTo: action.report.to,
-      emailClient,
-      authActive: action.report.auth.active,
       authMode: action.report.auth.mode,
-      authUsername: action.report.auth.username,
+      authActive: action.report.auth.active,
+      authUsername: action.report.auth,
       authPassword: action.report.auth.password,
       authSelectorUsername,
       authSelectorPassword,
@@ -82,28 +98,52 @@ export default async function reportAction({
       chromeDevtools: config.settings.report.puppeteer.chrome_devtools,
       chromeArgs: config.settings.report.puppeteer.chrome_args,
       collapseNavbarSelector: get(action.report, 'selectors.collapse_navbar_selector'),
-    };
+      browserPath,
+    });
 
-    const attachment = await reportFactory(options);
+    log.info(`${watcherTitle}, '${config.settings.report.engine}' report results: '${filePath}'`);
 
     try {
-      if (!options.isStateless) {
+      if (!action.report.stateless) {
         client.logAlarm({
           actionName,
           watcherTitle,
-          level: options.actionLevel,
-          message: options.emailText,
+          level: action.report.priority,
+          message: text,
           isReport: true,
-          attachment,
+          attachment: [
+            {
+              data: text,
+              alternative: true
+            },
+            {
+              data: base64String(filePath),
+              type: action.report.snapshot.type === 'png' ? 'image/png' : 'application/pdf',
+              name: fileName,
+              encoded: true,
+            }
+          ],
         });
       }
 
       await emailClient.send({
-        text: options.emailText,
-        from: options.emailFrom,
-        to: options.emailTo,
-        subject: options.emailSubject,
-        attachment,
+        text,
+        subject,
+        from: action.report.from,
+        to: action.report.to,
+        attachment: [
+          {
+            data: text,
+            alternative: true
+          },
+          {
+            data: text,
+            path: filePath,
+            type: action.report.snapshot.type === 'png' ? 'image/png' : 'application/pdf',
+            name: fileName,
+            encoded: true,
+          }
+        ],
       });
     } catch (err) {
       err = new ActionError('index report and send email', err);

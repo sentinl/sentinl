@@ -170,7 +170,7 @@ export default function appConfig(Joi) {
             url: Joi.string().default('http://google.com'),
             type: Joi.string().default('png'),
             pdf_landscape: Joi.boolean().default(true),
-            pdf_format: Joi.string().default('A4'),
+            pdf_format: Joi.string().default('A3'),
             params: Joi.object({
               delay: Joi.number().default(5000),
               crop: Joi.boolean().default(false),
