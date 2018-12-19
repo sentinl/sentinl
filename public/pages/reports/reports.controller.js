@@ -30,10 +30,6 @@ function ReportsController($scope, $injector, $route, $interval,
   const timefilter = timefilterFactory($injector);
   timefilter.enable(true);
 
-  $scope.isScreenshot = function (report) {
-    return report.attachment.charAt(0) === 'i';
-  };
-
   let running = false;
   async function getReports() {
     running = true;
@@ -69,6 +65,22 @@ function ReportsController($scope, $injector, $route, $interval,
   if (timefilter.refreshInterval) {
     $scope.$watchCollection('timefilter.refreshInterval', refreshIntervalForTimefilter); // Kibana v5.6-6.2
   }
+
+  function createReportUrl(base64String) {
+    const type = base64String.charAt(0) === 'i' ? 'image/png' : 'application/pdf';
+    const raw = atob(base64String);
+    const view = new Uint8Array(new ArrayBuffer(raw.length));
+    for (let i = 0; i < raw.length; i++) {
+      view[i] = raw.charCodeAt(i);
+    }
+    return URL.createObjectURL(new Blob([view], { type }));
+  };
+
+  $scope.collapseReport = function (id) {
+    const index = $scope.reports.findIndex(e => e.id === id);
+    $scope.reports[index].url = createReportUrl($scope.reports[index].attachment);
+    $scope.reports[index].collapsed = !$scope.reports[index].collapsed;
+  };
 
   /**
   * Delete report
