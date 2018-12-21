@@ -101,6 +101,7 @@ export default async function reportAction({
       chromeArgs: config.settings.report.puppeteer.chrome_args,
       collapseNavbarSelector,
       browserPath,
+      server,
     });
 
     log.info(`${watcherTitle}, '${config.settings.report.engine}' report results: '${filePath}'`);

@@ -1,6 +1,7 @@
 import puppeteer from 'puppeteer';
 import { ActionError } from '../../errors';
-import Promise from 'bluebird';
+import getConfiguration from '../../get_configuration';
+import Log from '../../log';
 
 export default async function puppeteerReport({
   browserPath,
@@ -24,9 +25,12 @@ export default async function puppeteerReport({
   chromeHeadless = true,
   chromeDevtools = false,
   collapseNavbarSelector,
+  server
 }) {
   let browser;
   let page;
+  const config = getConfiguration(server);
+  const log = new Log(config.app_name, server, 'report');
 
   try {
     try {
@@ -86,7 +90,7 @@ export default async function puppeteerReport({
         await page.waitFor(timeout);
       }
     } catch (err) {
-      throw new ActionError('collapse navbar', err);
+      log.error('collapse navbar', err);
     }
 
     if (fileType === 'pdf') {
