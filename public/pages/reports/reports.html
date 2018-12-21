@@ -8,10 +8,10 @@
         <a
           ng-repeat="item in tabsMenu.list"
           class="kuiLocalTab"
-          ng-class="{'kuiLocalTab-isSelected': tabsMenu.currentPath === item.url}"
-          kbn-href="{{::item.url}}"
+          ng-class="{ 'kuiLocalTab-isSelected': tabsMenu.currentPath === item.url }"
+          kbn-href="{{ ::item.url }}"
         >
-          {{::item.display}}
+          {{ ::item.display }}
         </a>
       </div>
     </div>
@@ -66,7 +66,7 @@
             </tr>
             <tr ng-if="report.collapsed">
               <td colspan="100%">
-                <a ng-href="{{report.url}}" download>Download report</a>
+                <a ng-href="{{ report.url }}" download>Download report</a>
               </td>
             </tr>
           </tbody>
