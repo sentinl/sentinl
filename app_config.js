@@ -195,7 +195,7 @@ export default function appConfig(Joi) {
           'Option "report.executable_path" was deprecated. The path is handled automatically!'
         )),
         css_selectors: Joi.object({
-          collapse_navbar_selector: Joi.string(),
+          collapse_navbar_selector: Joi.string().default('div.global-nav-link--close.global-nav-link.global-nav-link > a'),
         }).default(),
         auth: Joi.object({
           username: Joi.string(),
