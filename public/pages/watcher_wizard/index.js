@@ -37,11 +37,7 @@ routes
     controllerAs: 'watcherWizard',
     bindToController: true,
     resolve: {
-      watcher: function ($injector) {
-        const $route = $injector.get('$route');
-        const kbnUrl = $injector.get('kbnUrl');
-        const config = $injector.get('sentinlConfig');
-        const watcherService = $injector.get('watcherService');
+      watcher: function ($route, kbnUrl, sentinlConfig, watcherService) {
         const notifier = new Notifier({ location: 'Watcher' });
         const watcherId = $route.current.params.id;
 

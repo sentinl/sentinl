@@ -103,6 +103,27 @@ const init = once(function (server) {
 
   log.info('initializing ...');
 
+  server.injectUiAppVars('sentinl', () => {
+    const config = server.config();
+    return {
+      sentinlConfig: {
+        appName: config.get('sentinl.app_name'),
+        es: {
+          timezone: config.get('sentinl.es.timezone'),
+        },
+        wizard: {
+          condition: {
+            queryType: config.get('sentinl.settings.wizard.condition.query_type'),
+            scheduleType: config.get('sentinl.settings.wizard.condition.schedule_type'),
+            over: config.get('sentinl.settings.wizard.condition.over'),
+            last: config.get('sentinl.settings.wizard.condition.last'),
+            interval: config.get('sentinl.settings.wizard.condition.interval'),
+          },
+        },
+      }
+    };
+  });
+
   try {
     if (config.settings.report.puppeteer.browser_path) {
       server.expose('chrome_path', config.settings.report.puppeteer.browser_path);
@@ -129,10 +150,15 @@ const init = once(function (server) {
   sqlRoutes(server);
 
   // auto detect elasticsearch host, protocol and port
-  const esUrl = url.parse(server.config().get('elasticsearch.url'));
-  config.es.host = esUrl.hostname;
-  config.es.port = +esUrl.port;
-  config.es.protocol = esUrl.protocol.substring(0, esUrl.protocol.length - 1);
+  config.es.hosts = [];
+  server.config().get('elasticsearch.hosts').forEach(host => {
+    const hostUrl = url.parse(host);
+    config.es.hosts.push({
+      host: hostUrl.hostname,
+      port: +hostUrl.port,
+      protocol: hostUrl.protocol.substring(0, hostUrl.protocol.length - 1)
+    });
+  });
 
   if (config.settings.authentication.enabled && config.es.protocol === 'https') {
     config.settings.authentication.https = true;
@@ -173,27 +199,6 @@ const init = once(function (server) {
       log.error('start: ' + err.toString());
     }
   })();
-
-  server.injectUiAppVars('sentinl', () => {
-    const config = server.config();
-    return {
-      sentinlConfig: {
-        appName: config.get('sentinl.app_name'),
-        es: {
-          timezone: config.get('sentinl.es.timezone'),
-        },
-        wizard: {
-          condition: {
-            queryType: config.get('sentinl.settings.wizard.condition.query_type'),
-            scheduleType: config.get('sentinl.settings.wizard.condition.schedule_type'),
-            over: config.get('sentinl.settings.wizard.condition.over'),
-            last: config.get('sentinl.settings.wizard.condition.last'),
-            interval: config.get('sentinl.settings.wizard.condition.interval'),
-          },
-        },
-      }
-    };
-  });
 });
 
 export default function (server, options) {
