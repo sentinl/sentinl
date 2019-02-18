@@ -94,8 +94,7 @@ function syncPluginTo(dest, done) {
           spawn('npm', ['install', lib.gun_master], {
             cwd: dest,
             stdio: 'inherit'
-          })
-          .on('close', done);
+          }).on('close', done);
         }
       });
     }).catch(done);
