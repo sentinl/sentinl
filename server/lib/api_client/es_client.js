@@ -155,16 +155,10 @@ export default class EsApi {
       ignore: [404],
       body: body || {
         query: {
-          bool: {
-            filter: [
-              {
-                exists: {
-                  field: type
-                }
-              }
-            ]
-          }
+        type : {
+          value : type
         }
+    }
       }
     };
 
