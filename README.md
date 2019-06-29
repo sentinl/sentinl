@@ -1,3 +1,11 @@
+### Announcement - Sentinl (for Kibana) is currently unsupported
+
+With the availability of free alerting both in the [Opendistro for Elasticsearch](https://opendistro.github.io/for-elasticsearch/features/alerting.html) distribution and in the new Siren Community Edition ([download](https://siren.io/downloads/),[forum](http://community.siren.io), [documentation](https://docs.support.siren.io/latest/platform/en/siren-alert.html)), as of July 1 2019, Siren is discontinuing the support for the Open Source version of Sentinl to focus our resources on Siren Alert - the version distributed as part of the Siren Platform.
+
+Interested in continuing/maintaining Sentinl for Kibana as Open Source project? Contact us, we'd be happy to talk about it.
+
+---
+
 <img src="http://i.imgur.com/s4TKpbF.png" width="300"/>
 
 ### Siren Investigate & Kibana Alerting & Reporting App
@@ -10,7 +18,7 @@
 <img src="https://img.shields.io/badge/elasticsearch-6.*-green.svg"/>
 
 
-**SENTINL 6** extends *Siren Investigate* and *Kibana* with **Alerting** and **Reporting** functionality to monitor, notify and report on data series changes using standard queries, programmable validators and a variety of configurable actions - Think of it as a free an independent ["Watcher"](https://github.com/sirensolutions/sentinl/wiki/SENTINL-Introduction#what-is-a-watcher) which also has scheduled ["Reporting"](https://github.com/sirensolutions/sentinl/wiki/SENTINL-Report-Example) capabilities (PNG/PDFs snapshots).
+**SENTINL** extends *Siren Investigate* and *Kibana* with **Alerting** and **Reporting** functionality to monitor, notify and report on data series changes using standard queries, programmable validators and a variety of configurable actions - Think of it as a free an independent ["Watcher"](https://github.com/sirensolutions/sentinl/wiki/SENTINL-Introduction#what-is-a-watcher) which also has scheduled ["Reporting"](https://github.com/sirensolutions/sentinl/wiki/SENTINL-Report-Example) capabilities (PNG/PDFs snapshots).
 
 **SENTINL** is also designed to simplify the process of creating and managing alerts and reports in Siren Investigate/Kibana `6.x` via its native App Interface, or by using native watcher tools in Kibana `6.x+`.
 
@@ -36,7 +44,7 @@ Documentation, Examples and Guides are available at [sentinl.readthedocs.io](htt
 
 ## App Installation
 
-#### **ATTENTION** Siren 10 users should use the native version bundled with their distribution!
+#### **ATTENTION** Siren users should use the native version bundled with their distribution!
 
 #### Snapshot Plugin Install
 Use this example and substitute 6.2.2 with your _actual_ Kibana version or manually pick a [release](https://github.com/sirensolutions/sentinl/releases)
@@ -73,7 +81,7 @@ Please [report](https://github.com/sirensolutions/sentinl/issues) any ideas, bug
 <pre>
 This software is licensed under the Apache License, version 2 ("ALv2"), quoted below.
 
-Copyright 2016, 2018 Siren
+Copyright 2016, 2019 Siren
 Copyright 2016, 2018 QXIP BV
 Copyright 2015, Lorenzo Mangani (lorenzo.mangani@gmail.com), Rao Chenlin (rao.chenlin@gmail.com)
 
