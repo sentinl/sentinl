@@ -1,8 +1,6 @@
-### Announcement - Sentinl (for Kibana) is currently unsupported
+### Announcement - Sentinl (for Kibana) is looking for a Community!
 
-With the availability of free alerting both in the [Opendistro for Elasticsearch](https://opendistro.github.io/for-elasticsearch/features/alerting.html) distribution and in the new Siren Community Edition ([download](https://siren.io/downloads/),[forum](http://community.siren.io), [documentation](https://docs.support.siren.io/latest/platform/en/siren-alert.html)), as of July 1 2019, Siren is discontinuing the support for the Open Source version of Sentinl to focus our resources on Siren Alert - the version distributed as part of the Siren Platform.
-
-Interested in continuing/maintaining Sentinl for Kibana as Open Source project? Contact us, we'd be happy to talk about it.
+Siren Solutions and QXIP have long been heorically developing and maintaining SENTINL for Kibana, but reached the stage where a proper community and sponsors are needed and required to keep this project alive and well projected into the future. SENTINL still has plenty to offer and needs some Love! Interested in helping continue/maintain/extend the project? Contact us or open an Issue, we'd be glad to talk about it!
 
 ---
 
