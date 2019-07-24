@@ -7,7 +7,7 @@
   "name": "sentinl",
   "version": "6.8.1",
   "kibana": {
-    "version": 6
+    "version": "6.8.1"
   },
   "description": "Kibana Alert & Report App for Elasticsearch",
   "main": "index.js",
@@ -25,7 +25,7 @@
   "dependencies": {
     "@elastic/datemath": "2.3.0",
     "@elastic/eui": "4.3.0",
-    "@slack/client": "4.4.0",
+    "@slack/webhook": "5.0.0",
     "angular": "1.4.8",
     "angular-chart.js": "1.1.1",
     "angular-touch": "1.4.8",
@@ -45,7 +45,7 @@
     "moment-timezone": "0.5.16",
     "mustache": "2.3.0",
     "ngreact": "0.5.1",
-    "puppeteer": "^1.11.0",
+    "puppeteer": "^1.18.1",
     "react": "16.5.2",
     "react-dom": "^16.5.2",
     "rison": "0.1.1",
@@ -60,7 +60,7 @@
     "eslint": "3.14.1",
     "eslint-plugin-mocha": "4.8.0",
     "expect.js": "0.3.1",
-    "gulp": "3.9.1",
+    "gulp": "github:gulpjs/gulp",
     "gulp-eslint": "1.1.1",
     "gulp-util": "3.0.8",
     "gulp-zip": "3.1.0",
