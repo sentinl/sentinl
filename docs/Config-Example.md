@@ -47,7 +47,7 @@ sentinl:
       timeout: 10000  # mail server connection timeout
     slack:
       active: true
-      token: 'xoxp-265182-395150-419610-7ba6fb346bcddec9'
+      webhook: 'https://hooks.slack.com/services/AAAAAAAAAAAAAAA/bbbbbbbbbbbbb'
     webhook:
       active: false
       method: POST

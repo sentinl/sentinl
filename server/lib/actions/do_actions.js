@@ -27,7 +27,7 @@ import later from 'later';
 import moment from 'moment';
 import rison from 'rison';
 import mustache from 'mustache';
-import { WebClient } from '@slack/client';
+import { IncomingWebhook } from '@slack/webhook';
 import getConfiguration from '../get_configuration';
 import apiClient from '../api_client';
 import EmailClient from './email_client';
@@ -66,24 +66,6 @@ export default function (server, actions, payload, task) {
     email = new EmailClient(config.settings.email);
   } catch (err) {
     err = new ActionError('email client', err);
-    log.error(`${task.title}: ${err.message}: ${err.stack}`);
-
-    client.logAlarm({
-      watcherTitle: task.title,
-      message: err.toString(),
-      level: 'high',
-      isError: true,
-    });
-  }
-
-  /* Slack Settings */
-  let slack;
-  try {
-    if (config.settings.slack.active) {
-      slack = new WebClient(config.settings.slack.token);
-    }
-  } catch (err) {
-    err = new ActionError('slack client', err);
     log.error(`${task.title}: ${err.message}: ${err.stack}`);
 
     client.logAlarm({
@@ -437,18 +419,21 @@ export default function (server, actions, payload, task) {
             });
           }
 
-          if (!slack || !config.settings.slack.active) {
+          if (!config.settings.slack.active) {
             throw new Error('slack message delivery disabled');
           }
 
+          // Send the notification
+          const slack = new IncomingWebhook(config.settings.slack.webhook, {
+            channel: action.slack.channel,
+          });
           try {
-            const resp = await slack.chat.postMessage({
-              channel: action.slack.channel,
+            await slack.send({
               text: message
             });
-            log.info(`Message sent to slack channel ${resp.channel} as ${resp.message.username}`);
+            log.info(`Message sent to slack channel ${action.slack.channel}`);
           } catch (err) {
-            const msg = `Failed to send message to channel ${action.slack.channel} using token ${config.settings.slack.token}`;
+            const msg = `Failed to send message to channel ${action.slack.channel} using webhook ${config.settings.slack.webhook}`;
             throw new ActionError(msg, err);
           }
         } catch (err) {

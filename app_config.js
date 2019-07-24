@@ -148,7 +148,8 @@ export default function appConfig(Joi) {
       }).default(),
       slack: Joi.object({
         active: Joi.boolean().default(false),
-        token: Joi.string(),
+        webhook: Joi.string(),
+        channel: Joi.string(),
       }).default(),
       webhook: Joi.object({
         active: Joi.boolean().default(false),
