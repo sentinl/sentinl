@@ -428,9 +428,13 @@ export default function (server, actions, payload, task) {
             channel: action.slack.channel,
           });
           try {
-            await slack.send({
-              text: message
-            });
+            let obj;
+            try {
+              obj = JSON.parse(message);
+            } catch (err) {
+              obj = message;
+            }
+            await slack.send(obj);
             log.info(`Message sent to slack channel ${action.slack.channel}`);
           } catch (err) {
             const msg = `Failed to send message to channel ${action.slack.channel} using webhook ${config.settings.slack.webhook}`;
