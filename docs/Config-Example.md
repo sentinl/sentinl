@@ -48,6 +48,11 @@ sentinl:
     slack:
       active: true
       webhook: 'https://hooks.slack.com/services/AAAAAAAAAAAAAAA/bbbbbbbbbbbbb'
+    ses:
+      active: true
+      accessKeyId: ''
+      secretAccessKey: ''
+      region: 'us-east-1'
     webhook:
       active: false
       method: POST

@@ -33,6 +33,8 @@ import apiClient from '../api_client';
 import EmailClient from './email_client';
 import Log from '../log';
 import { ActionError } from '../errors';
+import AWS from 'aws-sdk/global';
+import SES from 'aws-sdk/clients/ses';
 
 // actions
 import reportAction from './report';
@@ -68,6 +70,26 @@ export default function (server, actions, payload, task) {
     err = new ActionError('email client', err);
     log.error(`${task.title}: ${err.message}: ${err.stack}`);
 
+    client.logAlarm({
+      watcherTitle: task.title,
+      message: err.toString(),
+      level: 'high',
+      isError: true,
+    });
+  }
+
+  /* SES Config */
+  let SESConfig;
+  try {
+    SESConfig = {
+      apiVersion: '2010-12-01',
+      accessKeyId: config.settings.ses.accessKeyId,
+      secretAccessKey: config.settings.ses.secretAccessKey,
+      region: config.settings.ses.region
+    };
+  } catch (err) {
+    err = new ActionError('SES settings', err);
+    log.error(`${task.title}: ${err.message}: ${err.stack}`);
     client.logAlarm({
       watcherTitle: task.title,
       message: err.toString(),
@@ -454,6 +476,98 @@ export default function (server, actions, payload, task) {
         }
       })();
     }
+
+    /* ***************************************************************************** */
+    /*
+    *   "ses" : {
+    *      "to" : "root@localhost",
+    *      "from" : "sentinl@localhost",
+    *      "subject" : "Alarm Title",
+    *      "priority" : "high",
+    *      "body" : "Series Alarm {{ payload._id}}: {{payload.hits.total}}",
+    *      "html" : "<p>Series Alarm {{ payload._id}}: {{payload.hits.total}}</p>",
+    *      "stateless" : false,
+    *   }
+    */
+   if (action.ses) {
+     (async () => {
+       try {
+         formatterSubject = action.ses.subject ? action.ses.subject : 'SENTINL: ' + actionId;
+
+         formatterBody = action.ses.body;
+         if (!formatterBody) {
+           if (payload.docs) {
+             formatterBody = 'Number of documents: {{payload.docs.length}}';
+           } else if (payload.sheet) {
+             formatterBody = 'Number of 0 sheet data: {{payload.sheet[0].list[0].data.length}}';
+           } else { // hits
+             formatterBody = 'Series Alarm {{payload._id}}: {{payload.hits.total}}';
+           }
+         }
+
+         let formatterConsole = action.ses.html || '<p>Series Alarm {{ payload._id}}: {{payload.hits.total}}</p>';
+         let subject = mustache.render(formatterSubject, {payload: payload, watcher: task});
+         let text = mustache.render(formatterBody, {payload: payload, watcher: task});
+         let html = mustache.render(formatterConsole, {payload: payload, watcher: task});
+         priority = action.ses.priority || 'medium';
+
+         var params = {
+          Source: action.ses.from,
+          Destination: {
+            ToAddresses: [
+              action.ses.to
+            ]
+          },
+          ReplyToAddresses: [
+            action.ses.from,
+          ],
+          Message: {
+            Body: {
+              Html: {
+                Charset: "UTF-8",
+                Data: html
+              }
+            },
+            Subject: {
+              Charset: 'UTF-8',
+              Data: subject
+            }
+          }
+        };
+
+         if (!action.ses.stateless) {
+           // Log Event
+           await client.logAlarm({
+             watcherTitle: task.title,
+             actionName,
+             message: toString(text),
+             level: priority,
+             payload: !task.save_payload ? {} : payload,
+           });
+         }
+
+         log.info('processing ses email');
+
+         if (!config.settings.ses.active) {
+           throw new Error('ses delivery disabled');
+         } else {
+           new AWS.SES(SESConfig).sendEmail(params).promise().then((res) => {
+              log.info(res);
+           });
+         }
+       } catch (err) {
+         err = new ActionError('ses action', err);
+         log.error(`${task.title}: ${err.message}: ${err.stack}`);
+         client.logAlarm({
+           watcherTitle: task.title,
+           message: err.toString(),
+           level: 'high',
+           isError: true,
+           actionName,
+         });
+       }
+     })();
+   }
 
     /* ***************************************************************************** */
     /*
