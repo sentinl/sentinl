@@ -151,6 +151,12 @@ export default function appConfig(Joi) {
         webhook: Joi.string(),
         channel: Joi.string(),
       }).default(),
+      ses: Joi.object({
+        active: Joi.boolean().default(false),
+        accessKeyId: Joi.string(),
+        secretAccessKey: Joi.string(),
+        region: Joi.string(),
+      }).default(),
       webhook: Joi.object({
         active: Joi.boolean().default(false),
         use_https: Joi.boolean().default(false),
