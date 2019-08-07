@@ -93,7 +93,7 @@ class WatcherWizardAddAction {
           stateless: false,
         },
       },
-      Ses: {
+      'Amazon SES': {
         name: 'AWS Simple Email alarm',
         throttle_period: '1m',
         ses: {
