@@ -20,6 +20,7 @@
 import { getTodaysAlarmIndex } from './helpers';
 import getElasticsearchClient from './get_elasticsearch_client';
 import Log from './log';
+import { settings } from 'cluster';
 
 const updateMappingTypes = function ({ mappings, watcherType, scriptType, userType, alarmType }) {
   const newMappings = {};
@@ -50,9 +51,13 @@ const updateMappingTypes = function ({ mappings, watcherType, scriptType, userTy
 */
 const createIndex = async function ({ server, config, index, mappings, alarmIndex}) {
   const log = new Log(config.app_name, server, 'init_indices');
-
+  var alias = index
   if (alarmIndex) {
-    index = getTodaysAlarmIndex(index);
+    if (config.es.rollover_index) {
+      index = index + "-000001" // run once when initialize plugin
+    } else {
+      index = getTodaysAlarmIndex(index);
+    }
   }
   log.info(`checking ${index} index ...`);
 
@@ -92,12 +97,25 @@ const createIndex = async function ({ server, config, index, mappings, alarmInde
         name: 'sentinl_watcher_alarms',
         body: {
           [patternAttributeName]: config.es.alarm_index + '*',
-          mappings: body.mappings
+          mappings: body.mappings,
+          settings: { 
+            index: {
+              lifecycle: {
+                name: config.es.rollover_index_name,
+                rollover_alias: alias
+              }
+            }
+          }
         }
       });
-    }
+      await client.indices.create({ index, body });
 
-    return await client.indices.create({ index, body });
+      log.info(`creating ${alias} alias ...`)
+      const aliasExists = await client.indices.existsAlias({ index: index, name: alias });
+      if (!aliasExists) {
+        return await client.indices.putAlias({index: index, name: alias});
+      }
+    }
   } catch (err) {
     throw new Error('create index: ' + err.toString());
   }

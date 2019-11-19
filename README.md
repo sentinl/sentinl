@@ -1,3 +1,14 @@
+#### This is a forked brach from https://github.com/sirensolutions/sentinl
+Improvement
+ - Support Kibana 6.8.x
+ - Change from Slack app to Slack webhook
+ - Improve several Slack integration e.g. attachments field
+ - Support ES index life cycle policy
+ - Support Amazon SES for sending alert emails
+
+See [Releases](https://github.com/KongZ/sentinl/releases) for more details
+
+
 <img src="http://i.imgur.com/s4TKpbF.png" width="300"/>
 
 ### Siren Investigate & Kibana Alerting & Reporting App
