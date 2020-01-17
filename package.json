@@ -23,7 +23,7 @@
     "archive": "tar cfz ./sentinl-latest.tar.gz --exclude .git --exclude .gitignore --exclude .github --exclude gradle --exclude build --exclude target --exclude sentinl-latest.tar.gz ./* && ls -alF sentinl-latest*"
   },
   "dependencies": {
-    "@elastic/datemath": "2.3.0",
+    "@elastic/datemath": "5.0.2",
     "@elastic/eui": "4.3.0",
     "@slack/client": "4.4.0",
     "angular": "1.7.9",
