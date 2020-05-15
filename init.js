@@ -150,15 +150,25 @@ const init = once(function (server) {
   sqlRoutes(server);
 
   // auto detect elasticsearch host, protocol and port
+  //#################################################
   config.es.hosts = [];
-  server.config().get('elasticsearch.hosts').forEach(host => {
-    const hostUrl = url.parse(host);
-    config.es.hosts.push({
-      host: hostUrl.hostname,
-      port: +hostUrl.port,
-      protocol: hostUrl.protocol.substring(0, hostUrl.protocol.length - 1)
+  /*if(server.config().get('elasticsearch.hosts')) {
+    server.config().get('elasticsearch.hosts').forEach(host => {
+      const hostUrl = url.parse(host);
+      config.es.hosts.push({
+        host: hostUrl.hostname,
+        port: hostUrl.port,
+        protocol: hostUrl.protocol.substring(0, hostUrl.protocol.length - 1)
+      });
     });
-  });
+  }*/
+  config.es.hosts.push(
+    {
+      host: 'localhost',
+      port: '9200',
+      protocol: 'http'
+    }
+  );
 
   if (config.settings.authentication.enabled && config.es.protocol === 'https') {
     config.settings.authentication.https = true;

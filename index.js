@@ -38,7 +38,7 @@ export default function (kibana) {
         title: 'Sentinl',
         description: 'Kibana Alert App for Elasticsearch',
         main: 'plugins/sentinl/app',
-        icon: 'plugins/sentinl/style/sentinl.svg',
+        icon: 'plugins/sentinl/style/sentinl-orange-logo.svg',
       },
     },
     config: function (Joi) {

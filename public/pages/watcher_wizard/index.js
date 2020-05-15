@@ -1,5 +1,4 @@
 import { uiModules } from 'ui/modules';
-import { Notifier } from 'ui/notify/notifier';
 import routes from 'ui/routes';
 import { assign } from 'lodash';
 
@@ -28,6 +27,11 @@ import './components/input_advanced_panel_watcher_wizard';
 
 import template from './watcher_wizard.html';
 import controller from './watcher_wizard';
+import { toastNotificationsFactory } from '../../factories';
+
+
+const toastNotifications = toastNotificationsFactory();
+
 
 routes
   .when('/watcher/:id/wizard')
@@ -39,7 +43,7 @@ routes
     bindToController: true,
     resolve: {
       watcher: function ($route, kbnUrl, sentinlConfig, watcherService) {
-        const notifier = new Notifier({ location: 'Watcher' });
+        const toastNotifications = toastNotificationsFactory();
         const watcherId = $route.current.params.id;
 
         let spyBtnWatcher;
@@ -49,7 +53,7 @@ routes
             delete window.localStorage.sentinl_saved_query;
           }
         } catch (err) {
-          notifier.error(`parse spy button watcher: ${err.toString()}`);
+          toastNotifications.addDanger(`parse spy button watcher: ${err.toString()}`);
           kbnUrl.redirect('/');
         }
 
@@ -60,7 +64,7 @@ routes
             }
             return watcher;
           }).catch(function (err) {
-            notifier.error(`create new watcher: ${err.toString()}`);
+            toastNotifications.addDanger(`create new watcher: ${err.toString()}`);
             kbnUrl.redirect('/');
           });
         }
@@ -69,7 +73,7 @@ routes
           watcher._edit = true;
           return watcher;
         }).catch(function (err) {
-          notifier.error(`get watcher: ${err.toString()}`);
+          toastNotifications.addDanger(`get watcher: ${err.toString()}`);
           kbnUrl.redirect('/');
         });
       },

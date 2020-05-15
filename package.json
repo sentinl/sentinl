@@ -5,9 +5,9 @@
     "url": "http://github.com/sirensolutions/sentinl.git"
   },
   "name": "sentinl",
-  "version": "6.8.4",
+  "version": "7.6.1",
   "kibana": {
-    "version": "6.8.4"
+    "version": "7.6.1"
   },
   "description": "Kibana Alert & Report App for Elasticsearch",
   "main": "index.js",
@@ -22,13 +22,10 @@
     "package": "gulp package",
     "archive": "tar cfz ./sentinl-latest.tar.gz --exclude .git --exclude .gitignore --exclude .github --exclude gradle --exclude build --exclude target --exclude sentinl-latest.tar.gz ./* && ls -alF sentinl-latest*"
   },
-  "os": [
-    "darwin",
-    "linux"
-  ],
   "dependencies": {
-    "@elastic/datemath": "2.3.0",
-    "@elastic/eui": "4.3.0",
+    "@elastic/datemath": "5.0.3",
+    "@elastic/eui": "^12.2.0",
+    "@elastic/kibana-ui-framework": "0.0.11",
     "@slack/webhook": "5.0.0",
     "angular": "1.4.8",
     "angular-chart.js": "1.1.1",

@@ -1,10 +1,8 @@
 import './threshold_watcher_wizard.less';
 import template from './threshold_watcher_wizard.html';
 import { cloneDeep, defaultsDeep, get, has, forEach, keys, isObject, isEmpty, includes, union } from 'lodash';
-import { Notifier } from 'ui/notify';
 import { toastNotificationsFactory } from '../../../../factories';
 
-const notify = new Notifier({ location: 'Wizard watcher' });
 const toastNotifications = toastNotificationsFactory();
 
 class ThresholdWatcherWizard {
@@ -234,7 +232,7 @@ class ThresholdWatcherWizard {
       toastNotifications.addWarning(err.message);
     } else {
       this.log.error(err);
-      notify.error(err);
+      toastNotifications.addDanger(err);
     }
   }
 }

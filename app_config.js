@@ -24,7 +24,7 @@ export default function appConfig(Joi) {
       )),
       alarm_index: Joi.string().default('watcher_alarms'),
       rollover_index: Joi.boolean().default(false), // Use ES rollover index
-      rollover_index_name: Joi.string().default("watcher-alarms"), // Use ES rollover index
+      rollover_index_name: Joi.string().default('watcher-alarms'), // Use ES rollover index
       user_type: Joi.string().default('sentinl-user'), // if you change this, also change the corresponding object type name here ./server/mappings/sentinl.json
       watcher_type: Joi.string().default('sentinl-watcher'), // if you change this, also change the corresponding object type name here ./server/mappings/sentinl.json
       script_type: Joi.string().default('script'), // if you change this, also change the corresponding object type name here ./server/mappings/sentinl.json

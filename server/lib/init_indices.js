@@ -51,10 +51,10 @@ const updateMappingTypes = function ({ mappings, watcherType, scriptType, userTy
 */
 const createIndex = async function ({ server, config, index, mappings, alarmIndex}) {
   const log = new Log(config.app_name, server, 'init_indices');
-  var alias = index
+  var alias = index;
   if (alarmIndex) {
     if (config.es.rollover_index) {
-      index = index + "-000001" // run once when initialize plugin
+      index = index + '-000001'; // run once when initialize plugin
     } else {
       index = getTodaysAlarmIndex(index);
     }
@@ -98,7 +98,7 @@ const createIndex = async function ({ server, config, index, mappings, alarmInde
         body: {
           [patternAttributeName]: config.es.alarm_index + '*',
           mappings: body.mappings,
-          settings: { 
+          settings: {
             index: {
               lifecycle: {
                 name: config.es.rollover_index_name,
@@ -110,7 +110,7 @@ const createIndex = async function ({ server, config, index, mappings, alarmInde
       });
       await client.indices.create({ index, body });
 
-      log.info(`creating ${alias} alias ...`)
+      log.info(`creating ${alias} alias ...`);
       const aliasExists = await client.indices.existsAlias({ index: index, name: alias });
       if (!aliasExists) {
         return await client.indices.putAlias({index: index, name: alias});

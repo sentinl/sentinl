@@ -1,10 +1,8 @@
 /* global angular */
 import { assign } from 'lodash';
-import { Notifier } from 'ui/notify';
 import { SentinlError } from '../../services';
 import { toastNotificationsFactory } from '../../factories';
 
-const notify = new Notifier({ location: 'Advanced watcher' });
 const toastNotifications = toastNotificationsFactory();
 
 class WatcherAdvanced {
@@ -88,8 +86,7 @@ class WatcherAdvanced {
   errorMessage(message, err) {
     err = new SentinlError(message, err);
     this.log.error(err);
-    notify.error(err);
-  }
+    toastNotifications.addDanger(err);  }
 
   updateWatcherDoc({ value }) {
     this.watcherSourceText = value;
