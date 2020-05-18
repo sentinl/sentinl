@@ -46,7 +46,7 @@ function AlarmsController($scope, $route, $interval,
   function errorMessage(message, err) {
     err = new SentinlError(message, err);
     log.error(err);
-    toastNotifications.addDanger(err);
+    toastNotifications.addDanger(err.message);
   }
 
   let running = false;

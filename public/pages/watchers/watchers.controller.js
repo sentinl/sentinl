@@ -19,7 +19,8 @@ function  WatchersController($injector, $scope, $route, $interval, $window, sent
   function errorMessage(message, err) {
     err = new SentinlError(message, err);
     log.error(err);
-    toastNotifications.addDanger(err);  }
+    toastNotifications.addDanger(err.message);
+  }
 
   $scope.topNavMenu = navMenu.getTopNav('watchers');
   $scope.tabsMenu = navMenu.getTabs();

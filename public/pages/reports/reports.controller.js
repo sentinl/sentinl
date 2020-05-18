@@ -21,7 +21,7 @@ function ReportsController($scope, $injector, $route, $interval,
   function errorMessage(message, err) {
     err = new SentinlError(message, err);
     log.error(err);
-    toastNotifications.addDanger(err);
+    toastNotifications.addDanger(err.message);
   }
 
   $scope.reports = [];
