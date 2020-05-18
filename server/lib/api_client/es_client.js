@@ -120,7 +120,11 @@ export default class EsApi {
    */
   async search(body, method = 'search') {
     try {
-      const resp = await this._client[method](body);
+      const resp = await this._client(null, method, {
+        index: body.index,
+        size: 10,
+        body: body.body
+      });
 
       if (resp.status === 404) {
         return {
@@ -240,9 +244,9 @@ export default class EsApi {
     try {
       let resp;
       if (attributes.error) { // log errors using internal client to bypass impersonated client auth fail
-        resp = await this._internal_client[method](esOptions);
+        resp = await this._internal_client(null, method, esOptions);
       } else {
-        resp = await this._client[method](esOptions);
+        resp = await this._client(null, method, esOptions);
       }
 
       return {
