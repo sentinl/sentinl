@@ -154,7 +154,7 @@ export default function watcherRoutes(server) {
       if (attributes.wizard) {
         watcherHandler = new WatcherWizardHandler(server);
       } else {
-        watcherHandler = new WatcherHandler(server);
+        watcherHandler = new WatcherHandler(server, req);
       }
 
       try {

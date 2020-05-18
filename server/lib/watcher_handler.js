@@ -20,7 +20,7 @@ import { WatcherHandlerError } from './errors';
 * Helper class to handle watchers
 */
 export default class WatcherHandler {
-  constructor(server) {
+  constructor(server, req) {
     this.server = server;
     this.config = getConfiguration(server);
     this.log = new Log(this.config.app_name, this.server, 'watcher_handler');
@@ -30,6 +30,7 @@ export default class WatcherHandler {
     // Use Elasticsearch API because Kibana savedObjectsClient
     // can't be used without session user from request
     this._client = apiClient(server, 'elasticsearchAPI');
+    this._req = req;
   }
 
   /**
@@ -197,7 +198,7 @@ export default class WatcherHandler {
       }
     } else if (search.request) {
       try {
-        payload = await this._client.search(search.request, method); // data from Elasticsearch
+        payload = await this._client.search(search.request, method, this._req); // data from Elasticsearch
       } catch (err) {
         throw new WatcherHandlerError('get elasticsearch payload', err);
       }
