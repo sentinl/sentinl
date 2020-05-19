@@ -98,6 +98,5 @@ export default function getElasticsearchClient({
   }
 
   log.debug('auth via Kibana server elasticsearch plugin');
-  const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
-  return callWithRequest;
+  return esClient(server, isSiren, type, config);
 }

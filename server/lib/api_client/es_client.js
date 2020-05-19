@@ -118,13 +118,9 @@ export default class EsApi {
   /**
    * @returns {promise} - { hits: { hits: [...docs] }, total }
    */
-  async search(body, method = 'search', req = null) {
+  async search(body, method = 'search') {
     try {
-      const resp = await this._client(req, method, {
-        index: body.index,
-        size: 10,
-        body: body.body
-      });
+      const resp = await this._client[method](body);
 
       if (resp.status === 404) {
         return {
@@ -218,7 +214,7 @@ export default class EsApi {
   /**
    * @returns {promise} - { id, type, version, attributes }
   */
-  async create(type, attributes = {}, options = { id: undefined, overwrite: true }, index, req = null) {
+  async create(type, attributes = {}, options = { id: undefined, overwrite: true }, index) {
     const { id, overwrite } = options;
     const method = id && !overwrite ? 'create' : 'index';
     const isAlarm = type === this._config.es.alarm_type;
@@ -244,9 +240,9 @@ export default class EsApi {
     try {
       let resp;
       if (attributes.error) { // log errors using internal client to bypass impersonated client auth fail
-        resp = await this._internal_client(req, method, esOptions);
+        resp = await this._internal_client[method](esOptions);
       } else {
-        resp = await this._client(req, method, esOptions);
+        resp = await this._client[method](esOptions);
       }
 
       return {
