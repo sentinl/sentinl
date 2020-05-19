@@ -28,7 +28,7 @@ async function getAlarms(isReport, server, req) {
   try {
     // Use Elasticsearch API because Kibana savedObjectsClient
     // can't search in a specific index and doesn't allow custom query body
-    const client = apiClient(server, config.api.type, req);
+    const client = apiClient(server, 'elasticsearchAPI');
     const resp = await client.find({
       index: config.es.alarm_index + '*',
       type: config.es.alarm_type,
