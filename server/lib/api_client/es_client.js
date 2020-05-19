@@ -218,7 +218,7 @@ export default class EsApi {
   /**
    * @returns {promise} - { id, type, version, attributes }
   */
-  async create(type, attributes = {}, options = { id: undefined, overwrite: true }, index, req) {
+  async create(type, attributes = {}, options = { id: undefined, overwrite: true }, index, req = null) {
     const { id, overwrite } = options;
     const method = id && !overwrite ? 'create' : 'index';
     const isAlarm = type === this._config.es.alarm_type;
