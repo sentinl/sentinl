@@ -128,7 +128,8 @@ export default function Scheduler(server) {
     watcherWizardHandler = new WatcherWizardHandler(server);
 
     try {
-      let tasks = await client.listWatchers();
+      const clt = apiClient(server, 'elasticsearchAPI');
+      let tasks = await clt.listWatchers();
       tasks = tasks.saved_objects;
 
       try {
