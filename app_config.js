@@ -17,8 +17,6 @@ export default function appConfig(Joi) {
       hosts: Joi.array().default([{ host: 'localhost', port: 9200, protocol: 'http'}]),
       host: Joi.string().default('localhost'),
       protocol: Joi.string().default('http'),
-      password: Joi.string().default(null),
-      username: Joi.string().default(null),
       port: Joi.number().default(9200),
       timefield: Joi.string().default('@timestamp'),
       timezone: Joi.string().default('Europe/Amsterdam'),
