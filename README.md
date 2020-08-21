@@ -1,6 +1,6 @@
-### Announcement - Sentinl (for Kibana) is looking for a Community!
+### SENTINL is looking for a Community!
 
-Siren Solutions and QXIP have long been heroically developing and maintaining SENTINL for Kibana, but reached the stage where a proper community/sponsors are needed and required to keep this project alive and maintained into the future. SENTINL still has plenty to offer and needs some Love! Interested in helping continue/maintain/extend the project? Contact us or open an Issue, we'd be glad to talk about it!
+Interested in helping continue/maintain/extend/document/test the SENTINL open-source project? Contact us or open an Issue, we'd love to have you!
 
 ---
 
