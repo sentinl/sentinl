@@ -3,18 +3,14 @@ import { get, isObject, find, keys, forEach } from 'lodash';
 import moment from 'moment';
 import $ from 'jquery';
 import ace from 'ace';
-import { Notifier } from 'ui/notify';
 import { SentinlError } from '../../services';
 import { toastNotificationsFactory, timefilterFactory } from '../../factories';
 
-const notify = new Notifier({ location: 'Watchers' });
 const toastNotifications = toastNotificationsFactory();
 
 // WATCHERS CONTROLLER
-function  WatchersController($injector, $scope, $route, $interval,
-  $timeout, Private, $window, $http, $uibModal, sentinlLog, navMenu,
-  globalNavState, $location, dataTransfer, Promise, confirmModal,
-  wizardHelper, watcherService, userService, sentinlConfig) {
+function  WatchersController($injector, $scope, $route, $interval, $window, sentinlLog, navMenu, $location,
+   dataTransfer, confirmModal, wizardHelper, watcherService, userService) {
   'ngInject';
 
   const log = sentinlLog;
@@ -23,7 +19,7 @@ function  WatchersController($injector, $scope, $route, $interval,
   function errorMessage(message, err) {
     err = new SentinlError(message, err);
     log.error(err);
-    notify.error(err);
+    toastNotifications.addDanger(err.message);
   }
 
   $scope.topNavMenu = navMenu.getTopNav('watchers');
@@ -203,6 +199,8 @@ function  WatchersController($injector, $scope, $route, $interval,
   $scope.getWatcherType = function (watcher) {
     if (get(watcher, 'wizard.chart_query_params')) {
       return 'wizard';
+    } else if (get(watcher, 'custom.type')) {
+      return 'custom';
     } else {
       return 'advanced';
     }

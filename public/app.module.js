@@ -26,13 +26,15 @@ const app = uiModules.get('apps/sentinl', [
   Components.name,
 ]);
 
-app.config(function (ChartJsProvider) {
+app.config(function (ChartJsProvider, $compileProvider) {
   'ngInject';
   // Configure all charts
   ChartJsProvider.setOptions({
     chartColors: ['#0074D9', '#FF4136'],
     responsive: true,
   });
+
+  $compileProvider.aHrefSanitizationWhitelist(/^\s*(blob|http|https):/);
 });
 
 export { app };

@@ -18,7 +18,7 @@ export default function userRoutes(server) {
         },
       },
     },
-    handler: async function (req, reply) {
+    handler: async function (req) {
       try {
         const client = apiClient(server, config.api.type, req);
 
@@ -30,9 +30,9 @@ export default function userRoutes(server) {
 
         resp.saved_objects = resp.saved_objects.map(flatAttributes);
 
-        return reply(resp).code(200);
+        return resp;
       } catch (err) {
-        return reply(handleESError(err));
+        return handleESError(err);
       }
     }
   });
@@ -47,15 +47,15 @@ export default function userRoutes(server) {
         },
       },
     },
-    handler: async function (req, reply) {
+    handler: async function (req) {
       try {
         const client = apiClient(server, config.api.type, req);
         let resp = await client.get(config.es.user_type, req.params.id, config.es.default_index);
         resp = flatAttributes(resp);
 
-        return reply(resp).code(200);
+        return resp;
       } catch (err) {
-        return reply(handleESError(err));
+        return handleESError(err);
       }
     }
   });
@@ -73,7 +73,7 @@ export default function userRoutes(server) {
         },
       },
     },
-    handler: async function (req, reply) {
+    handler: async function (req) {
       try {
         const { attributes } = req.payload;
 
@@ -84,9 +84,9 @@ export default function userRoutes(server) {
         const client = apiClient(server, config.api.type, req);
         const resp = await client.addUser(req.params.id, attributes);
 
-        return reply(resp).code(201);
+        return resp;
       } catch (err) {
-        return reply(handleESError(err));
+        return handleESError(err);
       }
     }
   });
@@ -101,14 +101,14 @@ export default function userRoutes(server) {
         },
       },
     },
-    handler: async function (req, reply) {
+    handler: async function (req) {
       try {
         const client = apiClient(server, config.api.type, req);
         const resp = await client.delete(config.es.user_type, req.params.id, config.es.default_index);
 
-        return reply(resp).code(200);
+        return resp;
       } catch (err) {
-        return reply(handleESError(err));
+        return handleESError(err);
       }
     }
   });

@@ -21,7 +21,7 @@ export default function watcherRoutes(server) {
         },
       },
     },
-    handler: async function (req, reply) {
+    handler: async function (req) {
       try {
         const client = apiClient(server, config.api.type, req);
 
@@ -33,9 +33,9 @@ export default function watcherRoutes(server) {
 
         resp.saved_objects = resp.saved_objects.map(flatAttributes);
 
-        return reply(resp).code(200);
+        return resp;
       } catch (err) {
-        return reply(handleESError(err));
+        return handleESError(err);
       }
     }
   });
@@ -50,15 +50,15 @@ export default function watcherRoutes(server) {
         },
       },
     },
-    handler: async function (req, reply) {
+    handler: async function (req) {
       try {
         const client = apiClient(server, config.api.type, req);
         let resp = await client.get(config.es.watcher_type, req.params.id, config.es.default_index);
         resp = flatAttributes(resp);
 
-        return reply(resp).code(200);
+        return resp;
       } catch (err) {
-        return reply(handleESError(err));
+        return handleESError(err);
       }
     }
   });
@@ -76,15 +76,15 @@ export default function watcherRoutes(server) {
         },
       },
     },
-    handler: async function (req, reply) {
+    handler: async function (req) {
       try {
         const client = apiClient(server, config.api.type, req);
         const resp = await client.create(config.es.watcher_type, req.payload.attributes,
           { id: req.params.id, overwrite: true }, config.es.default_index);
 
-        return reply(resp).code(201);
+        return resp;
       } catch (err) {
-        return reply(handleESError(err));
+        return handleESError(err);
       }
     }
   });
@@ -99,14 +99,14 @@ export default function watcherRoutes(server) {
         },
       },
     },
-    handler: async function (req, reply) {
+    handler: async function (req) {
       try {
         const client = apiClient(server, config.api.type, req);
         const resp = await client.delete(config.es.watcher_type, req.params.id, config.es.default_index);
 
-        return reply(resp).code(200);
+        return resp;
       } catch (err) {
-        return reply(handleESError(err));
+        return handleESError(err);
       }
     }
   });
@@ -122,7 +122,7 @@ export default function watcherRoutes(server) {
         },
       },
     },
-    handler: async function (req, reply) {
+    handler: async function (req) {
       try {
         // Use Elasticsearch API because Kibana savedObjectsClient
         // can't search in a specific index and doesn't allow custom query body
@@ -130,9 +130,9 @@ export default function watcherRoutes(server) {
         const { method, request } = req.payload;
 
         const resp = await client.search(request);
-        return reply(resp).code(200);
+        return resp;
       } catch (err) {
-        return reply(handleESError(err));
+        return handleESError(err);
       }
     }
   });
@@ -147,7 +147,7 @@ export default function watcherRoutes(server) {
         },
       },
     },
-    handler: async function (req, reply) {
+    handler: async function (req) {
       const attributes = req.payload.attributes;
 
       let watcherHandler;
@@ -159,9 +159,9 @@ export default function watcherRoutes(server) {
 
       try {
         const resp = await watcherHandler.execute(req.payload.attributes);
-        return reply(resp);
+        return resp;
       } catch (err) {
-        return reply(handleESError(err));
+        return handleESError(err);
       }
     }
   });
@@ -182,7 +182,7 @@ export default function watcherRoutes(server) {
         },
       },
     },
-    handler: async function (req, reply) {
+    handler: async function (req) {
       const esParams = req.payload.es_params;
 
       try {
@@ -200,9 +200,9 @@ export default function watcherRoutes(server) {
           body,
         });
 
-        return reply(resp);
+        return resp;
       } catch (err) {
-        return reply(handleESError(err));
+        return handleESError(err);
       }
     }
   });
@@ -223,7 +223,7 @@ export default function watcherRoutes(server) {
         },
       },
     },
-    handler: async function (req, reply) {
+    handler: async function (req) {
       const esParams = req.payload.es_params;
 
       try {
@@ -241,9 +241,9 @@ export default function watcherRoutes(server) {
           body,
         });
 
-        return reply(resp);
+        return resp;
       } catch (err) {
-        return reply(handleESError(err));
+        return handleESError(err);
       }
     }
   });
@@ -264,7 +264,7 @@ export default function watcherRoutes(server) {
         },
       },
     },
-    handler: async function (req, reply) {
+    handler: async function (req) {
       const esParams = req.payload.es_params;
 
       try {
@@ -282,9 +282,9 @@ export default function watcherRoutes(server) {
           body,
         });
 
-        return reply(resp);
+        return resp;
       } catch (err) {
-        return reply(handleESError(err));
+        return handleESError(err);
       }
     }
   });
@@ -305,7 +305,7 @@ export default function watcherRoutes(server) {
         },
       },
     },
-    handler: async function (req, reply) {
+    handler: async function (req) {
       const esParams = req.payload.es_params;
 
       try {
@@ -323,9 +323,9 @@ export default function watcherRoutes(server) {
           body,
         });
 
-        return reply(resp);
+        return resp;
       } catch (err) {
-        return reply(handleESError(err));
+        return handleESError(err);
       }
     }
   });
@@ -346,7 +346,7 @@ export default function watcherRoutes(server) {
         },
       },
     },
-    handler: async function (req, reply) {
+    handler: async function (req) {
       const esParams = req.payload.es_params;
 
       try {
@@ -364,9 +364,9 @@ export default function watcherRoutes(server) {
           body,
         });
 
-        return reply(resp);
+        return resp;
       } catch (err) {
-        return reply(handleESError(err));
+        return handleESError(err);
       }
     }
   });
@@ -381,7 +381,7 @@ export default function watcherRoutes(server) {
         },
       },
     },
-    handler: async function (request, reply) {
+    handler: async function (request) {
       const {index} = request.payload;
       try {
         // Use Elasticsearch API because Kibana savedObjectsClient
@@ -389,9 +389,9 @@ export default function watcherRoutes(server) {
         const client = apiClient(server, 'elasticsearchAPI');
 
         const resp = await client.getMapping(index);
-        return reply(resp).code(201);
+        return resp;
       } catch (err) {
-        return reply(handleESError(err));
+        return handleESError(err);
       }
     }
   });
@@ -399,16 +399,16 @@ export default function watcherRoutes(server) {
   server.route({
     path: '/api/sentinl/watcher/wizard/indexes',
     method: 'GET',
-    handler: async function (req, reply) {
+    handler: async function (req) {
       try {
         // Use Elasticsearch API because Kibana savedObjectsClient
         // can't search in a specific index and doesn't allow custom query body
         const client = apiClient(server, 'elasticsearchAPI');
 
         const resp = await client.getIndices();
-        return reply(resp);
+        return resp;
       } catch (err) {
-        return reply(handleESError(err));
+        return handleESError(err);
       }
     }
   });

@@ -13,7 +13,7 @@ export default function timelionRoutes(server) {
         },
       },
     },
-    handler: async function (req, reply) {
+    handler: async function (req) {
       const { sheet, time } = req.payload;
 
       try {
@@ -31,9 +31,9 @@ export default function timelionRoutes(server) {
           },
         });
 
-        return reply(resp.result);
+        return resp.result;
       } catch (err) {
-        return reply(handleESError(err));
+        return handleESError(err);
       }
     }
   });

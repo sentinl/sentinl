@@ -16,7 +16,7 @@ SENTINL uses `emailjs` to send emails. This NPM module requires a correct messag
 ---
 
 ##### Reports are not being generated. Why?
-SENTINL uses either `node-horseman` or `puppeteer` to generate reports. The `node-horseman` NPM module requires PhantomJS to be installed on the system running KaaE and Reports, and `puppeteer` requires Chrome. The default engine used is `puppeteer`, but this can be changed to `horseman` with the `sentinl.settings.report.engine` configuration property.
+SENTINL uses `puppeteer` to generate reports. The `puppeteer` requires Chrome or Chromium. Refer to [puppeteer trouobleshooting](https://github.com/GoogleChrome/puppeteer/blob/master/docs/troubleshooting.md) page if you have any problem.
 
 ---
 
@@ -55,6 +55,35 @@ When using ReadonlyREST, the following SENTINL exceptions should be added to its
   hosts: [localhost]
   verbosity: info
 ```
+
+---
+
+##### How can I use SENTINL with SearchGuard authentication?
+Here's an example provided by our Community to use SENTINL + SearchGuard. [Full demo configuration](HOWTO-Sentinl-and-SearchGuard).
+1. Edit the `sg_kibana_server` role in `sg_roles.yml`:
+    ```
+    sg_kibana_server:
+      cluster:
+          - CLUSTER_MONITOR
+          - CLUSTER_COMPOSITE_OPS
+      indices:
+        '?kibana':
+          '*':
+            - INDICES_ALL
+        'watcher*':
+          '*':
+           - MANAGE
+           - CREATE_INDEX
+           - INDEX
+           - READ
+           - WRITE
+           - DELETE
+    ```
+
+2. Reinitialize Search Guard afterwards:
+    ```
+    plugins/search-guard-5/tools/sgadmin.sh -cd plugins/search-guard-5/sgconfig/ -icl -ts config/truststore.jks -ks config/keystore.jks -h localhost -p 9300 -nhnv
+    ```
 
 ---
 

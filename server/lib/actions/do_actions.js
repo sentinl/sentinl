@@ -27,11 +27,14 @@ import later from 'later';
 import moment from 'moment';
 import rison from 'rison';
 import mustache from 'mustache';
-import { WebClient } from '@slack/client';
+import { IncomingWebhook } from '@slack/webhook';
 import getConfiguration from '../get_configuration';
 import apiClient from '../api_client';
 import EmailClient from './email_client';
 import Log from '../log';
+import { ActionError } from '../errors';
+import AWS from 'aws-sdk/global';
+import SES from 'aws-sdk/clients/ses';
 
 // actions
 import reportAction from './report';
@@ -64,26 +67,32 @@ export default function (server, actions, payload, task) {
   try {
     email = new EmailClient(config.settings.email);
   } catch (err) {
-    log.error('email client: ' + err.toString());
+    err = new ActionError('email client', err);
+    log.error(`${task.title}: ${err.message}: ${err.stack}`);
+
     client.logAlarm({
       watcherTitle: task.title,
-      message: 'email client: ' + err.toString(),
+      message: err.toString(),
       level: 'high',
       isError: true,
     });
   }
 
-  /* Slack Settings */
-  let slack;
+  /* SES Config */
+  let SESConfig;
   try {
-    if (config.settings.slack.active) {
-      slack = new WebClient(config.settings.slack.token);
-    }
+    SESConfig = {
+      apiVersion: '2010-12-01',
+      accessKeyId: config.settings.ses.accessKeyId,
+      secretAccessKey: config.settings.ses.secretAccessKey,
+      region: config.settings.ses.region
+    };
   } catch (err) {
-    log.error('slack client: ' + err.toString());
+    err = new ActionError('SES settings', err);
+    log.error(`${task.title}: ${err.message}: ${err.stack}`);
     client.logAlarm({
       watcherTitle: task.title,
-      message: 'slack client: ' + err.toString(),
+      message: err.toString(),
       level: 'high',
       isError: true,
     });
@@ -138,12 +147,14 @@ export default function (server, actions, payload, task) {
     */
 
     var priority;
+    var formatterConsole;
+    var message;
     if (action.console) {
       (async () => {
         try {
           priority = action.console.priority || 'medium';
-          let formatterConsole = action.console.message ? action.console.message : '{{ payload }}';
-          let message = mustache.render(formatterConsole, { payload });
+          formatterConsole = action.console.message ? action.console.message : '{{ payload }}';
+          message = mustache.render(formatterConsole, { payload });
           log.debug('console message', message);
           log.debug('console payload', payload);
 
@@ -155,10 +166,12 @@ export default function (server, actions, payload, task) {
             payload: !task.save_payload ? {} : payload,
           });
         } catch (err) {
-          log.error('console action: ' + err.toString());
+          err = new ActionError('console action', err);
+          log.error(`${task.title}: ${err.message}: ${err.stack}`);
+
           client.logAlarm({
             watcherTitle: task.title,
-            message: 'console action: ' + err.toString(),
+            message: err.toString(),
             level: 'high',
             isError: true,
             actionName,
@@ -252,10 +265,12 @@ export default function (server, actions, payload, task) {
             });
           }
         } catch (err) {
-          log.error('email action: ' + err.toString());
+          err = new ActionError('email action', err);
+          log.error(`${task.title}: ${err.message}: ${err.stack}`);
+
           client.logAlarm({
             watcherTitle: task.title,
-            message: 'email action: ' + err.toString(),
+            message: err.toString(),
             level: 'high',
             isError: true,
             actionName,
@@ -330,10 +345,12 @@ export default function (server, actions, payload, task) {
             });
           }
         } catch (err) {
-          log.error('html email action: ' + err.toString());
+          err = new ActionError('html email action', err);
+          log.error(`${task.title}: ${err.message}: ${err.stack}`);
+
           client.logAlarm({
             watcherTitle: task.title,
-            message: 'html email action: ' + err.toString(),
+            message: err.toString(),
             level: 'high',
             isError: true,
             actionName,
@@ -380,10 +397,12 @@ export default function (server, actions, payload, task) {
             emailClient: email,
           });
         } catch (err) {
-          log.error(`${task.title}, report action: ` + err.toString());
+          err = new ActionError('report action', err);
+          log.error(`${task.title}: ${err.message}: ${err.stack}`);
+
           client.logAlarm({
             watcherTitle: task.title,
-            message: 'report action: ' + err.toString(),
+            message: err.toString(),
             level: 'high',
             isError: true,
             isReport: true,
@@ -405,8 +424,9 @@ export default function (server, actions, payload, task) {
     if (action.slack) {
       (async () => {
         try {
-          let formatter = action.slack.message ? action.slack.message : 'Series Alarm {{ payload._id}}: {{payload.hits.total}}';
-          let message = mustache.render(formatter, {payload: payload, watcher: task});
+          let formatter;
+          formatter = action.slack.message ? action.slack.message : 'Series Alarm {{ payload._id}}: {{payload.hits.total}}';
+          message = mustache.render(formatter, {payload: payload, watcher: task});
           priority = action.slack.priority || 'medium';
           log.debug(`webhook to #${action.slack.channel}, message: ${message}`);
 
@@ -421,24 +441,126 @@ export default function (server, actions, payload, task) {
             });
           }
 
-          if (!slack || !config.settings.slack.active) {
+          if (!config.settings.slack.active) {
             throw new Error('slack message delivery disabled');
           }
 
+          // Send the notification
+          const slack = new IncomingWebhook(config.settings.slack.webhook, {
+            channel: action.slack.channel,
+          });
           try {
-            const resp = await slack.chat.postMessage({
-              channel: action.slack.channel,
-              text: message
-            });
-            log.info(`Message sent to slack channel ${resp.channel} as ${resp.message.username}`);
+            let obj;
+            try {
+              obj = JSON.parse(message);
+            } catch (err) {
+              obj = message;
+            }
+            await slack.send(obj);
+            log.info(`Message sent to slack channel ${action.slack.channel}`);
           } catch (err) {
-            throw new Error(`Failed to send message to channel ${action.slack.channel} using token ${config.settings.slack.token}, ${err}`);
+            const msg = `Failed to send message to channel ${action.slack.channel} using webhook ${config.settings.slack.webhook}`;
+            throw new ActionError(msg, err);
           }
         } catch (err) {
-          log.error(`${task.title}, report action: ` + err.toString());
+          err = new ActionError('slack action', err);
+          log.error(`${task.title}: ${err.message}: ${err.stack}`);
+
           client.logAlarm({
             watcherTitle: task.title,
-            message: 'slack action: ' + err.toString(),
+            message: err.toString(),
+            level: 'high',
+            isError: true,
+            actionName,
+          });
+        }
+      })();
+    }
+
+    /* ***************************************************************************** */
+    /*
+    *   "ses" : {
+    *      "to" : "root@localhost",
+    *      "from" : "sentinl@localhost",
+    *      "subject" : "Alarm Title",
+    *      "priority" : "high",
+    *      "body" : "Series Alarm {{ payload._id}}: {{payload.hits.total}}",
+    *      "html" : "<p>Series Alarm {{ payload._id}}: {{payload.hits.total}}</p>",
+    *      "stateless" : false,
+    *   }
+    */
+    if (action.ses) {
+      (async () => {
+        try {
+          formatterSubject = action.ses.subject ? action.ses.subject : 'SENTINL: ' + actionId;
+
+          formatterBody = action.ses.body;
+          if (!formatterBody) {
+            if (payload.docs) {
+              formatterBody = 'Number of documents: {{payload.docs.length}}';
+            } else if (payload.sheet) {
+              formatterBody = 'Number of 0 sheet data: {{payload.sheet[0].list[0].data.length}}';
+            } else { // hits
+              formatterBody = 'Series Alarm {{payload._id}}: {{payload.hits.total}}';
+            }
+          }
+
+          let formatterConsole = action.ses.html || '<p>Series Alarm {{ payload._id}}: {{payload.hits.total}}</p>';
+          let subject = mustache.render(formatterSubject, {payload: payload, watcher: task});
+          let text = mustache.render(formatterBody, {payload: payload, watcher: task});
+          let html = mustache.render(formatterConsole, {payload: payload, watcher: task});
+          priority = action.ses.priority || 'medium';
+
+          var params = {
+            Source: action.ses.from,
+            Destination: {
+              ToAddresses: [
+                action.ses.to
+              ]
+            },
+            ReplyToAddresses: [
+              action.ses.from,
+            ],
+            Message: {
+              Body: {
+                Html: {
+                  Charset: 'UTF-8',
+                  Data: html
+                }
+              },
+              Subject: {
+                Charset: 'UTF-8',
+                Data: subject
+              }
+            }
+          };
+
+          if (!action.ses.stateless) {
+            // Log Event
+            await client.logAlarm({
+              watcherTitle: task.title,
+              actionName,
+              message: toString(text),
+              level: priority,
+              payload: !task.save_payload ? {} : payload,
+            });
+          }
+
+          log.info('processing ses email');
+
+          if (!config.settings.ses.active) {
+            throw new Error('ses delivery disabled');
+          } else {
+            new AWS.SES(SESConfig).sendEmail(params).promise().then((res) => {
+              log.info(res);
+            });
+          }
+        } catch (err) {
+          err = new ActionError('ses action', err);
+          log.error(`${task.title}: ${err.message}: ${err.stack}`);
+          client.logAlarm({
+            watcherTitle: task.title,
+            message: err.toString(),
             level: 'high',
             isError: true,
             actionName,
@@ -521,10 +643,12 @@ export default function (server, actions, payload, task) {
           }
           req.end();
         } catch (err) {
-          log.error(`${task.title}, report action: ` + err.toString());
+          err = new ActionError('webhook action', err);
+          log.error(`${task.title}: ${err.message}: ${err.stack}`);
+
           client.logAlarm({
             watcherTitle: task.title,
-            message: 'webhook action: ' + err.toString(),
+            message: err.toString(),
             level: 'high',
             isError: true,
             actionName,
@@ -559,10 +683,12 @@ export default function (server, actions, payload, task) {
             payload: !task.save_payload ? {} : payload,
           });
         } catch (err) {
-          log.error(`${task.title}, report action: ` + err.toString());
+          err = new ActionError('elastic action', err);
+          log.error(`${task.title}: ${err.message}: ${err.stack}`);
+
           client.logAlarm({
             watcherTitle: task.title,
-            message: 'elastic action: ' + err.toString(),
+            message: err.toString(),
             level: 'high',
             isError: true,
             actionName,

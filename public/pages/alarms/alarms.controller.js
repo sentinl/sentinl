@@ -1,16 +1,11 @@
-import { get, isNumber } from 'lodash';
 import moment from 'moment';
-import uiChrome from 'ui/chrome';
-import { Notifier } from 'ui/notify';
 import { SentinlError } from '../../services';
 import { toastNotificationsFactory, timefilterFactory } from '../../factories';
 
 const toastNotifications = toastNotificationsFactory();
-const notify = new Notifier({ location: 'Alarms' });
 
 function AlarmsController($scope, $route, $interval,
-  $timeout, $injector, Private, $window, $uibModal, navMenu,
-  globalNavState, alarmService, confirmModal, sentinlLog) {
+  $timeout, $injector, navMenu, alarmService, confirmModal, sentinlLog) {
   'ngInject';
 
   $scope.alarmColumns = [
@@ -51,7 +46,7 @@ function AlarmsController($scope, $route, $interval,
   function errorMessage(message, err) {
     err = new SentinlError(message, err);
     log.error(err);
-    notify.error(err);
+    toastNotifications.addDanger(err.message);
   }
 
   let running = false;
@@ -83,8 +78,8 @@ function AlarmsController($scope, $route, $interval,
 
   getAlarms();
 
-  $scope.$listen(timefilter, 'fetch', getAlarms);
-  $scope.$listen(timefilter, 'refreshIntervalUpdate', refreshIntervalForTimefilter); // Kibana v6.3+
+  //$scope.$listen(timefilter, 'fetch', getAlarms);
+  //$scope.$listen(timefilter, 'refreshIntervalUpdate', refreshIntervalForTimefilter); // Kibana v6.3+
 
   if (timefilter.refreshInterval) {
     $scope.$watchCollection('timefilter.refreshInterval', refreshIntervalForTimefilter); // Kibana v5.6-6.2

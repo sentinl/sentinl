@@ -47,7 +47,12 @@ sentinl:
       timeout: 10000  # mail server connection timeout
     slack:
       active: true
-      token: 'xoxp-265182-395150-419610-7ba6fb346bcddec9'
+      webhook: 'https://hooks.slack.com/services/AAAAAAAAAAAAAAA/bbbbbbbbbbbbb'
+    ses:
+      active: true
+      accessKeyId: ''
+      secretAccessKey: ''
+      region: 'us-east-1'
     webhook:
       active: false
       method: POST
@@ -97,6 +102,8 @@ sentinl:
     # default_type: 'doc'
     # alarm_index: 'watcher_alarms'
     # alarm_type: 'sentinl-alarm'
+    # rollover_index: true # Use ES rollover index
+    # rollover_index_name: 'watcher-alarms'
   settings:
     email:
       active: true
@@ -129,6 +136,4 @@ sentinl:
       # engine: horseman # horseman, puppeteer
       # puppeteer:
       #   browser_path: /path/to/chrome
-      # horseman:
-      #   browser_path: /path/to/phantomjs
 ```

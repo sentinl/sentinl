@@ -3,7 +3,7 @@ import getConfiguration from  '../get_configuration';
 import { filter } from 'lodash';
 import { getCurrentTime, flatAttributes, getTodaysAlarmIndex, isKibi, trimIdTypePrefix } from '../helpers';
 import getElasticsearchClient from '../get_elasticsearch_client';
-import EsClientError from '../errors/es_client_error';
+import { EsClientError } from '../errors';
 
 export default class EsApi {
   constructor(server) {
@@ -101,8 +101,11 @@ export default class EsApi {
     if (payload) {
       attributes.payload = payload;
     }
-
-    const index = getTodaysAlarmIndex(this._config.es.alarm_index);
+    // If using rollover index, alarm_index will be pointed to alias
+    var index = this._config.es.alarm_index;
+    if (!this._config.es.rollover_index) {
+      index = getTodaysAlarmIndex(this._config.es.alarm_index);
+    }
 
     try {
       const resp = await this.create(this._config.es.alarm_type, attributes, { overwrite: true }, index, true);

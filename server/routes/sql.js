@@ -18,13 +18,13 @@ export default function sqlRoutes(server) {
         },
       },
     },
-    handler: async function (req, reply) {
+    handler: async function (req) {
       try {
-        return reply({
+        return {
           dsl_query: convertSQLtoDSL(req.payload.sql_query), // DSL query
-        });
+        };
       } catch (err) {
-        return reply(handleESError(err));
+        return handleESError(err);
       }
     }
   });
@@ -42,7 +42,7 @@ export default function sqlRoutes(server) {
         },
       },
     },
-    handler: async function (req, reply) {
+    handler: async function (req) {
       const sqlQuery = req.payload.sql_query;
       const index = req.params.index;
 
@@ -69,9 +69,9 @@ export default function sqlRoutes(server) {
           body,
           type: config.es.default_type,
         });
-        return reply(resp);
+        return resp;
       } catch (err) {
-        return reply(handleESError(err));
+        return handleESError(err);
       }
     }
   });

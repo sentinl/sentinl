@@ -21,8 +21,8 @@ export default function routes(server) {
   server.route({
     path: '/api/sentinl/time',
     method: 'GET',
-    handler(req, reply) {
-      return reply({ time: new Date().toISOString() });
+    handler(req) {
+      return { time: new Date().toISOString() };
     }
   });
 
@@ -30,17 +30,17 @@ export default function routes(server) {
   server.route({
     method: 'GET',
     path: '/api/sentinl/set/interval/{timefilter*}',
-    handler: function (request, reply) {
+    handler: function (request) {
       server.sentinlInterval = JSON.parse(request.params.timefilter);
-      return reply({ status: '200 OK' });
+      return { status: '200 OK' };
     }
   });
 
   server.route({
     method: 'GET',
     path: '/api/sentinl/get/interval',
-    handler: function (request, reply) {
-      return reply(server.sentinlInterval);
+    handler: function (request) {
+      return server.sentinlInterval;
     }
   });
 
@@ -48,7 +48,7 @@ export default function routes(server) {
   server.route({
     method: 'GET',
     path: '/api/sentinl/test/{id}',
-    handler: function (request, reply) {
+    handler: function (request) {
       log.debug('testing Elasticsearch connection with param: ' + request.params.id);
       client.ping({
         refresh: true,
@@ -58,10 +58,10 @@ export default function routes(server) {
       }, function (error) {
         if (error) {
           log.error('Elasticsearch connectivity is down! ' + request.params.id);
-          return reply({ status: 'DOWN' });
+          return { status: 'DOWN' };
         } else {
           log.debug('Elasticsearch connectivity is up! ' + request.params.id);
-          return reply({ status: 'UP' });
+          return { status: 'UP' };
         }
       });
     }

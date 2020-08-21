@@ -23,33 +23,6 @@ class SentinlHelper {
     return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
   }
 
-  /*
-  * Create user id
-  * Separate watcher object type name from its id
-  * There is only one user per watcher
-  */
-  createUserId(watcherId, userType) {
-    if (watcherId.includes(':')) {
-      return watcherId.split(':').slice(-1)[0];
-    }
-    return watcherId;
-  }
-
-  getWatcherDefaults(type) {
-    let defaults;
-    switch (type) {
-      case 'report':
-        defaults = cloneDeep(this.REPORTWATCHER);
-        break;
-      case 'advanced':
-        defaults = cloneDeep(this.EMAILWATCHERADVANCED);
-        break;
-      default:
-        defaults = cloneDeep(this.EMAILWATCHERWIZARD);
-    }
-    return defaults;
-  }
-
   getFieldsFromMappings(mapping) {
     const result = {
       date: [],

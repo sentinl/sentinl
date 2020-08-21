@@ -8,7 +8,7 @@
         ng-repeat="item in tabsMenu.list"
         class="kuiLocalTab"
         ng-class="{'kuiLocalTab-isSelected': tabsMenu.currentPath === item.url}"
-        kbn-href="{{::item.url}}"
+        ng-href="{{::item.url}}"
       > 
         {{::item.display}}
       </a>

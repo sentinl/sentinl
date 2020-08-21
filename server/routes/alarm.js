@@ -6,7 +6,7 @@ import { flatAttributes } from '../lib/helpers';
 import apiClient from '../lib/api_client';
 import { createMultipleHapijsRoutes } from '../lib/helpers';
 
-async function getAlarms(isReport, server, req, reply) {
+async function getAlarms(isReport, server, req) {
   const config = getConfiguration(server);
 
   let timeInterval = {
@@ -52,9 +52,9 @@ async function getAlarms(isReport, server, req, reply) {
 
     resp.saved_objects = resp.saved_objects.map(flatAttributes);
 
-    return reply(resp).code(200);
+    return resp;
   } catch (err) {
-    return reply(handleESError(err));
+    return handleESError(err);
   }
 };
 
@@ -69,15 +69,15 @@ export default function routes(server) {
   server.route({
     method: ['POST','GET'],
     path: '/api/sentinl/alarms',
-    handler(req, reply) {
-      return reply({ data: server.sentinlStore });
+    handler(req) {
+      return { data: server.sentinlStore };
     }
   });
 
   // ES Alarms
   server.route({
     method: ['POST', 'GET'],
-    path: '/api/sentinl/list/alarms',
+    path: '/api/sentinl/list/alarms/{size?}',
     config: {
       validate: {
         params: {
@@ -85,15 +85,15 @@ export default function routes(server) {
         },
       },
     },
-    handler: function (req, reply) {
+    handler: function (req) {
       const isReport = false;
-      return getAlarms(isReport, server, req, reply);
+      return getAlarms(isReport, server, req);
     }
   });
 
   server.route({
     method: ['POST', 'GET'],
-    path: '/api/sentinl/list/reports',
+    path: '/api/sentinl/list/reports/{size?}',
     config: {
       validate: {
         params: {
@@ -101,9 +101,9 @@ export default function routes(server) {
         },
       },
     },
-    handler:  function (req, reply) {
+    handler:  function (req) {
       const isReport = true;
-      return getAlarms(isReport, server, req, reply);
+      return getAlarms(isReport, server, req);
     }
   });
 
@@ -121,7 +121,7 @@ export default function routes(server) {
         },
       },
     },
-    handler: async function (req, reply) {
+    handler: async function (req) {
       try {
         const { id, index } = req.params;
         // Use Elasticsearch API because Kibana savedObjectsClient
@@ -129,9 +129,9 @@ export default function routes(server) {
         const client = apiClient(server, 'elasticsearchAPI');
         const resp = await client.delete(config.es.alarm_type, id, index);
 
-        return reply(resp).code(200);
+        return resp;
       } catch (err) {
-        return reply(handleESError(err));
+        return handleESError(err);
       }
     }
   }));
@@ -149,7 +149,7 @@ export default function routes(server) {
         },
       },
     },
-    handler: async function (req, reply) {
+    handler: async function (req) {
       try {
         // Use Elasticsearch API because Kibana savedObjectsClient
         // can't search in a specific index and doesn't allow custom query body
@@ -157,9 +157,9 @@ export default function routes(server) {
         const resp = await client.create(config.es.alarm_type, req.payload.attributes,
           { overwrite: true }, config.es.alarm_index);
 
-        return reply(resp).code(201);
+        return resp;
       } catch (err) {
-        return reply(handleESError(err));
+        return handleESError(err);
       }
     }
   });

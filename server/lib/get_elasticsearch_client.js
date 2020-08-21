@@ -19,15 +19,7 @@ function esClient(server, isSiren, clusterType, config, username, password) {
     return server.plugins.elasticsearch.getCluster(clusterType).createClient({ username, password });
   }
 
-  const options = {
-    host: [
-      {
-        host: config.es.host,
-        protocol: config.es.protocol,
-        port: config.es.port
-      }
-    ]
-  };
+  const options = { host: config.es.hosts };
   log.debug('es client options (password hidden): ' + JSON.stringify(options.host, null, 2));
 
   if (username && password) {
@@ -106,5 +98,5 @@ export default function getElasticsearchClient({
   }
 
   log.debug('auth via Kibana server elasticsearch plugin');
-  return server.plugins.elasticsearch.getCluster(type).getClient();
+  return esClient(server, isSiren, type, config);
 }

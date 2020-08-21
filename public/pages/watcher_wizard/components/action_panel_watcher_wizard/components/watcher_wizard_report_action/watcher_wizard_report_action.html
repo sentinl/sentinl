@@ -214,8 +214,7 @@
               {{watcherWizardReportAction.actionSettings.report.snapshot.type || 'report type'}} <span class="caret"></span>
             </button>
             <ul class="dropdown-menu" uib-dropdown-menu role="menu">
-              <li><a href="javascript:void(0)" ng-click="watcherWizardReportAction.applyReportType('png')">PNG</a></li>
-              <li><a href="javascript:void(0)" ng-click="watcherWizardReportAction.applyReportType('pdf')">PDF</a></li>
+              <li><a href="javascript:void(0)" ng-repeat="type in watcherWizardReportAction.reportTypes" ng-click="watcherWizardReportAction.setReportType(type)">{{type}}</a></li>
             </ul>
           </div>
         </div>

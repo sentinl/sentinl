@@ -1,14 +1,12 @@
 import { get, isNumber } from 'lodash';
 import moment from 'moment';
-import { Notifier } from 'ui/notify';
 import { SentinlError } from '../../services';
 import { toastNotificationsFactory, timefilterFactory } from '../../factories';
 
-const notify = new Notifier({ location: 'Reports' });
 const toastNotifications = toastNotificationsFactory();
 
 function ReportsController($scope, $injector, $route, $interval,
-  $timeout, Private, $window, $uibModal, navMenu, globalNavState, reportService,
+  $timeout, navMenu, reportService,
   confirmModal, sentinlLog) {
   'ngInject';
 
@@ -23,16 +21,12 @@ function ReportsController($scope, $injector, $route, $interval,
   function errorMessage(message, err) {
     err = new SentinlError(message, err);
     log.error(err);
-    notify.error(err);
+    toastNotifications.addDanger(err.message);
   }
 
   $scope.reports = [];
   const timefilter = timefilterFactory($injector);
   timefilter.enable(true);
-
-  $scope.isScreenshot = function (report) {
-    return report.attachment.charAt(0) === 'i';
-  };
 
   let running = false;
   async function getReports() {
@@ -63,12 +57,28 @@ function ReportsController($scope, $injector, $route, $interval,
 
   getReports();
 
-  $scope.$listen(timefilter, 'fetch', getReports);
-  $scope.$listen(timefilter, 'refreshIntervalUpdate', refreshIntervalForTimefilter); // Kibana v6.3+
+  //$scope.$listen(timefilter, 'fetch', getReports);
+  //$scope.$listen(timefilter, 'refreshIntervalUpdate', refreshIntervalForTimefilter); // Kibana v6.3+
 
   if (timefilter.refreshInterval) {
     $scope.$watchCollection('timefilter.refreshInterval', refreshIntervalForTimefilter); // Kibana v5.6-6.2
   }
+
+  function createReportUrl(base64String) {
+    const type = base64String.charAt(0) === 'i' ? 'image/png' : 'application/pdf';
+    const raw = atob(base64String);
+    const view = new Uint8Array(new ArrayBuffer(raw.length));
+    for (let i = 0; i < raw.length; i++) {
+      view[i] = raw.charCodeAt(i);
+    }
+    return URL.createObjectURL(new Blob([view], { type }));
+  };
+
+  $scope.collapseReport = function (id) {
+    const index = $scope.reports.findIndex(e => e.id === id);
+    $scope.reports[index].url = createReportUrl($scope.reports[index].attachment);
+    $scope.reports[index].collapsed = !$scope.reports[index].collapsed;
+  };
 
   /**
   * Delete report

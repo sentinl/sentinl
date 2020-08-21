@@ -4,8 +4,14 @@ export default class SavedObjectsClient {
   constructor(server, request) {
     const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
     const callCluster = (...args) => callWithRequest(request, ...args);
-    this._client = server.savedObjectsClientFactory({ callCluster });
+
     this._config = getConfiguration(server);
+
+    if (server.savedObjectsClientFactory) {
+      this._client = server.savedObjectsClientFactory({ callCluster });
+    } else {
+      this._client = server.savedObjects.getScopedSavedObjectsClient(request); // Kibana v6.4.2
+    }
   }
 
   addUser(id, attributes) {

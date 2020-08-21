@@ -27,7 +27,6 @@ import getConfiguration from './server/lib/get_configuration';
 import { existsSync } from 'fs';
 import Log from './server/lib/log';
 import getChromePath from './server/lib/actions/report/get_chrome_path';
-import installPhantomjs from './server/lib/actions/report/install_phantomjs';
 import { isKibi } from './server/lib/helpers';
 
 import sentinlRoutes from './server/routes/routes';
@@ -54,13 +53,15 @@ const siren = {
 async function prepareIndices(server, log, config, mappings) {
   try {
     let resp;
-    resp = await initIndices.createIndex({
-      server,
-      config,
-      index: config.es.default_index,
-      mappings: mappings.watcher
-    });
-    log.debug(`create index ${config.es.default_index}: ${JSON.stringify(resp)}`);
+    if (config.es.default_index) {
+      resp = await initIndices.createIndex({
+        server,
+        config,
+        index: config.es.default_index,
+        mappings: mappings.watcher
+      });
+      log.debug(`create index ${config.es.default_index}: ${JSON.stringify(resp)}`);
+    }
 
     resp = await initIndices.createIndex({
       server,
@@ -102,6 +103,27 @@ const init = once(function (server) {
 
   log.info('initializing ...');
 
+  server.injectUiAppVars('sentinl', () => {
+    const config = server.config();
+    return {
+      sentinlConfig: {
+        appName: config.get('sentinl.app_name'),
+        es: {
+          timezone: config.get('sentinl.es.timezone'),
+        },
+        wizard: {
+          condition: {
+            queryType: config.get('sentinl.settings.wizard.condition.query_type'),
+            scheduleType: config.get('sentinl.settings.wizard.condition.schedule_type'),
+            over: config.get('sentinl.settings.wizard.condition.over'),
+            last: config.get('sentinl.settings.wizard.condition.last'),
+            interval: config.get('sentinl.settings.wizard.condition.interval'),
+          },
+        },
+      }
+    };
+  });
+
   try {
     if (config.settings.report.puppeteer.browser_path) {
       server.expose('chrome_path', config.settings.report.puppeteer.browser_path);
@@ -111,18 +133,6 @@ const init = once(function (server) {
     log.info('Chrome bin found at: ' + server.plugins.sentinl.chrome_path);
   } catch (err) {
     log.error('setting puppeteer report engine: ' + err.toString());
-  }
-
-  if (config.settings.report.horseman.browser_path) {
-    server.expose('phantomjs_path', config.settings.report.horseman.browser_path);
-    log.info('PhantomJS bin found at: ' + server.plugins.sentinl.phantomjs_path);
-  } else {
-    installPhantomjs().then((pkg) => {
-      server.expose('phantomjs_path', pkg.binary);
-      log.info('PhantomJS bin found at: ' + server.plugins.sentinl.phantomjs_path);
-    }).catch((err) => {
-      log.error('setting horseman report engines: ' + err.toString());
-    });
   }
 
   // Object to hold different runtime values.
@@ -139,17 +149,22 @@ const init = once(function (server) {
   timelionRoutes(server);
   sqlRoutes(server);
 
-  // auto detect elasticsearch host, protocol and port
-  const esUrl = url.parse(server.config().get('elasticsearch.url'));
-  config.es.host = esUrl.hostname;
-  config.es.port = +esUrl.port;
-  config.es.protocol = esUrl.protocol.substring(0, esUrl.protocol.length - 1);
+  // auto detect sentinn es host, protocol and port
+  //default is [{ host: 'localhost', port: 9200, protocol: 'http'}]
+
+  if(config.es.host && config.es.port && config.es.protocol) {
+    config.es.hosts = [];
+    config.es.hosts.push({
+      host: config.es.host,
+      port: config.es.port,
+      protocol: config.es.protocol
+    });
+  }
 
   if (config.settings.authentication.enabled && config.es.protocol === 'https') {
     config.settings.authentication.https = true;
   }
 
-  config.es.default_index = config.es.default_index || server.config().get('kibana.index');
   config.settings.authentication.user_index = server.config().get('kibana.index');
 
   if (server.plugins.saved_objects_api) { // Siren: savedObjectsAPI.

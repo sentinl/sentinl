@@ -19,7 +19,7 @@ export default function kableRoutes(server) {
         },
       },
     },
-    handler: async function (req, reply) {
+    handler: async function (req) {
       const { expression, time } = req.payload;
 
       try {
@@ -37,9 +37,9 @@ export default function kableRoutes(server) {
           },
         });
 
-        return reply(resp.result);
+        return resp.result;
       } catch (err) {
-        return reply(handleESError(err));
+        return handleESError(err);
       }
     }
   });
@@ -55,7 +55,7 @@ export default function kableRoutes(server) {
         },
       },
     },
-    handler: async function (req, reply) {
+    handler: async function (req) {
       try {
         const kableExpression = req.payload.expression;
         const sentinlExpression = req.payload.sentinl_expression;
@@ -109,9 +109,9 @@ export default function kableRoutes(server) {
           },
         });
 
-        return reply(resp);
+        return resp;
       } catch (err) {
-        return reply(handleESError(err));
+        return handleESError(err);
       }
     }
   });

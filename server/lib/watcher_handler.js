@@ -14,7 +14,7 @@ import KableClient from './kable_client';
 import TimelionClient from './timelion_client';
 import sirenFederateHelper from './siren/federate_helper';
 import apiClient from './api_client';
-import WatcherHandlerError from './errors/watcher_handler_error';
+import { WatcherHandlerError } from './errors';
 
 /**
 * Helper class to handle watchers

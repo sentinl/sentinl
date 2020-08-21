@@ -1,10 +1,10 @@
-import { uiModules } from 'ui/modules';
-import { Notifier } from 'ui/notify';
 import { SentinlError } from '../../services';
 import routes from 'ui/routes';
-
 import template from './watcher_advanced.html';
 import controller from './watcher_advanced';
+import { toastNotificationsFactory } from '../../factories';
+
+const toastNotifications = toastNotificationsFactory();
 
 routes
   .when('/watcher/raw/:id/edit')
@@ -15,24 +15,19 @@ routes
     controllerAs: 'watcherAdvanced',
     bindToController: true,
     resolve: {
-      watcher: function ($injector) {
-        const $route = $injector.get('$route');
-        const kbnUrl = $injector.get('kbnUrl');
-        const config = $injector.get('sentinlConfig');
-        const watcherService = $injector.get('watcherService');
-        const notify = new Notifier({ location: 'Watcher' });
+      watcher: function ($route, kbnUrl, sentinlConfig, watcherService) {
 
         const watcherId = $route.current.params.id;
 
         if (!watcherId) {
           return watcherService.new('advanced').catch(function (err) {
-            notify.error(new SentinlError('create adv watcher', err));
+            toastNotifications.addDanger(new SentinlError('get adv watcher', err));
             kbnUrl.redirect('/');
           });
         }
 
         return watcherService.get(watcherId).catch(function (err) {
-          notify.error(new SentinlError('get adv watcher', err));
+          toastNotifications.addDanger(new SentinlError('get adv watcher', err));
           kbnUrl.redirect('/');
         });
       },

@@ -40,6 +40,7 @@ export default {
         body: 'Sample Screenshot Report',
         save: true,
         snapshot: {
+          type: 'png',
           res: '1920x1080',
           url: 'http://localhost/app/kibana#/dashboard/Alerts',
           params: {

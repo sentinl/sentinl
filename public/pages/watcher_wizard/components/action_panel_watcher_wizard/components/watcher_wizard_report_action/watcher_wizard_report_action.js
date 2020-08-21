@@ -12,6 +12,7 @@ class WatcherWizardReportAction {
     this.aceOptions = this.aceOptions || this.$scope.aceOptions;
 
     this.type = 'report';
+    this.reportTypes = ['png', 'pdf'];
     this.status = {
       isOpen: false,
     };
@@ -29,6 +30,10 @@ class WatcherWizardReportAction {
   getTagId(name = 'action') {
     name = name === 'action' ? 'watcherWizardReportAction' : ('watcherWizardReportAction' + capitalize(name));
     return this.wizardHelper.getUniqueTagId(name, this.actionId);
+  }
+
+  setReportType(type) {
+    this.actionSettings.report.snapshot.type = type;
   }
 
   deleteAction() {
