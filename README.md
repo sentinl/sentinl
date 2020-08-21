@@ -1,13 +1,8 @@
-#### This is a forked brach from https://github.com/sirensolutions/sentinl
-Improvement
- - Support Kibana 6.8.x
- - Change from Slack app to Slack webhook
- - Improve several Slack integration e.g. attachments field
- - Support ES index life cycle policy
- - Support Amazon SES for sending alert emails
+### SENTINL is looking for a Community!
 
-See [Releases](https://github.com/KongZ/sentinl/releases) for more details
+Interested in helping continue/maintain/extend/document/test the SENTINL open-source project? Contact us or open an Issue, we'd love to have you!
 
+---
 
 <img src="http://i.imgur.com/s4TKpbF.png" width="300"/>
 
@@ -21,7 +16,7 @@ See [Releases](https://github.com/KongZ/sentinl/releases) for more details
 <img src="https://img.shields.io/badge/elasticsearch-6.*-green.svg"/>
 
 
-**SENTINL 6** extends *Siren Investigate* and *Kibana* with **Alerting** and **Reporting** functionality to monitor, notify and report on data series changes using standard queries, programmable validators and a variety of configurable actions - Think of it as a free an independent ["Watcher"](https://github.com/sirensolutions/sentinl/wiki/SENTINL-Introduction#what-is-a-watcher) which also has scheduled ["Reporting"](https://github.com/sirensolutions/sentinl/wiki/SENTINL-Report-Example) capabilities (PNG/PDFs snapshots).
+**SENTINL** extends *Siren Investigate* and *Kibana* with **Alerting** and **Reporting** functionality to monitor, notify and report on data series changes using standard queries, programmable validators and a variety of configurable actions - Think of it as a free an independent ["Watcher"](https://github.com/sirensolutions/sentinl/wiki/SENTINL-Introduction#what-is-a-watcher) which also has scheduled ["Reporting"](https://github.com/sirensolutions/sentinl/wiki/SENTINL-Report-Example) capabilities (PNG/PDFs snapshots).
 
 **SENTINL** is also designed to simplify the process of creating and managing alerts and reports in Siren Investigate/Kibana `6.x` via its native App Interface, or by using native watcher tools in Kibana `6.x+`.
 
@@ -47,7 +42,7 @@ Documentation, Examples and Guides are available at [sentinl.readthedocs.io](htt
 
 ## App Installation
 
-#### **ATTENTION** Siren 10 users should use the native version bundled with their distribution!
+#### **ATTENTION** Siren users should use the native version bundled with their distribution!
 
 #### Snapshot Plugin Install
 Use this example and substitute 6.2.2 with your _actual_ Kibana version or manually pick a [release](https://github.com/sirensolutions/sentinl/releases)
@@ -83,9 +78,8 @@ Please [report](https://github.com/sirensolutions/sentinl/issues) any ideas, bug
 ## License
 <pre>
 This software is licensed under the Apache License, version 2 ("ALv2"), quoted below.
-
-Copyright 2016, 2018 Siren
-Copyright 2016, 2018 QXIP BV
+Copyright 2016, 2020 QXIP BV
+Copyright 2016, 2019 Siren
 Copyright 2015, Lorenzo Mangani (lorenzo.mangani@gmail.com), Rao Chenlin (rao.chenlin@gmail.com)
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not
