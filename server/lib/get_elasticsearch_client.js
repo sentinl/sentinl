@@ -106,5 +106,5 @@ export default function getElasticsearchClient({
   }
 
   log.debug('auth via Kibana server elasticsearch plugin');
-  return server.plugins.elasticsearch.getCluster(type).getClient();
+  return  server.plugins.elasticsearch.getCluster(type).clusterClient.client;
 }
