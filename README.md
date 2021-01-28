@@ -1,6 +1,7 @@
 ### SENTINL is looking for a Community!
 
-Interested in helping continue/maintain/extend/document/test the SENTINL open-source project? Contact us or open an Issue, we'd love to have you!
+Interested in helping continue/maintain/extend/document/test the SENTINL open-source project?<br>
+Contact us or open an Issue, we'd love to have you onboard!
 
 ---
 
