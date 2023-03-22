@@ -47,7 +47,7 @@
     "ngreact": "0.5.1",
     "node-horseman": "3.3.0",
     "phantom": "6.0.3",
-    "puppeteer": "1.5.0",
+    "puppeteer": "5.2.1",
     "react": "16.5.2",
     "react-dom": "^16.5.2",
     "rison": "0.1.1",
