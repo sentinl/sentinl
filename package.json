@@ -26,7 +26,7 @@
     "@elastic/datemath": "2.3.0",
     "@elastic/eui": "4.3.0",
     "@slack/client": "4.4.0",
-    "angular": "1.4.8",
+    "angular": "1.8.3",
     "angular-chart.js": "1.1.1",
     "angular-touch": "1.4.8",
     "angular-ui-bootstrap": "2.5.6",
